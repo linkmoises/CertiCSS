@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, redirect, url_for, flash
 from pymongo import MongoClient
 from datetime import datetime, timedelta
+from PIL import Image
 import os
 import random
 import string
@@ -37,6 +38,15 @@ try:
     collection_participantes.create_index([("cedula", 1), ("codigo_evento", 1), ("titulo_ponencia", 1)], unique=True)
 except Exception as e:
     print(f"Error al crear índice: {e}")
+
+
+###
+### Gestión de imágenes
+###
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Limitar a 16 MB
+
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 
 ###
@@ -205,7 +215,32 @@ def crear_evento():
         timestamp = request.form['timestamp']
 
         # Obtener un código único
-        codigo = obtener_codigo_unico()  # Esta función genera un código único
+        codigo = obtener_codigo_unico()
+
+        # Carga de archivos
+        afiche_file = request.files.get('afiche_evento')
+        fondo_file = request.files.get('fondo_evento')
+
+        afiche_path = None
+        fondo_path = None
+
+        if afiche_file:
+            afiche_filename = f"{codigo}-afiche.jpg"
+            afiche_path = os.path.join(app.config['UPLOAD_FOLDER'], afiche_filename)
+            
+            # Convertir y guardar la imagen como JPG
+            image = Image.open(afiche_file)
+            image.convert('RGB').save(afiche_path, 'JPEG')  # Convertir a JPG y guardar
+            print(f"Archivo afiche guardado en: {afiche_path}")  # Confirmación
+
+        if fondo_file:
+            fondo_filename = f"{codigo}-fondo.jpg"
+            fondo_path = os.path.join(app.config['UPLOAD_FOLDER'], fondo_filename)
+            
+            # Convertir y guardar la imagen como JPG
+            image = Image.open(fondo_file)
+            image.convert('RGB').save(fondo_path, 'JPEG')  # Convertir a JPG y guardar
+            print(f"Archivo fondo guardado en: {fondo_path}")  # Confirmación
 
         # Insertar nuevo evento en la colección
         collection_eventos.insert_one({
@@ -214,6 +249,8 @@ def crear_evento():
             'tipo': tipo,
             'fecha_inicio': fecha_inicio,
             'fecha_fin': fecha_fin,
+            'afiche': afiche_path if afiche_file else None,
+            'fondo': fondo_path if fondo_file else None,
             'timestamp': timestamp
         })
         flash("Evento creado con éxito", "success")

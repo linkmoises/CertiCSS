@@ -7,7 +7,7 @@
 <body>
     <h1>Crear Nuevo Evento</h1>
 
-    <form action="/crear_evento" method="post">
+    <form action="/crear_evento" method="post" enctype="multipart/form-data">
         <label for="nombre">Nombre del Evento:</label>
         <input type="text" id="nombre" name="nombre" required><br><br>
 
@@ -30,6 +30,13 @@
 
         <label for="fecha_fin">Fecha Final:</label>
         <input type="date" id="fecha_fin" name="fecha_fin" required><br><br>
+
+        <!-- Campos para subir imágenes -->
+        <label for="afiche_evento">Afiche del Evento (imagen 1000x1000 px):</label>
+        <input type="file" id="afiche_evento" name="afiche_evento" accept=".jpg, .jpeg, .png"><br><br>
+
+        <label for="fondo_evento">Fondo del Evento (imagen 1920x1080 px):</label>
+        <input type="file" id="fondo_evento" name="fondo_evento" accept=".jpg, .jpeg, .png"><br><br>
 
         <!-- Campo oculto para el código del evento -->
         <input type="hidden" id="codigo" name="codigo" value="{{ codigo }}">
