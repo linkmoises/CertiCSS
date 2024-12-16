@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ nombre_evento }} - Participantes Registrados</title>
+</head>
+<body>
+    <h1>Participantes Registrados en {{ nombre_evento }}</h1>
+
+    <h2>Código del Evento: {{ codigo_evento }}</h2>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Nombres</th>
+                <th>Apellidos</th>
+                <th>Cédula</th>
+                <th>Rol</th>
+                <th>ID verificación</th>
+                <th>Timestamp</th>
+                <th>Acción</th> <!-- Nueva cabecera para la acción -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for participante in participantes %}
+            <tr>
+                <td>{{ participante.nombres }}</td>
+                <td>{{ participante.apellidos }}</td>
+                <td>{{ participante.cedula }}</td>
+                <td>{{ participante.rol }}</td>
+                <td>{{ participante.nanoid }}</td>
+                <td>{{ participante.timestamp }}</td>
+                <td>
+                    <!-- Botón para eliminar el participante -->
+                    <form action="{{ url_for('eliminar_participante', codigo_evento=codigo_evento, cedula=participante.cedula) }}" method="post" style="display:inline;">
+                        <button type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este participante?');">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="/eventos">Volver a la lista de eventos</a>
+</body>
+</html>

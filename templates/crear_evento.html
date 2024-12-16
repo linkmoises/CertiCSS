@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Crear Evento</title>
+</head>
+<body>
+    <h1>Crear Nuevo Evento</h1>
+
+    <form action="/crear_evento" method="post">
+        <label for="nombre">Nombre del Evento:</label>
+        <input type="text" id="nombre" name="nombre" required><br><br>
+
+        <label for="tipo">Tipo de Evento:</label>
+        <select id="tipo" name="tipo" required>
+            <option value="">Seleccione un tipo</option>
+            <option value="Congreso">Congreso</option>
+            <option value="Seminario">Seminario</option>
+            <option value="Jornada">Jornada</option>
+            <option value="Sesión Docente">Sesión Docente</option>
+            <option value="Simposio">Simposio</option>
+            <option value="Mesa Redonda">Mesa Redonda</option>
+            <option value="Taller">Taller</option>
+            <option value="Curso">Curso</option>
+            <option value="Diplomado">Diplomado</option>
+        </select><br><br>
+
+        <label for="fecha_inicio">Fecha de Inicio:</label>
+        <input type="date" id="fecha_inicio" name="fecha_inicio" required><br><br>
+
+        <label for="fecha_fin">Fecha Final:</label>
+        <input type="date" id="fecha_fin" name="fecha_fin" required><br><br>
+
+        <!-- Campo oculto para el código del evento -->
+        <input type="hidden" id="codigo" name="codigo" value="{{ codigo }}">
+
+         <!-- Campo oculto para el timestamp -->
+         <input type="hidden" id="timestamp" name="timestamp">
+
+        <button type="submit">Crear Evento</button>
+    </form>
+
+    <a href="/eventos">Volver a la lista de eventos</a>
+
+<script>
+    // Establecer el timestamp actual en el campo oculto
+    document.getElementById('timestamp').value = new Date().toISOString();
+</script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ nombre_evento }} - Registro de Participantes</title>
+</head>
+<body>
+    <h1>Registro de Participantes</h1>
+    <h2>{{ nombre_evento }}</h2>
+
+    <!-- Mostrar mensajes -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul>
+          {% for category, message in messages %}
+            <li class="{{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    
+    <h2>Código OTP: {{ otp }}</h2> <!-- Mostrar el código OTP -->
+    
+    <form action="/registrar" method="post">
+        <label for="nombres">Nombres:</label>
+        <input type="text" id="nombres" name="nombres" required><br><br>
+
+        <label for="apellidos">Apellidos:</label>
+        <input type="text" id="apellidos" name="apellidos" required><br><br>
+
+        <label for="cedula">Cédula:</label>
+        <input type="text" id="cedula" name="cedula" required><br><br>
+
+        <input type="hidden" name="rol" value="participante">
+
+        <input type="hidden" name="codigo_evento" value="{{ codigo_evento }}"> <!-- Campo oculto para el código del evento -->
+
+        <label for="otp">Código OTP:</label>
+        <input type="text" id="otp" name="otp" required placeholder="Ingrese su código OTP"><br><br> <!-- Campo para ingresar el OTP -->
+
+        <button type="submit">Registrar</button>
+    </form>
+</body>
+</html>

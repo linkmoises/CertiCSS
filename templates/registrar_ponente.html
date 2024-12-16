@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registrar Ponente</title>
+</head>
+<body>
+    <h1>Registrar Nuevo Ponente</h1>
+
+    <form action="/registrar_ponente/{{ codigo_evento }}" method="post">
+        <label for="nombres">Nombres:</label>
+        <input type="text" id="nombres" name="nombres" required><br><br>
+
+        <label for="apellidos">Apellidos:</label>
+        <input type="text" id="apellidos" name="apellidos" required><br><br>
+
+        <label for="cedula">Cédula:</label>
+        <input type="text" id="cedula" name="cedula" required><br><br>
+
+        <input type="hidden" name="rol" value="ponente">
+
+        <label for="titulo_ponencia">Título de la Ponencia:</label>
+        <input type="text" id="titulo_ponencia" name="titulo_ponencia"><br><br> <!-- Campo opcional -->
+
+        <!-- El campo oculto para el código del evento ya no es necesario, ya que se pasa a través de la URL -->
+
+        <button type="submit">Registrar Ponente</button>
+    </form>
+
+    <a href="/eventos">Volver a la lista de eventos</a>
+</body>
+</html>
