@@ -19,8 +19,6 @@
       {% endif %}
     {% endwith %}
     
-    <h2>Código OTP: {{ otp }}</h2> <!-- Mostrar el código OTP -->
-    
     <form action="/registrar" method="post">
         <label for="nombres">Nombres:</label>
         <input type="text" id="nombres" name="nombres" required><br><br>
@@ -32,11 +30,10 @@
         <input type="text" id="cedula" name="cedula" required><br><br>
 
         <input type="hidden" name="rol" value="participante">
-
-        <input type="hidden" name="codigo_evento" value="{{ codigo_evento }}"> <!-- Campo oculto para el código del evento -->
+        <input type="hidden" name="codigo_evento" value="{{ codigo_evento }}">
 
         <label for="otp">Código OTP:</label>
-        <input type="text" id="otp" name="otp" required placeholder="Ingrese su código OTP"><br><br> <!-- Campo para ingresar el OTP -->
+        <input type="text" id="otp" name="otp" required placeholder="Ingrese su código OTP"><br><br>
 
         <button type="submit">Registrar</button>
     </form>

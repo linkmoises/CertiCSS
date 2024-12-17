@@ -31,6 +31,7 @@ db = client['certi_css']
 collection_eventos = db['eventos']
 collection_participantes = db['participantes']
 
+
 ###
 ### Crear índice único para evitar duplicados
 ###
@@ -52,14 +53,17 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 ###
 ### Función código OTP
 ###
-otp_code = ""
-otp_valid_until = datetime.now()
+otp_storage = {}
 
 def generate_otp():
     """Genera un código OTP de 4 dígitos (mayúsculas y números)."""
     characters = string.ascii_uppercase + string.digits
     return ''.join(random.choice(characters) for _ in range(4))
 
+
+###
+### Función código nanoid
+###
 def generate_nanoid(cedula, codigo_evento, titulo_ponencia=None):
     """Genera un hash nanoid truncado a 8 caracteres utilizando cédula, código de evento y opcionalmente título de ponencia."""
     # Si no se proporciona un título de ponencia, usar una cadena vacía
@@ -96,20 +100,21 @@ def index(codigo_evento):
     if evento is None:
         return redirect(url_for('page_not_found'))  # Redirigir a la página 404 si el código no existe
     
-    global otp_code, otp_valid_until
-    
-    # Generar un nuevo OTP cada minuto
-    if datetime.now() >= otp_valid_until:
+    # Generar un nuevo OTP si no existe o ha expirado
+    if codigo_evento not in otp_storage or datetime.now() >= otp_storage[codigo_evento]['valid_until']:
         otp_code = generate_otp()
-        otp_valid_until = datetime.now() + timedelta(minutes=1)
+        otp_storage[codigo_evento] = {
+            'code': otp_code,
+            'valid_until': datetime.now() + timedelta(minutes=1)
+        }
+    else:
+        otp_code = otp_storage[codigo_evento]['code']
 
     return render_template('index.html', otp=otp_code, codigo_evento=codigo_evento, nombre_evento=evento['nombre'])
 
 
 @app.route('/registrar', methods=['POST'])
 def registrar():
-    global otp_code, otp_valid_until
-    
     nombres = request.form['nombres']
     apellidos = request.form['apellidos']
     cedula = request.form['cedula']
@@ -123,29 +128,34 @@ def registrar():
         flash("El participante ya está registrado en este evento.", "error")
         return redirect(url_for('index', codigo_evento=codigo_evento))
 
-    # Validar si el registro se realizó durante la validez del OTP y si coincide con el OTP ingresado
-    if datetime.now() <= otp_valid_until and otp_ingresado == otp_code:
+    # Verificar si el código OTP existe y su validez
+    if codigo_evento in otp_storage:
+        otp_info = otp_storage[codigo_evento]
         
-        # Generar nanoid
-        nanoid = generate_nanoid(cedula, codigo_evento)
-        
-        # Insertar datos en la colección de MongoDB
-        collection_participantes.insert_one({
-            'nombres': nombres,
-            'apellidos': apellidos,
-            'cedula': cedula,
-            'rol': rol,
-            'codigo_evento': codigo_evento,
-            'otp': otp_code,
-            'nanoid': nanoid,
-            'timestamp': timestamp
-        })
+        # Validar si el registro se realizó durante la validez del OTP y si coincide con el OTP ingresado
+        if datetime.now() <= otp_info['valid_until'] and otp_ingresado == otp_info['code']:
+            # Generar nanoid
+            nanoid = generate_nanoid(cedula, codigo_evento)
+            
+            # Insertar datos en la colección de MongoDB
+            collection_participantes.insert_one({
+                'nombres': nombres,
+                'apellidos': apellidos,
+                'cedula': cedula,
+                'rol': rol,
+                'codigo_evento': codigo_evento,
+                'nanoid': nanoid,
+                'timestamp': timestamp
+            })
 
-        # Mensaje de éxito o falla en registro
-        flash("Registro completado con éxito", "success")
-        return redirect(url_for('index', codigo_evento=codigo_evento))
+            # Mensaje de éxito o falla en registro
+            flash("Registro completado con éxito", "success")
+            return redirect(url_for('index', codigo_evento=codigo_evento))
+        else:
+            flash("El OTP ha expirado o es incorrecto. Por favor, recargue la página.", "error")
+            return redirect(url_for('index', codigo_evento=codigo_evento))
     else:
-        flash("El OTP ha expirado o es incorrecto. Por favor, recargue la página.", "error")
+        flash("El código del evento no es válido.", "error")
         return redirect(url_for('index', codigo_evento=codigo_evento))
 
 
@@ -281,6 +291,31 @@ def eliminar_participante(codigo_evento, cedula):
     # Eliminar el participante específico por cédula y código de evento
     collection_participantes.delete_one({"cedula": cedula, "codigo_evento": codigo_evento})
     return redirect(url_for('listar_participantes', codigo_evento=codigo_evento))  # Redirigir a la lista de participantes
+
+
+###
+### Página de evento
+###
+@app.route('/evento/<codigo_evento>', methods=['GET'])
+def mostrar_evento(codigo_evento):
+    
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+
+    if evento:
+        
+        # Generar un nuevo OTP si no existe o ha expirado
+        if codigo_evento not in otp_storage or datetime.now() >= otp_storage[codigo_evento]['valid_until']:
+            otp_code = generate_otp()
+            otp_storage[codigo_evento] = {
+                'code': otp_code,
+                'valid_until': datetime.now() + timedelta(minutes=1)
+            }
+        else:
+            otp_code = otp_storage[codigo_evento]['code']
+
+        return render_template('evento-individual.html', evento=evento, otp=otp_code)
+    else:
+        return "Evento no encontrado", 404
 
 
 ###

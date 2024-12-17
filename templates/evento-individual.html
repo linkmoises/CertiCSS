@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ evento.nombre }}</title>
+    <style>
+        body {
+            background-image: url('{{ url_for('static', filename='uploads/' + evento.fondo.split('/')[-1]) }}');
+            background-size: cover;
+            color: white;
+            text-align: center;
+        }
+        .afiche {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ evento.nombre }}</h1>
+    
+    <h2>Código OTP: {{ otp }}</h2>
+
+    <p>¡Bienvenidos al evento!</p>
+</body>
+</html>
