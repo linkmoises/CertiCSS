@@ -90,6 +90,17 @@ def obtener_codigo_unico():
 
 
 ###
+### Home dashboard
+###
+@app.route('/')
+def home():
+    # Obtener los próximos eventos de la base de datos
+    eventos = collection_eventos.find({"fecha_inicio": {"$gte": datetime.now()}}).sort("fecha_inicio", 1)  # Filtrar eventos futuros
+
+    return render_template('home.html', eventos=eventos)
+
+
+###
 ### Formulario de registro de participantes
 ###
 @app.route('/registrar/<codigo_evento>')
@@ -110,7 +121,7 @@ def index(codigo_evento):
     else:
         otp_code = otp_storage[codigo_evento]['code']
 
-    return render_template('index.html', otp=otp_code, codigo_evento=codigo_evento, nombre_evento=evento['nombre'])
+    return render_template('registrar.html', otp=otp_code, codigo_evento=codigo_evento, nombre_evento=evento['nombre'])
 
 
 @app.route('/registrar', methods=['POST'])
