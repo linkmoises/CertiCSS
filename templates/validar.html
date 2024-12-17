@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Validar Certificado</title>
+</head>
+<body>
+    <h1>Validar Certificado</h1>
+
+    <!-- Mostrar mensajes -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul>
+          {% for category, message in messages %}
+            <li class="{{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <form action="/validar_certificado" method="post">
+        <label for="nanoid">Ingrese el código de verificación:</label>
+        <input type="text" id="nanoid" name="nanoid" required placeholder="Ej: abc1234"><br><br>
+
+        <button type="submit">Validar</button>
+    </form>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Certificado Válido</title>
+</head>
+<body>
+    <h1>Certificado Válido</h1>
+
+    <h2>Detalles del Participante</h2>
+    <p><strong>Nombres:</strong> {{ participante.nombres }}</p>
+    <p><strong>Apellidos:</strong> {{ participante.apellidos }}</p>
+    <p><strong>Evento:</strong> {{ evento.nombre }}</p>
+    <p><strong>Rol:</strong> {{ participante.rol }}</p>
+    {% if participante.rol == 'ponente' %}
+        <!-- Mostrar título de la ponencia solo si es un ponente -->
+        <p><strong>Ponencia:</strong> {{ participante.titulo_ponencia }}</p>
+    {% endif %}
+    <a href="/validar_certificado">Validar otro certificado</a>
+</body>
+</html>

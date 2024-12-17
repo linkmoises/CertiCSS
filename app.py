@@ -319,6 +319,32 @@ def mostrar_evento(codigo_evento):
 
 
 ###
+### Validación de certificados
+###
+@app.route('/validar_certificado', methods=['GET', 'POST'])
+def validar_certificado():
+    if request.method == 'POST':
+        nanoid = request.form['nanoid']
+        
+        participante = collection_participantes.find_one({"nanoid": nanoid})
+
+        if participante:
+
+            evento = collection_eventos.find_one({"codigo": participante['codigo_evento']})
+
+            if evento:
+                return render_template('certificado_validado.html', participante=participante, evento=evento)
+            else:
+                flash("Evento no encontrado. Por favor, verifique el nanoid.", "error")
+                return redirect(url_for('validar_certificado'))
+        else:
+            flash("Certificado no válido. Por favor, verifique el código ingresado.", "error")
+            return redirect(url_for('validar_certificado'))
+
+    return render_template('validar.html')
+
+
+###
 ### Error 404
 ###
 @app.route('/404')
