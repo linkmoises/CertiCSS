@@ -2,6 +2,8 @@
 
 Este proyecto es una aplicación web diseñada específicamente para el Departamento Nacional de Docencia e Investigación de la Caja de Seguro Social en Panamá, para la gestión de eventos académicos. Permite registrar participantes y ponentes, crear eventos y subir imágenes asociadas a cada evento. La aplicación está construida utilizando Flask y MongoDB.
 
+![CertiCSS](screenshot.png)
+
 ## Características
 
 - **Registro de Eventos**: Permite crear eventos con información como nombre, tipo, fechas.
