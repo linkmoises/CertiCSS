@@ -11,19 +11,18 @@ Este proyecto es una aplicación web diseñada específicamente para el Departam
 - **Registro de Ponentes**: Los coordinadores locales de docencia u organizadores pueden registrar a los ponentes, incluyendo el título de su ponencia.
 - **Prevención de Duplicados**: Implementa mecanismos para evitar que los participantes se registren múltiples veces en el mismo evento y asigna códigos únicos para verificación de certificados.
 
-## Tecnologías Utilizadas
+## Stack tecnológico
 
 - **Flask**: Microframework para Python utilizado para construir la aplicación web.
 - **MongoDB**: Base de datos NoSQL utilizada para almacenar la información de eventos, participantes y ponentes.
-- **HTML/CSS**: Para la creación de las interfaces de usuario.
+- **Tailwind**: Para la creación de las interfaces de usuario.
 
 ## Requisitos Previos
 
 Asegúrate de tener instalados los siguientes requisitos:
 
-- Python 3.x
+- Python 3.x / pip
 - MongoDB
-- pip (gestor de paquetes de Python)
 
 ## Instalación
 
