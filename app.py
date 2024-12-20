@@ -94,10 +94,13 @@ def obtener_codigo_unico():
 ###
 @app.route('/')
 def home():
-    # Obtener los próximos eventos de la base de datos
-    eventos = collection_eventos.find({"fecha_inicio": {"$gte": datetime.now()}}).sort("fecha_inicio", 1)  # Filtrar eventos futuros
+    # Obtener la fecha y hora actual
+    ahora = datetime.utcnow()
+    
+    # Consultar eventos futuros
+    eventos_futuros = collection_eventos.find({"fecha_inicio": {"$gte": ahora}}).sort("fecha_inicio").limit(6)
 
-    return render_template('home.html', eventos=eventos)
+    return render_template('home.html', eventos=eventos_futuros)
 
 
 ###
@@ -231,8 +234,14 @@ def crear_evento():
     if request.method == 'POST':
         nombre = request.form['nombre']
         tipo = request.form['tipo']
-        fecha_inicio = request.form['fecha_inicio']
-        fecha_fin = request.form['fecha_fin']
+        
+
+        fecha_inicio_str = request.form['fecha_inicio']
+        fecha_fin_str = request.form['fecha_fin']
+
+        fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d')
+        fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d')
+       
         timestamp = request.form['timestamp']
 
         # Obtener un código único
@@ -252,7 +261,13 @@ def crear_evento():
             # Convertir y guardar la imagen como JPG
             image = Image.open(afiche_file)
             image.convert('RGB').save(afiche_path, 'JPEG')  # Convertir a JPG y guardar
+            
+            # Redimensionar la imagen a 750x750 píxeles
+            image.thumbnail((750, 750))  # Mantiene la relación de aspecto
+            resized_afiche_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{codigo}-afiche-750.jpg")
+            image.save(resized_afiche_path, 'JPEG')  # Guardar la versión redimensionada
             print(f"Archivo afiche guardado en: {afiche_path}")  # Confirmación
+            print(f"Archivo afiche redimensionado guardado en: {resized_afiche_path}")  # Confirmación
 
         if fondo_file:
             fondo_filename = f"{codigo}-fondo.jpg"
@@ -271,6 +286,7 @@ def crear_evento():
             'fecha_inicio': fecha_inicio,
             'fecha_fin': fecha_fin,
             'afiche': afiche_path if afiche_file else None,
+            'afiche_750': resized_afiche_path if afiche_file else None,
             'fondo': fondo_path if fondo_file else None,
             'timestamp': timestamp
         })
