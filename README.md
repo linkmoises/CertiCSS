@@ -71,7 +71,7 @@ Las contribuciones son bienvenidas. Si deseas contribuir a este proyecto, por fa
 
 ## Licencia
 
-Este proyecto está bajo la Licencia MIT - consulta el archivo [LICENSE](LICENSE) para más detalles.
+Este proyecto está bajo la Licencia AGPL v3 - consulta el archivo [LICENSE](LICENSE) para más detalles.
 
 ## Contacto
 
