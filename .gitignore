@@ -164,3 +164,4 @@ cython_debug/
 # tailwind
 tailwind/
 tailwindcss
+static/css/tailwind.css
