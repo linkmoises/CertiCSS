@@ -1,5 +1,9 @@
 from flask import Flask, request, render_template, redirect, url_for, flash
+from flask_login import LoginManager, login_user, UserMixin
 from pymongo import MongoClient
+from flask_pymongo import PyMongo
+from bson.objectid import ObjectId
+from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 from PIL import Image
 import os
@@ -23,6 +27,37 @@ app.config['SECRET_KEY'] = os.urandom(24)  # Genera una clave secreta aleatoria
 # export FLASK_SECRET_KEY='mi_clave_secreta_super_segura' // hacer esto antes de iniciar el script y eliminar esta línea
 
 
+###
+### Login
+###
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return collection_usuarios.find_one({"_id": user_id})
+
+
+class User(UserMixin):
+    def __init__(self, email, password, rol):
+        self.email = email
+        self.password = password
+        self.rol = rol
+        self.id = None
+
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return str(self.id)
+
+
 ##
 ## Conexión a MongoDB
 ##
@@ -30,6 +65,7 @@ client = MongoClient('mongodb://localhost:27017/')
 db = client['certi_css']
 collection_eventos = db['eventos']
 collection_participantes = db['participantes']
+collection_usuarios = db['usuarios']
 
 
 ###
@@ -87,6 +123,78 @@ def obtener_codigo_unico():
         codigo = generar_codigo_evento()
         if collection_eventos.find_one({"codigo": codigo}) is None:
             return codigo
+
+
+###
+### Página de registro
+###
+@app.route('/registrar_usuario', methods=['GET', 'POST'])
+def registro():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        rol = request.form['rol']  # 'administrador' o 'coordinador'
+        unidad_ejecutora = request.form['unidad_ejecutora'] 
+
+        # Verificar si el usuario ya existe
+        if collection_usuarios.find_one({"email": email}):
+            flash('El usuario ya existe.')
+            return redirect(url_for('registro'))
+
+        # Crear un nuevo usuario y guardar en la base de datos
+        hashed_password = generate_password_hash(password)
+        collection_usuarios.insert_one({
+            "email": email,
+            "password": hashed_password,
+            "rol": rol,
+            "unidad_ejecutora": unidad_ejecutora
+        })
+        flash('Registro exitoso. Ahora puedes iniciar sesión.')
+        return redirect(url_for('index'))
+
+    return render_template('registrar_usuario.html')
+
+
+###
+### Login
+###
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+
+        user_data = collection_usuarios.find_one({"email": email})
+        
+        if user_data and check_password_hash(user_data['password'], password):
+            user = User(email=user_data['email'], password=user_data['password'], rol=user_data['rol'])
+            user.id = str(user_data['_id'])
+            login_user(user)
+            flash('Inicio de sesión exitoso.')
+            return redirect(url_for('home'))  # Redirigir a la página principal o donde necesites
+        
+        flash('Credenciales incorrectas. Inténtalo de nuevo.')
+
+    return render_template('iniciar_sesion.html')
+
+
+@app.route('/iniciar_sesion', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+
+        user_data = collection_usuarios.find_one({"email": email})
+        
+        if user_data and check_password_hash(user_data['password'], password):
+            user = User(email=user_data['email'], password=user_data['password'], rol=user_data['rol'])
+            user.id = str(user_data['_id'])
+            login_user(user)
+            flash('Inicio de sesión exitoso.')
+            return redirect(url_for('home'))  # Redirigir a la página principal o donde necesites
+        
+        flash('Credenciales incorrectas. Inténtalo de nuevo.')
+
+    return render_template('iniciar_sesion.html')
 
 
 ###
