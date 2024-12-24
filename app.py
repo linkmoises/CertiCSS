@@ -131,6 +131,9 @@ def obtener_codigo_unico():
 @app.route('/registrar_usuario', methods=['GET', 'POST'])
 def registro():
     if request.method == 'POST':
+        nombres = request.form['nombres']
+        apellidos = request.form['apellidos']
+        cedula = request.form['cedula']
         email = request.form['email']
         password = request.form['password']
         rol = request.form['rol']  # 'administrador' o 'coordinador'
@@ -144,6 +147,9 @@ def registro():
         # Crear un nuevo usuario y guardar en la base de datos
         hashed_password = generate_password_hash(password)
         collection_usuarios.insert_one({
+            'nombres': nombres,
+            'apellidos': apellidos,
+            'cedula': cedula,
             "email": email,
             "password": hashed_password,
             "rol": rol,
