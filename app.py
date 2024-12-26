@@ -137,7 +137,8 @@ def registro():
         email = request.form['email']
         password = request.form['password']
         rol = request.form['rol']  # 'administrador' o 'coordinador'
-        unidad_ejecutora = request.form['unidad_ejecutora'] 
+        unidad_ejecutora = request.form['unidad_ejecutora']
+        timestamp = datetime.now()
 
         # Verificar si el usuario ya existe
         if collection_usuarios.find_one({"email": email}):
@@ -153,7 +154,8 @@ def registro():
             "email": email,
             "password": hashed_password,
             "rol": rol,
-            "unidad_ejecutora": unidad_ejecutora
+            "unidad_ejecutora": unidad_ejecutora,
+            'timestamp': timestamp
         })
         flash('Registro exitoso. Ahora puedes iniciar sesión.')
         return redirect(url_for('index'))
@@ -204,7 +206,7 @@ def login():
 
 
 ###
-### Home dashboard
+### Home
 ###
 @app.route('/')
 def home():
@@ -215,6 +217,19 @@ def home():
     eventos_futuros = collection_eventos.find({"fecha_inicio": {"$gte": ahora}}).sort("fecha_inicio").limit(6)
 
     return render_template('home.html', eventos=eventos_futuros)
+
+
+###
+### Dashboard
+###
+@app.route('/tablero')
+#@login_required
+def tablero_coordinadores():
+
+    # Obtener todos los usuarios con rol 'coordinador'
+    coordinadores = collection_usuarios.find({"rol": "coordinador"})
+    
+    return render_template('tablero.html', coordinadores=coordinadores)
 
 
 ###
@@ -321,12 +336,14 @@ def registrar_ponente(codigo_evento):
 
 
 ###
-### Listado de eventos
+### Listado de eventos próximos
 ###
-@app.route('/eventos')
+@app.route('/eventos-proximos')
 def listar_eventos():
-    eventos = collection_eventos.find()  # Recuperar todos los eventos de la base de datos
-    return render_template('eventos.html', eventos=eventos)
+    ahora = datetime.utcnow()  # Obtener la fecha y hora actuales
+    eventos_cursor = collection_eventos.find({"fecha_inicio": {"$gte": ahora}})  # Recuperar solo eventos futuros
+    eventos = list(eventos_cursor)  # Convertir el cursor a una lista
+    return render_template('eventos-proximos.html', eventos=eventos)
 
 
 ###
