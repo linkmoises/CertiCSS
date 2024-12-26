@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Reportar bug
+    url: https://github.com/linkmoises/CertiCSS/issues/new?template=bug_report.md
+    about: Usa esta plantilla para reportar un error en el sistema.
+  - name: Nueva funcionalidad
+    url: https://github.com/linkmoises/CertiCSS/issues/new?template=feature_request.md
+    about: Sugiere nuevas funcionalidades o mejoras.
