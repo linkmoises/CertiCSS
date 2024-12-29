@@ -67,14 +67,14 @@
                 </li>
 
                 <li>
-                    <a class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100 bg-gray-100" href="#">
+                    <a class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100" href="#">
                         <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
                         Eventos próximos
                     </a>
                 </li>
 
                 <li>
-                    <a class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100" href="#">
+                    <a class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100 bg-gray-100" href="#">
                         <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-check"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
                         Eventos realizados
                     </a>
@@ -145,17 +145,17 @@
                     <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
                         <div>
                             <h2 class="text-xl font-semibold text-gray-800">
-                                Próximos eventos
+                                Eventos anteriores
                             </h2>
                             <p class="text-sm text-gray-600">
-                                Eventos próximos a realizarse
+                                Eventos que ya han sido realizados
                             </p>
                         </div>
         
                         <div>
                             <div class="inline-flex gap-x-2">
                             <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="#">
-                                Ver eventos anteriores
+                                Ver eventos próximos
                             </a>
             
                             <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="#">
@@ -179,7 +179,7 @@
                             No hay eventos
                         </h2>
                         <p class="mt-2 text-sm text-gray-600 dark:text-neutral-400">
-                            Sin eventos disponibles para fechas próximas.
+                            No hay eventos guardados.
                         </p>
                         
                         <div class="mt-5 flex flex-col sm:flex-row gap-2">
@@ -202,7 +202,7 @@
                         <div>
                             <div class="inline-flex gap-x-2">
                                 <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="#">
-                                    Ver eventos anteriores
+                                    Ver eventos próximos
                                 </a>
                             </div>
                         </div>
@@ -241,15 +241,11 @@
         
                         <th scope="col" class="px-6 py-3 text-start">
                             <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
-                                Acciones de usuarios
+                                Ponencias registradas
                             </a>
                         </th>
         
-                        <th scope="col" class="px-6 py-3 text-start">
-                            <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
-                                Acciones de evento
-                            </a>
-                        </th>
+                        <th scope="col" class="px-6 py-3 text-end"></th>
                         </tr>
                     </thead>
         
@@ -257,7 +253,7 @@
 {% for evento in eventos %}
                         <tr class="bg-white hover:bg-gray-50">
                             <td class="size-px whitespace-nowrap">
-                                <a class="block relative z-10" href="{{ url_for('mostrar_evento', codigo_evento=evento.codigo) }}">
+                                <a class="block relative z-10" href="{{ url_for('listar_participantes', codigo_evento=evento.codigo) }}">
                                 <div class="px-6 py-2">
                                     <div class="block text-sm text-blue-600 decoration-2 hover:underline">{{ evento.nombre }}</div>
                                 </div>
@@ -284,18 +280,10 @@
                                     <span class="text-sm text-gray-500">{{ evento.fecha_inicio.strftime('%d %b, %Y') }}</span>
                                 </a>
                             </td>
-                            <td class="size-px whitespace-nowrap">
-                                <div class="px-6 py-2">
-                                    <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('index', codigo_evento=evento.codigo) }}">
-                                        Añadir participante
-                                    </a><br>
-                                    <a class="inline-flex items-center gap-x-1 text-sm text-green-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('registrar_ponente', codigo_evento=evento.codigo) }}">
-                                        Añadir ponente
-                                    </a><br>
-                                    <a class="inline-flex items-center gap-x-1 text-sm text-pink-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('listar_participantes', codigo_evento=evento.codigo) }}">
-                                        Listado de participantes
-                                    </a>
-                                </div>
+                            <td class="size-px whitespace-nowrap text-center">
+                                <a class="block relative z-10" href="#">
+                                    <span class="text-sm text-gray-500">10</span>
+                                </a>
                             </td>
                             <td class="size-px whitespace-nowrap">
                                 <div class="px-6 py-2">

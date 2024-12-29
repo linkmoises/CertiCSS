@@ -158,7 +158,7 @@ def registro():
             'timestamp': timestamp
         })
         flash('Registro exitoso. Ahora puedes iniciar sesión.')
-        return redirect(url_for('index'))
+        return redirect(url_for('listar_usuarios'))
 
     return render_template('registrar_usuario.html')
 
@@ -206,6 +206,15 @@ def login():
 
 
 ###
+### Listado de usuarios
+###
+@app.route('/usuarios')
+def listar_usuarios():
+    usuarios = collection_usuarios.find()
+    return render_template('usuarios.html', usuarios=usuarios)
+
+
+###
 ### Home
 ###
 @app.route('/')
@@ -235,7 +244,7 @@ def tablero_coordinadores():
 ###
 ### Formulario de registro de participantes
 ###
-@app.route('/registrar/<codigo_evento>')
+@app.route('/registrar_participante/<codigo_evento>')
 def index(codigo_evento):
     # Verificar si el código del evento existe en la base de datos
     evento = collection_eventos.find_one({"codigo": codigo_evento})
@@ -339,11 +348,33 @@ def registrar_ponente(codigo_evento):
 ### Listado de eventos próximos
 ###
 @app.route('/eventos-proximos')
-def listar_eventos():
-    ahora = datetime.utcnow()  # Obtener la fecha y hora actuales
+def listar_eventos_proximos():
+    ahora = datetime.utcnow() 
     eventos_cursor = collection_eventos.find({"fecha_inicio": {"$gte": ahora}})  # Recuperar solo eventos futuros
     eventos = list(eventos_cursor)  # Convertir el cursor a una lista
     return render_template('eventos-proximos.html', eventos=eventos)
+
+
+###
+### Listado de eventos anteriores
+###
+@app.route('/eventos-anteriores')
+def listar_eventos_anteriores():
+    ahora = datetime.utcnow()
+    eventos_cursor = collection_eventos.find({"fecha_inicio": {"$lt": ahora}})  # Recuperar solo eventos pasados
+    eventos = list(eventos_cursor)  # Convertir el cursor a una lista
+    return render_template('eventos-anteriores.html', eventos=eventos)
+
+
+###
+### Todos los eventos
+###
+@app.route('/eventos')
+def listar_eventos():
+    ahora = datetime.utcnow() 
+    eventos_cursor = collection_eventos.find()  # Recuperar solo eventos futuros
+    eventos = list(eventos_cursor)  # Convertir el cursor a una lista
+    return render_template('eventos.html', eventos=eventos)
 
 
 ###
@@ -365,7 +396,7 @@ def crear_evento():
     if request.method == 'POST':
         nombre = request.form['nombre']
         tipo = request.form['tipo']
-        
+        descripcion = request.form['descripcion']
 
         fecha_inicio_str = request.form['fecha_inicio']
         fecha_fin_str = request.form['fecha_fin']
@@ -414,6 +445,7 @@ def crear_evento():
             'nombre': nombre,
             'codigo': codigo,
             'tipo': tipo,
+            'descripcion': descripcion,
             'fecha_inicio': fecha_inicio,
             'fecha_fin': fecha_fin,
             'afiche': afiche_path if afiche_file else None,
