@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template, redirect, url_for, flash
-from flask_login import LoginManager, login_user, UserMixin
+from flask_login import LoginManager, login_user, UserMixin, logout_user
 from pymongo import MongoClient
 from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
@@ -215,6 +215,65 @@ def listar_usuarios():
 
 
 ###
+###
+###
+@app.route('/editar_usuario/<user_id>', methods=['GET', 'POST'])
+def editar_usuario(user_id):
+    if request.method == 'POST':
+        # Recoger los datos del formulario
+        nombres = request.form.get('nombres')
+        apellidos = request.form.get('apellidos')
+        cedula = request.form.get('cedula')
+        unidad_ejecutora = request.form.get('unidad_ejecutora')
+        rol = request.form.get('rol')
+        email = request.form.get('email')
+        password = request.form.get('password')  # Si se permite cambiar la contraseña
+
+        # Crear un diccionario con los nuevos datos
+        updated_user_data = {
+            "nombres": nombres,
+            "apellidos": apellidos,
+            "cedula": cedula,
+            "unidad_ejecutora": unidad_ejecutora,
+            "rol": rol,
+        }
+
+        # Solo actualizar la contraseña si se proporciona
+        if password:
+            updated_user_data["password"] = generate_password_hash(password)  # Asegúrate de importar y usar esta función
+
+        # Actualizar el usuario en la base de datos
+        collection_usuarios.update_one({"_id": ObjectId(user_id)}, {"$set": updated_user_data})
+
+        flash('Usuario actualizado con éxito.')
+        return redirect(url_for('listar_usuarios'))  # Redirigir a la lista de usuarios
+
+    # Obtener los datos del usuario
+    usuario = collection_usuarios.find_one({"_id": ObjectId(user_id)})
+    return render_template('editar_usuario.html', usuario=usuario)
+
+
+###
+###
+###
+@app.route('/eliminar_usuario/<user_id>', methods=['POST'])
+def eliminar_usuario(user_id):
+    # Lógica para eliminar un usuario
+    collection_usuarios.delete_one({"_id": ObjectId(user_id)})
+    flash('Usuario eliminado con éxito.')
+    return redirect(url_for('listar_usuarios'))
+
+
+###
+###
+###
+@app.route('/salir', methods=['POST'])
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
+
+
+###
 ### Home
 ###
 @app.route('/')
@@ -371,9 +430,8 @@ def listar_eventos_anteriores():
 ###
 @app.route('/eventos')
 def listar_eventos():
-    ahora = datetime.utcnow() 
-    eventos_cursor = collection_eventos.find()  # Recuperar solo eventos futuros
-    eventos = list(eventos_cursor)  # Convertir el cursor a una lista
+    eventos_cursor = collection_eventos.find().sort("fecha_inicio", -1) ## -1 de reciente a antiguo / ## 1 de antiguo a reciente
+    eventos = list(eventos_cursor) 
     return render_template('eventos.html', eventos=eventos)
 
 

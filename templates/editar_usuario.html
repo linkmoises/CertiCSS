@@ -139,10 +139,10 @@
             <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-7 dark:bg-neutral-800">
             <div class="mb-8">
                 <h2 class="text-xl font-bold text-gray-800 dark:text-neutral-200">
-                    Registrar usuario
+                    Editar usuario
                 </h2>
                 <p class="text-sm text-gray-600 dark:text-neutral-400">
-                    Registrar nuevo coordinador de docencia
+                    Editar datos de un coordinador de docencia
                 </p>
             </div>
         
@@ -159,8 +159,8 @@
             
                     <div class="sm:col-span-9">
                         <div class="sm:flex">
-                        <input id="nombres" name="nombres" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Nombres...">
-                        <input id="apellidos" name="apellidos" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Apellidos...">
+                        <input id="nombres" name="nombres" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Nombres..." value="{{ usuario.nombres }}">
+                        <input id="apellidos" name="apellidos" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Apellidos..." value="{{ usuario.apellidos }}">
                         </div>
                     </div>
                     <!-- End Col -->
@@ -173,7 +173,7 @@
                     <!-- End Col -->
             
                     <div class="sm:col-span-9">
-                        <input id="cedula" name="cedula" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Escriba su número de cédula...">
+                        <input id="cedula" name="cedula" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Escriba su número de cédula..." value="{{ usuario.cedula }}">
                     </div>
                     <!-- End Col -->
 
@@ -185,7 +185,7 @@
                     <!-- End Col -->
             
                     <div class="sm:col-span-9">
-                        <input id="unidad_ejecutora" name="unidad_ejecutora" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Escriba su unidad ejecutora...">
+                        <input id="unidad_ejecutora" name="unidad_ejecutora" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Escriba su unidad ejecutora..." value="{{ usuario.unidad_ejecutora }}">
                     </div>
                     <!-- End Col -->
 
@@ -199,9 +199,9 @@
                     <div class="sm:col-span-9">
                         <select class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" id="rol" name="rol" required>
                             <option value="">Seleccione el rol de usuario</option>
-                            <option value="administrador">Administrador</option>
-                            <option value="denadoi">DENADOI</option>
-                            <option value="coordinador">Coordinador</option>
+                            <option value="administrador" {% if usuario.rol == 'administrador' %}selected{% endif %}>Administrador</option>
+                            <option value="denadoi" {% if usuario.rol == 'denadoi' %}selected{% endif %}>DENADOI</option>
+                            <option value="coordinador" {% if usuario.rol == 'coordinador' %}selected{% endif %}>Coordinador</option>
                         </select>
                     </div>
                     <!-- End Col -->
@@ -214,7 +214,7 @@
                     <!-- End Col -->
             
                     <div class="sm:col-span-9">
-                        <input type="email" id="email" name="email" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="usuario@css.gob.pa">
+                        <input type="email" id="email" name="email" disabled class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="usuario@css.gob.pa" value="{{ usuario.email }}">
                     </div>
                     <!-- End Col -->
         
@@ -240,7 +240,7 @@
         
                 <div class="mt-5 flex justify-end gap-x-2">
                     <button type="submit" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
-                        Registrar usuario
+                        Editar usuario
                     </button>
                 </div>
             </form>
