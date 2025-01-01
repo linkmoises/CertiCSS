@@ -294,10 +294,13 @@ def home():
 #@login_required
 def tablero_coordinadores():
 
-    # Obtener todos los usuarios con rol 'coordinador'
-    coordinadores = collection_usuarios.find({"rol": "coordinador"})
+    eventos_proximos = collection_eventos.find({
+        'fecha_inicio': {'$gte': datetime.now()}
+    }).sort('fecha_inicio').limit(5)
+
+    usuarios_recientes = collection_usuarios.find().sort('fecha_registro', -1).limit(5)
     
-    return render_template('tablero.html', coordinadores=coordinadores)
+    return render_template('tablero.html', eventos=eventos_proximos, usuarios=usuarios_recientes)
 
 
 ###
@@ -453,6 +456,7 @@ def listar_participantes(codigo_evento):
 def crear_evento():
     if request.method == 'POST':
         nombre = request.form['nombre']
+        unidad_ejecutora = request.form['unidad_ejecutora']
         tipo = request.form['tipo']
         descripcion = request.form['descripcion']
 
@@ -502,6 +506,7 @@ def crear_evento():
         collection_eventos.insert_one({
             'nombre': nombre,
             'codigo': codigo,
+            'unidad_ejecutora': unidad_ejecutora,
             'tipo': tipo,
             'descripcion': descripcion,
             'fecha_inicio': fecha_inicio,
@@ -515,6 +520,84 @@ def crear_evento():
         return redirect(url_for('listar_eventos'))  # Redirigir a la lista de eventos
 
     return render_template('crear_evento.html')
+
+
+###
+### Editar evento
+###
+@app.route('/editar_evento/<codigo_evento>', methods=['GET', 'POST'])
+def editar_evento(codigo_evento):
+    # Obtener el evento actual de la base de datos
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+
+    if not evento:
+        flash("Evento no encontrado", "danger")
+        return redirect(url_for('listar_eventos'))
+
+    if request.method == 'POST':
+        # Recoger los datos del formulario
+        nombre = request.form['nombre']
+        unidad_ejecutora = request.form['unidad_ejecutora']
+        tipo = request.form['tipo']
+        descripcion = request.form['descripcion']
+
+        fecha_inicio_str = request.form['fecha_inicio']
+        fecha_fin_str = request.form['fecha_fin']
+
+        fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d')
+        fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d')
+
+        timestamp = request.form['timestamp']
+
+        # Carga de archivos (opcional)
+        afiche_file = request.files.get('afiche_evento')
+        fondo_file = request.files.get('fondo_evento')
+
+        afiche_path = evento.get('afiche')
+        fondo_path = evento.get('fondo')
+        resized_afiche_path = evento.get('afiche_750')
+
+        if afiche_file:
+            afiche_filename = f"{codigo_evento}-afiche.jpg"
+            afiche_path = os.path.join(app.config['UPLOAD_FOLDER'], afiche_filename)
+            
+            # Convertir y guardar la imagen como JPG
+            image = Image.open(afiche_file)
+            image.convert('RGB').save(afiche_path, 'JPEG')  # Convertir a JPG y guardar
+            
+            # Redimensionar la imagen a 750x750 píxeles
+            image.thumbnail((750, 750))  # Mantiene la relación de aspecto
+            resized_afiche_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{codigo_evento}-afiche-750.jpg")
+            image.save(resized_afiche_path, 'JPEG')  # Guardar la versión redimensionada
+
+        if fondo_file:
+            fondo_filename = f"{codigo_evento}-fondo.jpg"
+            fondo_path = os.path.join(app.config['UPLOAD_FOLDER'], fondo_filename)
+            
+            # Convertir y guardar la imagen como JPG
+            image = Image.open(fondo_file)
+            image.convert('RGB').save(fondo_path, 'JPEG')  # Convertir a JPG y guardar
+
+        # Actualizar el evento en la base de datos
+        collection_eventos.update_one(
+            {"codigo": codigo_evento},
+            {"$set": {
+                'nombre': nombre,
+                'unidad_ejecutora': unidad_ejecutora,
+                'tipo': tipo,
+                'descripcion': descripcion,
+                'fecha_inicio': fecha_inicio,
+                'fecha_fin': fecha_fin,
+                'afiche': afiche_path,
+                'afiche_750': resized_afiche_path,
+                'fondo': fondo_path
+            }}
+        )
+        
+        flash("Evento actualizado con éxito", "success")
+        return redirect(url_for('listar_eventos'))  # Redirigir a la lista de eventos
+
+    return render_template('editar_evento.html', evento=evento)
 
 
 ###
