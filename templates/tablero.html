@@ -1,278 +1,6 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="utf-8">
-    <title>CertiCSS - Tablero de Eventos</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
-</head>
-<body class="bg-gray-50 dark:bg-neutral-900">
-    <!-- ========== HEADER ========== -->
-    <header class="sticky top-0 inset-x-0 flex flex-wrap md:justify-start md:flex-nowrap z-[48] w-full bg-white border-b text-sm py-2.5 lg:ps-[260px] dark:bg-neutral-800 dark:border-neutral-700">
-        <nav class="px-4 sm:px-6 flex basis-full items-center w-full mx-auto">
-        <div class="me-5 lg:me-0 lg:hidden">
-            <!-- Logo -->
-            <a class="flex-none rounded-md text-xl inline-block font-semibold focus:outline-none focus:opacity-80" href="#" aria-label="CertiCSS">
-                <img src="{{ url_for('static', filename='assets/certicss-logo.svg') }}" alt="Logo" class="items-center w-24">
-            </a>
-            <!-- End Logo -->
-        </div>
+{% include 'tablero-header.html' %}
 
-        <div class="w-full flex items-center justify-end ms-auto md:justify-between gap-x-1 md:gap-x-3">
-
-            <div class="hidden md:block">
-            <!-- Search Input -->
-            <div class="relative">
-                <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none z-20 ps-3.5">
-                <svg class="shrink-0 size-4 text-gray-400 dark:text-white/60" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8" />
-                    <path d="m21 21-4.3-4.3" />
-                </svg>
-                </div>
-                <input type="text" class="py-2 ps-10 pe-16 block w-full bg-white border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder:text-neutral-400 dark:focus:ring-neutral-600" placeholder="Search">
-                <div class="hidden absolute inset-y-0 end-0 flex items-center pointer-events-none z-20 pe-1">
-                <button type="button" class="inline-flex shrink-0 justify-center items-center size-6 rounded-full text-gray-500 hover:text-blue-600 focus:outline-none focus:text-blue-600 dark:text-neutral-500 dark:hover:text-blue-500 dark:focus:text-blue-500" aria-label="Close">
-                    <span class="sr-only">Close</span>
-                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="m15 9-6 6" />
-                    <path d="m9 9 6 6" />
-                    </svg>
-                </button>
-                </div>
-                <div class="absolute inset-y-0 end-0 flex items-center pointer-events-none z-20 pe-3 text-gray-400">
-                <svg class="shrink-0 size-3 text-gray-400 dark:text-white/60" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
-                </svg>
-                <span class="mx-1">
-                    <svg class="shrink-0 size-3 text-gray-400 dark:text-white/60" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M5 12h14" />
-                    <path d="M12 5v14" />
-                    </svg>
-                </span>
-                <span class="text-xs">/</span>
-                </div>
-            </div>
-            <!-- End Search Input -->
-            </div>
-
-            <div class="flex flex-row items-center justify-end gap-1">
-            <button type="button" class="md:hidden size-[38px] relative inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
-                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.3-4.3" />
-                </svg>
-                <span class="sr-only">Buscar</span>
-            </button>
-
-            <button type="button" class="size-[38px] relative inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
-                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-                </svg>
-                <span class="sr-only">Notificationes</span>
-            </button>
-
-            <button type="button" class="size-[38px] relative inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
-                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                </svg>
-                <span class="sr-only">Registro de actividad</span>
-            </button>
-
-            <!-- Dropdown -->
-            <div class="hs-dropdown [--placement:bottom-right] relative inline-flex">
-                <button id="hs-dropdown-account" type="button" class="size-[38px] inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-800 focus:outline-none disabled:opacity-50 disabled:pointer-events-none dark:text-white" aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
-                <img class="shrink-0 size-[38px] rounded-full" src="{{ url_for('static', filename='assets/user-avatar.png') }}" alt="Avatar">
-                </button>
-
-                <div class="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden min-w-60 bg-white shadow-md rounded-lg mt-2 dark:bg-neutral-800 dark:border dark:border-neutral-700 dark:divide-neutral-700 after:h-4 after:absolute after:-bottom-4 after:start-0 after:w-full before:h-4 before:absolute before:-top-4 before:start-0 before:w-full" role="menu" aria-orientation="vertical" aria-labelledby="hs-dropdown-account">
-                <div class="py-3 px-5 bg-gray-100 rounded-t-lg dark:bg-neutral-700">
-                    <p class="text-sm text-gray-500 dark:text-neutral-500">Has iniciado sesion como</p>
-                    <p class="text-sm font-medium text-gray-800 dark:text-neutral-200">moserrano@css.gob.pa</p>
-                </div>
-                <div class="p-1.5 space-y-0.5">
-                    <a class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 dark:focus:bg-neutral-700 dark:focus:text-neutral-300" href="#">
-                        <svg class="shrink-0 mt-0.5 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="15" r="3"/><circle cx="9" cy="7" r="4"/><path d="M10 15H6a4 4 0 0 0-4 4v2"/><path d="m21.7 16.4-.9-.3"/><path d="m15.2 13.9-.9-.3"/><path d="m16.6 18.7.3-.9"/><path d="m19.1 12.2.3-.9"/><path d="m19.6 18.7-.4-1"/><path d="m16.8 12.3-.4-1"/><path d="m14.3 16.6 1-.4"/><path d="m20.7 13.8 1-.4"/></svg>
-                        Mi perfil
-                    </a>
-                    <a class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 dark:focus:bg-neutral-700 dark:focus:text-neutral-300" href="#">
-                        <svg class="shrink-0 mt-0.5 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-user"><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 18a3 3 0 1 0-6 0"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><circle cx="12" cy="13" r="2"/></svg>
-                        Mis Certificados
-                    </a>
-                    <a class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:text-white hover:bg-red-600 focus:outline-none focus:bg-red-600 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 dark:focus:bg-neutral-700 dark:focus:text-neutral-300" href="#">
-                        <svg class="shrink-0 mt-0.5 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
-                        Salir
-                    </a>
-                </div>
-                </div>
-            </div>
-            <!-- End Dropdown -->
-            </div>
-        </div>
-        </nav>
-    </header>
-    <!-- ========== END HEADER ========== -->
-
-    <!-- ========== MAIN CONTENT ========== -->
-    <div class="-mt-px">
-        <!-- Breadcrumb -->
-        <div class="sticky top-0 inset-x-0 z-20 bg-white border-y px-4 sm:px-6 lg:px-8 lg:hidden dark:bg-neutral-800 dark:border-neutral-700">
-        <div class="flex items-center py-2">
-            <!-- Navigation Toggle -->
-            <button type="button" class="size-8 flex justify-center items-center gap-x-2 border border-gray-200 text-gray-800 hover:text-gray-500 rounded-lg focus:outline-none focus:text-gray-500 disabled:opacity-50 disabled:pointer-events-none dark:border-neutral-700 dark:text-neutral-200 dark:hover:text-neutral-500 dark:focus:text-neutral-500" aria-haspopup="dialog" aria-expanded="false" aria-controls="hs-application-sidebar" aria-label="Toggle navigation" data-hs-overlay="#hs-application-sidebar">
-            <span class="sr-only">Toggle Navigation</span>
-            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect width="18" height="18" x="3" y="3" rx="2" />
-                <path d="M15 3v18" />
-                <path d="m8 9 3 3-3 3" />
-            </svg>
-            </button>
-            <!-- End Navigation Toggle -->
-
-            <!-- Breadcrumb -->
-            <ol class="ms-3 flex items-center whitespace-nowrap">
-            <li class="flex items-center text-sm text-gray-800 dark:text-neutral-400">
-                CertiCSS
-                <svg class="shrink-0 mx-3 overflow-visible size-2.5 text-gray-400 dark:text-neutral-500" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M5 1L10.6869 7.16086C10.8637 7.35239 10.8637 7.64761 10.6869 7.83914L5 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                </svg>
-            </li>
-            <li class="text-sm font-semibold text-gray-800 truncate dark:text-neutral-400" aria-current="page">
-                Tablero
-            </li>
-            </ol>
-            <!-- End Breadcrumb -->
-        </div>
-        </div>
-        <!-- End Breadcrumb -->
-    </div>
-
-    <!-- Sidebar -->
-    <div id="hs-application-sidebar" class="hs-overlay  [--auto-close:lg]
-        hs-overlay-open:translate-x-0
-        -translate-x-full transition-all duration-300 transform
-        w-[260px] h-full
-        hidden
-        fixed inset-y-0 start-0 z-[60]
-        bg-white border-e border-gray-200
-        lg:block lg:translate-x-0 lg:end-auto lg:bottom-0
-        dark:bg-neutral-800 dark:border-neutral-700" role="dialog" tabindex="-1" aria-label="Sidebar">
-        <div class="relative flex flex-col h-full max-h-full">
-        <div class="px-6 pt-4">
-            <!-- Logo -->
-            <a class="flex-none items-center rounded-xl text-xl inline-block font-semibold focus:outline-none focus:opacity-80" href="#" aria-label="Preline">
-                <img src="{{ url_for('static', filename='assets/certicss-logo.svg') }}" alt="Logo" class="h-auto mb-3">
-            </a>
-            <!-- End Logo -->
-        </div>
-
-        <!-- Content -->
-        <div class="h-full overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
-            <nav class="hs-accordion-group p-3 w-full flex flex-col flex-wrap" data-hs-accordion-always-open>
-            <ul class="flex flex-col space-y-1">
-                <li>
-                    <a class="flex items-center gap-x-3.5 py-2 px-2.5 bg-gray-100 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:bg-neutral-700 dark:text-white" href="#">
-                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                        <polyline points="9 22 9 12 15 12 15 22" />
-                        </svg>
-                        Tablero
-                    </a>
-                </li>
-
-                <li class="hs-accordion" id="projects-accordion">
-                <button type="button" class="hs-accordion-toggle w-full text-start flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:text-neutral-200" aria-expanded="true" aria-controls="projects-accordion-child">
-                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
-                    Eventos
-
-                    <svg class="hs-accordion-active:block ms-auto hidden size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="m18 15-6-6-6 6" />
-                    </svg>
-
-                    <svg class="hs-accordion-active:hidden ms-auto block size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="m6 9 6 6 6-6" />
-                    </svg>
-                </button>
-
-                <div id="projects-accordion-child" class="hs-accordion-content w-full overflow-hidden transition-[height] duration-300 hidden" role="region" aria-labelledby="projects-accordion">
-                    <ul class="ps-8 pt-1 space-y-1">
-                        <li>
-                            <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:bg-neutral-800 dark:text-neutral-200" href="#">
-                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
-                            Todos los eventos
-                            </a>
-                        </li>
-                        <li>
-                            <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:bg-neutral-800 dark:text-neutral-200" href="#">
-                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-clock"><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h5"/><path d="M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/></svg>
-                            Eventos próximos
-                            </a>
-                        </li>
-                        <li>
-                            <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:bg-neutral-800 dark:text-neutral-200" href="#">
-                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-check"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
-                            Eventos anteriores
-                            </a>
-                        </li>
-                        <li>
-                            <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:bg-neutral-800 dark:text-neutral-200" href="#">
-                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-plus-2"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M10 16h4"/><path d="M12 14v4"/></svg>
-                            Evento nuevo
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                </li>
-
-                <li class="hs-accordion" id="users-accordion">
-                    <button type="button" class="hs-accordion-toggle w-full text-start flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:text-neutral-200" aria-expanded="true" aria-controls="users-accordion-child">
-                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                        <circle cx="9" cy="7" r="4" />
-                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                        </svg>
-                        Usuarios
-
-                        <svg class="hs-accordion-active:block ms-auto hidden size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m18 15-6-6-6 6" />
-                        </svg>
-
-                        <svg class="hs-accordion-active:hidden ms-auto block size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m6 9 6 6 6-6" />
-                        </svg>
-                    </button>
-
-                    <div id="account-accordion-child" class="hs-accordion-content w-full overflow-hidden transition-[height] duration-300 hidden" role="region" aria-labelledby="account-accordion">
-                        <ul class="ps-8 pt-1 space-y-1">
-                            <li>
-                                <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:bg-neutral-800 dark:text-neutral-200" href="#">
-                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                                Todos los usuarios
-                                </a>
-                            </li>
-                            <li>
-                                <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:bg-neutral-800 dark:text-neutral-200" href="#">
-                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-plus"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
-                                Añadir usuario
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-
-                <li><a class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-900 dark:text-neutral-200 dark:hover:text-neutral-300" href="#">
-                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                    Documentación
-                </a></li>
-            </ul>
-            </nav>
-        </div>
-        <!-- End Content -->
-        </div>
-    </div>
-    <!-- End Sidebar -->
+{% include 'tablero-sidebar.html' %}
 
     <!-- Content -->
     <div class="w-full lg:ps-64">
@@ -362,316 +90,227 @@
             <div class="max-w-[85rem] px-2 pt-1 mx-auto">
                 <!-- Card -->
                 <div class="flex flex-col">
-                <div class="-m-1.5 overflow-x-auto">
-                    <div class="p-1.5 min-w-full inline-block align-middle">
-                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                        <!-- Header -->
-                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
-                            <div>
-                                <h2 class="text-xl font-semibold text-gray-800">
-                                    Próximos eventos
-                                </h2>
-                                <p class="text-sm text-gray-600">
-                                    Eventos próximos a realizarse
-                                </p>
-                            </div>
-            
-                            <div>
-                                <div class="inline-flex gap-x-2">
-                                <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="#">
-                                    Ver todos los eventos
-                                </a>
+                    <div class="-m-1.5 overflow-x-auto">
+                        <div class="p-1.5 min-w-full inline-block align-middle">
+                        <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                            <!-- Header -->
+                            <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
+                                <div>
+                                    <h2 class="text-xl font-semibold text-gray-800">
+                                        Próximos eventos
+                                    </h2>
+                                    <p class="text-sm text-gray-600">
+                                        Eventos próximos a realizarse
+                                    </p>
+                                </div>
                 
-                                <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="#">
-                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                                    Añadir evento
-                                </a>
+                                <div>
+                                    <div class="inline-flex gap-x-2">
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="#">
+                                        Ver todos los eventos
+                                    </a>
+                    
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="#">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                        Añadir evento
+                                    </a>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <!-- End Header -->
-            
-                        <!-- Table -->
-                        <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                            <th scope="col" class="px-6 py-3 text-start">
-                                <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
-                                    Título
-                                </a>
-                            </th>
-            
-                            <th scope="col" class="px-6 py-3 text-start">
-                                <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
-                                    Descripción
-                                </a>
-                            </th>
-            
-                            <th scope="col" class="px-6 py-3 text-start">
-                                <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
-                                    Tipo de evento
-                                </a>
-                            </th>
-            
-                            <th scope="col" class="px-6 py-3 text-start">
-                                <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
-                                    Fecha inicio
-                                </a>
-                            </th>
-            
-                            <th scope="col" class="px-6 py-3 text-start">
-                                <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
-                                    Ponencias registradas
-                                </a>
-                            </th>
-            
-                            <th scope="col" class="px-6 py-3 text-end"></th>
-                            </tr>
-                        </thead>
-            
-                        <tbody class="divide-y divide-gray-200">
+                            <!-- End Header -->
 
-                            <tr class="bg-white hover:bg-gray-50">
-                                <td class="size-px whitespace-nowrap">
-                                    <a class="block relative z-10" href="#">
-                                    <div class="px-6 py-2">
-                                        <div class="block text-sm text-blue-600 decoration-2 hover:underline">Seminarios Científicos del CHMDrAAM</div>
-                                    </div>
-                                    </a>
-                                </td>
-                                <td class="h-px w-72 min-w-72">
-                                    <a class="block relative z-10" href="#">
-                                    <div class="px-6 py-2">
-                                        <p class="text-sm text-gray-500">Un evento científico académico del CHMDrAAM con una vitrina a la producción científica local.</p>
-                                    </div>
-                                    </a>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <a class="block relative z-10" href="#">
-                                    <div class="px-6 py-2">
-                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
-                                            Seminario
-                                        </span>
-                                    </div>
-                                    </a>
-                                </td>
-                                <td class="size-px whitespace-nowrap text-center">
-                                    <a class="block relative z-10" href="#">
-                                        <span class="text-sm text-gray-500">18 Dec, 15:20</span>
-                                    </a>
-                                </td>
-                                <td class="size-px whitespace-nowrap text-center">
-                                    <a class="block relative z-10" href="#">
-                                        <span class="text-sm text-gray-500">10</span>
-                                    </a>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="px-6 py-2">
-                                        <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="#">
-                                            Editar
-                                            <svg class="size-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-pen-line"><path d="m18 5-2.414-2.414A2 2 0 0 0 14.172 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2"/><path d="M21.378 12.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><path d="M8 18h1"/></svg>
+{% if eventos|length == 0 %}
+                    
+                            <!-- Body -->
+                            <div class="max-w-sm w-full min-h-[400px] flex flex-col justify-center mx-auto px-6 py-4">
+                                <div class="flex justify-center items-center size-[46px] bg-gray-100 rounded-lg dark:bg-neutral-800">
+                                    <svg class="shrink-0 size-6 text-gray-600 dark:text-neutral-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-off"><path d="M4.2 4.2A2 2 0 0 0 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 1.82-1.18"/><path d="M21 15.5V6a2 2 0 0 0-2-2H9.5"/><path d="M16 2v4"/><path d="M3 10h7"/><path d="M21 10h-5.5"/><path d="m2 2 20 20"/></svg>
+                                </div>
+
+                                <h2 class="mt-5 font-semibold text-gray-800 dark:text-white">
+                                    No hay eventos
+                                </h2>
+                                <p class="mt-2 text-sm text-gray-600 dark:text-neutral-400">
+                                    Sin eventos disponibles para fechas próximas.
+                                </p>
+                                
+                                <div class="mt-5 flex flex-col sm:flex-row gap-2">
+                                <button type="button" class="py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                    Nuevo evento
+                                </button>
+                                </div>
+                            </div>
+                            <!-- End Body -->
+
+                            <!-- Footer -->
+                            <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
+                                <div>
+                                <p class="text-sm text-gray-600 dark:text-neutral-400">
+                                    <span class="font-semibold text-gray-800 dark:text-neutral-200">0</span> resultados
+                                </p>
+                                </div>
+
+                                <div>
+                                    <div class="inline-flex gap-x-2">
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="#">
+                                            Ver eventos anteriores
                                         </a>
                                     </div>
-                                </td>
-                            </tr>
+                                </div>
+                            </div>
+                            <!-- End Footer -->
 
-                            <tr class="bg-white hover:bg-gray-50">
-                                <td class="size-px whitespace-nowrap">
-                                    <a class="block relative z-10" href="#">
-                                    <div class="px-6 py-2">
-                                        <div class="block text-sm text-blue-600 decoration-2 hover:underline">Seminarios Científicos del CHMDrAAM</div>
-                                    </div>
-                                    </a>
-                                </td>
-                                <td class="h-px w-72 min-w-72">
-                                    <a class="block relative z-10" href="#">
-                                    <div class="px-6 py-2">
-                                        <p class="text-sm text-gray-500">Un evento científico académico del CHMDrAAM con una vitrina a la producción científica local.</p>
-                                    </div>
-                                    </a>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <a class="block relative z-10" href="#">
-                                    <div class="px-6 py-2">
-                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
-                                            Seminario
-                                        </span>
-                                    </div>
-                                    </a>
-                                </td>
-                                <td class="size-px whitespace-nowrap text-center">
-                                    <a class="block relative z-10" href="#">
-                                        <span class="text-sm text-gray-500">18 Dec, 15:20</span>
-                                    </a>
-                                </td>
-                                <td class="size-px whitespace-nowrap text-center">
-                                    <a class="block relative z-10" href="#">
-                                        <span class="text-sm text-gray-500">10</span>
-                                    </a>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="px-6 py-2">
-                                        <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="#">
-                                            Editar
-                                            <svg class="size-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-pen-line"><path d="m18 5-2.414-2.414A2 2 0 0 0 14.172 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2"/><path d="M21.378 12.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><path d="M8 18h1"/></svg>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
+{% else %}
 
-                            <tr class="bg-white hover:bg-gray-50">
-                                <td class="size-px whitespace-nowrap">
-                                    <a class="block relative z-10" href="#">
-                                    <div class="px-6 py-2">
-                                        <div class="block text-sm text-blue-600 decoration-2 hover:underline">Seminarios Científicos del CHMDrAAM</div>
-                                    </div>
+                            <!-- Table -->
+                            <table class="table-auto min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
+                                        Título
                                     </a>
-                                </td>
-                                <td class="h-px w-72 min-w-72">
-                                    <a class="block relative z-10" href="#">
-                                    <div class="px-6 py-2">
-                                        <p class="text-sm text-gray-500">Un evento científico académico del CHMDrAAM con una vitrina a la producción científica local.</p>
-                                    </div>
+                                </th>
+                
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
+                                        Descripción
                                     </a>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <a class="block relative z-10" href="#">
-                                    <div class="px-6 py-2">
-                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
-                                            Seminario
-                                        </span>
-                                    </div>
+                                </th>
+                
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
+                                        Estado
                                     </a>
-                                </td>
-                                <td class="size-px whitespace-nowrap text-center">
-                                    <a class="block relative z-10" href="#">
-                                        <span class="text-sm text-gray-500">18 Dec, 15:20</span>
+                                </th>
+                
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
+                                        Fecha inicio
                                     </a>
-                                </td>
-                                <td class="size-px whitespace-nowrap text-center">
-                                    <a class="block relative z-10" href="#">
-                                        <span class="text-sm text-gray-500">10</span>
+                                </th>
+                
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
+                                        Acciones de usuarios
                                     </a>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="px-6 py-2">
-                                        <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="#">
-                                            Editar
-                                            <svg class="size-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-pen-line"><path d="m18 5-2.414-2.414A2 2 0 0 0 14.172 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2"/><path d="M21.378 12.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><path d="M8 18h1"/></svg>
+                                </th>
+                
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
+                                        Acciones de evento
+                                    </a>
+                                </th>
+                                </tr>
+                            </thead>
+                
+                            <tbody class="divide-y divide-gray-200">
+{% for evento in eventos %}
+                                <tr class="bg-white hover:bg-gray-50">
+                                    <td class="h-px w-72 min-w-72">
+                                        <div class="px-6 py-2">
+                                            <p class="text-sm text-gray-500 mb-2">
+                                                <a class="text-sm text-blue-600 decoration-2 hover:underline" href="{{ url_for('mostrar_evento', codigo_evento=evento.codigo) }}">
+                                                {{ evento.nombre }}</a>
+                                            </p>
+                                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                                {{ evento.unidad_ejecutora }}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td class="h-px w-72 min-w-72">
+                                        <a class="block relative z-10" href="#">
+                                        <div class="px-6 py-2">
+                                            <p class="text-sm text-gray-500 mb-2">{{ evento.descripcion }}</p>
+                                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                                {{ evento.tipo }}
+                                            </span>
+                                        </div>
                                         </a>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            <tr class="bg-white hover:bg-gray-50">
-                                <td class="size-px whitespace-nowrap">
-                                    <a class="block relative z-10" href="#">
-                                    <div class="px-6 py-2">
-                                        <div class="block text-sm text-blue-600 decoration-2 hover:underline">Seminarios Científicos del CHMDrAAM</div>
-                                    </div>
-                                    </a>
-                                </td>
-                                <td class="h-px w-72 min-w-72">
-                                    <a class="block relative z-10" href="#">
-                                    <div class="px-6 py-2">
-                                        <p class="text-sm text-gray-500">Un evento científico académico del CHMDrAAM con una vitrina a la producción científica local.</p>
-                                    </div>
-                                    </a>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <a class="block relative z-10" href="#">
-                                    <div class="px-6 py-2">
-                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
-                                            Seminario
-                                        </span>
-                                    </div>
-                                    </a>
-                                </td>
-                                <td class="size-px whitespace-nowrap text-center">
-                                    <a class="block relative z-10" href="#">
-                                        <span class="text-sm text-gray-500">18 Dec, 15:20</span>
-                                    </a>
-                                </td>
-                                <td class="size-px whitespace-nowrap text-center">
-                                    <a class="block relative z-10" href="#">
-                                        <span class="text-sm text-gray-500">10</span>
-                                    </a>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="px-6 py-2">
-                                        <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="#">
-                                            Editar
-                                            <svg class="size-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-pen-line"><path d="m18 5-2.414-2.414A2 2 0 0 0 14.172 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2"/><path d="M21.378 12.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><path d="M8 18h1"/></svg>
+                                    </td>
+                                    <td class="size-px whitespace-nowrap">
+                                        <a class="block relative z-10" href="#">
+                                        <div class="px-6 py-2">
+                                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium {% if evento.estado_evento == 'publicado' %}bg-blue-100 text-blue-800{% elif evento.estado_evento == 'cerrado' %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+{% if evento.estado_evento == 'publicado' %}Publicado{% elif evento.estado_evento == 'cerrado' %}Cerrado{% else %}Borrador{% endif %}
+                                            </span><br /><br />
+{% if evento.estado == 'En curso' %}
+<span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-green-100 text-green-800">
+{{ evento.evento_estado }}
+</span>
+{% elif evento.estado == 'Finalizado' %}
+<span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+{{ evento.evento_estado }}
+</span>
+{% else %}
+<span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-blue-100 text-blue-800">
+{{ evento.evento_estado }}
+</span>
+{% endif %}
+                                        </div>
                                         </a>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            <tr class="bg-white hover:bg-gray-50">
-                                <td class="size-px whitespace-nowrap">
-                                    <a class="block relative z-10" href="#">
-                                    <div class="px-6 py-2">
-                                        <div class="block text-sm text-blue-600 decoration-2 hover:underline">Seminarios Científicos del CHMDrAAM</div>
-                                    </div>
-                                    </a>
-                                </td>
-                                <td class="h-px w-72 min-w-72">
-                                    <a class="block relative z-10" href="#">
-                                    <div class="px-6 py-2">
-                                        <p class="text-sm text-gray-500">Un evento científico académico del CHMDrAAM con una vitrina a la producción científica local.</p>
-                                    </div>
-                                    </a>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <a class="block relative z-10" href="#">
-                                    <div class="px-6 py-2">
-                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
-                                            Seminario
-                                        </span>
-                                    </div>
-                                    </a>
-                                </td>
-                                <td class="size-px whitespace-nowrap text-center">
-                                    <a class="block relative z-10" href="#">
-                                        <span class="text-sm text-gray-500">18 Dec, 15:20</span>
-                                    </a>
-                                </td>
-                                <td class="size-px whitespace-nowrap text-center">
-                                    <a class="block relative z-10" href="#">
-                                        <span class="text-sm text-gray-500">10</span>
-                                    </a>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="px-6 py-2">
-                                        <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="#">
-                                            Editar
-                                            <svg class="size-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-pen-line"><path d="m18 5-2.414-2.414A2 2 0 0 0 14.172 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2"/><path d="M21.378 12.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><path d="M8 18h1"/></svg>
+                                    </td>
+                                    <td class="size-px whitespace-nowrap text-center">
+                                        <a class="block relative z-10" href="#">
+                                            <span class="text-sm text-gray-500">{{ evento.fecha_inicio.strftime('%d %b, %Y') }}</span>
                                         </a>
-                                    </div>
-                                </td>
-                            </tr>
-            
-                        </tbody>
+                                    </td>
+                                    <td class="size-px whitespace-nowrap">
+                                        <div class="px-6 py-2">
+                                            <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('index', codigo_evento=evento.codigo) }}">
+                                                Añadir participante
+                                            </a><br>
+                                            <a class="inline-flex items-center gap-x-1 text-sm text-green-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('registrar_ponente', codigo_evento=evento.codigo) }}">
+                                                Añadir ponente
+                                            </a><br>
+                                            <a class="inline-flex items-center gap-x-1 text-sm text-pink-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('listar_participantes', codigo_evento=evento.codigo) }}">
+                                                Listado de participantes
+                                            </a>
+                                        </div>
+                                    </td>
+                                    <td class="size-px whitespace-nowrap">
+                                        <div class="px-6 py-2">
+                                            <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('editar_evento', codigo_evento=evento.codigo) }}">
+                                                Editar
+                                            </a><br />
+                                            <form action="{{ url_for('eliminar_evento', codigo_evento=evento.codigo) }}" method="post" style="display:inline;">
+                                                <button class="text-sm text-red-600 decoration-2 hover:underline" type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este evento?');">
+                                                    Eliminar
+                                                </button>
+                                            </form><br />
+                                            <form action="{{ url_for('cerrar_evento', codigo_evento=evento.codigo) }}" method="post" style="display:inline;">
+                                                <button class="text-sm text-red-800 decoration-2 hover:underline" type="submit" onclick="return confirm('¿Estás seguro de que deseas cerrar este evento?');">
+                                                    Cerrar
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+{% endfor %}
+                            </tbody>
                         </table>
                         <!-- End Table -->
             
                         <!-- Footer -->
                         <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200">
-                        <div>
-                            <p class="text-sm text-gray-600">
-                            <span class="font-semibold text-gray-800">5</span> resultados más próximos
-                            </p>
-                        </div>
-            
-                        <div>
-                            <div class="inline-flex gap-x-2">
-                                <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="#">
-                                    Ver todos
-                                </a>
+                            <div>
+                                <p class="text-sm text-gray-600">
+                                <span class="font-semibold text-gray-800">{{ num_eventos }}</span> {{ 'resultado próximo' if num_eventos == 1 else 'resultados próximos' }}
+                                </p>
+                            </div>
+                
+                            <div>
+                                <div class="inline-flex gap-x-2">
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="#">
+                                        Ver todos
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                        </div>
                         <!-- End Footer -->
+{% endif %}
+
                     </div>
                     </div>
                 </div>
@@ -681,7 +320,7 @@
             <!-- FIN TABLA RESUMEN EVENTOS -->
 
             <!-- TABLA RESUMEN USUARIOS -->
-            <div class="max-w-[85rem] px-2 py-1 mx-auto">
+            <div class="max-w-[85rem] px-4 pt-4 mx-auto">
                 <!-- Card -->
                 <div class="flex flex-col">
                 <div class="-m-1.5 overflow-x-auto">
@@ -755,62 +394,16 @@
                         </thead>
             
                         <tbody class="divide-y divide-gray-200">
-            
-                            <tr class="bg-white hover:bg-gray-50">
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="ps-6 py-3">
-                                    <div class="flex items-center gap-x-3">
-                                        <span class="inline-flex items-center justify-center size-[38px] rounded-full bg-white border border-gray-300">
-                                        <span class="font-medium text-sm text-gray-800 leading-none">A</span>
-                                        </span>
-                                        <div class="grow">
-                                        <span class="block text-sm font-semibold text-gray-800">Nombre Apellido</span>
-                                        <span class="block text-sm text-gray-500">correo@css.gob.pa</span>
-                                        </div>
-                                    </div>
-                                    </div>
-                                </td>
-                                <td class="h-px w-72 whitespace-nowrap">
-                                    <div class="px-6 py-3">
-                                    <span class="block text-sm font-semibold text-gray-800">Coordinador Local de Docencia</span>
-                                    <span class="block text-sm text-gray-500">Policlínica Lic. Manuel María Valdés</span>
-                                    </div>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="px-6 py-3">
-                                    <span class="py-1 px-1.5 inline-flex items-center gap-x-1 text-xs font-medium bg-teal-100 text-teal-800 rounded-full">
-                                        <svg class="size-2.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
-                                        </svg>
-                                        Activo
-                                    </span>
-                                    </div>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="px-6 py-3">
-                                    <span class="text-sm text-gray-500">18 Dec, 15:20</span>
-                                    </div>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="px-6 py-1.5">
-                                    <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="#">
-                                        Editar
-                                        <svg class="size-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round-pen"><path d="M2 21a8 8 0 0 1 10.821-7.487"/><path d="M21.378 16.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><circle cx="10" cy="8" r="5"/></svg>
-                                    </a>
-                                    </div>
-                                </td>
-                            </tr>
 
+    {% for usuario in usuarios %}
                             <tr class="bg-white hover:bg-gray-50">
                                 <td class="size-px whitespace-nowrap">
                                     <div class="ps-6 py-3">
                                     <div class="flex items-center gap-x-3">
-                                        <span class="inline-flex items-center justify-center size-[38px] rounded-full bg-white border border-gray-300">
-                                        <span class="font-medium text-sm text-gray-800 leading-none">A</span>
-                                        </span>
+                                        <img class="shrink-0 size-[38px] rounded-full" src="{{ url_for('static', filename='assets/user-avatar.png') }}" alt="Avatar">
                                         <div class="grow">
-                                        <span class="block text-sm font-semibold text-gray-800">Nombre Apellido</span>
-                                        <span class="block text-sm text-gray-500">correo@css.gob.pa</span>
+                                        <span class="block text-sm font-semibold text-gray-800">{{ usuario.nombres }} {{ usuario.apellidos }}</span>
+                                        <span class="block text-sm text-gray-500">{{ usuario.email }}</span>
                                         </div>
                                     </div>
                                     </div>
@@ -818,7 +411,7 @@
                                 <td class="h-px w-72 whitespace-nowrap">
                                     <div class="px-6 py-3">
                                     <span class="block text-sm font-semibold text-gray-800">Coordinador Local de Docencia</span>
-                                    <span class="block text-sm text-gray-500">Policlínica Generoso Guardia</span>
+                                    <span class="block text-sm text-gray-500">{{ usuario.unidad_ejecutora }}</span>
                                     </div>
                                 </td>
                                 <td class="size-px whitespace-nowrap">
@@ -833,153 +426,25 @@
                                 </td>
                                 <td class="size-px whitespace-nowrap">
                                     <div class="px-6 py-3">
-                                    <span class="text-sm text-gray-500">18 Dec, 15:20</span>
+                                    <span class="text-sm text-gray-500">{{ usuario.timestamp.strftime('%d %b, %Y - %H:%M') }}</span>
                                     </div>
                                 </td>
                                 <td class="size-px whitespace-nowrap">
                                     <div class="px-6 py-1.5">
-                                    <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="#">
+                                    <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('editar_usuario', user_id=usuario._id) }}">
                                         Editar
-                                        <svg class="size-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round-pen"><path d="M2 21a8 8 0 0 1 10.821-7.487"/><path d="M21.378 16.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><circle cx="10" cy="8" r="5"/></svg>
-                                    </a>
+                                        <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round-pen"><path d="M2 21a8 8 0 0 1 10.821-7.487"/><path d="M21.378 16.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><circle cx="10" cy="8" r="5"/></svg>
+                                    </a><br>
+                                    <form action="{{ url_for('eliminar_usuario', user_id=usuario._id) }}" method="post" style="display:inline;">
+                                        <button type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este usuario?');" class="text-sm text-red-500 hover:text-red-700 inline-flex items-center gap-x-1">
+                                            Eliminar 
+                                            <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round-x"><path d="M2 21a8 8 0 0 1 11.873-7"/><circle cx="10" cy="8" r="5"/><path d="m17 17 5 5"/><path d="m22 17-5 5"/></svg>
+                                        </button>
+                                    </form><br>
                                     </div>
                                 </td>
                             </tr>
-
-                            <tr class="bg-white hover:bg-gray-50">
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="ps-6 py-3">
-                                    <div class="flex items-center gap-x-3">
-                                        <span class="inline-flex items-center justify-center size-[38px] rounded-full bg-white border border-gray-300">
-                                        <span class="font-medium text-sm text-gray-800 leading-none">A</span>
-                                        </span>
-                                        <div class="grow">
-                                        <span class="block text-sm font-semibold text-gray-800">Nombre Apellido</span>
-                                        <span class="block text-sm text-gray-500">correo@css.gob.pa</span>
-                                        </div>
-                                    </div>
-                                    </div>
-                                </td>
-                                <td class="h-px w-72 whitespace-nowrap">
-                                    <div class="px-6 py-3">
-                                    <span class="block text-sm font-semibold text-gray-800">Coordinador Local de Docencia</span>
-                                    <span class="block text-sm text-gray-500">Hospital Dra. Susana Jones Cano</span>
-                                    </div>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="px-6 py-3">
-                                    <span class="py-1 px-1.5 inline-flex items-center gap-x-1 text-xs font-medium bg-teal-100 text-teal-800 rounded-full">
-                                        <svg class="size-2.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
-                                        </svg>
-                                        Activo
-                                    </span>
-                                    </div>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="px-6 py-3">
-                                    <span class="text-sm text-gray-500">18 Dec, 15:20</span>
-                                    </div>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="px-6 py-1.5">
-                                    <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="#">
-                                        Editar
-                                        <svg class="size-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round-pen"><path d="M2 21a8 8 0 0 1 10.821-7.487"/><path d="M21.378 16.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><circle cx="10" cy="8" r="5"/></svg>
-                                    </a>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            <tr class="bg-white hover:bg-gray-50">
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="ps-6 py-3">
-                                    <div class="flex items-center gap-x-3">
-                                        <span class="inline-flex items-center justify-center size-[38px] rounded-full bg-white border border-gray-300">
-                                        <span class="font-medium text-sm text-gray-800 leading-none">A</span>
-                                        </span>
-                                        <div class="grow">
-                                        <span class="block text-sm font-semibold text-gray-800">Nombre Apellido</span>
-                                        <span class="block text-sm text-gray-500">correo@css.gob.pa</span>
-                                        </div>
-                                    </div>
-                                    </div>
-                                </td>
-                                <td class="h-px w-72 whitespace-nowrap">
-                                    <div class="px-6 py-3">
-                                    <span class="block text-sm font-semibold text-gray-800">Coordinador Local de Docencia</span>
-                                    <span class="block text-sm text-gray-500">Policlínica Dra. Cecilia Guerra</span>
-                                    </div>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="px-6 py-3">
-                                    <span class="py-1 px-1.5 inline-flex items-center gap-x-1 text-xs font-medium bg-teal-100 text-teal-800 rounded-full">
-                                        <svg class="size-2.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
-                                        </svg>
-                                        Activo
-                                    </span>
-                                    </div>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="px-6 py-3">
-                                    <span class="text-sm text-gray-500">18 Dec, 15:20</span>
-                                    </div>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="px-6 py-1.5">
-                                    <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="#">
-                                        Editar
-                                        <svg class="size-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round-pen"><path d="M2 21a8 8 0 0 1 10.821-7.487"/><path d="M21.378 16.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><circle cx="10" cy="8" r="5"/></svg>
-                                    </a>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            <tr class="bg-white hover:bg-gray-50">
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="ps-6 py-3">
-                                    <div class="flex items-center gap-x-3">
-                                        <span class="inline-flex items-center justify-center size-[38px] rounded-full bg-white border border-gray-300">
-                                        <span class="font-medium text-sm text-gray-800 leading-none">A</span>
-                                        </span>
-                                        <div class="grow">
-                                        <span class="block text-sm font-semibold text-gray-800">Nombre Apellido</span>
-                                        <span class="block text-sm text-gray-500">correo@css.gob.pa</span>
-                                        </div>
-                                    </div>
-                                    </div>
-                                </td>
-                                <td class="h-px w-72 whitespace-nowrap">
-                                    <div class="px-6 py-3">
-                                    <span class="block text-sm font-semibold text-gray-800">Coordinador Local de Docencia</span>
-                                    <span class="block text-sm text-gray-500">Policlínica Dr. Joaquín José Vallarino Zebede</span>
-                                    </div>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="px-6 py-3">
-                                    <span class="py-1 px-1.5 inline-flex items-center gap-x-1 text-xs font-medium bg-teal-100 text-teal-800 rounded-full">
-                                        <svg class="size-2.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
-                                        </svg>
-                                        Activo
-                                    </span>
-                                    </div>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="px-6 py-3">
-                                    <span class="text-sm text-gray-500">18 Dec, 15:20</span>
-                                    </div>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="px-6 py-1.5">
-                                    <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="#">
-                                        Editar
-                                        <svg class="size-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round-pen"><path d="M2 21a8 8 0 0 1 10.821-7.487"/><path d="M21.378 16.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><circle cx="10" cy="8" r="5"/></svg>
-                                    </a>
-                                    </div>
-                                </td>
-                            </tr>
+    {% endfor %}
             
                         </tbody>
                         </table>
@@ -1012,13 +477,29 @@
             </div>
             <!-- FIN TABLA RESUMEN USUARIOS -->
 
+            <footer class="w-full mx-auto px-4">
+                <div class="flex flex-wrap justify-between items-center gap-2">
+                    <div>
+                        <p class="text-xs text-gray-600 dark:text-neutral-400">
+                            © 2024-2025 Departamento Nacional de Docencia e Investigación.
+                        </p>
+                    </div>
+                    <!-- End Col -->
+            
+                    <a class="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-500 hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-400 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700" href="https://github.com/linkmoises/CertiCSS/">
+                        <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                        </svg>
+                    </a>
+                </div>
+            </footer>
+
         </div>
     </div>
     <!-- End Content -->
-    <!-- ========== END MAIN CONTENT ========== -->
 
-    <!-- JS PLUGINS -->
-    <script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
 
 </body>
 </html>

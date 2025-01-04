@@ -294,13 +294,28 @@ def home():
 #@login_required
 def tablero_coordinadores():
 
-    eventos_proximos = collection_eventos.find({
+    ahora = datetime.utcnow() 
+    eventos_prox = collection_eventos.find({
         'fecha_inicio': {'$gte': datetime.now()}
     }).sort('fecha_inicio').limit(5)
+    eventos_prox_list = list(eventos_prox)
+
+    eventos_prox_list_estado = []
+    for evento in eventos_prox:
+        fecha_inicio = evento['fecha_inicio']
+        if fecha_inicio.date() == ahora.date():
+            evento['estado'] = 'En curso'
+        elif fecha_inicio.date() < ahora.date():
+            evento['estado'] = 'Finalizado'
+        else:
+            evento['estado'] = 'Publicado'
+        eventos_prox_list_estado.append(evento)
+
+    num_eventos = len(eventos_prox_list)
 
     usuarios_recientes = collection_usuarios.find().sort('fecha_registro', -1).limit(5)
     
-    return render_template('tablero.html', eventos=eventos_proximos, usuarios=usuarios_recientes)
+    return render_template('tablero.html', eventos=eventos_prox_list, eventos_estado=eventos_prox_list_estado, ahora=ahora, num_eventos=num_eventos, usuarios=usuarios_recientes)
 
 
 ###
@@ -465,6 +480,8 @@ def crear_evento():
 
         fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d')
         fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d')
+
+        estado_evento = request.form['estado_evento']
        
         timestamp = request.form['timestamp']
 
@@ -511,6 +528,7 @@ def crear_evento():
             'descripcion': descripcion,
             'fecha_inicio': fecha_inicio,
             'fecha_fin': fecha_fin,
+            'estado_evento': estado_evento,
             'afiche': afiche_path if afiche_file else None,
             'afiche_750': resized_afiche_path if afiche_file else None,
             'fondo': fondo_path if fondo_file else None,
@@ -546,6 +564,8 @@ def editar_evento(codigo_evento):
 
         fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d')
         fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d')
+
+        estado_evento = request.form['estado_evento']
 
         timestamp = request.form['timestamp']
 
@@ -588,6 +608,7 @@ def editar_evento(codigo_evento):
                 'descripcion': descripcion,
                 'fecha_inicio': fecha_inicio,
                 'fecha_fin': fecha_fin,
+                'estado_evento': estado_evento,
                 'afiche': afiche_path,
                 'afiche_750': resized_afiche_path,
                 'fondo': fondo_path
@@ -598,6 +619,20 @@ def editar_evento(codigo_evento):
         return redirect(url_for('listar_eventos'))  # Redirigir a la lista de eventos
 
     return render_template('editar_evento.html', evento=evento)
+
+
+###
+###
+###
+@app.route('/cerrar_evento/<codigo_evento>', methods=['POST'])
+def cerrar_evento(codigo_evento):
+    # Actualizar el estado del evento a "cerrado"
+    collection_eventos.update_one(
+        {"codigo": codigo_evento},
+        {"$set": {"estado_evento": "cerrado"}}
+    )
+    flash("Evento cerrado con éxito", "success")
+    return redirect(url_for('listar_eventos'))  # Redirigir a la lista de eventos
 
 
 ###

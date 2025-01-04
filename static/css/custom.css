@@ -33,3 +33,19 @@
 input[type="file"] {
     display: none; /* Oculta el input original */
 }
+
+.toggle-bg {
+    cursor: pointer;
+}
+
+.toggle-dot {
+    transition: transform 0.2s;
+}
+
+input:checked ~ .toggle-bg {
+    background-color: #4caf50;
+}
+
+input:checked ~ .toggle-dot {
+    transform: translateX(100%);
+}

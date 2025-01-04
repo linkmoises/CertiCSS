@@ -201,7 +201,9 @@
                             <option value="">Seleccione el rol de usuario</option>
                             <option value="administrador" {% if usuario.rol == 'administrador' %}selected{% endif %}>Administrador</option>
                             <option value="denadoi" {% if usuario.rol == 'denadoi' %}selected{% endif %}>DENADOI</option>
-                            <option value="coordinador" {% if usuario.rol == 'coordinador' %}selected{% endif %}>Coordinador</option>
+                            <option value="coordinador-departamental" {% if usuario.rol == 'coordinador-departamental' %}selected{% endif %}>Coordinador de Docencia Departamental</option>
+                            <option value="coordinador-local" {% if usuario.rol == 'coordinador-local' %}selected{% endif %}>Coordinador Local de Docencia</option>
+                            <option value="coordinador-regional" {% if usuario.rol == 'coordinador-regional' %}selected{% endif %}>Coordinador Regional de Docencia</option>
                         </select>
                     </div>
                     <!-- End Col -->
