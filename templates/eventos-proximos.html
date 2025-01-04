@@ -1,353 +1,268 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>CertiCSS - Tablero de Eventos</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
-</head>
-<body class="bg-gray-50 dark:bg-neutral-900">
+{% include 'tablero-header.html' %}
 
-    <!-- ========== TABLERO ========== -->
-    <!-- Breadcrumb -->
-    <div class="sticky top-0 inset-x-0 z-20 bg-white border-y px-4 sm:px-6 lg:px-8 lg:hidden">
-        <div class="flex items-center py-2">
-        <!-- Navigation Toggle -->
-        <button type="button" class="size-8 flex justify-center items-center gap-x-2 border border-gray-200 text-gray-800 hover:text-gray-500 rounded-lg focus:outline-none focus:text-gray-500 disabled:opacity-50 disabled:pointer-events-none" aria-haspopup="dialog" aria-expanded="false" aria-controls="hs-application-sidebar" aria-label="Toggle navigation" data-hs-overlay="#hs-application-sidebar">
-            <span class="sr-only">Toggle Navigation</span>
-            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/><path d="m8 9 3 3-3 3"/></svg>
-        </button>
-        <!-- End Navigation Toggle -->
-    
-        <!-- Breadcrumb -->
-        <ol class="ms-3 flex items-center whitespace-nowrap">
-            <li class="flex items-center text-sm text-gray-800">
-            Application Layout
-            <svg class="shrink-0 mx-3 overflow-visible size-2.5 text-gray-400" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M5 1L10.6869 7.16086C10.8637 7.35239 10.8637 7.64761 10.6869 7.83914L5 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            </li>
-            <li class="text-sm font-semibold text-gray-800 truncate" aria-current="page">
-            Tablero
-            </li>
-        </ol>
-        <!-- End Breadcrumb -->
-        </div>
-    </div>
-    <!-- End Breadcrumb -->
-    
-    <!-- Sidebar -->
-    <div id="hs-application-sidebar" class="hs-overlay  [--auto-close:lg]
-        hs-overlay-open:translate-x-0
-        -translate-x-full transition-all duration-300 transform
-        w-[260px] h-full
-        hidden
-        fixed inset-y-0 start-0 z-[60]
-        bg-white border-e border-gray-200
-        lg:block lg:translate-x-0 lg:end-auto lg:bottom-0
-    " role="dialog" tabindex="-1" aria-label="Sidebar">
-        <div class="relative flex flex-col h-full max-h-full">
-        <div class="px-6 pt-4">
-            <!-- Logo -->
-            <a class="flex-none rounded-xl text-xl inline-block font-semibold focus:outline-none focus:opacity-80" href="#" aria-label="Preline">
-                <img src="{{ url_for('static', filename='assets/certicss-logo.svg') }}" alt="Logo" class="w-auto mb-3">
-            </a>
-            <!-- End Logo -->
-        </div>
-    
-        <!-- Content -->
-        <div class="h-full overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300">
-            <nav class="hs-accordion-group p-3 w-full flex flex-col flex-wrap" data-hs-accordion-always-open>
-            <ul class="flex flex-col space-y-1">
-                <li>
-                    <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100" href="#">
-                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                        Tablero
-                    </a>
-                </li>
-
-                <li>
-                    <a class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100 bg-gray-100" href="#">
-                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
-                        Eventos próximos
-                    </a>
-                </li>
-
-                <li>
-                    <a class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100" href="#">
-                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-check"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
-                        Eventos realizados
-                    </a>
-                </li>
-
-                <li>
-                    <a class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100" href="#">
-                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-plus-2"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M10 16h4"/><path d="M12 14v4"/></svg>
-                        Añadir evento
-                    </a>
-                </li>
-
-                <li>
-                    <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100" href="#">
-                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                        Usuarios
-                    </a>
-                </li>
-
-                <li>
-                    <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100" href="#">
-                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-plus"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
-                        Añadir Usuario
-                    </a>
-                </li>
-
-                <li>
-                    <a class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100" href="#">
-                        <svg class="shrink-0 mt-0.5 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="15" r="3"/><circle cx="9" cy="7" r="4"/><path d="M10 15H6a4 4 0 0 0-4 4v2"/><path d="m21.7 16.4-.9-.3"/><path d="m15.2 13.9-.9-.3"/><path d="m16.6 18.7.3-.9"/><path d="m19.1 12.2.3-.9"/><path d="m19.6 18.7-.4-1"/><path d="m16.8 12.3-.4-1"/><path d="m14.3 16.6 1-.4"/><path d="m20.7 13.8 1-.4"/></svg>
-                        Mi perfil
-                    </a>
-                </li>
-
-                <li>
-                    <a class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100" href="#">
-                        <svg class="shrink-0 mt-0.5 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
-                        Salir
-                    </a>
-                </li>
-                
-                <li>
-                    <a class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100" href="#">
-                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                        Documentación
-                    </a>
-                </li>
-
-            </ul>
-            </nav>
-        </div>
-        <!-- End Content -->
-        </div>
-    </div>
-    <!-- End Sidebar -->
+{% include 'tablero-sidebar.html' %}
     
     <!-- CONTENIDO -->
-    <div class="w-full pt-10 px-4 sm:px-6 md:px-8 lg:ps-72">
+    <div class="w-full lg:ps-64">
+        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
 
-        <!-- TABLA RESUMEN EVENTOS -->
-        <div class="max-w-[85rem] px-4 py-4 mx-auto mb-8">
-            <!-- Card -->
-            <div class="flex flex-col">
-            <div class="-m-1.5 overflow-x-auto">
-                <div class="p-1.5 min-w-full inline-block align-middle">
-                <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <!-- TABLA RESUMEN EVENTOS -->
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <!-- Card -->
+                <div class="flex flex-col">
+                <div class="-m-1.5 overflow-x-auto">
+                    <div class="p-1.5 min-w-full inline-block align-middle">
+                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
 
-                    <!-- Header -->
-                    <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
-                        <div>
-                            <h2 class="text-xl font-semibold text-gray-800">
-                                Próximos eventos
-                            </h2>
-                            <p class="text-sm text-gray-600">
-                                Eventos próximos a realizarse
-                            </p>
-                        </div>
-        
-                        <div>
-                            <div class="inline-flex gap-x-2">
-                            <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="#">
-                                Ver eventos anteriores
-                            </a>
+                        <!-- Header -->
+                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-800">
+                                    Próximos eventos
+                                </h2>
+                                <p class="text-sm text-gray-600">
+                                    Eventos próximos a realizarse
+                                </p>
+                            </div>
             
-                            <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="#">
+                            <div>
+                                <div class="inline-flex gap-x-2">
+                                <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="#">
+                                    Ver todos los eventos
+                                </a>
+                
+                                <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="#">
+                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                    Añadir evento
+                                </a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Header -->
+
+    {% if eventos|length == 0 %}
+                        
+                        <!-- Body -->
+                        <div class="max-w-sm w-full min-h-[400px] flex flex-col justify-center mx-auto px-6 py-4">
+                            <div class="flex justify-center items-center size-[46px] bg-gray-100 rounded-lg dark:bg-neutral-800">
+                                <svg class="shrink-0 size-6 text-gray-600 dark:text-neutral-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-off"><path d="M4.2 4.2A2 2 0 0 0 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 1.82-1.18"/><path d="M21 15.5V6a2 2 0 0 0-2-2H9.5"/><path d="M16 2v4"/><path d="M3 10h7"/><path d="M21 10h-5.5"/><path d="m2 2 20 20"/></svg>
+                            </div>
+
+                            <h2 class="mt-5 font-semibold text-gray-800 dark:text-white">
+                                No hay eventos
+                            </h2>
+                            <p class="mt-2 text-sm text-gray-600 dark:text-neutral-400">
+                                Sin eventos disponibles para fechas próximas.
+                            </p>
+                            
+                            <div class="mt-5 flex flex-col sm:flex-row gap-2">
+                            <button type="button" class="py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
                                 <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                                 Nuevo evento
-                            </a>
+                            </button>
                             </div>
                         </div>
-                    </div>
-                    <!-- End Header -->
+                        <!-- End Body -->
 
-{% if eventos|length == 0 %}
-                    
-                    <!-- Body -->
-                    <div class="max-w-sm w-full min-h-[400px] flex flex-col justify-center mx-auto px-6 py-4">
-                        <div class="flex justify-center items-center size-[46px] bg-gray-100 rounded-lg dark:bg-neutral-800">
-                            <svg class="shrink-0 size-6 text-gray-600 dark:text-neutral-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-off"><path d="M4.2 4.2A2 2 0 0 0 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 1.82-1.18"/><path d="M21 15.5V6a2 2 0 0 0-2-2H9.5"/><path d="M16 2v4"/><path d="M3 10h7"/><path d="M21 10h-5.5"/><path d="m2 2 20 20"/></svg>
-                        </div>
+                        <!-- Footer -->
+                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
+                            <div>
+                            <p class="text-sm text-gray-600 dark:text-neutral-400">
+                                <span class="font-semibold text-gray-800 dark:text-neutral-200">0</span> resultados
+                            </p>
+                            </div>
 
-                        <h2 class="mt-5 font-semibold text-gray-800 dark:text-white">
-                            No hay eventos
-                        </h2>
-                        <p class="mt-2 text-sm text-gray-600 dark:text-neutral-400">
-                            Sin eventos disponibles para fechas próximas.
-                        </p>
-                        
-                        <div class="mt-5 flex flex-col sm:flex-row gap-2">
-                        <button type="button" class="py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
-                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                            Nuevo evento
-                        </button>
-                        </div>
-                    </div>
-                    <!-- End Body -->
-
-                    <!-- Footer -->
-                    <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
-                        <div>
-                        <p class="text-sm text-gray-600 dark:text-neutral-400">
-                            <span class="font-semibold text-gray-800 dark:text-neutral-200">0</span> resultados
-                        </p>
-                        </div>
-
-                        <div>
-                            <div class="inline-flex gap-x-2">
-                                <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="#">
-                                    Ver eventos anteriores
-                                </a>
+                            <div>
+                                <div class="inline-flex gap-x-2">
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="#">
+                                        Ver eventos anteriores
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <!-- End Footer -->
+                        <!-- End Footer -->
 
-{% else %}
+    {% else %}
 
-                    <!-- Table -->
-                    <table class="table-auto min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                        <th scope="col" class="px-6 py-3 text-start">
-                            <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
-                                Título
-                            </a>
-                        </th>
-        
-                        <th scope="col" class="px-6 py-3 text-start">
-                            <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
-                                Descripción
-                            </a>
-                        </th>
-        
-                        <th scope="col" class="px-6 py-3 text-start">
-                            <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
-                                Tipo de evento
-                            </a>
-                        </th>
-        
-                        <th scope="col" class="px-6 py-3 text-start">
-                            <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
-                                Fecha inicio
-                            </a>
-                        </th>
-        
-                        <th scope="col" class="px-6 py-3 text-start">
-                            <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
-                                Acciones de usuarios
-                            </a>
-                        </th>
-        
-                        <th scope="col" class="px-6 py-3 text-start">
-                            <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
-                                Acciones de evento
-                            </a>
-                        </th>
-                        </tr>
-                    </thead>
-        
-                    <tbody class="divide-y divide-gray-200">
+                        <!-- Table -->
+                        <table class="table-auto min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
+                                        Título
+                                    </a>
+                                </th>
+                
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
+                                        Descripción
+                                    </a>
+                                </th>
+                
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
+                                        Estado
+                                    </a>
+                                </th>
+                
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
+                                        Fecha inicio
+                                    </a>
+                                </th>
+                
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
+                                        Acciones de usuarios
+                                    </a>
+                                </th>
+                
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
+                                        Acciones de evento
+                                    </a>
+                                </th>
+                                </tr>
+                            </thead>
+            
+                        <tbody class="divide-y divide-gray-200">
 {% for evento in eventos %}
-                        <tr class="bg-white hover:bg-gray-50">
-                            <td class="h-px w-72 min-w-72">
-                                <div class="px-6 py-2">
-                                    <p class="text-sm text-gray-500">
-                                        <a class="text-sm text-blue-600 decoration-2 hover:underline" href="{{ url_for('mostrar_evento', codigo_evento=evento.codigo) }}">
-                                        {{ evento.nombre }}</a> 
-                                        <br /><br />
+                            <tr class="bg-white hover:bg-gray-50">
+                                <td class="h-px w-72 min-w-72">
+                                    <div class="px-6 py-2">
+                                        <p class="text-sm text-gray-500 mb-2">
+                                            <a class="text-sm text-blue-600 decoration-2 hover:underline" href="{{ url_for('mostrar_evento', codigo_evento=evento.codigo) }}">
+                                            {{ evento.nombre }}</a>
+                                        </p>
                                         <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
                                             {{ evento.unidad_ejecutora }}
                                         </span>
-                                    </p>
-                                </div>
-                            </td>
-                            <td class="h-px w-72 min-w-72">
-                                <a class="block relative z-10" href="#">
-                                <div class="px-6 py-2">
-                                    <p class="text-sm text-gray-500">{{ evento.descripcion }}</p>
-                                </div>
-                                </a>
-                            </td>
-                            <td class="size-px whitespace-nowrap">
-                                <a class="block relative z-10" href="#">
-                                <div class="px-6 py-2">
-                                    <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
-                                        {{ evento.tipo }}
-                                    </span>
-                                </div>
-                                </a>
-                            </td>
-                            <td class="size-px whitespace-nowrap text-center">
-                                <a class="block relative z-10" href="#">
-                                    <span class="text-sm text-gray-500">{{ evento.fecha_inicio.strftime('%d %b, %Y') }}</span>
-                                </a>
-                            </td>
-                            <td class="size-px whitespace-nowrap">
-                                <div class="px-6 py-2">
-                                    <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('index', codigo_evento=evento.codigo) }}">
-                                        Añadir participante
-                                    </a><br>
-                                    <a class="inline-flex items-center gap-x-1 text-sm text-green-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('registrar_ponente', codigo_evento=evento.codigo) }}">
-                                        Añadir ponente
-                                    </a><br>
-                                    <a class="inline-flex items-center gap-x-1 text-sm text-pink-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('listar_participantes', codigo_evento=evento.codigo) }}">
-                                        Listado de participantes
+                                    </div>
+                                </td>
+                                <td class="h-px w-72 min-w-72">
+                                    <a class="block relative z-10" href="#">
+                                    <div class="px-6 py-2">
+                                        <p class="text-sm text-gray-500 mb-2">{{ evento.descripcion }}</p>
+                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                            {{ evento.tipo }}
+                                        </span>
+                                    </div>
+                                    </a>
+                                </td>
+                                <td class="size-px whitespace-nowrap">
+                                    <a class="block relative z-10" href="#">
+                                    <div class="px-6 py-2">
+                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium {% if evento.estado_evento == 'publicado' %}bg-blue-100 text-blue-800{% elif evento.estado_evento == 'cerrado' %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {% if evento.estado_evento == 'publicado' %}Publicado{% elif evento.estado_evento == 'cerrado' %}Cerrado{% else %}Borrador{% endif %}
+                                        </span><br /><br />
+                            {% if evento.estado == 'En curso' %}
+                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-green-100 text-green-800">
+                            {{ evento.evento_estado }}
+                            </span>
+                            {% elif evento.estado == 'Finalizado' %}
+                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                            {{ evento.evento_estado }}
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-blue-100 text-blue-800">
+                            {{ evento.evento_estado }}
+                            </span>
+                            {% endif %}
+                                    </div>
+                                    </a>
+                                </td>
+                                <td class="size-px whitespace-nowrap text-center">
+                                    <a class="block relative z-10" href="#">
+                                        <span class="text-sm text-gray-500">{{ evento.fecha_inicio.strftime('%d %b, %Y') }}</span>
+                                    </a>
+                                </td>
+                                <td class="size-px whitespace-nowrap">
+                                    <div class="px-6 py-2">
+                                        <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('index', codigo_evento=evento.codigo) }}">
+                                            Añadir participante
+                                        </a><br>
+                                        <a class="inline-flex items-center gap-x-1 text-sm text-green-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('registrar_ponente', codigo_evento=evento.codigo) }}">
+                                            Añadir ponente
+                                        </a><br>
+                                        <a class="inline-flex items-center gap-x-1 text-sm text-pink-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('listar_participantes', codigo_evento=evento.codigo) }}">
+                                            Listado de participantes
+                                        </a>
+                                    </div>
+                                </td>
+                                <td class="size-px whitespace-nowrap">
+                                    <div class="px-6 py-2">
+                                        <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('editar_evento', codigo_evento=evento.codigo) }}">
+                                            Editar
+                                        </a><br />
+                                        <form action="{{ url_for('eliminar_evento', codigo_evento=evento.codigo) }}" method="post" style="display:inline;">
+                                            <button class="text-sm text-red-600 decoration-2 hover:underline" type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este evento?');">
+                                                Eliminar
+                                            </button>
+                                        </form><br />
+                                        <form action="{{ url_for('cerrar_evento', codigo_evento=evento.codigo) }}" method="post" style="display:inline;">
+                                            <button class="text-sm text-red-800 decoration-2 hover:underline" type="submit" onclick="return confirm('¿Estás seguro de que deseas cerrar este evento?');">
+                                                Cerrar
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+{% endfor %}
+                        </tbody>
+                        </table>
+                        <!-- End Table -->
+            
+                        <!-- Footer -->
+                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200">
+                            <div>
+                                <p class="text-sm text-gray-600">
+                                <span class="font-semibold text-gray-800">5</span> resultados más próximos
+                                </p>
+                            </div>
+                
+                            <div>
+                                <div class="inline-flex gap-x-2">
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="#">
+                                        Ver todos
                                     </a>
                                 </div>
-                            </td>
-                            <td class="size-px whitespace-nowrap">
-                                <div class="px-6 py-2">
-                                    <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('editar_evento', codigo_evento=evento.codigo) }}">
-                                        Editar
-                                    </a><br>
-                                    <form action="{{ url_for('eliminar_evento', codigo_evento=evento.codigo) }}" method="post" style="display:inline;">
-                                        <button class="text-sm text-red-600 decoration-2 hover:underline" type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este evento?');">
-                                            Eliminar
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-{% endfor %}
-                    </tbody>
-                    </table>
-                    <!-- End Table -->
-        
-                    <!-- Footer -->
-                    <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200">
-                        <div>
-                            <p class="text-sm text-gray-600">
-                            <span class="font-semibold text-gray-800">5</span> resultados más próximos
-                            </p>
-                        </div>
-            
-                        <div>
-                            <div class="inline-flex gap-x-2">
-                                <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="#">
-                                    Ver todos
-                                </a>
                             </div>
                         </div>
+                        <!-- End Footer -->
+    {% endif %}
+
                     </div>
-                    <!-- End Footer -->
-{% endif %}
+                    </div>
+                </div>
+                </div>
+                <!-- End Card -->
+            </div>
+            <!-- FIN TABLA RESUMEN EVENTOS -->
 
+            <footer class="w-full mx-auto px-4">
+                <div class="flex flex-wrap justify-between items-center gap-2">
+                    <div>
+                        <p class="text-xs text-gray-600 dark:text-neutral-400">
+                            © 2024-2025 Departamento Nacional de Docencia e Investigación.
+                        </p>
+                    </div>
+                    <!-- End Col -->
+            
+                    <a class="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-500 hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-400 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700" href="https://github.com/linkmoises/CertiCSS/">
+                        <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                        </svg>
+                    </a>
                 </div>
-                </div>
-            </div>
-            </div>
-            <!-- End Card -->
+            </footer>
+
         </div>
-        <!-- FIN TABLA RESUMEN EVENTOS -->
-
     </div>
     <!-- FIN CONTENIDO -->
 
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+
+</body>
 </html>
