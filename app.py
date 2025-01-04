@@ -128,7 +128,7 @@ def obtener_codigo_unico():
 ###
 ### Página de registro
 ###
-@app.route('/registrar_usuario', methods=['GET', 'POST'])
+@app.route('/registrar-usuario', methods=['GET', 'POST'])
 def registro():
     if request.method == 'POST':
         nombres = request.form['nombres']
@@ -467,7 +467,7 @@ def listar_participantes(codigo_evento):
 ###
 ### Formulario de creación de evento
 ###
-@app.route('/crear_evento', methods=['GET', 'POST'])
+@app.route('/evento-nuevo', methods=['GET', 'POST'])
 def crear_evento():
     if request.method == 'POST':
         nombre = request.form['nombre']
