@@ -48,6 +48,20 @@
                         <!-- End Col -->
 
                         <div class="sm:col-span-3">
+                            <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">Modalidad</label>
+                        </div>
+
+                        <div class="sm:col-span-9">
+                            <select class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" id="modalidad" name="modalidad" required>
+                                <option value="">Seleccione la modalidad del evento académico</option>
+                                <option value="Presencial">Presencial</option>
+                                <option value="Hibrida">Híbrida</option>
+                                <option value="Virtual asincrónica">Virtual asincrónica</option>
+                                <option value="Virtual sincrónica">Virtual sincrónica</option>
+                            </select>
+                        </div>
+
+                        <div class="sm:col-span-3">
                             <label for="tipo" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                 Categoría
                             </label>
@@ -121,15 +135,11 @@
                             <img class="inline-block size-16 rounded-full ring-2 ring-white dark:ring-neutral-900" src="{{ url_for('static', filename='assets/image-art.png') }}" alt="Avatar">
                             <div class="flex gap-x-2">
                                 <div class="upload-container">
-                                    <label for="afiche_evento" class="upload-button">
-                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                            <polyline points="17 8 12 3 7 8"/>
-                                            <line x1="12" x2="12" y1="3" y2="15"/>
-                                        </svg>
-                                        Subir afiche del evento
-                                    </label>
-                                    <input type="file" id="afiche_evento" name="afiche_evento" accept=".jpg, .jpeg, .png">
+                                    <input type="file" name="afiche_evento" id="afiche_evento" class="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400
+                                    file:bg-gray-50 file:border-0
+                                    file:bg-gray-100 file:me-4
+                                    file:py-2 file:px-4
+                                    dark:file:bg-neutral-700 dark:file:text-neutral-400" accept=".jpg, .jpeg" />
                                 </div>
                             </div>
                             </div>
@@ -151,15 +161,37 @@
                             <img class="inline-block size-16 rounded-full ring-2 ring-white dark:ring-neutral-900" src="{{ url_for('static', filename='assets/image-art.png') }}" alt="Avatar">
                             <div class="flex gap-x-2">
                                 <div class="upload-container">
-                                    <label for="fondo_evento" class="upload-button">
-                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                            <polyline points="17 8 12 3 7 8"/>
-                                            <line x1="12" x2="12" y1="3" y2="15"/>
-                                        </svg>
-                                        Subir fondo del evento
-                                    </label>
-                                    <input type="file" id="fondo_evento" name="fondo_evento" accept=".jpg, .jpeg, .png">
+                                    <input type="file" name="fondo_evento" id="fondo_evento" class="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400
+                                    file:bg-gray-50 file:border-0
+                                    file:bg-gray-100 file:me-4
+                                    file:py-2 file:px-4
+                                    dark:file:bg-neutral-700 dark:file:text-neutral-400" accept=".jpg, .jpeg" />
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-3">
+                            <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                Programa del evento
+                                <span class="text-sm text-gray-400 dark:text-neutral-600">
+                                    (solo formato PDF)
+                                </span>
+                            </label>
+                        </div>
+                        <!-- End Col -->
+            
+                        <div class="sm:col-span-9">
+                            <div class="flex items-center gap-5">
+                            <img class="inline-block size-16 rounded-full ring-2 ring-white dark:ring-neutral-900" src="{{ url_for('static', filename='assets/program-art.png') }}" alt="Avatar">
+                            <div class="flex gap-x-2">
+                                <div class="upload-container">
+                                    <input type="file" name="programa_evento" id="programa_evento" class="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400
+                                    file:bg-gray-50 file:border-0
+                                    file:bg-gray-100 file:me-4
+                                    file:py-2 file:px-4
+                                    dark:file:bg-neutral-700 dark:file:text-neutral-400" accept=".pdf" />
                                 </div>
                             </div>
                             </div>

@@ -2,38 +2,6 @@
     bottom: -1px;
 }
 
-.upload-container {
-    position: relative;
-    display: inline-block;
-}
-
-.upload-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px; /* Espacio entre el icono y el texto */
-    padding: 10px 20px; /* Espaciado interno */
-    font-size: 14px; /* Tamaño de fuente */
-    font-weight: medium;
-    border-radius: 8px; /* Bordes redondeados */
-    border: 1px solid #ccc; /* Borde */
-    background-color: white; /* Fondo blanco */
-    color: #333; /* Color del texto */
-    cursor: pointer; /* Cambia el cursor al pasar sobre el botón */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Sombra */
-}
-
-.upload-button:hover {
-    background-color: #f0f0f0; /* Color de fondo al pasar el mouse */
-}
-
-.upload-button:disabled {
-    opacity: 0.5; /* Opacidad para botones deshabilitados */
-}
-
-input[type="file"] {
-    display: none; /* Oculta el input original */
-}
-
 .toggle-bg {
     cursor: pointer;
 }
@@ -48,4 +16,12 @@ input:checked ~ .toggle-bg {
 
 input:checked ~ .toggle-dot {
     transform: translateX(100%);
+}
+
+.bg-profile {
+    background-image: url("../assets/bg-profile.svg");
+}
+
+.bg-css-profile {
+    background: bottom right url("../assets/css-op.svg") no-repeat;
 }

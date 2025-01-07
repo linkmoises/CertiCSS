@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   class="w-full"
+   preserveAspectRatio="none"
+   width="1113"
+   height="161"
+   viewBox="0 0 1113 161"
+   fill="none"
+   version="1.1"
+   id="svg3"
+   sodipodi:docname="bg-profile.svg"
+   inkscape:version="1.4 (e7c3feb100, 2024-10-09)"
+   inkscape:export-filename="bg-profile.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs4">
+    <defs
+       id="defs3" />
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath10">
+      <rect
+         x="0.5"
+         width="1112"
+         height="161"
+         rx="12"
+         fill="#ffffff"
+         id="rect10"
+         y="0" />
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath11">
+      <rect
+         x="0.5"
+         width="1112"
+         height="161"
+         rx="12"
+         fill="#ffffff"
+         id="rect11"
+         y="0" />
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath12">
+      <rect
+         x="0.5"
+         width="1112"
+         height="161"
+         rx="12"
+         fill="#ffffff"
+         id="rect12"
+         y="0" />
+    </clipPath>
+  </defs>
+  <sodipodi:namedview
+     id="namedview3"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="2.1850854"
+     inkscape:cx="1056.0228"
+     inkscape:cy="74.825452"
+     inkscape:window-width="1231"
+     inkscape:window-height="754"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg3" />
+  <rect
+     x="0.5"
+     width="1112"
+     height="161"
+     rx="12"
+     fill="#ffffff"
+     id="rect1"
+     y="0" />
+  <rect
+     x="1"
+     width="1112"
+     height="348"
+     fill="#d9deea"
+     id="rect2"
+     y="0"
+     clip-path="url(#clipPath12)"
+     transform="translate(-10)" />
+  <path
+     d="M 512.694,359.31 C 547.444,172.086 469.835,34.2204 426.688,-11.3096 H 1144.27 V 359.31 Z"
+     fill="#c0cbdd"
+     id="path2"
+     clip-path="url(#clipPath11)" />
+  <path
+     d="M 818.885,185.745 C 703.515,143.985 709.036,24.7949 726.218,-29.5801 H 1118.31 V 331.905 c -93.82,-71.34 -155.212,-93.96 -299.425,-146.16 z"
+     fill="#8192b0"
+     id="path3"
+     clip-path="url(#clipPath10)"
+     transform="translate(10)" />
+</svg>

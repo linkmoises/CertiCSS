@@ -39,6 +39,31 @@
                         <!-- End Col -->
 
                         <div class="sm:col-span-3">
+                            <label for="genero" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                Género
+                            </label>
+                        </div>
+
+                        <div class="sm:col-span-9">
+                            <div class="sm:flex">
+                              <label for="genero-m" class="flex py-2 px-3 w-full border border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
+                                <input type="radio" name="genero" value="masculino" class="shrink-0 mt-0.5 border-gray-300 rounded-full text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-500 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800" id="genero-m">
+                                <span class="text-sm text-gray-500 ms-3 dark:text-neutral-400">Masculino</span>
+                              </label>
+                  
+                              <label for="genero-f" class="flex py-2 px-3 w-full border border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
+                                <input type="radio" name="genero" value="femenino" class="shrink-0 mt-0.5 border-gray-300 rounded-full text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-500 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800" id="genero-f">
+                                <span class="text-sm text-gray-500 ms-3 dark:text-neutral-400">Femenino</span>
+                              </label>
+                  
+                              <label for="genero-o" class="flex py-2 px-3 w-full border border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
+                                <input type="radio" name="genero" value="otro" class="shrink-0 mt-0.5 border-gray-300 rounded-full text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-500 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800" id="genero-o">
+                                <span class="text-sm text-gray-500 ms-3 dark:text-neutral-400">Prefiero no especificar</span>
+                              </label>
+                            </div>
+                        </div>
+
+                        <div class="sm:col-span-3">
                             <label for="cedula" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                 Identificación
                             </label>
@@ -51,6 +76,30 @@
                         <!-- End Col -->
 
                         <div class="sm:col-span-3">
+                            <label for="region" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                Región de Salud
+                            </label>
+                        </div>
+                        <!-- End Col -->
+                
+                        <div class="sm:col-span-9">
+                            <select class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" id="region" name="region" required>
+                                <option value="">Seleccione la región de salud</option>
+                                <option value="css01">Región de Salud de Bocas Del Toro</option>
+                                <option value="css02">Región de Salud de Coclé</option>
+                                <option value="css03">Región de Salud de Colón</option>
+                                <option value="css04">Región de Salud de Chiriquí</option>
+                                <option value="css06">Región de Salud de Herrera</option>
+                                <option value="css07">Región de Salud de Los Santos</option>
+                                <option value="css09">Región de Salud de Veraguas</option>
+                                <option value="css13">Región de Salud de Panamá Oeste</option>
+                                <option value="css082">Región de Salud de Panamá Este</option>
+                                <option value="css081">Región de Salud de Panamá Metro</option>
+                            </select>
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-3">
                             <label for="unidad_ejecutora" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                 Unidad ejecutora
                             </label>
@@ -59,6 +108,18 @@
                 
                         <div class="sm:col-span-9">
                             <input id="unidad_ejecutora" name="unidad_ejecutora" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Escriba su unidad ejecutora...">
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-3">
+                            <label for="departamento" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                Servicio o departamento adscrito
+                            </label>
+                        </div>
+                        <!-- End Col -->
+                
+                        <div class="sm:col-span-9">
+                            <input id="departamento" name="departamento" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Escriba el servicio o departamento al que pertenece...">
                         </div>
                         <!-- End Col -->
 

@@ -6,6 +6,7 @@ from bson.objectid import ObjectId
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 from PIL import Image
+from markupsafe import Markup
 import os
 import random
 import string
@@ -18,6 +19,15 @@ app = Flask(__name__)
 ### Salt key 
 ###
 app.config['SECRET_KEY'] = os.urandom(24)  # Genera una clave secreta aleatoria
+app.config['BASE_URL'] = "http://localhost:5000/"  # base url del sitio
+
+
+###
+### Variable para BASE_URL disponible globalmente 
+###
+@app.context_processor
+def inject_base_url():
+    return dict(BASE_URL=app.config['BASE_URL'])
 
 
 ###
@@ -133,11 +143,14 @@ def registro():
     if request.method == 'POST':
         nombres = request.form['nombres']
         apellidos = request.form['apellidos']
+        genero = request.form['genero']
         cedula = request.form['cedula']
         email = request.form['email']
         password = request.form['password']
-        rol = request.form['rol']  # 'administrador' o 'coordinador'
+        rol = request.form['rol']
+        region = request.form['region']
         unidad_ejecutora = request.form['unidad_ejecutora']
+        departamento = request.form['departamento']
         timestamp = datetime.now()
 
         # Verificar si el usuario ya existe
@@ -150,11 +163,14 @@ def registro():
         collection_usuarios.insert_one({
             'nombres': nombres,
             'apellidos': apellidos,
+            'genero': genero,
             'cedula': cedula,
             "email": email,
             "password": hashed_password,
             "rol": rol,
+            "region": region,
             "unidad_ejecutora": unidad_ejecutora,
+            "departamento": departamento,
             'timestamp': timestamp
         })
         flash('Registro exitoso. Ahora puedes iniciar sesión.')
@@ -223,18 +239,24 @@ def editar_usuario(user_id):
         # Recoger los datos del formulario
         nombres = request.form.get('nombres')
         apellidos = request.form.get('apellidos')
+        genero = request.form.get('genero')
         cedula = request.form.get('cedula')
-        unidad_ejecutora = request.form.get('unidad_ejecutora')
         rol = request.form.get('rol')
+        region = request.form.get('region')
+        unidad_ejecutora = request.form.get('unidad_ejecutora')
+        departamento = request.form.get('departamento')
         email = request.form.get('email')
-        password = request.form.get('password')  # Si se permite cambiar la contraseña
+        password = request.form.get('password')
 
         # Crear un diccionario con los nuevos datos
         updated_user_data = {
             "nombres": nombres,
             "apellidos": apellidos,
+            "genero": genero,
             "cedula": cedula,
+            "region": region,
             "unidad_ejecutora": unidad_ejecutora,
+            "departamento": departamento,
             "rol": rol,
         }
 
@@ -251,6 +273,21 @@ def editar_usuario(user_id):
     # Obtener los datos del usuario
     usuario = collection_usuarios.find_one({"_id": ObjectId(user_id)})
     return render_template('editar_usuario.html', usuario=usuario)
+
+
+###
+### Perfil de usuario
+###
+@app.route('/usuario/<user_id>')
+def mostrar_usuario(user_id):
+    # Obtener los datos del usuario desde la base de datos usando el user_id
+    usuario = collection_usuarios.find_one({"_id": ObjectId(user_id)})
+    
+    if not usuario:
+        flash("Usuario no encontrado", "danger")
+        return redirect(url_for('listar_usuarios'))  # Redirigir a la lista de usuarios si no se encuentra
+
+    return render_template('perfil_usuario.html', usuario=usuario)
 
 
 ###
@@ -315,7 +352,7 @@ def tablero_coordinadores():
 
     usuarios_recientes = collection_usuarios.find().sort('fecha_registro', -1).limit(5)
     
-    return render_template('tablero.html', eventos=eventos_prox_list, eventos_estado=eventos_prox_list_estado, ahora=ahora, num_eventos=num_eventos, usuarios=usuarios_recientes)
+    return render_template('tablero.html', eventos=eventos_prox_list, eventos_estado=eventos_prox_list_estado, ahora=ahora, num_eventos=num_eventos, usuarios=usuarios_recientes, active_section='tablero')
 
 
 ###
@@ -473,6 +510,7 @@ def crear_evento():
         nombre = request.form['nombre']
         unidad_ejecutora = request.form['unidad_ejecutora']
         tipo = request.form['tipo']
+        modalidad = request.form['modalidad']
         descripcion = request.form['descripcion']
 
         fecha_inicio_str = request.form['fecha_inicio']
@@ -491,9 +529,11 @@ def crear_evento():
         # Carga de archivos
         afiche_file = request.files.get('afiche_evento')
         fondo_file = request.files.get('fondo_evento')
+        programa_file = request.files.get('programa_evento')
 
         afiche_path = None
         fondo_path = None
+        programa_path = None
 
         if afiche_file:
             afiche_filename = f"{codigo}-afiche.jpg"
@@ -519,12 +559,18 @@ def crear_evento():
             image.convert('RGB').save(fondo_path, 'JPEG')  # Convertir a JPG y guardar
             print(f"Archivo fondo guardado en: {fondo_path}")  # Confirmación
 
+        if programa_file:
+            programa_filename = f"{codigo}-programa.pdf"
+            programa_path = os.path.join(app.config['UPLOAD_FOLDER'], programa_filename)
+            programa_file.save(programa_path)
+
         # Insertar nuevo evento en la colección
         collection_eventos.insert_one({
             'nombre': nombre,
             'codigo': codigo,
             'unidad_ejecutora': unidad_ejecutora,
             'tipo': tipo,
+            'modalidad': modalidad,
             'descripcion': descripcion,
             'fecha_inicio': fecha_inicio,
             'fecha_fin': fecha_fin,
@@ -532,10 +578,11 @@ def crear_evento():
             'afiche': afiche_path if afiche_file else None,
             'afiche_750': resized_afiche_path if afiche_file else None,
             'fondo': fondo_path if fondo_file else None,
+            'programa': programa_path if programa_file else None,
             'timestamp': timestamp
         })
         flash("Evento creado con éxito", "success")
-        return redirect(url_for('listar_eventos'))  # Redirigir a la lista de eventos
+        return redirect(url_for('listar_eventos_proximos'))  # Redirigir a la lista de eventos
 
     return render_template('crear_evento.html')
 
@@ -557,6 +604,7 @@ def editar_evento(codigo_evento):
         nombre = request.form['nombre']
         unidad_ejecutora = request.form['unidad_ejecutora']
         tipo = request.form['tipo']
+        modalidad = request.form['modalidad']
         descripcion = request.form['descripcion']
 
         fecha_inicio_str = request.form['fecha_inicio']
@@ -572,10 +620,12 @@ def editar_evento(codigo_evento):
         # Carga de archivos (opcional)
         afiche_file = request.files.get('afiche_evento')
         fondo_file = request.files.get('fondo_evento')
+        programa_file = request.files.get('programa_evento')
 
         afiche_path = evento.get('afiche')
         fondo_path = evento.get('fondo')
         resized_afiche_path = evento.get('afiche_750')
+        programa_path = evento.get('programa')
 
         if afiche_file:
             afiche_filename = f"{codigo_evento}-afiche.jpg"
@@ -598,6 +648,11 @@ def editar_evento(codigo_evento):
             image = Image.open(fondo_file)
             image.convert('RGB').save(fondo_path, 'JPEG')  # Convertir a JPG y guardar
 
+        if programa_file:
+            programa_filename = f"{codigo_evento}-programa.pdf"
+            programa_path = os.path.join(app.config['UPLOAD_FOLDER'], programa_filename)
+            programa_file.save(programa_path)
+
         # Actualizar el evento en la base de datos
         collection_eventos.update_one(
             {"codigo": codigo_evento},
@@ -605,13 +660,15 @@ def editar_evento(codigo_evento):
                 'nombre': nombre,
                 'unidad_ejecutora': unidad_ejecutora,
                 'tipo': tipo,
+                'modalidad': modalidad,
                 'descripcion': descripcion,
                 'fecha_inicio': fecha_inicio,
                 'fecha_fin': fecha_fin,
                 'estado_evento': estado_evento,
                 'afiche': afiche_path,
                 'afiche_750': resized_afiche_path,
-                'fondo': fondo_path
+                'fondo': fondo_path,
+                'programa': programa_path,
             }}
         )
         
@@ -716,6 +773,26 @@ def validar_certificado():
 @app.route('/404')
 def page_not_found():
     return render_template('404.html'), 404
+
+
+###
+###
+###
+from datetime import date
+
+def calcular_estado(fecha):
+    hoy = date.today()
+    # Convertir fecha a date si es datetime
+    if isinstance(fecha, datetime):
+        fecha = fecha.date()
+    if fecha == hoy:
+        return Markup('<span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-red-100 text-red-800">En curso</span>')
+    elif fecha < hoy:
+        return Markup('<span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-green-100 text-green-800">Finalizado</span>')
+    else:
+        return "Próximo"
+
+app.jinja_env.filters['estado'] = calcular_estado
 
 
 if __name__ == '__main__':

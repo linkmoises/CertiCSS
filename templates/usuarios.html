@@ -10,157 +10,177 @@
             <div class="max-w-[85rem] px-2 pt-1 mx-auto">
                 <!-- Card -->
                 <div class="flex flex-col">
-                <div class="-m-1.5 overflow-x-auto">
-                    <div class="p-1.5 min-w-full inline-block align-middle">
-                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                        <!-- Header -->
-                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
-                            <div>
-                                <h2 class="text-xl font-semibold text-gray-800">
-                                    Últimos usuarios
-                                </h2>
-                                <p class="text-sm text-gray-600">
-                                    Últimos usuarios registrados en CertiCSS
-                                </p>
+                    <div class="-m-1.5 overflow-x-auto">
+                        <div class="p-1.5 min-w-full inline-block align-middle">
+                        <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                            <!-- Header -->
+                            <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
+                                <div>
+                                    <h2 class="text-xl font-semibold text-gray-800">
+                                        Últimos usuarios
+                                    </h2>
+                                    <p class="text-sm text-gray-600">
+                                        Últimos usuarios registrados en CertiCSS
+                                    </p>
+                                </div>
+                    
+                                <div>
+                                    <div class="inline-flex gap-x-2">
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="#">
+                                        Ver todos los usuarios
+                                    </a>
+                    
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="#">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                        Añadir usuario
+                                    </a>
+                                    </div>
+                                </div>
                             </div>
+                            <!-- End Header -->
                 
-                            <div>
-                                <div class="inline-flex gap-x-2">
-                                <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="#">
-                                    Ver todos los usuarios
-                                </a>
+                            <!-- Table -->
+                            <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
                 
-                                <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="#">
-                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                                    Añadir usuario
-                                </a>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- End Header -->
-            
-                        <!-- Table -->
-                        <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-            
-                            <th scope="col" class="ps-6 py-3 text-start">
-                                <div class="flex items-center gap-x-2">
-                                <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
-                                    Nombre
-                                </span>
-                                </div>
-                            </th>
-            
-                            <th scope="col" class="px-6 py-3 text-start">
-                                <div class="flex items-center gap-x-2">
-                                <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
-                                    Rol
-                                </span>
-                                </div>
-                            </th>
-            
-                            <th scope="col" class="px-6 py-3 text-start">
-                                <div class="flex items-center gap-x-2">
-                                <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
-                                    Estado
-                                </span>
-                                </div>
-                            </th>
-            
-                            <th scope="col" class="px-6 py-3 text-start">
-                                <div class="flex items-center gap-x-2">
-                                <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
-                                    Fecha de creación
-                                </span>
-                                </div>
-                            </th>
-            
-                            <th scope="col" class="px-6 py-3 text-end"></th>
-                            </tr>
-                        </thead>
-            
-                        <tbody class="divide-y divide-gray-200">
-
-    {% for usuario in usuarios %}
-                            <tr class="bg-white hover:bg-gray-50">
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="ps-6 py-3">
-                                    <div class="flex items-center gap-x-3">
-                                        <span class="inline-flex items-center justify-center size-[38px] rounded-full bg-white border border-gray-300">
-                                        <span class="font-medium text-sm text-gray-800 leading-none">A</span>
-                                        </span>
-                                        <div class="grow">
-                                        <span class="block text-sm font-semibold text-gray-800">{{ usuario.nombres }} {{ usuario.apellidos }}</span>
-                                        <span class="block text-sm text-gray-500">{{ usuario.email }}</span>
-                                        </div>
-                                    </div>
-                                    </div>
-                                </td>
-                                <td class="h-px w-72 whitespace-nowrap">
-                                    <div class="px-6 py-3">
-                                    <span class="block text-sm font-semibold text-gray-800">Coordinador Local de Docencia</span>
-                                    <span class="block text-sm text-gray-500">{{ usuario.unidad_ejecutora }}</span>
-                                    </div>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="px-6 py-3">
-                                    <span class="py-1 px-1.5 inline-flex items-center gap-x-1 text-xs font-medium bg-teal-100 text-teal-800 rounded-full">
-                                        <svg class="size-2.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
-                                        </svg>
-                                        Activo
+                                <th scope="col" class="ps-6 py-3 text-start">
+                                    <div class="flex items-center gap-x-2">
+                                    <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
+                                        Nombre
                                     </span>
                                     </div>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="px-6 py-3">
-                                    <span class="text-sm text-gray-500">{{ usuario.timestamp.strftime('%d %b, %Y - %H:%M') }}</span>
+                                </th>
+                
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <div class="flex items-center gap-x-2">
+                                    <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
+                                        Rol
+                                    </span>
                                     </div>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="px-6 py-1.5">
-                                    <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('editar_usuario', user_id=usuario._id) }}">
-                                        Editar
-                                        <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round-pen"><path d="M2 21a8 8 0 0 1 10.821-7.487"/><path d="M21.378 16.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><circle cx="10" cy="8" r="5"/></svg>
-                                    </a><br>
-                                    <form action="{{ url_for('eliminar_usuario', user_id=usuario._id) }}" method="post" style="display:inline;">
-                                        <button type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este usuario?');" class="text-sm text-red-500 hover:text-red-700 inline-flex items-center gap-x-1">
-                                            Eliminar 
-                                            <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round-x"><path d="M2 21a8 8 0 0 1 11.873-7"/><circle cx="10" cy="8" r="5"/><path d="m17 17 5 5"/><path d="m22 17-5 5"/></svg>
-                                        </button>
-                                    </form><br>
+                                </th>
+                
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <div class="flex items-center gap-x-2">
+                                    <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
+                                        Estado
+                                    </span>
                                     </div>
-                                </td>
-                            </tr>
-    {% endfor %}
-            
-                        </tbody>
-                        </table>
-                        <!-- End Table -->
-            
-                        <!-- Footer -->
-                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200">
+                                </th>
+                
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <div class="flex items-center gap-x-2">
+                                    <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
+                                        Fecha de creación
+                                    </span>
+                                    </div>
+                                </th>
+                
+                                <th scope="col" class="px-6 py-3 text-end"></th>
+                                </tr>
+                            </thead>
+                
+                            <tbody class="divide-y divide-gray-200">
 
-                            <div>
-                                <p class="text-sm text-gray-600">
-                                    <span class="font-semibold text-gray-800">5</span> resultados más recientes
-                                </p>
-                            </div>
+        {% for usuario in usuarios %}
+                                <tr class="bg-white hover:bg-gray-50">
+                                    <td class="size-px whitespace-nowrap">
+                                        <div class="ps-6 py-3">
+                                        <div class="flex items-center gap-x-3">
+                                            <span class="inline-flex items-center justify-center size-[38px] rounded-full bg-white border border-gray-300">
+                                            <span class="font-medium text-sm text-gray-800 leading-none">A</span>
+                                            </span>
+                                            <div class="grow">
+                                            <span class="block text-sm font-semibold text-gray-800">{{ usuario.nombres }} {{ usuario.apellidos }}</span>
+                                            <span class="block text-sm text-gray-500">{{ usuario.email }}</span>
+                                            </div>
+                                        </div>
+                                        </div>
+                                    </td>
+                                    <td class="h-px w-72 whitespace-nowrap">
+                                        <div class="px-6 py-3">
+                                        <span class="block text-sm font-semibold text-gray-800">{% if usuario.rol == 'coordinador-regional' %}Coordinador Regional de Docencia e Investigación{% endif %}{% if usuario.rol == 'coordinador-local' %}Coordinador Local de Docencia e Investigación{% endif %}{% if usuario.rol == 'coordinador-departamental' %}Coordinador Departamental de Docencia{% endif %}</span>
+                                        <span class="block text-sm italic text-gray-800">{% if usuario.rol == 'coordinador-regional' %}
+                                            {% set regiones = {
+                                                'css01': 'Región de Salud de Bocas Del Toro',
+                                                'css02': 'Región de Salud de Coclé',
+                                                'css03': 'Región de Salud de Colón',
+                                                'css04': 'Región de Salud de Chiriquí',
+                                                'css06': 'Región de Salud de Herrera',
+                                                'css07': 'Región de Salud de Los Santos',
+                                                'css09': 'Región de Salud de Veraguas',
+                                                'css13': 'Región de Salud de Panamá Oeste',
+                                                'css082': 'Región de Salud de Panamá Este',
+                                                'css081': 'Región de Salud de Panamá Metro'
+                                            } %}
+                                            {{ regiones[usuario.region] if usuario.region in regiones else usuario.region }}
+                                        {% endif %}</span>
+                                        <span class="block text-sm text-gray-500">{{ usuario.unidad_ejecutora }}</span>
+                                        {% if usuario.rol == 'coordinador-departamental' %}<span class="block text-sm italic text-gray-500">{{ usuario.departamento }}</span>{% endif %}
+                                        </div>
+                                    </td>
+                                    <td class="size-px whitespace-nowrap">
+                                        <div class="px-6 py-3">
+                                        <span class="py-1 px-1.5 inline-flex items-center gap-x-1 text-xs font-medium bg-teal-100 text-teal-800 rounded-full">
+                                            <svg class="size-2.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                                            </svg>
+                                            Activo
+                                        </span>
+                                        </div>
+                                    </td>
+                                    <td class="size-px whitespace-nowrap">
+                                        <div class="px-6 py-3">
+                                        <span class="text-sm text-gray-500">{{ usuario.timestamp.strftime('%d %b, %Y - %H:%M') }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="size-px whitespace-nowrap">
+                                        <div class="px-6 py-1.5">
+                                            <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('mostrar_usuario', user_id=usuario._id) }}">
+                                                Ver perfil
+                                                <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round-search"><circle cx="10" cy="8" r="5"/><path d="M2 21a8 8 0 0 1 10.434-7.62"/><circle cx="18" cy="18" r="3"/><path d="m22 22-1.9-1.9"/></svg>
+                                            </a><br />
+                                            <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('editar_usuario', user_id=usuario._id) }}">
+                                                Editar
+                                                <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round-pen"><path d="M2 21a8 8 0 0 1 10.821-7.487"/><path d="M21.378 16.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><circle cx="10" cy="8" r="5"/></svg>
+                                            </a><br />
+                                            <form action="{{ url_for('eliminar_usuario', user_id=usuario._id) }}" method="post" style="display:inline;">
+                                                <button type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este usuario?');" class="text-sm text-red-500 hover:text-red-700 inline-flex items-center gap-x-1">
+                                                    Eliminar 
+                                                    <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round-x"><path d="M2 21a8 8 0 0 1 11.873-7"/><circle cx="10" cy="8" r="5"/><path d="m17 17 5 5"/><path d="m22 17-5 5"/></svg>
+                                                </button>
+                                            </form><br/>
+                                        </div>
+                                    </td>
+                                </tr>
+        {% endfor %}
+                
+                            </tbody>
+                            </table>
+                            <!-- End Table -->
+                
+                            <!-- Footer -->
+                            <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200">
 
-                            <div>
-                                <div class="inline-flex gap-x-2">
-                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="#">
-                                        Ver todos
-                                    </a>
+                                <div>
+                                    <p class="text-sm text-gray-600">
+                                        <span class="font-semibold text-gray-800">5</span> resultados más recientes
+                                    </p>
                                 </div>
+
+                                <div>
+                                    <div class="inline-flex gap-x-2">
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="#">
+                                            Ver todos
+                                        </a>
+                                    </div>
+                                </div>
+                
                             </div>
-            
+                            <!-- End Footer -->
                         </div>
-                        <!-- End Footer -->
+                        </div>
                     </div>
-                    </div>
-                </div>
                 </div>
                 <!-- End Card -->
             </div>
