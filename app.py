@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template, redirect, url_for, flash
-from flask_login import LoginManager, login_user, UserMixin, logout_user
+from flask_login import LoginManager, login_user, UserMixin, logout_user, login_required
 from pymongo import MongoClient
 from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
@@ -45,14 +45,25 @@ login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(user_id):
-    return collection_usuarios.find_one({"_id": user_id})
+    user_data = collection_usuarios.find_one({"_id": ObjectId(user_id)})
+    if user_data:
+        user = User(
+            email=user_data['email'], 
+            password=user_data['password'], 
+            rol=user_data['rol'], 
+            nombres=user_data['nombres']
+        )
+        user.id = str(user_data['_id'])
+        return user
+    return None
 
 
 class User(UserMixin):
-    def __init__(self, email, password, rol):
+    def __init__(self, email, password, rol, nombres):
         self.email = email
         self.password = password
         self.rol = rol
+        self.nombres = nombres
         self.id = None
 
     def is_authenticated(self):
@@ -182,25 +193,6 @@ def registro():
 ###
 ### Login
 ###
-def login():
-    if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-
-        user_data = collection_usuarios.find_one({"email": email})
-        
-        if user_data and check_password_hash(user_data['password'], password):
-            user = User(email=user_data['email'], password=user_data['password'], rol=user_data['rol'])
-            user.id = str(user_data['_id'])
-            login_user(user)
-            flash('Inicio de sesión exitoso.')
-            return redirect(url_for('home'))  # Redirigir a la página principal o donde necesites
-        
-        flash('Credenciales incorrectas. Inténtalo de nuevo.')
-
-    return render_template('iniciar_sesion.html')
-
-
 @app.route('/iniciar_sesion', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -210,11 +202,16 @@ def login():
         user_data = collection_usuarios.find_one({"email": email})
         
         if user_data and check_password_hash(user_data['password'], password):
-            user = User(email=user_data['email'], password=user_data['password'], rol=user_data['rol'])
+            user = User(
+                email=user_data['email'], 
+                password=user_data['password'], 
+                rol=user_data['rol'], 
+                nombres=user_data['nombres']
+            )
             user.id = str(user_data['_id'])
             login_user(user)
             flash('Inicio de sesión exitoso.')
-            return redirect(url_for('home'))  # Redirigir a la página principal o donde necesites
+            return redirect(url_for('tablero_coordinadores'))
         
         flash('Credenciales incorrectas. Inténtalo de nuevo.')
 
@@ -305,7 +302,7 @@ def eliminar_usuario(user_id):
 ###
 ###
 @app.route('/salir', methods=['POST'])
-def logout():
+def salir():
     logout_user()
     return redirect(url_for('home'))
 
@@ -328,7 +325,7 @@ def home():
 ### Dashboard
 ###
 @app.route('/tablero')
-#@login_required
+@login_required
 def tablero_coordinadores():
 
     ahora = datetime.utcnow() 
@@ -462,6 +459,7 @@ def registrar_ponente(codigo_evento):
 ### Listado de eventos próximos
 ###
 @app.route('/eventos-proximos')
+@login_required
 def listar_eventos_proximos():
     ahora = datetime.utcnow() 
     eventos_cursor = collection_eventos.find({"fecha_inicio": {"$gte": ahora}})  # Recuperar solo eventos futuros
@@ -473,6 +471,7 @@ def listar_eventos_proximos():
 ### Listado de eventos anteriores
 ###
 @app.route('/eventos-anteriores')
+@login_required
 def listar_eventos_anteriores():
     ahora = datetime.utcnow()
     eventos_cursor = collection_eventos.find({"fecha_inicio": {"$lt": ahora}})  # Recuperar solo eventos pasados
@@ -484,6 +483,7 @@ def listar_eventos_anteriores():
 ### Todos los eventos
 ###
 @app.route('/eventos')
+@login_required
 def listar_eventos():
     eventos_cursor = collection_eventos.find().sort("fecha_inicio", -1) ## -1 de reciente a antiguo / ## 1 de antiguo a reciente
     eventos = list(eventos_cursor) 
@@ -494,6 +494,7 @@ def listar_eventos():
 ### Listado de participantes de un evento
 ###
 @app.route('/participantes/<codigo_evento>')
+@login_required
 def listar_participantes(codigo_evento):
     # Recuperar participantes registrados para el evento específico
     participantes = collection_participantes.find({"codigo_evento": codigo_evento})
@@ -505,6 +506,7 @@ def listar_participantes(codigo_evento):
 ### Formulario de creación de evento
 ###
 @app.route('/evento-nuevo', methods=['GET', 'POST'])
+@login_required
 def crear_evento():
     if request.method == 'POST':
         nombre = request.form['nombre']
@@ -591,6 +593,7 @@ def crear_evento():
 ### Editar evento
 ###
 @app.route('/editar_evento/<codigo_evento>', methods=['GET', 'POST'])
+@login_required
 def editar_evento(codigo_evento):
     # Obtener el evento actual de la base de datos
     evento = collection_eventos.find_one({"codigo": codigo_evento})
@@ -682,6 +685,7 @@ def editar_evento(codigo_evento):
 ###
 ###
 @app.route('/cerrar_evento/<codigo_evento>', methods=['POST'])
+@login_required
 def cerrar_evento(codigo_evento):
     # Actualizar el estado del evento a "cerrado"
     collection_eventos.update_one(
@@ -696,6 +700,7 @@ def cerrar_evento(codigo_evento):
 ### Validación para eliminar evento
 ###
 @app.route('/eliminar_evento/<codigo_evento>', methods=['POST'])
+@login_required
 def eliminar_evento(codigo_evento):
     # Verificar si hay participantes asociados al evento
     if collection_participantes.find_one({"codigo_evento": codigo_evento}) is not None:
@@ -710,6 +715,7 @@ def eliminar_evento(codigo_evento):
 ### Eliminar participante
 ###
 @app.route('/eliminar_participante/<codigo_evento>/<cedula>', methods=['POST'])
+@login_required
 def eliminar_participante(codigo_evento, cedula):
     # Eliminar el participante específico por cédula y código de evento
     collection_participantes.delete_one({"cedula": cedula, "codigo_evento": codigo_evento})
@@ -768,11 +774,19 @@ def validar_certificado():
 
 
 ###
-### Error 404
+### Errores
 ###
-@app.route('/404')
-def page_not_found():
+@app.errorhandler(404)
+def page_not_found(e):
     return render_template('404.html'), 404
+
+@app.errorhandler(401)
+def unauthorized_error(e):
+    return render_template('401.html'), 401
+
+@app.errorhandler(403)
+def forbidden_error(e):
+    return render_template('403.html'), 403
 
 
 ###
