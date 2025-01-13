@@ -11,7 +11,7 @@ db = client['certi_css']
 collection_usuarios = db['usuarios']
 
 def crear_usuario_admin():
-    email_admin = input("Introduce el nombre de usuario para el rol de administrador: ")  # Solicitar email
+    email_admin = input("Introduce el nombre de usuario para el rol de administrador: ")  # Solicitar usuario
     password_admin = input("Introduce la contraseña: ")  # Solicitar contraseña
 
     # Hashear la contraseña

@@ -21,7 +21,7 @@
                 
                         <div class="mt-1 flex items-center gap-x-2">
                             <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
-                                20
+                                {{ total_usuarios }}
                             </h3>
                         </div>
                     </div>
@@ -39,7 +39,7 @@
             
                         <div class="mt-1 flex items-center gap-x-2">
                             <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
-                                20
+                                {{ total_eventos }}
                             </h3>
                         </div>
                     </div>
@@ -57,7 +57,7 @@
 
                         <div class="mt-1 flex items-center gap-x-2">
                             <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
-                                20
+                                {{ total_ponentes }}
                             </h3>
                         </div>
                     </div>
@@ -75,7 +75,7 @@
 
                         <div class="mt-1 flex items-center gap-x-2">
                             <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
-                                20
+                                {{ total_participantes }}
                             </h3>
                         </div>
                     </div>
@@ -326,6 +326,7 @@
                 <div class="-m-1.5 overflow-x-auto">
                     <div class="p-1.5 min-w-full inline-block align-middle">
                     <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+
                         <!-- Header -->
                         <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
                             <div>
@@ -351,6 +352,48 @@
                             </div>
                         </div>
                         <!-- End Header -->
+
+{% if usuario|length == 0 %}
+                        <!-- Body -->
+                        <div class="max-w-sm w-full min-h-[400px] flex flex-col justify-center mx-auto px-6 py-4">
+                            <div class="flex justify-center items-center size-[46px] bg-gray-100 rounded-lg dark:bg-neutral-800">
+                                <svg class="shrink-0 size-6 text-gray-600 dark:text-neutral-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-x"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" x2="22" y1="8" y2="13"/><line x1="22" x2="17" y1="8" y2="13"/></svg>
+                            </div>
+
+                            <h2 class="mt-5 font-semibold text-gray-800 dark:text-white">
+                                No hay usuarios
+                            </h2>
+                            <p class="mt-2 text-sm text-gray-600 dark:text-neutral-400">
+                                No hay usuarios registrados en la plataforma.
+                            </p>
+                            
+                            <div class="mt-5 flex flex-col sm:flex-row gap-2">
+                            <button type="button" class="py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                Nuevo usuario
+                            </button>
+                            </div>
+                        </div>
+                        <!-- End Body -->
+
+                        <!-- Footer -->
+                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
+                            <div>
+                            <p class="text-sm text-gray-600 dark:text-neutral-400">
+                                <span class="font-semibold text-gray-800 dark:text-neutral-200">0</span> resultados
+                            </p>
+                            </div>
+
+                            <div>
+                                <div class="inline-flex gap-x-2">
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="#">
+                                        Ver eventos anteriores
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Footer -->
+{% else %}
             
                         <!-- Table -->
                         <table class="min-w-full divide-y divide-gray-200">
@@ -392,7 +435,7 @@
                             <th scope="col" class="px-6 py-3 text-end"></th>
                             </tr>
                         </thead>
-            
+
                         <tbody class="divide-y divide-gray-200">
 
 {% for usuario in usuarios %}
@@ -455,6 +498,7 @@
                         </tbody>
                         </table>
                         <!-- End Table -->
+ 
             
                         <!-- Footer -->
                         <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200">
@@ -475,6 +519,7 @@
             
                         </div>
                         <!-- End Footer -->
+{% endif %}
                     </div>
                     </div>
                 </div>

@@ -328,6 +328,17 @@ def home():
 @login_required
 def tablero_coordinadores():
 
+    ## Tarjetas
+    
+    # Obtener el número total de usuarios
+    total_usuarios = collection_usuarios.count_documents({})
+    # Obtener el número total de eventos
+    total_eventos = collection_eventos.count_documents({})
+    # Contar el número total de ponentes
+    total_ponentes = collection_participantes.count_documents({"rol": "ponente"})
+    # Contar el número total de participantes
+    total_participantes = collection_participantes.count_documents({"rol": "participante"})
+
     ahora = datetime.utcnow() 
     eventos_prox = collection_eventos.find({
         'fecha_inicio': {'$gte': datetime.now()}
@@ -349,7 +360,7 @@ def tablero_coordinadores():
 
     usuarios_recientes = collection_usuarios.find().sort('fecha_registro', -1).limit(5)
     
-    return render_template('tablero.html', eventos=eventos_prox_list, eventos_estado=eventos_prox_list_estado, ahora=ahora, num_eventos=num_eventos, usuarios=usuarios_recientes, active_section='tablero')
+    return render_template('tablero.html', eventos=eventos_prox_list, eventos_estado=eventos_prox_list_estado, ahora=ahora, num_eventos=num_eventos, usuarios=usuarios_recientes, active_section='tablero', total_usuarios=total_usuarios, total_eventos=total_eventos, total_ponentes=total_ponentes, total_participantes=total_participantes)
 
 
 ###
