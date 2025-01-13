@@ -395,7 +395,8 @@
             
                         <tbody class="divide-y divide-gray-200">
 
-    {% for usuario in usuarios %}
+{% for usuario in usuarios %}
+    {% if usuario.rol != 'administrador' %}
                             <tr class="bg-white hover:bg-gray-50">
                                 <td class="size-px whitespace-nowrap">
                                     <div class="ps-6 py-3">
@@ -448,7 +449,8 @@
                                     </div>
                                 </td>
                             </tr>
-    {% endfor %}
+    {% endif %}
+{% endfor %}
             
                         </tbody>
                         </table>

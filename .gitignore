@@ -166,3 +166,4 @@ tailwind/
 tailwindcss
 static/css/tailwind.css
 node_modules
+admin.py

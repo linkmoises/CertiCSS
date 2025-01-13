@@ -82,14 +82,13 @@
                 
                             <tbody class="divide-y divide-gray-200">
 
-        {% for usuario in usuarios %}
+{% for usuario in usuarios %}
+    {% if usuario.rol != 'administrador' %}
                                 <tr class="bg-white hover:bg-gray-50">
                                     <td class="size-px whitespace-nowrap">
                                         <div class="ps-6 py-3">
                                         <div class="flex items-center gap-x-3">
-                                            <span class="inline-flex items-center justify-center size-[38px] rounded-full bg-white border border-gray-300">
-                                            <span class="font-medium text-sm text-gray-800 leading-none">A</span>
-                                            </span>
+                                            <img class="shrink-0 size-[38px] rounded-full" src="{{ url_for('static', filename='assets/user-avatar.png') }}" alt="Avatar">
                                             <div class="grow">
                                             <span class="block text-sm font-semibold text-gray-800">{{ usuario.nombres }} {{ usuario.apellidos }}</span>
                                             <span class="block text-sm text-gray-500">{{ usuario.email }}</span>
@@ -153,7 +152,8 @@
                                         </div>
                                     </td>
                                 </tr>
-        {% endfor %}
+    {% endif %}
+{% endfor %}
                 
                             </tbody>
                             </table>
