@@ -331,7 +331,7 @@ def tablero_coordinadores():
     ## Tarjetas
     
     # Obtener el número total de usuarios
-    total_usuarios = collection_usuarios.count_documents({})
+    total_usuarios = collection_usuarios.count_documents({"rol": {"$ne": "administrador"}})
     # Obtener el número total de eventos
     total_eventos = collection_eventos.count_documents({})
     # Contar el número total de ponentes
@@ -339,12 +339,16 @@ def tablero_coordinadores():
     # Contar el número total de participantes
     total_participantes = collection_participantes.count_documents({"rol": "participante"})
 
+    ## Resumen Eventos
+
+    # Consulta de eventos próximos y en curso si hay alguno en la consulta
     ahora = datetime.utcnow() 
-    eventos_prox = collection_eventos.find({
-        'fecha_inicio': {'$gte': datetime.now()}
-    }).sort('fecha_inicio').limit(5)
+    inicio_hoy = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    fin_hoy = inicio_hoy + timedelta(days=1)
+    eventos_prox = collection_eventos.find({ 'fecha_inicio': {'$gte': inicio_hoy, '$lt': fin_hoy} }).sort('fecha_inicio').limit(5)
     eventos_prox_list = list(eventos_prox)
 
+    #Etiqueta de estado
     eventos_prox_list_estado = []
     for evento in eventos_prox:
         fecha_inicio = evento['fecha_inicio']
@@ -801,7 +805,7 @@ def forbidden_error(e):
 
 
 ###
-###
+### Etiqueta filtro de fecha
 ###
 from datetime import date
 
@@ -815,7 +819,7 @@ def calcular_estado(fecha):
     elif fecha < hoy:
         return Markup('<span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-green-100 text-green-800">Finalizado</span>')
     else:
-        return "Próximo"
+        return ""
 
 app.jinja_env.filters['estado'] = calcular_estado
 
