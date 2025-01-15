@@ -503,35 +503,83 @@ def registrar_ponente(codigo_evento):
 ### Listado de eventos próximos
 ###
 @app.route('/eventos-proximos')
+@app.route('/eventos-proximos/page/<int:page>')
 @login_required
-def listar_eventos_proximos():
-    ahora = datetime.utcnow() 
-    eventos_cursor = collection_eventos.find({"fecha_inicio": {"$gte": ahora}})  # Recuperar solo eventos futuros
-    eventos = list(eventos_cursor)  # Convertir el cursor a una lista
-    return render_template('eventos-proximos.html', eventos=eventos)
+def listar_eventos_proximos(page=1):
+    ahora = datetime.utcnow()
+    inicio_hoy = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    eventos_por_pagina = 20
+
+    # Contar el total de eventos próximos
+    total_eventos = collection_eventos.count_documents({'fecha_inicio': {'$gte': inicio_hoy}})
+    
+    # Calcular el número total de páginas
+    total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
+
+    # Obtener los eventos próximos para la página actual
+    eventos_cursor = collection_eventos.find({'fecha_inicio': {'$gte': inicio_hoy}}).sort('fecha_inicio').skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    eventos = list(eventos_cursor)
+
+    return render_template('eventos-proximos.html', 
+        eventos=eventos, 
+        page=page, 
+        total_paginas=total_paginas,
+        total_eventos=total_eventos
+    )
+
 
 
 ###
 ### Listado de eventos anteriores
 ###
 @app.route('/eventos-anteriores')
+@app.route('/eventos-anteriores/page/<int:page>')
 @login_required
-def listar_eventos_anteriores():
+def listar_eventos_anteriores(page=1):
     ahora = datetime.utcnow()
-    eventos_cursor = collection_eventos.find({"fecha_inicio": {"$lt": ahora}})  # Recuperar solo eventos pasados
-    eventos = list(eventos_cursor)  # Convertir el cursor a una lista
-    return render_template('eventos-anteriores.html', eventos=eventos)
+    eventos_por_pagina = 20
+
+    # Contar el total de eventos pasados
+    total_eventos = collection_eventos.count_documents({"fecha_inicio": {"$lt": ahora}})
+    # Calcular el número total de páginas
+    total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
+
+    # Obtener los eventos pasados para la página actual
+    eventos_cursor = collection_eventos.find({"fecha_inicio": {"$lt": ahora}}).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    eventos = list(eventos_cursor)
+
+    return render_template('eventos-anteriores.html', 
+        eventos=eventos, 
+        page=page, 
+        total_paginas=total_paginas,
+        total_eventos=total_eventos
+    )
 
 
 ###
 ### Todos los eventos
 ###
 @app.route('/eventos')
+@app.route('/eventos/page/<int:page>')
 @login_required
-def listar_eventos():
-    eventos_cursor = collection_eventos.find().sort("fecha_inicio", -1) ## -1 de reciente a antiguo / ## 1 de antiguo a reciente
-    eventos = list(eventos_cursor) 
-    return render_template('eventos.html', eventos=eventos)
+def listar_eventos(page=1):
+    eventos_por_pagina = 20
+
+    # Calcular el número total de eventos
+    total_eventos = collection_eventos.count_documents({})
+    # Calcular el número total de páginas
+    total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
+
+    # Obtener los eventos para la página actual
+    eventos_cursor = collection_eventos.find().sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    eventos = list(eventos_cursor)
+
+    return render_template('eventos.html',
+        eventos=eventos,
+        total_eventos=total_eventos,
+        page=page,
+        total_paginas=total_paginas
+    )
 
 
 ###
