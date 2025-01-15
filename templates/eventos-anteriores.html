@@ -160,7 +160,7 @@
                                 </td>
                                 <td class="size-px whitespace-nowrap">
                                     <div class="px-6 py-2">
-                                        <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('index', codigo_evento=evento.codigo) }}">
+                                        <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('registrar_participante', codigo_evento=evento.codigo) }}">
                                             Añadir participante
                                         </a><br>
                                         <a class="inline-flex items-center gap-x-1 text-sm text-green-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('registrar_ponente', codigo_evento=evento.codigo) }}">

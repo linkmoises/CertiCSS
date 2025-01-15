@@ -25,3 +25,15 @@ input:checked ~ .toggle-dot {
 .bg-css-profile {
     background: bottom right url("../assets/css-op.svg") no-repeat;
 }
+
+.qr-code {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+}
+
+.otp-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+}

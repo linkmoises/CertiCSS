@@ -10,24 +10,19 @@
             background-image: url('{{ url_for('static', filename='uploads/' + evento.fondo.split('/')[-1]) }}');
             background-size: cover;
             color: white;
-            text-align: left; /* Alinear texto a la izquierda */
-            padding: 20px; /* Espaciado interno */
+            text-align: left;
+            padding: 20px;
         }
         .afiche {
             margin-top: 20px;
         }
         .otp-container {
-            background-color: white; /* Fondo blanco */
-            color: black; /* Texto negro */
-            font-family: monospace; /* Fuente tipo monospace */
-            padding: 10px; /* Espaciado interno */
-            border-radius: 5px; /* Bordes redondeados */
-            max-width: 300px; /* Ancho máximo del contenedor */
-            margin-left: auto; /* Centrar el contenedor a la derecha */
-            margin-right: 0; /* Sin margen a la derecha */
+            color: black;
+            font-family: monospace;
+            max-width: 500px;
         }
         .event-details {
-            margin-bottom: 20px; /* Espacio entre detalles del evento y OTP */
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -35,26 +30,44 @@
     <!-- Hero -->
     <div class="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Grid -->
-        <div class="grid md:grid-cols-2 gap-4 md:gap-8 xl:gap-20 md:items-center">
-        <div>
-            <h1 class="block text-3xl font-bold dark:text-gray-800 sm:text-4xl lg:text-6xl lg:leading-tight">{{ evento.nombre }}</h1>
-{% if evento.fecha_fin %}
-            <h3 class="mt-3 text-lg dark:text-gray-800">{{ evento.fecha_inicio.strftime('%d') }} - {{ evento.fecha_fin.strftime('%d de %B de %Y') }}</h3>
+        <div class="grid md:grid-cols-2 gap-4 md:gap-8 xl:gap-20">
+            <div>
+                <div class="flex items-center gap-x-3">
+                    <div class="shrink-0">
+                        <img class="h-24 w-24" src="{{ url_for('static', filename='assets/' + 'css-logo-op.png') }}" alt="Caja de Seguro Social" />
+                    </div>
+                    
+                    <div class="grow">
+                        <h2 class="block text-3xl font-bold mt-8">{{ evento.tipo }}</h2>
+                        <h4 class="block italic mb-8">{{ evento.unidad_ejecutora }}</h4>
+                    </div>
+                </div>
+                  
+                
+                
+                
+                <h1 class="block text-3xl font-bold dark:text-gray-800 sm:text-4xl lg:text-6xl lg:leading-tight mb-8">{{ evento.nombre }}</h1>
+{% if evento.fecha_inicio == evento.fecha_fin %}
+                <h3 class="my-3 text-lg dark:text-gray-800">{{ evento.fecha_inicio.strftime('%d de %B de %Y') }}</h3>
+{% elif evento.fecha_fin %}
+                <h3 class="my-3 text-lg dark:text-gray-800">{{ evento.fecha_inicio.strftime('%d') }} - {{ evento.fecha_fin.strftime('%d de %B de %Y') }}</h3>
 {% else %}
-            <h3 class="mt-3 text-lg dark:text-gray-800">{{ evento.fecha_inicio.strftime('%d de %B de %Y') }}</h3>
+                <h3 class="my-3 text-lg dark:text-gray-800">{{ evento.fecha_inicio.strftime('%d de %B de %Y') }}</h3>
 {% endif %}
-        </div>
-        <!-- End Col -->
-    
-        <div class="relative ms-4">
-            <div class="otp-container">
-                <h2>Código OTP:</h2>
-                <p>{{ otp }}</p>
             </div>
-            <div class="absolute inset-0 -z-[1] bg-gradient-to-tr from-gray-200 via-white/0 to-white/0 size-full rounded-md mt-4 -mb-4 me-4 -ms-4 lg:mt-6 lg:-mb-6 lg:me-6 lg:-ms-6"></div>
-
-        </div>
-        <!-- End Col -->
+            <!-- End Col -->
+    
+            <div class="relative my-4">
+                <div class="otp-container">
+                    <p class="bg-white p-3 text-5xl border-4 border-black rounded-xl">Código OTP: <span class="font-bold">{{ otp }}</span></p>
+                </div>
+                <div class="qr-code">
+                    <img class="block float-right mt-8 w-64 h-64 border-4 border-black rounded-xl" src="{{ url_for('static', filename='uploads/' + evento.codigo + '-qr.png') }}" alt="Código QR" class="w-64 h-64" /><br />
+                    <p class="mt-8 bg-white block text-black float-right p-4 text-3xl border-4 border-black rounded-xl">{{ BASE_URL }}{{ evento.codigo }}</p>
+                </div>
+            </div>
+            <!-- End Col -->
+        
         </div>
         <!-- End Grid -->
     </div>

@@ -245,7 +245,7 @@
                                     </td>
                                     <td class="size-px whitespace-nowrap">
                                         <div class="px-6 py-2">
-                                            <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('index', codigo_evento=evento.codigo) }}">
+                                            <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('registrar_participante', codigo_evento=evento.codigo) }}">
                                                 Añadir participante
                                             </a><br>
                                             <a class="inline-flex items-center gap-x-1 text-sm text-green-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('registrar_ponente', codigo_evento=evento.codigo) }}">
@@ -336,7 +336,7 @@
                         </div>
                         <!-- End Header -->
 
-{% if usuario|length == 0 %}
+{% if usuarios|length == 0 %}
                         <!-- Body -->
                         <div class="max-w-sm w-full min-h-[400px] flex flex-col justify-center mx-auto px-6 py-4">
                             <div class="flex justify-center items-center size-[46px] bg-gray-100 rounded-lg dark:bg-neutral-800">
@@ -480,7 +480,7 @@
 
                             <div>
                                 <p class="text-sm text-gray-600">
-                                    <span class="font-semibold text-gray-800">5</span> resultados más recientes
+                                    <span class="font-semibold text-gray-800">{{ num_usuarios }}</span> {{ 'usuario reciente' if num_eventos == 1 else 'usuarios recientes' }}
                                 </p>
                             </div>
 

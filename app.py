@@ -210,7 +210,6 @@ def login():
             )
             user.id = str(user_data['_id'])
             login_user(user)
-            flash('Inicio de sesión exitoso.')
             return redirect(url_for('tablero_coordinadores'))
         
         flash('Credenciales incorrectas. Inténtalo de nuevo.')
@@ -343,9 +342,10 @@ def tablero_coordinadores():
 
     # Consulta de eventos próximos y en curso si hay alguno en la consulta
     ahora = datetime.utcnow() 
+    # Normaliza al inicio del día actual
     inicio_hoy = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    fin_hoy = inicio_hoy + timedelta(days=1)
-    eventos_prox = collection_eventos.find({ 'fecha_inicio': {'$gte': inicio_hoy, '$lt': fin_hoy} }).sort('fecha_inicio').limit(5)
+    # Consulta a MongoDB para incluir desde el inicio del día actual en adelante
+    eventos_prox = collection_eventos.find({ 'fecha_inicio': {'$gte': inicio_hoy} }).sort('fecha_inicio').limit(5)
     eventos_prox_list = list(eventos_prox)
 
     #Etiqueta de estado
@@ -362,16 +362,30 @@ def tablero_coordinadores():
 
     num_eventos = len(eventos_prox_list)
 
-    usuarios_recientes = collection_usuarios.find().sort('fecha_registro', -1).limit(5)
+    usuarios_recientes = list(collection_usuarios.find({"rol": {"$ne": "administrador"}}).sort('fecha_registro', -1).limit(5))
+
+    num_usuarios_recientes = len(usuarios_recientes)
     
-    return render_template('tablero.html', eventos=eventos_prox_list, eventos_estado=eventos_prox_list_estado, ahora=ahora, num_eventos=num_eventos, usuarios=usuarios_recientes, active_section='tablero', total_usuarios=total_usuarios, total_eventos=total_eventos, total_ponentes=total_ponentes, total_participantes=total_participantes)
+    return render_template('tablero.html', 
+        eventos=eventos_prox_list, 
+        eventos_estado=eventos_prox_list_estado, 
+        ahora=ahora, 
+        num_eventos=num_eventos, 
+        usuarios=usuarios_recientes,
+        num_usuarios=num_usuarios_recientes,
+        active_section='tablero', 
+        total_usuarios=total_usuarios, 
+        total_eventos=total_eventos, 
+        total_ponentes=total_ponentes, 
+        total_participantes=total_participantes
+    )
 
 
 ###
 ### Formulario de registro de participantes
 ###
 @app.route('/registrar_participante/<codigo_evento>')
-def index(codigo_evento):
+def registrar_participante(codigo_evento):
     # Verificar si el código del evento existe en la base de datos
     evento = collection_eventos.find_one({"codigo": codigo_evento})
     
@@ -388,7 +402,14 @@ def index(codigo_evento):
     else:
         otp_code = otp_storage[codigo_evento]['code']
 
-    return render_template('registrar.html', otp=otp_code, codigo_evento=codigo_evento, nombre_evento=evento['nombre'])
+    return render_template('registrar.html', 
+        otp=otp_code,
+        evento=evento,
+        codigo_evento=codigo_evento, 
+        nombre_evento=evento['nombre'], 
+        afiche_url=url_for('static', filename='uploads/' + evento['afiche_750'].split('/')[-1]),
+        programa_url=evento.get('programa_url') 
+    )
 
 
 @app.route('/registrar', methods=['POST'])
@@ -404,7 +425,7 @@ def registrar():
     # Verificar si el participante ya está registrado en este evento
     if collection_participantes.find_one({"cedula": cedula, "codigo_evento": codigo_evento}):
         flash("El participante ya está registrado en este evento.", "error")
-        return redirect(url_for('index', codigo_evento=codigo_evento))
+        return redirect(url_for('registrar_participante', codigo_evento=codigo_evento))
 
     # Verificar si el código OTP existe y su validez
     if codigo_evento in otp_storage:
@@ -427,14 +448,22 @@ def registrar():
             })
 
             # Mensaje de éxito o falla en registro
-            flash("Registro completado con éxito", "success")
-            return redirect(url_for('index', codigo_evento=codigo_evento))
+            flash("Registro exitoso. El certificado de participación se podrá descargar al finalizar el evento.", "success")
+            return redirect(url_for('registrar_participante', codigo_evento=codigo_evento))
         else:
-            flash("El OTP ha expirado o es incorrecto. Por favor, recargue la página.", "error")
-            return redirect(url_for('index', codigo_evento=codigo_evento))
+            flash("El OTP ha expirado o es incorrecto.", "error")
+            return redirect(url_for('registrar_participante', codigo_evento=codigo_evento))
     else:
         flash("El código del evento no es válido.", "error")
-        return redirect(url_for('index', codigo_evento=codigo_evento))
+        return redirect(url_for('registrar_participante', codigo_evento=codigo_evento))
+
+
+###
+### Redirección corta (solo registro de evento)
+###
+@app.route('/<codigo_evento>')
+def redirigir_ruta_corta(codigo_evento):
+    return redirect(url_for('registrar_participante', codigo_evento=codigo_evento))
 
 
 ###
@@ -746,6 +775,8 @@ def mostrar_evento(codigo_evento):
     evento = collection_eventos.find_one({"codigo": codigo_evento})
 
     if evento:
+
+        qr_path = generate_qr_code(codigo_evento)
         
         # Generar un nuevo OTP si no existe o ha expirado
         if codigo_evento not in otp_storage or datetime.now() >= otp_storage[codigo_evento]['valid_until']:
@@ -760,6 +791,23 @@ def mostrar_evento(codigo_evento):
         return render_template('evento-individual.html', evento=evento, otp=otp_code)
     else:
         return "Evento no encontrado", 404
+
+
+###
+### QR evento
+###
+import qrcode
+from flask import send_file
+
+def generate_qr_code(codigo_evento):
+    qr_path = f"static/uploads/{codigo_evento}-qr.png"
+
+    if not os.path.exists(qr_path):
+        url = f"http://localhost:5000/registrar_participante/{codigo_evento}"
+        qr = qrcode.make(url)
+        qr.save(qr_path)
+    
+    return qr_path
 
 
 ###
