@@ -470,7 +470,10 @@ def redirigir_ruta_corta(codigo_evento):
 ### Formulario de registro de ponentes
 ###
 @app.route('/registrar_ponente/<codigo_evento>', methods=['GET', 'POST'])
+@login_required
 def registrar_ponente(codigo_evento):
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+
     if request.method == 'POST':
         nombres = request.form['nombres']
         apellidos = request.form['apellidos']
@@ -493,10 +496,14 @@ def registrar_ponente(codigo_evento):
             'timestamp': datetime.now()  # Almacenar timestamp actual
         })
 
-        flash("Ponente registrado con éxito", "success")
+        flash("Ponente registrado con éxito.", "success")
         return redirect(url_for('listar_participantes', codigo_evento=codigo_evento))
 
-    return render_template('registrar_ponente.html', codigo_evento=codigo_evento)
+    return render_template('registrar_ponente.html',
+        codigo_evento=codigo_evento,
+        evento=evento,
+        afiche_url=url_for('static', filename='uploads/' + evento['afiche_750'].split('/')[-1])
+    )
 
 
 ###

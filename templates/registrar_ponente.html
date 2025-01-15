@@ -2,31 +2,126 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Registrar Ponente</title>
+    <title>{{ nombre_evento }} - Registro de Ponentes</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
 </head>
-<body>
-    <h1>Registrar Nuevo Ponente</h1>
+<body class="bg-gray-50 dark:bg-neutral-900">
 
-    <form action="/registrar_ponente/{{ codigo_evento }}" method="post">
-        <label for="nombres">Nombres:</label>
-        <input type="text" id="nombres" name="nombres" required><br><br>
+    <!-- ========== MAIN CONTENT ========== -->
+    <main id="content">
 
-        <label for="apellidos">Apellidos:</label>
-        <input type="text" id="apellidos" name="apellidos" required><br><br>
+        <!-- Card -->
+        <div class="max-w-[75rem] px-4 pt-10 sm:px-6 lg:px-8 lg:pt-14 mx-auto">
+            <!-- Grid -->
+            <div class="bg-white grid sm:grid-cols-2 sm:items-center gap-8 border border-gray-200 rounded-xl">
 
-        <label for="cedula">Cédula:</label>
-        <input type="text" id="cedula" name="cedula" required><br><br>
+                <div class="sm:order-2">
+                    <div class="relative pt-[50%] sm:pt-[100%]">
+                        <img class="size-full absolute top-0 start-0 object-cover rounded-r-xl" src="{{ afiche_url }}" alt="{{ nombre_evento }}">
+                    </div>
+                </div>
+                <!-- End Col -->
 
-        <input type="hidden" name="rol" value="ponente">
+                <div class="sm:order-1">
 
-        <label for="titulo_ponencia">Título de la Ponencia:</label>
-        <input type="text" id="titulo_ponencia" name="titulo_ponencia"><br><br> <!-- Campo opcional -->
+<!-- Mostrar mensajes -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+                    <div class="mb-4">
+                        <ul>
+                        {% for category, message in messages %}
+                            <li class="{{ 'p-2 text-sm bg-red-100 text-red-800 rounded-r-xl' if category == 'error' else 'p-2 text-sm bg-green-100 text-green-800 rounded-r-xl' }}">
+                            {{ message }}
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+{% endif %}
+{% endwith %}
 
-        <!-- El campo oculto para el código del evento ya no es necesario, ya que se pasa a través de la URL -->
+                    <div class="m-8">
+                        <h2 class="text-xl font-bold text-gray-800">Registro de ponentes</h2>
+                        <p class="text-sm text-gray-600 mb-4">{{ evento.nombre }}</p>
+                    
+                        <form action="/registrar_ponente/{{ codigo_evento }}" method="post">
+                            <!-- Grid -->
+                            <div class="mt-4 grid sm:grid-cols-12 gap-2 sm:gap-6">
+                                
+                                <div class="sm:col-span-3">
+                                    <label for="nombres" class="inline-block text-sm text-gray-800 mt-2.5">
+                                        Nombre
+                                    </label>
+                                </div>
+                                <!-- End Col -->
+                            
+                                <div class="sm:col-span-9">
+                                    <input id="nombres" name="nombres" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" placeholder="Nombres..." required>
+                                </div>
+                                <!-- End Col -->
 
-        <button type="submit">Registrar Ponente</button>
-    </form>
+                                <div class="sm:col-span-3">
+                                    <label for="apellidos" class="inline-block text-sm text-gray-800 mt-2.5">
+                                        Apellidos
+                                    </label>
+                                </div>
+                                <!-- End Col -->
+                            
+                                <div class="sm:col-span-9">
+                                    <input id="apellidos" name="apellidos" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" placeholder="Apellidos..." required>
+                                </div>
+                                <!-- End Col -->
 
-    <a href="/eventos">Volver a la lista de eventos</a>
+                                <div class="sm:col-span-3">
+                                    <label for="cedula" class="inline-block text-sm text-gray-800 mt-2.5">
+                                        Cédula
+                                    </label>
+                                </div>
+                                <!-- End Col -->
+                            
+                                <div class="sm:col-span-9">
+                                    <input id="cedula" name="cedula" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" placeholder="8-123-456" required>
+                                </div>
+                                <!-- End Col -->
+
+                                <div class="sm:col-span-3">
+                                    <label for="titulo_ponencia" class="inline-block text-sm text-gray-800 mt-2.5">
+                                        Ponencia
+                                    </label>
+                                </div>
+                                <!-- End Col -->
+                            
+                                <div class="sm:col-span-9">
+                                    <input id="titulo_ponencia" name="titulo_ponencia" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" placeholder="Ingrese el título de la ponencia...">
+                                </div>
+                                <!-- End Col -->
+
+                                <input type="hidden" name="rol" value="ponente">
+
+                                <div class="sm:col-span-12 gap-2">
+                                    <button type="submit" class="w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="{{ url_for('crear_evento') }}">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                        Registrar datos de ponente
+                                    </button>
+                                </div>
+
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <!-- End Col -->
+            </div>
+            <!-- End Grid -->
+        </div>
+        <!-- End Card -->
+
+    </main>
+
+    <footer class="mt-auto w-full max-w-[85rem] px-4 sm:px-6 lg:px-8 mx-auto">
+        <div class="text-center text-xs text-gray-500 my-8">
+            <p>Este evento es avalado por DENADOI y potenciado por la plataforma CertiCSS.</p>
+        </div>
+    </footer>
+
 </body>
 </html>
