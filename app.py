@@ -225,7 +225,7 @@ def login():
 @app.route('/usuarios/page/<int:page>')
 @login_required
 def listar_usuarios(page=1):
-    usuarios_por_pagina = 5  # Número de usuarios por página
+    usuarios_por_pagina = 20  # Número de usuarios por página
 
     # Contar el total de usuarios
     total_usuarios = collection_usuarios.count_documents({"rol": {"$ne": "administrador"}})  # Excluir administradores si es necesario
