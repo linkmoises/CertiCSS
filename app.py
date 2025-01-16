@@ -150,6 +150,7 @@ def obtener_codigo_unico():
 ### Página de registro
 ###
 @app.route('/registrar-usuario', methods=['GET', 'POST'])
+@login_required
 def registro():
     if request.method == 'POST':
         nombres = request.form['nombres']
@@ -221,15 +222,34 @@ def login():
 ### Listado de usuarios
 ###
 @app.route('/usuarios')
-def listar_usuarios():
-    usuarios = collection_usuarios.find()
-    return render_template('usuarios.html', usuarios=usuarios)
+@app.route('/usuarios/page/<int:page>')
+@login_required
+def listar_usuarios(page=1):
+    usuarios_por_pagina = 5  # Número de usuarios por página
+
+    # Contar el total de usuarios
+    total_usuarios = collection_usuarios.count_documents({"rol": {"$ne": "administrador"}})  # Excluir administradores si es necesario
+    
+    # Calcular el número total de páginas
+    total_paginas = (total_usuarios + usuarios_por_pagina - 1) // usuarios_por_pagina  # Redondear hacia arriba
+
+    # Obtener los usuarios para la página actual
+    usuarios_cursor = collection_usuarios.find({"rol": {"$ne": "administrador"}}).sort("fecha_registro", -1).skip((page - 1) * usuarios_por_pagina).limit(usuarios_por_pagina)
+    usuarios = list(usuarios_cursor)
+
+    return render_template('usuarios.html', 
+        usuarios=usuarios, 
+        page=page, 
+        total_paginas=total_paginas,
+        total_usuarios=total_usuarios
+    )
 
 
 ###
 ###
 ###
 @app.route('/editar_usuario/<user_id>', methods=['GET', 'POST'])
+@login_required
 def editar_usuario(user_id):
     if request.method == 'POST':
         # Recoger los datos del formulario
@@ -275,6 +295,7 @@ def editar_usuario(user_id):
 ### Perfil de usuario
 ###
 @app.route('/usuario/<user_id>')
+@login_required
 def mostrar_usuario(user_id):
     # Obtener los datos del usuario desde la base de datos usando el user_id
     usuario = collection_usuarios.find_one({"_id": ObjectId(user_id)})
@@ -290,6 +311,7 @@ def mostrar_usuario(user_id):
 ###
 ###
 @app.route('/eliminar_usuario/<user_id>', methods=['POST'])
+@login_required
 def eliminar_usuario(user_id):
     # Lógica para eliminar un usuario
     collection_usuarios.delete_one({"_id": ObjectId(user_id)})
