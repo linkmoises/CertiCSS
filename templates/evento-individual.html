@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     <style>
         body {
-            background-image: url('{{ url_for('static', filename='uploads/' + evento.fondo.split('/')[-1]) }}');
+            background-image: url('{% if evento.fondo and evento.fondo.split('/')[-1] %}{{ url_for('static', filename='uploads/' + evento.fondo.split('/')[-1]) }}{% else %}{{ base_url }}{{ url_for('static', filename='assets/auditorio-cidelas-moredark.jpg') }}{% endif %}');
             background-size: cover;
             color: white;
             text-align: left;
