@@ -123,6 +123,18 @@
                         <!-- End Col -->
 
                         <div class="sm:col-span-3">
+                            <label for="cargo" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                Cargo
+                            </label>
+                        </div>
+                        <!-- End Col -->
+                
+                        <div class="sm:col-span-9">
+                            <input id="cargo" name="cargo" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" value="{{ usuario.cargo }}">
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-3">
                             <label for="rol" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                 Rol
                             </label>
@@ -138,6 +150,18 @@
                                 <option value="coordinador-local" {% if usuario.rol == 'coordinador-local' %}selected{% endif %}>Coordinador Local de Docencia</option>
                                 <option value="coordinador-regional" {% if usuario.rol == 'coordinador-regional' %}selected{% endif %}>Coordinador Regional de Docencia</option>
                             </select>
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-3">
+                            <label for="phone" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                Teléfono de contacto
+                            </label>
+                        </div>
+                        <!-- End Col -->
+                
+                        <div class="sm:col-span-9">
+                            <input type="tel" id="phone" name="phone" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="+507-XXXX-XXXX" value="{{ usuario.phone }}">
                         </div>
                         <!-- End Col -->
             
@@ -208,6 +232,33 @@
 
 <!-- JS PLUGINS -->
 <script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+<script>
+document.getElementById('phone').addEventListener('input', function (e) {
+    let value = e.target.value;
 
+    // Eliminar todos los caracteres que no sean dígitos
+    value = value.replace(/\D/g, '');
+
+    // Verificar si ya contiene el código de país y eliminarlo
+    if (value.startsWith('507')) {
+        value = value.slice(3); // Eliminar el código de país si ya está presente
+    }
+
+    // Formatear el número según el patrón +507-6XXX-XXXX
+    if (value.length > 0) {
+        value = '+507-' + value; // Agregar el código de país
+
+        // Insertar guiones en las posiciones correctas
+        if (value.length > 9) {
+            value = value.slice(0, 9) + '-' + value.slice(9); // Después de los primeros 4 dígitos
+        }
+        if (value.length > 14) {
+            value = value.slice(0, 14); // Limitar el número total de caracteres
+        }
+    }
+
+    e.target.value = value; // Actualizar el valor del campo
+});
+</script>
 </body>
 </html>

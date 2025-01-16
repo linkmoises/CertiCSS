@@ -160,9 +160,11 @@ def registro():
         email = request.form['email']
         password = request.form['password']
         rol = request.form['rol']
+        cargo = request.form['cargo']
         region = request.form['region']
         unidad_ejecutora = request.form['unidad_ejecutora']
         departamento = request.form['departamento']
+        phone = request.form['phone']
         timestamp = datetime.now()
 
         # Verificar si el usuario ya existe
@@ -177,12 +179,14 @@ def registro():
             'apellidos': apellidos,
             'genero': genero,
             'cedula': cedula,
-            "email": email,
-            "password": hashed_password,
-            "rol": rol,
-            "region": region,
-            "unidad_ejecutora": unidad_ejecutora,
-            "departamento": departamento,
+            'email': email,
+            'phone': phone,
+            'password': hashed_password,
+            'rol': rol,
+            'cargo': cargo,
+            'region': region,
+            'unidad_ejecutora': unidad_ejecutora,
+            'departamento': departamento,
             'timestamp': timestamp
         })
         flash('Registro exitoso. Ahora puedes iniciar sesión.')
@@ -229,7 +233,6 @@ def listar_usuarios(page=1):
 
     # Contar el total de usuarios
     total_usuarios = collection_usuarios.count_documents({"rol": {"$ne": "administrador"}})  # Excluir administradores si es necesario
-    
     # Calcular el número total de páginas
     total_paginas = (total_usuarios + usuarios_por_pagina - 1) // usuarios_por_pagina  # Redondear hacia arriba
 
@@ -258,10 +261,12 @@ def editar_usuario(user_id):
         genero = request.form.get('genero')
         cedula = request.form.get('cedula')
         rol = request.form.get('rol')
+        cargo = request.form.get('cargo')
         region = request.form.get('region')
         unidad_ejecutora = request.form.get('unidad_ejecutora')
         departamento = request.form.get('departamento')
         email = request.form.get('email')
+        phone = request.form.get('phone')
         password = request.form.get('password')
 
         # Crear un diccionario con los nuevos datos
@@ -271,9 +276,11 @@ def editar_usuario(user_id):
             "genero": genero,
             "cedula": cedula,
             "region": region,
+            "phone": phone,
             "unidad_ejecutora": unidad_ejecutora,
             "departamento": departamento,
             "rol": rol,
+            "cargo": cargo,
         }
 
         # Solo actualizar la contraseña si se proporciona

@@ -81,20 +81,21 @@
 {% for usuario in usuarios %}
     {% if usuario.rol != 'administrador' %}
                                 <tr class="bg-white hover:bg-gray-50">
-                                    <td class="size-px whitespace-nowrap">
+                                    <td class="size-px w-52 min-w-52">
                                         <div class="ps-6 py-3">
                                         <div class="flex items-center gap-x-3">
                                             <img class="shrink-0 size-[38px] rounded-full" src="{{ url_for('static', filename='assets/user-avatar.png') }}" alt="Avatar">
                                             <div class="grow">
                                             <span class="block text-sm font-semibold text-gray-800">{{ usuario.nombres }} {{ usuario.apellidos }}</span>
                                             <span class="block text-sm text-gray-500">{{ usuario.email }}</span>
+                                            <span class="block text-xs text-gray-500">{{ usuario.phone }}</span>
                                             </div>
                                         </div>
                                         </div>
                                     </td>
-                                    <td class="h-px w-72 whitespace-nowrap">
+                                    <td class="w-80 min-w-80">
                                         <div class="px-6 py-3">
-                                        <span class="block text-sm font-semibold text-gray-800">{% if usuario.rol == 'coordinador-regional' %}Coordinador Regional de Docencia e Investigación{% endif %}{% if usuario.rol == 'coordinador-local' %}Coordinador Local de Docencia e Investigación{% endif %}{% if usuario.rol == 'coordinador-departamental' %}Coordinador Departamental de Docencia{% endif %}</span>
+                                        <span class="block text-sm font-semibold text-gray-800">{% if usuario.rol == 'coordinador-regional' %}Coordinador Regional de Docencia e Investigación{% endif %}{% if usuario.rol == 'coordinador-local' %}Coordinador Local de Docencia e Investigación{% endif %}{% if usuario.rol == 'coordinador-departamental' %}Coordinador Departamental de Docencia{% endif %}{% if usuario.rol == 'denadoi' %}{{ usuario.cargo }}{% endif %}</span>
                                         <span class="block text-sm italic text-gray-800">{% if usuario.rol == 'coordinador-regional' %}
                                             {% set regiones = {
                                                 'css01': 'Región de Salud de Bocas Del Toro',
@@ -110,6 +111,7 @@
                                             } %}
                                             {{ regiones[usuario.region] if usuario.region in regiones else usuario.region }}
                                         {% endif %}</span>
+                                        {% if usuario.rol == "denadoi" %}<span class="block text-sm italic text-gray-500">Departamento Nacional de Docencia e Investigación</span>{% endif %}
                                         <span class="block text-sm text-gray-500">{{ usuario.unidad_ejecutora }}</span>
                                         {% if usuario.rol == 'coordinador-departamental' %}<span class="block text-sm italic text-gray-500">{{ usuario.departamento }}</span>{% endif %}
                                         </div>
@@ -135,16 +137,20 @@
                                                 Ver perfil
                                                 <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round-search"><circle cx="10" cy="8" r="5"/><path d="M2 21a8 8 0 0 1 10.434-7.62"/><circle cx="18" cy="18" r="3"/><path d="m22 22-1.9-1.9"/></svg>
                                             </a><br />
+{% if current_user.id|string == usuario._id|string or current_user.rol == 'administrador' %}
                                             <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('editar_usuario', user_id=usuario._id) }}">
                                                 Editar
                                                 <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round-pen"><path d="M2 21a8 8 0 0 1 10.821-7.487"/><path d="M21.378 16.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><circle cx="10" cy="8" r="5"/></svg>
                                             </a><br />
+{% endif %}
+{% if current_user.rol == 'administrador' %}
                                             <form action="{{ url_for('eliminar_usuario', user_id=usuario._id) }}" method="post" style="display:inline;">
                                                 <button type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este usuario?');" class="text-sm text-red-500 hover:text-red-700 inline-flex items-center gap-x-1">
                                                     Eliminar 
                                                     <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round-x"><path d="M2 21a8 8 0 0 1 11.873-7"/><circle cx="10" cy="8" r="5"/><path d="m17 17 5 5"/><path d="m22 17-5 5"/></svg>
                                                 </button>
                                             </form><br/>
+{% endif %}
                                         </div>
                                     </td>
                                 </tr>
