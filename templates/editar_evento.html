@@ -18,6 +18,21 @@
                         Editar evento académico
                     </p>
                 </div>
+
+<!-- Mostrar mensajes -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+                    <div class="mb-4">
+                        <ul>
+                        {% for category, message in messages %}
+                            <li class="{{ 'p-2 text-sm bg-red-100 text-red-800 rounded-xl' if category == 'error' else 'p-2 text-sm bg-green-100 text-green-800 rounded-xl' }}">
+                            {{ message }}
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+{% endif %}
+{% endwith %}
             
                 <form action="{{ url_for('editar_evento', codigo_evento=evento.codigo) }}" method="post" enctype="multipart/form-data">
                     <!-- Grid -->
@@ -80,6 +95,7 @@
                                 <option value="Taller" {% if evento.tipo == 'Taller' %}selected{% endif %}>Taller</option>
                                 <option value="Curso" {% if evento.tipo == 'Curso' %}selected{% endif %}>Curso</option>
                                 <option value="Diplomado" {% if evento.tipo == 'Diplomado' %}selected{% endif %}>Diplomado</option>
+                                <option value="Seminario-Taller" {% if evento.tipo == 'Seminario-Taller' %}selected{% endif %}>Seminario-Taller</option>
                             </select>
                         </div>
                         <!-- End Col -->

@@ -72,9 +72,12 @@
                 {% for evento in eventos %}
                 <!-- Card -->
                 <div class="group flex flex-col h-full bg-white border border-gray-200 shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70">
-                    <div class="flex flex-col justify-center items-center bg-blue-600 rounded-t-xl">
-                        <img src="{{ url_for('static', filename='uploads/' + evento.afiche_750.split('/')[-1]) }}" alt="{{ evento.nombre }}" class="h-full w-full object-cover rounded-t-xl">
-                    </div>
+                    <div class="relative pt-[100%] sm:pt-[100%] overflow-hidden rounded-t-xl">
+                        <img class="size-full absolute top-0 start-0 object-cover group-hover:scale-105 group-focus:scale-105 transition-transform duration-500 ease-in-out rounded-t-xl" src="{{ url_for('static', filename='uploads/' + evento.afiche_750.split('/')[-1]) }}" alt="{{ evento.nombre }}">
+                        <span class="absolute top-0 end-0 rounded-se-xl rounded-es-xl text-xs font-medium bg-gray-800 text-white py-1.5 px-3 dark:bg-neutral-900">
+                            {{ evento.modalidad }}
+                        </span>
+                      </div>
                     <div class="p-4 md:p-6">
                         <span class="block mb-1 text-xs font-semibold uppercase text-blue-600 dark:text-blue-500">
                             {{ evento.tipo }} <!-- Tipo de evento -->
@@ -87,12 +90,18 @@
                         </p>
                     </div>
                     <div class="mt-auto flex border-t border-gray-200 divide-x divide-gray-200 dark:border-neutral-700 dark:divide-neutral-700">
-                        <a class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-es-xl bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800" href="#">
-                            Lista de Participantes
+{% if evento.programa %}
+                        <a class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-es-xl bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800" href="{{ url_for('resumen_evento', codigo_evento=evento.codigo) }}">
+                            Detalles del evento
                         </a>
-                        <a class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-ee-xl bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800" href="#">
-                            Ver Evento
+                        <a class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-ee-xl bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800" href="{{ evento.programa }}">
+                            Descargar programa
                         </a>
+{% else %}
+                        <a class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-b-xl bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800" href="{{ url_for('resumen_evento', codigo_evento=evento.codigo) }}">
+                            Detalles del evento
+                        </a>
+{% endif %}                        
                     </div>
                 </div>
                 <!-- End Card -->

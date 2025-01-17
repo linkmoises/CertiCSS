@@ -18,6 +18,21 @@
                         Añadir nuevo evento académico
                     </p>
                 </div>
+
+<!-- Mostrar mensajes -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+                    <div class="mb-4">
+                        <ul>
+                        {% for category, message in messages %}
+                            <li class="{{ 'p-2 text-sm bg-red-100 text-red-800 rounded-xl' if category == 'error' else 'p-2 text-sm bg-green-100 text-green-800 rounded-xl' }}">
+                            {{ message }}
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+{% endif %}
+{% endwith %}
             
                 <form action="/evento-nuevo" method="post" enctype="multipart/form-data">
                     <!-- Grid -->
@@ -80,6 +95,7 @@
                                 <option value="Taller">Taller</option>
                                 <option value="Curso">Curso</option>
                                 <option value="Diplomado">Diplomado</option>
+                                <option value="Seminario-Taller">Seminario-Taller</option>
                             </select>
                         </div>
                         <!-- End Col -->

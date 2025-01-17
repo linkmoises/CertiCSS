@@ -625,9 +625,16 @@ def listar_eventos(page=1):
 @login_required
 def listar_participantes(codigo_evento):
     # Recuperar participantes registrados para el evento específico
-    participantes = collection_participantes.find({"codigo_evento": codigo_evento})
+    participantes_cursor = collection_participantes.find({"codigo_evento": codigo_evento})
+    total_participantes = collection_participantes.count_documents({"codigo_evento": codigo_evento})
+    participantes = list(participantes_cursor)
     evento = collection_eventos.find_one({"codigo": codigo_evento})
-    return render_template('participantes.html', participantes=participantes, codigo_evento=codigo_evento, nombre_evento=evento['nombre'])
+    return render_template('participantes.html', 
+        participantes=participantes,
+        total_participantes=total_participantes,
+        codigo_evento=codigo_evento,
+        nombre_evento=evento['nombre']
+    )
 
 
 ###
@@ -712,7 +719,7 @@ def crear_evento():
             'timestamp': timestamp
         })
         flash("Evento creado con éxito", "success")
-        return redirect(url_for('listar_eventos_proximos'))  # Redirigir a la lista de eventos
+        return redirect(url_for('crear_evento'))  # Redirigir a la lista de eventos
 
     return render_template('crear_evento.html')
 
@@ -804,9 +811,22 @@ def editar_evento(codigo_evento):
         )
         
         flash("Evento actualizado con éxito", "success")
-        return redirect(url_for('listar_eventos'))  # Redirigir a la lista de eventos
+        return redirect(url_for('crear_evento'))  # Redirigir a la lista de eventos
 
     return render_template('editar_evento.html', evento=evento)
+
+
+###
+### Resumen de evento
+###
+@app.route('/resumen/<codigo_evento>')
+def resumen_evento(codigo_evento):
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+
+    if not evento:
+        abort(404)
+
+    return render_template('resumen_evento.html', evento=evento)
 
 
 ###
