@@ -27,11 +27,11 @@
             
                             <div>
                                 <div class="inline-flex gap-x-2">
-                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="{{ url_for('registrar_ponente', codigo_evento=codigo_evento) }}">
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="{{ url_for('registrar_ponente', codigo_evento=evento.codigo) }}">
                                         <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                                         Registrar ponente
                                     </a>
-                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="{{ url_for('registrar_participante', codigo_evento=codigo_evento) }}">
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="{{ url_for('registrar_participante', codigo_evento=evento.codigo) }}">
                                         <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                                         Registrar participante
                                     </a>
@@ -100,7 +100,7 @@
                 
                                 <th scope="col" class="px-6 py-3 text-center">
                                     <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
-                                        ID verificación
+                                        ID validación
                                     </a>
                                 </th>
                 
@@ -140,7 +140,10 @@
                                 </td>
                                 <td class="size-px whitespace-nowrap text-center">
                                     <div class="px-6 py-2">
-                                        <span class="text-sm text-gray-500">{{ participante.nanoid }}</span>
+                                        <a class="inline-flex items-center gap-x-1 text-sm font-medium decoration-2 hover:underline" href="{{ url_for('generar_pdf', nanoid=participante.nanoid) }}" target="_blank">
+                                            <svg class="size-3.5 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-card-text" viewBox="0 0 16 16"><path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2z"/><path d="M3 5.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5M3 8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 8m0 2.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5"/></svg>
+                                            <span class="text-sm text-gray-500 font-mono">{{ participante.nanoid }}</span>
+                                        </a>
                                     </div>
                                 </td>
                                 <td class="size-px whitespace-nowrap">
@@ -150,10 +153,16 @@
                                 </td>
                                 <td class="size-px whitespace-nowrap">
                                     <div class="px-6 py-2">
-                                        <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="#">
+{% if participante.rol == 'ponente' %}
+                                        <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('editar_ponente', nanoid=participante.nanoid) }}">
+                                            Corregir ponente
+                                        </a><br />
+{% else %}
+                                        <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('editar_participante', nanoid=participante.nanoid) }}">
                                             Corregir datos
                                         </a><br />
-                                        <form action="{{ url_for('eliminar_participante', codigo_evento=codigo_evento, cedula=participante.cedula) }}" method="post" style="display:inline;">
+{% endif %}
+                                        <form action="{{ url_for('eliminar_participante', nanoid=participante.nanoid) }}" method="post" style="display:inline;">
                                             <button class="text-sm text-red-600 decoration-2 hover:underline" type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este participante? Esta acción no se puede deshacer.');">
                                                 Eliminar participante
                                             </button>

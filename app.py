@@ -329,6 +329,78 @@ def eliminar_usuario(user_id):
 ###
 ###
 ###
+@app.route('/editar_participante/<nanoid>', methods=['GET', 'POST'])
+def editar_participante(nanoid):
+
+    participante = collection_participantes.find_one({"nanoid": nanoid})
+
+    if not participante:
+        abort(404)  # Si no se encuentra el participante, devuelve un error 404
+
+    codigo_evento = participante['codigo_evento']
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+
+    if request.method == 'POST':
+        # Obtener los datos del formulario
+        nombres = request.form.get('nombres')
+        apellidos = request.form.get('apellidos')
+        cedula = request.form.get('cedula')
+
+        # Actualizar el participante en la base de datos
+        collection_participantes.update_one(
+            {"nanoid": nanoid},
+            {"$set": {
+                "nombres": nombres,
+                "apellidos": apellidos,
+                "cedula": cedula
+            }}
+        )
+
+        return redirect(url_for('listar_participantes', codigo_evento=participante['codigo_evento']))
+
+    return render_template('editar_participante.html', participante=participante, evento=evento)
+
+
+###
+###
+###
+@app.route('/editar_ponente/<nanoid>', methods=['GET', 'POST'])
+def editar_ponente(nanoid):
+
+    ponente = collection_participantes.find_one({"nanoid": nanoid})
+
+    if not ponente:
+        abort(404)  # Si no se encuentra el participante, devuelve un error 404
+
+    codigo_evento = ponente['codigo_evento']
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+
+    if request.method == 'POST':
+        # Obtener los datos del formulario
+        nombres = request.form.get('nombres', '').strip()
+        apellidos = request.form.get('apellidos', '').strip()
+        cedula = request.form.get('cedula', '').strip()
+        titulo_ponencia = request.form.get('titulo_ponencia', '').strip()
+
+        # Actualizar el participante en la base de datos
+        collection_participantes.update_one(
+            {"nanoid": nanoid},
+            {"$set": {
+                "nombres": nombres,
+                "apellidos": apellidos,
+                "cedula": cedula,
+                "titulo_ponencia": titulo_ponencia,
+            }}
+        )
+
+        return redirect(url_for('listar_participantes', codigo_evento=ponente['codigo_evento']))
+
+    return render_template('editar_ponente.html', ponente=ponente, evento=evento)
+
+
+###
+###
+###
 @app.route('/salir', methods=['POST'])
 def salir():
     logout_user()
@@ -452,7 +524,7 @@ def registrar():
     timestamp = datetime.now()
 
     # Verificar si el participante ya está registrado en este evento
-    if collection_participantes.find_one({"cedula": cedula, "codigo_evento": codigo_evento}):
+    if collection_participantes.find_one({"cedula": cedula, "codigo_evento": codigo_evento, "rol": "participante"}):
         flash("El participante ya está registrado en este evento.", "error")
         return redirect(url_for('registrar_participante', codigo_evento=codigo_evento))
 
@@ -625,6 +697,7 @@ def listar_eventos(page=1):
 @login_required
 def listar_participantes(codigo_evento):
     # Recuperar participantes registrados para el evento específico
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
     participantes_cursor = collection_participantes.find({"codigo_evento": codigo_evento})
     total_participantes = collection_participantes.count_documents({"codigo_evento": codigo_evento})
     participantes = list(participantes_cursor)
@@ -632,7 +705,7 @@ def listar_participantes(codigo_evento):
     return render_template('participantes.html', 
         participantes=participantes,
         total_participantes=total_participantes,
-        codigo_evento=codigo_evento,
+        evento=evento,
         nombre_evento=evento['nombre']
     )
 
@@ -862,13 +935,12 @@ def eliminar_evento(codigo_evento):
 ###
 ### Eliminar participante
 ###
-@app.route('/eliminar_participante/<codigo_evento>/<cedula>', methods=['POST'])
+@app.route('/eliminar_participante/<nanoid>', methods=['POST'])
 @login_required
-def eliminar_participante(codigo_evento, cedula):
-    # Eliminar el participante específico por cédula y código de evento
-    collection_participantes.delete_one({"cedula": cedula, "codigo_evento": codigo_evento})
-    return redirect(url_for('listar_participantes', codigo_evento=codigo_evento))  # Redirigir a la lista de participantes
-
+def eliminar_participante(nanoid):
+    participante = collection_participantes.find_one({"nanoid": nanoid})
+    result = collection_participantes.delete_one({"nanoid": nanoid})
+    return redirect(url_for('listar_participantes', codigo_evento=participante['codigo_evento']))
 
 ###
 ### Página de evento
@@ -929,15 +1001,61 @@ def validar_certificado():
             evento = collection_eventos.find_one({"codigo": participante['codigo_evento']})
 
             if evento:
-                return render_template('certificado_validado.html', participante=participante, evento=evento)
+                return render_template('certificado_valido.html', participante=participante, evento=evento)
             else:
-                flash("Evento no encontrado. Por favor, verifique el nanoid.", "error")
-                return redirect(url_for('validar_certificado'))
+                return render_template('certificado_invalido.html')
         else:
-            flash("Certificado no válido. Por favor, verifique el código ingresado.", "error")
-            return redirect(url_for('validar_certificado'))
+            return render_template('certificado_invalido.html', nanoid=nanoid)
 
     return render_template('validar.html')
+
+
+###
+###
+###
+@app.route('/buscar_certificados', methods=['GET', 'POST'])
+def buscar_certificados():
+    if request.method == 'POST':
+        # Obtener el número de cédula del formulario
+        cedula = request.form.get('cedula')
+        
+        # Buscar participantes por cédula
+        participantes = list(collection_participantes.find({"cedula": cedula}))
+
+        if not participantes:  # Si no hay participantes encontrados
+            return render_template('lista_certificados.html', cedula=cedula, resultados=None)
+        
+        # Crear una lista para almacenar los resultados
+        resultados = []
+        
+        for participante in participantes:
+            codigo_evento = participante.get('codigo_evento')
+            evento = collection_eventos.find_one({"codigo": codigo_evento})
+            
+            if evento:  # Verificar si el evento fue encontrado
+                resultado = {
+                    'cedula': participante['cedula'],
+                    'nanoid': participante['nanoid'],
+                    'rol': participante['rol'],
+                    'codigo_evento': codigo_evento,
+                    'titulo_evento': evento.get('nombre', 'Título no disponible'),
+                    'fecha_evento': evento.get('fecha_inicio', 'Fecha no disponible')  # Asegúrate de que este campo exista
+                }
+                resultados.append(resultado)
+            else:
+                # Manejar casos donde no se encuentra el evento
+                resultado = {
+                    'cedula': participante['cedula'],
+                    'nanoid': participante['nanoid'],
+                    'codigo_evento': codigo_evento,
+                    'titulo_evento': 'Evento no encontrado',
+                    'fecha_evento': 'Fecha no disponible'
+                }
+                resultados.append(resultado)
+
+        return render_template('lista_certificados.html', resultados=resultados)  # Renderizar la plantilla con los resultados
+    
+    return render_template('buscar.html')  # Mostrar el formulario para buscar certificados
 
 
 ###
@@ -974,6 +1092,144 @@ def calcular_estado(fecha):
         return ""
 
 app.jinja_env.filters['estado'] = calcular_estado
+
+
+###
+### generación de certificado
+###
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter, landscape
+from reportlab.lib.units import inch
+from reportlab.lib.colors import HexColor
+from reportlab.pdfgen import canvas
+from reportlab.pdfbase.pdfmetrics import stringWidth
+from pdfrw import PdfReader, PdfWriter, PageMerge
+import os
+
+def generar_pdf_participante(participante, afiche_path):
+    codigo_evento = participante['codigo_evento']
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+
+    titulo_evento = evento.get('nombre', 'Título no disponible')
+    unidad_evento = evento.get('unidad_ejecutora', 'Unidad ejecutora no disponible')
+
+    # Definir la ruta donde se guardará el PDF
+    pdf_directory = 'static/certificados/'
+    
+    if not os.path.exists(pdf_directory):
+        os.makedirs(pdf_directory)
+
+    # Nombre del archivo PDF temporal a crear
+    temp_pdf_filename = f"temp_{participante['nanoid']}.pdf"
+    temp_pdf_path = os.path.join(pdf_directory, temp_pdf_filename)
+    
+    c = canvas.Canvas(temp_pdf_path, pagesize=landscape(letter))
+    
+    c.setFont("Helvetica", 14)
+    #c.setFillColor("black")
+    c.setFillColor(HexColor('#002060'))
+    
+    page_width = landscape(letter)[0]
+    
+    # Escribir los datos del participante centrados en la página
+    def draw_centered_text(y_position, text, font="Helvetica", size=12):
+        c.setFont(font, size)  # Cambiar fuente y tamaño
+        text_width = c.stringWidth(text, font, size)
+        x_position = (page_width - text_width) / 2  # Calcular posición X para centrar
+        c.drawString(x_position, y_position, text)
+    
+    draw_centered_text(6 * inch, f"{unidad_evento}", font='Helvetica-Bold', size=15)
+    draw_centered_text(5.7 * inch, f"confiere el presente certificado a:")
+    draw_centered_text(5.2 * inch, f"{participante['nombres']} {participante['apellidos']}", font="Helvetica-Bold", size=18)
+    draw_centered_text(4.8 * inch, f"Cédula: {participante['cedula']}", font="Helvetica-Oblique", size=14)
+    draw_centered_text(4.4 * inch, f"Por su asistencia en calidad de {participante['rol']} en:")
+    draw_centered_text(4 * inch, f"{titulo_evento}", font="Helvetica-Bold", size=14)
+    
+    if participante['rol'] == 'ponente':
+        draw_centered_text(3.5 * inch, f"Con la ponencia:")
+        draw_centered_text(3.2 * inch, f"{participante.get('titulo_ponencia', 'N/A')}", font="Helvetica-Bold", size=16)
+    else:
+        draw_centered_text(3.5 * inch, f"Actividad académica con una duración de XX horas")
+        draw_centered_text(3.2 * inch, f"Fecha")
+
+    draw_centered_text(2.7 * inch, f"Dado en la República de Panamá, :")
+
+    # Código de certificado en la esquina superior derecha
+    c.setFillColor("white")
+    c.setFont("Courier", 12)
+    nanoid_text = f"ID validación: {participante['nanoid']}"
+    text_width = c.stringWidth(nanoid_text, "Courier", 12)
+    x_position = page_width - text_width - 0.3 * inch
+    c.drawString(x_position, landscape(letter)[1] - 0.3 * inch, nanoid_text)
+
+    # Generar el código QR
+    qr_data = participante['nanoid']
+    qr_img_path = "static/certificados/qrcode.png"  # Ruta donde se guardará el QR
+    qr_img = qrcode.make(qr_data)
+    qr_img.save(qr_img_path)
+
+    # Insertar el código QR en el PDF justo debajo del nanoid
+    c.drawImage(qr_img_path, x_position - -1.45 * inch, landscape(letter)[1] - 1.5 * inch, width=1 * inch, height=1 * inch)  # Ajusta tamaño y posición según sea necesario
+    
+    # Finalizar el nuevo PDF
+    c.save()
+
+    os.remove(qr_img_path)
+    
+    # Nombre del archivo PDF combinado a crear
+    output_pdf_filename = f"{participante['nanoid']}.pdf"
+    output_pdf_path = os.path.join(pdf_directory, output_pdf_filename)
+    
+    # Leer el PDF de fondo
+    background_pdf = PdfReader(afiche_path)
+    new_pdf = PdfReader(temp_pdf_path)
+    
+    writer = PdfWriter()
+    
+    # Combinar las páginas
+    for page in range(len(background_pdf.pages)):
+        background_page = background_pdf.pages[page]
+        new_page = new_pdf.pages[0] if page < len(new_pdf.pages) else None
+        
+        if new_page:
+            # Combinar la página de fondo con la nueva página
+            PageMerge(background_page).add(new_page).render()
+        
+        writer.addPage(background_page)
+    
+    # Guardar el PDF combinado en la ruta deseada
+    writer.write(output_pdf_path)
+
+    # Eliminar el archivo PDF temporal
+    os.remove(temp_pdf_path)
+    
+    return output_pdf_path  # Retornar la ruta del archivo guardado
+
+
+###
+###
+###
+@app.route('/certificado/<nanoid>', methods=['GET'])
+def generar_pdf(nanoid):
+    # Buscar el participante en la base de datos usando el nanoid
+    participante = collection_participantes.find_one({"nanoid": nanoid})
+
+    if not participante:
+        abort(404)  # Si no se encuentra el participante
+
+    # Obtener el código del evento para buscar plantilla *** aun no funciona
+    codigo_evento = participante['codigo_evento']
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+
+    # if not evento or not evento.get('afiche'):
+    #     abort(404)  # Si no se encuentra el evento o no hay afiche
+
+    afiche_path = f"static/assets/plantilla-certificado.pdf"  # Ajusta según la ruta real de plantilla
+
+    # Llamar a la función para generar el PDF
+    pdf_file = generar_pdf_participante(participante, afiche_path)
+
+    return send_file(pdf_file)  # Enviar el archivo PDF al cliente para descarga
 
 
 if __name__ == '__main__':

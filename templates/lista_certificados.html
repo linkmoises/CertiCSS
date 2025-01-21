@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Certificado Válido</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+</head>
+<body class="bg-gray-50 dark:bg-neutral-900">
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main id="content">
+    <!-- Table Section -->
+    <div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
+        <!-- Card -->
+        <div class="flex flex-col">
+            <div class="-m-1.5 overflow-x-auto">
+                <div class="p-1.5 min-w-full inline-block align-middle">
+                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden dark:bg-neutral-900 dark:border-neutral-700">
+                        <!-- Header -->
+                        <div class="px-6 py-4 border-b border-gray-200 dark:border-neutral-700">
+                            <h2 class="text-xl font-semibold text-gray-800 dark:text-neutral-200">
+                                Búsqueda de certificados
+                            </h2>
+                            <p class="text-sm text-gray-600 dark:text-neutral-400">
+                                Sistema de verificación de autenticidad de certificados emitidos por DENADOI.
+                            </p>
+                        </div>
+                        <!-- End Header -->
+{% if resultados %}
+                        <!-- Table -->
+                        <table class="table-auto min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-start">
+                                        <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500">
+                                            Evento académico
+                                        </a>
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-start">
+                                        <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500">
+                                            Rol
+                                        </a>
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-start">
+                                        <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500">
+                                            Fecha
+                                        </a>
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-start">
+                                        <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500">
+                                            ID validación
+                                        </a>
+                                    </th>
+                                </tr>
+                            </thead>
+                
+                            <tbody class="divide-y divide-gray-200">
+{% for resultado in resultados %}
+                                <tr class="bg-white hover:bg-gray-50">
+                                    <td class="h-px w-72 min-w-72">
+                                        <div class="px-6 py-2">
+                                            <p class="text-sm text-gray-500 mb-2">
+                                                {{ resultado['titulo_evento'] }}
+                                            </p>
+                                        </div>
+                                    </td>
+                                    <td class="h-px w-24 min-w-24">
+                                        <div class="px-6 py-2">
+                                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium 
+                                                {% if resultado['rol'] == 'participante' %}bg-blue-100 text-blue-800
+                                                {% elif resultado['rol'] == 'ponente' %}bg-green-100 text-green-800
+                                                {% else %}bg-gray-100 text-gray-800
+                                                {% endif %}">
+                                                {{ resultado['rol'] }}
+                                            </span><br />
+                                        </div>
+                                    </td>
+                                    <td class="h-px w-48 min-w-48">
+                                        <div class="px-6 py-2">
+                                            <p class="text-sm text-gray-500 mb-2">{{ resultado['fecha_evento'] }}</p>
+                                        </div>
+                                    </td>
+                                    <td class="h-px w-36 min-w-36">
+                                        <div class="px-6 py-2">
+                                            <a class="inline-flex items-center gap-x-1 text-sm font-medium decoration-2 hover:underline" href="{{ url_for('generar_pdf', nanoid=resultado['nanoid']) }}" target="_blank">
+                                                <svg class="size-3.5 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-card-text" viewBox="0 0 16 16"><path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2z"/><path d="M3 5.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5M3 8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 8m0 2.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5"/></svg>
+                                                <span class="text-sm text-gray-500">Descargar certificado</span>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+{% endfor %}
+                            </tbody>
+                        </table>
+                        <!-- End Table -->
+
+                        <!-- Footer -->
+                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
+                            <div>
+                                <p class="text-sm text-gray-600 dark:text-neutral-400">
+                                    <span class="font-semibold text-gray-800 dark:text-neutral-200"> </span>
+                                </p>
+                            </div>
+                            <div class="print:hidden">
+                                <div class="inline-flex gap-x-2">
+                                    <a href="{{ BASE_URL }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                                        Inicio
+                                    </a>
+{% if current_user.is_authenticated %}
+                                    <a href="{{ url_for('tablero_coordinadores') }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700" disabled>
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-window-sidebar" viewBox="0 0 16 16"><path d="M2.5 4a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1m2-.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0m1 .5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1"/><path d="M2 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2zm12 1a1 1 0 0 1 1 1v2H1V3a1 1 0 0 1 1-1zM1 13V6h4v8H2a1 1 0 0 1-1-1m5 1V6h9v7a1 1 0 0 1-1 1z"/></svg>
+                                        Tablero
+                                    </a>
+{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Footer -->
+{% else %}
+                        <!-- Body -->
+                        <div class="max-w-lg w-full min-h-[400px] flex flex-col justify-center mx-auto px-6 py-4">
+                            <div class="flex justify-center items-center size-[46px] bg-red-100 rounded-lg dark:bg-neutral-800">
+                                <svg class="shrink-0 size-6 text-red-600 dark:text-neutral-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-search"><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M4.268 21a2 2 0 0 0 1.727 1H18a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v3"/><path d="m9 18-1.5-1.5"/><circle cx="5" cy="14" r="3"/></svg>
+                            </div>
+
+                            <h2 class="mt-5 font-semibold text-gray-800 dark:text-white">
+                                Cédula no encontrada
+                            </h2>
+
+                            <p class="my-2 text-sm text-gray-600 dark:text-neutral-400">
+                                El documento de identificación <span class="font-mono bg-red-300">{{ cedula }}</span> no fue encontrado en los eventos registrados en nuestra base de datos. Si considera que este mensaje es un error, por favor contacte al equipo de soporte:
+                            </p>
+
+                            <form method="POST" action="/buscar_certificados">
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none z-20 ps-3.5">
+                                        <svg class="shrink-0 size-4 text-gray-400 dark:text-white/60" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="11" cy="11" r="8"></circle>
+                                            <path d="m21 21-4.3-4.3"></path>
+                                        </svg>
+                                    </div>
+                                    <input type="text" id="cedula" name="cedula" class="py-2 ps-10 pe-16 block w-full bg-white border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder:text-neutral-400 dark:focus:ring-neutral-600" placeholder="Ingrese el documento de identificación.">
+                                    <div class="hidden absolute inset-y-0 end-0 flex items-center pointer-events-none z-20 pe-1">
+                                        <button type="button" class="inline-flex shrink-0 justify-center items-center size-6 rounded-full text-gray-500 hover:text-blue-600 focus:outline-none focus:text-blue-600 dark:text-neutral-500 dark:hover:text-blue-500 dark:focus:text-blue-500" aria-label="Close">
+                                            <span class="sr-only">Close</span>
+                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <path d="m15 9-6 6"></path>
+                                            <path d="m9 9 6 6"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="absolute inset-y-0 end-0 flex items-center pointer-events-none z-20 pe-3 text-gray-400">
+                                        <svg class="shrink-0 size-3 text-gray-400 dark:text-white/60" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-corner-down-left"><polyline points="9 10 4 15 9 20"/><path d="M20 4v7a4 4 0 0 1-4 4H4"/></svg>
+                                    </div>
+                                </div>
+                            </form>
+
+                        </div>
+                        <!-- End Body -->
+
+                        <!-- Footer -->
+                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
+                            <div>
+                                <p class="text-sm text-gray-600 dark:text-neutral-400">
+                                    <span class="font-semibold text-gray-800 dark:text-neutral-200"> </span>
+                                </p>
+                            </div>
+                            <div class="print:hidden">
+                                <div class="inline-flex gap-x-2">
+                                    <a href="{{ BASE_URL }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                                        Inicio
+                                    </a>
+        {% if current_user.is_authenticated %}
+                                    <a href="{{ url_for('tablero_coordinadores') }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700" disabled>
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-window-sidebar" viewBox="0 0 16 16"><path d="M2.5 4a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1m2-.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0m1 .5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1"/><path d="M2 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2zm12 1a1 1 0 0 1 1 1v2H1V3a1 1 0 0 1 1-1zM1 13V6h4v8H2a1 1 0 0 1-1-1m5 1V6h9v7a1 1 0 0 1-1 1z"/></svg>
+                                        Tablero
+                                    </a>
+        {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Footer -->
+{% endif %}  
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Card -->
+    </div>
+    <!-- End Table Section -->
+    </main>
+    <!-- ========== END MAIN CONTENT ========== -->
+
+  </body>
+  </html>

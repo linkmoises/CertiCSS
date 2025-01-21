@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar participante</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+</head>
+<body class="bg-gray-50 dark:bg-neutral-900">
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main id="content">
+
+        <!-- Card -->
+        <div class="max-w-[75rem] px-4 pt-10 sm:px-6 lg:px-8 lg:pt-14 mx-auto">
+            <!-- Grid -->
+            <div class="bg-white grid sm:grid-cols-2 sm:items-center gap-8 border border-gray-200 rounded-xl">
+
+                <div class="sm:order-2">
+                    <div class="relative pt-[50%] sm:pt-[100%]">
+                        <img class="size-full absolute top-0 start-0 object-cover rounded-r-xl" src="{{ BASE_URL }}{{ evento.afiche_750 }}" alt="#">
+                    </div>
+                </div>
+                <!-- End Col -->
+
+                <div class="sm:order-1">
+
+<!-- Mostrar mensajes -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+                    <div class="mb-4">
+                        <ul>
+                        {% for category, message in messages %}
+                            <li class="{{ 'p-2 text-sm bg-red-100 text-red-800 rounded-r-xl' if category == 'error' else 'p-2 text-sm bg-green-100 text-green-800 rounded-r-xl' }}">
+                            {{ message }}
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+{% endif %}
+{% endwith %}
+
+                    <div class="m-8">
+                        <h2 class="text-xl font-bold text-gray-800">Editar participante</h2>
+                        <p class="text-sm text-gray-600 mb-4">Corregir datos de participante</p>
+                    
+                        <form action="{{ url_for('editar_participante', nanoid=participante.nanoid) }}" method="post">
+                            <!-- Grid -->
+                            <div class="mt-4 grid sm:grid-cols-12 gap-2 sm:gap-6">
+                                
+                                <div class="sm:col-span-3">
+                                    <label for="nombres" class="inline-block text-sm text-gray-800 mt-2.5">
+                                        Nombre
+                                    </label>
+                                </div>
+                                <!-- End Col -->
+                            
+                                <div class="sm:col-span-9">
+                                    <input id="nombres" name="nombres" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" placeholder="Nombres..." value="{{ participante.nombres }}" required>
+                                </div>
+                                <!-- End Col -->
+
+                                <div class="sm:col-span-3">
+                                    <label for="apellidos" class="inline-block text-sm text-gray-800 mt-2.5">
+                                        Apellidos
+                                    </label>
+                                </div>
+                                <!-- End Col -->
+                            
+                                <div class="sm:col-span-9">
+                                    <input id="apellidos" name="apellidos" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" placeholder="Apellidos..." value="{{ participante.apellidos }}" required>
+                                </div>
+                                <!-- End Col -->
+
+                                <div class="sm:col-span-3">
+                                    <label for="cedula" class="inline-block text-sm text-gray-800 mt-2.5">
+                                        Cédula
+                                    </label>
+                                </div>
+                                <!-- End Col -->
+                            
+                                <div class="sm:col-span-9">
+                                    <input id="cedula" name="cedula" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" placeholder="8-123-456" value="{{ participante.cedula }}" required>
+                                </div>
+                                <!-- End Col -->
+
+                                <div class="sm:col-span-12 gap-2">
+                                    <button type="submit" class="w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                        Corregir datos de participante
+                                    </button>
+                                </div>
+
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <!-- End Col -->
+            </div>
+            <!-- End Grid -->
+        </div>
+        <!-- End Card -->
+
+    </main>
+
+    <footer class="mt-auto w-full max-w-[85rem] px-4 sm:px-6 lg:px-8 mx-auto">
+        <div class="text-center text-xs text-gray-500 my-8">
+            <p>Este evento es avalado por DENADOI y potenciado por la plataforma CertiCSS.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
