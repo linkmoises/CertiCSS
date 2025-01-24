@@ -1,21 +1,30 @@
-version: '3'
+version: '3.8'
+
 services:
-  flask:
+  # Servicio para la aplicación Flask
+  web:
     build: .
     ports:
       - "5000:5000"
-    depends_on:
-      - mongodb
+    volumes:
+      - .:/app
+      - static_certificados:/app/static/certificados
+      - static_uploads:/app/static/uploads
     environment:
-      - MONGO_URI=mongodb://mongodb:27017/
-    volumes:
-      - ./static/certificados:/app/static/certificados
-      - ./static/uploads:/app/static/uploads
+      - MONGO_URI=mongodb://db:27017/  # Usar "db" como hostname
+    depends_on:
+      - db
 
-  mongodb:
-    image: mongo:latest
+  # Servicio para MongoDB
+  db:
+    image: mongo:6.0
     volumes:
-      - mongo-data:/data/db
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
 
+# Definir volúmenes para persistencia
 volumes:
-  mongo-data:
+  static_certificados:
+  static_uploads:
+  mongo_data:

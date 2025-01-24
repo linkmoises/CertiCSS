@@ -82,8 +82,10 @@ class User(UserMixin):
 ##
 ## Conexión a MongoDB
 ##
-client = MongoClient('mongodb://mongodb:27017/')
-db = client['certi_css']
+mongo_uri = os.getenv("MONGO_URI", "mongodb://db:27017/")  # Usar "db" en lugar de "localhost"
+client = MongoClient(mongo_uri)
+# client = MongoClient('mongodb://localhost:27017/')
+# db = client['certi_css']
 collection_eventos = db['eventos']
 collection_participantes = db['participantes']
 collection_usuarios = db['usuarios']
@@ -1251,5 +1253,8 @@ def generar_pdf(nanoid):
     return send_file(pdf_file)  # Enviar el archivo PDF al cliente para descarga
 
 
+# if __name__ == '__main__':
+#     app.run(debug=True)
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
