@@ -82,7 +82,7 @@ class User(UserMixin):
 ##
 ## Conexión a MongoDB
 ##
-client = MongoClient('mongodb://localhost:27017/')
+client = MongoClient('mongodb://mongodb:27017/')
 db = client['certi_css']
 collection_eventos = db['eventos']
 collection_participantes = db['participantes']
