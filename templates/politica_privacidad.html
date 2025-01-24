@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CertiCSS - Eventos académicos de la Caja de Seguro Social</title>
+    <title>CertiCSS - Política de privacidad</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     <!-- favicons -->
@@ -83,66 +83,101 @@
     <!--====== CARDS ======-->
     <section class="bg-white">
         <div class="text-center">
-            <h1 class="text-3xl font-bold text-gray-800 sm:text-4xl dark:text-white">Próximos Eventos</h1>
-            <p class="mt-1 text-gray-600 dark:text-neutral-400">Un vistazo a los eventos que se avecinan</p>
+            <h1 class="text-3xl font-bold text-gray-800 sm:text-4xl dark:text-white">Política de privacidad</h1>
+            <p class="mt-1 text-gray-600 dark:text-neutral-400">y de protección de datos personales</p>
         </div>
+        <div class="max-w-3xl px-4 pt-6 lg:pt-10 pb-12 sm:px-6 lg:px-8 mx-auto">
+            <p class="mb-4">
+                En el Departamento Nacional de Docencia e Investigación de la Caja de Seguro Social de Panamá (en adelante, "nosotros" o "el Departamento"), nos comprometemos a proteger la privacidad y seguridad de los datos personales de los usuarios de nuestro sitio web y participantes en nuestros eventos académicos. La presente Política de Privacidad describe cómo recopilamos, utilizamos, almacenamos y protegemos la información personal que usted nos proporciona, en cumplimiento con la <strong>Ley 81 de 26 de marzo de 2019 sobre Protección de Datos Personales</strong> de la República de Panamá.
+            </p>
 
-        <!-- Tarjetas de evento -->
-        <div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
-            <!-- Grid -->
-            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% for evento in eventos %}
-                <!-- Card -->
-                <div class="group flex flex-col h-full bg-white border border-gray-200 shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70">
-                    <div class="relative pt-[100%] sm:pt-[100%] overflow-hidden rounded-t-xl">
-                        <img class="size-full absolute top-0 start-0 object-cover group-hover:scale-105 group-focus:scale-105 transition-transform duration-500 ease-in-out rounded-t-xl" src="{{ url_for('static', filename='uploads/' + evento.afiche_750.split('/')[-1]) }}" alt="{{ evento.nombre }}">
-                        <span class="absolute top-0 end-0 rounded-se-xl rounded-es-xl text-xs font-medium bg-gray-800 text-white py-1.5 px-3 dark:bg-neutral-900">
-                            {{ evento.modalidad }}
-                        </span>
-                      </div>
-                    <div class="p-4 md:p-6">
-                        <span class="block mb-1 text-xs font-semibold uppercase text-blue-600 dark:text-blue-500">
-                            {{ evento.tipo }} <!-- Tipo de evento -->
-                        </span>
-                        <h3 class="text-xl font-semibold text-gray-800 dark:text-neutral-300 dark:hover:text-white">
-                            {{ evento.nombre }} <!-- Nombre del evento -->
-                        </h3>
-                        <p class="mt-3 text-gray-500 dark:text-neutral-500">
-                            Fecha: {% if evento.fecha_inicio == evento.fecha_fin %}{{ evento.fecha_inicio.strftime('%d de %B de %Y') }}{% elif evento.fecha_fin %}{{ evento.fecha_inicio.strftime('%d') }} - {{ evento.fecha_fin.strftime('%d de %B de %Y') }}{% else %}{{ evento.fecha_inicio.strftime('%d de %B de %Y') }}{% endif %} <!-- Fecha de inicio -->
-                        </p>
-                    </div>
-                    <div class="mt-auto flex border-t border-gray-200 divide-x divide-gray-200 dark:border-neutral-700 dark:divide-neutral-700">
-{% if evento.programa %}
-                        <a class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-es-xl bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800" href="{{ url_for('resumen_evento', codigo_evento=evento.codigo) }}">
-                            Detalles del evento
-                        </a>
-                        <a class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-ee-xl bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800" href="{{ evento.programa }}">
-                            Descargar programa
-                        </a>
-{% else %}
-                        <a class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-b-xl bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800" href="{{ url_for('resumen_evento', codigo_evento=evento.codigo) }}">
-                            Detalles del evento
-                        </a>
-{% endif %}                        
-                    </div>
-                </div>
-                <!-- End Card -->
-                {% endfor %}
-            </div>
-            <!-- End Grid -->
-        </div>
-        <!-- End Tarjetas de evento -->
+            <h2 class="text-xl font-semibold mt-6 mb-2">1. Información que Recopilamos</h2>
+            <p class="mb-4">
+                Recopilamos la siguiente información personal cuando usted se registra para participar en nuestros eventos académicos:
+            </p>
+            <ul class="list-disc list-inside mb-4">
+                <li>Nombre completo.</li>
+                <li>Número de cédula o documento de identificación.</li>
+                <li>Número de teléfono.</li>
+                <li>Dirección de correo electrónico.</li>
+            </ul>
+            <p class="mb-4">
+                Esta información es necesaria para gestionar su participación en los eventos, enviarle comunicaciones relacionadas con los mismos y cumplir con los requisitos administrativos y legales correspondientes.
+            </p>
 
-        <div class="text-center mb-12">
-            <div class="inline-block bg-white border shadow-sm rounded-full dark:bg-neutral-900 dark:border-neutral-800">
-                <div class="py-3 px-4 flex items-center gap-x-2">
-                <p class="text-gray-600 dark:text-neutral-400">¿Quieres ver más eventos?</p>
-                <a class="inline-flex items-center gap-x-1.5 text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium dark:text-blue-500" href="#">
-                    Visita el catálogo completo
-                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-                </a>
-                </div>
-            </div>
+            <h2 class="text-xl font-semibold mt-6 mb-2">2. Finalidad del Tratamiento de Datos</h2>
+            <p class="mb-4">
+                Los datos personales que usted nos proporciona serán utilizados para las siguientes finalidades:
+            </p>
+            <ul class="list-disc list-inside mb-4">
+                <li>Gestionar su inscripción y participación en eventos académicos organizados por el Departamento.</li>
+                <li>Enviarle información relacionada con los eventos, como confirmaciones, recordatorios y materiales de apoyo.</li>
+                <li>Cumplir con obligaciones legales y regulatorias.</li>
+                <li>Mejorar nuestros servicios y eventos académicos.</li>
+            </ul>
+
+            <h2 class="text-xl font-semibold mt-6 mb-2">3. Consentimiento</h2>
+            <p class="mb-4">
+                Al proporcionarnos sus datos personales, usted otorga su consentimiento expreso e informado para que el Departamento trate su información de acuerdo con las finalidades descritas en esta Política de Privacidad. Usted tiene derecho a revocar su consentimiento en cualquier momento, siguiendo los procedimientos establecidos en esta política.
+            </p>
+
+            <h2 class="text-xl font-semibold mt-6 mb-2">4. Seguridad de los Datos</h2>
+            <p class="mb-4">
+                Implementamos medidas técnicas, administrativas y organizativas para garantizar la seguridad, integridad y confidencialidad de sus datos personales. Estas medidas incluyen, pero no se limitan a:
+            </p>
+            <ul class="list-disc list-inside mb-4">
+                <li>Acceso restringido a la información personal.</li>
+                <li>Uso de tecnologías de encriptación para proteger los datos.</li>
+                <li>Actualizaciones periódicas de nuestros sistemas de seguridad.</li>
+            </ul>
+
+            <h2 class="text-xl font-semibold mt-6 mb-2">5. Compartir Información con Terceros</h2>
+            <p class="mb-4">
+                No compartimos, vendemos ni transferimos sus datos personales a terceros, excepto en los siguientes casos:
+            </p>
+            <ul class="list-disc list-inside mb-4">
+                <li>Cuando sea necesario para cumplir con obligaciones legales o requerimientos de autoridades competentes.</li>
+                <li>Con proveedores de servicios que nos apoyan en la organización de eventos académicos, quienes están obligados a mantener la confidencialidad de la información.</li>
+            </ul>
+
+            <h2 class="text-xl font-semibold mt-6 mb-2">6. Derechos de los Titulares de los Datos</h2>
+            <p class="mb-4">
+                De acuerdo con la Ley 81 de Protección de Datos Personales, usted tiene los siguientes derechos:
+            </p>
+            <ul class="list-disc list-inside mb-4">
+                <li><strong>Acceso:</strong> Solicitar información sobre los datos personales que tenemos sobre usted.</li>
+                <li><strong>Rectificación:</strong> Solicitar la corrección de datos inexactos o incompletos.</li>
+                <li><strong>Cancelación:</strong> Solicitar la eliminación de sus datos personales cuando ya no sean necesarios para las finalidades para las que fueron recopilados.</li>
+                <li><strong>Oposición:</strong> Oponerse al tratamiento de sus datos personales en ciertas circunstancias.</li>
+                <li><strong>Revocación del consentimiento:</strong> Revocar su consentimiento para el tratamiento de sus datos en cualquier momento.</li>
+            </ul>
+            <p class="mb-4">
+                Para ejercer estos derechos, puede contactarnos a través de los medios proporcionados en la sección de contacto de esta política.
+            </p>
+
+            <h2 class="text-xl font-semibold mt-6 mb-2">7. Conservación de los Datos</h2>
+            <p class="mb-4">
+                Conservaremos sus datos personales durante el tiempo necesario para cumplir con las finalidades descritas en esta política, así como para cumplir con obligaciones legales y regulatorias. Una vez que ya no sean necesarios, sus datos serán eliminados de manera segura.
+            </p>
+
+            <h2 class="text-xl font-semibold mt-6 mb-2">8. Cambios en la Política de Privacidad</h2>
+            <p class="mb-4">
+                Nos reservamos el derecho de actualizar o modificar esta Política de Privacidad en cualquier momento. Cualquier cambio será publicado en nuestro sitio web, y la fecha de la última actualización será indicada al final de la política.
+            </p>
+
+            <h2 class="text-xl font-semibold mt-6 mb-2">9. Contacto</h2>
+            <p class="mb-4">
+                Si tiene alguna pregunta, comentario o solicitud relacionada con esta Política de Privacidad o el tratamiento de sus datos personales, puede contactarnos a través de:
+            </p>
+            <ul class="list-disc list-inside mb-4">
+                <li><strong>Correo electrónico:</strong> <a href="mailto:correo@dominio.com" class="text-blue-600 hover:underline">correo@dominio.com</a></li>
+                <li><strong>Teléfono:</strong> [número de teléfono]</li>
+                <li><strong>Dirección:</strong> [dirección física del Departamento]</li>
+            </ul>
+            <hr class="my-8"/>
+            <p class="text-sm mb-8 text-gray-500">
+                Fecha de última actualización: 24 de enero 2025
+            </p>
         </div>
     </section>
 
@@ -239,7 +274,7 @@
         
             <!-- Social Brands -->
             <div class="md:text-end space-x-2">
-                <a target="_blank" class="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-500 hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-400 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700" href="https://github.com/linkmoises/CertiCSS/">
+                <a class="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-500 hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-400 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700" href="https://github.com/linkmoises/CertiCSS/">
                     <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
                     </svg>

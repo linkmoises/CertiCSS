@@ -1033,13 +1033,16 @@ def buscar_certificados():
             evento = collection_eventos.find_one({"codigo": codigo_evento})
             
             if evento:  # Verificar si el evento fue encontrado
+
+                fecha_evento = evento.get('fecha_inicio', None)
+
                 resultado = {
                     'cedula': participante['cedula'],
                     'nanoid': participante['nanoid'],
                     'rol': participante['rol'],
                     'codigo_evento': codigo_evento,
                     'titulo_evento': evento.get('nombre', 'Título no disponible'),
-                    'fecha_evento': evento.get('fecha_inicio', 'Fecha no disponible')  # Asegúrate de que este campo exista
+                    'fecha_evento': fecha_evento
                 }
                 resultados.append(resultado)
             else:
@@ -1049,13 +1052,29 @@ def buscar_certificados():
                     'nanoid': participante['nanoid'],
                     'codigo_evento': codigo_evento,
                     'titulo_evento': 'Evento no encontrado',
-                    'fecha_evento': 'Fecha no disponible'
+                    'fecha_evento': None
                 }
                 resultados.append(resultado)
 
         return render_template('lista_certificados.html', resultados=resultados)  # Renderizar la plantilla con los resultados
     
     return render_template('buscar.html')  # Mostrar el formulario para buscar certificados
+
+
+###
+### Plantilla varias
+###
+@app.route('/plantillas')
+def plantillas():
+    return render_template('plantillas.html', active_section='plantillas')
+
+
+###
+### Política de privacidad y protección de datos personales
+###
+@app.route('/politica-privacidad', methods=['GET'])
+def politica_privacidad():
+    return render_template('politica_privacidad.html')
 
 
 ###
