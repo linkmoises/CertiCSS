@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 from PIL import Image
 from markupsafe import Markup
+from config import config
 import os
 import random
 import string
@@ -16,25 +17,21 @@ app = Flask(__name__)
 
 
 ###
-### Salt key 
+### Configuraciones comunes
 ###
-app.config['SECRET_KEY'] = os.urandom(24)  # Genera una clave secreta aleatoria
-#app.config['BASE_URL'] = "http://localhost:5000/"       # base url del sitio local
-app.config['BASE_URL'] = "https://docenciamedica.org/"  # base url demo
+app.config.from_object(config)                              # Cargar configuraciones desde config.py
 
-###
-### Variable para BASE_URL disponible globalmente 
-###
-@app.context_processor
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)     # Crear la carpeta de subida si no existe
+
+client = MongoClient(app.config['MONGO_URI'])               # Configurar MongoDB usando la URI de la configuración
+db = client['certi_css']
+collection_eventos = db['eventos']
+collection_participantes = db['participantes']
+collection_usuarios = db['usuarios']
+
+@app.context_processor                                      # Variable BASE_URL
 def inject_base_url():
     return dict(BASE_URL=app.config['BASE_URL'])
-
-
-###
-### Salt key para producción
-###
-# app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'default_secret_key')
-# export FLASK_SECRET_KEY='mi_clave_secreta_super_segura' // hacer esto antes de iniciar el script y eliminar esta línea
 
 
 ###
@@ -79,27 +76,6 @@ class User(UserMixin):
         return str(self.id)
 
 
-##
-## Conexión a MongoDB local
-##
-# client = MongoClient('mongodb://localhost:27017/')
-# db = client['certi_css']
-# collection_eventos = db['eventos']
-# collection_participantes = db['participantes']
-# collection_usuarios = db['usuarios']
-
-
-###
-### Conexión a MongoDB docker
-###
-mongo_uri = os.getenv("MONGO_URI", "mongodb://db:27017/")
-client = MongoClient(mongo_uri)
-db = client['certi_css']
-collection_eventos = db['eventos']
-collection_participantes = db['participantes']
-collection_usuarios = db['usuarios']
-
-
 ###
 ### Crear índice único para evitar duplicados
 ###
@@ -107,15 +83,6 @@ try:
     collection_participantes.create_index([("cedula", 1), ("codigo_evento", 1), ("titulo_ponencia", 1)], unique=True)
 except Exception as e:
     print(f"Error al crear índice: {e}")
-
-
-###
-### Gestión de imágenes
-###
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Limitar a 16 MB
-
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 
 ###
@@ -1300,14 +1267,5 @@ def generar_pdf(nanoid):
     return send_file(pdf_file)  # Enviar el archivo PDF al cliente para descarga
 
 
-###
-### local
-###
-# if __name__ == '__main__':
-#     app.run(debug=True)
-
-###
-### Contenedor
-###
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host=app.config['HOST'], port=app.config['PORT'])

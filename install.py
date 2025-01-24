@@ -10,6 +10,15 @@ client = MongoClient('mongodb://localhost:27017/')
 db = client['certi_css']
 collection_usuarios = db['usuarios']
 
+# Verificar si la base de datos y la colección existen
+if 'certi_css' not in client.list_database_names():
+    print("La base de datos 'certi_css' no existe. Creándola...")
+    db = client['certi_css']
+
+if 'usuarios' not in db.list_collection_names():
+    print("La colección 'usuarios' no existe. Creándola...")
+    collection_usuarios = db['usuarios']
+
 def crear_usuario_admin():
     email_admin = input("Introduce el nombre de usuario para el rol de administrador: ")  # Solicitar usuario
     password_admin = input("Introduce la contraseña: ")  # Solicitar contraseña

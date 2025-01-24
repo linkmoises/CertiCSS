@@ -165,6 +165,8 @@ cython_debug/
 tailwind/
 tailwindcss
 static/css/tailwind.css
-node_modules
-admin.py
+
 *.old
+/static/certificados/*
+/static/uploads/*
+/static/users/*

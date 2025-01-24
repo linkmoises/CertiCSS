@@ -3,13 +3,19 @@ version: '3.8'
 services:
   web:
     build: .
+    env_file:
+      - .env
     ports:
       - "5000:5000"
     volumes:
       - .:/app
-      - static_certificados:/app/static/certificados
-      - static_uploads:/app/static/uploads
+      - ../static_certificados:/app/static/certificados
+      - ../static_uploads:/app/static/uploads
     environment:
+      - FLASK_ENV=production
+      - FLASK_HOST=0.0.0.0
+      - FLASK_PORT=5000
+      - BASE_URL=https://docenciamedica.org/
       - MONGO_URI=mongodb://db:27017/
       - TZ=America/Panama
     depends_on:
@@ -18,13 +24,8 @@ services:
   db:
     image: mongo:6.0
     volumes:
-      - mongo_data:/data/db
+      - ../db_data:/data/db
     ports:
       - "27017:27017"
     environment:
       - TZ=America/Panama
-
-volumes:
-  static_certificados:
-  static_uploads:
-  mongo_data:
