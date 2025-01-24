@@ -13,18 +13,29 @@
             text-align: left;
             padding: 20px;
         }
-        .afiche {
-            margin-top: 20px;
-        }
         .otp-container {
             color: black;
             font-family: monospace;
             max-width: 500px;
         }
-        .event-details {
-            margin-bottom: 20px;
-        }
     </style>
+    <!-- Script para actualizar dinámicamente el OTP -->
+    <script>
+        function actualizarOTP() {
+            const codigoEvento = "{{ evento.codigo }}";  // Obtener el código del evento desde la plantilla
+            console.log("Actualizando OTP para el evento:", codigoEvento);  // Depuración
+            fetch(`/get-otp/${codigoEvento}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Nuevo OTP recibido:", data.otp);  // Depuración
+                    document.getElementById('otp').innerText = data.otp;
+                })
+        }
+        // Actualizar el OTP cada 2 segundos
+        setInterval(actualizarOTP, 1000);
+        // Actualizar el OTP inmediatamente al cargar la página
+        actualizarOTP();
+    </script>
 </head>
 <body>
     <!-- Hero -->
@@ -43,9 +54,6 @@
                     </div>
                 </div>
                   
-                
-                
-                
                 <h1 class="block text-3xl font-bold dark:text-gray-800 sm:text-4xl lg:text-6xl lg:leading-tight mb-8">{{ evento.nombre }}</h1>
 {% if evento.fecha_inicio == evento.fecha_fin %}
                 <h3 class="my-3 text-lg dark:text-gray-800">{{ evento.fecha_inicio.strftime('%d de %B de %Y') }}</h3>
@@ -59,7 +67,7 @@
     
             <div class="relative my-4">
                 <div class="otp-container">
-                    <p class="bg-white p-3 text-5xl border-4 border-black rounded-xl">Código OTP: <span class="font-bold">{{ otp }}</span></p>
+                    <p class="bg-white p-3 text-5xl border-4 border-black rounded-xl">Código OTP: <span id="otp" class="font-bold">{{ otp }}</span></p>
                 </div>
                 <div class="qr-code">
                     <img class="block float-right mt-8 w-64 h-64 border-4 border-black rounded-xl" src="{{ url_for('static', filename='uploads/' + evento.codigo + '-qr.png') }}" alt="Código QR" class="w-64 h-64" /><br />
@@ -72,6 +80,5 @@
         <!-- End Grid -->
     </div>
     <!-- End Hero -->
-   
 </body>
 </html>

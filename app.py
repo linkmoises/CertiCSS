@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, flash
+from flask import Flask, jsonify, request, render_template, redirect, url_for, flash
 from flask_login import LoginManager, login_user, UserMixin, logout_user, login_required
 from pymongo import MongoClient
 from flask_pymongo import PyMongo
@@ -19,8 +19,8 @@ app = Flask(__name__)
 ### Salt key 
 ###
 app.config['SECRET_KEY'] = os.urandom(24)  # Genera una clave secreta aleatoria
-app.config['BASE_URL'] = "http://moria.serrano.red:5000/"  # base url del sitio
-
+#app.config['BASE_URL'] = "http://localhost:5000/"       # base url del sitio local
+app.config['BASE_URL'] = "https://docenciamedica.org/"  # base url demo
 
 ###
 ### Variable para BASE_URL disponible globalmente 
@@ -82,22 +82,22 @@ class User(UserMixin):
 ##
 ## Conexión a MongoDB local
 ##
-# client = MongoClient('mongodb://localhost:27017/')
-# db = client['certi_css']
-# collection_eventos = db['eventos']
-# collection_participantes = db['participantes']
-# collection_usuarios = db['usuarios']
+client = MongoClient('mongodb://localhost:27017/')
+db = client['certi_css']
+collection_eventos = db['eventos']
+collection_participantes = db['participantes']
+collection_usuarios = db['usuarios']
 
 
 ###
 ### Conexión a MongoDB docker
 ###
-mongo_uri = os.getenv("MONGO_URI", "mongodb://db:27017/")  # Usar "db" en lugar de "localhost"
-client = MongoClient(mongo_uri)
-db = client['certi_css']  # Seleccionar la base de datos
-collection_eventos = db['eventos']
-collection_participantes = db['participantes']
-collection_usuarios = db['usuarios']
+# mongo_uri = os.getenv("MONGO_URI", "mongodb://db:27017/")
+# client = MongoClient(mongo_uri)
+# db = client['certi_css']
+# collection_eventos = db['eventos']
+# collection_participantes = db['participantes']
+# collection_usuarios = db['usuarios']
 
 
 ###
@@ -127,6 +127,26 @@ def generate_otp():
     """Genera un código OTP de 4 dígitos (mayúsculas y números)."""
     characters = string.ascii_uppercase + string.digits
     return ''.join(random.choice(characters) for _ in range(4))
+
+
+###
+### OTP dinámico
+###
+@app.route('/get-otp/<codigo_evento>')
+def get_otp(codigo_evento):
+    # Verificar si el OTP existe y no ha expirado
+    if codigo_evento in otp_storage and datetime.now() < otp_storage[codigo_evento]['valid_until']:
+        otp_code = otp_storage[codigo_evento]['code']
+    else:
+        # Generar un nuevo OTP
+        otp_code = generate_otp()
+        otp_storage[codigo_evento] = {
+            'code': otp_code,
+            'valid_until': datetime.now() + timedelta(minutes=1)
+        }
+
+    # Devolver el OTP en formato JSON
+    return jsonify(otp=otp_code)
 
 
 ###
@@ -1261,9 +1281,14 @@ def generar_pdf(nanoid):
 
     return send_file(pdf_file)  # Enviar el archivo PDF al cliente para descarga
 
-
+###
+### local
+###
 # if __name__ == '__main__':
 #     app.run(debug=True)
 
+###
+### Contenedor
+###
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # Servicio para la aplicación Flask
+
   web:
     build: .
     ports:
@@ -11,11 +11,10 @@ services:
       - static_certificados:/app/static/certificados
       - static_uploads:/app/static/uploads
     environment:
-      - MONGO_URI=mongodb://db:27017/  # Usar "db" como hostname
+      - MONGO_URI=mongodb://db:27017/
     depends_on:
       - db
 
-  # Servicio para MongoDB
   db:
     image: mongo:6.0
     volumes:
@@ -23,7 +22,6 @@ services:
     ports:
       - "27017:27017"
 
-# Definir volúmenes para persistencia
 volumes:
   static_certificados:
   static_uploads:
