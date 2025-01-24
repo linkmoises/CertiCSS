@@ -82,22 +82,22 @@ class User(UserMixin):
 ##
 ## Conexión a MongoDB local
 ##
-client = MongoClient('mongodb://localhost:27017/')
-db = client['certi_css']
-collection_eventos = db['eventos']
-collection_participantes = db['participantes']
-collection_usuarios = db['usuarios']
+# client = MongoClient('mongodb://localhost:27017/')
+# db = client['certi_css']
+# collection_eventos = db['eventos']
+# collection_participantes = db['participantes']
+# collection_usuarios = db['usuarios']
 
 
 ###
 ### Conexión a MongoDB docker
 ###
-# mongo_uri = os.getenv("MONGO_URI", "mongodb://db:27017/")
-# client = MongoClient(mongo_uri)
-# db = client['certi_css']
-# collection_eventos = db['eventos']
-# collection_participantes = db['participantes']
-# collection_usuarios = db['usuarios']
+mongo_uri = os.getenv("MONGO_URI", "mongodb://db:27017/")
+client = MongoClient(mongo_uri)
+db = client['certi_css']
+collection_eventos = db['eventos']
+collection_participantes = db['participantes']
+collection_usuarios = db['usuarios']
 
 
 ###
@@ -771,10 +771,12 @@ def crear_evento():
         afiche_file = request.files.get('afiche_evento')
         fondo_file = request.files.get('fondo_evento')
         programa_file = request.files.get('programa_evento')
+        certificado_file = request.files.get('certificado_evento')
 
         afiche_path = None
         fondo_path = None
         programa_path = None
+        certificado_path = None
 
         if afiche_file:
             afiche_filename = f"{codigo}-afiche.jpg"
@@ -805,6 +807,11 @@ def crear_evento():
             programa_path = os.path.join(app.config['UPLOAD_FOLDER'], programa_filename)
             programa_file.save(programa_path)
 
+        if certificado_file:
+            certificado_filename = f"{codigo}-certificado.pdf"
+            certificado_path = os.path.join(app.config['UPLOAD_FOLDER'], certificado_filename)
+            certificado_file.save(certificado_path)
+
         # Insertar nuevo evento en la colección
         collection_eventos.insert_one({
             'nombre': nombre,
@@ -820,6 +827,7 @@ def crear_evento():
             'afiche_750': resized_afiche_path if afiche_file else None,
             'fondo': fondo_path if fondo_file else None,
             'programa': programa_path if programa_file else None,
+            'certificado': certificado_path if certificado_file else None,
             'timestamp': timestamp
         })
         flash("Evento creado con éxito", "success")
@@ -863,11 +871,13 @@ def editar_evento(codigo_evento):
         afiche_file = request.files.get('afiche_evento')
         fondo_file = request.files.get('fondo_evento')
         programa_file = request.files.get('programa_evento')
+        certificado_file = request.files.get('certificado_evento')
 
         afiche_path = evento.get('afiche')
         fondo_path = evento.get('fondo')
         resized_afiche_path = evento.get('afiche_750')
         programa_path = evento.get('programa')
+        certificado_path = evento.get('certificado')
 
         if afiche_file:
             afiche_filename = f"{codigo_evento}-afiche.jpg"
@@ -895,6 +905,11 @@ def editar_evento(codigo_evento):
             programa_path = os.path.join(app.config['UPLOAD_FOLDER'], programa_filename)
             programa_file.save(programa_path)
 
+        if certificado_file:
+            certificado_filename = f"{codigo_evento}-certificado.pdf"
+            certificado_path = os.path.join(app.config['UPLOAD_FOLDER'], certificado_filename)
+            certificado_file.save(certificado_path)
+
         # Actualizar el evento en la base de datos
         collection_eventos.update_one(
             {"codigo": codigo_evento},
@@ -911,6 +926,7 @@ def editar_evento(codigo_evento):
                 'afiche_750': resized_afiche_path,
                 'fondo': fondo_path,
                 'programa': programa_path,
+                'certificado': certificado_path,
             }}
         )
         
@@ -1010,7 +1026,8 @@ def generate_qr_code(codigo_evento):
     qr_path = f"static/uploads/{codigo_evento}-qr.png"
 
     if not os.path.exists(qr_path):
-        url = f"http://localhost:5000/registrar_participante/{codigo_evento}"
+        #url = f"http://localhost:5000/registrar_participante/{codigo_evento}"
+        url = f"https://docenciamedica.org/registrar_participante/{codigo_evento}"
         qr = qrcode.make(url)
         qr.save(qr_path)
     
@@ -1199,10 +1216,10 @@ def generar_pdf_participante(participante, afiche_path):
         draw_centered_text(3.5 * inch, f"Con la ponencia:")
         draw_centered_text(3.2 * inch, f"{participante.get('titulo_ponencia', 'N/A')}", font="Helvetica-Bold", size=16)
     else:
-        draw_centered_text(3.5 * inch, f"Actividad académica con una duración de XX horas")
-        draw_centered_text(3.2 * inch, f"Fecha")
+        draw_centered_text(3.5 * inch, f"Actividad académica con una duración de 08 horas")
+        draw_centered_text(3.2 * inch, f"24 de enero de 2025")
 
-    draw_centered_text(2.7 * inch, f"Dado en la República de Panamá, :")
+    draw_centered_text(2.7 * inch, f"Dado en la República de Panamá, Provincia de Panamá, el 24 de enero de 2025")
 
     # Código de certificado en la esquina superior derecha
     c.setFillColor("white")
@@ -1274,12 +1291,14 @@ def generar_pdf(nanoid):
     # if not evento or not evento.get('afiche'):
     #     abort(404)  # Si no se encuentra el evento o no hay afiche
 
-    afiche_path = f"static/assets/plantilla-certificado.pdf"  # Ajusta según la ruta real de plantilla
+    ##afiche_path = f"static/assets/plantilla-certificado.pdf"
+    afiche_path = evento.get('certificado')
 
     # Llamar a la función para generar el PDF
     pdf_file = generar_pdf_participante(participante, afiche_path)
 
     return send_file(pdf_file)  # Enviar el archivo PDF al cliente para descarga
+
 
 ###
 ### local
