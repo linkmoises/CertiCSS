@@ -19,7 +19,7 @@ app = Flask(__name__)
 ### Salt key 
 ###
 app.config['SECRET_KEY'] = os.urandom(24)  # Genera una clave secreta aleatoria
-app.config['BASE_URL'] = "http://localhost:5000/"  # base url del sitio
+app.config['BASE_URL'] = "http://moria.serrano.red:5000/"  # base url del sitio
 
 
 ###
