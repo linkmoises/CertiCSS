@@ -410,11 +410,8 @@ def salir():
 ###
 @app.route('/')
 def home():
-    # Obtener la fecha y hora actual
-    ahora = datetime.utcnow()
-    
-    # Consultar eventos futuros
-    eventos_futuros = collection_eventos.find({"fecha_inicio": {"$gte": ahora}}).sort("fecha_inicio").limit(6)
+    inicio_hoy = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    eventos_futuros = collection_eventos.find({"fecha_inicio": {"$gte": inicio_hoy}}).sort("fecha_inicio").limit(6)
 
     return render_template('home.html', eventos=eventos_futuros)
 
