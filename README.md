@@ -1,78 +1,103 @@
 # CertiCSS
 
-Este proyecto es una aplicación web diseñada específicamente para el Departamento Nacional de Docencia e Investigación de la Caja de Seguro Social en Panamá, para la gestión de eventos académicos. Permite registrar participantes y ponentes, crear eventos y subir imágenes asociadas a cada evento. La aplicación está construida utilizando Flask y MongoDB.
+¡Hola! 👋 Este proyecto es una aplicación web diseñada específicamente para el Departamento Nacional de Docencia e Investigación de la Caja de Seguro Social en Panamá. Su objetivo es facilitar la gestión de eventos académicos, permitiendo registrar participantes, ponentes, crear eventos y subir imágenes asociadas a cada uno. Está construida con Flask y MongoDB, y es súper fácil de usar. 😊
 
 ![CertiCSS](screenshot.png)
 
-## Características
+## ¿Qué se puede hacer con CertiCSS?
 
-- **Registro de Eventos**: Permite crear eventos con información como nombre, tipo, fechas.
-- **Registro de Participantes**: Los usuarios pueden registrarse como participantes en eventos específicos.
-- **Registro de Ponentes**: Los coordinadores locales de docencia u organizadores pueden registrar a los ponentes, incluyendo el título de su ponencia.
-- **Prevención de Duplicados**: Implementa mecanismos para evitar que los participantes se registren múltiples veces en el mismo evento y asigna códigos únicos para verificación de certificados.
+- **Crear Eventos**: Define eventos con detalles como nombre, tipo, fechas, etc.
+- **Registrar Participantes**: Los usuarios pueden inscribirse en eventos específicos.
+- **Registrar Ponentes**: Los coordinadores locales de docencia pueden agregar ponentes con el título de su ponencia.
+- **Evitar Duplicados**: La aplicación evita que los participantes se registren múltiples veces en el mismo evento y genera códigos únicos para verificar certificados.
 
-## Stack tecnológico
+## ¿Qué tecnologías usa?
 
-- **Flask**: Microframework para Python utilizado para construir la aplicación web.
-- **MongoDB**: Base de datos NoSQL utilizada para almacenar la información de eventos, participantes y ponentes.
-- **Tailwind**: Para la creación de las interfaces de usuario.
+- **Flask**: Un framework ligero y poderoso para construir aplicaciones web en Python.
+- **MongoDB**: Una base de datos NoSQL que almacena toda la información de eventos, participantes y ponentes.
+- **Tailwind**: Un framework CSS que hace que las interfaces se vean geniales sin complicaciones.
 
-## Requisitos Previos
+## ¿Cómo empezar?
 
-Asegúrate de tener instalados los siguientes requisitos:
+### Opción 1: Instalación Local (para desarrollo)
 
-- Python 3.x / pip
-- MongoDB
+Si quieres probar la aplicación en tu máquina, sigue estos pasos:
 
-## Instalación
-
-1. Clona este repositorio:
+1. **Clona este repositorio**:
 ```
 git clone https://github.com/linkmoises/CertiCSS.git
 cd CertiCSS
 ```
 
-2. Crea un entorno virtual (opcional pero recomendado):
+2. **Crea un entorno virtual** (opcional pero recomendado):
 ```
 python -m venv venv
 source venv/bin/activate
 ```
 
-3. Instala las dependencias:
+3. **Instala las dependencias**:
 ```
 pip install -r requirements.txt
 ```
 
-4. Configura tu base de datos MongoDB y asegúrate de que esté en ejecución.
+4. Asegúrate de tener MongoDB instalado y en ejecución.
 
-5. Ejecuta la aplicación:
+Si no lo tienes, puedes instalarlo siguiendo [estas instrucciones](https://www.mongodb.com/docs/manual/installation/).
+
+5. **Crear el usuario administrador**:
+```
+python install.py
+```
+
+6. **Ejecuta la aplicación**:
 ```
 python app.py
 ```
 
-6. Abre tu navegador y ve a `http://localhost:5000` para acceder a la aplicación.
+7. **¡Listo!** Abre tu navegador y ve a `http://localhost:5000` para empezar a usar CertiCSS.
 
-## Uso
+### Opción 2: Usar Docker (para producción o pruebas rápidas)
 
-1. **Crear un Evento**: Accede a la página de creación de eventos y completa el formulario.
-2. **Registrar Participantes**: Una vez creado un evento, puedes registrar participantes proporcionando su información.
-3. **Registrar Ponentes**: También puedes registrar ponentes asociados a un evento específico.
-4. **Ver Listados**: Puedes ver listas de eventos, participantes y ponentes registrados.
+Si prefieres no instalar nada en tu máquina o quieres probar la aplicación en un entorno aislado, ¡Docker es tu mejor amigo! 🐳
 
-## Contribuciones
+1. **Clona el repositorio** (si no lo has hecho):
+```
+git clone https://github.com/linkmoises/CertiCSS.git
+cd CertiCSS
+```
 
-Las contribuciones son bienvenidas. Si deseas contribuir a este proyecto, por favor sigue estos pasos:
+2. **Crea un archivo `.env`**:
+
+- Copia el archivo `.env.example` y renómbralo a `.env`.
+- Edita el archivo `.env` para configurar las variables de entorno necesarias (como la SECRET_KEY).
+
+3. **Levanta los contenedores**:
+
+Ejecuta el siguiente comando para construir y levantar la aplicación con Docker:
+```
+docker-compose up --build
+```
+
+4. **¡Eso es todo!** La aplicación estará disponible en `http://localhost:5000`, y MongoDB estará corriendo en segundo plano.
+
+## ¿Quieres contribuir? ¡Genial! 🚀
+
+Si te gusta este proyecto y quieres aportar, ¡estás más que bienvenido! Así es como puedes hacerlo:
 
 1. Haz un fork del repositorio.
 2. Crea una nueva rama (`git checkout -b feature/nueva-caracteristica`).
 3. Realiza tus cambios y haz commit (`git commit -m 'Añadir nueva característica'`).
 4. Haz push a la rama (`git push origin feature/nueva-caracteristica`).
-5. Abre un Pull Request.
+5. Abre un Pull Request y cuéntame qué has hecho. ¡Estare encantado de revisarlo!
 
 ## Licencia
 
-Este proyecto está bajo la Licencia AGPL v3 - consulta el archivo [LICENSE](LICENSE) para más detalles.
+Este proyecto está bajo la Licencia AGPL v3. Eso significa que puedes usarlo, modificarlo y distribuirlo libremente, pero si haces cambios, debes compartirlos con la comunidad. ¡Compartir es vivir! 😄
 
-## Contacto
+Consulta el archivo [LICENSE](LICENSE) para más detalles.
 
-Si tienes alguna pregunta o sugerencia, no dudes en contactarme en [moserrano@css.gob.pa].
+## ¿Tienes preguntas o sugerencias?
+
+Puedes contactarme en [moserrano@css.gob.pa] o abrir un issue en el repositorio. ¡Estoy aquí para ayudar! 🙌
+
+**¡Gracias por usar CertiCSS!** Espero que te sea útil y que disfrutes gestionando tus eventos académicos. 💪
