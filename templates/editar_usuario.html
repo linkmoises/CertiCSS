@@ -152,6 +152,18 @@
                                 <option value="coordinador-local" {% if usuario.rol == 'coordinador-local' %}selected{% endif %}>Coordinador Local de Docencia</option>
                                 <option value="coordinador-regional" {% if usuario.rol == 'coordinador-regional' %}selected{% endif %}>Coordinador Regional de Docencia</option>
                             </select>
+{% if current_user.rol == 'administrador' %}
+                            <div class="py-4 gap-x-2 text-sm">
+                                <div class="inline-block px-4">
+                                    <label for="jefe">Jefe: </label>
+                                    <input type="checkbox" id="jefe" name="jefe" {% if usuario.jefe %}checked{% endif %}>
+                                </div>
+                                <div class="inline-block px-4">
+                                    <label for="subjefe">Subjefe: </label>
+                                    <input type="checkbox" id="subjefe" name="subjefe" {% if usuario.subjefe %}checked{% endif %}>
+                                </div>
+                            </div>
+{% endif %}
                         </div>
                         <!-- End Col -->
 

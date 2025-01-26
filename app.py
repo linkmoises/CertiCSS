@@ -185,6 +185,9 @@ def registro():
             'region': region,
             'unidad_ejecutora': unidad_ejecutora,
             'departamento': departamento,
+            'jefe': False,
+            'subjefe': False,
+            'activo': True,
             'timestamp': timestamp
         })
         flash('Registro exitoso. Ahora el usuario puede iniciar sesión.')
@@ -210,6 +213,12 @@ def login():
             if user_data.get('blocked_until') and user_data['blocked_until'] > datetime.utcnow():
                 log_event(f"Usuario [{email}] intentó ingresar con la cuenta bloqueada temporalmente.")
                 flash('Esta cuenta está bloqueada temporalmente. Intente más tarde.', 'error')
+                return render_template('iniciar_sesion.html')
+
+            # Verificar si el usuario está activo
+            if not user_data.get('activo', False):  # Si 'activo' es False o no existe
+                log_event(f"Usuario [{email}] intentó ingresar con una cuenta inactiva.")
+                flash('Esta cuenta está inactiva. Contacte al administrador.', 'error')
                 return render_template('iniciar_sesion.html')
 
             # Verificar la contraseña
@@ -310,6 +319,9 @@ def editar_usuario(user_id):
         phone = request.form.get('phone')
         password = request.form.get('password')
 
+        jefe = request.form.get('jefe') == 'on' if 'jefe' in request.form else usuario.get('jefe', False)
+        subjefe = request.form.get('subjefe') == 'on' if 'subjefe' in request.form else usuario.get('subjefe', False)
+
         # Crear un diccionario con los nuevos datos
         updated_user_data = {
             "nombres": nombres,
@@ -322,6 +334,8 @@ def editar_usuario(user_id):
             "departamento": departamento,
             "rol": rol,
             "cargo": cargo,
+            "jefe": jefe,
+            "subjefe": subjefe,
         }
 
         # Solo actualizar la contraseña si se proporciona
@@ -361,11 +375,15 @@ def mostrar_usuario(user_id):
 
 
 ###
-###
+### Acciones de usuario
 ###
 @app.route('/eliminar_usuario/<user_id>', methods=['POST'])
 @login_required
 def eliminar_usuario(user_id):
+    if current_user.rol != 'administrador':
+        flash('No tienes permisos para realizar esta acción.', 'error')
+        return redirect(url_for('listar_usuarios'))
+
     # Obtener el usuario que se va a eliminar
     usuario = collection_usuarios.find_one({"_id": ObjectId(user_id)})
     
@@ -381,6 +399,31 @@ def eliminar_usuario(user_id):
 
     log_event(f"Usuario [{current_user.email}] eliminó el usuario {email}.")
     flash('Usuario eliminado con éxito.')
+    return redirect(url_for('listar_usuarios'))
+
+
+@app.route('/toggle_activo/<user_id>', methods=['POST'])
+@login_required
+def toggle_activo(user_id):
+    if current_user.rol != 'administrador':
+        flash('No tienes permisos para realizar esta acción.', 'error')
+        return redirect(url_for('listar_usuarios'))
+
+    usuario = collection_usuarios.find_one({"_id": ObjectId(user_id)})
+    if not usuario:
+        flash('Usuario no encontrado.', 'error')
+        return redirect(url_for('listar_usuarios'))
+
+    email = usuario.get('email')
+
+    # Cambiar el estado de "activo"
+    nuevo_estado = not usuario.get('activo', False)
+    collection_usuarios.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {"activo": nuevo_estado}}
+    )
+
+    log_event(f"Usuario [{current_user.email}] cambió el estado de {email} a {'activo' if nuevo_estado else 'inactivo'}.")
     return redirect(url_for('listar_usuarios'))
 
 

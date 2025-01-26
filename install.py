@@ -37,6 +37,7 @@ def crear_usuario_admin():
         "nombres": "Administrador",
         "password": hashed_password,
         "rol": "administrador",
+        "activo": True,
         "timestamp": datetime.now()
     })
 
