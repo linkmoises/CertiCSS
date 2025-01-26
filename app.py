@@ -226,6 +226,7 @@ def login():
                 )
                 user.id = str(user_data['_id'])
                 login_user(user)
+                session.permanent = True
                 log_event(f"Usuario [{email}] ingresó exitosamente.")
                 return redirect(url_for('tablero_coordinadores'))
             else:
