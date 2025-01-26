@@ -2,7 +2,8 @@ from pymongo import MongoClient
 from datetime import datetime
 
 # Conectar a MongoDB
-client = MongoClient('mongodb://localhost:27017/')
+mongo_uri = os.getenv("MONGO_URI", "mongodb://db:27017/")
+client = MongoClient(mongo_uri)
 db = client['certi_css']
 collection_usuarios = db['usuarios']
 
