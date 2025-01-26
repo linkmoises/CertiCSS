@@ -187,7 +187,8 @@ def registro():
             'departamento': departamento,
             'timestamp': timestamp
         })
-        flash('Registro exitoso. Ahora puedes iniciar sesión.')
+        flash('Registro exitoso. Ahora el usuario puede iniciar sesión.')
+        log_event(f"Usuario [{current_user.email}] registró un nuevo usuario: {email}.")
         return redirect(url_for('listar_usuarios'))
 
     return render_template('registrar_usuario.html')
@@ -291,6 +292,10 @@ def listar_usuarios(page=1):
 @login_required
 def editar_usuario(user_id):
     if request.method == 'POST':
+        usuario = collection_usuarios.find_one({"_id": ObjectId(user_id)})
+        if not usuario:
+            return redirect(url_for('listar_usuarios'))
+
         # Recoger los datos del formulario
         nombres = request.form.get('nombres')
         apellidos = request.form.get('apellidos')
@@ -325,8 +330,13 @@ def editar_usuario(user_id):
 
         # Actualizar el usuario en la base de datos
         collection_usuarios.update_one({"_id": ObjectId(user_id)}, {"$set": updated_user_data})
+        
+        email = usuario.get('email')
 
-        flash('Usuario actualizado con éxito.')
+        if current_user.email == email:
+            log_event(f"Usuario [{current_user.email}] actualizó su perfil.")
+        else:
+            log_event(f"Usuario [{current_user.email}] actualizó el perfil de usuario de {email}.")
         return redirect(url_for('listar_usuarios'))  # Redirigir a la lista de usuarios
 
     # Obtener los datos del usuario
@@ -356,8 +366,20 @@ def mostrar_usuario(user_id):
 @app.route('/eliminar_usuario/<user_id>', methods=['POST'])
 @login_required
 def eliminar_usuario(user_id):
-    # Lógica para eliminar un usuario
+    # Obtener el usuario que se va a eliminar
+    usuario = collection_usuarios.find_one({"_id": ObjectId(user_id)})
+    
+    if not usuario:
+        flash('Usuario no encontrado.', 'error')
+        return redirect(url_for('listar_usuarios'))
+
+    # Obtener el email del usuario que se va a eliminar
+    email = usuario.get('email')
+
+    # Eliminar el usuario de la base de datos
     collection_usuarios.delete_one({"_id": ObjectId(user_id)})
+
+    log_event(f"Usuario [{current_user.email}] eliminó el usuario {email}.")
     flash('Usuario eliminado con éxito.')
     return redirect(url_for('listar_usuarios'))
 
@@ -1031,8 +1053,8 @@ def generate_qr_code(codigo_evento):
     qr_path = f"static/uploads/{codigo_evento}-qr.png"
 
     if not os.path.exists(qr_path):
-        #url = f"http://localhost:5000/registrar_participante/{codigo_evento}"
-        url = f"https://docenciamedica.org/registrar_participante/{codigo_evento}"
+        base_url = app.config['BASE_URL']
+        url = f"{base_url}registrar_participante/{codigo_evento}"
         qr = qrcode.make(url)
         qr.save(qr_path)
     
@@ -1390,13 +1412,17 @@ def show_latest_log():
 
 
 @app.route('/descargar_log')
+@login_required
 def download_latest_log():
     latest_log_file = get_latest_log_file()
     
     if not latest_log_file:
         return "No hay archivos de registro de actividades."
     
-    return send_file(latest_log_file, as_attachment=True)
+    now = datetime.now()
+    formatted_datetime = now.strftime("app-%Y-%m-%d-%H-%M-%S.log")
+    
+    return send_file(latest_log_file, as_attachment=True, download_name=formatted_datetime)
 
 
 if __name__ == '__main__':
