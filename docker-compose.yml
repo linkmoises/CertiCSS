@@ -12,10 +12,8 @@ services:
       - ../static_certificados:/app/static/certificados
       - ../static_uploads:/app/static/uploads
     environment:
-      - FLASK_ENV=production
       - FLASK_HOST=0.0.0.0
       - FLASK_PORT=5000
-      - BASE_URL=https://docenciamedica.org/
       - MONGO_URI=mongodb://db:27017/
       - TZ=America/Panama
     depends_on:

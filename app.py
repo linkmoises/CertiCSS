@@ -203,19 +203,51 @@ def login():
         password = request.form['password']
 
         user_data = collection_usuarios.find_one({"email": email})
-        
-        if user_data and check_password_hash(user_data['password'], password):
-            user = User(
-                email=user_data['email'], 
-                password=user_data['password'], 
-                rol=user_data['rol'], 
-                nombres=user_data['nombres']
-            )
-            user.id = str(user_data['_id'])
-            login_user(user)
-            return redirect(url_for('tablero_coordinadores'))
-        
-        flash('Credenciales incorrectas. Inténtalo de nuevo.')
+
+        if user_data:
+            # Verificar si el usuario está bloqueado
+            if user_data.get('blocked_until') and user_data['blocked_until'] > datetime.utcnow():
+                flash('Esta cuenta está bloqueada temporalmente. Intente más tarde.', 'error')
+                return render_template('iniciar_sesion.html')
+
+            # Verificar la contraseña
+            if check_password_hash(user_data['password'], password):
+                # Reiniciar intentos fallidos si el inicio de sesión es exitoso
+                collection_usuarios.update_one(
+                    {"email": email},
+                    {"$set": {"failed_attempts": 0, "last_failed_attempt": None, "blocked_until": None}}
+                )
+                user = User(
+                    email=user_data['email'],
+                    password=user_data['password'],
+                    rol=user_data['rol'],
+                    nombres=user_data['nombres']
+                )
+                user.id = str(user_data['_id'])
+                login_user(user)
+                return redirect(url_for('tablero_coordinadores'))
+            else:
+                # Incrementar intentos fallidos
+                failed_attempts = user_data.get('failed_attempts', 0) + 1
+                last_failed_attempt = datetime.utcnow()
+
+                # Bloquear después de 5 intentos fallidos
+                if failed_attempts >= 5:
+                    blocked_until = last_failed_attempt + timedelta(minutes=15)
+                    collection_usuarios.update_one(
+                        {"email": email},
+                        {"$set": {"failed_attempts": failed_attempts, "last_failed_attempt": last_failed_attempt, "blocked_until": blocked_until}}
+                    )
+                    flash('Has excedido el número máximo de intentos. La cuenta ha sido bloqueada por 15 minutos.', 'error')
+                else:
+                    collection_usuarios.update_one(
+                        {"email": email},
+                        {"$set": {"failed_attempts": failed_attempts, "last_failed_attempt": last_failed_attempt}}
+                    )
+                    flash('Credenciales incorrectas. Inténtalo de nuevo.', 'error')
+
+        else:
+            flash('Credenciales incorrectas. Inténtalo de nuevo.', 'error')
 
     return render_template('iniciar_sesion.html')
 
