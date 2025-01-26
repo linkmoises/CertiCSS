@@ -35,6 +35,11 @@
                                         <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                                         Registrar participante
                                     </a>
+{% if participantes|length != 0 %}
+                                    <div>
+                                        <input class="text-gray-500 py-2 block w-full bg-white border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-blue-500" type="text" id="search" placeholder="Filtrar participantes...">
+                                    </div>
+{% endif %}
                                 </div>
                             </div>
                         </div>
@@ -124,13 +129,15 @@
                                 <td class="size-px whitespace-nowrap">
                                     <div class="px-6 py-2">
                                         <p class="text-sm text-gray-500 mb-2">
-                                            {{ participante.apellidos }}, {{ participante.nombres }}
+                                            <span class="participante-nombre">{{ participante.apellidos }}, {{ participante.nombres }}</span>
                                         </p>
                                     </div>
                                 </td>
                                 <td class="size-px whitespace-nowrap">
                                     <div class="px-6 py-2">
-                                        <p class="text-sm text-gray-500 mb-2">{{ participante.cedula }}</p>
+                                        <p class="text-sm text-gray-500 mb-2">
+                                            <span class="participante-cedula">{{ participante.cedula }}</span>
+                                        </p>
                                     </div>
                                 </td>
                                 <td class="size-px whitespace-nowrap">
@@ -226,5 +233,34 @@
 
 <!-- JS PLUGINS -->
 <script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+<script>
+    document.getElementById('search').addEventListener('input', function () {
+        const searchText = this.value.trim().toLowerCase(); // Texto de búsqueda
+        const rows = document.querySelectorAll('tr.bg-white'); // Todas las filas de la tabla
+
+        rows.forEach(row => {
+            const nombre = row.querySelector('.participante-nombre').textContent.toLowerCase();
+            const cedula = row.querySelector('.participante-cedula').textContent.toLowerCase();
+
+            // Verificar si el texto de búsqueda coincide con nombre o cédula
+            if (nombre.includes(searchText) || cedula.includes(searchText)) {
+                row.style.display = ''; // Mostrar la fila
+                // Resaltar coincidencias en nombre y cédula
+                highlightText(row.querySelector('.participante-nombre'), searchText);
+                highlightText(row.querySelector('.participante-cedula'), searchText);
+            } else {
+                row.style.display = 'none'; // Ocultar la fila
+            }
+        });
+    });
+
+    // Función para resaltar el texto coincidente
+    function highlightText(element, searchText) {
+        const text = element.textContent;
+        const regex = new RegExp(`(${searchText})`, 'gi'); // Expresión regular para buscar coincidencias
+        const highlightedText = text.replace(regex, '<span class="bg-yellow-200">$1</span>'); // Resaltar coincidencias
+        element.innerHTML = highlightedText; // Actualizar el contenido del elemento
+    }
+</script>
 </body>
 </html>
