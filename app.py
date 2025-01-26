@@ -590,6 +590,14 @@ def registrar_participante(codigo_evento):
     
     if evento is None:
         return redirect(url_for('page_not_found'))  # Redirigir a la página 404 si el código no existe
+
+    # Verificar si el evento está cerrado
+    if evento.get('estado_evento') == 'cerrado':
+        return render_template('registrar.html', 
+            evento_cerrado=True,
+            nombre_evento=evento['nombre'],
+            afiche_url=url_for('static', filename='uploads/' + evento['afiche_750'].split('/')[-1])
+        )
     
     # Generar un nuevo OTP si no existe o ha expirado
     if codigo_evento not in otp_storage or datetime.now() >= otp_storage[codigo_evento]['valid_until']:
@@ -672,6 +680,14 @@ def redirigir_ruta_corta(codigo_evento):
 @login_required
 def registrar_ponente(codigo_evento):
     evento = collection_eventos.find_one({"codigo": codigo_evento})
+
+    # Verificar si el evento está cerrado
+    if evento.get('estado_evento') == 'cerrado':
+        return render_template('registrar_ponente.html', 
+            evento_cerrado=True,
+            nombre_evento=evento['nombre'],
+            afiche_url=url_for('static', filename='uploads/' + evento['afiche_750'].split('/')[-1])
+        )
 
     if request.method == 'POST':
         nombres = request.form['nombres']

@@ -19,6 +19,7 @@
             max-width: 500px;
         }
     </style>
+{% if evento.estado_evento == 'cerrado' %}
     <!-- Script para actualizar dinámicamente el OTP -->
     <script>
         function actualizarOTP() {
@@ -36,6 +37,7 @@
         // Actualizar el OTP inmediatamente al cargar la página
         actualizarOTP();
     </script>
+{% endif %}
 </head>
 <body>
     <!-- Hero -->
@@ -67,7 +69,7 @@
     
             <div class="relative my-4">
                 <div class="otp-container">
-                    <p class="bg-white p-3 text-5xl border-4 border-black rounded-xl">Código OTP: <span id="otp" class="font-bold">{{ otp }}</span></p>
+                    <p class="bg-white p-3 text-5xl border-4 border-black rounded-xl">{% if evento.estado_evento == 'cerrado' %}Evento cerrado{% else %}Código OTP: <span id="otp" class="font-bold">{{ otp }}{% endif %}</span></p>
                 </div>
                 <div class="qr-code">
                     <img class="block float-right mt-8 w-64 h-64 border-4 border-black rounded-xl" src="{{ url_for('static', filename='uploads/' + evento.codigo + '-qr.png') }}" alt="Código QR" class="w-64 h-64" /><br />
