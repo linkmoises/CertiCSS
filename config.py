@@ -1,5 +1,6 @@
 import os
 import random
+from datetime import timedelta
 
 ###
 ### Este es el archivo de configuración de CertiCSS, permite trabajar con mínimos cambios

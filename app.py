@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template, redirect, url_for, flash
+from flask import Flask, jsonify, request, render_template, redirect, url_for, flash, session
 from flask_login import LoginManager, login_user, UserMixin, logout_user, current_user, login_required
 from pymongo import MongoClient
 from flask_pymongo import PyMongo
@@ -1354,6 +1354,49 @@ def get_client_ip():
     else:
         # Si no hay proxy, usar la IP directa
         return request.remote_addr
+
+
+###
+###
+###
+import os
+from flask import Flask, render_template_string
+
+def get_latest_log_file():
+    log_dir = 'logs'
+    log_files = [f for f in os.listdir(log_dir) if f.startswith('app-') and f.endswith('.log')]
+    
+    if not log_files:
+        return None
+    
+    # Ordenar los archivos por fecha (el más reciente primero)
+    log_files.sort(reverse=True)
+    
+    # Devolver la ruta completa del archivo más reciente
+    return os.path.join(log_dir, log_files[0])
+
+@app.route('/logs')
+@login_required
+def show_latest_log():
+    latest_log_file = get_latest_log_file()
+    
+    if not latest_log_file:
+        return "No hay archivos de registro de actividades."
+    
+    with open(latest_log_file, 'r') as file:
+        log_content = file.read()
+    
+    return render_template('logs.html', log_file=latest_log_file, log_content=log_content)
+
+
+@app.route('/descargar_log')
+def download_latest_log():
+    latest_log_file = get_latest_log_file()
+    
+    if not latest_log_file:
+        return "No hay archivos de registro de actividades."
+    
+    return send_file(latest_log_file, as_attachment=True)
 
 
 if __name__ == '__main__':
