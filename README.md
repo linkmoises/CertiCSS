@@ -1,6 +1,6 @@
 # CertiCSS
 
-¡Hola! 👋 Este proyecto es una aplicación web diseñada específicamente para el Departamento Nacional de Docencia e Investigación de la Caja de Seguro Social en Panamá. Su objetivo es facilitar la gestión de eventos académicos, permitiendo registrar participantes, ponentes, crear eventos y subir imágenes asociadas a cada uno. Está construida con Flask y MongoDB, y es súper fácil de usar. 😊
+¡Hola! 👋 Este proyecto es una aplicación web diseñada específicamente para el **Departamento Nacional de Docencia e Investigación** de la Caja de Seguro Social en Panamá. Su objetivo es facilitar la gestión de eventos académicos, permitiendo registrar participantes, ponentes, crear eventos y subir imágenes asociadas a cada uno. Está construida con Flask y MongoDB, y es súper fácil de usar. 😊
 
 ![CertiCSS](screenshot.png)
 
@@ -40,9 +40,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. Asegúrate de tener MongoDB instalado y en ejecución.
-
-Si no lo tienes, puedes instalarlo siguiendo [estas instrucciones](https://www.mongodb.com/docs/manual/installation/).
+4. Asegúrate de tener MongoDB instalado y en ejecución. Si no lo tienes, puedes instalarlo siguiendo [estas instrucciones](https://www.mongodb.com/docs/manual/installation/).
 
 5. **Crear el usuario administrador**:
 ```

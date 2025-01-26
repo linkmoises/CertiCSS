@@ -11,6 +11,7 @@ services:
       - .:/app
       - ../static_certificados:/app/static/certificados
       - ../static_uploads:/app/static/uploads
+      - ../logs:/app/logs
     environment:
       - FLASK_HOST=0.0.0.0
       - FLASK_PORT=5000

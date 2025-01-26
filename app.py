@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request, render_template, redirect, url_for, flash
-from flask_login import LoginManager, login_user, UserMixin, logout_user, login_required
+from flask_login import LoginManager, login_user, UserMixin, logout_user, current_user, login_required
 from pymongo import MongoClient
 from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
@@ -207,6 +207,7 @@ def login():
         if user_data:
             # Verificar si el usuario está bloqueado
             if user_data.get('blocked_until') and user_data['blocked_until'] > datetime.utcnow():
+                log_event(f"Usuario [{email}] intentó ingresar con la cuenta bloqueada temporalmente.")
                 flash('Esta cuenta está bloqueada temporalmente. Intente más tarde.', 'error')
                 return render_template('iniciar_sesion.html')
 
@@ -225,6 +226,7 @@ def login():
                 )
                 user.id = str(user_data['_id'])
                 login_user(user)
+                log_event(f"Usuario [{email}] ingresó exitosamente.")
                 return redirect(url_for('tablero_coordinadores'))
             else:
                 # Incrementar intentos fallidos
@@ -238,15 +240,18 @@ def login():
                         {"email": email},
                         {"$set": {"failed_attempts": failed_attempts, "last_failed_attempt": last_failed_attempt, "blocked_until": blocked_until}}
                     )
+                    log_event(f"Usuario [{email}] ha bloqueado la cuenta.")
                     flash('Has excedido el número máximo de intentos. La cuenta ha sido bloqueada por 15 minutos.', 'error')
                 else:
                     collection_usuarios.update_one(
                         {"email": email},
                         {"$set": {"failed_attempts": failed_attempts, "last_failed_attempt": last_failed_attempt}}
                     )
+                    log_event(f"Usuario [{email}] intentó ingresar con credenciales incorrectas.")
                     flash('Credenciales incorrectas. Inténtalo de nuevo.', 'error')
 
         else:
+            log_event(f"Usuario [{email}] intentó ingresar con credenciales incorrectas.")
             flash('Credenciales incorrectas. Inténtalo de nuevo.', 'error')
 
     return render_template('iniciar_sesion.html')
@@ -826,7 +831,7 @@ def crear_evento():
             'certificado': certificado_path if certificado_file else None,
             'timestamp': timestamp
         })
-        flash("Evento creado con éxito", "success")
+        log_event(f"Usuario [{current_user.email}] ha creado el evento {codigo} exitosamente.")
         return redirect(url_for('crear_evento'))  # Redirigir a la lista de eventos
 
     return render_template('crear_evento.html')
@@ -926,7 +931,7 @@ def editar_evento(codigo_evento):
             }}
         )
         
-        flash("Evento actualizado con éxito", "success")
+        log_event(f"Usuario [{current_user.email}] ha editado el evento {codigo_evento}.")
         return redirect(url_for('crear_evento'))  # Redirigir a la lista de eventos
 
     return render_template('editar_evento.html', evento=evento)
@@ -956,6 +961,7 @@ def cerrar_evento(codigo_evento):
         {"codigo": codigo_evento},
         {"$set": {"estado_evento": "cerrado"}}
     )
+    log_event(f"Usuario [{current_user.email}] cerró el evento {codigo_evento}.")
     flash("Evento cerrado con éxito", "success")
     return redirect(url_for('listar_eventos'))  # Redirigir a la lista de eventos
 
@@ -968,10 +974,12 @@ def cerrar_evento(codigo_evento):
 def eliminar_evento(codigo_evento):
     # Verificar si hay participantes asociados al evento
     if collection_participantes.find_one({"codigo_evento": codigo_evento}) is not None:
+        log_event(f"Usuario [{current_user.email}] intentó eliminar el evento {codigo_evento} con usuarios asociados.")
         return "No se puede eliminar el evento porque tiene participantes asociados.", 400
     
     # Si no hay participantes, eliminar el evento
     collection_eventos.delete_one({"codigo": codigo_evento})
+    log_event(f"Usuario [{current_user.email}] eliminó el evento {codigo_evento}.")
     return redirect(url_for('listar_eventos'))  # Redirigir a la lista de eventos
 
 
@@ -1294,6 +1302,57 @@ def generar_pdf(nanoid):
     pdf_file = generar_pdf_participante(participante, afiche_path)
 
     return send_file(pdf_file)  # Enviar el archivo PDF al cliente para descarga
+
+
+###
+### Sistema de logs
+###
+import logging
+from logging.handlers import RotatingFileHandler
+
+# Crear la carpeta /logs si no existe
+if not os.path.exists('logs'):
+    os.makedirs('logs')
+
+# Nombre del archivo de log basado en la fecha actual
+log_filename = datetime.now().strftime('logs/app-%Y-%m-%d.log')
+
+# Configuración del logging
+logger = logging.getLogger('app_logger')
+logger.setLevel(logging.INFO)  # Nivel de logging (INFO, WARNING, ERROR, etc.)
+
+# Formato del log
+formatter = logging.Formatter('%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+
+# Manejador para rotar archivos cada 250 registros
+handler = RotatingFileHandler(
+    log_filename,  # Nombre del archivo de log
+    maxBytes=0,  # No usar tamaño máximo (usamos backupCount en su lugar)
+    backupCount=250,  # Número máximo de registros por archivo
+)
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+def log_event(message):
+    client_ip = get_client_ip()  # Obtener la dirección IP del cliente
+    log_message = f"{message} {client_ip}."
+    logger.info(log_message)
+
+
+###
+### Obtener IP
+###
+from flask import request
+def get_client_ip():
+    """
+    Obtiene la dirección IP del cliente.
+    """
+    if request.headers.get('X-Forwarded-For'):
+        # Si la aplicación está detrás de un proxy
+        return request.headers.get('X-Forwarded-For').split(',')[0]
+    else:
+        # Si no hay proxy, usar la IP directa
+        return request.remote_addr
 
 
 if __name__ == '__main__':
