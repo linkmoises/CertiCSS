@@ -656,6 +656,7 @@ def registrar():
 
             # Mensaje de éxito o falla en registro
             flash("Registro exitoso. El certificado de participación se podrá descargar al finalizar el evento.", "success")
+
             return redirect(url_for('registrar_participante', codigo_evento=codigo_evento))
         else:
             flash("El OTP ha expirado o es incorrecto.", "error")
@@ -712,6 +713,7 @@ def registrar_ponente(codigo_evento):
         })
 
         flash("Ponente registrado con éxito.", "success")
+        log_event(f"Usuario [{current_user.email}] registró al { rol } { cedula } en el evento { codigo_evento }.")
         return redirect(url_for('listar_participantes', codigo_evento=codigo_evento))
 
     return render_template('registrar_ponente.html',
@@ -812,15 +814,19 @@ def listar_eventos(page=1):
 def listar_participantes(codigo_evento):
     # Recuperar participantes registrados para el evento específico
     evento = collection_eventos.find_one({"codigo": codigo_evento})
+
     participantes_cursor = collection_participantes.find({"codigo_evento": codigo_evento})
     total_participantes = collection_participantes.count_documents({"codigo_evento": codigo_evento})
     participantes = list(participantes_cursor)
-    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    
+    estado_evento = evento.get('estado_evento', 'borrador')
+    
     return render_template('participantes.html', 
         participantes=participantes,
         total_participantes=total_participantes,
         evento=evento,
-        nombre_evento=evento['nombre']
+        nombre_evento=evento['nombre'],
+        estado_evento=estado_evento,
     )
 
 
@@ -1072,8 +1078,16 @@ def eliminar_evento(codigo_evento):
 @login_required
 def eliminar_participante(nanoid):
     participante = collection_participantes.find_one({"nanoid": nanoid})
-    result = collection_participantes.delete_one({"nanoid": nanoid})
-    return redirect(url_for('listar_participantes', codigo_evento=participante['codigo_evento']))
+
+    if participante:
+        log_event(f"Usuario [{current_user.email}] eliminó al {participante['rol']} {participante['cedula']} del evento {participante['codigo_evento']}.")
+        result = collection_participantes.delete_one({"nanoid": nanoid})
+        return redirect(url_for('listar_participantes', codigo_evento=participante['codigo_evento']))
+
+    else:
+        log_event(f"Usuario [{current_user.email}] intentó eliminar un participante que no existe con nanoid {nanoid}")
+        return redirect(url_for('listar_participantes', codigo_evento=''))
+
 
 ###
 ### Página de evento
@@ -1171,6 +1185,8 @@ def buscar_certificados():
                 fecha_evento = evento.get('fecha_inicio', None)
 
                 resultado = {
+                    'nombres': participante['nombres'],
+                    'apellidos': participante['apellidos'],
                     'cedula': participante['cedula'],
                     'nanoid': participante['nanoid'],
                     'rol': participante['rol'],
@@ -1385,6 +1401,174 @@ def generar_pdf(nanoid):
 
     return send_file(pdf_file)  # Enviar el archivo PDF al cliente para descarga
 
+
+###
+### Generación de constancia de asistencia
+###
+from io import BytesIO
+from flask import send_file
+from reportlab.lib.units import inch
+from reportlab.lib.colors import HexColor
+from reportlab.pdfgen import canvas
+from pdfrw import PdfReader, PdfWriter, PageMerge
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import Paragraph, SimpleDocTemplate
+
+def generar_constancia_asistencia(participante, afiche_path):
+    # Crear un buffer en memoria para el PDF
+    buffer = BytesIO()
+    
+    # Crear el PDF en memoria
+    c = canvas.Canvas(buffer, pagesize=letter)
+
+    # Obtener datos del evento y participante
+    codigo_evento = participante['codigo_evento']
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+
+    titulo_evento = evento.get('nombre', 'Título no disponible')
+    unidad_evento = evento.get('unidad_ejecutora', 'Unidad ejecutora no disponible')
+    modalidad_evento = evento.get('modalidad', 'Modalidad no disponible')
+    ue_evento = evento.get('unidad_ejecutora', 'Unidad ejecutora no disponible')
+    
+    fi_evento = evento.get('fecha_inicio')
+    if isinstance(fi_evento, str):
+        fi_evento = datetime.strptime(fi_evento, '%Y-%m-%d %H:%M:%S')
+    # Formatear la fecha
+    fi_formateada = fi_evento.strftime('%d de %B de %Y')
+    
+    ff_evento = evento.get('fecha_fin')
+
+    # fecha_inicio = datetime.strptime(fi_evento, '%Y-%m-%d')
+    # fecha_fin = datetime.strptime(ff_evento, '%Y-%m-%d')
+
+    # Configurar fuentes y colores
+    c.setFont("Helvetica", 14)
+    c.setFillColor(HexColor('#002060'))  # Color azul oscuro
+    
+    page_width = letter[0]  # Ancho de la página
+    page_height = letter[1]  # Alto de la página
+    
+    # Función para centrar texto
+    def draw_centered_text(y_position, text, font="Helvetica", size=12):
+        c.setFont(font, size)
+        text_width = c.stringWidth(text, font, size)
+        x_position = (page_width - text_width) / 2
+        c.drawString(x_position, y_position, text)
+      
+    # Texto de la constancia
+    draw_centered_text(8.5 * inch, "CAJA DE SEGURO SOCIAL", font='Helvetica-Bold', size=16)
+    draw_centered_text(8.2 * inch, "DIRECCIÓN EJECUTIVA NACIONAL DE SERVICIOS Y PRESTACIONES EN SALUD", size=14)
+    draw_centered_text(7.9 * inch, "DEPARTAMENTO NACIONAL DE DOCENCIA E INVESTIGACIÓN", size=14)
+    # draw_centered_text(7.6 * inch, f"{unidad_evento.upper()}", size=14)
+    draw_centered_text(7.0 * inch, "CONSTANCIA DE ASISTENCIA", font='Helvetica-Bold', size=18)
+
+    # Configurar estilos para los párrafos
+    styles = getSampleStyleSheet()
+    style = styles['BodyText']
+    style.fontSize = 12                     # Tamaño fuente
+    style.leading = 24                      # Interlineado
+    style.textColor = HexColor('#002060')   # Color de fuente
+
+    # Texto de la constancia
+    texto_constancia = (
+        f"Se certifica la asistencia de <b>{participante['nombres']} {participante['apellidos']}</b>, "
+        f"con cédula <b>{participante['cedula']}</b>, en el evento <b>'{titulo_evento}'</b>, realizado en modalidad "
+        f"<b>{modalidad_evento.lower()}</b> y organizado por la unidad ejecutora <b>'{ue_evento}'</b>, "
+        f"el día <b>{fi_formateada}</b> en el horario de 7:00am a 3:00pm."
+    )
+
+    # Crear un párrafo
+    constancia_paragraph = Paragraph(texto_constancia, style)
+
+    # Texto de validación digital
+    texto_validacion = (
+        "La presente constancia es de carácter digital y puede validarse utilizando el código único suministrado: "
+        f"<b>{participante['nanoid']}</b> en la plataforma CertiCSS del Departamento Nacional de Docencia e Investigación."
+    )
+
+    # Crear otro párrafo
+    validacion_paragraph = Paragraph(texto_validacion, style)
+
+    # Texto de cumplimiento normativo
+    texto_reglamento = (
+        "Sirva la presente para cumplir con lo establecido en el Reglamento Interno de nuestra institución."
+    )
+
+    # Crear un tercer párrafo
+    reglamento_paragraph = Paragraph(texto_reglamento, style)
+
+    # Crear un elemento Flowable para el PDF
+    story = [
+        constancia_paragraph,
+        validacion_paragraph,
+        reglamento_paragraph
+    ]
+
+    # Configurar el PDF para usar los párrafos
+    # Sin embargo, para mantener el control sobre la posición, no usaremos SimpleDocTemplate directamente.
+    # En su lugar, dibujaremos los párrafos manualmente en el canvas.
+
+    # Dibujar los párrafos manualmente
+    from reportlab.platypus import FrameBreak, Frame
+    frame = Frame(1 * inch, 6.5 * inch, 7 * inch, 2 * inch, showBoundary=0)  # Ajusta las dimensiones según sea necesario
+
+    # Agregar los párrafos al frame
+    # Sin embargo, para mantener el control total, usaremos canvas para dibujar los párrafos en posiciones específicas.
+
+    # Posicionar manualmente los párrafos
+    margin_left = 1.25 * inch  # Margen izquierdo
+    y_position = 6.5 * inch  # Posición Y inicial
+
+    # Dibujar los párrafos en el canvas
+    for paragraph in story:
+        w, h = paragraph.wrapOn(c, 6 * inch, 2 * inch)  # Ajusta el ancho según sea necesario
+        paragraph.drawOn(c, margin_left, y_position - h)
+        y_position -= h + 0.2 * inch  # Espacio entre párrafos
+
+    # Finalizar el PDF
+    c.save()
+    
+    # Leer el PDF de fondo (plantilla)
+    background_pdf = PdfReader(afiche_path)
+    buffer.seek(0)
+    new_pdf = PdfReader(buffer)
+    
+    # Combinar el PDF generado con la plantilla
+    writer = PdfWriter()
+    for page in range(len(background_pdf.pages)):
+        background_page = background_pdf.pages[page]
+        new_page = new_pdf.pages[0] if page < len(new_pdf.pages) else None
+        
+        if new_page:
+            PageMerge(background_page).add(new_page).render()
+        
+        writer.addPage(background_page)
+    
+    # Guardar el PDF combinado en un buffer en memoria
+    output_buffer = BytesIO()
+    writer.write(output_buffer)
+    output_buffer.seek(0)
+    
+    return output_buffer
+  
+
+@app.route('/constancia/<nanoid>', methods=['GET'])
+def descargar_constancia(nanoid):
+    # Buscar el participante en la base de datos usando el nanoid
+    participante = collection_participantes.find_one({"nanoid": nanoid})
+
+    if not participante:
+        abort(404)  # Si no se encuentra el participante
+
+    # Ruta de la plantilla de la constancia
+    afiche_path = "static/assets/membrete-css-generico.pdf"
+
+    # Llamar a la función para generar el PDF en memoria
+    pdf_buffer = generar_constancia_asistencia(participante, afiche_path)
+
+    # Enviar el PDF al cliente para descarga
+    return send_file(pdf_buffer, as_attachment=True, download_name=f"constancia_{participante['nanoid']}.pdf", mimetype='application/pdf')
 
 ###
 ### Sistema de logs
