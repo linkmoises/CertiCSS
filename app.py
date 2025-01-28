@@ -1438,6 +1438,10 @@ def generar_constancia_asistencia(participante, afiche_path):
     fi_formateada = fi_evento.strftime('%d de %B de %Y')
     
     ff_evento = evento.get('fecha_fin')
+    if isinstance(ff_evento, str):
+        ff_evento = datetime.strptime(ff_evento, '%Y-%m-%d %H:%M:%S')
+    # Formatear la fecha
+    ff_formateada = ff_evento.strftime('%d de %B de %Y')
 
     # fecha_inicio = datetime.strptime(fi_evento, '%Y-%m-%d')
     # fecha_fin = datetime.strptime(ff_evento, '%Y-%m-%d')
