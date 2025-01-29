@@ -4,6 +4,8 @@ WORKDIR /app
 
 COPY app.py .
 
+RUN git rev-parse --short HEAD > version.txt
+
 COPY requirements.txt .
 
 RUN pip install -r requirements.txt
