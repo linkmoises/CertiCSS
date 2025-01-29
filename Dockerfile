@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY app.py .
 
-RUN git rev-parse --short HEAD > version.txt
+# RUN git rev-parse --short HEAD > version.txt ## errores con imagen
 
 COPY requirements.txt .
 
