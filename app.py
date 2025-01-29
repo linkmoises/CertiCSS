@@ -1672,5 +1672,23 @@ def download_latest_log():
     return send_file(latest_log_file, as_attachment=True, download_name=formatted_datetime)
 
 
+###
+###
+###
+# Cargar la versión una sola vez al iniciar la aplicación
+def load_version():
+    try:
+        with open("version.txt", "r") as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        return "Unknown"
+
+VERSION = load_version()  # Variable global con la versión
+
+@app.context_processor
+def inject_version():
+    return dict(version=VERSION)
+
+    
 if __name__ == '__main__':
     app.run(host=app.config['HOST'], port=app.config['PORT'])
