@@ -19,6 +19,7 @@ echo "Versión generada: $(cat version.txt)"
 
 # Construir y levantar los contenedores
 echo "Construyendo y levantando contenedores..."
-docker-compose up --build -d
+#docker-compose up --build -d
+docker-compose up --build --force-recreate
 
 echo "¡Despliegue completado!"
