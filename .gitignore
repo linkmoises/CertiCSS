@@ -168,3 +168,4 @@ tailwindcss
 /static/certificados/*
 /static/uploads/*
 /static/users/*
+version.txt
