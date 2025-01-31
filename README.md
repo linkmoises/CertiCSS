@@ -47,12 +47,12 @@ pip install -r requirements.txt
 python install.py
 ```
 
-6. **Ejecuta la aplicación**:
+8. Después de esta instalación del usuario administrador, podrás continuar corriendo la aplicacion con el comando:
 ```
-python app.py
+sh run-local.sh
 ```
 
-7. **¡Listo!** Abre tu navegador y ve a `http://localhost:5000` para empezar a usar CertiCSS.
+9. **¡Listo!** Abre tu navegador y ve a `http://localhost:5000` para empezar a usar CertiCSS.
 
 ### Opción 2: Usar Docker (para producción o pruebas rápidas)
 
@@ -73,7 +73,7 @@ cd CertiCSS
 
 Ejecuta el siguiente comando para construir y levantar la aplicación con Docker:
 ```
-docker-compose up --build
+sh run-docker.sh
 ```
 
 4. **¡Eso es todo!** La aplicación estará disponible en `http://localhost:5000`, y MongoDB estará corriendo en segundo plano.
