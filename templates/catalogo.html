@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CertiCSS - Eventos académicos de la Caja de Seguro Social</title>
+    <title>CertiCSS - Catálogo de Eventos Académicos</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -84,8 +84,8 @@
     <!--====== CARDS ======-->
     <section class="bg-white">
         <div class="text-center">
-            <h1 class="text-3xl font-bold text-gray-800 sm:text-4xl dark:text-white">Próximos Eventos</h1>
-            <p class="mt-1 text-gray-600 dark:text-neutral-400">Un vistazo a los eventos que se avecinan</p>
+            <h1 class="text-3xl font-bold text-gray-800 sm:text-4xl dark:text-white">Catálogo de Eventos Académicos</h1>
+            <p class="mt-1 text-gray-600 dark:text-neutral-400">Un vistazo a todos los eventos avalados y organizados por DENADOI</p>
         </div>
 
         <!-- Tarjetas de evento -->
@@ -139,14 +139,20 @@
         <!-- End Tarjetas de evento -->
 
         <div class="text-center mb-12">
-            <div class="inline-block bg-white border shadow-sm rounded-full dark:bg-neutral-900 dark:border-neutral-800">
-                <div class="py-3 px-4 flex items-center gap-x-2">
-                <p class="text-gray-600 dark:text-neutral-400">¿Quieres ver más eventos?</p>
-                <a class="inline-flex items-center gap-x-1.5 text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium dark:text-blue-500" href="/catalogo/1">
-                    Visita el catálogo completo
-                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-                </a>
-                </div>
+            <div class="inline-flex gap-x-2">
+                {% if page > 1 %}
+                    <a href="{{ url_for('catalogo', page=page-1) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                        Anterior
+                    </a>
+                {% endif %}
+                <p class="px-3 py-2 text-sm text-gray-600">Página {{ page }} de {{ total_pages }}</p>
+                {% if page < total_pages %}
+                    <a href="{{ url_for('catalogo', page=page+1) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                        Siguiente
+                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                    </a>
+                {% endif %}
             </div>
         </div>
     </section>

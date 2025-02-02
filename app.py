@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template, redirect, url_for, flash, session
+from flask import Flask, jsonify, request, render_template, redirect, url_for, flash, session, abort
 from flask_login import LoginManager, login_user, UserMixin, logout_user, current_user, login_required
 from pymongo import MongoClient
 from flask_pymongo import PyMongo
@@ -520,6 +520,29 @@ def home():
 
 
 ###
+### Catálogo eventos
+###
+@app.route('/catalogo/<int:page>', methods=['GET'])
+def catalogo(page=1):
+    per_page = 3  # Número máximo de eventos por página
+    skip = (page - 1) * per_page
+
+    # Contar total de eventos
+    total_eventos = collection_eventos.count_documents({})  # Contar el total de eventos
+    total_pages = (total_eventos + per_page - 1) // per_page  # Calcular el total de páginas
+
+    # Verificar si la página solicitada es válida
+    if page < 1 or page > total_pages:
+        abort(404)  # Forzar un error 404 si la página no existe
+
+    # Obtener eventos paginados
+    eventos = collection_eventos.find().sort("fecha_inicio", -1).skip(skip).limit(per_page)
+
+    return render_template('catalogo.html', eventos=eventos, page=page, total_pages=total_pages)
+
+
+
+###
 ### Dashboard
 ###
 @app.route('/tablero')
@@ -589,7 +612,7 @@ def registrar_participante(codigo_evento):
     evento = collection_eventos.find_one({"codigo": codigo_evento})
     
     if evento is None:
-        return redirect(url_for('page_not_found'))  # Redirigir a la página 404 si el código no existe
+        abort(404)
 
     # Verificar si el evento está cerrado
     if evento.get('estado_evento') == 'cerrado':
