@@ -40,16 +40,21 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. Asegúrate de tener MongoDB instalado y en ejecución. Si no lo tienes, puedes instalarlo siguiendo [estas instrucciones](https://www.mongodb.com/docs/manual/installation/).
+4. **Asegúrate de tener MongoDB instalado y en ejecución**. Si no lo tienes, puedes instalarlo siguiendo [estas instrucciones](https://www.mongodb.com/docs/manual/installation/).
 
-5. **Crear el usuario administrador**:
+5. **Crear el usuario administrador** (solo es necesario realizar la primera vez):
 ```
 python install.py
 ```
 
 8. Después de esta instalación del usuario administrador, podrás continuar corriendo la aplicacion con el comando:
 ```
-sh run-local.sh
+chmod +x run-local.sh
+./run-local.sh
+```
+o puedes ejecutar directamente la aplicación:
+```
+python app.py
 ```
 
 9. **¡Listo!** Abre tu navegador y ve a `http://localhost:5000` para empezar a usar CertiCSS.
@@ -73,10 +78,11 @@ cd CertiCSS
 
 Ejecuta el siguiente comando para construir y levantar la aplicación con Docker:
 ```
-sh run-docker.sh
+chmod +x run-docker.sh
+./run-docker.sh
 ```
 
-4. **¡Eso es todo!** La aplicación estará disponible en `http://localhost:5000`, y MongoDB estará corriendo en segundo plano.
+4. **¡Eso es todo!** La aplicación estará disponible en `http://localhost:5000`, MongoDB estará corriendo en segundo plano y ya podrás usar CertiCSS.
 
 ## ¿Quieres contribuir? ¡Genial! 🚀
 
