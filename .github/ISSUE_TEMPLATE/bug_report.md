@@ -1,3 +1,12 @@
+---
+name: Bug report
+about: Plantilla de reporte de bugs
+title: ''
+labels: bug
+assignees: ''
+
+---
+
 ### Descripción
 [Describe brevemente el objetivo o problema.]
 
