@@ -514,7 +514,10 @@ def salir():
 @app.route('/')
 def home():
     inicio_hoy = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    eventos_futuros = collection_eventos.find({"fecha_inicio": {"$gte": inicio_hoy}}).sort("fecha_inicio").limit(6)
+    eventos_futuros = collection_eventos.find({
+        "fecha_inicio": {"$gte": inicio_hoy},
+        "estado_evento": {"$ne": "borrador"}
+    }).sort("fecha_inicio").limit(3)
 
     return render_template('home.html', eventos=eventos_futuros)
 
@@ -524,7 +527,7 @@ def home():
 ###
 @app.route('/catalogo/<int:page>', methods=['GET'])
 def catalogo(page=1):
-    per_page = 3  # Número máximo de eventos por página
+    per_page = 15  # Número máximo de eventos por página
     skip = (page - 1) * per_page
 
     # Contar total de eventos
@@ -536,7 +539,9 @@ def catalogo(page=1):
         abort(404)  # Forzar un error 404 si la página no existe
 
     # Obtener eventos paginados
-    eventos = collection_eventos.find().sort("fecha_inicio", -1).skip(skip).limit(per_page)
+    eventos = collection_eventos.find(
+        {"estado_evento": {"$ne": "borrador"}}
+    ).sort("fecha_inicio", -1).skip(skip).limit(per_page)
 
     return render_template('catalogo.html', eventos=eventos, page=page, total_pages=total_pages)
 
@@ -1248,6 +1253,14 @@ def plantillas():
 @app.route('/politica-privacidad', methods=['GET'])
 def politica_privacidad():
     return render_template('politica_privacidad.html')
+
+
+###
+### Nosotros
+###
+@app.route('/nosotros', methods=['GET'])
+def nosotros():
+    return render_template('nosotros.html')
 
 
 ###

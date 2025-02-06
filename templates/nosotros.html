@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CertiCSS - Eventos académicos de la Caja de Seguro Social</title>
+    <title>CertiCSS - Nosotros</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -83,72 +83,52 @@
     
     <!--====== CARDS ======-->
     <section class="bg-white">
-        <div class="text-center">
-            <h1 class="text-3xl font-bold text-gray-800 sm:text-4xl dark:text-white">Próximos Eventos</h1>
-            <p class="mt-1 text-gray-600 dark:text-neutral-400">Un vistazo a los eventos que se avecinan</p>
-        </div>
-
-        <!-- Tarjetas de evento -->
+        <!-- Team -->
         <div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
+            <!-- Title -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800 sm:text-4xl dark:text-white">Equipo DENADOI</h1>
+                <p class="mt-1 text-gray-600 dark:text-neutral-400">quienes hacen posible la educación continua</p>
+            </div>
+            <!-- End Title -->
+
             <!-- Grid -->
-            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% for evento in eventos %}
-                <!-- Card -->
-                <div class="group flex flex-col h-full bg-white border border-gray-200 shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70">
-                    <div class="relative pt-[100%] sm:pt-[100%] overflow-hidden rounded-t-xl">
-{% if evento.afiche_750 %}
-                        <img class="size-full absolute top-0 start-0 object-cover group-hover:scale-105 group-focus:scale-105 transition-transform duration-500 ease-in-out rounded-t-xl" src="{{ url_for('static', filename='uploads/' + evento.afiche_750.split('/')[-1]) }}" alt="{{ evento.nombre }}">
-{% else %}
-                        <img class="size-full absolute top-0 start-0 object-cover group-hover:scale-105 group-focus:scale-105 transition-transform duration-500 ease-in-out rounded-t-xl" src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}" alt="{{ evento.nombre }}">
-{% endif %}
-                        <span class="absolute top-0 end-0 rounded-se-xl rounded-es-xl text-xs font-medium bg-gray-800 text-white py-1.5 px-3 dark:bg-neutral-900">
-                            {{ evento.modalidad }}
-                        </span>
-                      </div>
-                    <div class="p-4 md:p-6">
-                        <span class="block mb-1 text-xs font-semibold uppercase text-blue-600 dark:text-blue-500">
-                            {{ evento.tipo }} <!-- Tipo de evento -->
-                        </span>
-                        <h3 class="text-xl font-semibold text-gray-800 dark:text-neutral-300 dark:hover:text-white">
-                            {{ evento.nombre }} <!-- Nombre del evento -->
-                        </h3>
-                        <p class="mt-3 text-gray-500 dark:text-neutral-500">
-                            Fecha: {% if evento.fecha_inicio == evento.fecha_fin %}{{ evento.fecha_inicio.strftime('%d de %B de %Y') }}{% elif evento.fecha_fin %}{{ evento.fecha_inicio.strftime('%d') }} - {{ evento.fecha_fin.strftime('%d de %B de %Y') }}{% else %}{{ evento.fecha_inicio.strftime('%d de %B de %Y') }}{% endif %} <!-- Fecha de inicio -->
-                        </p>
-                    </div>
-                    <div class="mt-auto flex border-t border-gray-200 divide-x divide-gray-200 dark:border-neutral-700 dark:divide-neutral-700">
-{% if evento.programa %}
-                        <a class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-es-xl bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800" href="{{ url_for('resumen_evento', codigo_evento=evento.codigo) }}">
-                            Detalles del evento
-                        </a>
-                        <a class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-ee-xl bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800" href="{{ evento.programa }}">
-                            Descargar programa
-                        </a>
-{% else %}
-                        <a class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-b-xl bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800" href="{{ url_for('resumen_evento', codigo_evento=evento.codigo) }}">
-                            Detalles del evento
-                        </a>
-{% endif %}                        
+            <div class="justify-center grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-12">
+                <div class="text-center">
+                    <div>
+                        <img class="rounded-xl sm:size-48 lg:size-60 mx-auto" src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=320&h=320&q=80" alt="Avatar">
+                        <div class="mt-2 sm:mt-4">
+                            <h3 class="text-sm font-medium text-gray-800 sm:text-base lg:text-lg dark:text-neutral-200">
+                            David Forren
+                            </h3>
+                            <p class="text-xs text-gray-600 sm:text-sm lg:text-base dark:text-neutral-400">
+                            Founder / CEO
+                            </p>
+                        </div>
                     </div>
                 </div>
-                <!-- End Card -->
-                {% endfor %}
+                <!-- End Col -->
+
+                <div class="text-center">
+                    <div>
+                        <img class="rounded-xl sm:size-48 lg:size-60 mx-auto" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=320&h=320&q=80" alt="Avatar">
+                        <div class="mt-2 sm:mt-4">
+                            <h3 class="text-sm font-medium text-gray-800 sm:text-base lg:text-lg dark:text-neutral-200">
+                            David Forren
+                            </h3>
+                            <p class="text-xs text-gray-600 sm:text-sm lg:text-base dark:text-neutral-400">
+                            Founder / CEO
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Col -->
+                
             </div>
             <!-- End Grid -->
-        </div>
-        <!-- End Tarjetas de evento -->
 
-        <div class="text-center mb-12">
-            <div class="inline-block bg-white border shadow-sm rounded-full dark:bg-neutral-900 dark:border-neutral-800">
-                <div class="py-3 px-4 flex items-center gap-x-2">
-                <p class="text-gray-600 dark:text-neutral-400">¿Quieres ver más eventos?</p>
-                <a class="inline-flex items-center gap-x-1.5 text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium dark:text-blue-500" href="/catalogo/1">
-                    Visita el catálogo completo
-                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-                </a>
-                </div>
-            </div>
         </div>
+        <!-- End Team -->
     </section>
 
     <!--====== PROCESO ======-->
