@@ -867,6 +867,7 @@ def crear_evento():
     if request.method == 'POST':
         nombre = request.form['nombre']
         unidad_ejecutora = request.form['unidad_ejecutora']
+        lugar = request.form['lugar']
         tipo = request.form['tipo']
         modalidad = request.form['modalidad']
         descripcion = request.form['descripcion']
@@ -934,6 +935,7 @@ def crear_evento():
             'nombre': nombre,
             'codigo': codigo,
             'unidad_ejecutora': unidad_ejecutora,
+            'lugar': lugar,
             'tipo': tipo,
             'modalidad': modalidad,
             'descripcion': descripcion,
@@ -970,6 +972,7 @@ def editar_evento(codigo_evento):
         # Recoger los datos del formulario
         nombre = request.form['nombre']
         unidad_ejecutora = request.form['unidad_ejecutora']
+        lugar = request.form['lugar']
         tipo = request.form['tipo']
         modalidad = request.form['modalidad']
         descripcion = request.form['descripcion']
@@ -1033,6 +1036,7 @@ def editar_evento(codigo_evento):
             {"$set": {
                 'nombre': nombre,
                 'unidad_ejecutora': unidad_ejecutora,
+                'lugar': lugar,
                 'tipo': tipo,
                 'modalidad': modalidad,
                 'descripcion': descripcion,
