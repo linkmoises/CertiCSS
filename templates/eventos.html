@@ -125,7 +125,7 @@
                                         </p>
                                         <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
                                             {{ evento.unidad_ejecutora }}
-                                        </span> {{ evento.autor }}
+                                        </span>
                                     </div>
                                 </td>
                                 <td class="h-px w-72 min-w-72">
@@ -158,7 +158,7 @@
                                 </td>
                                 <td class="size-px whitespace-nowrap">
                                     <div class="px-6 py-2">
-{% if evento.estado_evento != 'cerrado' or current_user.rol == 'administrador' %}
+{% if current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor)) %}
                                         <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('registrar_participante', codigo_evento=evento.codigo) }}">
                                             Añadir participante
                                         </a><br>
@@ -176,7 +176,7 @@
                                         <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('resumen_evento', codigo_evento=evento.codigo) }}">
                                             Resumen
                                         </a><br />
-{% if evento.estado_evento != 'cerrado' or current_user.rol == 'administrador' %}
+{% if current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor)) %}  
                                         <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('editar_evento', codigo_evento=evento.codigo) }}">
                                             Editar
                                         </a><br />
