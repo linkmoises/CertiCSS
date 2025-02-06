@@ -947,7 +947,8 @@ def crear_evento():
             'fondo': fondo_path if fondo_file else None,
             'programa': programa_path if programa_file else None,
             'certificado': certificado_path if certificado_file else None,
-            'timestamp': timestamp
+            'timestamp': timestamp,
+            'autor': current_user.id
         })
         log_event(f"Usuario [{current_user.email}] ha creado el evento {codigo} exitosamente.")
         return redirect(url_for('crear_evento'))  # Redirigir a la lista de eventos
