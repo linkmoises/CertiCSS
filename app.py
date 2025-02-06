@@ -1049,7 +1049,6 @@ def editar_evento(codigo_evento):
                 'fondo': fondo_path,
                 'programa': programa_path,
                 'certificado': certificado_path,
-                'autor': current_user.id ## variable transitoria
             }}
         )
         
@@ -1084,7 +1083,6 @@ def cerrar_evento(codigo_evento):
         {"$set": {"estado_evento": "cerrado"}}
     )
     log_event(f"Usuario [{current_user.email}] cerró el evento {codigo_evento}.")
-    flash("Evento cerrado con éxito", "success")
     return redirect(url_for('listar_eventos'))  # Redirigir a la lista de eventos
 
 
