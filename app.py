@@ -1049,6 +1049,7 @@ def editar_evento(codigo_evento):
                 'fondo': fondo_path,
                 'programa': programa_path,
                 'certificado': certificado_path,
+                'autor': current_user.id ## variable transitoria
             }}
         )
         
