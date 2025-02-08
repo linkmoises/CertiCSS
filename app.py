@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template, redirect, url_for, flash, session, abort
+from flask import Flask, jsonify, request, render_template, redirect, url_for, flash, session, abort, send_from_directory
 from flask_login import LoginManager, login_user, UserMixin, logout_user, current_user, login_required
 from pymongo import MongoClient
 from flask_pymongo import PyMongo
@@ -591,7 +591,7 @@ def tablero_coordinadores():
 
     num_eventos = len(eventos_prox_list)
 
-    usuarios_recientes = list(collection_usuarios.find({"rol": {"$ne": "administrador"}}).sort('fecha_registro', -1).limit(5))
+    usuarios_recientes = list(collection_usuarios.find({"rol": {"$ne": "administrador"}}).sort("fecha_registro", -1).limit(5))
 
     num_usuarios_recientes = len(usuarios_recientes)
     
@@ -1763,6 +1763,14 @@ VERSION = load_version()  # Variable global con la versión
 def inject_version():
     return dict(version=VERSION)
 
-    
+
+###
+### robots.txt
+###
+@app.route("/robots.txt")
+def robots():
+    return send_from_directory(app.static_folder, "robots.txt")
+
+
 if __name__ == '__main__':
     app.run(host=app.config['HOST'], port=app.config['PORT'])
