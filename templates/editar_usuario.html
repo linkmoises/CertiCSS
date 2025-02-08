@@ -151,6 +151,7 @@
                                 <option value="coordinador-departamental" {% if usuario.rol == 'coordinador-departamental' %}selected{% endif %}>Coordinador de Docencia Departamental</option>
                                 <option value="coordinador-local" {% if usuario.rol == 'coordinador-local' %}selected{% endif %}>Coordinador Local de Docencia</option>
                                 <option value="coordinador-regional" {% if usuario.rol == 'coordinador-regional' %}selected{% endif %}>Coordinador Regional de Docencia</option>
+                                <option value="simulacion" {% if usuario.rol == 'simulacion' %}selected{% endif %}>Centro Avanzado de Simulación</option>
                             </select>
 {% if current_user.rol == 'administrador' %}
                             <div class="py-4 gap-x-2 text-sm">

@@ -33,6 +33,8 @@ collection_usuarios = db['usuarios']
 def inject_base_url():
     return dict(BASE_URL=app.config['BASE_URL'])
 
+app.jinja_env.globals['now'] = datetime.now                 # Variable now para fecha actual
+
 
 ###
 ### Login
@@ -983,7 +985,7 @@ def crear_evento():
             'autor': current_user.id
         })
         log_event(f"Usuario [{current_user.email}] ha creado el evento {codigo} exitosamente.")
-        return redirect(url_for('crear_evento'))  # Redirigir a la lista de eventos
+        return redirect(url_for('mis_eventos'))  # Redirigir a la lista de eventos
 
     return render_template('crear_evento.html')
 
@@ -1085,7 +1087,7 @@ def editar_evento(codigo_evento):
         )
         
         log_event(f"Usuario [{current_user.email}] ha editado el evento {codigo_evento}.")
-        return redirect(url_for('crear_evento'))  # Redirigir a la lista de eventos
+        return redirect(url_for('mis_eventos'))  # Redirigir a la lista de eventos
 
     return render_template('editar_evento.html', evento=evento)
 

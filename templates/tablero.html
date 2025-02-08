@@ -443,7 +443,7 @@
                                 </td>
                                 <td class="w-80 min-w-80">
                                     <div class="px-6 py-3">
-                                    <span class="block text-sm font-semibold text-gray-800">{% if usuario.rol == 'coordinador-regional' %}Coordinador Regional de Docencia e Investigación{% endif %}{% if usuario.rol == 'coordinador-local' %}Coordinador Local de Docencia e Investigación{% endif %}{% if usuario.rol == 'coordinador-departamental' %}Coordinador Departamental de Docencia{% endif %}{% if usuario.rol == 'denadoi' %}{{ usuario.cargo }}{% endif %}</span>
+                                    <span class="block text-sm font-semibold text-gray-800">{% if usuario.rol == 'coordinador-regional' %}Coordinador Regional de Docencia e Investigación{% endif %}{% if usuario.rol == 'coordinador-local' %}Coordinador Local de Docencia e Investigación{% endif %}{% if usuario.rol == 'coordinador-departamental' %}Coordinador Departamental de Docencia{% endif %}{% if usuario.rol in ['simulacion', 'denadoi'] %}{{ usuario.cargo }}{% endif %}</span>
                                     <span class="block text-sm italic text-gray-800">{% if usuario.rol == 'coordinador-regional' %}
                                         {% set regiones = {
                                             'css01': 'Región de Salud de Bocas Del Toro',
@@ -460,6 +460,7 @@
                                         {{ regiones[usuario.region] if usuario.region in regiones else usuario.region }}
                                     {% endif %}</span>
                                     {% if usuario.rol == "denadoi" %}<span class="block text-sm italic text-gray-500">Departamento Nacional de Docencia e Investigación</span>{% endif %}
+                                    {% if usuario.rol == 'simulacion' %}<span class="block text-sm italic text-gray-500">Centro Avanzado de Simulacion</span>{% endif %}
                                     <span class="block text-sm text-gray-500">{{ usuario.unidad_ejecutora }}</span>
                                     {% if usuario.rol == 'coordinador-departamental' %}<span class="block text-sm italic text-gray-500">{{ usuario.departamento }}</span>{% endif %}
                                     </div>

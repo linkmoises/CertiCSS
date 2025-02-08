@@ -34,11 +34,13 @@
                                         {{ usuario.nombres }} {{ usuario.apellidos }}
                                     </h2>
                                     <span class="block text-sm font-semibold text-gray-800">
+                                    {% if usuario.rol in ['simulacion', 'denadoi'] %}{{ usuario.cargo }} - {% endif %}
                                     {% set roles = {
                                         'coordinador-regional': 'Coordinador Regional de Docencia e Investigación -',
                                         'coordinador-local': 'Coordinador Local de Docencia e Investigación',
                                         'coordinador-departamental': 'Coordinador Departamental de Docencia',
-                                        'denadoi': 'Departamento Nacional de Docencia e Investigación'
+                                        'denadoi': 'Departamento Nacional de Docencia e Investigación',
+                                        'simulacion': 'Centro de Simulación Avanzada',
                                     } %}
                                     {{ roles[usuario.rol] if usuario.rol in roles else '' }}
                                     {% if usuario.rol == 'coordinador-regional' %}
