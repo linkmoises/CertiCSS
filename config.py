@@ -1,6 +1,7 @@
 import os
 import random
 from datetime import timedelta
+import locale
 
 ###
 ### Este es el archivo de configuración de CertiCSS, permite trabajar con mínimos cambios
@@ -32,3 +33,6 @@ if env == 'production':
     config = ProductionConfig()
 else:
     config = DevelopmentConfig()
+
+# Locale de Panamá para mostrar fechas en español
+locale.setlocale(locale.LC_TIME, "es_PA")
