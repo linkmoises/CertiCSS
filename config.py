@@ -35,4 +35,4 @@ else:
     config = DevelopmentConfig()
 
 # Locale de Panamá para mostrar fechas en español
-locale.setlocale(locale.LC_TIME, "es_PA")
+locale.setlocale(locale.LC_TIME, "es_PA.UTF-8")

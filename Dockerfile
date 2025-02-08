@@ -2,9 +2,17 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-COPY app.py .
+# Instalar locales y generar el español de Panamá
+RUN apt-get update && apt-get install -y locales && \
+    echo "es_PA.UTF-8 UTF-8" >> /etc/locale.gen && \
+    locale-gen && \
+    apt-get clean
 
-# RUN git rev-parse --short HEAD > version.txt ## errores con imagen
+# Configurar las variables de entorno para que Python use el locale correcto
+ENV LANG=es_PA.UTF-8  
+ENV LC_ALL=es_PA.UTF-8  
+
+COPY app.py .
 
 COPY requirements.txt .
 
