@@ -18,7 +18,11 @@
 
                 <div class="sm:order-2">
                     <div class="relative pt-[50%] sm:pt-[100%]">
+{% if afiche_url %}
                         <img class="size-full absolute top-0 start-0 object-cover rounded-r-xl" src="{{ afiche_url }}" alt="{{ nombre_evento }}">
+{% else %}
+                        <img class="size-full absolute top-0 start-0 object-cover rounded-r-xl" src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}" alt="{{ nombre_evento }}">
+{% endif %}
                     </div>
                 </div>
                 <!-- End Col -->

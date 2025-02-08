@@ -32,8 +32,11 @@ fi
 
 # Generar version.txt
 echo "Generando version.txt..."
-git rev-parse --short HEAD > version.txt
-echo "Versión generada: $(cat version.txt)"
+BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+COMMIT_HASH=$(git rev-parse --short HEAD)
+VERSION="${BRANCH_NAME}-${COMMIT_HASH}"
+echo "$VERSION" > version.txt
+echo "Versión generada: $VERSION"
 
 # Manejar el entorno virtual
 if [ "$FORCE_NEW_VENV" = true ]; then

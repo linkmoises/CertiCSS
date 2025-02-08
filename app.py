@@ -710,12 +710,15 @@ def redirigir_ruta_corta(codigo_evento):
 def registrar_ponente(codigo_evento):
     evento = collection_eventos.find_one({"codigo": codigo_evento})
 
+    afiche_750 = evento.get('afiche_750')
+    afiche_url = url_for('static', filename='uploads/' + afiche_750.split('/')[-1]) if afiche_750 else None
+
     # Verificar si el evento está cerrado
     if evento.get('estado_evento') == 'cerrado':
         return render_template('registrar_ponente.html', 
             evento_cerrado=True,
             nombre_evento=evento['nombre'],
-            afiche_url=url_for('static', filename='uploads/' + evento['afiche_750'].split('/')[-1])
+            afiche_url=afiche_url
         )
 
     if request.method == 'POST':
@@ -741,13 +744,13 @@ def registrar_ponente(codigo_evento):
         })
 
         flash("Ponente registrado con éxito.", "success")
-        log_event(f"Usuario [{current_user.email}] registró al { rol } { cedula } en el evento { codigo_evento }.")
+        log_event(f"Usuario [{current_user.email}] registró al {rol} {cedula} en el evento {codigo_evento}.")
         return redirect(url_for('listar_participantes', codigo_evento=codigo_evento))
 
     return render_template('registrar_ponente.html',
         codigo_evento=codigo_evento,
         evento=evento,
-        afiche_url=url_for('static', filename='uploads/' + evento['afiche_750'].split('/')[-1])
+        afiche_url=afiche_url
     )
 
 
