@@ -372,6 +372,7 @@ def editar_usuario(user_id):
 
             # Guardar la imagen
             image_resized.save(foto_path, 'JPEG')
+            updated_user_data["foto"] = foto_filename
 
         # Solo actualizar la contraseña si se proporciona
         if password:
@@ -390,9 +391,6 @@ def editar_usuario(user_id):
 
     # Obtener los datos del usuario
     usuario = collection_usuarios.find_one({"_id": ObjectId(user_id)})
-
-    #foto_url = url_for('static', filename=f"usuarios/{usuario.get('foto', '')}") if usuario.get('foto') else None
-    print(usuario)
 
     if usuario.get('foto'):
         foto_url = f"/static/usuarios/{usuario['foto']}"
