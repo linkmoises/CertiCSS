@@ -50,7 +50,8 @@ def load_user(user_id):
             email=user_data['email'], 
             password=user_data['password'], 
             rol=user_data['rol'], 
-            nombres=user_data['nombres']
+            nombres=user_data['nombres'],
+            foto=user_data.get('foto')
         )
         user.id = str(user_data['_id'])
         return user
@@ -58,11 +59,12 @@ def load_user(user_id):
 
 
 class User(UserMixin):
-    def __init__(self, email, password, rol, nombres):
+    def __init__(self, email, password, rol, nombres, foto=None):
         self.email = email
         self.password = password
         self.rol = rol
         self.nombres = nombres
+        self.foto = foto
         self.id = None
 
     def is_authenticated(self):
