@@ -287,6 +287,9 @@ def listar_usuarios(page=1):
     usuarios_cursor = collection_usuarios.find({"rol": {"$ne": "administrador"}}).sort("fecha_registro", -1).skip((page - 1) * usuarios_por_pagina).limit(usuarios_por_pagina)
     usuarios = list(usuarios_cursor)
 
+    for usuario in usuarios:
+        usuario['foto_url'] = f"/static/usuarios/{usuario['foto']}" if usuario.get('foto') else "/static/assets/user-avatar.png"
+
     return render_template('usuarios.html', 
         usuarios=usuarios, 
         page=page, 
@@ -442,12 +445,14 @@ def eliminar_foto(user_id):
 def mostrar_usuario(user_id):
     # Obtener los datos del usuario desde la base de datos usando el user_id
     usuario = collection_usuarios.find_one({"_id": ObjectId(user_id)})
+
+    foto_url = f"/static/usuarios/{usuario['foto']}" if usuario.get('foto') else None
     
     if not usuario:
         flash("Usuario no encontrado", "danger")
         return redirect(url_for('listar_usuarios'))  # Redirigir a la lista de usuarios si no se encuentra
 
-    return render_template('perfil_usuario.html', usuario=usuario)
+    return render_template('perfil_usuario.html', usuario=usuario, foto_url=foto_url)
 
 
 ###
@@ -668,6 +673,9 @@ def tablero_coordinadores():
     usuarios_recientes = list(collection_usuarios.find({"rol": {"$ne": "administrador"}}).sort("fecha_registro", -1).limit(5))
 
     num_usuarios_recientes = len(usuarios_recientes)
+
+    for usuario in usuarios_recientes:
+        usuario['foto_url'] = f"/static/usuarios/{usuario['foto']}" if usuario.get('foto') else "/static/assets/user-avatar.png"
     
     return render_template('tablero.html', 
         eventos=eventos_prox_list, 
@@ -680,7 +688,7 @@ def tablero_coordinadores():
         total_usuarios=total_usuarios, 
         total_eventos=total_eventos, 
         total_ponentes=total_ponentes, 
-        total_participantes=total_participantes
+        total_participantes=total_participantes,
     )
 
 

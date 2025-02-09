@@ -84,7 +84,7 @@
                                     <td class="size-px w-52 min-w-52">
                                         <div class="ps-6 py-3">
                                         <div class="flex items-center gap-x-3">
-                                            <img class="shrink-0 size-[38px] rounded-full" src="{{ url_for('static', filename='assets/user-avatar.png') }}" alt="Avatar">
+                                            <img class="shrink-0 size-[38px] rounded-full" src="{{ usuario.foto_url }}" alt="Avatar de {{ usuario.nombres }} {{ usuario.apellidos }}">
                                             <div class="grow">
                                             <span class="block text-sm font-semibold text-gray-800">{{ usuario.nombres }} {{ usuario.apellidos }}</span>
                                             <span class="block text-sm text-gray-500">{{ usuario.email }}</span>

@@ -26,7 +26,11 @@
                             <div>
                 
                                 <div class="items-center flex flex-col sm:flex-row sm:items-center sm:gap-x-5">
+{% if foto_url %}
+                                    <img class="-mt-24 relative z-10 inline-block size-32 mx-auto sm:mx-0 rounded-full ring-4 ring-white" src="{{ foto_url }}" alt="Avatar de {{ usuario.nombre}} {{ usuario.apellidos }}">
+{% else %}
                                     <img class="-mt-24 relative z-10 inline-block size-32 mx-auto sm:mx-0 rounded-full ring-4 ring-white" src="{{ url_for('static', filename='assets/user-avatar.png') }}" alt="Avatar">
+{% endif %}
                                 </div>
 
                                 <div class="space-y-2 mt-2">
