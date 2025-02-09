@@ -19,7 +19,7 @@
                     </p>
                 </div>
             
-                <form method="POST">
+                <form method="POST" enctype="multipart/form-data">
                     <!-- Grid -->
                     <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
                                 
@@ -72,6 +72,36 @@
                 
                         <div class="sm:col-span-9">
                             <input id="cedula" name="cedula" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Escriba su número de cédula..." value="{{ usuario.cedula }}">
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-3">
+                            <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                Fotografía de perfil
+                                <span class="text-sm text-gray-400 dark:text-neutral-600">
+                                    (tamaño mínimo 750x750 px)
+                                </span>
+                            </label>
+                        </div>
+                        <!-- End Col -->
+                
+                        <div class="sm:col-span-9">
+                            <div class="flex items-center gap-5">
+{% if foto_url %}
+                                <img class="inline-block size-16 rounded-full ring-2 ring-white dark:ring-neutral-900" src="{{ foto_url }}" alt="Avatar">
+{% else %}
+                                <img class="inline-block size-16 rounded-full ring-2 ring-white dark:ring-neutral-900" src="{{ url_for('static', filename='assets/image-art.png') }}" alt="Avatar">
+{% endif %}
+                                <div class="flex gap-x-2">
+                                    <div class="upload-container">
+                                        <input type="file" name="foto" id="foto" class="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400
+                                        file:bg-gray-50 file:border-0
+                                        file:bg-gray-100 file:me-4
+                                        file:py-2 file:px-4
+                                        dark:file:bg-neutral-700 dark:file:text-neutral-400" accept=".jpg, .jpeg" />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <!-- End Col -->
 

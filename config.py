@@ -11,10 +11,12 @@ class Config:
     # Configuraciones comunes
     SECRET_KEY = os.getenv('SECRET_KEY', os.urandom(24))            # Clave secreta aleatoria por defecto
     UPLOAD_FOLDER = 'static/uploads'                                # Carpeta para subir archivos
+    USERS_FOLDER = 'static/usuarios'                                # Carpeta para fotos de perfil de usuarios
     BASE_URL = os.getenv('BASE_URL', 'http://localhost:5000/')      # URL base por defecto
     HOST = os.getenv('FLASK_HOST', '0.0.0.0')                       # Host por defecto
     PORT = int(os.getenv('FLASK_PORT', 5000))                       # Puerto por defecto
     PERMANENT_SESSION_LIFETIME = timedelta(minutes=30)              # duración de sesión a 30 minutos
+    ALLOWED_EXTENSIONS = ('png', 'jpg', 'jpeg', 'gif')
 
 
 class DevelopmentConfig(Config):

@@ -192,7 +192,6 @@ def registro():
             'activo': True,
             'timestamp': timestamp
         })
-        flash('Registro exitoso. Ahora el usuario puede iniciar sesión.')
         log_event(f"Usuario [{current_user.email}] registró un nuevo usuario: {email}.")
         return redirect(url_for('listar_usuarios'))
 
@@ -297,7 +296,7 @@ def listar_usuarios(page=1):
 
 
 ###
-###
+### Edición de perfil de usuario
 ###
 @app.route('/editar_usuario/<user_id>', methods=['GET', 'POST'])
 @login_required
@@ -340,6 +339,40 @@ def editar_usuario(user_id):
             "subjefe": subjefe,
         }
 
+        # Procesar la foto de perfil
+        foto_file = request.files.get('foto')
+        if foto_file and allowed_file(foto_file.filename):
+            foto_filename = f"{user_id}-foto.jpg"
+            foto_path = os.path.join(app.config['USERS_FOLDER'], foto_filename)
+
+            image = Image.open(foto_file)
+            if image.mode != 'RGB':
+                image = image.convert('RGB')
+
+            # Redimensionar y recortar la imagen a 750x750 píxeles
+            width, height = image.size
+
+            # Calcular el tamaño del recorte
+            if width > height:
+                # La imagen es más ancha que alta
+                left = (width - height) / 2
+                top = 0
+                right = (width + height) / 2
+                bottom = height
+            else:
+                # La imagen es más alta que ancha
+                left = 0
+                top = (height - width) / 2
+                right = width
+                bottom = (height + width) / 2
+
+            # Recortar la imagen
+            image_cropped = image.crop((left, top, right, bottom))
+            image_resized = image_cropped.resize((750, 750), Image.Resampling.LANCZOS)
+
+            # Guardar la imagen
+            image_resized.save(foto_path, 'JPEG')
+
         # Solo actualizar la contraseña si se proporciona
         if password:
             updated_user_data["password"] = generate_password_hash(password)  # Asegúrate de importar y usar esta función
@@ -357,7 +390,44 @@ def editar_usuario(user_id):
 
     # Obtener los datos del usuario
     usuario = collection_usuarios.find_one({"_id": ObjectId(user_id)})
-    return render_template('editar_usuario.html', usuario=usuario)
+
+    foto_url = url_for('static', filename=f"usuarios/{usuario.get('foto', '')}") if usuario.get('foto') else None
+
+    return render_template('editar_usuario.html', usuario=usuario, foto_url=foto_url)
+
+
+def allowed_file(filename):
+    """Verifica si la extensión del archivo está permitida."""
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
+
+###
+### Eliminar foto de perfil
+###
+@app.route('/eliminar_foto/<user_id>', methods=['POST'])
+@login_required
+def eliminar_foto(user_id):
+    usuario = collection_usuarios.find_one({"_id": ObjectId(user_id)})
+    
+    if not usuario or ("foto" not in usuario):
+        flash("No hay foto para eliminar.", "warning")
+        return redirect(url_for('editar_usuario', user_id=user_id))
+
+    # Ruta de la foto en el servidor
+    foto_filename = f"{user_id}-foto.jpg"
+    foto_path = os.path.join(app.config['USERS_FOLDER'], foto_filename)
+
+    # Eliminar el archivo si existe
+    if os.path.exists(foto_path):
+        os.remove(foto_path)
+
+    # Actualizar la base de datos
+    collection_usuarios.update_one({"_id": ObjectId(user_id)}, {"$unset": {"foto": ""}})
+
+    flash("Foto eliminada con éxito.", "success")
+    log_event(f"Usuario [{current_user.email}] eliminó la foto de perfil de {usuario.get('email')}.")
+
+    return redirect(url_for('editar_usuario', user_id=user_id))
 
 
 ###
