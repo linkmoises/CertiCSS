@@ -392,6 +392,7 @@ def editar_usuario(user_id):
     usuario = collection_usuarios.find_one({"_id": ObjectId(user_id)})
 
     #foto_url = url_for('static', filename=f"usuarios/{usuario.get('foto', '')}") if usuario.get('foto') else None
+    print(usuario)
 
     if usuario.get('foto'):
         foto_url = f"/static/usuarios/{usuario['foto']}"
