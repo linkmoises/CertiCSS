@@ -286,7 +286,7 @@ def listar_usuarios(page=1):
     total_paginas = (total_usuarios + usuarios_por_pagina - 1) // usuarios_por_pagina  # Redondear hacia arriba
 
     # Obtener los usuarios para la página actual
-    usuarios_cursor = collection_usuarios.find({"rol": {"$ne": "administrador"}}).sort("fecha_registro", -1).skip((page - 1) * usuarios_por_pagina).limit(usuarios_por_pagina)
+    usuarios_cursor = collection_usuarios.find({"rol": {"$ne": "administrador"}}).sort([("apellidos", 1), ("nombres", 1)]).skip((page - 1) * usuarios_por_pagina).limit(usuarios_por_pagina)
     usuarios = list(usuarios_cursor)
 
     for usuario in usuarios:
@@ -672,7 +672,7 @@ def tablero_coordinadores():
 
     num_eventos = len(eventos_prox_list)
 
-    usuarios_recientes = list(collection_usuarios.find({"rol": {"$ne": "administrador"}}).sort("fecha_registro", -1).limit(5))
+    usuarios_recientes = list(collection_usuarios.find({"rol": {"$ne": "administrador"}}).sort("fecha_registro", 1).limit(5))
 
     num_usuarios_recientes = len(usuarios_recientes)
 
