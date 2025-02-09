@@ -1841,7 +1841,6 @@ def inject_version():
 def robots():
     return send_from_directory(app.static_folder, "robots.txt")
 
-app = Flask(__name__, static_folder="static", static_url_path="/static")
 
 if __name__ == '__main__':
     app.run(host=app.config['HOST'], port=app.config['PORT'])
