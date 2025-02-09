@@ -2,7 +2,7 @@
 
 ¡Hola! 👋 Este proyecto es una aplicación web diseñada específicamente para el **Departamento Nacional de Docencia e Investigación** de la Caja de Seguro Social en Panamá. Su objetivo es facilitar la gestión de eventos académicos, permitiendo registrar participantes, ponentes, crear eventos y subir imágenes asociadas a cada uno. Está construida con Flask y MongoDB, y es súper fácil de usar. 😊
 
-![CertiCSS](screenshot.png)
+![CertiCSS](screenshot.jpg)
 
 ## ¿Qué se puede hacer con CertiCSS?
 
