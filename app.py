@@ -368,7 +368,7 @@ def editar_usuario(user_id):
 
             # Recortar la imagen
             image_cropped = image.crop((left, top, right, bottom))
-            image_resized = image_cropped.resize((750, 750), Image.Resampling.LANCZOS)
+            image_resized = image_cropped.resize((450, 450), Image.Resampling.LANCZOS)
 
             # Guardar la imagen
             image_resized.save(foto_path, 'JPEG')
@@ -1841,6 +1841,7 @@ def inject_version():
 def robots():
     return send_from_directory(app.static_folder, "robots.txt")
 
+app = Flask(__name__, static_folder="static", static_url_path="/static")
 
 if __name__ == '__main__':
     app.run(host=app.config['HOST'], port=app.config['PORT'])
