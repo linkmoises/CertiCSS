@@ -19,7 +19,7 @@
             max-width: 500px;
         }
     </style>
-{% if evento.estado_evento == 'cerrado' %}
+{% if evento.estado_evento != 'cerrado' %}
     <!-- Script para actualizar dinámicamente el OTP -->
     <script>
         function actualizarOTP() {
