@@ -1646,7 +1646,7 @@ def generar_constancia_asistencia(participante, afiche_path):
     # Texto de validación digital
     texto_validacion = (
         "La presente constancia es de carácter digital y puede validarse utilizando el código único suministrado: "
-        f"<b>{participante['nanoid']}</b> en la plataforma CertiCSS del Departamento Nacional de Docencia e Investigación."
+        f"<b>{participante['nanoid']}</b> en la plataforma CertiCSS del Departamento Nacional de Docencia e Investigación <u>www.docenciamedica.org</u>"
     )
 
     # Crear otro párrafo
