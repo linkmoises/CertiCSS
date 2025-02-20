@@ -274,7 +274,11 @@ document.addEventListener("DOMContentLoaded", function () {
 document.getElementById("buscadorForm").addEventListener("submit", function (event) {
     event.preventDefault(); // Prevenir envío estándar del formulario
 
-    const valor = document.getElementById("buscador").value.trim();
+    const buscadorInput = document.getElementById("buscador");
+    const valor = buscadorInput.value.trim();
+    buscadorInput.value = valor;
+    //const valor = document.getElementById("buscador").value.trim();
+
     const patterns = {
         cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas
         pasaporte: /^[A-Z]{2}\d{6,9}$/,                        // Pasaportes
