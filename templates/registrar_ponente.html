@@ -143,6 +143,7 @@
 <script>
 function validarCedula(input) {
     const cedula = input.value.trim();
+    input.value = cedula;
     const errorMessage = document.getElementById('cedula-error');
 
     const patrones = [
