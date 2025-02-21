@@ -1440,6 +1440,11 @@ def generar_pdf_participante(participante, afiche_path):
     titulo_evento = evento.get('nombre', 'Título no disponible')
     unidad_evento = evento.get('unidad_ejecutora', 'Unidad ejecutora no disponible')
 
+    fecha_fin_evento = evento.get('fecha_fin')
+    fecha_fin_formateada = fecha_fin_evento.strftime('%d de %B de %Y')
+
+    fecha_evento = evento.get('fecha_fin', 'Fecha no disponible')
+
     # Definir la ruta donde se guardará el PDF
     pdf_directory = 'static/certificados/'
     
@@ -1477,9 +1482,9 @@ def generar_pdf_participante(participante, afiche_path):
         draw_centered_text(3.2 * inch, f"{participante.get('titulo_ponencia', 'N/A')}", font="Helvetica-Bold", size=16)
     else:
         draw_centered_text(3.5 * inch, f"Actividad académica con una duración de 08 horas")
-        draw_centered_text(3.2 * inch, f"20 de febrero de 2025")
+        draw_centered_text(3.2 * inch, f"{fecha_fin_formateada}")
 
-    draw_centered_text(2.7 * inch, f"Dado en la República de Panamá, Provincia de Panamá, el 20 de febrero de 2025")
+    draw_centered_text(2.7 * inch, f"Dado en la República de Panamá, Provincia de Panamá, el {fecha_fin_formateada}")
 
     # Código de certificado en la esquina superior derecha
     c.setFillColor("white")
