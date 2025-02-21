@@ -3050,10 +3050,6 @@ select {
     justify-content: space-between;
   }
 
-  .md\:gap-12 {
-    gap: 3rem;
-  }
-
   .md\:gap-8 {
     gap: 2rem;
   }

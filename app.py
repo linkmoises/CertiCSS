@@ -1340,6 +1340,7 @@ def buscar_certificados():
                     'cedula': participante['cedula'],
                     'nanoid': participante['nanoid'],
                     'rol': participante['rol'],
+                    'ponencia': participante.get('titulo_ponencia', 'N/A'),
                     'codigo_evento': codigo_evento,
                     'titulo_evento': evento.get('nombre', 'Título no disponible'),
                     'fecha_evento': fecha_evento
