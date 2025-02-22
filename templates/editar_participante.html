@@ -84,6 +84,35 @@
                                 </div>
                                 <!-- End Col -->
 
+                                <div class="sm:col-span-3">
+                                    <label for="perfil_profesional" class="inline-block text-sm text-gray-800 mt-2.5">
+                                        Perfil
+                                    </label>
+                                </div>
+                                <!-- End Col -->
+                            
+                                <div class="sm:col-span-9">
+                                    <select id="perfil_profesional" name="perfil_profesional" class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" required>
+                                        <option value="">Seleccione el perfil profesional</option>
+                                        <option value="medico_general" {% if participante.perfil == 'medico_general' %}selected{% endif %}>Médico General</option>
+                                        <option value="medico_especialista" {% if participante.perfil == 'medico_especialista' %}selected{% endif %}>Médico Especialista</option>
+                                        <option value="odontologo" {% if participante.perfil == 'odontologo' %}selected{% endif %}>Odontólogo(a)</option>
+                                        <option value="odontologo_especialista" {% if participante.perfil == 'odontologo_especialista' %}selected{% endif %}>Odontólogo(a) Especialista</option>
+                                        <option value="enfermero" {% if participante.perfil == 'enfermero' %}selected{% endif %}>Enfermera(o)</option>
+                                        <option value="tecnico_enfermeria" {% if participante.perfil == 'tecnico_enfermeria' %}selected{% endif %}>Técnico en Enfermería</option>
+                                        <option value="laboratorista" {% if participante.perfil == 'laboratorista' %}selected{% endif %}>Laboratorista</option>
+                                        <option value="tecnico_laboratorio" {% if participante.perfil == 'tecnico_laboratorio' %}selected{% endif %}>Técnico de Laboratorio</option>
+                                        <option value="farmaceutico" {% if participante.perfil == 'farmaceutico' %}selected{% endif %}>Farmacéutico(a)</option>
+                                        <option value="fisioterapeuta" {% if participante.perfil == 'fisioterapeuta' %}selected{% endif %}>Fisioterapeuta</option>
+                                        <option value="fonoaudiologo" {% if participante.perfil == 'fonoaudiologo' %}selected{% endif %}>Fonoaudiólogo(a)</option>
+                                        <option value="psicologo" {% if participante.perfil == 'psicologo' %}selected{% endif %}>Psicólogo(a)</option>
+                                        <option value="nutricionista" {% if participante.perfil == 'nutricionista' %}selected{% endif %}>Nutricionista</option>
+                                        <option value="estudiante_salud" {% if participante.perfil == 'estudiante_salud' %}selected{% endif %}>Estudiante de Ciencias de la Salud</option>
+                                        <option value="otro" {% if participante.perfil == 'otro' %}selected{% endif %}>Otro</option>
+                                    </select>
+                                </div>
+                                <!-- End Col -->
+
                                 <div class="sm:col-span-12 gap-2">
                                     <button type="submit" class="w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
                                         <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>

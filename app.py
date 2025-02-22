@@ -529,6 +529,7 @@ def editar_participante(nanoid):
         nombres = request.form.get('nombres')
         apellidos = request.form.get('apellidos')
         cedula = request.form.get('cedula')
+        perfil = request.form.get('perfil_profesional')
 
         # Actualizar el participante en la base de datos
         collection_participantes.update_one(
@@ -536,7 +537,8 @@ def editar_participante(nanoid):
             {"$set": {
                 "nombres": nombres,
                 "apellidos": apellidos,
-                "cedula": cedula
+                "cedula": cedula,
+                "perfil": perfil
             }}
         )
 
@@ -739,6 +741,7 @@ def registrar():
     apellidos = request.form['apellidos']
     cedula = request.form['cedula']
     rol = request.form['rol']
+    perfil = request.form['perfil_profesional']
     codigo_evento = request.form['codigo_evento']
     otp_ingresado = request.form['otp']
     timestamp = datetime.now()
@@ -763,6 +766,7 @@ def registrar():
                 'apellidos': apellidos,
                 'cedula': cedula,
                 'rol': rol,
+                'perfil': perfil,
                 'codigo_evento': codigo_evento,
                 'nanoid': nanoid,
                 'timestamp': timestamp
@@ -974,6 +978,45 @@ def listar_participantes(codigo_evento):
         nombre_evento=evento['nombre'],
         estado_evento=estado_evento,
     )
+
+
+###
+### Exportar participantes en CSV
+###
+from flask import make_response
+import csv
+import io
+
+@app.route('/exportar_csv/<codigo_evento>')
+@login_required
+def exportar_csv(codigo_evento):
+    # Recuperar participantes registrados para el evento específico
+    participantes_cursor = collection_participantes.find({"codigo_evento": codigo_evento})
+    participantes = list(participantes_cursor)
+
+    # Crear un archivo CSV en memoria
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    # Escribir la cabecera del CSV
+    writer.writerow(['Nombre', 'Apellido', 'Cédula', 'Rol'])
+
+    # Escribir los datos de los participantes
+    for participante in participantes:
+        writer.writerow([
+            participante.get('nombres', 'N/A'),
+            participante.get('apellidos', 'N/A'),
+            participante.get('cedula', 'N/A'),
+            participante.get('rol', 'N/A')
+        ])
+
+    # Preparar la respuesta para descargar el archivo CSV
+    output.seek(0)
+    response = make_response(output.getvalue())
+    response.headers['Content-Disposition'] = f'attachment; filename={codigo_evento}_participantes.csv'
+    response.headers['Content-type'] = 'text/csv'
+
+    return response
 
 
 ###
@@ -1357,7 +1400,7 @@ def buscar_certificados():
                 }
                 resultados.append(resultado)
 
-        return render_template('lista_certificados.html', resultados=resultados)  # Renderizar la plantilla con los resultados
+        return render_template('lista_certificados.html', cedula=cedula, resultados=resultados)  # Renderizar la plantilla con los resultados
     
     return render_template('buscar.html')  # Mostrar el formulario para buscar certificados
 
