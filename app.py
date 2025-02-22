@@ -1022,12 +1022,14 @@ def exportar_csv(codigo_evento):
     # Escribir la cabecera del CSV
     writer.writerow(['Nombre', 'Apellido', 'Cédula', 'Rol', 'Perfil'])
 
-    for participante in participantes:
-        # Obtener la etiqueta del perfil usando el diccionario de mapeo
-        perfil = PERFILES_MAP.get(participante.get('perfil', 'N/A'), participante.get('perfil', 'N/A'))
+    # Escribir la cabecera del CSV
+    writer.writerow(['Nombre', 'Apellido', 'Cédula', 'Rol', 'Perfil'])
 
     # Escribir los datos de los participantes
     for participante in participantes:
+
+        perfil = PERFILES_MAP.get(participante.get('perfil', 'N/A'), participante.get('perfil', 'N/A'))
+
         writer.writerow([
             participante.get('nombres', 'N/A'),
             participante.get('apellidos', 'N/A'),
