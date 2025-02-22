@@ -991,6 +991,23 @@ from flask import make_response
 import csv
 import io
 
+PERFILES_MAP = {
+    "medico_general": "Médico General",
+    "medico_especialista": "Médico Especialista",
+    "odontologo": "Odontólogo(a)",
+    "odontologo_especialista": "Odontólogo(a) Especialista",
+    "enfermero": "Enfermera(o)",
+    "tecnico_enfermeria": "Técnico en Enfermería",
+    "laboratorista": "Laboratorista",
+    "tecnico_laboratorio": "Técnico de Laboratorio",
+    "fisioterapeuta": "Fisioterapeuta",
+    "farmaceutico": "Farmacéutico(a)",
+    "fonoaudiologo": "Fonoaudiólogo(a)",
+    "psicologo": "Psicólogo(a)",
+    "nutricionista": "Nutricionista",
+    "estudiante_salud": "Estudiante de Ciencias de la Salud"
+}
+
 @app.route('/exportar_csv/<codigo_evento>')
 @login_required
 def exportar_csv(codigo_evento):
@@ -1003,7 +1020,11 @@ def exportar_csv(codigo_evento):
     writer = csv.writer(output)
 
     # Escribir la cabecera del CSV
-    writer.writerow(['Nombre', 'Apellido', 'Cédula', 'Rol'])
+    writer.writerow(['Nombre', 'Apellido', 'Cédula', 'Rol', 'Perfil'])
+
+    for participante in participantes:
+        # Obtener la etiqueta del perfil usando el diccionario de mapeo
+        perfil = PERFILES_MAP.get(participante.get('perfil', 'N/A'), participante.get('perfil', 'N/A'))
 
     # Escribir los datos de los participantes
     for participante in participantes:
@@ -1011,8 +1032,8 @@ def exportar_csv(codigo_evento):
             participante.get('nombres', 'N/A'),
             participante.get('apellidos', 'N/A'),
             participante.get('cedula', 'N/A'),
-            participante.get('perfil', 'N/A'),
-            participante.get('rol', 'N/A')
+            participante.get('rol', 'N/A'),
+            perfil
         ])
 
     # Preparar la respuesta para descargar el archivo CSV
