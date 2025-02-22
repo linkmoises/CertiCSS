@@ -1005,7 +1005,8 @@ PERFILES_MAP = {
     "fonoaudiologo": "Fonoaudiólogo(a)",
     "psicologo": "Psicólogo(a)",
     "nutricionista": "Nutricionista",
-    "estudiante_salud": "Estudiante de Ciencias de la Salud"
+    "estudiante_salud": "Estudiante",
+    "otro": "Otro"
 }
 
 @app.route('/exportar_csv/<codigo_evento>')
@@ -1018,9 +1019,6 @@ def exportar_csv(codigo_evento):
     # Crear un archivo CSV en memoria
     output = io.StringIO()
     writer = csv.writer(output)
-
-    # Escribir la cabecera del CSV
-    writer.writerow(['Nombre', 'Apellido', 'Cédula', 'Rol', 'Perfil'])
 
     # Escribir la cabecera del CSV
     writer.writerow(['Nombre', 'Apellido', 'Cédula', 'Rol', 'Perfil'])
