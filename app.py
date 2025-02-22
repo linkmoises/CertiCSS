@@ -566,6 +566,7 @@ def editar_ponente(nanoid):
         nombres = request.form.get('nombres', '').strip()
         apellidos = request.form.get('apellidos', '').strip()
         cedula = request.form.get('cedula', '').strip()
+        perfil = request.form.get('perfil_profesional').strip()
         titulo_ponencia = request.form.get('titulo_ponencia', '').strip()
 
         # Actualizar el participante en la base de datos
@@ -575,6 +576,7 @@ def editar_ponente(nanoid):
                 "nombres": nombres,
                 "apellidos": apellidos,
                 "cedula": cedula,
+                "perfil": perfil,
                 "titulo_ponencia": titulo_ponencia,
             }}
         )
@@ -815,6 +817,7 @@ def registrar_ponente(codigo_evento):
         nombres = request.form['nombres']
         apellidos = request.form['apellidos']
         cedula = request.form['cedula']
+        perfil = request.form['perfil_profesional']
         rol = request.form['rol']
         titulo_ponencia = request.form['titulo_ponencia']
 
@@ -826,6 +829,7 @@ def registrar_ponente(codigo_evento):
             'nombres': nombres,
             'apellidos': apellidos,
             'cedula': cedula,
+            'perfil': perfil
             'rol': rol,
             'titulo_ponencia': titulo_ponencia,
             'codigo_evento': codigo_evento,
@@ -1007,6 +1011,7 @@ def exportar_csv(codigo_evento):
             participante.get('nombres', 'N/A'),
             participante.get('apellidos', 'N/A'),
             participante.get('cedula', 'N/A'),
+            participante.get('perfil', 'N/A'),
             participante.get('rol', 'N/A')
         ])
 
