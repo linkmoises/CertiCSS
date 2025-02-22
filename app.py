@@ -829,7 +829,7 @@ def registrar_ponente(codigo_evento):
             'nombres': nombres,
             'apellidos': apellidos,
             'cedula': cedula,
-            'perfil': perfil
+            'perfil': perfil,
             'rol': rol,
             'titulo_ponencia': titulo_ponencia,
             'codigo_evento': codigo_evento,
