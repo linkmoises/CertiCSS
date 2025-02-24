@@ -3157,6 +3157,10 @@ select {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
+  .lg\:gap-6 {
+    gap: 1.5rem;
+  }
+
   .lg\:px-28 {
     padding-left: 7rem;
     padding-right: 7rem;
