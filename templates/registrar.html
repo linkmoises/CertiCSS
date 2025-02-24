@@ -129,6 +129,45 @@
                                 <!-- End Col -->
 
                                 <div class="sm:col-span-3">
+                                    <label for="provincia" class="inline-block text-sm text-gray-800 mt-2.5">
+                                        Región
+                                    </label>
+                                </div>
+                                <!-- End Col -->
+
+                                <div class="sm:col-span-9">
+                                    <select id="provincia" name="provincia" onchange="actualizarUnidades()"
+                                        class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" required>
+                                        <option value="">Seleccione una provincia / región</option>
+                                        <option value="panama">Panamá</option>
+                                        <option value="sanmiguelito">San Miguelito</option>
+                                        <option value="panamaoeste">Panamá Oeste</option>
+                                        <option value="panamaeste">Panamá Este</option>
+                                        <option value="bocasdeltoro">Bocas del Toro</option>
+                                        <option value="cocle">Coclé</option>
+                                        <option value="colon">Colón</option>
+                                        <option value="chiriqui">Chiriquí</option>
+                                        <option value="herrera">Herrera</option>
+                                        <option value="lossantos">Los Santos</option>
+                                        <option value="veraguas">Veraguas</option>
+                                    </select>
+                                </div>
+                                <!-- End Col -->
+
+                                <div class="sm:col-span-3">
+                                    <label for="unidad" class="inline-block text-sm text-gray-800 mt-2.5">
+                                        Unidad
+                                    </label>
+                                </div>
+
+                                <div class="sm:col-span-9">
+                                    <select id="unidad" name="unidad"
+                                        class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" required>
+                                        <option value="">Seleccione una unidad ejecutora</option>
+                                    </select>
+                                </div>
+
+                                <div class="sm:col-span-3">
                                     <label for="otp" class="inline-block text-sm text-gray-800 mt-2.5">
                                         Código OTP
                                     </label>
@@ -200,6 +239,123 @@ function validarCedula(input) {
         errorMessage.classList.remove('hidden');
     }
 }
+</script>
+<script>
+    const unidadesPorProvincia = {
+        panama: [
+            "Complejo Hospitalario Metropolitano Dr. Arnulfo Arias Madrid",
+            "Hospital de Especialidades Pediátricas Omar Torrijos Herrera",
+            "Policlínica Presidente Remón",
+            "Policlínica Dr. Manuel Ferrer Valdés",
+            "Policlínica Dr. Carlos N. Brin",
+            "Policlínica Don Alejandro De La Guardia Hijo",
+            "Policlínica Don Joaquín José Vallarino",
+            "ULAPS Máximo Herrera",
+            "ULAPS Prof. Carlos Velarde",
+            "CAPPS Plaza Tocumen",
+            "CAPPS Pedregal"
+        ],
+        sanmiguelito: [
+            "Hospital Dra. Susana Jones Cano",
+            "Policlínica Lic. Manuel María Valdés",
+            "Policlínica Don Generoso Guardia",
+            "Policlínica Dr. Edilberto Culiolis",
+            "CAPPS Torrijos Carter"
+        ],
+        panamaoeste: [
+            "Hospital Hogar de La Esperanza",
+            "Policlínica Dr. Santiago Barraza",
+            "Policlínica Dr. Blas Gómez Chetro",
+            "Policlínica Dr. Juan Vega Méndez",
+            "ULAPS Vista Alegre",
+            "ULAPS Guadalupe",
+            "ULAPS San José",
+            "CAPPS Capira",
+            "CAPPS Vacamonte",
+            "CAPPS El Tecal"
+        ],
+        panamaeste: [
+            "Hospital Regional de Chepo",
+            "Hospital Irma de Lourdes Tzanetatos",
+            "Policlínica de Cañitas",
+            "CAPPS Los Nogales"
+        ],
+        bocasdeltoro: [
+            "Hospital Regional de Changuinola",
+            "Hospital Regional de Almirante",
+            "Hospital de Chiriquí Grande",
+            "Policlínica de Guabito",
+            "ULAPS Las Tablas"
+        ],
+        cocle: [
+            "Hospital Regional Dr. Rafael Estévez",
+            "Policlínica Dr. Manuel De Jesús Rojas",
+            "Policlínica San Juan De Dios",
+            "Policlínica Dr. Manuel Paulino Ocaña"
+        ],
+        colon: [
+            "Complejo Hospitalario Dr. Manuel Amador Guerrero",
+            "Policlínica de Nuevo San Juan",
+            "Policlínica de Sabanitas",
+            "Policlínica Dr. Hugo Spadafora",
+            "ULAPS Portobelo"
+        ],
+        chiriqui: [
+            "Hospital Regional Dr. Rafael Hernández",
+            "Hospital Dr. Dionisio Arrocha",
+            "Policlínica Dr. Gustavo Adolfo Ross",
+            "Policlínica Dr. Pablo Espinosa",
+            "Policlínica Dr. Ernesto Perez Balladares",
+            "Policlínica de Divalá",
+            "ULAPS Nuevo Vedado",
+            "ULAPS Volcán",
+            "ULAPS Dolega",
+            "CAPPS Barú",
+            "CAPPS Jobito",
+            "CAPPS Balsa",
+            "CAPPS Blanco",
+            "CAPPS Caoba",
+            "CAPPS Corredor",
+            "CAPPS Zapatero"
+        ],
+        herrera: [
+            "Hospital Dr. Gustavo Nelson Collado",
+            "Policlínica Dr. Roberto Ramírez De Diego",
+            "CAPPS Los Pozos",
+            "CAPPS Ocú",
+            "CAPPS Pesé"
+        ],
+        lossantos: [
+            "Policlínica Dr. Miguel Cárdenas Barahona",
+            "Policlínica San Juan de Dios",
+            "CAPPS Guararé",
+            "CAPPS Tonosí",
+            "CAPPS Macaracas"
+        ],
+        veraguas: [
+            "Hospital Dr. Ezequiel Abadía",
+            "Policlínica Dr. Horacio Díaz Gómez",
+            "ULAPS Alberto León",
+            "CAPPS Zapotillo"
+        ]
+    };
+    
+    function actualizarUnidades() {
+        const provinciaSeleccionada = document.getElementById("provincia").value;
+        const unidadSelect = document.getElementById("unidad");
+        
+        // Limpiar opciones previas
+        unidadSelect.innerHTML = '<option value="">-- Selecciona una unidad --</option>';
+        
+        if (provinciaSeleccionada && unidadesPorProvincia[provinciaSeleccionada]) {
+            unidadesPorProvincia[provinciaSeleccionada].forEach(unidad => {
+                const option = document.createElement("option");
+                option.value = unidad;
+                option.textContent = unidad;
+                unidadSelect.appendChild(option);
+            });
+        }
+    }
 </script>
 </body>
 </html>
