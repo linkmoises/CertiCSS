@@ -744,6 +744,8 @@ def registrar():
     cedula = request.form['cedula']
     rol = request.form['rol']
     perfil = request.form['perfil_profesional']
+    region = request.form['region']
+    unidad = request.form['unidad']
     codigo_evento = request.form['codigo_evento']
     otp_ingresado = request.form['otp']
     timestamp = datetime.now()
@@ -769,6 +771,8 @@ def registrar():
                 'cedula': cedula,
                 'rol': rol,
                 'perfil': perfil,
+                'region': region,
+                'unidad': unidad,
                 'codigo_evento': codigo_evento,
                 'nanoid': nanoid,
                 'timestamp': timestamp
@@ -1011,6 +1015,20 @@ PERFILES_MAP = {
     "otro": "Otro"
 }
 
+REGION_MAP = {
+    "panama": "Panamá Metro",
+    "sanmiguelito": "San Miguelito",
+    "panamaoeste": "Panamá Oeste",
+    "panamaeste": "Panamá Este",
+    "bocasdeltoro": "Bocas del Toro",
+    "cocle": "Coclé",
+    "colon": "Colón",
+    "chiriqui": "Chiriquí",
+    "herrera": "Herrera",
+    "lossantos": "Los Santos",
+    "veraguas": "Veraguas"
+}
+
 @app.route('/exportar_csv/<codigo_evento>')
 @login_required
 def exportar_csv(codigo_evento):
@@ -1023,19 +1041,23 @@ def exportar_csv(codigo_evento):
     writer = csv.writer(output)
 
     # Escribir la cabecera del CSV
-    writer.writerow(['Nombre', 'Apellido', 'Cédula', 'Rol', 'Perfil'])
+    writer.writerow(['Nombre', 'Apellido', 'Cédula', 'Rol', 'Perfil', 'Región', 'Unidad Ejecutora'])
 
     # Escribir los datos de los participantes
     for participante in participantes:
 
         perfil = PERFILES_MAP.get(participante.get('perfil', 'N/A'), participante.get('perfil', 'N/A'))
 
+        region = REGION_MAP.get(participante.get('region', 'N/A'), participante.get('region', 'N/A'))
+
         writer.writerow([
             participante.get('nombres', 'N/A'),
             participante.get('apellidos', 'N/A'),
             participante.get('cedula', 'N/A'),
             participante.get('rol', 'N/A'),
-            perfil
+            perfil,
+            region,
+            participante.get('unidad', 'N/A')
         ])
 
     # Preparar la respuesta para descargar el archivo CSV
