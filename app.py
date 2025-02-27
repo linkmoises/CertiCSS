@@ -530,6 +530,8 @@ def editar_participante(nanoid):
         apellidos = request.form.get('apellidos')
         cedula = request.form.get('cedula')
         perfil = request.form.get('perfil_profesional')
+        region = request.form.get('region')
+        unidad = request.form.get('unidad')
 
         # Actualizar el participante en la base de datos
         collection_participantes.update_one(
@@ -538,7 +540,9 @@ def editar_participante(nanoid):
                 "nombres": nombres,
                 "apellidos": apellidos,
                 "cedula": cedula,
-                "perfil": perfil
+                "perfil": perfil,
+                'region': region,
+                'unidad': unidad,
             }}
         )
 

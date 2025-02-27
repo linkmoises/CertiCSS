@@ -1,0 +1,87 @@
+<datalist id="unidades">
+    <!-- Panamá -->
+    <option value="Complejo Hospitalario Metropolitano Dr. Arnulfo Arias Madrid"></option>
+    <option value="Hospital de Especialidades Pediátricas Omar Torrijos Herrera"></option>
+    <option value="Policlinica Presidente Remón"></option>
+    <option value="Policlínica Dr. Manuel Ferrer Valdés"></option>
+    <option value="Policlínica Dr. Carlos N. Brin"></option>
+    <option value="Policlínica Don Alejandro De La Guardia Hijo"></option>
+    <option value="Policlínica Don Joaquín José Vallarino"></option>
+    <option value="ULAPS Máximo Herrera"></option>
+    <option value="ULAPS Prof. Carlos Velarde"></option>
+    <option value="CAPPS Plaza Tocumen"></option>
+    <option value="CAPPS Pedregal"></option>
+    <!-- San Miguelito -->
+    <option value="Hospital Dra. Susana Jones Cano"></option>
+    <option value="Policlínica Lic. Manuel María Valdés"></option>
+    <option value="Policlínica Don Generoso Guardia"></option>
+    <option value="Policlínica Dr. Edilberto Culiolis"></option>
+    <option value="CAPPS Torrijos Carter"></option>
+    <!-- Panamá Oeste -->
+    <option value="Hospital Hogar de La Esperanza"></option>
+    <option value="Policlínica Dr. Santiago Barraza"></option>
+    <option value="Policlínica Dr. Blas Gómez Chetro"></option>
+    <option value="Policlínica Dr. Juan Vega Méndez"></option>
+    <option value="ULAPS Vista Alegre"></option>
+    <option value="ULAPS Guadalupe"></option>
+    <option value="ULAPS San José"></option>
+    <option value="CAPPS Capira"></option>
+    <option value="CAPPS Vacamonte"></option>
+    <option value="CAPPS El Tecal"></option>
+    <!-- Panamá Este -->
+    <option value="Hospital Regional de Chepo"></option>
+    <option value="Hospital Irma de Lourdes Tzanetatos"></option>
+    <option value="Policlínica de Cañitas"></option>
+    <option value="CAPPS Los Nogales"></option>
+    <!-- Bocas del Toro -->
+    <option value="Hospital Regional de Changuinola"></option>
+    <option value="Hospital Regional de Almirante"></option>
+    <option value="Hospital de Chiriquí Grande"></option>
+    <option value="Policlínica de Guabito"></option>
+    <option value="ULAPS Las Tablas"></option>
+    <!-- Coclé -->
+    <option value="Hospital Regional Dr. Rafael Estévez"></option>
+    <option value="Policlínica Dr. Manuel De Jesús Rojas"></option>
+    <option value="Policlínica San Juan De Dios"></option>
+    <option value="Policlínica Dr. Manuel Paulino Ocaña"></option>
+    <!-- Colón -->
+    <option value="Complejo Hospitalario Dr. Manuel Amador Guerrero"></option>
+    <option value="Policlínica de Nuevo San Juan"></option>
+    <option value="Policlínica de Sabanitas"></option>
+    <option value="Policlínica Dr. Hugo Spadafora"></option>
+    <option value="ULAPS Portobelo"></option>
+    <!-- Chiriquí -->
+    <option value="Hospital Regional Dr. Rafael Hernández"></option>
+    <option value="Hospital Dr. Dionisio Arrocha"></option>
+    <option value="Policlínica Dr. Gustavo Adolfo Ross"></option>
+    <option value="Policlínica Dr. Pablo Espinosa"></option>
+    <option value="Policlínica Dr. Ernesto Perez Balladares"></option>
+    <option value="Policlínica de Divalá"></option>
+    <option value="ULAPS Nuevo Vedado"></option>
+    <option value="ULAPS Volcán"></option>
+    <option value="ULAPS Dolega"></option>
+    <option value="CAPPS Barú"></option>
+    <option value="CAPPS Jobito"></option>
+    <option value="CAPPS Balsa"></option>
+    <option value="CAPPS Blanco"></option>
+    <option value="CAPPS Caoba"></option>
+    <option value="CAPPS Corredor"></option>
+    <option value="CAPPS Zapatero"></option>
+    <!-- Herrera -->
+    <option value="Hospital Dr. Gustavo Nelson Collado"></option>
+    <option value="Policlínica Dr. Roberto Ramírez De Diego"></option>
+    <option value="CAPPS Los Pozos"></option>
+    <option value="CAPPS Ocú"></option>
+    <option value="CAPPS Pesé"></option>
+    <!-- Los Santos -->
+    <option value="Policlínica Dr. Miguel Cárdenas Barahona"></option>
+    <option value="Policlínica San Juan de Dios"></option>
+    <option value="CAPPS Guararé"></option>
+    <option value="CAPPS Tonosí"></option>
+    <option value="CAPPS Macaracas"></option>
+    <!-- Veraguas -->
+    <option value="Hospital Dr. Ezequiel Abadía"></option>
+    <option value="Policlínica Dr. Horacio Díaz Gómez"></option>
+    <option value="ULAPS Alberto León"></option>
+    <option value="CAPPS Zapotillo"></option>
+</datalist>
