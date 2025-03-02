@@ -1478,9 +1478,17 @@ def politica_privacidad():
 ###
 ### Nosotros
 ###
-@app.route('/nosotros', methods=['GET'])
+@app.route('/nosotros')
 def nosotros():
-    return render_template('nosotros.html')
+    # Obtener los datos del jefe y subjefe desde la base de datos
+    jefe = collection_usuarios.find_one({"jefe": True}, {"nombres": 1, "apellidos": 1, "foto": 1, "cargo": 1})
+    subjefe = collection_usuarios.find_one({"subjefe": True}, {"nombres": 1, "apellidos": 1, "foto": 1, "cargo": 1})
+
+    # Construir las URLs de las fotos o usar una imagen predeterminada
+    jefe_foto_url = f"/static/usuarios/{jefe['foto']}" if jefe and jefe.get('foto') else "/static/default-avatar.jpg"
+    subjefe_foto_url = f"/static/usuarios/{subjefe['foto']}" if subjefe and subjefe.get('foto') else "/static/default-avatar.jpg"
+
+    return render_template('nosotros.html', jefe=jefe, subjefe=subjefe, jefe_foto_url=jefe_foto_url, subjefe_foto_url=subjefe_foto_url)
 
 
 ###
