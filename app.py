@@ -416,24 +416,33 @@ def allowed_file(filename):
 @app.route('/eliminar_foto/<user_id>', methods=['POST'])
 @login_required
 def eliminar_foto(user_id):
+    print(f"Intentando eliminar la foto del usuario: {user_id}")  # Debug
+
     usuario = collection_usuarios.find_one({"_id": ObjectId(user_id)})
     
-    if not usuario or ("foto" not in usuario):
-        flash("No hay foto para eliminar.", "warning")
+    if not usuario or not usuario.get("foto"):
+        print("No se encontró una foto asociada en la base de datos.")  # Debug
         return redirect(url_for('editar_usuario', user_id=user_id))
 
     # Ruta de la foto en el servidor
-    foto_filename = f"{user_id}-foto.jpg"
-    foto_path = os.path.join(app.config['USERS_FOLDER'], foto_filename)
+    foto_path = os.path.join(app.config['USERS_FOLDER'], f"{user_id}-foto.jpg")
+    print(f"Ruta de la foto: {foto_path}")  # Debug
+    print(f"Existe en el servidor: {os.path.exists(foto_path)}")  # Debug
 
-    # Eliminar el archivo si existe
-    if os.path.exists(foto_path):
-        os.remove(foto_path)
+    # Intentar eliminar la foto
+    try:
+        if os.path.exists(foto_path):
+            os.remove(foto_path)
+            print("Foto eliminada correctamente.")  # Debug
+        else:
+            print("Foto no encontrada en el servidor.")  # Debug
+    except Exception as e:
+        print(f"Error al eliminar la foto: {str(e)}")  # Debug
 
     # Actualizar la base de datos
-    collection_usuarios.update_one({"_id": ObjectId(user_id)}, {"$unset": {"foto": ""}})
+    collection_usuarios.update_one({"_id": ObjectId(user_id)}, {"$unset": {"foto": 1}})
+    print("Registro de la foto eliminado de la base de datos.")  # Debug
 
-    flash("Foto eliminada con éxito.", "success")
     log_event(f"Usuario [{current_user.email}] eliminó la foto de perfil de {usuario.get('email')}.")
 
     return redirect(url_for('editar_usuario', user_id=user_id))

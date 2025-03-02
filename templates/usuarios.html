@@ -153,6 +153,23 @@
                                                 <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round-pen"><path d="M2 21a8 8 0 0 1 10.821-7.487"/><path d="M21.378 16.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><circle cx="10" cy="8" r="5"/></svg>
                                             </a><br />
 {% endif %}
+{% if usuario.foto %}
+{% if current_user.id|string == usuario._id|string or current_user.rol == 'administrador' %}
+                                        <form action="{{ url_for('eliminar_foto', user_id=usuario._id) }}" method="post" style="display:inline;">
+                                            <button type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar la foto de perfil?');"
+                                                class="text-sm text-red-500 hover:text-red-700 inline-flex items-center gap-x-1">
+                                                Eliminar foto perfil
+                                                <svg class="size-3.5 text-red-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
+                                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+                                                    <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+                                                    <path d="m14.5 12.5-5 5"/>
+                                                    <path d="m9.5 12.5 5 5"/>
+                                                </svg>
+                                            </button>
+                                        </form><br />
+{% endif %}
+{% endif %}
 {% if current_user.rol == 'administrador' %}
                                         <form action="{{ url_for('toggle_activo', user_id=usuario._id) }}" method="post" style="display:inline;">
                                             <button type="submit" onclick="return confirm('¿Estás seguro de que deseas {% if usuario.activo %}desactivar{% else %}activar{% endif %} este usuario?');" class="text-sm {% if usuario.activo %}text-red-500 hover:text-red-700{% else %}text-green-500 hover:text-green-700{% endif %} inline-flex items-center gap-x-1">
