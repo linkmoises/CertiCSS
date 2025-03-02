@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CertiCSS - Política de privacidad</title>
+    <title>CertiCSS - Política de privacidad y protección de datos</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -17,7 +17,7 @@
 
     <!--====== HERO ======-->
     <section class="relative bg-gradient-to-br from-blue-900 to-indigo-800 text-white overflow-hidden">
-        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('static/assets/auditorio-cidelas-dark.jpg');"></div>
+        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ url_for('static', filename='assets/auditorio-cidelas-dark.jpg') }}');"></div>
         
         <div class="container mx-auto px-4 py-24 md:py-24 relative z-10">
             <div class="flex flex-col md:flex-row items-center justify-between">
@@ -29,7 +29,7 @@
                     </h1>
                     <p class="text-xl mb-8 text-gray-300">Empoderando la educación continua en los profesionales de la salud en nuestras unidades ejecutoras desde el Departamento Nacional de Docencia e Investigación de la Caja de Seguro Social.</p>
                     <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mb-8">
-                        <a href="#" class="bg-white text-blue-900 font-semibold px-8 py-3 rounded-full hover:bg-blue-100 transition duration-300 text-center">Explorar Eventos</a>
+                        <a href="/catalogo/1" class="bg-white text-blue-900 font-semibold px-8 py-3 rounded-full hover:bg-blue-100 transition duration-300 text-center">Explorar Eventos</a>
                         <a href="{{ url_for('buscar_certificados') }}" class="border-2 border-white text-white font-semibold px-8 py-3 rounded-full hover:bg-white hover:text-blue-900 transition duration-300 text-center">Buscar Certificado</a>
                     </div>
                 </div>
@@ -80,7 +80,7 @@
             </svg>
         </div>
     </section>
-    
+
     <!--====== CARDS ======-->
     <section class="bg-white">
         <div class="text-center">
@@ -171,13 +171,13 @@
                 Si tiene alguna pregunta, comentario o solicitud relacionada con esta Política de Privacidad o el tratamiento de sus datos personales, puede contactarnos a través de:
             </p>
             <ul class="list-disc list-inside mb-4">
-                <li><strong>Correo electrónico:</strong> <a href="mailto:correo@dominio.com" class="text-blue-600 hover:underline">correo@dominio.com</a></li>
-                <li><strong>Teléfono:</strong> [número de teléfono]</li>
-                <li><strong>Dirección:</strong> [dirección física del Departamento]</li>
+                <li><strong>Correo electrónico:</strong> <a href="mailto:&#x64;&#x6f;&#x63;&#x65;&#x6e;&#x63;&#x69;&#x61;&#x63;&#x73;&#x73;&#x40;&#x63;&#x73;&#x73;&#x2e;&#x67;&#x6f;&#x62;&#x2e;&#x70;&#x61;" class="text-blue-600 hover:underline">&#x64;&#x6f;&#x63;&#x65;&#x6e;&#x63;&#x69;&#x61;&#x63;&#x73;&#x73;&#x40;&#x63;&#x73;&#x73;&#x2e;&#x67;&#x6f;&#x62;&#x2e;&#x70;&#x61;</a></li>
+                <li><strong>Teléfono:</strong> 513-9736 (VoIP: 19736)</li>
+                <li><strong>Dirección:</strong> Planta Baja. Edificio 4A (Instituto de Investigación, Innovación y Gestión del Conocimiento), Ciudad de la Salud, Panamá</li>
             </ul>
             <hr class="my-8"/>
             <p class="text-sm mb-8 text-gray-500">
-                Fecha de última actualización: 24 de enero 2025
+                Fecha de última actualización: 1 de marzo de 2025
             </p>
         </div>
     </section>
@@ -275,7 +275,7 @@
         
             <!-- Social Brands -->
             <div class="md:text-end space-x-2">
-                <a class="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-500 hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-400 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700" href="https://github.com/linkmoises/CertiCSS/">
+                <a target="_blank" class="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-500 hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-400 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700" href="https://github.com/linkmoises/CertiCSS/">
                     <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
                     </svg>
@@ -285,7 +285,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-window-sidebar" viewBox="0 0 16 16"><path d="M2.5 4a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1m2-.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0m1 .5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1"/><path d="M2 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2zm12 1a1 1 0 0 1 1 1v2H1V3a1 1 0 0 1 1-1zM1 13V6h4v8H2a1 1 0 0 1-1-1m5 1V6h9v7a1 1 0 0 1-1 1z"/></svg>
                 </a>
 {% else %}
-                <a class="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-500 hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-400 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700" href="{{ url_for('login') }}">
+                <a class="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-500 hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-400 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700" href="{{ url_for('login') }}" rel="nofollow">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 448 512"><path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z"/></svg>
                 </a>
 {% endif %}
@@ -305,7 +305,11 @@ document.addEventListener("DOMContentLoaded", function () {
 document.getElementById("buscadorForm").addEventListener("submit", function (event) {
     event.preventDefault(); // Prevenir envío estándar del formulario
 
-    const valor = document.getElementById("buscador").value.trim();
+    const buscadorInput = document.getElementById("buscador");
+    const valor = buscadorInput.value.trim();
+    buscadorInput.value = valor;
+    //const valor = document.getElementById("buscador").value.trim();
+
     const patterns = {
         cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas
         pasaporte: /^[A-Z]{2}\d{6,9}$/,                        // Pasaportes
