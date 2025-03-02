@@ -5,6 +5,13 @@
     <title>{{ evento.nombre }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- favicons -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
+    <meta name="apple-mobile-web-app-title" content="CertiCSS" />
+    <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
 </head>
 <body class="bg-gray-50 dark:bg-neutral-900">
 
@@ -17,7 +24,7 @@
             <div class="bg-white grid sm:grid-cols-2 sm:items-center gap-8 border border-gray-200 rounded-xl">
 
                 <div class="sm:order-2">
-                    <div class="relative pt-[50%] sm:pt-[100%]">
+                    <div class="relative pt-[100%] sm:pt-[100%]">
 {% if evento.afiche_750 %}
                         <img class="size-full absolute top-0 start-0 object-cover rounded-r-xl" src="{{ BASE_URL }}{{ evento.afiche_750 }}" alt="{{ evento.nombre }}">
 {% else %}

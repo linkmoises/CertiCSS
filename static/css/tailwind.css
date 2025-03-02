@@ -2080,6 +2080,10 @@ select {
   padding-top: 50%;
 }
 
+.pt-\[80\%\] {
+  padding-top: 80%;
+}
+
 .text-center {
   text-align: center;
 }

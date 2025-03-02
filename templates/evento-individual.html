@@ -5,6 +5,12 @@
     <title>{{ evento.nombre }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <!-- favicons -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
+    <meta name="apple-mobile-web-app-title" content="CertiCSS" />
+    <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
     <style>
         body {
             background-image: url('{% if evento.fondo and evento.fondo.split('/')[-1] %}{{ url_for('static', filename='uploads/' + evento.fondo.split('/')[-1]) }}{% else %}{{ base_url }}{{ url_for('static', filename='assets/auditorio-cidelas-moredark.jpg') }}{% endif %}');
