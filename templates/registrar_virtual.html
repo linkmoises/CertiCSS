@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ nombre_evento }} - Registro de Participantes</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- favicons -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
+    <meta name="apple-mobile-web-app-title" content="CertiCSS" />
+    <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
+</head>
+<body class="bg-gray-50 dark:bg-neutral-900">
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main id="content">
+
+        <!-- Card -->
+        <div class="max-w-[75rem] px-4 pt-10 sm:px-6 lg:px-8 lg:pt-14 mx-auto">
+            <!-- Grid -->
+            <div class="bg-white grid sm:grid-cols-2 sm:items-center gap-8 border border-gray-200 rounded-xl">
+
+                <div class="sm:order-2">
+                    <div class="relative pt-[100%] sm:pt-[100%]">
+{% if evento.afiche_750 %}
+                        <img class="size-full absolute top-0 start-0 object-cover rounded-r-xl" src="{{ afiche_url }}" alt="{{ nombre_evento }}">
+{% else %}
+                        <img class="size-full absolute top-0 start-0 object-cover rounded-r-xl" src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}" alt="{{ nombre_evento }}">
+{% endif %}
+                    </div>
+                </div>
+                <!-- End Col -->
+
+                <div class="sm:order-1">
+
+<!-- Mostrar mensajes -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+                    <div class="mb-4">
+                        <ul>
+                        {% for category, message in messages %}
+                            <li class="{{ 'p-2 text-sm bg-red-100 text-red-800 rounded-r-xl' if category == 'error' else 'p-2 text-sm bg-green-100 text-green-800 rounded-r-xl' }}">
+                            {{ message }}
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+{% endif %}
+{% endwith %}
+
+                    <div class="m-8">
+{% if evento_cerrado %}
+                        <div class="bg-white p-8 border border-gray-200 rounded-xl text-center">
+                            <h1 class="text-2xl font-bold text-gray-800 mb-4">Evento Cerrado</h1>
+                            <p class="text-gray-600 mb-4 text-sm">Lo sentimos, este evento está cerrado y no se permiten añadir más registros de participantes.</p>
+                            <a href="{{ url_for('home') }}" class="inline-block text-sm py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                Volver al inicio
+                            </a>
+                        </div>
+{% else %}
+                        <h2 class="text-xl font-bold text-gray-800">Registro de participantes</h2>
+                        <p class="text-sm text-gray-600 mb-4">{{ nombre_evento }}</p>
+                        <form action="/registrar" method="post">
+                            <!-- Grid -->
+                            <div class="mt-4 grid sm:grid-cols-12 gap-2 sm:gap-6">
+                                
+                                <div class="sm:col-span-3">
+                                    <label for="nombres" class="inline-block text-sm text-gray-800 mt-2.5">
+                                        Nombre
+                                    </label>
+                                </div>
+                                <!-- End Col -->
+                            
+                                <div class="sm:col-span-9">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
+                                        <div>
+                                            <input id="nombres" name="nombres" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" placeholder="Nombres..." required>
+                                        </div>
+                                        <div>
+                                            <input id="apellidos" name="apellidos" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" placeholder="Apellidos..." required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- End Col -->
+
+                                <div class="sm:col-span-3">
+                                    <label for="cedula" class="inline-block text-sm text-gray-800 mt-2.5">
+                                        Cédula
+                                    </label>
+                                </div>
+                                <!-- End Col -->
+                            
+                                <div class="sm:col-span-9">
+                                    <input id="cedula" name="cedula" type="text" 
+                                        class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" 
+                                        placeholder="8-123-456" required 
+                                        onblur="validarCedula(this)" />
+                                    <small id="cedula-error" class="text-red-500 text-sm hidden">Cédula inválida. Por favor, verifica el formato.</small>
+                                </div>
+                                <!-- End Col -->
+
+                                <div class="sm:col-span-3">
+                                    <label for="perfil_profesional" class="inline-block text-sm text-gray-800 mt-2.5">
+                                        Perfil
+                                    </label>
+                                </div>
+                                <!-- End Col -->
+                            
+                                <div class="sm:col-span-9">
+                                    <select id="perfil_profesional" name="perfil_profesional" class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" required>
+                                        <option value="">Seleccione el perfil profesional</option>
+                                        <option value="medico_general">Médico General</option>
+                                        <option value="medico_especialista">Médico Especialista</option>
+                                        <option value="odontologo">Odontólogo(a)</option>
+                                        <option value="odontologo_especialista">Odontólogo(a) Especialista</option>
+                                        <option value="enfermero">Enfermera(o)</option>
+                                        <option value="tecnico_enfermeria">Técnico en Enfermería</option>
+                                        <option value="laboratorista">Laboratorista</option>
+                                        <option value="tecnico_laboratorio">Técnico de Laboratorio</option>
+                                        <option value="fisioterapeuta">Fisioterapeuta</option>
+                                        <option value="farmaceutico">Farmacéutico(a)</option>
+                                        <option value="fonoaudiologo">Fonoaudiólogo(a)</option>
+                                        <option value="psicologo">Psicólogo(a)</option>
+                                        <option value="nutricionista">Nutricionista</option>
+                                        <option value="estudiante_salud">Estudiante de Ciencias de la Salud</option>
+                                    </select>
+                                </div>
+                                <!-- End Col -->
+
+                                <div class="sm:col-span-3">
+                                    <label for="region" class="inline-block text-sm text-gray-800 mt-2.5">
+                                        Región
+                                    </label>
+                                </div>
+                                <!-- End Col -->
+
+                                <div class="sm:col-span-9">
+                                    <select id="region" name="region" onchange="actualizarUnidades()"
+                                        class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" required>
+                                        <option value="">Seleccione una provincia / región</option>
+                                        <option value="panama">Panamá</option>
+                                        <option value="sanmiguelito">San Miguelito</option>
+                                        <option value="panamaoeste">Panamá Oeste</option>
+                                        <option value="panamaeste">Panamá Este</option>
+                                        <option value="bocasdeltoro">Bocas del Toro</option>
+                                        <option value="cocle">Coclé</option>
+                                        <option value="colon">Colón</option>
+                                        <option value="chiriqui">Chiriquí</option>
+                                        <option value="herrera">Herrera</option>
+                                        <option value="lossantos">Los Santos</option>
+                                        <option value="veraguas">Veraguas</option>
+                                    </select>
+                                </div>
+                                <!-- End Col -->
+
+                                <div class="sm:col-span-3">
+                                    <label for="unidad" class="inline-block text-sm text-gray-800 mt-2.5">
+                                        Unidad
+                                    </label>
+                                </div>
+
+                                <div class="sm:col-span-9">
+                                    <select id="unidad" name="unidad"
+                                        class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" required>
+                                        <option value="">Seleccione una unidad ejecutora</option>
+                                    </select>
+                                </div>
+
+                                <input type="hidden" name="rol" value="participante">
+                                <input type="hidden" name="codigo_evento" value="{{ codigo_evento }}">
+
+                                <div class="sm:col-span-12 gap-2">
+                                    <button type="submit" class="w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="{{ url_for('crear_evento') }}">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                        Registrar datos de participante
+                                    </button>
+                                </div>
+{% if evento.programa %}
+                                <div class="sm:col-span-12 gap-2">
+                                    <a href="{{ BASE_URL }}{{ evento.programa }}" class="w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open-text"><path d="M12 7v14"/><path d="M16 12h2"/><path d="M16 8h2"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/><path d="M6 12h2"/><path d="M6 8h2"/></svg>
+                                        Descargar programa del evento
+                                    </a>
+                                </div>
+{% endif %}
+
+                            </div>
+                        </form>
+{% endif %}
+                    </div>
+                </div>
+                <!-- End Col -->
+            </div>
+            <!-- End Grid -->
+        </div>
+        <!-- End Card -->
+
+    </main>
+
+    <footer class="mt-auto w-full max-w-[85rem] px-4 sm:px-6 lg:px-8 mx-auto">
+        <div class="text-center text-xs text-gray-500 my-8">
+            <p>Este evento es avalado por DENADOI y potenciado por la plataforma CertiCSS.</p>
+        </div>
+    </footer>
+
+<script>
+function validarCedula(input) {
+    const cedula = input.value.trim();
+    input.value = cedula;
+    const errorMessage = document.getElementById('cedula-error');
+
+    const patrones = [
+        /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$|^[A-Z]{2}\d{6,20}$/
+    ];
+
+    // Verificar si la cédula cumple con alguno de los patrones
+    const esValido = patrones.some(patron => patron.test(cedula));
+
+    if (esValido) {
+        input.classList.remove('border-red-500');
+        input.classList.add('border-gray-200');
+        errorMessage.classList.add('hidden');
+    } else {
+        input.classList.remove('border-gray-200');
+        input.classList.add('border-red-500');
+        errorMessage.classList.remove('hidden');
+    }
+}
+</script>
+<script>
+    const unidadesPorProvincia = {
+        panama: [
+            "Complejo Hospitalario Metropolitano Dr. Arnulfo Arias Madrid",
+            "Hospital de Especialidades Pediátricas Omar Torrijos Herrera",
+            "Policlínica Presidente Remón",
+            "Policlínica Dr. Manuel Ferrer Valdés",
+            "Policlínica Dr. Carlos N. Brin",
+            "Policlínica Don Alejandro De La Guardia Hijo",
+            "Policlínica Don Joaquín José Vallarino",
+            "ULAPS Máximo Herrera",
+            "ULAPS Prof. Carlos Velarde",
+            "CAPPS Plaza Tocumen",
+            "CAPPS Pedregal",
+            "Otra unidad"
+        ],
+        sanmiguelito: [
+            "Hospital Dra. Susana Jones Cano",
+            "Policlínica Lic. Manuel María Valdés",
+            "Policlínica Don Generoso Guardia",
+            "Policlínica Dr. Edilberto Culiolis",
+            "CAPPS Torrijos Carter",
+            "Otra unidad"
+        ],
+        panamaoeste: [
+            "Hospital Hogar de La Esperanza",
+            "Policlínica Dr. Santiago Barraza",
+            "Policlínica Dr. Blas Gómez Chetro",
+            "Policlínica Dr. Juan Vega Méndez",
+            "ULAPS Vista Alegre",
+            "ULAPS Guadalupe",
+            "ULAPS San José",
+            "CAPPS Capira",
+            "CAPPS Vacamonte",
+            "CAPPS El Tecal",
+            "Otra unidad"
+        ],
+        panamaeste: [
+            "Hospital Regional de Chepo",
+            "Hospital Irma de Lourdes Tzanetatos",
+            "Policlínica de Cañitas",
+            "CAPPS Los Nogales",
+            "Otra unidad"
+        ],
+        bocasdeltoro: [
+            "Hospital Regional de Changuinola",
+            "Hospital Regional de Almirante",
+            "Hospital de Chiriquí Grande",
+            "Policlínica de Guabito",
+            "ULAPS Las Tablas",
+            "Otra unidad"
+        ],
+        cocle: [
+            "Hospital Regional Dr. Rafael Estévez",
+            "Policlínica Dr. Manuel De Jesús Rojas",
+            "Policlínica San Juan De Dios",
+            "Policlínica Dr. Manuel Paulino Ocaña",
+            "Otra unidad"
+        ],
+        colon: [
+            "Complejo Hospitalario Dr. Manuel Amador Guerrero",
+            "Policlínica de Nuevo San Juan",
+            "Policlínica de Sabanitas",
+            "Policlínica Dr. Hugo Spadafora",
+            "ULAPS Portobelo",
+            "Otra unidad"
+        ],
+        chiriqui: [
+            "Hospital Regional Dr. Rafael Hernández",
+            "Hospital Dr. Dionisio Arrocha",
+            "Policlínica Dr. Gustavo Adolfo Ross",
+            "Policlínica Dr. Pablo Espinosa",
+            "Policlínica Dr. Ernesto Perez Balladares",
+            "Policlínica de Divalá",
+            "ULAPS Nuevo Vedado",
+            "ULAPS Volcán",
+            "ULAPS Dolega",
+            "CAPPS Barú",
+            "CAPPS Jobito",
+            "CAPPS Balsa",
+            "CAPPS Blanco",
+            "CAPPS Caoba",
+            "CAPPS Corredor",
+            "CAPPS Zapatero",
+            "Otra unidad"
+        ],
+        herrera: [
+            "Hospital Dr. Gustavo Nelson Collado",
+            "Policlínica Dr. Roberto Ramírez De Diego",
+            "CAPPS Los Pozos",
+            "CAPPS Ocú",
+            "CAPPS Pesé",
+            "Otra unidad"
+        ],
+        lossantos: [
+            "Policlínica Dr. Miguel Cárdenas Barahona",
+            "Policlínica San Juan de Dios",
+            "CAPPS Guararé",
+            "CAPPS Tonosí",
+            "CAPPS Macaracas",
+            "Otra unidad"
+        ],
+        veraguas: [
+            "Hospital Dr. Ezequiel Abadía",
+            "Policlínica Dr. Horacio Díaz Gómez",
+            "ULAPS Alberto León",
+            "CAPPS Zapotillo",
+            "Otra unidad"
+        ]
+    };
+    
+    function actualizarUnidades() {
+        const provinciaSeleccionada = document.getElementById("region").value;
+        const unidadSelect = document.getElementById("unidad");
+        
+        // Limpiar opciones previas
+        unidadSelect.innerHTML = '<option value="">-- Selecciona una unidad --</option>';
+        
+        if (provinciaSeleccionada && unidadesPorProvincia[provinciaSeleccionada]) {
+            unidadesPorProvincia[provinciaSeleccionada].forEach(unidad => {
+                const option = document.createElement("option");
+                option.value = unidad;
+                option.textContent = unidad;
+                unidadSelect.appendChild(option);
+            });
+        }
+    }
+</script>
+</body>
+</html>

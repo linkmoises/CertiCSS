@@ -28,6 +28,8 @@ db = client['certi_css']
 collection_eventos = db['eventos']
 collection_participantes = db['participantes']
 collection_usuarios = db['usuarios']
+collection_preregistro = db['preregistro']
+collection_aula = db['aula']
 
 @app.context_processor                                      # Variable BASE_URL
 def inject_base_url():
@@ -722,6 +724,8 @@ def registrar_participante(codigo_evento):
     if evento is None:
         abort(404)
 
+    es_presencial = evento.get("modalidad", "") == "Presencial"
+
     # Verificar si el evento está cerrado
     if evento.get('estado_evento') == 'cerrado':
         return render_template('registrar.html', 
@@ -730,24 +734,35 @@ def registrar_participante(codigo_evento):
             afiche_url=url_for('static', filename='uploads/' + evento['afiche_750'].split('/')[-1])
         )
     
-    # Generar un nuevo OTP si no existe o ha expirado
-    if codigo_evento not in otp_storage or datetime.now() >= otp_storage[codigo_evento]['valid_until']:
-        otp_code = generate_otp()
-        otp_storage[codigo_evento] = {
-            'code': otp_code,
-            'valid_until': datetime.now() + timedelta(minutes=1)
-        }
-    else:
-        otp_code = otp_storage[codigo_evento]['code']
+    # Plantilla diferente según el tipo de evento
+    if es_presencial:
+        # Eventos presenciales
+        if codigo_evento not in otp_storage or datetime.now() >= otp_storage[codigo_evento]['valid_until']:
+            otp_code = generate_otp()
+            otp_storage[codigo_evento] = {
+                'code': otp_code,
+                'valid_until': datetime.now() + timedelta(minutes=1)
+            }
+        else:
+            otp_code = otp_storage[codigo_evento]['code']
 
-    return render_template('registrar.html', 
-        otp=otp_code,
-        evento=evento,
-        codigo_evento=codigo_evento, 
-        nombre_evento=evento['nombre'], 
-        afiche_url=url_for('static', filename='uploads/' + evento['afiche_750'].split('/')[-1]),
-        programa_url=evento.get('programa_url') 
-    )
+        return render_template('registrar_presencial.html', 
+            otp=otp_code,
+            evento=evento,
+            codigo_evento=codigo_evento, 
+            nombre_evento=evento['nombre'], 
+            afiche_url=url_for('static', filename='uploads/' + evento['afiche_750'].split('/')[-1]),
+            programa_url=evento.get('programa_url') 
+        )
+    else:
+        # Eventos no presenciales
+        return render_template('registrar_virtual.html', 
+            evento=evento,
+            codigo_evento=codigo_evento, 
+            nombre_evento=evento['nombre'], 
+            afiche_url=url_for('static', filename='uploads/' + evento['afiche_750'].split('/')[-1]),
+            programa_url=evento.get('programa_url') 
+        )
 
 
 @app.route('/registrar', methods=['POST'])
@@ -760,47 +775,68 @@ def registrar():
     region = request.form['region']
     unidad = request.form['unidad']
     codigo_evento = request.form['codigo_evento']
-    otp_ingresado = request.form['otp']
+    #otp_ingresado = request.form['otp']
     timestamp = datetime.now()
+
+    # Obtener el evento
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+
+    if evento is None:
+        flash("El código del evento no es válido.", "error")
+        return redirect(url_for('registrar_participante', codigo_evento=codigo_evento))
+
+    es_presencial = evento.get("modalidad", "") == "Presencial"
 
     # Verificar si el participante ya está registrado en este evento
     if collection_participantes.find_one({"cedula": cedula, "codigo_evento": codigo_evento, "rol": "participante"}):
         flash("El participante ya está registrado en este evento.", "error")
         return redirect(url_for('registrar_participante', codigo_evento=codigo_evento))
 
-    # Verificar si el código OTP existe y su validez
-    if codigo_evento in otp_storage:
-        otp_info = otp_storage[codigo_evento]
+    # Proceso según tipo de evento
+    if es_presencial:
+        # Eventos presenciales, validamos OTP
+        otp_ingresado = request.form.get('otp', '')
         
-        # Validar si el registro se realizó durante la validez del OTP y si coincide con el OTP ingresado
-        if datetime.now() <= otp_info['valid_until'] and otp_ingresado == otp_info['code']:
-            # Generar nanoid
-            nanoid = generate_nanoid(cedula, codigo_evento)
+        # Verificar si el código OTP existe y su validez
+        if codigo_evento in otp_storage:
+            otp_info = otp_storage[codigo_evento]
             
-            # Insertar datos en la colección de MongoDB
-            collection_participantes.insert_one({
-                'nombres': nombres,
-                'apellidos': apellidos,
-                'cedula': cedula,
-                'rol': rol,
-                'perfil': perfil,
-                'region': region,
-                'unidad': unidad,
-                'codigo_evento': codigo_evento,
-                'nanoid': nanoid,
-                'timestamp': timestamp
-            })
-
-            # Mensaje de éxito o falla en registro
-            flash("Registro exitoso. El certificado de participación se podrá descargar al finalizar el evento.", "success")
-
-            return redirect(url_for('registrar_participante', codigo_evento=codigo_evento))
+            # Validar si el registro se realizó durante la validez del OTP y si coincide con el OTP ingresado
+            if datetime.now() > otp_info['valid_until'] or otp_ingresado != otp_info['code']:
+                flash("El OTP ha expirado o es incorrecto.", "error")
+                return redirect(url_for('registrar_participante', codigo_evento=codigo_evento))
         else:
-            flash("El OTP ha expirado o es incorrecto.", "error")
+            flash("El código del evento no es válido.", "error")
             return redirect(url_for('registrar_participante', codigo_evento=codigo_evento))
     else:
-        flash("El código del evento no es válido.", "error")
-        return redirect(url_for('registrar_participante', codigo_evento=codigo_evento))
+        # Para eventos no presenciales, validamos contra preregistro
+        preregistro = collection_preregistro.find_one({"codigo_evento": codigo_evento, "cedula": cedula})
+        if preregistro is None:
+            flash("Su cédula no está preregistrada para este evento virtual.", "error")
+            return redirect(url_for('registrar_participante', codigo_evento=codigo_evento))
+
+    # Si llegamos aquí, todas las validaciones han pasado :)
+    # Generar nanoid
+    nanoid = generate_nanoid(cedula, codigo_evento)
+    
+    # Insertar datos en la colección de MongoDB
+    collection_participantes.insert_one({
+        'nombres': nombres,
+        'apellidos': apellidos,
+        'cedula': cedula,
+        'rol': rol,
+        'perfil': perfil,
+        'region': region,
+        'unidad': unidad,
+        'codigo_evento': codigo_evento,
+        'nanoid': nanoid,
+        'timestamp': timestamp,
+        'tipo_evento': 'Presencial' if es_presencial else 'Virtual'
+    })
+
+    # Mensaje de éxito
+    flash("Registro exitoso. El certificado de participación se podrá descargar al finalizar el evento.", "success")
+    return redirect(url_for('registrar_participante', codigo_evento=codigo_evento))
 
 
 ###
@@ -809,6 +845,65 @@ def registrar():
 @app.route('/<codigo_evento>')
 def redirigir_ruta_corta(codigo_evento):
     return redirect(url_for('registrar_participante', codigo_evento=codigo_evento))
+
+
+###
+### Formulario de preregistro
+###
+@app.route('/preregistro/<codigo_evento>', methods=['GET', 'POST'])
+def preregistro(codigo_evento):
+    # Obtener cédulas existentes de la colección preregistros
+    cedulas_guardadas = [registro["cedula"] for registro in collection_preregistro.find({"codigo_evento": codigo_evento}, {"cedula": 1, "_id": 0})]
+
+    if request.method == "POST":
+        datos_formulario = request.form.get("cedulas", "")
+        
+        # Dividir el contenido usando la línea de guiones como separador
+        partes = datos_formulario.split("-----")
+        
+        if len(partes) >= 2:
+            # La primera parte contiene las cédulas existentes (posiblemente modificadas)
+            cedulas_existentes_actualizadas = {c.strip() for c in partes[0].split("\n") if c.strip()}
+            
+            # Nuevas cédulas están después del separador
+            nuevas_cedulas = {c.strip() for c in partes[1].split("\n") if c.strip()}
+            
+            # Identificar cédulas que fueron eliminadas
+            cedulas_a_eliminar = set(cedulas_guardadas) - cedulas_existentes_actualizadas
+            if cedulas_a_eliminar:
+                for cedula in cedulas_a_eliminar:
+                    collection_preregistro.delete_one({"codigo_evento": codigo_evento, "cedula": cedula})
+                flash(f"Se han eliminado {len(cedulas_a_eliminar)} cédulas del registro.", "info")
+            
+            # Insertar nuevas cédulas
+            cedulas_a_insertar = [c for c in nuevas_cedulas if c not in cedulas_existentes_actualizadas]
+            if cedulas_a_insertar:
+                documentos = [{"codigo_evento": codigo_evento, "cedula": c} for c in cedulas_a_insertar]
+                collection_preregistro.insert_many(documentos)
+                flash(f"Se han preregistrado {len(cedulas_a_insertar)} nuevas cédulas.", "success")
+            
+        else:
+            # Si no hay separador, consideramos todo como nuevas cédulas
+            nuevas_cedulas = {c.strip() for c in datos_formulario.split("\n") if c.strip()}
+            cedulas_a_insertar = [c for c in nuevas_cedulas if c not in cedulas_guardadas]
+            
+            if cedulas_a_insertar:
+                documentos = [{"codigo_evento": codigo_evento, "cedula": c} for c in cedulas_a_insertar]
+                collection_preregistro.insert_many(documentos)
+                flash(f"Se han preregistrado {len(cedulas_a_insertar)} nuevas cédulas.", "success")
+            else:
+                flash("Todas las cédulas ingresadas ya están registradas.", "info")
+
+        # Redireccionar para actualizar la lista
+        return redirect(url_for('preregistro', codigo_evento=codigo_evento))
+
+    # Actualizar la lista de cédulas guardadas después de posibles cambios
+    cedulas_guardadas = [registro["cedula"] for registro in collection_preregistro.find({"codigo_evento": codigo_evento}, {"cedula": 1, "_id": 0})]
+    
+    return render_template('preregistro.html', 
+                           codigo_evento=codigo_evento, 
+                           nombre_evento="text", 
+                           cedulas_guardadas=cedulas_guardadas)
 
 
 ###
@@ -970,6 +1065,40 @@ def mis_eventos(page=1):
     eventos = list(eventos_cursor)
 
     return render_template('mis_eventos.html',
+        eventos=eventos,
+        total_eventos=total_eventos,
+        page=page,
+        total_paginas=total_paginas
+    )
+
+
+###
+### Aula Digital
+###
+@app.route('/aula-digital')
+@app.route('/aula-digital/page/<int:page>')
+@login_required
+def listar_eventos_digitales(page=1):
+    eventos_por_pagina = 20
+
+    # Filtrar eventos que no sean presenciales
+    filtro = {"modalidad": {"$ne": "Presencial"}}
+
+    # Calcular el número total de eventos que cumplen la condición
+    total_eventos = collection_eventos.count_documents(filtro)
+    total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondeo hacia arriba
+
+    # Obtener los eventos que cumplen la condición para la página actual
+    eventos_cursor = (
+        collection_eventos.find(filtro)
+        .sort("fecha_inicio", -1)
+        .skip((page - 1) * eventos_por_pagina)
+        .limit(eventos_por_pagina)
+    )
+    eventos = list(eventos_cursor)
+
+    return render_template(
+        'aula_digital.html',  # Si el template cambia de nombre, actualízalo aquí
         eventos=eventos,
         total_eventos=total_eventos,
         page=page,
