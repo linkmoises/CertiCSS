@@ -29,7 +29,7 @@ collection_eventos = db['eventos']
 collection_participantes = db['participantes']
 collection_usuarios = db['usuarios']
 collection_preregistro = db['preregistro']
-collection_aula = db['aula']
+collection_eva = db['eva']
 
 @app.context_processor                                      # Variable BASE_URL
 def inject_base_url():
@@ -873,7 +873,7 @@ def preregistro(codigo_evento):
             if cedulas_a_eliminar:
                 for cedula in cedulas_a_eliminar:
                     collection_preregistro.delete_one({"codigo_evento": codigo_evento, "cedula": cedula})
-                flash(f"Se han eliminado {len(cedulas_a_eliminar)} cédulas del registro.", "info")
+                flash(f"Se han eliminado {len(cedulas_a_eliminar)} cédulas del registro.", "danger")
             
             # Insertar nuevas cédulas
             cedulas_a_insertar = [c for c in nuevas_cedulas if c not in cedulas_existentes_actualizadas]
@@ -1098,7 +1098,7 @@ def listar_eventos_digitales(page=1):
     eventos = list(eventos_cursor)
 
     return render_template(
-        'aula_digital.html',  # Si el template cambia de nombre, actualízalo aquí
+        'aula_digital.html',
         eventos=eventos,
         total_eventos=total_eventos,
         page=page,
