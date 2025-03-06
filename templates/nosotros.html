@@ -18,7 +18,7 @@
     <!--====== HERO ======-->
     <section class="relative bg-gradient-to-br from-blue-900 to-indigo-800 text-white overflow-hidden">
         <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ url_for('static', filename='assets/auditorio-cidelas-dark.jpg') }}');"></div>
-        
+
         <div class="container mx-auto px-4 py-24 md:py-24 relative z-10">
             <div class="flex flex-col md:flex-row items-center justify-between">
 
@@ -33,11 +33,11 @@
                         <a href="{{ url_for('buscar_certificados') }}" class="border-2 border-white text-white font-semibold px-8 py-3 rounded-full hover:bg-white hover:text-blue-900 transition duration-300 text-center">Buscar Certificado</a>
                     </div>
                 </div>
-                
+
                 <div class="w-full md:w-1/2 md:pl-12">
                     <div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-xl p-8 shadow-2xl">
                         <h2 class="text-2xl font-semibold mb-6">Validar o buscar un certificado</h2>
-                        
+
                             <div class="relative z-10 flex gap-x-3 p-3 bg-white border rounded-lg shadow-lg shadow-gray-100">
                                 <div class="w-full">
                                     <form id="buscadorForm">
@@ -66,13 +66,13 @@
                                     </form>
                                 </div>
                             </div>
-                        
+
                     </div>
                 </div>
 
             </div>
         </div>
-        
+
         <!-- Decorative Element -->
         <div class="absolute custom-bottom-y left-0 right-0">
             <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -80,7 +80,7 @@
             </svg>
         </div>
     </section>
-    
+
     <!--====== CARDS ======-->
     <section class="bg-white">
         <!-- Team -->
@@ -91,7 +91,7 @@
                 <p class="mt-1 text-gray-600 dark:text-neutral-400">Educación, Formación e Investigación para el Fortalecimiento del Sistema de Salud</p>
             </div>
             <!-- End Title -->
-            
+
             <div class="max-w-3xl px-4 pt-6 lg:pt-10 pb-12 sm:px-6 lg:px-8 mx-auto">
                 <p class="mb-4">El <strong>Departamento Nacional de Docencia e Investigación (DENADOI)</strong> de la <strong>Caja de Seguro Social (CSS)</strong> forma parte de la <strong>Dirección Nacional de Servicios y Prestaciones Médicas</strong> y actúa como el ente rector en la planificación, estructuración e implementación de estrategias de educación y capacitación para el personal de salud que labora en la institución.</p>
 
@@ -149,6 +149,24 @@
                     <p class="mt-1 text-gray-600 dark:text-neutral-400">Fortaleciendo la Educación Continua en el Territorio Nacional</p>
                 </div>
                 <!-- End Title -->
+
+                <div id="denadoi" class="justify-center grid grid-cols-2 max-md:gap-x-4">
+{% for usuario in denadoi_users %}
+                    <div class="text-center">
+                        <div>
+                            <img class="rounded-xl sm:size-48 lg:size-60 mx-auto" src="{{ subjefe_foto_url }}" alt="Subjefe">
+                            <div class="mt-2 sm:mt-4">
+                                <h3 class="text-sm font-medium text-gray-800 sm:text-base lg:text-lg dark:text-neutral-200">
+                                    {{ usuario.nombres }} {{ usuario.apellidos }}
+                                </h3>
+                                <p class="text-xs text-gray-600 sm:text-sm lg:text-base dark:text-neutral-400">
+                                    {{ usuario.cargo }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+{% endfor %}
+                </div>
 
             </div>
             <!-- End Grid -->
@@ -228,7 +246,7 @@
             <a class="flex-none text-xl font-semibold text-black focus:outline-none dark:text-white" href="#" aria-label="Brand">CertiCSS</a>
             </div>
             <!-- End Col -->
-        
+
             <ul class="text-center">
                 <li class="inline-block relative pe-8 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
                     <a target="_blank" class="inline-flex gap-x-2 text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200" href="https://css.gob.pa/">
@@ -247,7 +265,7 @@
                 </li>
             </ul>
             <!-- End Col -->
-        
+
             <!-- Social Brands -->
             <div class="md:text-end space-x-2">
                 <a target="_blank" class="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-500 hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-400 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700" href="https://github.com/linkmoises/CertiCSS/">
@@ -264,7 +282,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 448 512"><path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z"/></svg>
                 </a>
 {% endif %}
-                
+
             </div>
             <!-- End Social Brands -->
         </div>

@@ -49,9 +49,9 @@ def load_user(user_id):
     user_data = collection_usuarios.find_one({"_id": ObjectId(user_id)})
     if user_data:
         user = User(
-            email=user_data['email'], 
-            password=user_data['password'], 
-            rol=user_data['rol'], 
+            email=user_data['email'],
+            password=user_data['password'],
+            rol=user_data['rol'],
             nombres=user_data['nombres'],
             foto=user_data.get('foto')
         )
@@ -294,9 +294,9 @@ def listar_usuarios(page=1):
     for usuario in usuarios:
         usuario['foto_url'] = f"/static/usuarios/{usuario['foto']}" if usuario.get('foto') else "/static/assets/user-avatar.png"
 
-    return render_template('usuarios.html', 
-        usuarios=usuarios, 
-        page=page, 
+    return render_template('usuarios.html',
+        usuarios=usuarios,
+        page=page,
         total_paginas=total_paginas,
         total_usuarios=total_usuarios
     )
@@ -387,7 +387,7 @@ def editar_usuario(user_id):
 
         # Actualizar el usuario en la base de datos
         collection_usuarios.update_one({"_id": ObjectId(user_id)}, {"$set": updated_user_data})
-        
+
         email = usuario.get('email')
 
         if current_user.email == email:
@@ -421,7 +421,7 @@ def eliminar_foto(user_id):
     print(f"Intentando eliminar la foto del usuario: {user_id}")  # Debug
 
     usuario = collection_usuarios.find_one({"_id": ObjectId(user_id)})
-    
+
     if not usuario or not usuario.get("foto"):
         print("No se encontró una foto asociada en la base de datos.")  # Debug
         return redirect(url_for('editar_usuario', user_id=user_id))
@@ -460,7 +460,7 @@ def mostrar_usuario(user_id):
     usuario = collection_usuarios.find_one({"_id": ObjectId(user_id)})
 
     foto_url = f"/static/usuarios/{usuario['foto']}" if usuario.get('foto') else None
-    
+
     if not usuario:
         flash("Usuario no encontrado", "danger")
         return redirect(url_for('listar_usuarios'))  # Redirigir a la lista de usuarios si no se encuentra
@@ -480,7 +480,7 @@ def eliminar_usuario(user_id):
 
     # Obtener el usuario que se va a eliminar
     usuario = collection_usuarios.find_one({"_id": ObjectId(user_id)})
-    
+
     if not usuario:
         flash('Usuario no encontrado.', 'error')
         return redirect(url_for('listar_usuarios'))
@@ -657,7 +657,7 @@ def catalogo(page=1):
 def tablero_coordinadores():
 
     ## Tarjetas
-    
+
     # Obtener el número total de usuarios
     total_usuarios = collection_usuarios.count_documents({"rol": {"$ne": "administrador"}})
     # Obtener el número total de eventos
@@ -670,7 +670,7 @@ def tablero_coordinadores():
     ## Resumen Eventos
 
     # Consulta de eventos próximos y en curso si hay alguno en la consulta
-    ahora = datetime.utcnow() 
+    ahora = datetime.utcnow()
     # Normaliza al inicio del día actual
     inicio_hoy = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     # Consulta a MongoDB para incluir desde el inicio del día actual en adelante
@@ -697,18 +697,18 @@ def tablero_coordinadores():
 
     for usuario in usuarios_recientes:
         usuario['foto_url'] = f"/static/usuarios/{usuario['foto']}" if usuario.get('foto') else "/static/assets/user-avatar.png"
-    
-    return render_template('tablero.html', 
-        eventos=eventos_prox_list, 
-        eventos_estado=eventos_prox_list_estado, 
-        ahora=ahora, 
-        num_eventos=num_eventos, 
+
+    return render_template('tablero.html',
+        eventos=eventos_prox_list,
+        eventos_estado=eventos_prox_list_estado,
+        ahora=ahora,
+        num_eventos=num_eventos,
         usuarios=usuarios_recientes,
         num_usuarios=num_usuarios_recientes,
-        active_section='tablero', 
-        total_usuarios=total_usuarios, 
-        total_eventos=total_eventos, 
-        total_ponentes=total_ponentes, 
+        active_section='tablero',
+        total_usuarios=total_usuarios,
+        total_eventos=total_eventos,
+        total_ponentes=total_ponentes,
         total_participantes=total_participantes,
     )
 
@@ -720,7 +720,7 @@ def tablero_coordinadores():
 def registrar_participante(codigo_evento):
     # Verificar si el código del evento existe en la base de datos
     evento = collection_eventos.find_one({"codigo": codigo_evento})
-    
+
     if evento is None:
         abort(404)
 
@@ -728,12 +728,12 @@ def registrar_participante(codigo_evento):
 
     # Verificar si el evento está cerrado
     if evento.get('estado_evento') == 'cerrado':
-        return render_template('registrar.html', 
+        return render_template('registrar.html',
             evento_cerrado=True,
             nombre_evento=evento['nombre'],
             afiche_url=url_for('static', filename='uploads/' + evento['afiche_750'].split('/')[-1])
         )
-    
+
     # Plantilla diferente según el tipo de evento
     if es_presencial:
         # Eventos presenciales
@@ -746,22 +746,22 @@ def registrar_participante(codigo_evento):
         else:
             otp_code = otp_storage[codigo_evento]['code']
 
-        return render_template('registrar_presencial.html', 
+        return render_template('registrar_presencial.html',
             otp=otp_code,
             evento=evento,
-            codigo_evento=codigo_evento, 
-            nombre_evento=evento['nombre'], 
+            codigo_evento=codigo_evento,
+            nombre_evento=evento['nombre'],
             afiche_url=url_for('static', filename='uploads/' + evento['afiche_750'].split('/')[-1]),
-            programa_url=evento.get('programa_url') 
+            programa_url=evento.get('programa_url')
         )
     else:
         # Eventos no presenciales
-        return render_template('registrar_virtual.html', 
+        return render_template('registrar_virtual.html',
             evento=evento,
-            codigo_evento=codigo_evento, 
-            nombre_evento=evento['nombre'], 
+            codigo_evento=codigo_evento,
+            nombre_evento=evento['nombre'],
             afiche_url=url_for('static', filename='uploads/' + evento['afiche_750'].split('/')[-1]),
-            programa_url=evento.get('programa_url') 
+            programa_url=evento.get('programa_url')
         )
 
 
@@ -796,11 +796,11 @@ def registrar():
     if es_presencial:
         # Eventos presenciales, validamos OTP
         otp_ingresado = request.form.get('otp', '')
-        
+
         # Verificar si el código OTP existe y su validez
         if codigo_evento in otp_storage:
             otp_info = otp_storage[codigo_evento]
-            
+
             # Validar si el registro se realizó durante la validez del OTP y si coincide con el OTP ingresado
             if datetime.now() > otp_info['valid_until'] or otp_ingresado != otp_info['code']:
                 flash("El OTP ha expirado o es incorrecto.", "error")
@@ -818,7 +818,7 @@ def registrar():
     # Si llegamos aquí, todas las validaciones han pasado :)
     # Generar nanoid
     nanoid = generate_nanoid(cedula, codigo_evento)
-    
+
     # Insertar datos en la colección de MongoDB
     collection_participantes.insert_one({
         'nombres': nombres,
@@ -851,42 +851,43 @@ def redirigir_ruta_corta(codigo_evento):
 ### Formulario de preregistro
 ###
 @app.route('/preregistro/<codigo_evento>', methods=['GET', 'POST'])
+@login_required
 def preregistro(codigo_evento):
     # Obtener cédulas existentes de la colección preregistros
     cedulas_guardadas = [registro["cedula"] for registro in collection_preregistro.find({"codigo_evento": codigo_evento}, {"cedula": 1, "_id": 0})]
 
     if request.method == "POST":
         datos_formulario = request.form.get("cedulas", "")
-        
+
         # Dividir el contenido usando la línea de guiones como separador
         partes = datos_formulario.split("-----")
-        
+
         if len(partes) >= 2:
             # La primera parte contiene las cédulas existentes (posiblemente modificadas)
             cedulas_existentes_actualizadas = {c.strip() for c in partes[0].split("\n") if c.strip()}
-            
+
             # Nuevas cédulas están después del separador
             nuevas_cedulas = {c.strip() for c in partes[1].split("\n") if c.strip()}
-            
+
             # Identificar cédulas que fueron eliminadas
             cedulas_a_eliminar = set(cedulas_guardadas) - cedulas_existentes_actualizadas
             if cedulas_a_eliminar:
                 for cedula in cedulas_a_eliminar:
                     collection_preregistro.delete_one({"codigo_evento": codigo_evento, "cedula": cedula})
                 flash(f"Se han eliminado {len(cedulas_a_eliminar)} cédulas del registro.", "danger")
-            
+
             # Insertar nuevas cédulas
             cedulas_a_insertar = [c for c in nuevas_cedulas if c not in cedulas_existentes_actualizadas]
             if cedulas_a_insertar:
                 documentos = [{"codigo_evento": codigo_evento, "cedula": c} for c in cedulas_a_insertar]
                 collection_preregistro.insert_many(documentos)
                 flash(f"Se han preregistrado {len(cedulas_a_insertar)} nuevas cédulas.", "success")
-            
+
         else:
             # Si no hay separador, consideramos todo como nuevas cédulas
             nuevas_cedulas = {c.strip() for c in datos_formulario.split("\n") if c.strip()}
             cedulas_a_insertar = [c for c in nuevas_cedulas if c not in cedulas_guardadas]
-            
+
             if cedulas_a_insertar:
                 documentos = [{"codigo_evento": codigo_evento, "cedula": c} for c in cedulas_a_insertar]
                 collection_preregistro.insert_many(documentos)
@@ -899,10 +900,10 @@ def preregistro(codigo_evento):
 
     # Actualizar la lista de cédulas guardadas después de posibles cambios
     cedulas_guardadas = [registro["cedula"] for registro in collection_preregistro.find({"codigo_evento": codigo_evento}, {"cedula": 1, "_id": 0})]
-    
-    return render_template('preregistro.html', 
-                           codigo_evento=codigo_evento, 
-                           nombre_evento="text", 
+
+    return render_template('preregistro.html',
+                           codigo_evento=codigo_evento,
+                           nombre_evento="text",
                            cedulas_guardadas=cedulas_guardadas)
 
 
@@ -919,7 +920,7 @@ def registrar_ponente(codigo_evento):
 
     # Verificar si el evento está cerrado
     if evento.get('estado_evento') == 'cerrado':
-        return render_template('registrar_ponente.html', 
+        return render_template('registrar_ponente.html',
             evento_cerrado=True,
             nombre_evento=evento['nombre'],
             afiche_url=afiche_url
@@ -973,7 +974,7 @@ def listar_eventos_proximos(page=1):
 
     # Contar el total de eventos próximos
     total_eventos = collection_eventos.count_documents({'fecha_inicio': {'$gte': inicio_hoy}})
-    
+
     # Calcular el número total de páginas
     total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
 
@@ -981,9 +982,9 @@ def listar_eventos_proximos(page=1):
     eventos_cursor = collection_eventos.find({'fecha_inicio': {'$gte': inicio_hoy}}).sort('fecha_inicio').skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
 
-    return render_template('eventos-proximos.html', 
-        eventos=eventos, 
-        page=page, 
+    return render_template('eventos-proximos.html',
+        eventos=eventos,
+        page=page,
         total_paginas=total_paginas,
         total_eventos=total_eventos
     )
@@ -1009,9 +1010,9 @@ def listar_eventos_anteriores(page=1):
     eventos_cursor = collection_eventos.find({"fecha_inicio": {"$lt": ahora}}).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
 
-    return render_template('eventos-anteriores.html', 
-        eventos=eventos, 
-        page=page, 
+    return render_template('eventos-anteriores.html',
+        eventos=eventos,
+        page=page,
         total_paginas=total_paginas,
         total_eventos=total_eventos
     )
@@ -1118,10 +1119,10 @@ def listar_participantes(codigo_evento):
     participantes_cursor = collection_participantes.find({"codigo_evento": codigo_evento})
     total_participantes = collection_participantes.count_documents({"codigo_evento": codigo_evento})
     participantes = list(participantes_cursor)
-    
+
     estado_evento = evento.get('estado_evento', 'borrador')
-    
-    return render_template('participantes.html', 
+
+    return render_template('participantes.html',
         participantes=participantes,
         total_participantes=total_participantes,
         evento=evento,
@@ -1232,7 +1233,7 @@ def crear_evento():
         fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d')
 
         estado_evento = request.form['estado_evento']
-       
+
         timestamp = request.form['timestamp']
 
         # Obtener un código único
@@ -1252,11 +1253,11 @@ def crear_evento():
         if afiche_file:
             afiche_filename = f"{codigo}-afiche.jpg"
             afiche_path = os.path.join(app.config['UPLOAD_FOLDER'], afiche_filename)
-            
+
             # Convertir y guardar la imagen como JPG
             image = Image.open(afiche_file)
             image.convert('RGB').save(afiche_path, 'JPEG')  # Convertir a JPG y guardar
-            
+
             # Redimensionar la imagen a 750x750 píxeles
             image.thumbnail((750, 750))  # Mantiene la relación de aspecto
             resized_afiche_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{codigo}-afiche-750.jpg")
@@ -1267,7 +1268,7 @@ def crear_evento():
         if fondo_file:
             fondo_filename = f"{codigo}-fondo.jpg"
             fondo_path = os.path.join(app.config['UPLOAD_FOLDER'], fondo_filename)
-            
+
             # Convertir y guardar la imagen como JPG
             image = Image.open(fondo_file)
             image.convert('RGB').save(fondo_path, 'JPEG')  # Convertir a JPG y guardar
@@ -1356,11 +1357,11 @@ def editar_evento(codigo_evento):
         if afiche_file:
             afiche_filename = f"{codigo_evento}-afiche.jpg"
             afiche_path = os.path.join(app.config['UPLOAD_FOLDER'], afiche_filename)
-            
+
             # Convertir y guardar la imagen como JPG
             image = Image.open(afiche_file)
             image.convert('RGB').save(afiche_path, 'JPEG')  # Convertir a JPG y guardar
-            
+
             # Redimensionar la imagen a 750x750 píxeles
             image.thumbnail((750, 750))  # Mantiene la relación de aspecto
             resized_afiche_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{codigo_evento}-afiche-750.jpg")
@@ -1369,7 +1370,7 @@ def editar_evento(codigo_evento):
         if fondo_file:
             fondo_filename = f"{codigo_evento}-fondo.jpg"
             fondo_path = os.path.join(app.config['UPLOAD_FOLDER'], fondo_filename)
-            
+
             # Convertir y guardar la imagen como JPG
             image = Image.open(fondo_file)
             image.convert('RGB').save(fondo_path, 'JPEG')  # Convertir a JPG y guardar
@@ -1404,7 +1405,7 @@ def editar_evento(codigo_evento):
                 'certificado': certificado_path,
             }}
         )
-        
+
         log_event(f"Usuario [{current_user.email}] ha editado el evento {codigo_evento}.")
         return redirect(url_for('mis_eventos'))  # Redirigir a la lista de eventos
 
@@ -1449,7 +1450,7 @@ def eliminar_evento(codigo_evento):
     if collection_participantes.find_one({"codigo_evento": codigo_evento}) is not None:
         log_event(f"Usuario [{current_user.email}] intentó eliminar el evento {codigo_evento} con usuarios asociados.")
         return "No se puede eliminar el evento porque tiene participantes asociados.", 400
-    
+
     # Si no hay participantes, eliminar el evento
     collection_eventos.delete_one({"codigo": codigo_evento})
     log_event(f"Usuario [{current_user.email}] eliminó el evento {codigo_evento}.")
@@ -1479,13 +1480,13 @@ def eliminar_participante(nanoid):
 ###
 @app.route('/evento/<codigo_evento>', methods=['GET'])
 def mostrar_evento(codigo_evento):
-    
+
     evento = collection_eventos.find_one({"codigo": codigo_evento})
 
     if evento:
 
         qr_path = generate_qr_code(codigo_evento)
-        
+
         # Generar un nuevo OTP si no existe o ha expirado
         if codigo_evento not in otp_storage or datetime.now() >= otp_storage[codigo_evento]['valid_until']:
             otp_code = generate_otp()
@@ -1515,7 +1516,7 @@ def generate_qr_code(codigo_evento):
         url = f"{base_url}registrar_participante/{codigo_evento}"
         qr = qrcode.make(url)
         qr.save(qr_path)
-    
+
     return qr_path
 
 
@@ -1526,7 +1527,7 @@ def generate_qr_code(codigo_evento):
 def validar_certificado():
     if request.method == 'POST':
         nanoid = request.form['nanoid']
-        
+
         participante = collection_participantes.find_one({"nanoid": nanoid})
 
         if participante:
@@ -1551,20 +1552,20 @@ def buscar_certificados():
     if request.method == 'POST':
         # Obtener el número de cédula del formulario
         cedula = request.form.get('cedula')
-        
+
         # Buscar participantes por cédula
         participantes = list(collection_participantes.find({"cedula": cedula}))
 
         if not participantes:  # Si no hay participantes encontrados
             return render_template('lista_certificados.html', cedula=cedula, resultados=None)
-        
+
         # Crear una lista para almacenar los resultados
         resultados = []
-        
+
         for participante in participantes:
             codigo_evento = participante.get('codigo_evento')
             evento = collection_eventos.find_one({"codigo": codigo_evento})
-            
+
             if evento:  # Verificar si el evento fue encontrado
 
                 fecha_evento = evento.get('fecha_inicio', None)
@@ -1593,7 +1594,7 @@ def buscar_certificados():
                 resultados.append(resultado)
 
         return render_template('lista_certificados.html', cedula=cedula, resultados=resultados)  # Renderizar la plantilla con los resultados
-    
+
     return render_template('buscar.html')  # Mostrar el formulario para buscar certificados
 
 
@@ -1622,11 +1623,26 @@ def nosotros():
     jefe = collection_usuarios.find_one({"jefe": True}, {"nombres": 1, "apellidos": 1, "foto": 1, "cargo": 1})
     subjefe = collection_usuarios.find_one({"subjefe": True}, {"nombres": 1, "apellidos": 1, "foto": 1, "cargo": 1})
 
-    # Construir las URLs de las fotos o usar una imagen predeterminada
-    jefe_foto_url = f"/static/usuarios/{jefe['foto']}" if jefe and jefe.get('foto') else "/static/default-avatar.jpg"
-    subjefe_foto_url = f"/static/usuarios/{subjefe['foto']}" if subjefe and subjefe.get('foto') else "/static/default-avatar.jpg"
+    denadoi_users = list(collection_usuarios.find(
+        {"rol": "denadoi", "jefe": {"$ne": True}, "subjefe": {"$ne": True}},
+        {"nombres": 1, "apellidos": 1, "foto": 1, "cargo": 1}
+    ))
 
-    return render_template('nosotros.html', jefe=jefe, subjefe=subjefe, jefe_foto_url=jefe_foto_url, subjefe_foto_url=subjefe_foto_url)
+    # Construir las URLs de las fotos o usar una imagen predeterminada
+    jefe_foto_url = f"/static/usuarios/{jefe['foto']}" if jefe and jefe.get('foto') else "/static/assets/user-avatar.png"
+    subjefe_foto_url = f"/static/usuarios/{subjefe['foto']}" if subjefe and subjefe.get('foto') else "/static/assets/user-avatar.png"
+
+    # Generar URLs de fotos para los usuarios "denadoi"
+    for usuario in denadoi_users:
+        usuario["foto_url"] = f"/static/usuarios/{usuario['foto']}" if usuario.get("foto") else "/static/assets/user-avatar.png"
+
+    return render_template('nosotros.html',
+        jefe=jefe,
+        subjefe=subjefe,
+        jefe_foto_url=jefe_foto_url,
+        subjefe_foto_url=subjefe_foto_url,
+        denadoi_users=denadoi_users,
+    )
 
 
 ###
@@ -1691,36 +1707,36 @@ def generar_pdf_participante(participante, afiche_path):
 
     # Definir la ruta donde se guardará el PDF
     pdf_directory = 'static/certificados/'
-    
+
     if not os.path.exists(pdf_directory):
         os.makedirs(pdf_directory)
 
     # Nombre del archivo PDF temporal a crear
     temp_pdf_filename = f"temp_{participante['nanoid']}.pdf"
     temp_pdf_path = os.path.join(pdf_directory, temp_pdf_filename)
-    
+
     c = canvas.Canvas(temp_pdf_path, pagesize=landscape(letter))
-    
+
     c.setFont("Helvetica", 14)
     #c.setFillColor("black")
     c.setFillColor(HexColor('#002060'))
-    
+
     page_width = landscape(letter)[0]
-    
+
     # Escribir los datos del participante centrados en la página
     def draw_centered_text(y_position, text, font="Helvetica", size=12):
         c.setFont(font, size)  # Cambiar fuente y tamaño
         text_width = c.stringWidth(text, font, size)
         x_position = (page_width - text_width) / 2  # Calcular posición X para centrar
         c.drawString(x_position, y_position, text)
-    
+
     draw_centered_text(6 * inch, f"{unidad_evento}", font='Helvetica-Bold', size=15)
     draw_centered_text(5.7 * inch, f"confiere el presente certificado a:")
     draw_centered_text(5.2 * inch, f"{participante['nombres']} {participante['apellidos']}", font="Helvetica-Bold", size=18)
     draw_centered_text(4.8 * inch, f"Cédula: {participante['cedula']}", font="Helvetica-Oblique", size=14)
     draw_centered_text(4.4 * inch, f"Por su asistencia en calidad de {participante['rol']} en:")
     draw_centered_text(4 * inch, f"{titulo_evento}", font="Helvetica-Bold", size=14)
-    
+
     if participante['rol'] == 'ponente':
         draw_centered_text(3.5 * inch, f"Con la ponencia:")
         draw_centered_text(3.2 * inch, f"{participante.get('titulo_ponencia', 'N/A')}", font="Helvetica-Bold", size=16)
@@ -1746,39 +1762,39 @@ def generar_pdf_participante(participante, afiche_path):
 
     # Insertar el código QR en el PDF justo debajo del nanoid
     c.drawImage(qr_img_path, x_position - -1.45 * inch, landscape(letter)[1] - 1.5 * inch, width=1 * inch, height=1 * inch)  # Ajusta tamaño y posición según sea necesario
-    
+
     # Finalizar el nuevo PDF
     c.save()
 
     os.remove(qr_img_path)
-    
+
     # Nombre del archivo PDF combinado a crear
     output_pdf_filename = f"{participante['nanoid']}.pdf"
     output_pdf_path = os.path.join(pdf_directory, output_pdf_filename)
-    
+
     # Leer el PDF de fondo
     background_pdf = PdfReader(afiche_path)
     new_pdf = PdfReader(temp_pdf_path)
-    
+
     writer = PdfWriter()
-    
+
     # Combinar las páginas
     for page in range(len(background_pdf.pages)):
         background_page = background_pdf.pages[page]
         new_page = new_pdf.pages[0] if page < len(new_pdf.pages) else None
-        
+
         if new_page:
             # Combinar la página de fondo con la nueva página
             PageMerge(background_page).add(new_page).render()
-        
+
         writer.addPage(background_page)
-    
+
     # Guardar el PDF combinado en la ruta deseada
     writer.write(output_pdf_path)
 
     # Eliminar el archivo PDF temporal
     os.remove(temp_pdf_path)
-    
+
     return output_pdf_path  # Retornar la ruta del archivo guardado
 
 
@@ -1825,7 +1841,7 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate
 def generar_constancia_asistencia(participante, afiche_path):
     # Crear un buffer en memoria para el PDF
     buffer = BytesIO()
-    
+
     # Crear el PDF en memoria
     c = canvas.Canvas(buffer, pagesize=letter)
 
@@ -1837,13 +1853,13 @@ def generar_constancia_asistencia(participante, afiche_path):
     unidad_evento = evento.get('unidad_ejecutora', 'Unidad ejecutora no disponible')
     modalidad_evento = evento.get('modalidad', 'Modalidad no disponible')
     ue_evento = evento.get('unidad_ejecutora', 'Unidad ejecutora no disponible')
-    
+
     fi_evento = evento.get('fecha_inicio')
     if isinstance(fi_evento, str):
         fi_evento = datetime.strptime(fi_evento, '%Y-%m-%d %H:%M:%S')
     # Formatear la fecha
     fi_formateada = fi_evento.strftime('%d de %B de %Y')
-    
+
     ff_evento = evento.get('fecha_fin')
     if isinstance(ff_evento, str):
         ff_evento = datetime.strptime(ff_evento, '%Y-%m-%d %H:%M:%S')
@@ -1856,17 +1872,17 @@ def generar_constancia_asistencia(participante, afiche_path):
     # Configurar fuentes y colores
     c.setFont("Helvetica", 14)
     c.setFillColor(HexColor('#002060'))  # Color azul oscuro
-    
+
     page_width = letter[0]  # Ancho de la página
     page_height = letter[1]  # Alto de la página
-    
+
     # Función para centrar texto
     def draw_centered_text(y_position, text, font="Helvetica", size=12):
         c.setFont(font, size)
         text_width = c.stringWidth(text, font, size)
         x_position = (page_width - text_width) / 2
         c.drawString(x_position, y_position, text)
-      
+
     # Texto de la constancia
     draw_centered_text(8.5 * inch, "CAJA DE SEGURO SOCIAL", font='Helvetica-Bold', size=16)
     draw_centered_text(8.2 * inch, "DIRECCIÓN EJECUTIVA NACIONAL DE SERVICIOS Y PRESTACIONES EN SALUD", size=14)
@@ -1939,30 +1955,30 @@ def generar_constancia_asistencia(participante, afiche_path):
 
     # Finalizar el PDF
     c.save()
-    
+
     # Leer el PDF de fondo (plantilla)
     background_pdf = PdfReader(afiche_path)
     buffer.seek(0)
     new_pdf = PdfReader(buffer)
-    
+
     # Combinar el PDF generado con la plantilla
     writer = PdfWriter()
     for page in range(len(background_pdf.pages)):
         background_page = background_pdf.pages[page]
         new_page = new_pdf.pages[0] if page < len(new_pdf.pages) else None
-        
+
         if new_page:
             PageMerge(background_page).add(new_page).render()
-        
+
         writer.addPage(background_page)
-    
+
     # Guardar el PDF combinado en un buffer en memoria
     output_buffer = BytesIO()
     writer.write(output_buffer)
     output_buffer.seek(0)
-    
+
     return output_buffer
-  
+
 
 @app.route('/constancia/<nanoid>', methods=['GET'])
 def descargar_constancia(nanoid):
@@ -2041,13 +2057,13 @@ from flask import Flask, render_template_string
 def get_latest_log_file():
     log_dir = 'logs'
     log_files = [f for f in os.listdir(log_dir) if f.startswith('app-') and f.endswith('.log')]
-    
+
     if not log_files:
         return None
-    
+
     # Ordenar los archivos por fecha (el más reciente primero)
     log_files.sort(reverse=True)
-    
+
     # Devolver la ruta completa del archivo más reciente
     return os.path.join(log_dir, log_files[0])
 
@@ -2055,13 +2071,13 @@ def get_latest_log_file():
 @login_required
 def show_latest_log():
     latest_log_file = get_latest_log_file()
-    
+
     if not latest_log_file:
         return "No hay archivos de registro de actividades."
-    
+
     with open(latest_log_file, 'r') as file:
         log_content = file.read()
-    
+
     return render_template('logs.html', log_file=latest_log_file, log_content=log_content)
 
 
@@ -2069,13 +2085,13 @@ def show_latest_log():
 @login_required
 def download_latest_log():
     latest_log_file = get_latest_log_file()
-    
+
     if not latest_log_file:
         return "No hay archivos de registro de actividades."
-    
+
     now = datetime.now()
     formatted_datetime = now.strftime("app-%Y-%m-%d-%H-%M-%S.log")
-    
+
     return send_file(latest_log_file, as_attachment=True, download_name=formatted_datetime)
 
 
