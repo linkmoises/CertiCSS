@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ evento.nombre }} - Aula Digital - CertiCSS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- favicons -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
+    <meta name="apple-mobile-web-app-title" content="CertiCSS" />
+    <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
+</head>
+<body class="bg-gray-50 dark:bg-neutral-900">
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main id="content">
+
+        <!-- Card -->
+        <div class="max-w-[90rem] px-8 pt-8 sm:px-6 lg:px-8 lg:pt-8 mx-auto">
+            <!-- Grid -->
+            <div class="bg-white grid sm:grid-cols-2 border border-gray-200 rounded-xl lg:grid-cols-12">
+
+                <div class="sm:order-1 lg:col-span-3 border-r border-gray-200">
+                    <div class="relative pt-[100%] sm:pt-[100%]">
+{% if evento.afiche_750 %}
+                        <img class="size-full absolute top-0 start-0 object-cover rounded-l-xl" src="{{ BASE_URL }}{{ evento.afiche_750 }}" alt="{{ evento.nombre }}">
+{% else %}
+                        <img class="size-full absolute top-0 start-0 object-cover rounded-l-xl" src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}" alt="{{ evento.nombre }}">
+{% endif %}
+                    </div>
+                    <div class="m-4">
+                        <h2 class="font-bold text-gray-800">{{ evento.nombre }}</h2>
+                        <p class="text-sm text-gray-500">{{ evento.descripcion }}</p>
+                    </div>
+                    <div class="m-6">
+                        <ul class="text-sm text-gray-500">
+{% for contenido in contenidos %}
+                            <li {% if contenido.orden == contenido_actual.orden %}style="font-weight: bold;"{% endif %}>
+                                <a href="{{ url_for('ver_contenido', codigo_evento=evento.codigo, orden=contenido.orden) }}">
+                                    {{ contenido.orden|string|zfill(2) }} - {{ contenido.titulo }}
+                                </a>
+                            </li>
+{% endfor %}
+                        </ul>
+                        <div class="my-4">
+                            <a href="{{ url_for('crear_contenido', codigo_evento=evento.codigo) }}" class="w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"">
+                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open-text"><path d="M12 7v14"/><path d="M16 12h2"/><path d="M16 8h2"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/><path d="M6 12h2"/><path d="M6 8h2"/></svg>
+                                Añadir contenido
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Col -->
+
+                <div class="sm:order-2 lg:col-span-9">
+
+                    <div class="m-8">
+                        
+{% if contenido_actual %}
+<h2 class="text-xl font-bold text-gray-800">{{ contenido_actual.titulo }}</h2>
+<p>{{ contenido_actual.descripcion }}</p>
+{% if contenido_actual.tipo == 'video' %}
+<iframe
+width="560"
+height="315"
+src="{{ contenido_actual.url_video }}"
+frameborder="0"
+allowfullscreen
+></iframe>
+{% elif contenido_actual.tipo == 'texto' %}
+<p>{{ contenido_actual.contenido_texto }}</p>
+{% elif contenido_actual.tipo == 'documento' %}
+<a
+href="{{ url_for('static', filename=contenido_actual.documento) }}"
+target="_blank"
+>📄 Descargar Documento</a
+>
+{% endif %} {% else %}
+<p>Selecciona un recurso del listado.</p>
+{% endif %}
+
+                    </div>
+                </div>
+                <!-- End Col -->
+            </div>
+            <!-- End Grid -->
+        </div>
+        <!-- End Card -->
+
+    </main>
+
+    <footer class="mt-auto w-full max-w-[85rem] px-4 sm:px-6 lg:px-8 mx-auto">
+        <div class="text-center text-xs text-gray-500 my-8">
+            <p>Este evento es avalado por DENADOI y potenciado por la plataforma CertiCSS.</p>
+        </div>
+    </footer>
+
+</body>
+</html>

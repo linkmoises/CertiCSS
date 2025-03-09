@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Añadir Contenido - {{ evento.nombre }}</title>
+        <script>
+            function toggleFields() {
+                let tipo = document.getElementById("tipo").value;
+                document.getElementById("video_fields").style.display =
+                    tipo === "video" ? "block" : "none";
+                document.getElementById("texto_fields").style.display =
+                    tipo === "texto" ? "block" : "none";
+                document.getElementById("documento_fields").style.display =
+                    tipo === "documento" ? "block" : "none";
+            }
+        </script>
+    </head>
+    <body>
+        <h1>Añadir Contenido - {{ evento.nombre }}</h1>
+
+        <form method="POST" enctype="multipart/form-data">
+            <label for="titulo">Título:</label>
+            <input type="text" id="titulo" name="titulo" required />
+
+            <label for="descripcion">Descripción:</label>
+            <textarea id="descripcion" name="descripcion" required></textarea>
+
+            <label for="tipo">Tipo de contenido:</label>
+            <select id="tipo" name="tipo" onchange="toggleFields()" required>
+                <option value="video">Video (YouTube)</option>
+                <option value="texto">Texto</option>
+                <option value="documento">Documento (PDF)</option>
+            </select>
+
+            <div id="video_fields" style="display: none">
+                <label for="url_video">URL del video (YouTube):</label>
+                <input type="url" id="url_video" name="url_video" />
+            </div>
+
+            <div id="texto_fields" style="display: none">
+                <label for="contenido_texto">Contenido en texto:</label>
+                <textarea
+                    id="contenido_texto"
+                    name="contenido_texto"
+                ></textarea>
+            </div>
+
+            <div id="documento_fields" style="display: none">
+                <label for="documento">Subir documento (PDF):</label>
+                <input
+                    type="file"
+                    id="documento"
+                    name="documento"
+                    accept="application/pdf"
+                />
+            </div>
+
+            <button type="submit">Guardar Contenido</button>
+        </form>
+
+        <hr />
+        <a href="{{ url_for('ver_plataforma', codigo_evento=evento.codigo) }}"
+            >⬅ Volver a la Plataforma</a
+        >
+
+        <script>
+            toggleFields(); // Para mostrar los campos correctos si el usuario cambia de opción
+        </script>
+    </body>
+</html>

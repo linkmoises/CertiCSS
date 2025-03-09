@@ -1646,6 +1646,89 @@ def nosotros():
 
 
 ###
+### LMS
+###
+def zfill_filter(value, width=2):
+    return str(value).zfill(width)
+app.jinja_env.filters['zfill'] = zfill_filter
+
+
+@app.route('/plataforma/<codigo_evento>/nuevo', methods=['GET', 'POST'])
+@login_required
+def crear_contenido(codigo_evento):
+    evento = collection_eventos.find_one({'codigo': codigo_evento})
+    if not evento:
+        abort(404)
+
+    if request.method == 'POST':
+        titulo = request.form['titulo']
+        descripcion = request.form['descripcion']
+        tipo = request.form['tipo']
+
+        # Obtener el próximo número en la secuencia
+        ultimo_contenido = collection_eva.find_one({'codigo_evento': codigo_evento}, sort=[("orden", -1)])
+        nuevo_orden = (ultimo_contenido['orden'] + 1) if ultimo_contenido else 1
+
+        contenido = {
+            'codigo_evento': codigo_evento,
+            'orden': nuevo_orden,
+            'titulo': titulo,
+            'descripcion': descripcion,
+            'tipo': tipo
+        }
+
+        if tipo == 'video':
+            contenido['url_video'] = request.form['url_video']
+
+        elif tipo == 'texto':
+            contenido['contenido_texto'] = request.form['contenido_texto']
+
+        elif tipo == 'documento':
+            documento_file = request.files.get('documento')
+            if documento_file:
+                documento_filename = f"{codigo_evento}-{nuevo_orden:02d}.pdf"
+                documento_path = os.path.join(app.config['UPLOAD_FOLDER'], documento_filename)
+                documento_file.save(documento_path)
+                contenido['documento'] = documento_filename
+
+        collection_eva.insert_one(contenido)
+
+        return redirect(url_for('ver_plataforma', codigo_evento=codigo_evento))
+
+    return render_template('crear_contenido.html', evento=evento)
+
+
+@app.route('/plataforma/<codigo_evento>')
+@login_required
+def ver_plataforma(codigo_evento):
+    evento = collection_eventos.find_one({'codigo': codigo_evento})
+    if not evento:
+        abort(404)
+
+    primer_contenido = collection_eva.find_one({'codigo_evento': codigo_evento}, sort=[("orden", 1)])
+
+    if primer_contenido:
+        return redirect(url_for('ver_contenido', codigo_evento=codigo_evento, orden=primer_contenido['orden']))
+    else:
+        return render_template('plataforma.html', evento=evento, contenidos=[], contenido_actual=None)
+
+
+@app.route('/plataforma/<codigo_evento>/<int:orden>')
+def ver_contenido(codigo_evento, orden):
+    evento = collection_eventos.find_one({'codigo': codigo_evento})
+    if not evento:
+        abort(404)
+
+    contenidos = list(collection_eva.find({'codigo_evento': codigo_evento}).sort('orden', 1))
+    contenido_actual = collection_eva.find_one({'codigo_evento': codigo_evento, 'orden': orden})
+
+    if not contenido_actual:
+        abort(404)
+
+    return render_template('plataforma.html', evento=evento, contenidos=contenidos, contenido_actual=contenido_actual)
+
+
+###
 ### Errores
 ###
 @app.errorhandler(404)
