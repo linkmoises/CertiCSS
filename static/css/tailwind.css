@@ -3252,6 +3252,8 @@ select {
   --placement: bottom-right;
 }
 
+@tailwind typography;
+
 .file\:me-4::file-selector-button {
   margin-inline-end: 1rem;
 }
