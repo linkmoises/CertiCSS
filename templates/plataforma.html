@@ -87,8 +87,9 @@
                     <div class="m-8">
 
 {% if contenido_actual %}
-<h2 class="text-xl font-bold text-gray-800 pb-4">{{ contenido_actual.titulo }}</h2>
+
 {% if contenido_actual.tipo == 'video' %}
+<h2 class="text-xl font-bold text-gray-800 pb-4">{{ contenido_actual.titulo }}</h2>
 <div style="display: flex; justify-content: center;">
     <iframe style="aspect-ratio: 16 / 9; width: 100% !important;" src="{{ contenido_actual.url_video }}" title="{{ contenido_actual.titulo }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 </div>
