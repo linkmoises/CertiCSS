@@ -1,0 +1,41 @@
+<form method="POST" enctype="multipart/form-data">
+    <label class="block text-sm font-medium text-gray-700">Título</label>
+    <input type="text" name="titulo" value="{{ contenido.titulo }}" required class="w-full border p-2 rounded">
+
+    <label class="block text-sm font-medium text-gray-700 mt-2">Descripción</label>
+    <textarea name="descripcion" required class="w-full border p-2 rounded">{{ contenido.descripcion }}</textarea>
+
+    <label class="block text-sm font-medium text-gray-700 mt-2">Tipo de contenido</label>
+    <select name="tipo" class="w-full border p-2 rounded">
+        <option value="video" {% if contenido.tipo == "video" %}selected{% endif %}>Video</option>
+        <option value="texto" {% if contenido.tipo == "texto" %}selected{% endif %}>Texto</option>
+        <option value="documento" {% if contenido.tipo == "documento" %}selected{% endif %}>Documento</option>
+    </select>
+
+    <div id="video-section" {% if contenido.tipo != "video" %}style="display:none"{% endif %}>
+        <label class="block text-sm font-medium text-gray-700 mt-2">URL del Video</label>
+        <input type="text" name="url_video" value="{{ contenido.url_video if contenido.url_video else '' }}" class="w-full border p-2 rounded">
+    </div>
+
+    <div id="texto-section" {% if contenido.tipo != "texto" %}style="display:none"{% endif %}>
+        <label class="block text-sm font-medium text-gray-700 mt-2">Contenido de Texto</label>
+        <textarea name="contenido_texto" class="w-full border p-2 rounded">{{ contenido.contenido_texto if contenido.contenido_texto else '' }}</textarea>
+    </div>
+
+    <div id="documento-section" {% if contenido.tipo != "documento" %}style="display:none"{% endif %}>
+        <label class="block text-sm font-medium text-gray-700 mt-2">Subir Nuevo Documento</label>
+        <input type="file" name="documento" class="w-full border p-2 rounded">
+    </div>
+
+    <button type="submit" class="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+        Guardar Cambios
+    </button>
+</form>
+
+<script>
+    document.querySelector('select[name="tipo"]').addEventListener('change', function() {
+        document.getElementById('video-section').style.display = this.value === 'video' ? 'block' : 'none';
+        document.getElementById('texto-section').style.display = this.value === 'texto' ? 'block' : 'none';
+        document.getElementById('documento-section').style.display = this.value === 'documento' ? 'block' : 'none';
+    });
+</script>
