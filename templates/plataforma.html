@@ -42,6 +42,7 @@
                                 <a href="{{ url_for('ver_contenido', codigo_evento=evento.codigo, orden=contenido.orden) }}">
                                     {{ contenido.orden|string|zfill(2) }} - {{ contenido.titulo }}
                                 </a>
+{% if current_user.is_authenticated %}
 <div>
     <form action="{{ url_for('mover_contenido', codigo_evento=evento.codigo, orden=contenido.orden, direccion='arriba') }}" method="POST" class="inline">
         <button type="submit" class="text-sm text-blue-600 decoration-2 hover:underline disabled:text-gray-200" {% if contenido.orden == 1 %}disabled{% endif %}>
@@ -65,15 +66,18 @@
         </button>
     </form>
 </div>
+{% endif %}
                             </li>
 {% endfor %}
                         </ul>
+{% if current_user.is_authenticated %}
                         <div class="my-4">
                             <a href="{{ url_for('crear_contenido', codigo_evento=evento.codigo) }}" class="w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"">
                                 <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open-text"><path d="M12 7v14"/><path d="M16 12h2"/><path d="M16 8h2"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/><path d="M6 12h2"/><path d="M6 8h2"/></svg>
                                 Añadir contenido
                             </a>
                         </div>
+{% endif %}
                     </div>
                 </div>
                 <!-- End Col -->
@@ -81,7 +85,7 @@
                 <div class="sm:order-2 lg:col-span-9">
 
                     <div class="m-8">
-                        
+
 {% if contenido_actual %}
 <h2 class="text-xl font-bold text-gray-800 pb-4">{{ contenido_actual.titulo }}</h2>
 {% if contenido_actual.tipo == 'video' %}

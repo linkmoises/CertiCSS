@@ -1786,7 +1786,6 @@ def eliminar_contenido(codigo_evento, orden):
 
 
 @app.route('/plataforma/<codigo_evento>')
-@login_required
 def ver_plataforma(codigo_evento):
     evento = collection_eventos.find_one({'codigo': codigo_evento})
     if not evento:
