@@ -1799,19 +1799,39 @@ def ver_plataforma(codigo_evento):
         return render_template('plataforma.html', evento=evento, contenidos=[], contenido_actual=None)
 
 
+import markdown
+import markdown
 @app.route('/plataforma/<codigo_evento>/<int:orden>')
 def ver_contenido(codigo_evento, orden):
     evento = collection_eventos.find_one({'codigo': codigo_evento})
     if not evento:
         abort(404)
 
+    # Obtener la lista completa de contenidos ordenados
     contenidos = list(collection_eva.find({'codigo_evento': codigo_evento}).sort('orden', 1))
-    contenido_actual = collection_eva.find_one({'codigo_evento': codigo_evento, 'orden': orden})
-
+    
+    # Buscar el contenido actual
+    contenido_actual = next((c for c in contenidos if c['orden'] == orden), None)
     if not contenido_actual:
         abort(404)
+        
+    # Convertir Markdown a HTML solo si el tipo es 'texto'
+    if contenido_actual.get('tipo') == 'texto' and 'contenido_texto' in contenido_actual:
+        contenido_actual['contenido_texto'] = markdown.markdown(contenido_actual['contenido_texto'])
 
-    return render_template('plataforma.html', evento=evento, contenidos=contenidos, contenido_actual=contenido_actual)
+    # Encontrar el contenido anterior y el siguiente
+    indice_actual = contenidos.index(contenido_actual)
+    contenido_anterior = contenidos[indice_actual - 1] if indice_actual > 0 else None
+    contenido_siguiente = contenidos[indice_actual + 1] if indice_actual < len(contenidos) - 1 else None
+
+    return render_template(
+        'plataforma.html',
+        evento=evento,
+        contenidos=contenidos,
+        contenido_actual=contenido_actual,
+        contenido_anterior=contenido_anterior,
+        contenido_siguiente=contenido_siguiente
+    )
 
 
 ###

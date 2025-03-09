@@ -32,7 +32,7 @@
 {% endif %}
                     </div>
                     <div class="m-4">
-                        <h2 class="font-bold text-gray-800">{{ evento.nombre }}</h2>
+                        <h2 class="font-bold text-gray-800 mb-2">{{ evento.nombre }}</h2>
                         <p class="text-sm text-gray-500">{{ evento.descripcion }}</p>
                     </div>
                     <div class="m-6">
@@ -95,7 +95,9 @@
 <br />
 <p>{{ contenido_actual.descripcion }}</p>
 {% elif contenido_actual.tipo == 'texto' %}
-<p>{{ contenido_actual.contenido_texto }}</p>
+    <div class="prose prose-lg text-gray-600">
+        {{ contenido_actual.contenido_texto | safe }}
+    </div>
 {% elif contenido_actual.tipo == 'documento' %}
 <a
 href="{{ url_for('static', filename=contenido_actual.documento) }}"
@@ -105,6 +107,26 @@ target="_blank"
 {% endif %} {% else %}
 <p>Selecciona un recurso del listado.</p>
 {% endif %}
+
+<div class="mt-6 flex justify-between">
+    {% if contenido_anterior %}
+        <a href="{{ url_for('ver_contenido', codigo_evento=evento.codigo, orden=contenido_anterior.orden) }}" 
+           class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+            ⬅ Anterior
+        </a>
+    {% else %}
+        <span class="px-4 py-2 bg-gray-300 text-white rounded-lg opacity-50">⬅ Anterior</span>
+    {% endif %}
+
+    {% if contenido_siguiente %}
+        <a href="{{ url_for('ver_contenido', codigo_evento=evento.codigo, orden=contenido_siguiente.orden) }}" 
+           class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+            Siguiente ➡
+        </a>
+    {% else %}
+        <span class="px-4 py-2 bg-gray-300 text-white rounded-lg opacity-50">Siguiente ➡</span>
+    {% endif %}
+</div>
 
                     </div>
                 </div>

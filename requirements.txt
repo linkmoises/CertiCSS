@@ -12,6 +12,7 @@ idna==3.10
 itsdangerous==2.2.0
 Jinja2==3.1.4
 MarkupSafe==3.0.2
+markdown==3.7
 pdfrw==0.4
 pillow==11.0.0
 pipreqs==0.4.13
