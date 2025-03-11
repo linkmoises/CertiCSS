@@ -2090,6 +2090,10 @@ select {
   margin-top: auto;
 }
 
+.mb-2\.5 {
+  margin-bottom: 0.625rem;
+}
+
 .block {
   display: block;
 }

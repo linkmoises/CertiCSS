@@ -1800,7 +1800,6 @@ def ver_plataforma(codigo_evento):
 
 
 import markdown
-import markdown
 @app.route('/plataforma/<codigo_evento>/<int:orden>')
 def ver_contenido(codigo_evento, orden):
     evento = collection_eventos.find_one({'codigo': codigo_evento})
