@@ -1610,7 +1610,7 @@ def buscar_certificados():
 
         # Ordenar resultados por fecha_evento
         from datetime import datetime
-            def obtener_fecha_ordenable(item):
+        def obtener_fecha_ordenable(item):
             fecha = item.get('fecha_evento')
             return fecha or datetime.min 
             # datetime.min 
