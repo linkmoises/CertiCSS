@@ -1545,7 +1545,22 @@ def validar_certificado():
 
 
 ###
+### Función para ordenar eventos 
 ###
+def obtener_fecha_ordenable(item):
+    fecha = item.get('fecha_evento')
+    if not fecha:
+        return datetime.min  # Para que los eventos sin fecha aparezcan al inicio o final
+    # Asume que la fecha está en formato string como '2023-04-15'
+    # Ajusta el formato según cómo estén almacenadas tus fechas
+    try:
+        return datetime.strptime(fecha, '%Y-%m-%d')
+    except (ValueError, TypeError):
+        return datetime.min
+
+
+###
+### listado de resultados 
 ###
 @app.route('/buscar_certificados', methods=['GET', 'POST'])
 def buscar_certificados():
