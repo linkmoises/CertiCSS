@@ -1608,6 +1608,16 @@ def buscar_certificados():
                 }
                 resultados.append(resultado)
 
+        # Ordenar resultados por fecha_evento
+        from datetime import datetime
+            def obtener_fecha_ordenable(item):
+            fecha = item.get('fecha_evento')
+            return fecha or datetime.min 
+            # datetime.min 
+            # datetime.max
+        
+        resultados.sort(key=obtener_fecha_ordenable, reverse=True)
+
         return render_template('lista_certificados.html', cedula=cedula, resultados=resultados)  # Renderizar la plantilla con los resultados
 
     return render_template('buscar.html')  # Mostrar el formulario para buscar certificados
