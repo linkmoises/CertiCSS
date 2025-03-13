@@ -1584,6 +1584,7 @@ def buscar_certificados():
             if evento:  # Verificar si el evento fue encontrado
 
                 fecha_evento = evento.get('fecha_inicio', None)
+                es_no_presencial = evento.get('modalidad') != 'Presencial'
 
                 resultado = {
                     'nombres': participante['nombres'],
@@ -1594,7 +1595,8 @@ def buscar_certificados():
                     'ponencia': participante.get('titulo_ponencia', 'N/A'),
                     'codigo_evento': codigo_evento,
                     'titulo_evento': evento.get('nombre', 'Título no disponible'),
-                    'fecha_evento': fecha_evento
+                    'fecha_evento': fecha_evento,
+                    'modalidad_evento': evento.get('modalidad', 'No disponible')
                 }
                 resultados.append(resultado)
             else:
@@ -1612,7 +1614,7 @@ def buscar_certificados():
         from datetime import datetime
         fecha_actual = datetime.now().date()
         hora_actual = datetime.now().time()
-        
+
         def obtener_fecha_ordenable(item):
             fecha = item.get('fecha_evento')
             return fecha or datetime.min 
