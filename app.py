@@ -1618,7 +1618,7 @@ def buscar_certificados():
         
         resultados.sort(key=obtener_fecha_ordenable, reverse=True)
 
-        return render_template('lista_certificados.html', cedula=cedula, resultados=resultados)  # Renderizar la plantilla con los resultados
+        return render_template('lista_certificados.html', cedula=cedula, resultados=resultados, fecha_actual=datetime.now().date())  # Renderizar la plantilla con los resultados
 
     return render_template('buscar.html')  # Mostrar el formulario para buscar certificados
 
