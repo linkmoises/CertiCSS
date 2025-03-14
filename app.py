@@ -30,6 +30,7 @@ collection_participantes = db['participantes']
 collection_usuarios = db['usuarios']
 collection_preregistro = db['preregistro']
 collection_eva = db['eva']
+collection_tokens = db['tokens']
 
 @app.context_processor                                      # Variable BASE_URL
 def inject_base_url():
@@ -148,6 +149,54 @@ def obtener_codigo_unico():
         codigo = generar_codigo_evento()
         if collection_eventos.find_one({"codigo": codigo}) is None:
             return codigo
+
+
+###
+### Tokens EVA
+###
+from functools import wraps
+import secrets
+
+def generate_token(cedula):
+    """Genera un token único para una cédula"""
+    token = secrets.token_urlsafe(32)
+    expiry = datetime.now() + timedelta(hours=24)
+    
+    # Almacenar token en MongoDB
+    collection_tokens.update_one(
+        {'cedula': cedula},
+        {'$set': {'token': token, 'expiry': expiry}},
+        upsert=True
+    )
+    
+    return token
+
+def verify_token(cedula, token):
+    """Verifica si el token es válido para la cédula dada"""
+    token_data = collection_tokens.find_one({'cedula': cedula})
+    
+    if not token_data:
+        return False
+    
+    # Verificar expiración
+    if datetime.now() > token_data['expiry']:
+        collection_tokens.delete_one({'cedula': cedula})
+        return False
+    
+    return token_data['token'] == token
+
+def token_required(f):
+    """Decorator para rutas protegidas con token"""
+    @wraps(f)
+    def decorated_function(codigo_evento, *args, **kwargs):
+        token = request.args.get('token')
+        cedula = request.args.get('cedula')
+        
+        if not cedula or not token or not verify_token(cedula, token):
+            abort(401)
+        
+        return f(codigo_evento, *args, **kwargs)
+    return decorated_function
 
 
 ###
@@ -1568,6 +1617,8 @@ def buscar_certificados():
         # Obtener el número de cédula del formulario
         cedula = request.form.get('cedula')
 
+        token = generate_token(cedula)
+
         # Buscar participantes por cédula
         participantes = list(collection_participantes.find({"cedula": cedula}))
 
@@ -1623,7 +1674,7 @@ def buscar_certificados():
         
         resultados.sort(key=obtener_fecha_ordenable, reverse=True)
 
-        return render_template('lista_certificados.html', cedula=cedula, resultados=resultados, fecha_actual=fecha_actual, hora_actual=hora_actual)  # Renderizar la plantilla con los resultados
+        return render_template('lista_certificados.html', cedula=cedula, resultados=resultados, fecha_actual=fecha_actual, hora_actual=hora_actual, token=token)  # Renderizar la plantilla con los resultados
 
     return render_template('buscar.html')  # Mostrar el formulario para buscar certificados
 
@@ -1816,7 +1867,12 @@ def eliminar_contenido(codigo_evento, orden):
 
 
 @app.route('/plataforma/<codigo_evento>')
+@token_required
 def ver_plataforma(codigo_evento):
+    # Obtener cédula y token de los parámetros
+    cedula = request.args.get('cedula')
+    token = request.args.get('token')
+
     evento = collection_eventos.find_one({'codigo': codigo_evento})
     if not evento:
         abort(404)
@@ -1824,14 +1880,19 @@ def ver_plataforma(codigo_evento):
     primer_contenido = collection_eva.find_one({'codigo_evento': codigo_evento}, sort=[("orden", 1)])
 
     if primer_contenido:
-        return redirect(url_for('ver_contenido', codigo_evento=codigo_evento, orden=primer_contenido['orden']))
+        return redirect(url_for('ver_contenido', codigo_evento=codigo_evento, orden=primer_contenido['orden'], cedula=cedula, token=token))
     else:
-        return render_template('plataforma.html', evento=evento, contenidos=[], contenido_actual=None)
+        return render_template('plataforma.html', evento=evento, contenidos=[], contenido_actual=None, cedula=cedula, token=token)
 
 
 import markdown
 @app.route('/plataforma/<codigo_evento>/<int:orden>')
+@token_required
 def ver_contenido(codigo_evento, orden):
+    # Obtener cédula y token de los parámetros
+    cedula = request.args.get('cedula')
+    token = request.args.get('token')
+
     evento = collection_eventos.find_one({'codigo': codigo_evento})
     if not evento:
         abort(404)
@@ -1859,7 +1920,9 @@ def ver_contenido(codigo_evento, orden):
         contenidos=contenidos,
         contenido_actual=contenido_actual,
         contenido_anterior=contenido_anterior,
-        contenido_siguiente=contenido_siguiente
+        contenido_siguiente=contenido_siguiente,
+        cedula=cedula, 
+        token=token
     )
 
 
