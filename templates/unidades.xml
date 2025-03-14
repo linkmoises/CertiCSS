@@ -1,5 +1,6 @@
 <datalist id="unidades">
     <!-- Panamá -->
+    <option value="Ciudad De La Salud"></option>
     <option value="Complejo Hospitalario Metropolitano Dr. Arnulfo Arias Madrid"></option>
     <option value="Hospital de Especialidades Pediátricas Omar Torrijos Herrera"></option>
     <option value="Policlinica Presidente Remón"></option>
@@ -16,6 +17,7 @@
     <option value="Policlínica Lic. Manuel María Valdés"></option>
     <option value="Policlínica Don Generoso Guardia"></option>
     <option value="Policlínica Dr. Edilberto Culiolis"></option>
+    <option value="Policlínica Dra. Cecilia Guerra"></option>
     <option value="CAPPS Torrijos Carter"></option>
     <!-- Panamá Oeste -->
     <option value="Hospital Hogar de La Esperanza"></option>
