@@ -1189,7 +1189,7 @@ import io
 
 PERFILES_MAP = {
     "medico_general": "Médico General - Consulta Externa",
-    "medico_urgencias": "Médico General - Urgencias"
+    "medico_urgencias": "Médico General - Urgencias",
     "medico_especialista": "Médico Especialista",
     "odontologo": "Odontólogo(a)",
     "odontologo_especialista": "Odontólogo(a) Especialista",
@@ -1205,7 +1205,7 @@ PERFILES_MAP = {
     "psicologo": "Psicólogo(a)",
     "nutricionista": "Nutricionista",
     "estudiante_salud": "Estudiante",
-    "administrativo": "Administrativo"
+    "administrativo": "Administrativo",
     "otro": "Otro"
 }
 
