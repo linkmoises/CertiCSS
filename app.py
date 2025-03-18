@@ -1929,22 +1929,6 @@ def ver_contenido(codigo_evento, orden):
 
 
 ###
-### Errores
-###
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('404.html'), 404
-
-@app.errorhandler(401)
-def unauthorized_error(e):
-    return render_template('401.html'), 401
-
-@app.errorhandler(403)
-def forbidden_error(e):
-    return render_template('403.html'), 403
-
-
-###
 ### Etiqueta filtro de fecha
 ###
 from datetime import date
@@ -2332,50 +2316,11 @@ def get_client_ip():
 
 
 ###
+### Importación y blueprints
 ###
-###
-import os
-from flask import Flask, render_template_string
+from app.logs import logs_blueprint
 
-def get_latest_log_file():
-    log_dir = 'logs'
-    log_files = [f for f in os.listdir(log_dir) if f.startswith('app-') and f.endswith('.log')]
-
-    if not log_files:
-        return None
-
-    # Ordenar los archivos por fecha (el más reciente primero)
-    log_files.sort(reverse=True)
-
-    # Devolver la ruta completa del archivo más reciente
-    return os.path.join(log_dir, log_files[0])
-
-@app.route('/logs')
-@login_required
-def show_latest_log():
-    latest_log_file = get_latest_log_file()
-
-    if not latest_log_file:
-        return "No hay archivos de registro de actividades."
-
-    with open(latest_log_file, 'r') as file:
-        log_content = file.read()
-
-    return render_template('logs.html', log_file=latest_log_file, log_content=log_content)
-
-
-@app.route('/descargar_log')
-@login_required
-def download_latest_log():
-    latest_log_file = get_latest_log_file()
-
-    if not latest_log_file:
-        return "No hay archivos de registro de actividades."
-
-    now = datetime.now()
-    formatted_datetime = now.strftime("app-%Y-%m-%d-%H-%M-%S.log")
-
-    return send_file(latest_log_file, as_attachment=True, download_name=formatted_datetime)
+app.register_blueprint(logs_blueprint)
 
 
 ###
@@ -2403,6 +2348,22 @@ def inject_version():
 def robots():
     return send_from_directory(app.static_folder, "robots.txt")
 
+
+###
+### Errores
+###
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+@app.errorhandler(401)
+def unauthorized_error(e):
+    return render_template('401.html'), 401
+
+@app.errorhandler(403)
+def forbidden_error(e):
+    return render_template('403.html'), 403
+    
 
 if __name__ == '__main__':
     app.run(host=app.config['HOST'], port=app.config['PORT'])
