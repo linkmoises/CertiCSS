@@ -1869,7 +1869,7 @@ def eliminar_contenido(codigo_evento, orden):
 
 
 @app.route('/plataforma/<codigo_evento>')
-@token_required
+# @token_required
 def ver_plataforma(codigo_evento):
     # Obtener cédula y token de los parámetros
     cedula = request.args.get('cedula')
