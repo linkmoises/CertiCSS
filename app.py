@@ -32,11 +32,28 @@ collection_preregistro = db['preregistro']
 collection_eva = db['eva']
 collection_tokens = db['tokens']
 
+
+###
+### Variables globales personalizadas
+###
 @app.context_processor                                      # Variable BASE_URL
 def inject_base_url():
     return dict(BASE_URL=app.config['BASE_URL'])
 
 app.jinja_env.globals['now'] = datetime.now                 # Variable now para fecha actual
+
+def load_version():                                         # Cargar la versión una sola vez al iniciar la aplicación
+    try:
+        with open("version.txt", "r") as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        return "Unknown"
+
+VERSION = load_version()                                    # Variable global con la versión
+
+@app.context_processor
+def inject_version():
+    return dict(version=VERSION)
 
 
 ###
@@ -2324,24 +2341,6 @@ app.register_blueprint(logs_blueprint)
 
 
 ###
-###
-###
-# Cargar la versión una sola vez al iniciar la aplicación
-def load_version():
-    try:
-        with open("version.txt", "r") as f:
-            return f.read().strip()
-    except FileNotFoundError:
-        return "Unknown"
-
-VERSION = load_version()  # Variable global con la versión
-
-@app.context_processor
-def inject_version():
-    return dict(version=VERSION)
-
-
-###
 ### robots.txt
 ###
 @app.route("/robots.txt")
@@ -2363,7 +2362,7 @@ def unauthorized_error(e):
 @app.errorhandler(403)
 def forbidden_error(e):
     return render_template('403.html'), 403
-    
+
 
 if __name__ == '__main__':
     app.run(host=app.config['HOST'], port=app.config['PORT'])
