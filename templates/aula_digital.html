@@ -172,6 +172,44 @@
                                             Preregistrar participantes
                                         </a><br />
 {% endif %}
+                                        <a class="inline-flex items-center gap-x-1 text-sm text-green-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="#" onclick="openModal('modal-{{ evento.codigo }}')">
+                                            Invitación
+                                        </a><br />
+<!-- MODAL -->
+<div id="modal-{{ evento.codigo }}" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex justify-center items-start">
+    <div class="relative flex flex-col mt-20 mx-auto p-5 border w-2/3 sm:w-1/2 max-h-[80vh] shadow-lg rounded-md bg-white overflow-y-auto">
+        <div class="absolute top-2 end-2">
+            <button onclick="closeModal('modal-{{ evento.codigo }}')" type="button" class="size-8 inline-flex justify-center items-center gap-x-2 rounded-full border border-transparent bg-gray-100 text-gray-800 hover:bg-gray-200 focus:outline-hidden focus:bg-gray-200 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-700 dark:hover:bg-neutral-600 dark:text-neutral-400 dark:focus:bg-neutral-600" aria-label="Close" data-hs-overlay="#hs-cookies">
+                <span class="sr-only">Cerrar</span>
+                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+            </button>
+        </div>
+        <div class="w-full mt-3 text-center">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Invitación a {{ evento.nombre }}</h3>
+            <div class="mt-2 px-4 py-3 text-left">
+                <p class="text-sm text-gray-500 mb-4 overflow-y-auto">
+                    Estimados profesional de la salud,
+                    <br /><br />
+                    El Departamento Nacional de Docencia e Investigación les invita a participar en <strong>{{ evento.nombre }}</strong>, una sesión diseñada para fortalecer sus conocimientos, habilidades y experticia en el área.
+                    <br /><br />
+                    <strong>Registro y Acceso al Evento</strong><br>
+                    Para participar, deben completar su registro en el siguiente enlace (solo permite completar el registro a aquellos participantes preinscritos):<br>
+                    👉 <a href="{{ BASE_URL }}registrar_participante/{{ evento.codigo }}" class="text-blue-600 underline">Registro al evento</a> [{{ BASE_URL }}registrar_participante/{{ evento.codigo }}]
+                    <br />
+                    Luego de completar el registro, deberán ingresar a <a href="https://docenciamedica.org" class="text-blue-600 underline">docenciamedica.org</a> y utilizar el formulario de búsqueda ingresando su número de cédula. Esto les permitirá verificar su inscripción y acceder al evento.
+                    <br /><br />
+                    <strong>Certificación</strong><br>
+                    Al finalizar el evento, los participantes podrán descargar su certificado de participación y constancia de asistencia a través de la misma plataforma.
+                    <br />
+                    Para cualquier consulta, pueden escribirnos a <a href="mailto:mocampo@css.gob.pa" class="text-blue-600 underline">mocampo@css.gob.pa</a> o <a href="mailto:moserrano@css.gob.pa" class="text-blue-600 underline">moserrano@css.gob.pa</a>.
+                    <br /><br />
+                    Esperamos contar con su participación.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- MODAL -->
                                         <a class="inline-flex items-center gap-x-1 text-sm text-pink-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('listar_participantes', codigo_evento=evento.codigo) }}">
                                             Listado de participantes
                                         </a>
@@ -251,7 +289,7 @@
 
         </div>
     </div>
-    <!-- FIN CONTENIDO -->
+    <!-- FIN CONTENIDO -->    
 
 <!-- JS PLUGINS -->
 <script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
@@ -303,6 +341,25 @@ document.getElementById("buscadorForm").addEventListener("submit", function (eve
     form.appendChild(hiddenInput);
     form.submit();
 });
+// Función para abrir el modal
+function openModal(modalId) {
+    document.getElementById(modalId).classList.remove('hidden');
+}
+
+// Función para cerrar el modal
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.add('hidden');
+}
+
+// Cerrar el modal si se hace clic fuera de él
+window.onclick = function(event) {
+    const modals = document.querySelectorAll('[id^="modal-"]');
+    modals.forEach(modal => {
+        if (event.target === modal) {
+            closeModal(modal.id);
+        }
+    });
+}
 </script>
 </body>
 </html>
