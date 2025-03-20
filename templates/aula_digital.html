@@ -172,44 +172,18 @@
                                             Preregistrar participantes
                                         </a><br />
 {% endif %}
-                                        <a class="inline-flex items-center gap-x-1 text-sm text-green-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="#" onclick="openModal('modal-{{ evento.codigo }}')">
+                                        <a class="inline-flex items-center gap-x-1 text-sm text-green-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="mailto:?subject=Invitación%20a%20{{ evento.nombre }}&body=Estimado%20profesional%20de%20la%20salud,%0D%0A%0D%0A
+El%20Departamento%20Nacional%20de%20Docencia%20e%20Investigación%20le%20invita%20a%20participar%20en%20la%20actividad%20docente:%20{{ evento.nombre }}.%20Esta%20es%20una%20actividad%20diseñada%20para%20fortalecer%20sus%20conocimientos,%20habilidades,%20destrezas%20y%20experticia%20en%20el%20área.%0D%0A%0D%0A
+Registro%20y%20Acceso%20al%20Evento%0D%0A
+Para%20participar,%20debe%20completar%20su%20registro%20en%20el%20siguiente%20enlace%20(solo%20permite%20completar%20el%20registro%20a%20aquellos%20participantes%20preinscritos):%0D%0A
+👉%20Registro%20al%20evento%20[https://docenciamedica.org/registrar_participante/{{ evento.codigo }}]%0D%0A%0D%0A
+Luego%20de%20completar%20el%20registro,%20deberá%20ingresar%20a%20https://docenciamedica.org%20y%20utilizar%20el%20formulario%20de%20búsqueda%20ingresando%20su%20número%20de%20cédula.%20Esto%20le%20permitirá%20verificar%20su%20inscripción%20y%20acceder%20a%20los%20contenidos%20del%20evento.%0D%0A%0D%0A
+Certificación%0D%0A
+Al%20finalizar%20el%20evento,%20podrá%20descargar%20su%20certificado%20de%20participación%20y%20constancia%20de%20asistencia%20a%20través%20de%20la%20misma%20plataforma.%0D%0A%0D%0A
+Para%20cualquier%20consulta,%20puede%20escribirnos%20respondiendo%20a%20este%20correo%20ó%20vía%20WhatsApp%20+507-6447-8057.%0D%0A%0D%0A
+Esperamos%20contar%20con%20su%20participación.">
                                             Invitación
                                         </a><br />
-<!-- MODAL -->
-<div id="modal-{{ evento.codigo }}" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex justify-center items-start">
-    <div class="relative flex flex-col mt-20 mx-auto p-5 border w-2/3 sm:w-1/2 max-h-[80vh] shadow-lg rounded-md bg-white overflow-y-auto">
-        <div class="absolute top-2 end-2">
-            <button onclick="closeModal('modal-{{ evento.codigo }}')" type="button" class="size-8 inline-flex justify-center items-center gap-x-2 rounded-full border border-transparent bg-gray-100 text-gray-800 hover:bg-gray-200 focus:outline-hidden focus:bg-gray-200 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-700 dark:hover:bg-neutral-600 dark:text-neutral-400 dark:focus:bg-neutral-600" aria-label="Close" data-hs-overlay="#hs-cookies">
-                <span class="sr-only">Cerrar</span>
-                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-            </button>
-        </div>
-        <div class="w-full mt-3 text-center">
-            <h3 class="text-lg leading-6 font-medium text-gray-900">Invitación a {{ evento.nombre }}</h3>
-            <div class="mt-2 px-4 py-3 text-left">
-                <p class="text-sm text-gray-500 mb-4 overflow-y-auto">
-                    Estimados profesional de la salud,
-                    <br /><br />
-                    El Departamento Nacional de Docencia e Investigación les invita a participar en <strong>{{ evento.nombre }}</strong>, una sesión diseñada para fortalecer sus conocimientos, habilidades y experticia en el área.
-                    <br /><br />
-                    <strong>Registro y Acceso al Evento</strong><br>
-                    Para participar, deben completar su registro en el siguiente enlace (solo permite completar el registro a aquellos participantes preinscritos):<br>
-                    👉 <a href="{{ BASE_URL }}registrar_participante/{{ evento.codigo }}" class="text-blue-600 underline">Registro al evento</a> [{{ BASE_URL }}registrar_participante/{{ evento.codigo }}]
-                    <br />
-                    Luego de completar el registro, deberán ingresar a <a href="https://docenciamedica.org" class="text-blue-600 underline">docenciamedica.org</a> y utilizar el formulario de búsqueda ingresando su número de cédula. Esto les permitirá verificar su inscripción y acceder al evento.
-                    <br /><br />
-                    <strong>Certificación</strong><br>
-                    Al finalizar el evento, los participantes podrán descargar su certificado de participación y constancia de asistencia a través de la misma plataforma.
-                    <br />
-                    Para cualquier consulta, pueden escribirnos a <a href="mailto:mocampo@css.gob.pa" class="text-blue-600 underline">mocampo@css.gob.pa</a> o <a href="mailto:moserrano@css.gob.pa" class="text-blue-600 underline">moserrano@css.gob.pa</a>.
-                    <br /><br />
-                    Esperamos contar con su participación.
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- MODAL -->
                                         <a class="inline-flex items-center gap-x-1 text-sm text-pink-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('listar_participantes', codigo_evento=evento.codigo) }}">
                                             Listado de participantes
                                         </a>
@@ -341,25 +315,6 @@ document.getElementById("buscadorForm").addEventListener("submit", function (eve
     form.appendChild(hiddenInput);
     form.submit();
 });
-// Función para abrir el modal
-function openModal(modalId) {
-    document.getElementById(modalId).classList.remove('hidden');
-}
-
-// Función para cerrar el modal
-function closeModal(modalId) {
-    document.getElementById(modalId).classList.add('hidden');
-}
-
-// Cerrar el modal si se hace clic fuera de él
-window.onclick = function(event) {
-    const modals = document.querySelectorAll('[id^="modal-"]');
-    modals.forEach(modal => {
-        if (event.target === modal) {
-            closeModal(modal.id);
-        }
-    });
-}
 </script>
 </body>
 </html>
