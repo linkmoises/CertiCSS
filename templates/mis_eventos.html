@@ -144,8 +144,7 @@
                                 <td class="size-px whitespace-nowrap">
                                     <a class="block relative z-10" href="#">
                                     <div class="px-6 py-2">
-                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium {% if evento.estado_evento == 'publicado' %}bg-blue-100 text-blue-800{% elif evento.estado_evento == 'cerrado' %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
-                            {% if evento.estado_evento == 'publicado' %}Publicado{% elif evento.estado_evento == 'cerrado' %}Cerrado{% else %}Borrador{% endif %}
+                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium {% if evento.estado_evento == 'publicado' %}bg-blue-100 text-blue-800{% elif evento.estado_evento == 'cerrado' %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">{% if evento.estado_evento == 'publicado' %}Publicado{% elif evento.estado_evento == 'cerrado' %}Cerrado{% else %}Borrador{% endif %}
                                         </span><br />
                                         {{ evento.fecha_inicio|estado }}
                                     </div>

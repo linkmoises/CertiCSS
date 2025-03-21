@@ -71,6 +71,7 @@ def load_user(user_id):
             password=user_data['password'],
             rol=user_data['rol'],
             nombres=user_data['nombres'],
+            apellidos=user_data['apellidos'],
             cedula=user_data['cedula'],
             foto=user_data.get('foto')
         )
@@ -80,11 +81,12 @@ def load_user(user_id):
 
 
 class User(UserMixin):
-    def __init__(self, email, password, rol, nombres, cedula, foto=None):
+    def __init__(self, email, password, rol, nombres, apellidos, cedula, foto=None):
         self.email = email
         self.password = password
         self.rol = rol
         self.nombres = nombres
+        self.apellidos = apellidos
         self.cedula = cedula
         self.foto = foto
         self.id = None
@@ -306,7 +308,8 @@ def login():
                     password=user_data['password'],
                     rol=user_data['rol'],
                     cedula=user_data['cedula'],
-                    nombres=user_data['nombres']
+                    nombres=user_data['nombres'],
+                    apellidos=user_data['apellidos']
                 )
                 user.id = str(user_data['_id'])
                 login_user(user)
@@ -758,6 +761,17 @@ def tablero_coordinadores():
             evento['estado'] = 'Publicado'
         eventos_prox_list_estado.append(evento)
 
+        # Verificar si el usuario es organizador en cada evento
+        es_organizador = collection_participantes.find_one({
+            "codigo_evento": evento["codigo"],
+            "cedula": str(current_user.cedula),
+            "rol": "coorganizador"
+        }) is not None 
+
+        evento["es_organizador"] = es_organizador
+
+        eventos_prox_list_estado.append(evento)
+
     num_eventos = len(eventos_prox_list)
 
     usuarios_recientes = list(collection_usuarios.find({"rol": {"$ne": "administrador"}}).sort("fecha_registro", 1).limit(5))
@@ -1109,7 +1123,7 @@ def listar_eventos_proximos(page=1):
         es_organizador = collection_participantes.find_one({
             "codigo_evento": evento["codigo"],
             "cedula": str(current_user.cedula),
-            "rol": "organizador"
+            "rol": "coorganizador"
         }) is not None 
 
         evento["es_organizador"] = es_organizador
@@ -1147,7 +1161,7 @@ def listar_eventos_anteriores(page=1):
         es_organizador = collection_participantes.find_one({
             "codigo_evento": evento["codigo"],
             "cedula": str(current_user.cedula),
-            "rol": "organizador"
+            "rol": "coorganizador"
         }) is not None 
 
         evento["es_organizador"] = es_organizador
@@ -1183,7 +1197,7 @@ def listar_eventos(page=1):
         es_organizador = collection_participantes.find_one({
             "codigo_evento": evento["codigo"],
             "cedula": str(current_user.cedula),
-            "rol": "organizador"
+            "rol": "coorganizador"
         }) is not None 
 
         evento["es_organizador"] = es_organizador
