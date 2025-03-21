@@ -176,8 +176,6 @@
                                 <option value="">Seleccione el rol de usuario</option>
 {% if current_user.rol in ['coordinador-local', 'coordinador-regional', 'coordinador-nacional', 'denadoi', 'administrador'] %}
                                 <option value="coordinador-departamental" {% if usuario.rol == 'coordinador-departamental' %}selected{% endif %}>Coordinador de Docencia Departamental</option>
-{% endif %}
-{% if current_user.rol in ['coordinador-regional', 'coordinador-nacional', 'denadoi', 'administrador'] %}
                                 <option value="coordinador-local" {% if usuario.rol == 'coordinador-local' %}selected{% endif %}>Coordinador Local de Docencia</option>
 {% endif %}
 {% if current_user.rol in ['coordinador-nacional', 'denadoi', 'administrador'] %}
