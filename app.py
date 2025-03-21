@@ -71,6 +71,7 @@ def load_user(user_id):
             password=user_data['password'],
             rol=user_data['rol'],
             nombres=user_data['nombres'],
+            cedula=user_data['cedula'],
             foto=user_data.get('foto')
         )
         user.id = str(user_data['_id'])
@@ -79,11 +80,12 @@ def load_user(user_id):
 
 
 class User(UserMixin):
-    def __init__(self, email, password, rol, nombres, foto=None):
+    def __init__(self, email, password, rol, nombres, cedula, foto=None):
         self.email = email
         self.password = password
         self.rol = rol
         self.nombres = nombres
+        self.cedula = cedula
         self.foto = foto
         self.id = None
 
@@ -303,6 +305,7 @@ def login():
                     email=user_data['email'],
                     password=user_data['password'],
                     rol=user_data['rol'],
+                    cedula=user_data['cedula'],
                     nombres=user_data['nombres']
                 )
                 user.id = str(user_data['_id'])
@@ -1028,6 +1031,59 @@ def registrar_ponente(codigo_evento):
 
 
 ###
+### Formulario de registro de organizadores
+###
+@app.route('/registrar_organizador/<codigo_evento>', methods=['GET', 'POST'])
+@login_required
+def registrar_organizador(codigo_evento):
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+
+    afiche_750 = evento.get('afiche_750')
+    afiche_url = url_for('static', filename='uploads/' + afiche_750.split('/')[-1]) if afiche_750 else None
+
+    # Verificar si el evento está cerrado
+    if evento.get('estado_evento') == 'cerrado':
+        return render_template('registrar_organizador.html',
+            evento_cerrado=True,
+            nombre_evento=evento['nombre'],
+            afiche_url=afiche_url
+        )
+
+    if request.method == 'POST':
+        nombres = request.form['nombres']
+        apellidos = request.form['apellidos']
+        cedula = request.form['cedula']
+        rol = request.form['rol']
+        
+        titulo_ponencia = rol                # hack para poder registrar
+
+        # Generar nanoid
+        nanoid = generate_nanoid(cedula, codigo_evento, titulo_ponencia)
+
+        # Insertar datos en la colección de MongoDB
+        collection_participantes.insert_one({
+            'nombres': nombres,
+            'apellidos': apellidos,
+            'cedula': cedula,
+            'rol': rol,
+            'codigo_evento': codigo_evento,
+            'nanoid': nanoid,
+            'titulo_ponencia': titulo_ponencia,
+            'timestamp': datetime.now()     # Almacenar timestamp actual
+        })
+
+        flash("Organizador registrado con éxito.", "success")
+        log_event(f"Usuario [{current_user.email}] registró al {rol} {cedula} en el evento {codigo_evento}.")
+        return redirect(url_for('listar_participantes', codigo_evento=codigo_evento))
+
+    return render_template('registrar_organizador.html',
+        codigo_evento=codigo_evento,
+        evento=evento,
+        afiche_url=afiche_url
+    )
+
+
+###
 ### Listado de eventos próximos
 ###
 @app.route('/eventos-proximos')
@@ -1047,6 +1103,16 @@ def listar_eventos_proximos(page=1):
     # Obtener los eventos próximos para la página actual
     eventos_cursor = collection_eventos.find({'fecha_inicio': {'$gte': inicio_hoy}}).sort('fecha_inicio').skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
+
+    # Verificar si el usuario es organizador en cada evento
+    for evento in eventos:
+        es_organizador = collection_participantes.find_one({
+            "codigo_evento": evento["codigo"],
+            "cedula": str(current_user.cedula),
+            "rol": "organizador"
+        }) is not None 
+
+        evento["es_organizador"] = es_organizador
 
     return render_template('eventos-proximos.html',
         eventos=eventos,
@@ -1076,6 +1142,16 @@ def listar_eventos_anteriores(page=1):
     eventos_cursor = collection_eventos.find({"fecha_inicio": {"$lt": ahora}}).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
 
+    # Verificar si el usuario es organizador en cada evento
+    for evento in eventos:
+        es_organizador = collection_participantes.find_one({
+            "codigo_evento": evento["codigo"],
+            "cedula": str(current_user.cedula),
+            "rol": "organizador"
+        }) is not None 
+
+        evento["es_organizador"] = es_organizador
+
     return render_template('eventos-anteriores.html',
         eventos=eventos,
         page=page,
@@ -1101,6 +1177,16 @@ def listar_eventos(page=1):
     # Obtener los eventos para la página actual
     eventos_cursor = collection_eventos.find().sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
+
+    # Verificar si el usuario es organizador en cada evento
+    for evento in eventos:
+        es_organizador = collection_participantes.find_one({
+            "codigo_evento": evento["codigo"],
+            "cedula": str(current_user.cedula),
+            "rol": "organizador"
+        }) is not None 
+
+        evento["es_organizador"] = es_organizador
 
     return render_template('eventos.html',
         eventos=eventos,

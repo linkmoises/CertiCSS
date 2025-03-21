@@ -164,13 +164,16 @@
                                 </td>
                                 <td class="size-px whitespace-nowrap">
                                     <div class="px-6 py-2">
-{% if current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor)) %}
+{% if current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor or evento.es_organizador)) %}
                                         <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('registrar_participante', codigo_evento=evento.codigo) }}">
                                             Añadir participante
-                                        </a><br>
+                                        </a><br />
                                         <a class="inline-flex items-center gap-x-1 text-sm text-green-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('registrar_ponente', codigo_evento=evento.codigo) }}">
                                             Añadir ponente
-                                        </a><br>
+                                        </a><br />
+                                        <a class="inline-flex items-center gap-x-1 text-sm text-teal-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('registrar_organizador', codigo_evento=evento.codigo) }}">
+                                            Añadir organizador
+                                        </a><br />
 {% endif %}
                                         <a class="inline-flex items-center gap-x-1 text-sm text-pink-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('listar_participantes', codigo_evento=evento.codigo) }}">
                                             Listado de participantes
