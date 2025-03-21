@@ -1231,6 +1231,16 @@ def mis_eventos(page=1):
     eventos_cursor = collection_eventos.find(filtro).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
 
+    # Verificar si el usuario es organizador en cada evento
+    for evento in eventos:
+        es_organizador = collection_participantes.find_one({
+            "codigo_evento": evento["codigo"],
+            "cedula": str(current_user.cedula),
+            "rol": "coorganizador"
+        }) is not None 
+
+        evento["es_organizador"] = es_organizador
+
     return render_template('mis_eventos.html',
         eventos=eventos,
         total_eventos=total_eventos,
@@ -1242,8 +1252,8 @@ def mis_eventos(page=1):
 ###
 ### Aula Digital
 ###
-@app.route('/aula-digital')
-@app.route('/aula-digital/page/<int:page>')
+@app.route('/eventos-digitales')
+@app.route('/eventos-digitales/page/<int:page>')
 @login_required
 def listar_eventos_digitales(page=1):
     eventos_por_pagina = 20
@@ -1263,6 +1273,16 @@ def listar_eventos_digitales(page=1):
         .limit(eventos_por_pagina)
     )
     eventos = list(eventos_cursor)
+
+    # Verificar si el usuario es organizador en cada evento
+    for evento in eventos:
+        es_organizador = collection_participantes.find_one({
+            "codigo_evento": evento["codigo"],
+            "cedula": str(current_user.cedula),
+            "rol": "coorganizador"
+        }) is not None 
+
+        evento["es_organizador"] = es_organizador
 
     return render_template(
         'aula_digital.html',
