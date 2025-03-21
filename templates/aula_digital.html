@@ -181,7 +181,13 @@ Certificación%0D%0A
 Al%20finalizar%20el%20evento,%20podrá%20descargar%20su%20certificado%20de%20participación%20y%20constancia%20de%20asistencia%20a%20través%20de%20la%20misma%20plataforma.%0D%0A%0D%0A
 Para%20cualquier%20consulta,%20puede%20escribirnos%20respondiendo%20a%20este%20correo%20ó%20vía%20WhatsApp%20+507-6447-8057.%0D%0A%0D%0A
 Esperamos%20contar%20con%20su%20participación.">
-                                            Invitación
+                                            Invitación (participantes)
+                                        </a><br />
+                                        <a class="inline-flex items-center gap-x-1 text-sm text-green-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('registrar_ponente', codigo_evento=evento.codigo) }}">
+                                            Añadir ponente
+                                        </a><br />
+                                        <a class="inline-flex items-center gap-x-1 text-sm text-teal-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('registrar_organizador', codigo_evento=evento.codigo) }}">
+                                            Añadir organizador
                                         </a><br />
 {% endif %}
                                         <a class="inline-flex items-center gap-x-1 text-sm text-pink-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('listar_participantes', codigo_evento=evento.codigo) }}">
@@ -194,7 +200,7 @@ Esperamos%20contar%20con%20su%20participación.">
                                         <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('resumen_evento', codigo_evento=evento.codigo) }}">
                                             Resumen
                                         </a><br />
-{% if current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor)) %}
+{% if current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor or evento.es_organizador)) %}
                                         <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('ver_plataforma', codigo_evento=evento.codigo) }}">
                                             Contenidos
                                         </a><br />
