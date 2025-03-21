@@ -751,7 +751,7 @@ def tablero_coordinadores():
 
     #Etiqueta de estado
     eventos_prox_list_estado = []
-    for evento in eventos_prox:
+    for evento in eventos_prox_list:
         fecha_inicio = evento['fecha_inicio']
         if fecha_inicio.date() == ahora.date():
             evento['estado'] = 'En curso'
@@ -759,18 +759,20 @@ def tablero_coordinadores():
             evento['estado'] = 'Finalizado'
         else:
             evento['estado'] = 'Publicado'
-        eventos_prox_list_estado.append(evento)
 
-        # Verificar si el usuario es organizador en cada evento
+        # Verificar si el usuario es organizador o coorganizador en cada evento
         es_organizador = collection_participantes.find_one({
             "codigo_evento": evento["codigo"],
             "cedula": str(current_user.cedula),
-            "rol": "coorganizador"
+            "rol": "coorganizador",
         }) is not None 
 
         evento["es_organizador"] = es_organizador
-
-        eventos_prox_list_estado.append(evento)
+        
+        # Para depuración
+        print(f"Evento {evento['codigo']}, es_organizador: {es_organizador}")
+        
+        eventos_prox_list_estado.append(evento)  # CORREGIDO: añadir el evento solo una vez
 
     num_eventos = len(eventos_prox_list)
 
