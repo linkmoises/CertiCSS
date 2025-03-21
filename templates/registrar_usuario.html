@@ -149,11 +149,22 @@
                         <div class="sm:col-span-9">
                             <select class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" id="rol" name="rol" required>
                                 <option value="">Seleccione el rol de usuario</option>
-                                <option value="denadoi">DENADOI</option>
+{% if current_user.rol in ['coordinador-local', 'coordinador-regional', 'coordinador-nacional', 'denadoi', 'administrador'] %}
                                 <option value="coordinador-departamental">Coordinador de Docencia Departamental</option>
+{% endif %}
+{% if current_user.rol in ['coordinador-regional', 'coordinador-nacional', 'denadoi', 'administrador'] %}
                                 <option value="coordinador-local">Coordinador Local de Docencia</option>
+{% endif %}
+{% if current_user.rol in ['coordinador-nacional', 'denadoi', 'administrador'] %}
                                 <option value="coordinador-regional">Coordinador Regional de Docencia</option>
+{% endif %}
+{% if current_user.rol in ['denadoi', 'administrador'] %}
+                                <option value="coordinador-nacional">Coordinador Nacional de Docencia</option>
+{% endif %}
+{% if current_user.rol == 'administrador' %}
+                                <option value="denadoi">DENADOI</option>
                                 <option value="simulacion">Centro de Simulación Avanzada</option>
+{% endif %}
                             </select>
                         </div>
                         <!-- End Col -->
