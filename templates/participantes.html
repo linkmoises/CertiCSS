@@ -221,7 +221,8 @@
                 
                             <div>
                                 <div class="inline-flex gap-x-2">
-{% if evento.estado_evento != 'cerrado' and current_user.id == evento.autor %}
+{% if evento.estado_evento != 'cerrado' and 
+current_user.id == evento.autor %}
                                     <form action="/registrar_organizador/{{ evento.codigo }}" method="POST">
                                         <input type="hidden" name="nombres" value="{{ current_user.nombres }}">
                                         <input type="hidden" name="apellidos" value="{{ current_user.apellidos }}">

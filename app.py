@@ -1308,6 +1308,12 @@ def listar_participantes(codigo_evento):
 
     estado_evento = evento.get('estado_evento', 'borrador')
 
+    es_organizador = collection_participantes.find_one({
+        "codigo_evento": codigo_evento,
+        "cedula": str(current_user.cedula),
+        "rol": "coorganizador"
+    }) is not None
+
     return render_template('participantes.html',
         participantes=participantes,
         total_participantes=total_participantes,
