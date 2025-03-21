@@ -70,9 +70,9 @@ def load_user(user_id):
             email=user_data['email'],
             password=user_data['password'],
             rol=user_data['rol'],
-            nombres=user_data['nombres'],
-            apellidos=user_data['apellidos'],
-            cedula=user_data['cedula'],
+            cedula=user_data.get('cedula', ''),
+            nombres=user_data.get('nombres', ''),
+            apellidos=user_data.get('apellidos', ''),
             foto=user_data.get('foto')
         )
         user.id = str(user_data['_id'])
@@ -307,9 +307,9 @@ def login():
                     email=user_data['email'],
                     password=user_data['password'],
                     rol=user_data['rol'],
-                    cedula=user_data['cedula'],
-                    nombres=user_data['nombres'],
-                    apellidos=user_data['apellidos']
+                    cedula=user_data.get('cedula', ''),
+                    nombres=user_data.get('nombres', ''),
+                    apellidos=user_data.get('apellidos', '')
                 )
                 user.id = str(user_data['_id'])
                 login_user(user)
