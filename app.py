@@ -1320,6 +1320,7 @@ def listar_participantes(codigo_evento):
         evento=evento,
         nombre_evento=evento['nombre'],
         estado_evento=estado_evento,
+        es_organizador=es_organizador,
     )
 
 
