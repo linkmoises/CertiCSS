@@ -106,9 +106,27 @@
     </div>
 
 <!-- JavaScript -->
-<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+<script defer src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    setTimeout(function() {
+        const carouselElement = document.querySelector('#vertical-thumbnails-carousel');
+
+        if (carouselElement) {
+            try {
+                const carouselInstance = new HSCarousel(carouselElement, {
+                    autoplay: true,
+                    interval: 5000
+                });
+
+                console.log("Carrusel inicializado correctamente:", carouselInstance);
+            } catch (error) {
+                console.error("Error al inicializar el carrusel:", error);
+            }
+        } else {
+            console.error("No se encontró el elemento del carrusel.");
+        }
+    }, 500);
     // Para ajustar el tamaño al cargar y al cambiar el tamaño de la ventana
     function adjustCarouselSize() {
         const viewportHeight = window.innerHeight;
@@ -150,8 +168,28 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('resize', adjustCarouselSize);
     
     // Para la funcionalidad de thumbnails
-    const carouselInstance = HSCarousel.getInstance('#vertical-thumbnails-carousel');
+    //const carouselInstance = HSCarousel.getInstance('#vertical-thumbnails-carousel');
+    const carouselElement = document.querySelector('#vertical-thumbnails-carousel');
+    if (carouselElement) {
+        try {
+            const carouselInstance = new HSCarousel(carouselElement, {
+                autoplay: true,
+                interval: 5000
+            });
+            console.log("Carrusel inicializado:", carouselInstance);
+        } catch (error) {
+            console.error("Error al inicializar el carrusel:", error);
+        }
+    } else {
+        console.error("No se encontró el elemento del carrusel.");
+    }
+
     const thumbnails = document.querySelectorAll('#vertical-thumbnails-carousel [data-hs-tab]');
+
+    // Verificar si el carrusel se inicializó correctamente
+        if (!carouselInstance) {
+            console.error('El carrusel no se pudo inicializar.');
+        }
     
     // Actualizar el estado activo del thumbnail cuando cambia el slide
     carouselInstance?.on('slide.hs.carousel', function (e) {
