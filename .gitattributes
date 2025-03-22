@@ -1,0 +1,32 @@
+* text=auto
+# Imágenes
+*.png       binary
+*.jpg       binary
+*.svg       text
+*.ico       binary
+# Documentos
+*.pdf       diff=astextplain
+*.csv       text eol=crlf
+*.txt       text
+*.md        text diff=markdown
+*.sql       text
+# LF
+*.py        text eol=lf
+*.sh        text eol=lf
+*.zsh       text eol=lf
+# Archivos Windows
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+*.ps1       text eol=crlf
+# JSON y similares
+*.json      text
+*.xml       text
+*.yaml      text
+*.yml       text
+# Binarios
+*.zip       binary
+*.gz        binary
+*.bz        binary
+*.lz        binary
+*.xz        binary
+*.tar       binary
