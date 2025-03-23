@@ -32,6 +32,10 @@
 *.tar       binary
 # Conteo de lenguajes
 * linguist-vendored
+*.py        linguist-vendored=false
+*.sh        linguist-vendored=false
+*.yml       linguist-vendored=false
+*.bash      linguist-vendored=false
 *.html      linguist-vendored=true
 *.htm       linguist-vendored=true
 *.css       linguist-vendored=true
