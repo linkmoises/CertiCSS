@@ -1252,6 +1252,48 @@ def mis_eventos(page=1):
 
 
 ###
+### Mis Eventos
+###
+@app.route('/mis-eventos-digitales')
+@app.route('/mis-eventos-digitales/page/<int:page>')
+@login_required
+def mis_eventos_digitales(page=1):
+    eventos_por_pagina = 20
+
+    # Filtrar eventos donde el autor sea el usuario actual y modalidad != presencial
+    filtro = {
+        "autor": current_user.id,
+        "modalidad": {"$ne": "Presencial"}
+    }
+
+    # Calcular el número total de eventos del usuario
+    total_eventos = collection_eventos.count_documents(filtro)
+    # Calcular el número total de páginas
+    total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
+
+    # Obtener los eventos para la página actual
+    eventos_cursor = collection_eventos.find(filtro).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    eventos = list(eventos_cursor)
+
+    # Verificar si el usuario es organizador en cada evento
+    for evento in eventos:
+        es_organizador = collection_participantes.find_one({
+            "codigo_evento": evento["codigo"],
+            "cedula": str(current_user.cedula),
+            "rol": "coorganizador"
+        }) is not None 
+
+        evento["es_organizador"] = es_organizador
+
+    return render_template('mis_eventos_digitales.html',
+        eventos=eventos,
+        total_eventos=total_eventos,
+        page=page,
+        total_paginas=total_paginas
+    )
+
+
+###
 ### Aula Digital
 ###
 @app.route('/eventos-digitales')

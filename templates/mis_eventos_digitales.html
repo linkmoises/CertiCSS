@@ -18,21 +18,15 @@
                         <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
                             <div>
                                 <h2 class="text-xl font-semibold text-gray-800">
-                                    Aula Digital
+                                    Mis eventos digitales
                                 </h2>
                                 <p class="text-sm text-gray-600">
-                                    Todos los eventos virtuales registrados en nuestro LMS
+                                    Se muestran solamente los eventos con componentes digitales creados por el autor
                                 </p>
                             </div>
             
                             <div>
                                 <div class="inline-flex gap-x-2">
-{% if current_user.rol != 'administrador' %}
-                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="{{ url_for('mis_eventos_digitales') }}">
-                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-heart"><path d="M3 10h18V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7"/><path d="M8 2v4"/><path d="M16 2v4"/><path d="M21.29 14.7a2.43 2.43 0 0 0-2.65-.52c-.3.12-.57.3-.8.53l-.34.34-.35-.34a2.43 2.43 0 0 0-2.65-.53c-.3.12-.56.3-.79.53-.95.94-1 2.53.2 3.74L17.5 22l3.6-3.55c1.2-1.21 1.14-2.8.19-3.74Z"/></svg>
-                                        Mis eventos digitales
-                                    </a>
-{% endif %}
                                     <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="{{ url_for('crear_evento') }}">
                                         <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                                         Nuevo evento
@@ -126,7 +120,7 @@
                                 <td class="h-px w-72 min-w-72">
                                     <div class="px-6 py-2">
                                         <p class="text-sm text-gray-500 mb-2">
-                                            <a class="text-sm text-blue-600 decoration-2 hover:underline" href="{{ url_for('ver_plataforma', codigo_evento=evento.codigo) }}">
+                                            <a class="text-sm text-blue-600 decoration-2 hover:underline" href="{{ url_for('mostrar_evento', codigo_evento=evento.codigo) }}">
                                             {{ evento.nombre }}</a>
                                         </p>
                                         <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
@@ -134,7 +128,7 @@
                                         </span>
                                     </div>
                                 </td>
-                                <td class="h-px w-64 min-w-64">
+                                <td class="h-px w-72 min-w-72">
                                     <a class="block relative z-10" href="#">
                                     <div class="px-6 py-2">
                                         <p class="text-sm text-gray-500 mb-2">{{ evento.descripcion }}</p>
@@ -150,8 +144,7 @@
                                 <td class="size-px whitespace-nowrap">
                                     <a class="block relative z-10" href="#">
                                     <div class="px-6 py-2">
-                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium {% if evento.estado_evento == 'publicado' %}bg-blue-100 text-blue-800{% elif evento.estado_evento == 'cerrado' %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
-                            {% if evento.estado_evento == 'publicado' %}Publicado{% elif evento.estado_evento == 'cerrado' %}Cerrado{% else %}Borrador{% endif %}
+                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium {% if evento.estado_evento == 'publicado' %}bg-blue-100 text-blue-800{% elif evento.estado_evento == 'cerrado' %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">{% if evento.estado_evento == 'publicado' %}Publicado{% elif evento.estado_evento == 'cerrado' %}Cerrado{% else %}Borrador{% endif %}
                                         </span><br />
                                         {{ evento.fecha_inicio|estado }}
                                     </div>
@@ -164,31 +157,13 @@
                                 </td>
                                 <td class="size-px whitespace-nowrap">
                                     <div class="px-6 py-2">
-{% if current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor or evento.es_organizador)) %}
+{% if current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor)) %}
                                         <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('registrar_participante', codigo_evento=evento.codigo) }}">
                                             Añadir participante
                                         </a><br>
-                                        <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('preregistro', codigo_evento=evento.codigo) }}">
-                                            Preregistrar participantes
-                                        </a><br />
-                                        <a class="inline-flex items-center gap-x-1 text-sm text-green-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="mailto:?subject=Invitación%20a%20{{ evento.nombre }}&body=Estimado%20profesional%20de%20la%20salud,%0D%0A%0D%0A
-El%20Departamento%20Nacional%20de%20Docencia%20e%20Investigación%20le%20invita%20a%20participar%20en%20la%20actividad%20docente:%20{{ evento.nombre }}.%20Esta%20es%20una%20actividad%20diseñada%20para%20fortalecer%20sus%20conocimientos,%20habilidades,%20destrezas%20y%20experticia%20en%20el%20área.%0D%0A%0D%0A
-Registro%20y%20Acceso%20al%20Evento%0D%0A
-Para%20participar,%20debe%20completar%20su%20registro%20en%20el%20siguiente%20enlace%20(solo%20permite%20completar%20el%20registro%20a%20aquellos%20participantes%20preinscritos):%0D%0A
-👉%20Registro%20al%20evento%20[https://docenciamedica.org/registrar_participante/{{ evento.codigo }}]%0D%0A%0D%0A
-Luego%20de%20completar%20el%20registro,%20deberá%20ingresar%20a%20https://docenciamedica.org%20y%20utilizar%20el%20formulario%20de%20búsqueda%20ingresando%20su%20número%20de%20cédula.%20Esto%20le%20permitirá%20verificar%20su%20inscripción%20y%20acceder%20a%20los%20contenidos%20del%20evento.%0D%0A%0D%0A
-Certificación%0D%0A
-Al%20finalizar%20el%20evento,%20podrá%20descargar%20su%20certificado%20de%20participación%20y%20constancia%20de%20asistencia%20a%20través%20de%20la%20misma%20plataforma.%0D%0A%0D%0A
-Para%20cualquier%20consulta,%20puede%20escribirnos%20respondiendo%20a%20este%20correo%20ó%20vía%20WhatsApp%20+507-6447-8057.%0D%0A%0D%0A
-Esperamos%20contar%20con%20su%20participación.">
-                                            Invitación (participantes)
-                                        </a><br />
                                         <a class="inline-flex items-center gap-x-1 text-sm text-green-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('registrar_ponente', codigo_evento=evento.codigo) }}">
                                             Añadir ponente
-                                        </a><br />
-                                        <a class="inline-flex items-center gap-x-1 text-sm text-teal-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('registrar_organizador', codigo_evento=evento.codigo) }}">
-                                            Añadir organizador
-                                        </a><br />
+                                        </a><br>
 {% endif %}
                                         <a class="inline-flex items-center gap-x-1 text-sm text-pink-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('listar_participantes', codigo_evento=evento.codigo) }}">
                                             Listado de participantes
@@ -200,10 +175,7 @@ Esperamos%20contar%20con%20su%20participación.">
                                         <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('resumen_evento', codigo_evento=evento.codigo) }}">
                                             Resumen
                                         </a><br />
-{% if current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor or evento.es_organizador)) %}
-                                        <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('ver_plataforma', codigo_evento=evento.codigo) }}">
-                                            Contenidos
-                                        </a><br />
+{% if current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor)) %}  
                                         <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('editar_evento', codigo_evento=evento.codigo) }}">
                                             Editar
                                         </a><br />
@@ -269,7 +241,7 @@ Esperamos%20contar%20con%20su%20participación.">
 
         </div>
     </div>
-    <!-- FIN CONTENIDO -->    
+    <!-- FIN CONTENIDO -->
 
 <!-- JS PLUGINS -->
 <script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
