@@ -31,11 +31,12 @@
 *.xz        binary
 *.tar       binary
 # Conteo de lenguajes
-* linguist-vendored
-*.py        linguist-vendored=false
-*.sh        linguist-vendored=false
-*.yml       linguist-vendored=false
-*.bash      linguist-vendored=false
-*.html      linguist-vendored=true
-*.htm       linguist-vendored=true
-*.css       linguist-vendored=true
+## para contar
+*.py        linguist-detectable=true
+*.sh        linguist-detectable=true
+*.yml       linguist-detectable=true
+*.bash      linguist-detectable=true
+## no contar
+*.html      linguist-detectable=false
+*.htm       linguist-detectable=false
+*.css       linguist-detectable=false
