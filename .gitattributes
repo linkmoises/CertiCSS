@@ -30,3 +30,8 @@
 *.lz        binary
 *.xz        binary
 *.tar       binary
+# Conteo de lenguajes
+* linguist-vendored
+*.html      linguist-vendored=false
+*.htm       linguist-vendored=false
+*.css       linguist-vendored=false
