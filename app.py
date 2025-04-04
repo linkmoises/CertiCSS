@@ -2531,7 +2531,7 @@ def carrusel():
     eventos_futuros = collection_eventos.find({
         "fecha_inicio": {"$gte": inicio_hoy},
         "estado_evento": {"$ne": "borrador"}
-    }).sort("fecha_inicio").limit(3)
+    }).sort("fecha_inicio").limit(5)
     
     # Preparar las imágenes para el carrusel
     carousel_images = []
