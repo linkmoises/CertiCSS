@@ -1,3 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ evento.nombre }} - Aula Digital - CertiCSS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- favicons -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
+    <meta name="apple-mobile-web-app-title" content="CertiCSS" />
+    <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
+</head>
+<body class="bg-gray-50 dark:bg-neutral-900">
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main id="content">
+
+        <!-- Card -->
+        <div class="max-w-[90rem] px-8 pt-8 sm:px-6 lg:px-8 lg:pt-8 mx-auto">
+            <!-- Grid -->
+            <div class="bg-white grid sm:grid-cols-2 border border-gray-200 rounded-xl lg:grid-cols-12">
+
+                <div class="sm:order-1 lg:col-span-3 border-r border-gray-200">
+                    <div class="relative pt-[100%] sm:pt-[100%]">
+{% if evento.afiche_750 %}
+                        <img class="size-full absolute top-0 start-0 object-cover rounded-l-xl" src="{{ BASE_URL }}{{ evento.afiche_750 }}" alt="{{ evento.nombre }}">
+{% else %}
+                        <img class="size-full absolute top-0 start-0 object-cover rounded-l-xl" src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}" alt="{{ evento.nombre }}">
+{% endif %}
+                    </div>
+                    <div class="m-4">
+                        <h2 class="font-bold text-gray-800 mb-2">{{ evento.nombre }}</h2>
+                        <p class="text-sm text-gray-500">{{ evento.descripcion }}</p>
+                    </div>
+                    <div class="m-6">
+{% if current_user.is_authenticated %}
+                        <div class="my-4">
+                            <a href="{{ url_for('crear_contenido', codigo_evento=evento.codigo) }}" class="w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"">
+                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open-text"><path d="M12 7v14"/><path d="M16 12h2"/><path d="M16 8h2"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/><path d="M6 12h2"/><path d="M6 8h2"/></svg>
+                                Añadir contenido
+                            </a>
+                        </div>
+{% endif %}
+                    </div>
+                </div>
+                <!-- End Col -->
+
+                <div class="sm:order-2 lg:col-span-9">
+
+                    <form method="POST" enctype="multipart/form-data">
+                        <!-- Grid -->
+                        <div class="m-8">
+
+                            <h2 class="text-xl font-bold text-gray-800 pb-4">Añadir Contenido - {{ evento.nombre }}</h2>
+
+                            <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
+                            
+                                <div class="sm:col-span-3">
+                                    <label for="titulo" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                        Título del contenido
+                                    </label>
+                                </div>
+                                <!-- End Col -->
+                        
+                                <div class="sm:col-span-9">
+                                    <input id="titulo" name="titulo" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Título del contenido o actividad..." required>
+                                </div>
+                                <!-- End Col -->
+
+                                <div class="sm:col-span-3">
+                                    <label for="descripcion" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                        Descripción
+                                    </label>
+                                </div>
+                                <!-- End Col -->
+                        
+                                <div class="sm:col-span-9">
+                                    <textarea id="descripcion" name="descripcion" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" rows="3" placeholder="Breve descripción del contenido o actividad docente..."></textarea>
+                                </div>
+                                <!-- End Col -->
+
+                                <div class="sm:col-span-3">
+                                    <label for="tipo" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                        Seleccione el contenido a agregar
+                                    </label>
+                                </div>
+                                <!-- End Col -->
+
+                                <div class="sm:col-span-9">
+                                    <select class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" id="tipo" name="tipo">
+                                        <option value="video">Video</option>
+                                        <option value="texto">Texto</option>
+                                        <option value="documento">Documento</option>
+                                    </select>
+
+                                    <div id="video-section" class="w-full inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200" {% if contenido.tipo != "video" %}style="display:none"{% endif %}>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2.5">URL del Video</label>
+                                        <input type="text" name="url_video" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="https://youtube.com/embed/...">
+                                    </div>
+                                
+                                    <div id="texto-section" class="w-full inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200" {% if contenido.tipo != "texto" %}style="display:none"{% endif %}>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2.5">Contenido de Texto (admite markdown)</label>
+                                        <textarea name="contenido_texto" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" rows="12"></textarea>
+                                    </div>
+                                
+                                    <div id="documento-section" class="w-full inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200" {% if contenido.tipo != "documento" %}style="display:none"{% endif %}>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2.5">Subir Nuevo Documento</label>
+                                        <input type="file" name="documento" class="w-full border p-2 rounded">
+                                    </div>
+                                </div>
+                                <!-- End Col -->
+
+                            </div>
+
+                            <button type="submit" class="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                                Guardar Cambios
+                            </button>
+
+                        </div>
+                        <!-- End Grid -->
+                    </form>
+
+                </div>
+                <!-- End Col -->
+
+            </div>
+            <!-- End Grid -->
+
+        </div>
+        <!-- End Card -->
+
+    </main>
+
+    <footer class="mt-auto w-full max-w-[85rem] px-4 sm:px-6 lg:px-8 mx-auto">
+        <div class="text-center text-xs text-gray-500 my-8">
+            <p>Este evento es avalado por DENADOI y potenciado por la plataforma CertiCSS.</p>
+        </div>
+    </footer>
+
+<script>
+    document.querySelector('select[name="tipo"]').addEventListener('change', function() {
+        document.getElementById('video-section').style.display = this.value === 'video' ? 'block' : 'none';
+        document.getElementById('texto-section').style.display = this.value === 'texto' ? 'block' : 'none';
+        document.getElementById('documento-section').style.display = this.value === 'documento' ? 'block' : 'none';
+    });
+</script>
+</body>
+</html>
+
+
+
+
+
 <!doctype html>
 <html lang="es">
     <head>

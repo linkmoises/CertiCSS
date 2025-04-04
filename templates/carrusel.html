@@ -1,10 +1,8 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Carrusel de Eventos Próximos - DENADOI</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- favicons -->
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
@@ -13,205 +11,102 @@
     <meta name="apple-mobile-web-app-title" content="CertiCSS" />
     <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
     <style>
-        /* Asegurar que el contenedor principal ocupa toda la altura de la ventana */
-        html, body {
-            height: 100%;
+        body {
+            height: 700px; /* Aumentado de 600px a 700px */
             margin: 0;
-            padding: 0;
-        }
-        
-        /* Esta clase asegura que la imagen central sea cuadrada y del tamaño correcto */
-        .main-image-container {
-            aspect-ratio: 1/1;
-            max-height: 90vh;
-            width: auto;
-        }
-        
-        /* Clase para los thumbnails de tamaño fijo */
-        .thumbnail-fixed {
-            width: auto;
-            height: auto;
-            flex-shrink: 0;
-        }
-        
-        /* Contenedor principal centrado */
-        .carousel-wrapper {
-            display: flex;
-            justify-content: center;
+            display: grid;
+            grid-template-rows: 600px 100px; /* Primer valor aumentado de 500px a 600px */
+            grid-template-columns: 1fr;
             align-items: center;
-            height: 100vh;
+            justify-items: center;
+            background-color: #f5f5f5;
+        }
+        main#carousel {
+            grid-row: 1 / 2;
+            grid-column: 1 / 2;
             width: 100vw;
+            height: 600px; /* Aumentado de 500px a 600px para dar más espacio */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            perspective: 800px; /* Ajustado de 600px a 800px para mejor visualización */
+            --items: 5;
+            --middle: 3;
+            --position: 1;
+            animation: rotate 15s infinite linear;
+            pointer-events: none;
+        }
+        @keyframes rotate {
+            0% {
+            --position: 1;
+            }
+            20% {
+            --position: 2;
+            }
+            40% {
+            --position: 3;
+            }
+            60% {
+            --position: 4;
+            }
+            80% {
+            --position: 5;
+            }
+            100% {
+            --position: 1;
+            }
+        }
+        div.item {
+            position: absolute;
+            width: 400px;  /* Cambiado de 300px a 400px */
+            height: 400px; /* Cambiado de 400px a 400px para hacerlo cuadrado */
+            --r: calc(var(--position) - var(--offset));
+            --abs: max(calc(var(--r) * -1), var(--r));
+            transition: all 0.5s ease-in-out;
+            transform: rotateY(calc(-10deg * var(--r)))
+            translateX(calc(-400px * var(--r))); /* Ajustado también aquí de -300px a -400px */
+            z-index: calc((var(--position) - var(--abs)));
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        div.item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.5s ease;
+        }
+
+        div.item:hover img {
+            transform: scale(1.05);
+        }
+
+        div.item:nth-of-type(1) {
+            --offset: 1;
+        }
+        div.item:nth-of-type(2) {
+            --offset: 2;
+        }
+        div.item:nth-of-type(3) {
+            --offset: 3;
+        }
+        div.item:nth-of-type(4) {
+            --offset: 4;
+        }
+        div.item:nth-of-type(5) {
+            --offset: 5;
         }
     </style>
 </head>
-<body class="bg-gray-100">
-    <div class="carousel-wrapper">
-        <!-- Carousel with vertical thumbnails and autoplay -->
-        <div id="vertical-thumbnails-carousel" class="relative flex" data-hs-carousel='{"autoplay": true, "interval": 5000}'>
-            <div class="flex space-x-4 rtl:space-x-reverse items-center">
-                
-                <!-- Vertical thumbnails -->
-                <div class="flex flex-col justify-center space-y-4" id="thumbnails-container">
-                    {% for image in carousel_images %}
-                    <button type="button" 
-                            class="thumbnail-fixed rounded-lg overflow-hidden hs-tab-active:opacity-100 opacity-30 border-2 border-transparent hs-tab-active:border-blue-500 transition-all duration-300" 
-                            id="carousel-tab-{{ image.id }}" 
-                            data-hs-tab="#carousel-slide-{{ image.id }}" 
-                            aria-controls="carousel-slide-{{ image.id }}"
-                            {% if loop.first %}aria-selected="true"{% endif %}>
-                        <img src="{{ image.afiche_thumb }}" class="w-full h-full object-cover" alt="{{ image.alt }} thumbnail">
-                    </button>
-                    {% endfor %}
-                </div>
-
-                <!-- Main carousel - Square aspect ratio 1:1 -->
-                <div class="relative main-image-container rounded-xl overflow-hidden shadow-xl">
-                    <div class="hs-carousel-body h-full w-full">
-                        {% for image in carousel_images %}
-                        <!-- Slide {{ image.id }} -->
-                        <div id="carousel-slide-{{ image.id }}" 
-                            role="tabpanel" 
-                            aria-labelledby="carousel-tab-{{ image.id }}" 
-                            class="hs-carousel-slide h-full w-full {% if not loop.first %}hidden{% endif %}">
-                            <div class="flex h-full w-full justify-center items-center">
-                                <img src="{{ image.afiche }}" class="h-full w-full object-contain" alt="{{ image.alt }}">
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-
-                    <!-- Flechas de navegación -->
-                    <button type="button" class="hs-carousel-prev absolute inset-y-0 start-0 inline-flex justify-center items-center w-[46px] h-full text-gray-800 hover:bg-gray-800/[.1]">
-                        <span class="size-9 bg-white flex items-center justify-center rounded-full shadow">
-                            <span class="sr-only">Anterior</span>
-                            <svg class="flex-shrink-0 size-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="m15 18-6-6 6-6"/>
-                            </svg>
-                        </span>
-                    </button>
-                    
-                    <button type="button" class="hs-carousel-next absolute inset-y-0 end-0 inline-flex justify-center items-center w-[46px] h-full text-gray-800 hover:bg-gray-800/[.1]">
-                        <span class="size-9 bg-white flex items-center justify-center rounded-full shadow">
-                            <span class="sr-only">Siguiente</span>
-                            <svg class="flex-shrink-0 size-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="m9 18 6-6-6-6"/>
-                            </svg>
-                        </span>
-                    </button>
-
-                </div>
-
-            </div>
+<body>
+    <main id="carousel">
+{% for image in carousel_images %}
+        <div id="{{ image.id }}" class="item">
+            <img src="{{ image.afiche }}" alt="{{ image.alt }}">
         </div>
-    </div>
-
-<!-- JavaScript -->
-<script defer src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    setTimeout(function() {
-        const carouselElement = document.querySelector('#vertical-thumbnails-carousel');
-
-        if (carouselElement) {
-            try {
-                const carouselInstance = new HSCarousel(carouselElement, {
-                    autoplay: true,
-                    interval: 5000
-                });
-
-                console.log("Carrusel inicializado correctamente:", carouselInstance);
-            } catch (error) {
-                console.error("Error al inicializar el carrusel:", error);
-            }
-        } else {
-            console.error("No se encontró el elemento del carrusel.");
-        }
-    }, 500);
-    // Para ajustar el tamaño al cargar y al cambiar el tamaño de la ventana
-    function adjustCarouselSize() {
-        const viewportHeight = window.innerHeight;
-        const mainContainer = document.querySelector('.main-image-container');
-        const thumbnailsContainer = document.getElementById('thumbnails-container');
-        
-        if (mainContainer && thumbnailsContainer) {
-            // Calcular el tamaño máximo que puede tener la imagen principal
-            const maxMainSize = Math.min(
-                viewportHeight * 0.9,    // No exceder el 90% de la altura de la ventana
-                window.innerWidth * 0.6  // No ser demasiado ancho
-            );
-            
-            mainContainer.style.width = `${maxMainSize}px`;
-            mainContainer.style.height = `${maxMainSize}px`;
-            
-            // Ajustar el tamaño de los thumbnails para que coincidan con la altura de la imagen principal
-            const thumbnailHeight = maxMainSize / 3 - 16; // 3 thumbnails con espacio entre ellos
-            const thumbnails = thumbnailsContainer.querySelectorAll('.thumbnail-fixed');
-            thumbnails.forEach(thumbnail => {
-                thumbnail.style.height = `${thumbnailHeight}px`;
-                thumbnail.style.width = `${thumbnailHeight}px`; // Asumiendo que quieres que sean cuadrados
-            });
-        }
-        
-        // Centrar todo el conjunto
-        const carouselWrapper = document.querySelector('.carousel-wrapper');
-        if (carouselWrapper) {
-            carouselWrapper.style.display = 'flex';
-            carouselWrapper.style.justifyContent = 'center';
-            carouselWrapper.style.alignItems = 'center';
-        }
-    }
-    
-    // Ajustar al cargar
-    adjustCarouselSize();
-    
-    // Ajustar al cambiar el tamaño de la ventana
-    window.addEventListener('resize', adjustCarouselSize);
-    
-    // Para la funcionalidad de thumbnails
-    //const carouselInstance = HSCarousel.getInstance('#vertical-thumbnails-carousel');
-    const carouselElement = document.querySelector('#vertical-thumbnails-carousel');
-    if (carouselElement) {
-        try {
-            const carouselInstance = new HSCarousel(carouselElement, {
-                autoplay: true,
-                interval: 5000
-            });
-            console.log("Carrusel inicializado:", carouselInstance);
-        } catch (error) {
-            console.error("Error al inicializar el carrusel:", error);
-        }
-    } else {
-        console.error("No se encontró el elemento del carrusel.");
-    }
-
-    const thumbnails = document.querySelectorAll('#vertical-thumbnails-carousel [data-hs-tab]');
-
-    // Verificar si el carrusel se inicializó correctamente
-        if (!carouselInstance) {
-            console.error('El carrusel no se pudo inicializar.');
-        }
-    
-    // Actualizar el estado activo del thumbnail cuando cambia el slide
-    carouselInstance?.on('slide.hs.carousel', function (e) {
-        const targetId = e.detail.target.id;
-        thumbnails.forEach(thumb => {
-            if (thumb.getAttribute('data-hs-tab') === `#${targetId}`) {
-                thumb.classList.add('hs-tab-active');
-            } else {
-                thumb.classList.remove('hs-tab-active');
-            }
-        });
-    });
-    
-    // Clic en thumbnails para cambiar el slide
-    thumbnails.forEach(thumbnail => {
-        thumbnail.addEventListener('click', function (e) {
-            e.preventDefault();
-            const targetSlide = this.getAttribute('data-hs-tab');
-            carouselInstance?.goToItem(document.querySelector(targetSlide));
-        });
-    });
-});
-</script>
+{% endfor %}
+    </main>
 </body>
 </html>
