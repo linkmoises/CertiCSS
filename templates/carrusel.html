@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Carrusel de Eventos Próximos - DENADOI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- favicons -->
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
@@ -12,66 +14,62 @@
     <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
     <style>
         body {
-            height: 700px; /* Aumentado de 600px a 700px */
+            height: 100vh;
             margin: 0;
             display: grid;
-            grid-template-rows: 600px 100px; /* Primer valor aumentado de 500px a 600px */
+            grid-template-rows: 85vh 15vh;
             grid-template-columns: 1fr;
             align-items: center;
             justify-items: center;
-            background-color: #f5f5f5;
+            background-color: #202A44;
         }
+
         main#carousel {
             grid-row: 1 / 2;
             grid-column: 1 / 2;
             width: 100vw;
-            height: 600px; /* Aumentado de 500px a 600px para dar más espacio */
+            height: 80vh;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             transform-style: preserve-3d;
-            perspective: 800px; /* Ajustado de 600px a 800px para mejor visualización */
-            --items: 5;
-            --middle: 3;
+            perspective: 50vw;
+            --items: {{ carousel_images|length }};
+            --middle: {{ (carousel_images|length // 2) + 1 }};
             --position: 1;
-            animation: rotate 15s infinite linear;
+            animation: rotate {{ carousel_images|length * 8 }}s infinite linear;
             pointer-events: none;
         }
+
         @keyframes rotate {
-            0% {
-            --position: 1;
-            }
-            20% {
-            --position: 2;
-            }
-            40% {
-            --position: 3;
-            }
-            60% {
-            --position: 4;
-            }
-            80% {
-            --position: 5;
-            }
-            100% {
-            --position: 1;
-            }
-        }
+{% for i in range(carousel_images|length) %}
+{{ (i / carousel_images|length) * 100 }}% {
+                --position: {{ i + 1 }};
+}
+{% endfor %}
+100% {
+                --position: 1;
+}
+}
+
         div.item {
             position: absolute;
-            width: 400px;  /* Cambiado de 300px a 400px */
-            height: 400px; /* Cambiado de 400px a 400px para hacerlo cuadrado */
+            width: 25vw;
+            height: 25vw;
+            max-width: 500px;
+            max-height: 500px;
             --r: calc(var(--position) - var(--offset));
             --abs: max(calc(var(--r) * -1), var(--r));
             transition: all 0.5s ease-in-out;
             transform: rotateY(calc(-10deg * var(--r)))
-            translateX(calc(-400px * var(--r))); /* Ajustado también aquí de -300px a -400px */
+            translateX(calc(-25vw * var(--r)));
             z-index: calc((var(--position) - var(--abs)));
             border-radius: 10px;
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
             overflow: hidden;
         }
+
         div.item img {
             width: 100%;
             height: 100%;
@@ -83,21 +81,12 @@
             transform: scale(1.05);
         }
 
-        div.item:nth-of-type(1) {
-            --offset: 1;
+/* Dinámicamente crear los selectores CSS para cada posible ítem */
+{% for i in range(carousel_images|length) %}
+        div.item:nth-of-type({{ i + 1 }}) {
+            --offset: {{ i + 1 }};
         }
-        div.item:nth-of-type(2) {
-            --offset: 2;
-        }
-        div.item:nth-of-type(3) {
-            --offset: 3;
-        }
-        div.item:nth-of-type(4) {
-            --offset: 4;
-        }
-        div.item:nth-of-type(5) {
-            --offset: 5;
-        }
+{% endfor %}
     </style>
 </head>
 <body>
@@ -108,5 +97,8 @@
         </div>
 {% endfor %}
     </main>
+    <a href="/" class="text-cyan-950">
+        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
+    </a>
 </body>
 </html>
