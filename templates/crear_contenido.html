@@ -90,25 +90,25 @@
                                 <!-- End Col -->
 
                                 <div class="sm:col-span-9">
-                                    <select class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" id="tipo" name="tipo">
+                                    <select class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" id="tipo" name="tipo" onchange="toggleFields()" required>
                                         <option value="video">Video</option>
                                         <option value="texto">Texto</option>
                                         <option value="documento">Documento</option>
                                     </select>
 
-                                    <div id="video-section" class="w-full inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200" {% if contenido.tipo != "video" %}style="display:none"{% endif %}>
+                                    <div id="video_fields" style="display: none;" class="w-full inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                         <label class="block text-sm font-medium text-gray-700 mb-2.5">URL del Video</label>
-                                        <input type="text" name="url_video" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="https://youtube.com/embed/...">
+                                        <input type="text" id="url_video" name="url_video" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="https://youtube.com/embed/...">
                                     </div>
                                 
-                                    <div id="texto-section" class="w-full inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200" {% if contenido.tipo != "texto" %}style="display:none"{% endif %}>
+                                    <div id="texto_fields" style="display: none;" class="w-full inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                         <label class="block text-sm font-medium text-gray-700 mb-2.5">Contenido de Texto (admite markdown)</label>
-                                        <textarea name="contenido_texto" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" rows="12"></textarea>
+                                        <textarea id="contenido_texto" name="contenido_texto" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" rows="12"></textarea>
                                     </div>
                                 
-                                    <div id="documento-section" class="w-full inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200" {% if contenido.tipo != "documento" %}style="display:none"{% endif %}>
+                                    <div id="documento_fields" style="display: none;" class="w-full inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                         <label class="block text-sm font-medium text-gray-700 mb-2.5">Subir Nuevo Documento</label>
-                                        <input type="file" name="documento" class="w-full border p-2 rounded">
+                                        <input type="file" id="documento" name="documento" class="w-full border p-2 rounded">
                                     </div>
                                 </div>
                                 <!-- End Col -->
@@ -141,87 +141,28 @@
     </footer>
 
 <script>
-    document.querySelector('select[name="tipo"]').addEventListener('change', function() {
-        document.getElementById('video-section').style.display = this.value === 'video' ? 'block' : 'none';
-        document.getElementById('texto-section').style.display = this.value === 'texto' ? 'block' : 'none';
-        document.getElementById('documento-section').style.display = this.value === 'documento' ? 'block' : 'none';
-    });
+function toggleFields() {
+    const tipo = document.getElementById('tipo').value;
+    
+    // Ocultar todos los campos primero
+    document.getElementById('video_fields').style.display = 'none';
+    document.getElementById('texto_fields').style.display = 'none';
+    document.getElementById('documento_fields').style.display = 'none';
+    
+    // Mostrar solo el campo seleccionado
+    if (tipo === 'video') {
+        document.getElementById('video_fields').style.display = 'block';
+    } else if (tipo === 'texto') {
+        document.getElementById('texto_fields').style.display = 'block';
+    } else if (tipo === 'documento') {
+        document.getElementById('documento_fields').style.display = 'block';
+    }
+}
+
+// Inicializar el formulario al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    toggleFields(); // Mostrar los campos correctos según la selección inicial
+});
 </script>
 </body>
-</html>
-
-
-
-
-
-<!doctype html>
-<html lang="es">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Añadir Contenido - {{ evento.nombre }}</title>
-        <script>
-            function toggleFields() {
-                let tipo = document.getElementById("tipo").value;
-                document.getElementById("video_fields").style.display =
-                    tipo === "video" ? "block" : "none";
-                document.getElementById("texto_fields").style.display =
-                    tipo === "texto" ? "block" : "none";
-                document.getElementById("documento_fields").style.display =
-                    tipo === "documento" ? "block" : "none";
-            }
-        </script>
-    </head>
-    <body>
-        <h1>Añadir Contenido - {{ evento.nombre }}</h1>
-
-        <form method="POST" enctype="multipart/form-data">
-            <label for="titulo">Título:</label>
-            <input type="text" id="titulo" name="titulo" required />
-
-            <label for="descripcion">Descripción:</label>
-            <textarea id="descripcion" name="descripcion" required></textarea>
-
-            <label for="tipo">Tipo de contenido:</label>
-            <select id="tipo" name="tipo" onchange="toggleFields()" required>
-                <option value="video">Video (YouTube)</option>
-                <option value="texto">Texto</option>
-                <option value="documento">Documento (PDF)</option>
-            </select>
-
-            <div id="video_fields" style="display: none">
-                <label for="url_video">URL del video (YouTube):</label>
-                <input type="url" id="url_video" name="url_video" />
-            </div>
-
-            <div id="texto_fields" style="display: none">
-                <label for="contenido_texto">Contenido en texto:</label>
-                <textarea
-                    id="contenido_texto"
-                    name="contenido_texto"
-                ></textarea>
-            </div>
-
-            <div id="documento_fields" style="display: none">
-                <label for="documento">Subir documento (PDF):</label>
-                <input
-                    type="file"
-                    id="documento"
-                    name="documento"
-                    accept="application/pdf"
-                />
-            </div>
-
-            <button type="submit">Guardar Contenido</button>
-        </form>
-
-        <hr />
-        <a href="{{ url_for('ver_plataforma', codigo_evento=evento.codigo) }}"
-            >⬅ Volver a la Plataforma</a
-        >
-
-        <script>
-            toggleFields(); // Para mostrar los campos correctos si el usuario cambia de opción
-        </script>
-    </body>
 </html>
