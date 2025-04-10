@@ -74,9 +74,24 @@
                         <!-- Footer -->
                         <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
                             <div>
-                                <p class="text-sm text-gray-600 dark:text-neutral-400">
+                                <p class="text-sm text-gray-600">
                                     <span class="font-semibold text-gray-800 dark:text-neutral-200">0</span> resultados
                                 </p>
+                            </div>
+                            <div>
+                                <div class="inline-flex gap-x-2">
+{% if evento.estado_evento != 'cerrado' and 
+current_user.id == evento.autor %}
+                                    <form action="/registrar_organizador/{{ evento.codigo }}" method="POST">
+                                        <input type="hidden" name="nombres" value="{{ current_user.nombres }}">
+                                        <input type="hidden" name="apellidos" value="{{ current_user.apellidos }}">
+                                        <input type="hidden" name="cedula" value="{{ current_user.cedula }}">
+                                        <input type="hidden" name="rol" value="organizador">
+                                        <input type="hidden" name="codigo_evento" value="{{ evento.codigo }}">
+                                        <button type="submit" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">Registrarme como organizador</button>
+                                    </form>
+{% endif %}
+                                </div>
                             </div>
                         </div>
                         <!-- End Footer -->
