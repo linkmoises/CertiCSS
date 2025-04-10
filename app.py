@@ -2283,6 +2283,10 @@ def generar_pdf(nanoid):
     ##afiche_path = f"static/assets/plantilla-certificado.pdf"
     afiche_path = evento.get('certificado')
 
+    # Si no se ha subido el certificado del evento, devuelve error 404
+    if not afiche_path:
+        abort(404)
+
     # Llamar a la función para generar el PDF
     pdf_file = generar_pdf_participante(participante, afiche_path)
 
