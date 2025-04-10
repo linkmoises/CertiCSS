@@ -1835,6 +1835,7 @@ def buscar_certificados():
                     'rol': participante['rol'],
                     'ponencia': participante.get('titulo_ponencia', 'N/A'),
                     'codigo_evento': codigo_evento,
+                    'certificado_evento': evento.get('certificado', None),
                     'titulo_evento': evento.get('nombre', 'Título no disponible'),
                     'fecha_evento': fecha_evento,
                     'modalidad_evento': evento.get('modalidad', 'No disponible')
@@ -1927,6 +1928,10 @@ app.jinja_env.filters['zfill'] = zfill_filter
 @app.route('/plataforma/<codigo_evento>/nuevo', methods=['GET', 'POST'])
 @login_required
 def crear_contenido(codigo_evento):
+    # Obtener cédula y token de los parámetros
+    cedula = request.args.get('cedula')
+    token = request.args.get('token')
+
     evento = collection_eventos.find_one({'codigo': codigo_evento})
     if not evento:
         abort(404)
@@ -1964,7 +1969,7 @@ def crear_contenido(codigo_evento):
 
         collection_eva.insert_one(contenido)
 
-        return redirect(url_for('ver_plataforma', codigo_evento=codigo_evento))
+        return redirect(url_for('ver_plataforma', codigo_evento=codigo_evento, cedula=cedula, token=token))
 
     return render_template('crear_contenido.html', evento=evento)
 
@@ -1972,6 +1977,10 @@ def crear_contenido(codigo_evento):
 @app.route('/plataforma/<codigo_evento>/<int:orden>/editar', methods=['GET', 'POST'])
 @login_required
 def editar_contenido(codigo_evento, orden):
+    # Obtener cédula y token de los parámetros
+    cedula = request.args.get('cedula')
+    token = request.args.get('token')
+
     evento = collection_eventos.find_one({'codigo': codigo_evento})
     if not evento:
         abort(404)
@@ -2005,7 +2014,7 @@ def editar_contenido(codigo_evento, orden):
 
         collection_eva.update_one({'codigo_evento': codigo_evento, 'orden': orden}, {'$set': actualizacion})
 
-        return redirect(url_for('ver_contenido', codigo_evento=codigo_evento, orden=orden))
+        return redirect(url_for('ver_contenido', codigo_evento=codigo_evento, orden=orden, cedula=cedula, token=token))
 
     return render_template('editar_contenido.html', evento=evento, contenido=contenido)
 
@@ -2032,7 +2041,7 @@ def mover_contenido(codigo_evento, orden, direccion):
     collection_eva.update_one({'_id': contenido_actual['_id']}, {'$set': {'orden': nuevo_orden}})
     collection_eva.update_one({'_id': contenido_destino['_id']}, {'$set': {'orden': orden}})
 
-    return redirect(url_for('ver_plataforma', codigo_evento=codigo_evento))
+    return redirect(url_for('ver_plataforma', codigo_evento=codigo_evento, cedula=cedula, token=token))
 
 
 @app.route('/plataforma/<codigo_evento>/<int:orden>/eliminar', methods=['POST'])
