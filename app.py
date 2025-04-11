@@ -1874,8 +1874,18 @@ def buscar_certificados():
 ### Plantilla varias
 ###
 @app.route('/plantillas')
+@login_required
 def plantillas():
     return render_template('plantillas.html', active_section='plantillas')
+
+
+###
+### Herramientas
+###
+@app.route('/herramientas')
+@login_required
+def herramientas():
+    return render_template('herramientas.html', active_section='herramientas')
 
 
 ###
@@ -2572,6 +2582,13 @@ def carrusel():
 
     return render_template('carrusel.html', carousel_images=carousel_images)
 
+
+###
+### Temporizador para charlas
+###
+@app.route('/temporizador')
+def temporizador():
+    return render_template('temporizador.html')
 
 ###
 ### Errores

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temporizador de conferencias - CertiCSS</title>
+    <!-- favicons -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
+    <meta name="apple-mobile-web-app-title" content="CertiCSS" />
+    <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #fff;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .config-panel {
+            background-color: #333;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .timer-display {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30vmin;
+            font-weight: bold;
+            color: #4CAF50; /* Color verde para tiempo normal */
+            transition: color 0.5s ease;
+        }
+        .timer-display.warning {
+            color: #FF9800; /* Color naranja para advertencia (2 minutos o menos) */
+        }
+        .timer-display.overtime {
+            color: #ff0000; /* Color rojo para tiempo agotado */
+        }
+        .timer-container {
+            text-align: center;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 1rem;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #reset, #pause {
+            background-color: #f44336;
+        }
+        #reset:hover, #pause:hover {
+            background-color: #d32f2f;
+        }
+        #fullscreen {
+            background-color: #2196F3;
+        }
+        #fullscreen:hover {
+            background-color: #0b7dda;
+        }
+        .config-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        input[type="number"] {
+            width: 60px;
+            padding: 8px;
+            font-size: 1rem;
+        }
+        .fullscreen-mode .config-panel {
+            display: none;
+        }
+        .fullscreen-mode .timer-display {
+            font-size: 42vmin;
+        }
+        button svg {
+            width: 24px;
+            height: 24px;
+            vertical-align: middle;
+        }
+        .footer-note {
+            position: fixed;
+            bottom: 5px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.75rem;
+            color: white;
+            z-index: 10;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div style="text-align: center; padding: 10px; font-size: 1.5rem;" id="clock"></div>
+    <div class="config-panel">
+        <div class="config-item">
+            <label for="minutes">Minutos:</label>
+            <input type="number" id="minutes" min="0" max="999" value="15">
+        </div>
+        <div class="config-item">
+            <label for="seconds">Segundos:</label>
+            <input type="number" id="seconds" min="0" max="59" value="0">
+        </div>
+
+        <button id="start" title="Iniciar">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" fill="white" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+        </button>
+        
+        <button id="pause" title="Pausar" disabled>
+            <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" fill="white" viewBox="0 0 24 24">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+            </svg>
+        </button>
+        
+        <button id="reset" title="Reiniciar">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" fill="white" viewBox="0 0 24 24">
+                <path d="M13 3a9 9 0 0 1 0 18 9 9 0 0 1-9-9H1l4-4 4 4H6a7 7 0 1 0 7-7V3z"/>
+            </svg>
+        </button>
+        
+        <button id="fullscreen" title="Pantalla completa">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrows-fullscreen" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707m4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707m0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707m-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707"/>
+              </svg>
+        </button>
+
+        <a href="https://docenciamedica.org" target="_blank">
+            <button style="background-color: steelblue";>
+                <img src="{{ url_for('static', filename='assets/css-logo-negativo.png') }}"  height="24" width="24" alt="Departamento Nacional de Docencia e Investigación">
+            </button>
+        </a>
+    </div>
+    
+    <div class="timer-container">
+        <div class="timer-display" id="timer">15:00</div>
+    </div>
+
+    <div class="footer-note">
+        
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const timerDisplay = document.getElementById('timer');
+    const startButton = document.getElementById('start');
+    const pauseButton = document.getElementById('pause');
+    const resetButton = document.getElementById('reset');
+    const fullscreenButton = document.getElementById('fullscreen');
+    const minutesInput = document.getElementById('minutes');
+    const secondsInput = document.getElementById('seconds');
+
+    const alarmSound = new Audio("{{ url_for('static', filename='assets/ding.mp3') }}");
+
+    let countdown;
+    let totalSeconds = 0;
+    let isRunning = false;
+    let hasFinished = false;
+    let overtimeSeconds = 0;
+
+    function init() {
+        const minutes = parseInt(minutesInput.value) || 0;
+        const seconds = parseInt(secondsInput.value) || 0;
+        totalSeconds = (minutes * 60) + seconds;
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        let displaySeconds;
+        let prefix = '';
+
+        if (hasFinished) {
+            displaySeconds = overtimeSeconds;
+            prefix = '+';
+            timerDisplay.classList.add('overtime');
+            timerDisplay.classList.remove('warning');
+        } else {
+            displaySeconds = totalSeconds;
+
+            if (totalSeconds <= 10 && totalSeconds > 0) {
+                timerDisplay.classList.add('overtime');
+                timerDisplay.classList.remove('warning');
+            } else if (totalSeconds <= 120 && totalSeconds > 10) {
+                timerDisplay.classList.add('warning');
+                timerDisplay.classList.remove('overtime');
+            } else {
+                timerDisplay.classList.remove('warning');
+                timerDisplay.classList.remove('overtime');
+            }
+        }
+
+        const minutes = Math.floor(displaySeconds / 60);
+        const seconds = displaySeconds % 60;
+
+        timerDisplay.textContent = `${prefix}${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    function startTimer() {
+        if (!isRunning) {
+            isRunning = true;
+            startButton.disabled = true;
+            pauseButton.disabled = false;
+            minutesInput.disabled = true;
+            secondsInput.disabled = true;
+
+            countdown = setInterval(function() {
+                if (!hasFinished) {
+                    if (totalSeconds <= 0) {
+                        clearInterval(countdown);
+                        hasFinished = true;
+
+                        timerDisplay.classList.add('overtime');
+                        timerDisplay.classList.remove('warning');
+
+                        alarmSound.play().catch(error => {
+                            console.log("No se pudo reproducir el sonido:", error);
+                        });
+
+                        startOvertime();
+                    } else {
+                        totalSeconds--;
+                        updateDisplay();
+                    }
+                }
+            }, 1000);
+        }
+    }
+
+    function startOvertime() {
+        overtimeSeconds = 0;
+        updateDisplay();
+
+        countdown = setInterval(function() {
+            overtimeSeconds++;
+            timerDisplay.classList.add('overtime');
+            updateDisplay();
+        }, 1000);
+    }
+
+    function pauseTimer() {
+        if (isRunning) {
+            clearInterval(countdown);
+            isRunning = false;
+            startButton.disabled = false;
+            pauseButton.disabled = true;
+        }
+    }
+
+    function resetTimer() {
+        clearInterval(countdown);
+        isRunning = false;
+        hasFinished = false;
+        overtimeSeconds = 0;
+        startButton.disabled = false;
+        pauseButton.disabled = true;
+        minutesInput.disabled = false;
+        secondsInput.disabled = false;
+        init();
+    }
+
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.log(`Error al intentar entrar en modo pantalla completa: ${err.message}`);
+            });
+            document.body.classList.add('fullscreen-mode');
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+                document.body.classList.remove('fullscreen-mode');
+            }
+        }
+    }
+
+    document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement) {
+            document.body.classList.remove('fullscreen-mode');
+        }
+    });
+
+    // Reloj en vivo
+    function updateClock() {
+        const now = new Date();
+        const h = now.getHours().toString().padStart(2, '0');
+        const m = now.getMinutes().toString().padStart(2, '0');
+        const s = now.getSeconds().toString().padStart(2, '0');
+        document.getElementById('clock').textContent = `Hora actual: ${h}:${m}:${s}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    startButton.addEventListener('click', startTimer);
+    pauseButton.addEventListener('click', pauseTimer);
+    resetButton.addEventListener('click', resetTimer);
+    fullscreenButton.addEventListener('click', toggleFullscreen);
+    minutesInput.addEventListener('change', init);
+    secondsInput.addEventListener('change', init);
+
+    init();
+});
+</script>    
+</body>
+</html>
