@@ -1,0 +1,378 @@
+{% include 'tablero-header.html' %}
+
+{% include 'tablero-sidebar.html' %}
+
+    <!-- Content -->
+    <div class="w-full lg:ps-64">
+        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+        
+            <!-- TARJETAS RESUMEN -->
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <!-- Grid -->
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                    <!-- Card -->
+                    <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
+                                Usuarios registrados
+                            </p>
+                        </div>
+                
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                {{ total_usuarios }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+            
+                <!-- Card -->
+                <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                    <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
+                                Eventos totales
+                            </p>
+                        </div>
+            
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                {{ total_eventos }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+            
+                <!-- Card -->
+                <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                    <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
+                                Ponentes registrados
+                            </p>
+                        </div>
+
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                {{ total_ponentes }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+            
+                <!-- Card -->
+                <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                    <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
+                                Participantes registrados
+                            </p>
+                        </div>
+
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                {{ total_participantes }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+                </div>
+                <!-- End Grid -->
+            </div>
+            <!-- FIN TARJETAS RESUMEN -->
+
+            <!-- TABLA RESUMEN EVENTOS -->
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <!-- Card -->
+                <div class="flex flex-col">
+                    <div class="-m-1.5 overflow-x-auto">
+                        <div class="p-1.5 min-w-full inline-block align-middle">
+                        <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                            <!-- Header -->
+                            <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
+                                <div>
+                                    <h2 class="text-xl font-semibold text-gray-800">
+                                        Métricas e indicadores de eventos
+                                    </h2>
+                                    <p class="text-sm text-gray-600">
+                                        Solo se muestran los eventos finalizados y cerrados
+                                    </p>
+                                </div>
+                
+                                <div>
+                                    <div class="inline-flex gap-x-2">
+{% if current_user.rol != 'administrador' %}
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="#">
+                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-heart"><path d="M3 10h18V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7"/><path d="M8 2v4"/><path d="M16 2v4"/><path d="M21.29 14.7a2.43 2.43 0 0 0-2.65-.52c-.3.12-.57.3-.8.53l-.34.34-.35-.34a2.43 2.43 0 0 0-2.65-.53c-.3.12-.56.3-.79.53-.95.94-1 2.53.2 3.74L17.5 22l3.6-3.55c1.2-1.21 1.14-2.8.19-3.74Z"/></svg>
+                                            Mis métricas
+                                        </a>
+{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- End Header -->
+
+{% if eventos|length == 0 %}
+                    
+                            <!-- Body -->
+                            <div class="max-w-sm w-full min-h-[400px] flex flex-col justify-center mx-auto px-6 py-4">
+                                <div class="flex justify-center items-center size-[46px] bg-gray-100 rounded-lg dark:bg-neutral-800">
+                                    <svg class="shrink-0 size-6 text-gray-600 dark:text-neutral-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-off"><path d="M4.2 4.2A2 2 0 0 0 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 1.82-1.18"/><path d="M21 15.5V6a2 2 0 0 0-2-2H9.5"/><path d="M16 2v4"/><path d="M3 10h7"/><path d="M21 10h-5.5"/><path d="m2 2 20 20"/></svg>
+                                </div>
+
+                                <h2 class="mt-5 font-semibold text-gray-800 dark:text-white">
+                                    No hay eventos
+                                </h2>
+                                <p class="mt-2 text-sm text-gray-600 dark:text-neutral-400">
+                                    Sin eventos disponibles para fechas próximas.
+                                </p>
+                                
+                                <div class="mt-5 flex flex-col sm:flex-row gap-2">
+                                    <a class="py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="{{ url_for('crear_evento') }}">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                        Nuevo evento
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- End Body -->
+
+                            <!-- Footer -->
+                            <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
+                                <div>
+                                    <p class="text-sm text-gray-600 dark:text-neutral-400">
+                                        <span class="font-semibold text-gray-800 dark:text-neutral-200">0</span> resultados
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <div class="inline-flex gap-x-2">
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="{{ url_for('listar_eventos') }}">
+                                            Ver todos los eventos
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- End Footer -->
+
+{% else %}
+
+                            <!-- Table -->
+                            <table class="table-auto min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
+                                        Título
+                                    </a>
+                                </th>
+                
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
+                                        Fecha(s)
+                                    </a>
+                                </th>
+                
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
+                                        Cupos disponibles
+                                    </a>
+                                </th>
+                
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
+                                        Total de participantes
+                                    </a>
+                                </th>
+
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
+                                        % asistencia
+                                    </a>
+                                </th>
+
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
+                                        Total de ponencias
+                                    </a>
+                                </th>
+                
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
+                                        Detalles de evento
+                                    </a>
+                                </th>
+                                </tr>
+                            </thead>
+                
+                            <tbody class="divide-y divide-gray-200">
+{% for evento in eventos %}
+                                <tr class="bg-white hover:bg-gray-50">
+                                    <td class="h-px w-72 min-w-72">
+                                        <div class="px-6 py-2">
+                                            <p class="text-sm text-gray-500 mb-2">
+                                                <a class="text-sm text-blue-600 decoration-2 hover:underline" href="{{ url_for('resumen_evento', codigo_evento=evento.codigo) }}">
+                                                {{ evento.nombre }}</a>
+                                            </p>
+                                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                                {{ evento.tipo }}
+                                            </span>
+                                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                                {{ evento.modalidad }}
+                                            </span>
+                                            <br />
+                                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                                {{ evento.unidad_ejecutora }}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td class="size-px whitespace-nowrap text-center">
+                                        <a class="block relative z-10" href="#">
+                                            <span class="text-sm text-gray-500">{{ evento.fecha_inicio.strftime('%d %b, %Y') }}</span>
+                                        </a>
+                                    </td>
+                                    <td class="size-px whitespace-nowrap text-center">
+                                        <a class="block relative z-10" href="#">
+                                            <span class="text-sm text-gray-500">nn</span>
+                                        </a>
+                                    </td>
+                                    <td class="size-px whitespace-nowrap text-center">
+                                        <a class="block relative z-10" href="#">
+                                            <span class="text-sm text-gray-500">nn</span>
+                                        </a>
+                                    </td>
+                                    <td class="size-px whitespace-nowrap text-center">
+                                        <a class="block relative z-10" href="#">
+                                            <span class="text-sm text-gray-500">% nn</span>
+                                        </a>
+                                    </td>
+                                    <td class="size-px whitespace-nowrap text-center">
+                                        <a class="block relative z-10" href="#">
+                                            <span class="text-sm text-gray-500">nn</span>
+                                        </a>
+                                    </td>
+                                    <td class="size-px whitespace-nowrap">
+                                        <div class="px-6 py-2">
+                                            <a class="inline-flex items-center gap-x-1 text-sm text-pink-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('listar_participantes', codigo_evento=evento.codigo) }}">
+                                                Listado de participantes
+                                            </a><br />
+                                            <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('resumen_evento', codigo_evento=evento.codigo) }}">
+                                                Resumen
+                                            </a><br />
+                                        </div>
+                                    </td>
+                                </tr>
+{% endfor %}
+                            </tbody>
+                        </table>
+                        <!-- End Table -->
+            
+                        <!-- Footer -->
+                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200">
+                            <div>
+                                <p class="text-sm text-gray-600">
+                                    <span class="font-semibold text-gray-800">{{ total_eventos_cerrados }}</span> {{ 'evento cerrado' if num_eventos == 1 else 'eventos cerrados' }}
+                                </p>
+                            </div>
+
+                            <div>
+{% if eventos|length == 0 %}
+                                <div class="inline-flex gap-x-2">
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="{{ url_for('listar_eventos') }}">
+                                        Ver todos
+                                    </a>
+                                </div>
+{% endif %}
+                                <div class="inline-flex gap-x-2"> 
+{% if page > 1 %}
+                                    <a href="{{ url_for('tablero_metricas', page=page-1) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                                        Anterior
+                                    </a>
+{% endif %}
+                                    <p class="px-3 py-2 text-sm text-gray-600">
+                                        Página {{ page }} de {{ total_paginas }}
+                                    </p>
+{% if page < total_paginas %}
+                                    <a href="{{ url_for('tablero_metricas', page=page+1) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                                        Siguiente
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                                    </a>
+{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Footer -->
+{% endif %}
+
+                    </div>
+                    </div>
+                </div>
+                </div>
+                <!-- End Card -->
+            </div>
+            <!-- FIN TABLA RESUMEN EVENTOS -->
+
+{% include 'tablero-footer.html' %}
+
+        </div>
+    </div>
+    <!-- End Content -->
+
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+<script>
+// Limpia campos dinámicos al cargar la página
+document.addEventListener("DOMContentLoaded", function () {
+    const hiddenInputs = document.querySelectorAll("#buscadorForm input[type='hidden']");
+    hiddenInputs.forEach((input) => input.remove());
+});
+document.getElementById("buscadorForm").addEventListener("submit", function (event) {
+    event.preventDefault(); // Prevenir envío estándar del formulario
+
+    const valor = document.getElementById("buscador").value.trim();
+    const patterns = {
+        cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas
+        pasaporte: /^[A-Z]{2}\d{6,9}$/,                        // Pasaportes
+        id_certificado: /^[a-zA-Z0-9]{8}$/                    // IDs de certificados
+    };
+
+    let action, field;
+
+    if (patterns.cedula.test(valor)) {
+        action = "/buscar_certificados";
+        field = "cedula";
+    } else if (patterns.pasaporte.test(valor)) {
+        action = "/buscar_certificados";
+        field = "cedula";
+    } else if (patterns.id_certificado.test(valor)) {
+        action = "/validar_certificado";
+        field = "nanoid";
+    } else {
+        alert("Formato no válido. Introduzca un documento de identificación o un ID de certificado válido.");
+        return;
+    }
+
+    // Crear y enviar el formulario dinámicamente
+    const form = event.target;
+    form.action = action;
+    form.method = "POST";
+
+    // Limpiar campos ocultos previos
+    const hiddenInputs = form.querySelectorAll("input[type='hidden']");
+    hiddenInputs.forEach((input) => input.remove());
+
+    const hiddenInput = document.createElement("input");
+    hiddenInput.type = "hidden";
+    hiddenInput.name = field;
+    hiddenInput.value = valor;
+    form.appendChild(hiddenInput);
+    form.submit();
+});
+</script>
+</body>
+</html>

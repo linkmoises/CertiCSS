@@ -1889,6 +1889,65 @@ def herramientas():
 
 
 ###
+###
+###
+###
+### Plantilla varias
+###
+@app.route('/metricas')
+@app.route('/metricas/page/<int:page>')
+@login_required
+def tablero_metricas(page=1):  # Asegúrate de dar un valor por defecto a 'page'
+
+    ## Tarjetas
+
+    # Obtener el número total de usuarios
+    total_usuarios = collection_usuarios.count_documents({"rol": {"$ne": "administrador"}})
+    # Obtener el número total de eventos
+    total_eventos = collection_eventos.count_documents({})
+    # Obtener el número total de eventos cerrados
+    total_eventos_cerrados = collection_eventos.count_documents({"estado_evento": "cerrado"})
+    # Contar el número total de ponentes
+    total_ponentes = collection_participantes.count_documents({"rol": "ponente"})
+    # Contar el número total de participantes
+    total_participantes = collection_participantes.count_documents({"rol": "participante"})
+
+    ## Tablero de Métricas de Eventos
+    eventos_por_pagina = 20
+    total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina
+
+    # Obtener los eventos con estado cerrado para la página actual
+    eventos_cursor = collection_eventos.find(
+        {"estado_evento": "cerrado"}
+    ).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    
+    eventos = list(eventos_cursor)
+
+    # Verificar si el usuario es organizador en cada evento
+    for evento in eventos:
+        es_organizador = collection_participantes.find_one({
+            "codigo_evento": evento["codigo"],
+            "cedula": str(current_user.cedula),
+            "rol": "coorganizador"
+        }) is not None 
+
+        evento["es_organizador"] = es_organizador
+
+    return render_template(
+        'metricas.html',
+        active_section='metricas',
+        page=page,
+        total_paginas=total_paginas,
+        total_usuarios=total_usuarios,
+        total_eventos=total_eventos,
+        total_eventos_cerrados=total_eventos_cerrados,
+        total_ponentes=total_ponentes,
+        total_participantes=total_participantes,
+        eventos=eventos,
+    )
+
+
+###
 ### Política de privacidad y protección de datos personales
 ###
 @app.route('/politica-privacidad', methods=['GET'])
