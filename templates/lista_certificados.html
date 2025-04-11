@@ -107,7 +107,7 @@
 {% endif %}
 {% set certificado_disponible = true %}
 {% if resultado.fecha_evento %}
-    {% if resultado.fecha_evento.date() == fecha_actual and hora_actual.hour < 12 %}
+    {% if resultado.fecha_evento.date() == fecha_actual and hora_actual.hour < 13 %}
         {% set certificado_disponible = false %}
     {% elif resultado.fecha_evento.date() > fecha_actual %}
         {% set certificado_disponible = false %}
@@ -181,8 +181,8 @@
                                 El documento de identificación <span class="font-mono bg-red-300">{{ cedula }}</span> no fue encontrado en los eventos registrados en nuestra base de datos. Si considera que este mensaje es un error, por favor contacte al equipo de soporte:
                             </p>
 
-                            <p class="mt-2 text-sm text-gray-600"><strong>Correo electrónico:</strong> soporte@css.gob.pa</p>
-                            <p class="mt-2 mb-4 text-sm text-gray-600"><strong>Teléfono:</strong> +507-6600-0000</p>
+                            <p class="mt-2 text-sm text-gray-600"><strong>Correo electrónico:</strong> soporte@docenciamedica.org</p>
+                            <p class="mt-2 mb-4 text-sm text-gray-600"><strong>Teléfono:</strong> +507-6447-8057</p>
 
                             <form method="POST" action="/buscar_certificados">
                                 <div class="relative">
