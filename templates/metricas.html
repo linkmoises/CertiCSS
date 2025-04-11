@@ -237,22 +237,22 @@
                                     </td>
                                     <td class="size-px whitespace-nowrap text-center">
                                         <a class="block relative z-10" href="#">
-                                            <span class="text-sm text-gray-500">nn</span>
+                                            <span class="text-sm text-gray-500">{{ evento.cupos | default("N/D") }}</span>
                                         </a>
                                     </td>
                                     <td class="size-px whitespace-nowrap text-center">
                                         <a class="block relative z-10" href="#">
-                                            <span class="text-sm text-gray-500">nn</span>
+                                            <span class="text-sm text-gray-500">{{ evento.total_participantes }}</span>
                                         </a>
                                     </td>
                                     <td class="size-px whitespace-nowrap text-center">
                                         <a class="block relative z-10" href="#">
-                                            <span class="text-sm text-gray-500">% nn</span>
+                                            <span class="text-sm text-gray-500">{% if evento.cupos and evento.cupos > 0 %}{{ ((evento.total_participantes / evento.cupos) * 100) | round(1) }}%{% else %}N/D{% endif %}</span>
                                         </a>
                                     </td>
                                     <td class="size-px whitespace-nowrap text-center">
                                         <a class="block relative z-10" href="#">
-                                            <span class="text-sm text-gray-500">nn</span>
+                                            <span class="text-sm text-gray-500">{{ evento.total_ponentes }}</span>
                                         </a>
                                     </td>
                                     <td class="size-px whitespace-nowrap">
@@ -275,7 +275,7 @@
                         <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200">
                             <div>
                                 <p class="text-sm text-gray-600">
-                                    <span class="font-semibold text-gray-800">{{ total_eventos_cerrados }}</span> {{ 'evento cerrado' if num_eventos == 1 else 'eventos cerrados' }}
+                                    <span class="font-semibold text-gray-800">{{ total_eventos_cerrados }}</span> {{ 'evento para evaluar' if num_eventos == 1 else 'eventos para evaluar' }}
                                 </p>
                             </div>
 

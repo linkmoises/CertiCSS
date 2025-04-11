@@ -1462,6 +1462,7 @@ def crear_evento():
         unidad_ejecutora = request.form['unidad_ejecutora']
         lugar = request.form['lugar']
         tipo = request.form['tipo']
+        cupos = request.form['cupos']
         modalidad = request.form['modalidad']
         descripcion = request.form['descripcion']
 
@@ -1532,6 +1533,7 @@ def crear_evento():
             'tipo': tipo,
             'modalidad': modalidad,
             'descripcion': descripcion,
+            'cupos': cupos,
             'fecha_inicio': fecha_inicio,
             'fecha_fin': fecha_fin,
             'estado_evento': estado_evento,
@@ -1897,9 +1899,7 @@ def herramientas():
 @app.route('/metricas')
 @app.route('/metricas/page/<int:page>')
 @login_required
-def tablero_metricas(page=1):  # Asegúrate de dar un valor por defecto a 'page'
-
-    ## Tarjetas
+def tablero_metricas(page=1):
 
     # Obtener el número total de usuarios
     total_usuarios = collection_usuarios.count_documents({"rol": {"$ne": "administrador"}})
@@ -1932,6 +1932,21 @@ def tablero_metricas(page=1):  # Asegúrate de dar un valor por defecto a 'page'
         }) is not None 
 
         evento["es_organizador"] = es_organizador
+
+        # Añade métricas específicas de cada evento
+        codigo_evento = evento["codigo"]
+        
+        # Total de participantes en este evento
+        evento["total_participantes"] = collection_participantes.count_documents({
+            "codigo_evento": codigo_evento,
+            # "rol": "participante"
+        })
+        
+        # Total de ponentes en este evento
+        evento["total_ponentes"] = collection_participantes.count_documents({
+            "codigo_evento": codigo_evento, 
+            "rol": "ponente"
+        })
 
     return render_template(
         'metricas.html',
