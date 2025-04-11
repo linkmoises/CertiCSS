@@ -1572,6 +1572,7 @@ def editar_evento(codigo_evento):
         tipo = request.form['tipo']
         modalidad = request.form['modalidad']
         descripcion = request.form['descripcion']
+        cupos = request.form['cupos']
 
         fecha_inicio_str = request.form['fecha_inicio']
         fecha_fin_str = request.form['fecha_fin']
@@ -1636,6 +1637,7 @@ def editar_evento(codigo_evento):
                 'tipo': tipo,
                 'modalidad': modalidad,
                 'descripcion': descripcion,
+                'cupos': cupos,
                 'fecha_inicio': fecha_inicio,
                 'fecha_fin': fecha_fin,
                 'estado_evento': estado_evento,

@@ -247,7 +247,11 @@
                                     </td>
                                     <td class="size-px whitespace-nowrap text-center">
                                         <a class="block relative z-10" href="#">
-                                            <span class="text-sm text-gray-500">{% if evento.cupos and evento.cupos > 0 %}{{ ((evento.total_participantes / evento.cupos) * 100) | round(1) }}%{% else %}N/D{% endif %}</span>
+                                            <span class="text-sm text-gray-500">{% if evento.cupos and evento.cupos|int > 0 %}
+                                                {{ ((evento.total_participantes / evento.cupos|int) * 100) | round(1) }}%
+                                            {% else %}
+                                                N/D
+                                            {% endif %}</span>
                                         </a>
                                     </td>
                                     <td class="size-px whitespace-nowrap text-center">
