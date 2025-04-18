@@ -55,6 +55,10 @@ VERSION = load_version()                                    # Variable global co
 def inject_version():
     return dict(version=VERSION)
 
+@app.context_processor                                      # Variable global UMAMI
+def inject_umami():
+    return dict(UMAMI_URL=app.config.get('UMAMI_URL', ''))
+
 
 ###
 ### Login
