@@ -12,6 +12,9 @@
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
     <meta name="apple-mobile-web-app-title" content="CertiCSS" />
     <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
+{% if UMAMI_URL %}
+    {{ UMAMI_URL | safe }}
+{% endif %}
 </head>
 <body class="bg-gray-50 dark:bg-neutral-900">
 
