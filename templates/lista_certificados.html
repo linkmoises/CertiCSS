@@ -110,7 +110,7 @@
 {% endif %}
 {% set certificado_disponible = true %}
 {% if resultado.fecha_evento %}
-    {% if resultado.fecha_evento.date() == fecha_actual and hora_actual.hour < 11 %}
+    {% if resultado.fecha_evento.date() == fecha_actual and hora_actual.hour < 13 %}
         {% set certificado_disponible = false %}
     {% elif resultado.fecha_evento.date() > fecha_actual %}
         {% set certificado_disponible = false %}
