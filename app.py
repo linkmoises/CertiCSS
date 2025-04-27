@@ -31,6 +31,7 @@ collection_usuarios = db['usuarios']
 collection_preregistro = db['preregistro']
 collection_eva = db['eva']
 collection_tokens = db['tokens']
+collection_repositorio = db['repositorio']
 
 
 ###
@@ -1830,6 +1831,8 @@ def buscar_certificados():
             codigo_evento = participante.get('codigo_evento')
             evento = collection_eventos.find_one({"codigo": codigo_evento})
 
+            tiene_archivos = collection_repositorio.count_documents({'codigo_evento': codigo_evento}) > 0
+
             if evento:  # Verificar si el evento fue encontrado
 
                 fecha_evento = evento.get('fecha_inicio', None)
@@ -1846,7 +1849,8 @@ def buscar_certificados():
                     'certificado_evento': evento.get('certificado', None),
                     'titulo_evento': evento.get('nombre', 'Título no disponible'),
                     'fecha_evento': fecha_evento,
-                    'modalidad_evento': evento.get('modalidad', 'No disponible')
+                    'modalidad_evento': evento.get('modalidad', 'No disponible'),
+                    'tiene_archivos': tiene_archivos,
                 }
                 resultados.append(resultado)
             else:
@@ -1873,7 +1877,7 @@ def buscar_certificados():
         
         resultados.sort(key=obtener_fecha_ordenable, reverse=True)
 
-        return render_template('lista_certificados.html', cedula=cedula, resultados=resultados, fecha_actual=fecha_actual, hora_actual=hora_actual, token=token)  # Renderizar la plantilla con los resultados
+        return render_template('lista_certificados.html', cedula=cedula, resultados=resultados, fecha_actual=fecha_actual, hora_actual=hora_actual, token=token, tiene_archivos=tiene_archivos)
 
     return render_template('buscar.html')  # Mostrar el formulario para buscar certificados
 
@@ -2213,6 +2217,184 @@ def ver_contenido(codigo_evento, orden):
         cedula=cedula, 
         token=token
     )
+
+
+###
+### Repositorio de archivos de evento
+###
+from werkzeug.utils import secure_filename
+import os
+
+### Extensiones permitidas para archivos del repositorio
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'pdf', 'ppt', 'pptx', 'doc', 'docx'}
+
+
+import os
+import uuid
+from flask import request, render_template, redirect, url_for, abort, flash
+from werkzeug.utils import secure_filename
+@app.route('/subir_archivo/<codigo_evento>', methods=['GET', 'POST'])
+@login_required
+def subir_archivo(codigo_evento):
+    evento = collection_eventos.find_one({'codigo': codigo_evento})
+    if not evento:
+        abort(404)
+
+    carpeta_evento = os.path.join(app.config['UPLOAD_FOLDER'], codigo_evento)
+    os.makedirs(carpeta_evento, exist_ok=True)
+
+    if request.method == 'POST':
+        archivo = request.files.get('archivo')
+        titulo = request.form.get('titulo', '')
+        autor = request.form.get('autor', '')
+
+        if archivo and archivo.filename:
+            filename = secure_filename(archivo.filename)
+            ext = filename.rsplit('.', 1)[1].lower()
+
+            nombre_unico = f"{uuid.uuid4()}.{ext}"
+
+            ruta_guardado = os.path.join(carpeta_evento, nombre_unico)
+            archivo.save(ruta_guardado)
+
+            ultimo_archivo = collection_repositorio.find_one(
+                {'codigo_evento': codigo_evento},
+                sort=[('orden', -1)]
+            )
+            nuevo_orden = 1 if not ultimo_archivo else ultimo_archivo['orden'] + 1
+
+            nombre_descarga = f"{codigo_evento}_{nuevo_orden}.{ext}"
+
+            collection_repositorio.insert_one({
+                'codigo_evento': codigo_evento,
+                'titulo': titulo,
+                'autor': autor,
+                'nombre': nombre_unico,
+                'nombre_descarga': nombre_descarga,
+                'orden': nuevo_orden
+            })
+
+            flash('Archivo subido correctamente.', 'success')
+            return redirect(url_for('subir_archivo', codigo_evento=codigo_evento))
+        else:
+            flash('No se seleccionó ningún archivo.', 'danger')
+
+    # Obtener lista de archivos para mostrar plantilla
+    archivos = list(collection_repositorio.find({'codigo_evento': codigo_evento}).sort('orden', 1))
+
+    return render_template('subir_archivo.html', evento=evento, archivos=archivos, generar_url_descarga=generar_url_descarga)
+
+
+@app.route('/eliminar_archivo/<codigo_evento>/<nombre>', methods=['POST'])
+@login_required  # Asegura que solo usuarios autenticados puedan eliminar archivos
+def eliminar_archivo(codigo_evento, nombre):
+    # Verificar que el archivo exista en la base de datos
+    archivo = collection_repositorio.find_one({
+        'codigo_evento': codigo_evento,
+        'nombre': nombre
+    })
+    
+    if not archivo:
+        flash('El archivo no existe.', 'danger')
+        return redirect(url_for('subir_archivo', codigo_evento=codigo_evento))
+    
+    # Verificar que el archivo exista en el sistema de archivos
+    carpeta_evento = os.path.join(app.config['UPLOAD_FOLDER'], codigo_evento)
+    ruta_archivo = os.path.join(carpeta_evento, nombre)
+    
+    try:
+        # Eliminar el archivo del sistema de archivos si existe
+        if os.path.isfile(ruta_archivo):
+            os.remove(ruta_archivo)
+        
+        # Eliminar el registro de la base de datos
+        collection_repositorio.delete_one({
+            'codigo_evento': codigo_evento,
+            'nombre': nombre
+        })
+        
+        flash('Archivo eliminado correctamente.', 'success')
+    except Exception as e:
+        flash(f'Error al eliminar el archivo: {str(e)}', 'danger')
+    
+    return redirect(url_for('subir_archivo', codigo_evento=codigo_evento))
+
+
+import hashlib
+import time
+from flask import send_from_directory, abort, request
+def generar_firma(codigo_evento, nombre, expires):
+    datos = f"{codigo_evento}:{nombre}:{expires}:{app.config['SECRET_KEY']}"
+    return hashlib.sha256(datos.encode()).hexdigest()
+
+
+@app.route('/descargar_archivo/<codigo_evento>/<nombre>')
+def descargar_archivo(codigo_evento, nombre):
+    expires = request.args.get('expires')
+    signature = request.args.get('signature')
+
+    if not all([expires, signature]):
+        abort(403)
+
+    if int(expires) < int(time.time()):
+        abort(403)
+
+    firma_esperada = generar_firma(codigo_evento, nombre, expires)
+    if signature != firma_esperada:
+        abort(403)
+
+    carpeta_evento = os.path.join(app.config['UPLOAD_FOLDER'], codigo_evento)
+    ruta_archivo = os.path.join(carpeta_evento, nombre)
+
+    if not os.path.isfile(ruta_archivo):
+        abort(404)
+
+    archivo_db = collection_repositorio.find_one({
+        'codigo_evento': codigo_evento,
+        'nombre': nombre
+    })
+    
+    nombre_descarga = archivo_db.get('nombre_descarga', nombre) if archivo_db else nombre
+
+    return send_from_directory(
+        carpeta_evento,
+        nombre,
+        as_attachment=True,
+        download_name=nombre_descarga
+    )
+
+
+def generar_url_descarga(codigo_evento, nombre, tiempo_expiracion_minutos=5):
+
+    expires = int(time.time()) + tiempo_expiracion_minutos * 60
+
+    signature = generar_firma(codigo_evento, nombre, str(expires))
+
+    return url_for('descargar_archivo', codigo_evento=codigo_evento, nombre=nombre, expires=expires, signature=signature, _external=True)
+
+
+@app.route('/repositorio/<codigo_evento>', methods=['GET'])
+def repositorio(codigo_evento):
+    # Verificamos que exista el evento con ese código
+    evento = collection_eventos.find_one({'codigo': codigo_evento})
+    if not evento:
+        abort(404)
+    
+    # Obtener los archivos del evento ordenados
+    archivos = list(collection_repositorio.find({'codigo_evento': codigo_evento}).sort('orden', 1))
+    
+    # Generar URLs de descarga para cada archivo
+    for archivo in archivos:
+        archivo['url_descarga'] = generar_url_descarga(
+            codigo_evento, 
+            archivo['nombre']
+        )
+    
+    return render_template('repositorio.html', 
+                          evento=evento,
+                          archivos=archivos,
+                          generar_url_descarga=generar_url_descarga)
 
 
 ###

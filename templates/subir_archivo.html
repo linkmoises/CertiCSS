@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Subir Archivos - {{ codigo_evento }}</title>
+</head>
+<body>
+
+    <h2>Archivos existentes</h2>
+    <ul>
+        {% for archivo in archivos %}
+            <li>{{ archivo['titulo'] }} (Autor: {{ archivo['autor'] }}) - {{ archivo['nombre_descarga'] }}
+                <a href="{{ generar_url_descarga(evento['codigo'], archivo['nombre']) }}" target="_blank">
+                    Descargar
+                </a>
+                <form class="delete-form" method="POST" action="{{ url_for('eliminar_archivo', codigo_evento=evento['codigo'], nombre=archivo['nombre']) }}" onsubmit="return confirm('¿Está seguro de eliminar este archivo?');">
+                    <button type="submit" class="delete-button">Eliminar</button>
+                </form>
+            </li>
+        {% else %}
+            <li>No hay archivos aún.</li>
+        {% endfor %}
+    </ul>
+
+    <hr>
+    
+    <h2>Subir nuevo archivo</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="text" name="titulo" placeholder="Título" required><br>
+        <input type="text" name="autor" placeholder="Autor" required><br>
+        <input type="file" name="archivo" required><br>
+        <button type="submit">Subir archivo</button>
+    </form>
+
+</body>
+</html>

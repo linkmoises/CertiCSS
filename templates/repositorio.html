@@ -1,0 +1,45 @@
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Repositorio del Evento: {{ evento.nombre }}</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>{{ evento.nombre }}</h2>
+            <p class="text-muted">{{ evento.descripcion }}</p>
+        </div>
+        <div class="card-body">
+            {% if archivos %}
+                <h3 class="mb-3">Archivos disponibles:</h3>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Título</th>
+                            <th>Autor</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for archivo in archivos %}
+                            <tr>
+                                <td>{{ archivo.orden }}</td>
+                                <td>{{ archivo.titulo }}</td>
+                                <td>{{ archivo.autor }}</td>
+                                <td>
+                                    <a href="{{ archivo.url_descarga }}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-download"></i> Descargar
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="alert alert-info">
+                    No hay archivos disponibles para este evento.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
