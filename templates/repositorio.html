@@ -56,21 +56,36 @@
 
                     <div class="m-8">
 
-                        <h2 class="text-xl font-bold text-gray-800 pb-4">Repositorio - {{ evento.nombre }}</h2>
+                        <div class="pb-4">
+                            <h2 class="text-xl font-semibold text-gray-800">
+                                {{ evento.nombre }}
+                            </h2>
+                            <p class="text-sm text-gray-600">
+                                Repositorio de archivos
+                            </p>
+                        </div>
                         
                         <div class="card mb-4">
-                            <div class="border-b border-gray-200">
+                            <div class="border border-gray-200 rounded-lg overflow-hidden dark:border-neutral-700">
 {% if archivos %}
-                            <table class="min-w-full divide-y divide-gray-200">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th scope="col" class="px-6 py-3 text-start">Título</th>
-                                        <th scope="col" class="px-6 py-3 text-start">Acciones</th>
+                                        <th scope="col" class="px-6 py-3 text-start">
+                                            <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
+                                                Título
+                                            </a>
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-start">
+                                            <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
+                                                Acciones
+                                            </a>
+                                        </th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody class="divide-y divide-gray-200">
 {% for archivo in archivos %}
-                                    <tr>
+                                    <tr class="bg-white hover:bg-gray-50">
                                         <td class="px-6 py-2">
                                             <p class="text-sm text-gray-500 mb-2">
                                                 <span class="font-semibold">{{ archivo.titulo }}</span><br />
@@ -78,9 +93,9 @@
                                             </p>
                                         </td>
                                         <td class="px-6 py-2">
-                                            <a href="{{ archivo.url_descarga }}" class="btn btn-primary btn-sm">
-                                                <i class="fas fa-download"></i> Descargar
-                                            </a>
+                                            <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ archivo.url_descarga }}">
+                                                Descargar
+                                            </a><br />
                                         </td>
                                     </tr>
 {% endfor %}

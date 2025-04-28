@@ -2664,6 +2664,10 @@ select {
   padding-top: 50%;
 }
 
+.pb-8 {
+  padding-bottom: 2rem;
+}
+
 .text-center {
   text-align: center;
 }

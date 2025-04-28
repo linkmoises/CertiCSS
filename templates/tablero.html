@@ -272,10 +272,10 @@
                                             <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('resumen_evento', codigo_evento=evento.codigo) }}">
                                                 Resumen
                                             </a><br />
+{% if current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor or evento.es_organizador)) %}
                                             <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('subir_archivo', codigo_evento=evento.codigo) }}">
                                                 Repositorio
-                                            </a><br />
-{% if current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor or evento.es_organizador)) %}
+                                            </a><br />                                            
                                             <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('editar_evento', codigo_evento=evento.codigo) }}">
                                                 Editar
                                             </a><br />
