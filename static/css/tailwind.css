@@ -1830,6 +1830,14 @@ select {
   width: 100%;
 }
 
+.w-48 {
+  width: 12rem;
+}
+
+.w-96 {
+  width: 24rem;
+}
+
 .min-w-52 {
   min-width: 13rem;
 }
@@ -1852,6 +1860,14 @@ select {
 
 .min-w-full {
   min-width: 100%;
+}
+
+.min-w-96 {
+  min-width: 24rem;
+}
+
+.min-w-48 {
+  min-width: 12rem;
 }
 
 .\!max-w-none {
@@ -2464,6 +2480,10 @@ select {
 
 .p-8 {
   padding: 2rem;
+}
+
+.p-6 {
+  padding: 1.5rem;
 }
 
 .\!py-0\.5 {

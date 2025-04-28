@@ -2366,9 +2366,7 @@ def descargar_archivo(codigo_evento, nombre):
 
 
 def generar_url_descarga(codigo_evento, nombre, tiempo_expiracion_minutos=5):
-
     expires = int(time.time()) + tiempo_expiracion_minutos * 60
-
     signature = generar_firma(codigo_evento, nombre, str(expires))
 
     return url_for('descargar_archivo', codigo_evento=codigo_evento, nombre=nombre, expires=expires, signature=signature, _external=True)
