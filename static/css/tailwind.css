@@ -1600,6 +1600,10 @@ select {
   margin-top: auto;
 }
 
+.ms-4 {
+  margin-inline-start: 1rem;
+}
+
 .block {
   display: block;
 }
@@ -2320,6 +2324,11 @@ select {
   border-color: rgb(255 255 255 / var(--tw-border-opacity, 1));
 }
 
+.border-red-200 {
+  --tw-border-opacity: 1;
+  border-color: rgb(254 202 202 / var(--tw-border-opacity, 1));
+}
+
 .border-t-transparent {
   border-top-color: transparent;
 }
@@ -2900,6 +2909,11 @@ select {
 .text-yellow-700 {
   --tw-text-opacity: 1;
   color: rgb(161 98 7 / var(--tw-text-opacity, 1));
+}
+
+.text-red-700 {
+  --tw-text-opacity: 1;
+  color: rgb(185 28 28 / var(--tw-text-opacity, 1));
 }
 
 .decoration-2 {

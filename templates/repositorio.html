@@ -66,8 +66,8 @@
                         </div>
                         
                         <div class="card mb-4">
-                            <div class="border border-gray-200 rounded-lg overflow-hidden dark:border-neutral-700">
 {% if archivos %}
+                            <div class="border border-gray-200 rounded-lg overflow-hidden dark:border-neutral-700">
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
                                 <thead class="bg-gray-50">
                                     <tr>
@@ -103,8 +103,24 @@
                             </table>
                             </div>
 {% else %}
-                            <div class="alert alert-info">
-                                No hay archivos disponibles para este evento.
+                            <div class="mt-2 bg-red-100 border border-red-200 text-sm text-red-800 rounded-lg p-4 dark:bg-red-800/10 dark:border-red-900 dark:text-red-500" role="alert" tabindex="-1" aria-labelledby="hs-soft-color-danger-label">
+                                <div class="flex">
+                                    <div class="shrink-0">
+                                    <svg class="shrink-0 size-4 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+                                        <path d="M12 9v4"></path>
+                                        <path d="M12 17h.01"></path>
+                                    </svg>
+                                    </div>
+                                    <div class="ms-4">
+                                    <h3 id="hs-with-description-label" class="text-sm font-semibold">
+                                        Error
+                                    </h3>
+                                    <div class="mt-1 text-sm text-red-700">
+                                        No hay archivos disponibles en este repositorio.
+                                    </div>
+                                    </div>
+                                </div>
                             </div>
 {% endif %}
                         </div>

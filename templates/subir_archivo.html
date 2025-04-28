@@ -27,15 +27,15 @@
             
                             <div>
                                 <div class="inline-flex gap-x-2">
-                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="{{ url_for('crear_evento') }}">
-                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                                        Nuevo evento
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="{{ url_for('repositorio', codigo_evento=evento.codigo) }}">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-icon lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+                                        Ver repositorio
                                     </a>
                                 </div>
                             </div>
                         </div>
                         <!-- End Header -->
-
+{% if archivos %}
                         <!-- Table -->
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
@@ -87,12 +87,31 @@
                                             </form>
                                         </div>
                                     </td>
-{% else %}
-                                    <li>No hay archivos aún.</li>
 {% endfor %}
                             </tbody>
                         </table>
                         <!-- End Table -->
+{% else %}
+                        <div class="m-8 bg-red-100 border border-red-200 text-sm text-red-800 rounded-lg p-4 dark:bg-red-800/10 dark:border-red-900 dark:text-red-500" role="alert" tabindex="-1" aria-labelledby="hs-soft-color-danger-label">
+                            <div class="flex">
+                                <div class="shrink-0">
+                                <svg class="shrink-0 size-4 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+                                    <path d="M12 9v4"></path>
+                                    <path d="M12 17h.01"></path>
+                                </svg>
+                                </div>
+                                <div class="ms-4">
+                                <h3 id="hs-with-description-label" class="text-sm font-semibold">
+                                    Error
+                                </h3>
+                                <div class="mt-1 text-sm text-red-700">
+                                    No hay archivos disponibles en este repositorio.
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+{% endif %}
     
                         <div class="p-8 border-t border-gray-200 bg-gray-50">
                             <h2 class="mb-8 text-xl font-semibold text-gray-800">
