@@ -261,8 +261,8 @@
                                     </td>
                                     <td class="size-px whitespace-nowrap">
                                         <div class="px-6 py-2">
-                                            <a class="inline-flex items-center gap-x-1 text-sm text-pink-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('listar_participantes', codigo_evento=evento.codigo) }}">
-                                                Listado de participantes
+                                            <a class="inline-flex items-center gap-x-1 text-sm text-pink-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('exportar_encuesta_csv', codigo_evento=evento.codigo) }}">
+                                                Datos brutos
                                             </a><br />
                                             <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('resumen_evento', codigo_evento=evento.codigo) }}">
                                                 Resumen

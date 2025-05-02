@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template, redirect, url_for, flash, session, abort, send_from_directory
+from flask import Flask, jsonify, request, render_template, redirect, url_for, flash, session, abort, send_from_directory, Response
 from flask_login import LoginManager, login_user, UserMixin, logout_user, current_user, login_required
 from pymongo import MongoClient
 from flask_pymongo import PyMongo
@@ -13,7 +13,8 @@ import random
 import string
 import hashlib
 import base64
-from io import BytesIO
+from io import BytesIO, StringIO
+import csv
 
 app = Flask(__name__)
 
@@ -2528,6 +2529,84 @@ def cierre_evento(codigo_evento):
                          url_encuesta=url_encuesta,
                          afiche_path=afiche_path,
                          estado=estado)
+
+
+@app.route('/exportar_encuesta_csv/<codigo_evento>')
+@login_required
+def exportar_encuesta_csv(codigo_evento):
+    # Obtener las respuestas de la encuesta para el evento
+    respuestas = list(collection_encuestas.find({'codigo_evento': codigo_evento}))
+    
+    if not respuestas:
+        flash('No hay respuestas de encuesta disponibles para este evento.', 'error')
+        return redirect(url_for('resumen_evento', codigo_evento=codigo_evento))
+    
+    # Crear el archivo CSV en memoria
+    output = StringIO()
+    writer = csv.writer(output)
+    
+    # Escribir encabezados
+    headers = [
+        'Fecha', 'Hora', 'D1', 'D2', 'D3', 'D4', 'D5',
+        'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7',
+        'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7',
+        'N1', 'N2',
+        'C1', 'C2', 'C3'
+    ]
+    writer.writerow(headers)
+    
+    # Escribir datos
+    for respuesta in respuestas:
+        # Obtener fecha y hora por separado
+        fecha_hora = respuesta.get('fecha', datetime.now())
+        if isinstance(fecha_hora, str):
+            fecha_hora = datetime.strptime(fecha_hora, '%Y-%m-%d %H:%M:%S')
+        fecha = fecha_hora.strftime('%Y-%m-%d')
+        hora = fecha_hora.strftime('%H:%M:%S')
+        
+        # Obtener los datos de las respuestas
+        respuestas_data = respuesta.get('respuestas', {})
+        
+        row = [
+            fecha,
+            hora,
+            respuestas_data.get('D1', ''),
+            respuestas_data.get('D2', ''),
+            respuestas_data.get('D3', ''),
+            respuestas_data.get('D4', ''),
+            respuestas_data.get('D5', ''),
+            respuestas_data.get('A1', ''),
+            respuestas_data.get('A2', ''),
+            respuestas_data.get('A3', ''),
+            respuestas_data.get('A4', ''),
+            respuestas_data.get('A5', ''),
+            respuestas_data.get('A6', ''),
+            respuestas_data.get('A7', ''),
+            respuestas_data.get('B1', ''),
+            respuestas_data.get('B2', ''),
+            respuestas_data.get('B3', ''),
+            respuestas_data.get('B4', ''),
+            respuestas_data.get('B5', ''),
+            respuestas_data.get('B6', ''),
+            respuestas_data.get('B7', ''),
+            respuestas_data.get('N1', ''),
+            respuestas_data.get('N2', ''),
+            respuestas_data.get('C1', ''),
+            respuestas_data.get('C2', ''),
+            respuestas_data.get('C3', '')
+        ]
+        writer.writerow(row)
+    
+    # Preparar la respuesta
+    output.seek(0)
+    return Response(
+        output.getvalue().encode('utf-8'),
+        mimetype="text/csv",
+        headers={
+            "Content-Disposition": f"attachment;filename=encuesta_{codigo_evento}.csv",
+            "Content-Type": "text/csv; charset=utf-8"
+        }
+    )
 
 
 ###
