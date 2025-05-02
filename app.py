@@ -2490,6 +2490,47 @@ def encuesta_satisfaccion(codigo_evento):
 
 
 ###
+### Cierre de evento
+###
+@app.route('/cierre/<codigo_evento>', methods=['GET'])
+def cierre_evento(codigo_evento):
+    # Buscar el evento en la base de datos
+    evento = collection_eventos.find_one({'codigo': codigo_evento})
+    
+    if not evento:
+        flash('Evento no encontrado', 'error')
+        return redirect(url_for('home'))
+    
+    # Generar el código QR para la encuesta
+    url_encuesta = url_for('encuesta_satisfaccion', codigo_evento=codigo_evento, _external=True)
+    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr.add_data(url_encuesta)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    
+    # Guardar el QR en un buffer
+    buffer = BytesIO()
+    img.save(buffer, format='PNG')
+    buffer.seek(0)
+    qr_base64 = base64.b64encode(buffer.getvalue()).decode()
+    
+    # Obtener el afiche del evento
+    afiche_path = os.path.join(app.config['UPLOAD_FOLDER'], evento.get('afiche', 'default.png'))
+    if not os.path.exists(afiche_path):
+        afiche_path = os.path.join(app.config['UPLOAD_FOLDER'], 'default.png')
+    
+    # Obtener el estado del evento
+    estado = calcular_estado(evento['fecha_inicio'])
+    
+    return render_template('cierre.html', 
+                         evento=evento,
+                         qr_base64=qr_base64,
+                         url_encuesta=url_encuesta,
+                         afiche_path=afiche_path,
+                         estado=estado)
+
+
+###
 ### Etiqueta filtro de fecha
 ###
 from datetime import date
@@ -2958,44 +2999,6 @@ def unauthorized_error(e):
 @app.errorhandler(403)
 def forbidden_error(e):
     return render_template('403.html'), 403
-
-
-@app.route('/cierre/<codigo_evento>', methods=['GET'])
-def cierre_evento(codigo_evento):
-    # Buscar el evento en la base de datos
-    evento = collection_eventos.find_one({'codigo': codigo_evento})
-    
-    if not evento:
-        flash('Evento no encontrado', 'error')
-        return redirect(url_for('home'))
-    
-    # Generar el código QR para la encuesta
-    url_encuesta = url_for('encuesta_satisfaccion', codigo_evento=codigo_evento, _external=True)
-    qr = qrcode.QRCode(version=1, box_size=10, border=5)
-    qr.add_data(url_encuesta)
-    qr.make(fit=True)
-    img = qr.make_image(fill_color="black", back_color="white")
-    
-    # Guardar el QR en un buffer
-    buffer = BytesIO()
-    img.save(buffer, format='PNG')
-    buffer.seek(0)
-    qr_base64 = base64.b64encode(buffer.getvalue()).decode()
-    
-    # Obtener el afiche del evento
-    afiche_path = os.path.join(app.config['UPLOAD_FOLDER'], evento.get('afiche', 'default.png'))
-    if not os.path.exists(afiche_path):
-        afiche_path = os.path.join(app.config['UPLOAD_FOLDER'], 'default.png')
-    
-    # Obtener el estado del evento
-    estado = calcular_estado(evento['fecha_inicio'])
-    
-    return render_template('cierre.html', 
-                         evento=evento,
-                         qr_base64=qr_base64,
-                         url_encuesta=url_encuesta,
-                         afiche_path=afiche_path,
-                         estado=estado)
 
 
 if __name__ == '__main__':

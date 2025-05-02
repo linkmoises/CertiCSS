@@ -225,13 +225,17 @@
                     {% for codigo, pregunta in preguntas_n %}
                     <div>
                         <label class="block text-gray-700 mb-2">{{ codigo }}. {{ pregunta }}</label>
-                        <div class="flex justify-between">
+                        <div class="grid grid-cols-6 sm:grid-cols-11 gap-2">
                             {% for i in range(0, 11) %}
-                            <label class="inline-flex items-center">
+                            <label class="inline-flex items-center justify-center">
                                 <input type="radio" name="{{ codigo }}" value="{{ i }}" class="form-radio h-5 w-5 text-blue-600" required>
-                                <span class="ml-1">{{ i }}</span>
+                                <span class="ml-1 text-sm">{{ i }}</span>
                             </label>
                             {% endfor %}
+                        </div>
+                        <div class="flex justify-between mt-1 text-xs text-gray-500">
+                            <span>0 = Nada probable</span>
+                            <span>10 = Extremadamente probable</span>
                         </div>
                     </div>
                     {% endfor %}
