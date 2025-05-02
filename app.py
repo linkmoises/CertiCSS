@@ -2409,6 +2409,24 @@ def encuesta_satisfaccion(codigo_evento):
     if not evento:
         abort(404)
 
+    # Verificar si la encuesta está disponible
+    ahora = datetime.now()
+    fecha_inicio = evento.get('fecha_inicio')
+    fecha_fin = evento.get('fecha_fin') + timedelta(days=3)  # Añadir 3 días a la fecha de fin
+
+    # Convertir fechas a datetime si son strings
+    if isinstance(fecha_inicio, str):
+        fecha_inicio = datetime.strptime(fecha_inicio, '%Y-%m-%d %H:%M:%S')
+    if isinstance(fecha_fin, str):
+        fecha_fin = datetime.strptime(fecha_fin, '%Y-%m-%d %H:%M:%S')
+
+    # Verificar si estamos dentro del período permitido
+    encuesta_disponible = fecha_inicio <= ahora <= fecha_fin
+
+    if request.method == 'POST' and not encuesta_disponible:
+        flash('La encuesta no está disponible en este momento.', 'error')
+        return redirect(url_for('resumen_evento', codigo_evento=codigo_evento))
+
     if request.method == 'POST':
         # Validar que todos los campos requeridos estén presentes
         campos_requeridos = {
@@ -2485,9 +2503,9 @@ def encuesta_satisfaccion(codigo_evento):
         })
 
         flash('¡Gracias por completar la encuesta!', 'success')
-        return redirect(url_for('encuesta_satisfaccion', codigo_evento=codigo_evento ))
+        return redirect(url_for('encuesta_satisfaccion', codigo_evento=codigo_evento))
 
-    return render_template('encuesta.html', evento=evento)
+    return render_template('encuesta.html', evento=evento, encuesta_disponible=encuesta_disponible)
 
 
 ###
