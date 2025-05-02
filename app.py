@@ -12,6 +12,8 @@ import os
 import random
 import string
 import hashlib
+import base64
+from io import BytesIO
 
 app = Flask(__name__)
 
@@ -32,6 +34,7 @@ collection_preregistro = db['preregistro']
 collection_eva = db['eva']
 collection_tokens = db['tokens']
 collection_repositorio = db['repositorio']
+collection_encuestas = db['encuestas'] 
 
 
 ###
@@ -2396,6 +2399,97 @@ def repositorio(codigo_evento):
 
 
 ###
+### Encuesta de satisfacción
+###
+@app.route('/encuesta/<codigo_evento>', methods=['GET', 'POST'])
+def encuesta_satisfaccion(codigo_evento):
+    # Verificar si el evento existe
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+
+    if request.method == 'POST':
+        # Validar que todos los campos requeridos estén presentes
+        campos_requeridos = {
+            'D1': ['Masculino', 'Femenino'],
+            'D2': ['20–30', '31–40', '41–50', '51–60', '61+'],
+            'D3': [
+                'medico_general_ce',
+                'medico_general_urg',
+                'medico_especialista',
+                'odontologo',
+                'odontologo_especialista',
+                'enfermero',
+                'tecnico_enfermeria',
+                'laboratorista',
+                'tecnico_laboratorio',
+                'fisioterapeuta',
+                'farmaceutico',
+                'fonoaudiologo',
+                'psicologo',
+                'nutricionista',
+                'trabajador_social',
+                'estudiante_salud',
+                'administrativo',
+                'otro'
+            ],
+            'D4': ['1', '2', '3', '4'],
+            'D5': ['<5', '5–10', '11–20', '21–30', '31–40', '+40'],
+            'A1': ['1', '2', '3', '4', '5'],
+            'A2': ['1', '2', '3', '4', '5'],
+            'A3': ['1', '2', '3', '4', '5'],
+            'A4': ['1', '2', '3', '4', '5'],
+            'A5': ['1', '2', '3', '4', '5'],
+            'A6': ['1', '2', '3', '4', '5'],
+            'A7': ['1', '2', '3', '4', '5'],
+            'B1': ['1', '2', '3', '4', '5'],
+            'B2': ['1', '2', '3', '4', '5'],
+            'B3': ['1', '2', '3', '4', '5'],
+            'B4': ['1', '2', '3', '4', '5'],
+            'B5': ['1', '2', '3', '4', '5'],
+            'B6': ['1', '2', '3', '4', '5'],
+            'B7': ['1', '2', '3', '4', '5'],
+            'N1': ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+            'N2': ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+        }
+
+        respuestas = {}
+        errores = []
+
+        # Validar respuestas
+        for codigo, valores_permitidos in campos_requeridos.items():
+            valor = request.form.get(codigo)
+            if not valor:
+                errores.append(f'Falta la respuesta para {codigo}')
+            elif valor not in valores_permitidos:
+                errores.append(f'Respuesta inválida para {codigo}')
+            else:
+                respuestas[codigo] = valor
+
+        # Validar comentarios (opcionales)
+        respuestas['C1'] = request.form.get('C1', '')
+        respuestas['C2'] = request.form.get('C2', '')
+        respuestas['C3'] = request.form.get('C3', '')
+
+        if errores:
+            for error in errores:
+                flash(error, 'error')
+            return redirect(url_for('encuesta_satisfaccion', codigo_evento=codigo_evento))
+
+        # Guardar la respuesta en la base de datos
+        collection_encuestas.insert_one({
+            'codigo_evento': codigo_evento,
+            'respuestas': respuestas,
+            'fecha': datetime.now()
+        })
+
+        flash('¡Gracias por completar la encuesta!', 'success')
+        return redirect(url_for('encuesta_satisfaccion', codigo_evento=codigo_evento ))
+
+    return render_template('encuesta.html', evento=evento)
+
+
+###
 ### Etiqueta filtro de fecha
 ###
 from datetime import date
@@ -2864,6 +2958,44 @@ def unauthorized_error(e):
 @app.errorhandler(403)
 def forbidden_error(e):
     return render_template('403.html'), 403
+
+
+@app.route('/cierre/<codigo_evento>', methods=['GET'])
+def cierre_evento(codigo_evento):
+    # Buscar el evento en la base de datos
+    evento = collection_eventos.find_one({'codigo': codigo_evento})
+    
+    if not evento:
+        flash('Evento no encontrado', 'error')
+        return redirect(url_for('home'))
+    
+    # Generar el código QR para la encuesta
+    url_encuesta = url_for('encuesta_satisfaccion', codigo_evento=codigo_evento, _external=True)
+    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr.add_data(url_encuesta)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    
+    # Guardar el QR en un buffer
+    buffer = BytesIO()
+    img.save(buffer, format='PNG')
+    buffer.seek(0)
+    qr_base64 = base64.b64encode(buffer.getvalue()).decode()
+    
+    # Obtener el afiche del evento
+    afiche_path = os.path.join(app.config['UPLOAD_FOLDER'], evento.get('afiche', 'default.png'))
+    if not os.path.exists(afiche_path):
+        afiche_path = os.path.join(app.config['UPLOAD_FOLDER'], 'default.png')
+    
+    # Obtener el estado del evento
+    estado = calcular_estado(evento['fecha_inicio'])
+    
+    return render_template('cierre.html', 
+                         evento=evento,
+                         qr_base64=qr_base64,
+                         url_encuesta=url_encuesta,
+                         afiche_path=afiche_path,
+                         estado=estado)
 
 
 if __name__ == '__main__':

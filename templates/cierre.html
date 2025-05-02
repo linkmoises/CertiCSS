@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Cierre - {{ evento.nombre }} - CertiCSS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <!-- favicons -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
+    <meta name="apple-mobile-web-app-title" content="CertiCSS" />
+    <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
+    <style>
+        body {
+            background-image: url('{% if evento.fondo and evento.fondo.split('/')[-1] %}{{ url_for('static', filename='uploads/' + evento.fondo.split('/')[-1]) }}{% else %}{{ base_url }}{{ url_for('static', filename='assets/auditorio-cidelas-moredark.jpg') }}{% endif %}');
+            background-size: cover;
+            color: white;
+            text-align: left;
+            padding: 20px;
+        }
+        .encuesta-container {
+            color: black;
+            font-family: monospace;
+            max-width: 500px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero -->
+    <div class="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Grid -->
+        <div class="grid md:grid-cols-2 gap-4 md:gap-8 xl:gap-20">
+            <div>
+                <div class="flex items-center gap-x-3">
+                    <div class="shrink-0">
+                        <img class="h-24 w-24" src="{{ url_for('static', filename='assets/' + 'css-logo-op.png') }}" alt="Caja de Seguro Social" />
+                    </div>
+                    
+                    <div class="grow">
+                        <h2 class="block text-3xl font-bold mt-8">{{ evento.tipo }}</h2>
+                        <h4 class="block italic mb-8">{{ evento.unidad_ejecutora }}</h4>
+                    </div>
+                </div>
+                  
+                <h1 class="block text-3xl font-bold dark:text-gray-800 sm:text-4xl lg:text-6xl lg:leading-tight mb-8">{{ evento.nombre }}</h1>
+{% if evento.fecha_inicio == evento.fecha_fin %}
+                <h3 class="my-3 text-lg dark:text-gray-800">{{ evento.fecha_inicio.strftime('%d de %B de %Y') }}</h3>
+{% elif evento.fecha_fin %}
+                <h3 class="my-3 text-lg dark:text-gray-800">{{ evento.fecha_inicio.strftime('%d') }} - {{ evento.fecha_fin.strftime('%d de %B de %Y') }}</h3>
+{% else %}
+                <h3 class="my-3 text-lg dark:text-gray-800">{{ evento.fecha_inicio.strftime('%d de %B de %Y') }}</h3>
+{% endif %}
+            </div>
+            <!-- End Col -->
+    
+            <div class="relative my-4">
+                <div class="qr-code">
+                    <img class="block float-right mt-8 w-64 h-64 border-4 border-black rounded-xl" src="data:image/png;base64,{{ qr_base64 }}" alt="Código QR Encuesta" /><br />
+                    <a href="{{ url_encuesta }}" target="_blank" class="mt-8 bg-white block text-black float-right p-4 text-3xl border-4 border-black rounded-xl hover:bg-gray-100 transition-colors">
+                        {{ BASE_URL }}encuesta/{{ evento.codigo }}
+                    </a>
+                </div>
+            </div>
+            <!-- End Col -->
+        
+        </div>
+        <!-- End Grid -->
+    </div>
+    <!-- End Hero -->
+</body>
+</html> 

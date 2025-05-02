@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Encuesta de Satisfacción - {{ evento.nombre }} - CertiCSS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- favicons -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
+    <meta name="apple-mobile-web-app-title" content="CertiCSS" />
+    <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
+{% if UMAMI_URL %}
+    {{ UMAMI_URL | safe }}
+{% endif %}
+</head>
+<body class="bg-gray-50 dark:bg-neutral-900">
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main id="content">
+
+        <div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
+            
+            <div class="max-w-xl mx-auto">
+              <div class="text-center">
+                <h1 class="text-3xl font-bold text-gray-800 sm:text-4xl dark:text-white">
+                  Encuesta de satisfacción
+                </h1>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">{{ evento.nombre }}</h2>
+                <p class="mt-1 text-justify text-gray-600 dark:text-neutral-400">
+                    Desde el Departamento Nacional de Docencia e Investigación (DENADOI), le invitamos a completar esta breve encuesta que tiene como objetivo evaluar tanto la calidad académica y organizativa del evento en el que participó, como su experiencia de uso con la plataforma CertiCSS.
+                </p>
+                <p class="mt-1 text-justify text-gray-600 dark:text-neutral-400">
+                    Su participación es totalmente voluntaria y las respuestas serán anónimas. Los datos recopilados serán utilizados únicamente con fines de mejora continua, análisis institucional y desarrollo de futuras actividades educativas.<br />
+                </p>
+                <p class="mt-1 text-justify text-gray-600 dark:text-neutral-400">
+                    La encuesta no tomará más de 5 minutos. Agradecemos de antemano su tiempo y colaboración.
+                </p>
+            </div>
+            <!-- Mostrar mensajes -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+            <div class="m-4">
+                <ul>
+                {% for category, message in messages %}
+                    <li class="{{ 'p-2 text-sm bg-red-100 text-red-800 rounded-r-xl' if category == 'error' else 'p-2 text-sm bg-green-100 text-green-800 rounded-r-xl' }}">
+                    {{ message }}
+                    </li>
+                {% endfor %}
+                </ul>
+            </div>
+{% endif %}
+{% endwith %}
+            </div>
+      
+            <div class="mt-12 max-w-lg mx-auto">
+
+{% block content %}
+        
+        <form method="POST" class="space-y-8">
+            <!-- Sección D: Datos demográficos -->
+            <div class="border rounded-lg p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Sección D: Datos demográficos</h3>
+                
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-gray-700 mb-2">D1. Sexo</label>
+                        <div class="flex space-x-4">
+                            <label class="inline-flex items-center">
+                                <input type="radio" name="D1" value="Masculino" class="form-radio h-5 w-5 text-blue-600" required>
+                                <span class="ml-2">Masculino</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="radio" name="D1" value="Femenino" class="form-radio h-5 w-5 text-blue-600" required>
+                                <span class="ml-2">Femenino</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-700 mb-2">D2. Grupo de edad</label>
+                        <select name="D2" class="py-2 px-3 pe-9 block w-full border-gray-200 shadow-sm rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" required>
+                            <option value="">Seleccione su grupo de edad</option>
+                            {% for edad in ['20–30', '31–40', '41–50', '51–60', '61+'] %}
+                            <option value="{{ edad }}">{{ edad }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-700 mb-2">D3. Perfil profesional</label>
+                        <select name="D3" class="py-2 px-3 pe-9 block w-full border-gray-200 shadow-sm rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" required>
+                            <option value="">Seleccione su perfil profesional</option>
+                            {% set perfiles = {
+                                'medico_general_ce': 'Médico General - Consulta Externa',
+                                'medico_general_urg': 'Médico General - Urgencias',
+                                'medico_especialista': 'Médico Especialista',
+                                'odontologo': 'Odontólogo(a)',
+                                'odontologo_especialista': 'Odontólogo(a) Especialista',
+                                'enfermero': 'Enfermera(o)',
+                                'tecnico_enfermeria': 'Técnico en Enfermería',
+                                'laboratorista': 'Laboratorista',
+                                'tecnico_laboratorio': 'Técnico de Laboratorio',
+                                'fisioterapeuta': 'Fisioterapeuta',
+                                'farmaceutico': 'Farmacéutico(a)',
+                                'fonoaudiologo': 'Fonoaudiólogo(a)',
+                                'psicologo': 'Psicólogo(a)',
+                                'nutricionista': 'Nutricionista',
+                                'trabajador_social': 'Trabajador Social',
+                                'estudiante_salud': 'Estudiante de Ciencias de la Salud',
+                                'administrativo': 'Personal administrativo',
+                                'otro': 'Otro no listado'
+                            } %}
+                            {% for value, label in perfiles.items() %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-700 mb-2">D4. Nivel de atención donde labora principalmente</label>
+                        <select name="D4" class="py-2 px-3 pe-9 block w-full border-gray-200 shadow-sm rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" required>
+                            <option value="">Seleccione el nivel de atención</option>
+                            {% set niveles = {
+                                '1': 'I nivel (CAPPS, ULAPS)',
+                                '2': 'II nivel (Policlínicas, Policlínicas-Hospitales, Hospitales regionales)',
+                                '3': 'III nivel (Hospitales de referencia nacional)',
+                                '4': 'IV nivel (Institutos especializados)'
+                            } %}
+                            {% for value, label in niveles.items() %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-700 mb-2">D5. Años de experiencia profesional</label>
+                        <select name="D5" class="py-2 px-3 pe-9 block w-full border-gray-200 shadow-sm rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" required>
+                            <option value="">Seleccione sus años de experiencia</option>
+                            {% for exp in ['<5', '5–10', '11–20', '21–30', '31–40', '+40'] %}
+                            <option value="{{ exp }}">{{ exp }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección A: Evaluación de la Plataforma CertiCSS -->
+            <div class="border rounded-lg p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Sección A: Evaluación de la Plataforma CertiCSS</h3>
+                <p class="text-sm text-gray-600 mb-4">Escala Likert 1–5: [1 = Totalmente en desacuerdo | 5 = Totalmente de acuerdo]</p>
+                
+                <div class="space-y-6">
+                    {% set preguntas_a = [
+                        ('A1', 'Me resultó fácil navegar por la plataforma CertiCSS.'),
+                        ('A2', 'La descarga del certificado fue sencilla y rápida.'),
+                        ('A3', 'Considero útil que la CSS utilice una plataforma como CertiCSS.'),
+                        ('A4', 'La plataforma funcionó correctamente durante el evento.'),
+                        ('A5', 'Recomendaría el uso de CertiCSS para otros eventos académicos.'),
+                        ('A6', 'Me sentí cómodo(a) utilizando la plataforma desde mi dispositivo.'),
+                        ('A7', 'CertiCSS representa un avance respecto al proceso anterior de certificación.')
+                    ] %}
+                    
+                    {% for codigo, pregunta in preguntas_a %}
+                    <div>
+                        <label class="block text-gray-700 mb-2">{{ codigo }}. {{ pregunta }}</label>
+                        <div class="flex justify-between">
+                            {% for i in range(1, 6) %}
+                            <label class="inline-flex items-center">
+                                <input type="radio" name="{{ codigo }}" value="{{ i }}" class="form-radio h-5 w-5 text-blue-600" required>
+                                <span class="ml-1">{{ i }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Sección B: Evaluación del Evento Académico -->
+            <div class="border rounded-lg p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Sección B: Evaluación del Evento Académico</h3>
+                <p class="text-sm text-gray-600 mb-4">Escala Likert 1–5: [1 = Totalmente en desacuerdo | 5 = Totalmente de acuerdo]</p>
+                
+                <div class="space-y-6">
+                    {% set preguntas_b = [
+                        ('B1', 'El contenido del evento fue pertinente para mi práctica profesional.'),
+                        ('B2', 'La información presentada fue clara y actualizada.'),
+                        ('B3', 'El ponente demostró dominio del tema.'),
+                        ('B4', 'El control del tiempo en el evento fue adecuado.'),
+                        ('B5', 'La organización del evento fue eficiente.'),
+                        ('B6', 'La modalidad del evento (presencial/virtual/híbrido) fue adecuada.'),
+                        ('B7', 'Recibí la información y materiales necesarios con anticipación.')
+                    ] %}
+                    
+                    {% for codigo, pregunta in preguntas_b %}
+                    <div>
+                        <label class="block text-gray-700 mb-2">{{ codigo }}. {{ pregunta }}</label>
+                        <div class="flex justify-between">
+                            {% for i in range(1, 6) %}
+                            <label class="inline-flex items-center">
+                                <input type="radio" name="{{ codigo }}" value="{{ i }}" class="form-radio h-5 w-5 text-blue-600" required>
+                                <span class="ml-1">{{ i }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Sección N: Satisfacción global -->
+            <div class="border rounded-lg p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Sección N: Satisfacción global</h3>
+                <p class="text-sm text-gray-600 mb-4">Escala del 0 al 10: 0 = Nada probable | 10 = Extremadamente probable</p>
+                
+                <div class="space-y-6">
+                    {% set preguntas_n = [
+                        ('N1', '¿Qué tan probable es que recomiende este evento a un colega o compañero de profesión?'),
+                        ('N2', '¿Qué tan probable es que recomiende el uso de esta plataforma a un colega o compañero de profesión?')
+                    ] %}
+                    
+                    {% for codigo, pregunta in preguntas_n %}
+                    <div>
+                        <label class="block text-gray-700 mb-2">{{ codigo }}. {{ pregunta }}</label>
+                        <div class="flex justify-between">
+                            {% for i in range(0, 11) %}
+                            <label class="inline-flex items-center">
+                                <input type="radio" name="{{ codigo }}" value="{{ i }}" class="form-radio h-5 w-5 text-blue-600" required>
+                                <span class="ml-1">{{ i }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Sección C: Comentarios abiertos -->
+            <div class="border rounded-lg p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Sección C: Comentarios abiertos</h3>
+                
+                <div class="space-y-6">
+                    {% set preguntas_c = [
+                        ('C1', '¿Qué fue lo que más le gustó del evento?'),
+                        ('C2', '¿Qué aspectos considera que podrían mejorar?'),
+                        ('C3', '¿Desea dejar algún comentario adicional sobre CertiCSS o el evento?')
+                    ] %}
+                    
+                    {% for codigo, pregunta in preguntas_c %}
+                    <div>
+                        <label class="block text-gray-700 mb-2">{{ codigo }}. {{ pregunta }}</label>
+                        <textarea name="{{ codigo }}" rows="3" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="flex justify-center">
+                <button type="submit" class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                    Enviar Encuesta
+                </button>
+            </div>
+        </form>
+
+{% endblock %} 
+
+            </div>
+        </div>
+
+    </main>
+    <!-- ========== END MAIN CONTENT ========== -->
+
+</body>
+</html>
