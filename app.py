@@ -2377,6 +2377,7 @@ def generar_url_descarga(codigo_evento, nombre, tiempo_expiracion_minutos=5):
 
 
 @app.route('/repositorio/<codigo_evento>', methods=['GET'])
+@token_required
 def repositorio(codigo_evento):
     # Verificamos que exista el evento con ese código
     evento = collection_eventos.find_one({'codigo': codigo_evento})
