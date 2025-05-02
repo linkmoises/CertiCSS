@@ -2412,7 +2412,7 @@ def encuesta_satisfaccion(codigo_evento):
     # Verificar si la encuesta está disponible
     ahora = datetime.now()
     fecha_inicio = evento.get('fecha_inicio')
-    fecha_fin = evento.get('fecha_fin') + timedelta(days=3)  # Añadir 3 días a la fecha de fin
+    fecha_fin = evento.get('fecha_fin') + timedelta(days=2)  # Añadir 2 días a la fecha de fin
 
     # Convertir fechas a datetime si son strings
     if isinstance(fecha_inicio, str):
