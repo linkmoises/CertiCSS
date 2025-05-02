@@ -21,24 +21,27 @@
     <!-- ========== MAIN CONTENT ========== -->
     <main id="content">
 
-        <div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
+        <div class="max-w-[85rem] px-4 py-4 sm:px-6 lg:px-8 lg:py-4 mx-auto">
             
             <div class="max-w-xl mx-auto">
-              <div class="text-center">
-                <img src="{{ url_for('static', filename='assets/css-logo-192x192.png') }}" alt="Caja de Seguro Social" class="h-16 w-16 mx-auto mb-4">
-                <h1 class="text-3xl font-bold text-gray-800 sm:text-4xl dark:text-white">
-                  Encuesta de satisfacción
-                </h1>
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">{{ evento.nombre }}</h2>
-                <p class="mt-1 text-justify text-gray-600 dark:text-neutral-400">
-                    Desde el Departamento Nacional de Docencia e Investigación (DENADOI), le invitamos a completar esta breve encuesta que tiene como objetivo evaluar tanto la calidad académica y organizativa del evento en el que participó, como su experiencia de uso con la plataforma CertiCSS.
-                </p>
-                <p class="mt-1 text-justify text-gray-600 dark:text-neutral-400">
-                    Su participación es totalmente voluntaria y las respuestas serán anónimas. Los datos recopilados serán utilizados únicamente con fines de mejora continua, análisis institucional y desarrollo de futuras actividades educativas.<br />
-                </p>
-                <p class="mt-1 text-justify text-gray-600 dark:text-neutral-400">
-                    La encuesta no tomará más de 5 minutos. Agradecemos de antemano su tiempo y colaboración.
-                </p>
+                <div class="text-center">
+                    <a href="{{ url_for('home') }}">
+                        <img src="{{ url_for('static', filename='assets/css-logo-192x192.png') }}" alt="Caja de Seguro Social" class="h-16 w-16 mx-auto mb-4">
+                    </a>
+                    <h1 class="text-3xl font-bold text-gray-800 sm:text-4xl dark:text-white">
+                        Encuesta de satisfacción
+                    </h1>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">{{ evento.nombre }}</h2>
+                    <p class="mt-1 text-justify text-gray-600 dark:text-neutral-400">
+                        Desde el <span class="font-bold">Departamento Nacional de Docencia e Investigación (DENADOI)</span>, le invitamos a completar esta breve encuesta que tiene como objetivo evaluar tanto la calidad académica y organizativa del evento en el que participó, como su experiencia de uso con la plataforma CertiCSS.
+                    </p>
+                    <p class="mt-1 text-justify text-gray-600 dark:text-neutral-400">
+                        Su participación es totalmente <span class="font-bold">voluntaria</span> y las respuestas serán <span class="font-bold">anónimas</span>. Los datos recopilados serán utilizados únicamente con fines de mejora continua, análisis institucional y desarrollo de futuras actividades educativas.<br />
+                    </p>
+                    <p class="mt-1 text-justify text-gray-600 dark:text-neutral-400">
+                        La encuesta no tomará más de 5 minutos. Agradecemos de antemano su tiempo y colaboración.
+                    </p>
+                </div>
             </div>
             <!-- Mostrar mensajes -->
 {% with messages = get_flashed_messages(with_categories=true) %}
@@ -56,14 +59,18 @@
 {% endwith %}
             </div>
       
-            <div class="mt-12 max-w-lg mx-auto">
+            <div class="mb-8 max-w-lg mx-auto">
 
 {% if encuesta_disponible %}
 {% block content %}
-        
-                <form method="POST" class="space-y-8">
-                    <!-- Sección D: Datos demográficos -->
-                    <div class="border rounded-lg p-6">
+                <form method="POST" class="space-y-8" id="encuestaForm">
+                    <!-- Campo oculto para spam -->
+                    <input type="email" name="email" class="hidden" autocomplete="off">
+                    
+                    <!-- Timestamp oculto para control de tiempo -->
+                    <input type="hidden" name="timestamp_inicio" id="timestamp_inicio">
+                    
+                    <div class="bg-white p-6 rounded-lg border">
                         <h3 class="text-xl font-semibold text-gray-800 mb-4">Sección D: Datos demográficos</h3>
                         
                         <div class="space-y-6">
@@ -150,7 +157,7 @@
                     </div>
 
                     <!-- Sección A: Evaluación de la Plataforma CertiCSS -->
-                    <div class="border rounded-lg p-6">
+                    <div class="bg-white p-6 rounded-lg border">
                         <h3 class="text-xl font-semibold text-gray-800 mb-4">Sección A: Evaluación de la Plataforma CertiCSS</h3>
                         <p class="text-sm text-gray-600 mb-4">Escala Likert 1–5: [1 = Totalmente en desacuerdo | 5 = Totalmente de acuerdo]</p>
                         
@@ -182,7 +189,7 @@
                     </div>
 
                     <!-- Sección B: Evaluación del Evento Académico -->
-                    <div class="border rounded-lg p-6">
+                    <div class="bg-white p-6 rounded-lg border">
                         <h3 class="text-xl font-semibold text-gray-800 mb-4">Sección B: Evaluación del Evento Académico</h3>
                         <p class="text-sm text-gray-600 mb-4">Escala Likert 1–5: [1 = Totalmente en desacuerdo | 5 = Totalmente de acuerdo]</p>
                         
@@ -214,7 +221,7 @@
                     </div>
 
                     <!-- Sección N: Satisfacción global -->
-                    <div class="border rounded-lg p-6">
+                    <div class="bg-white p-6 rounded-lg border">
                         <h3 class="text-xl font-semibold text-gray-800 mb-4">Sección N: Satisfacción global</h3>
                         <p class="text-sm text-gray-600 mb-4">Escala del 0 al 10: 0 = Nada probable | 10 = Extremadamente probable</p>
                         
@@ -245,7 +252,7 @@
                     </div>
 
                     <!-- Sección C: Comentarios abiertos -->
-                    <div class="border rounded-lg p-6">
+                    <div class="bg-white p-6 rounded-lg border">
                         <h3 class="text-xl font-semibold text-gray-800 mb-4">Sección C: Comentarios abiertos</h3>
                         
                         <div class="space-y-6">
@@ -264,21 +271,20 @@
                         </div>
                     </div>
 
-                    <div class="flex justify-center">
+                    <div class="justify-center">
                         <button type="submit" class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
                             Enviar Encuesta
                         </button>
                     </div>
                 </form>
-
 {% endblock %}
 {% else %}
-            <div class="text-center p-8 bg-white rounded-lg shadow-sm">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4">Encuesta no disponible</h3>
-                <p class="text-gray-600 mt-2">
-                    El período para completar la encuesta es desde el inicio del evento hasta 48 horas después de su finalización.
-                </p>
-            </div>
+                <div class="text-center p-8 bg-white rounded-lg shadow-sm">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Encuesta no disponible</h3>
+                    <p class="text-gray-600 mt-2">
+                        El período para completar la encuesta es desde el inicio del evento hasta 48 horas después de su finalización.
+                    </p>
+                </div>
 {% endif %}
 
             </div>
@@ -287,5 +293,22 @@
     </main>
     <!-- ========== END MAIN CONTENT ========== -->
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('timestamp_inicio').value = Date.now();
+    });
+
+    document.getElementById('encuestaForm').addEventListener('submit', function(e) {
+        const tiempoInicio = parseInt(document.getElementById('timestamp_inicio').value);
+        const tiempoActual = Date.now();
+        const tiempoTranscurrido = (tiempoActual - tiempoInicio) / 1000; // en segundos
+
+        if (tiempoTranscurrido < 10) {
+            e.preventDefault();
+            alert('¡Gracias por completar la encuesta!');
+            return false;
+        }
+    });
+</script>
 </body>
 </html>

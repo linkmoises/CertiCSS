@@ -2428,6 +2428,19 @@ def encuesta_satisfaccion(codigo_evento):
         return redirect(url_for('resumen_evento', codigo_evento=codigo_evento))
 
     if request.method == 'POST':
+        # Verificar si es spam
+        if request.form.get('email'):  # Si el campo oculto de email está lleno, es spam
+            flash('¡Gracias por completar la encuesta!', 'success')
+            return redirect(url_for('encuesta_satisfaccion', codigo_evento=codigo_evento))
+
+        # Verificar tiempo de llenado
+        timestamp_inicio = request.form.get('timestamp_inicio')
+        if timestamp_inicio:
+            tiempo_transcurrido = (datetime.now().timestamp() * 1000 - float(timestamp_inicio)) / 1000
+            if tiempo_transcurrido < 10:  # Menos de 10 segundos
+                flash('¡Gracias por completar la encuesta!', 'success')
+                return redirect(url_for('encuesta_satisfaccion', codigo_evento=codigo_evento))
+
         # Validar que todos los campos requeridos estén presentes
         campos_requeridos = {
             'D1': ['Masculino', 'Femenino'],
