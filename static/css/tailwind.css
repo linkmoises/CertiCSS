@@ -1838,6 +1838,10 @@ select {
   height: 1px;
 }
 
+.h-48 {
+  height: 12rem;
+}
+
 .max-h-full {
   max-height: 100%;
 }
@@ -1920,6 +1924,10 @@ select {
 
 .w-full {
   width: 100%;
+}
+
+.w-32 {
+  width: 8rem;
 }
 
 .min-w-48 {

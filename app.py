@@ -1953,7 +1953,7 @@ def tablero_metricas(page=1):
         # Total de participantes en este evento
         evento["total_participantes"] = collection_participantes.count_documents({
             "codigo_evento": codigo_evento,
-            # "rol": "participante"
+            "rol": "participante"
         })
         
         # Total de ponentes en este evento
@@ -2638,6 +2638,91 @@ def exportar_encuesta_csv(codigo_evento):
             "Content-Type": "text/csv; charset=utf-8"
         }
     )
+
+
+@app.route('/informe_avanzado/<codigo_evento>')
+@login_required
+def informe_avanzado(codigo_evento):
+    # Obtener el evento
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        flash('Evento no encontrado', 'error')
+        return redirect(url_for('home'))
+
+    # Obtener el total de participantes
+    total_participantes = collection_participantes.count_documents({
+        "codigo_evento": codigo_evento,
+        "rol": "participante"
+    })
+
+    # Obtener las respuestas de la encuesta
+    respuestas = list(collection_encuestas.find({'codigo_evento': codigo_evento}))
+    if not respuestas:
+        flash('No hay respuestas de encuesta disponibles para este evento.', 'error')
+        return redirect(url_for('resumen_evento', codigo_evento=codigo_evento))
+
+    # Procesar los datos para las métricas
+    total_respuestas = len(respuestas)
+    
+    # Calcular promedios por sección
+    promedios = {
+        'A': {'total': 0, 'count': 0},  # Plataforma CertiCSS
+        'B': {'total': 0, 'count': 0},  # Evento Académico
+        'N': {'total': 0, 'count': 0}   # Satisfacción global
+    }
+
+    # Contadores para datos demográficos
+    demograficos = {
+        'D1': {'Masculino': 0, 'Femenino': 0},
+        'D2': {'20–30': 0, '31–40': 0, '41–50': 0, '51–60': 0, '61+': 0},
+        'D3': {},  # Perfiles profesionales
+        'D4': {'1': 0, '2': 0, '3': 0, '4': 0},
+        'D5': {'<5': 0, '5–10': 0, '11–20': 0, '21–30': 0, '31–40': 0, '+40': 0}
+    }
+
+    # Procesar cada respuesta
+    for respuesta in respuestas:
+        respuestas_data = respuesta.get('respuestas', {})
+        
+        # Calcular promedios de secciones A, B y N
+        for seccion in ['A', 'B']:
+            for i in range(1, 8):  # A1-A7 y B1-B7
+                key = f'{seccion}{i}'
+                if key in respuestas_data:
+                    valor = int(respuestas_data[key])
+                    promedios[seccion]['total'] += valor
+                    promedios[seccion]['count'] += 1
+
+        # Calcular promedio de sección N
+        for i in range(1, 3):  # N1 y N2
+            key = f'N{i}'
+            if key in respuestas_data:
+                valor = int(respuestas_data[key])
+                promedios['N']['total'] += valor
+                promedios['N']['count'] += 1
+
+        # Contar datos demográficos
+        for key in demograficos:
+            if key in respuestas_data:
+                valor = respuestas_data[key]
+                if key == 'D3':  # Perfiles profesionales
+                    demograficos[key][valor] = demograficos[key].get(valor, 0) + 1
+                else:
+                    demograficos[key][valor] = demograficos[key].get(valor, 0) + 1
+
+    # Calcular promedios finales
+    metricas = {
+        'total_respuestas': total_respuestas,
+        'total_participantes': total_participantes,
+        'promedio_plataforma': round(promedios['A']['total'] / promedios['A']['count'], 2) if promedios['A']['count'] > 0 else 0,
+        'promedio_evento': round(promedios['B']['total'] / promedios['B']['count'], 2) if promedios['B']['count'] > 0 else 0,
+        'promedio_satisfaccion': round(promedios['N']['total'] / promedios['N']['count'], 2) if promedios['N']['count'] > 0 else 0,
+        'demograficos': demograficos
+    }
+
+    return render_template('metrica_avanzada.html', 
+                         evento=evento,
+                         metricas=metricas)
 
 
 ###

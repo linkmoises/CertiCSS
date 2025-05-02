@@ -1,0 +1,189 @@
+{% include 'tablero-header.html' %}
+
+{% include 'tablero-sidebar.html' %}
+
+    <!-- Content -->
+    <div class="w-full lg:ps-64">
+        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+
+            <!-- TABLA RESUMEN EVENTOS -->
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <!-- Card -->
+                <div class="flex flex-col">
+                    <div class="-m-1.5 overflow-x-auto">
+                        <div class="p-1.5 min-w-full inline-block align-middle">
+                            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                                <!-- Header -->
+                                <div class="flex items-center gap-x-3">
+                                    <div class="relative h-32 w-32 shrink-0">
+{% if evento.afiche_750 %}
+                                        <img src="{{ url_for('static', filename='uploads/' + evento.afiche_750.split('/')[-1]) }}" alt="{{ evento.nombre }}" class="w-32 h-32 object-cover rounded-lg absolute top-0 start-0">
+{% else %}
+                                        <img class="size-full absolute top-0 start-0 object-cover rounded-l-xl" src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}" alt="{{ evento.nombre }}">
+{% endif %}                                        
+                                    </div>
+                                    
+                                    <div class="grow">
+                                        <h2 class="block text-3xl font-bold mt-2">{{ evento.tipo }}</h2>
+                                        <h4 class="block italic mb-2">{{ evento.unidad_ejecutora }}</h4>
+                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                            {{ evento.tipo }}
+                                        </span>
+                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                            {{ evento.modalidad }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <!-- End Header -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+            </div>
+            <!-- End TABLA RESUMEN EVENTOS -->
+
+            <!-- TARJETAS RESUMEN -->
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <!-- Grid -->
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                    <!-- Card -->
+                    <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
+                                Cupos disponibles
+                            </p>
+                        </div>
+                
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                {{ evento.cupos | default("N/D") }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+            
+                <!-- Card -->
+                <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                    <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
+                                Participantes registrados
+                            </p>
+                        </div>
+            
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                {{ metricas.total_participantes }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+            
+                <!-- Card -->
+                <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                    <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
+                                % asistencia
+                            </p>
+                        </div>
+
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+{% if evento.cupos and evento.cupos|int > 0 %}
+                                {{ ((metricas.total_participantes / evento.cupos|int) * 100) | round(1) }}%
+{% else %}
+                                N/D
+{% endif %}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+            
+                <!-- Card -->
+                <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                    <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
+                                Participantes encuestados
+                            </p>
+                        </div>
+
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                {{ metricas.total_respuestas | default("N/D") }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+                </div>
+                <!-- End Grid -->
+            </div>
+            <!-- FIN TARJETAS RESUMEN -->
+
+
+{% include 'tablero-footer.html' %}
+
+        </div>
+    </div>
+    <!-- End Content -->
+
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+<script>
+// Limpia campos dinámicos al cargar la página
+document.addEventListener("DOMContentLoaded", function () {
+    const hiddenInputs = document.querySelectorAll("#buscadorForm input[type='hidden']");
+    hiddenInputs.forEach((input) => input.remove());
+});
+document.getElementById("buscadorForm").addEventListener("submit", function (event) {
+    event.preventDefault(); // Prevenir envío estándar del formulario
+
+    const valor = document.getElementById("buscador").value.trim();
+    const patterns = {
+        cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas
+        pasaporte: /^[A-Z]{2}\d{6,9}$/,                        // Pasaportes
+        id_certificado: /^[a-zA-Z0-9]{8}$/                    // IDs de certificados
+    };
+
+    let action, field;
+
+    if (patterns.cedula.test(valor)) {
+        action = "/buscar_certificados";
+        field = "cedula";
+    } else if (patterns.pasaporte.test(valor)) {
+        action = "/buscar_certificados";
+        field = "cedula";
+    } else if (patterns.id_certificado.test(valor)) {
+        action = "/validar_certificado";
+        field = "nanoid";
+    } else {
+        alert("Formato no válido. Introduzca un documento de identificación o un ID de certificado válido.");
+        return;
+    }
+
+    // Crear y enviar el formulario dinámicamente
+    const form = event.target;
+    form.action = action;
+    form.method = "POST";
+
+    // Limpiar campos ocultos previos
+    const hiddenInputs = form.querySelectorAll("input[type='hidden']");
+    hiddenInputs.forEach((input) => input.remove());
+
+    const hiddenInput = document.createElement("input");
+    hiddenInput.type = "hidden";
+    hiddenInput.name = field;
+    hiddenInput.value = valor;
+    form.appendChild(hiddenInput);
+    form.submit();
+});
+</script>
+</body>
+</html>
