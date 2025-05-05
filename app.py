@@ -2768,6 +2768,9 @@ def generar_pdf_participante(participante, afiche_path):
     fecha_fin_evento = evento.get('fecha_fin')
     fecha_fin_formateada = fecha_fin_evento.strftime('%d de %B de %Y')
 
+    fecha_inicio_evento = evento.get('fecha_inicio')
+    fecha_inicio_formateada = fecha_inicio_evento.strftime('%d')
+
     fecha_evento = evento.get('fecha_fin', 'Fecha no disponible')
 
     # Definir la ruta donde se guardará el PDF
@@ -2807,7 +2810,7 @@ def generar_pdf_participante(participante, afiche_path):
         draw_centered_text(3.2 * inch, f"{participante.get('titulo_ponencia', 'N/A')}", font="Helvetica-Bold", size=16)
     else:
         draw_centered_text(3.5 * inch, f"Actividad académica con una duración de 08 horas")
-        draw_centered_text(3.2 * inch, f"{fecha_fin_formateada}")
+        draw_centered_text(3.2 * inch, f"{fecha_inicio_formateada + ' al ' + fecha_fin_formateada if fecha_inicio_evento != fecha_fin_evento else fecha_fin_formateada}")
 
     draw_centered_text(2.7 * inch, f"Dado en la República de Panamá, Provincia de Panamá, el {fecha_fin_formateada}")
 
@@ -2928,6 +2931,7 @@ def generar_constancia_asistencia(participante, afiche_path):
         fi_evento = datetime.strptime(fi_evento, '%Y-%m-%d %H:%M:%S')
     # Formatear la fecha
     fi_formateada = fi_evento.strftime('%d de %B de %Y')
+    fid_formateada = fi_evento.strftime('%d')
 
     ff_evento = evento.get('fecha_fin')
     if isinstance(ff_evento, str):
@@ -2971,7 +2975,7 @@ def generar_constancia_asistencia(participante, afiche_path):
         f"Se certifica la asistencia de <b>{participante['nombres']} {participante['apellidos']}</b>, "
         f"con cédula <b>{participante['cedula']}</b>, en el evento <b>'{titulo_evento}'</b>, realizado en modalidad "
         f"<b>{modalidad_evento.lower()}</b> y organizado por la unidad ejecutora <b>'{ue_evento}'</b>, "
-        f"el día <b>{fi_formateada}</b> en el horario de 7:00am a 3:00pm."
+        f"{'los días ' + fid_formateada + ' al ' + ff_formateada if fi_evento != ff_evento else 'el día ' + ff_formateada} en el horario de 7:00am a 3:00pm."
     )
 
     # Crear un párrafo
