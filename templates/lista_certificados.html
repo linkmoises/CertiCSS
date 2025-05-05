@@ -66,6 +66,11 @@
                                             Documentos
                                         </a>
                                     </th>
+                                    <th scope="col" class="px-6 py-3 text-start">
+                                        <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500">
+                                            Credenciales
+                                        </a>
+                                    </th>
                                 </tr>
                             </thead>
                 
@@ -102,12 +107,6 @@
                                     </td>
                                     <td class="h-px w-1/6">
                                         <div class="px-6 py-2">
-{% if resultado.modalidad_evento != 'Presencial' %}
-                                            <a class="inline-flex items-center gap-x-1 text-sm font-medium decoration-2 hover:underline" href="{{ url_for('ver_contenido', codigo_evento=resultado['codigo_evento'], orden=1, cedula=cedula, token=token) }}" target="_blank">
-                                                <svg class="size-3.5 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-card-text" viewBox="0 0 16 16"><path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2z"/><path d="M3 5.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5M3 8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 8m0 2.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5"/></svg>
-                                                <span class="text-sm text-gray-500">Ver contenido en línea</span>
-                                            </a><br />
-{% endif %}
 {% set certificado_disponible = true %}
 {% if resultado.fecha_evento %}
     {% if resultado.fecha_evento.date() == fecha_actual and hora_actual.hour < 13 %}
@@ -121,34 +120,67 @@
         {% set repositorio_disponible = false %}
     {% endif %}
 {% endif %}
-{% if certificado_disponible %}
+
+{% if resultado.modalidad_evento != 'Presencial' %}
+                                            <a href="{{ url_for('ver_contenido', codigo_evento=resultado['codigo_evento'], orden=1, cedula=cedula, token=token) }}" class="mb-2 px-3 py-2 text-xs font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                                <svg class="w-3 h-3 text-white me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 576 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M0 128C0 92.7 28.7 64 64 64l256 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 448c-35.3 0-64-28.7-64-64L0 128zM559.1 99.8c10.4 5.6 16.9 16.4 16.9 28.2l0 256c0 11.8-6.5 22.6-16.9 28.2s-23 5-32.9-1.6l-96-64L416 337.1l0-17.1 0-128 0-17.1 14.2-9.5 96-64c9.8-6.5 22.4-7.2 32.9-1.6z"/></svg>
+                                                </svg>
+                                                Videoclases
+                                            </a>
+{% else %}
+
 {% if repositorio_disponible %}
 {% if resultado.tiene_archivos %}
-                                            <a href="{{ url_for('repositorio', codigo_evento=resultado.codigo_evento, cedula=cedula, token=token) }}" class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline font-medium">
-                                                <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                                                Descargar archivos
-                                            </a><br />
+                                            <a href="{{ url_for('repositorio', codigo_evento=resultado.codigo_evento, cedula=cedula, token=token) }}" class="mb-2 px-3 py-2 text-xs font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                                <svg class="w-3 h-3 text-white me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 576 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M88.7 223.8L0 375.8 0 96C0 60.7 28.7 32 64 32l117.5 0c17 0 33.3 6.7 45.3 18.7l26.5 26.5c12 12 28.3 18.7 45.3 18.7L416 96c35.3 0 64 28.7 64 64l0 32-336 0c-22.8 0-43.8 12.1-55.3 31.8zm27.6 16.1C122.1 230 132.6 224 144 224l400 0c11.5 0 22 6.1 27.7 16.1s5.7 22.2-.1 32.1l-112 192C453.9 474 443.4 480 432 480L32 480c-11.5 0-22-6.1-27.7-16.1s-5.7-22.2 .1-32.1l112-192z"/></svg>
+                                                </svg>
+                                                Repositorio
+                                            </a>
+{% else %}
+                                            <div class="inline-flex items-center gap-x-1 text-sm">
+                                                <div class="inline-flex text-center gap-x-1 text-sm py-1 px-2 bg-yellow-50 text-yellow-700 rounded-md">
+                                                    <span>No hay documentos disponibles</span>
+                                                </div>
+                                            </div>
+{% endif %}
+{% else %}
+                                            <div class="inline-flex items-center gap-x-1 text-sm">
+                                                <div class="inline-flex text-center gap-x-1 text-sm py-1 px-2 bg-yellow-50 text-yellow-700 rounded-md">
+                                                    <span>El plazo para acceder a los documentos ha vencido</span>
+                                                </div>
+                                            </div>
 {% endif %}
 {% endif %}
-                                            <a class="inline-flex items-center gap-x-1 text-sm font-medium decoration-2 hover:underline" href="{{ url_for('descargar_constancia', nanoid=resultado['nanoid']) }}" target="_blank">
-                                                <svg class="size-3.5 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-card-text" viewBox="0 0 16 16"><path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2z"/><path d="M3 5.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5M3 8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 8m0 2.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5"/></svg>
-                                                <span class="text-sm text-gray-500">Descargar constancia</span>
-                                            </a><br />
+                                        </div>
+                                    </td>
+{% if certificado_disponible %}
+                                    <td class="h-px w-1/6">
+                                        <div class="px-6 py-2">
+                                            <a href="{{ url_for('descargar_constancia', nanoid=resultado['nanoid']) }}" class="mb-2 px-3 py-2 text-xs font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                                <svg class="w-3 h-3 text-white me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 384 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-288-128 0c-17.7 0-32-14.3-32-32L224 0 64 0zM256 0l0 128 128 0L256 0zM112 256l160 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-160 0c-8.8 0-16-7.2-16-16s7.2-16 16-16zm0 64l160 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-160 0c-8.8 0-16-7.2-16-16s7.2-16 16-16zm0 64l160 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-160 0c-8.8 0-16-7.2-16-16s7.2-16 16-16z"/></svg>
+                                                </svg>
+                                                Constancia
+                                            </a>
                                             {% if resultado.certificado_evento %}
-                                            <a class="inline-flex items-center gap-x-1 text-sm font-medium decoration-2 hover:underline" href="{{ url_for('generar_pdf', nanoid=resultado['nanoid']) }}" target="_blank">
-                                                <svg class="size-3.5 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-card-text" viewBox="0 0 16 16"><path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2z"/><path d="M3 5.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5M3 8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 8m0 2.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5"/></svg>
-                                                <span class="text-sm text-gray-500">Descargar certificado</span>
+                                            <a href="{{ url_for('generar_pdf', nanoid=resultado['nanoid']) }}" class="mb-2 px-3 py-2 text-xs font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                                <svg class="w-3 h-3 text-white me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 640 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M320 32c-8.1 0-16.1 1.4-23.7 4.1L15.8 137.4C6.3 140.9 0 149.9 0 160s6.3 19.1 15.8 22.6l57.9 20.9C57.3 229.3 48 259.8 48 291.9l0 28.1c0 28.4-10.8 57.7-22.3 80.8c-6.5 13-13.9 25.8-22.5 37.6C0 442.7-.9 448.3 .9 453.4s6 8.9 11.2 10.2l64 16c4.2 1.1 8.7 .3 12.4-2s6.3-6.1 7.1-10.4c8.6-42.8 4.3-81.2-2.1-108.7C90.3 344.3 86 329.8 80 316.5l0-24.6c0-30.2 10.2-58.7 27.9-81.5c12.9-15.5 29.6-28 49.2-35.7l157-61.7c8.2-3.2 17.5 .8 20.7 9s-.8 17.5-9 20.7l-157 61.7c-12.4 4.9-23.3 12.4-32.2 21.6l159.6 57.6c7.6 2.7 15.6 4.1 23.7 4.1s16.1-1.4 23.7-4.1L624.2 182.6c9.5-3.4 15.8-12.5 15.8-22.6s-6.3-19.1-15.8-22.6L343.7 36.1C336.1 33.4 328.1 32 320 32zM128 408c0 35.3 86 72 192 72s192-36.7 192-72L496.7 262.6 354.5 314c-11.1 4-22.8 6-34.5 6s-23.5-2-34.5-6L143.3 262.6 128 408z"/></svg>
+                                                </svg>
+                                                Certificado
                                             </a>
                                             {% endif %}
+                                        </div>
+                                    </td>
 {% else %}
+                                    <td class="h-px w-1/6">
+                                        <div class="px-6 py-2">
                                             <div class="inline-flex items-center gap-x-1 text-sm">
                                                 <div class="inline-flex text-center gap-x-1 text-sm py-1 px-2 bg-yellow-50 text-yellow-700 rounded-md">
                                                     <span>Certificado disponible al finalizar evento</span>
                                                 </div>
                                             </div>
-{% endif %}
                                         </div>
                                     </td>
+{% endif %}
                                 </tr>
 {% endfor %}
                             </tbody>
