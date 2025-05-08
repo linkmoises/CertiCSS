@@ -117,7 +117,7 @@ class User(UserMixin):
 ### Crear índice único para evitar duplicados
 ###
 try:
-    collection_participantes.create_index([("cedula", 1), ("codigo_evento", 1), ("titulo_ponencia", 1)], unique=True)
+    collection_participantes.create_index([("cedula", 1), ("codigo_evento", 1), ("titulo_ponencia", 1), ("indice_registro", 1)], unique=True)
 except Exception as e:
     print(f"Error al crear índice: {e}")
 
@@ -925,6 +925,7 @@ def registrar():
         'codigo_evento': codigo_evento,
         'nanoid': nanoid,
         'timestamp': timestamp,
+        'indice_registro': datetime.now().strftime('%Y%m%d'),
         'tipo_evento': 'Presencial' if es_presencial else 'Virtual'
     })
 
@@ -1041,6 +1042,7 @@ def registrar_ponente(codigo_evento):
             'titulo_ponencia': titulo_ponencia,
             'codigo_evento': codigo_evento,
             'nanoid': nanoid,
+            'indice_registro': datetime.now().strftime('%Y%m%d'),
             'timestamp': datetime.now()  # Almacenar timestamp actual
         })
 
@@ -1094,6 +1096,7 @@ def registrar_organizador(codigo_evento):
             'codigo_evento': codigo_evento,
             'nanoid': nanoid,
             'titulo_ponencia': titulo_ponencia,
+            'indice_registro': datetime.now().strftime('%Y%m%d'),
             'timestamp': datetime.now()     # Almacenar timestamp actual
         })
 
