@@ -845,7 +845,7 @@ def registrar_participante(codigo_evento):
             evento=evento,
             codigo_evento=codigo_evento,
             nombre_evento=evento['nombre'],
-            afiche_url=url_for('static', filename='uploads/' + evento['afiche_750'].split('/')[-1]),
+            afiche_url=evento.get('afiche_750') if evento.get('afiche_750') else None,
             programa_url=evento.get('programa_url')
         )
     else:
@@ -854,7 +854,7 @@ def registrar_participante(codigo_evento):
             evento=evento,
             codigo_evento=codigo_evento,
             nombre_evento=evento['nombre'],
-            afiche_url=url_for('static', filename='uploads/' + evento['afiche_750'].split('/')[-1]),
+            afiche_url=evento.get('afiche_750') if evento.get('afiche_750') else None,
             programa_url=evento.get('programa_url')
         )
 
