@@ -58,6 +58,7 @@
                     <p class="mt-2 text-sm text-gray-600"><strong>Nombres:</strong> {{ participante.nombres }} {{ participante.apellidos }}</p>
                     <p class="mt-2 text-sm text-gray-600"><strong>Evento:</strong> {{ evento.nombre }}</p>
                     <p class="mt-2 text-sm text-gray-600"><strong>Rol:</strong> {{ participante.rol }}</p>
+                    <p class="mt-2 text-sm text-gray-600"><strong>Fecha:</strong> {% if evento.fecha_inicio == evento.fecha_fin %}{{ evento.fecha_inicio.strftime('%d de %B de %Y') }}{% else %}{{ evento.fecha_inicio.strftime('%d') }} al {{ evento.fecha_fin.strftime('%d de %B de %Y') }}{% endif %}</p>
     {% if participante.rol == 'ponente' %}
                     <p class="mt-2 text-sm text-gray-600"><strong>Ponencia:</strong> {{ participante.titulo_ponencia }}</p>
     {% endif %}

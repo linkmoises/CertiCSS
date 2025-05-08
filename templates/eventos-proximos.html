@@ -113,7 +113,7 @@
                 
                                 <th scope="col" class="px-6 py-3 text-start">
                                     <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
-                                        Fecha inicio
+                                        Fecha(s)
                                     </a>
                                 </th>
                 
@@ -170,7 +170,7 @@
                                 </td>
                                 <td class="size-px whitespace-nowrap text-center">
                                     <a class="block relative z-10" href="#">
-                                        <span class="text-sm text-gray-500">{{ evento.fecha_inicio.strftime('%d %b, %Y') }}</span>
+                                        <span class="text-sm text-gray-500">{% if evento.fecha_inicio == evento.fecha_fin %}{{ evento.fecha_inicio.strftime('%d %b, %Y') }}{% else %}{{ evento.fecha_inicio.strftime('%d') }} - {{ evento.fecha_fin.strftime('%d %b, %Y') }}{% endif %}</span>
                                     </a>
                                 </td>
                                 <td class="size-px whitespace-nowrap">
