@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Participantes</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    </style>
+</head>
+<body>
+    <h1>Lista de Participantes</h1>
+    <table>
+        <thead>
+            <tr>
+                {% for campo in campos %}
+                    <th>{{ campo }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for fila in datos %}
+                <tr>
+                    {% for campo in campos %}
+                        <td>{{ fila.get(campo, '') }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

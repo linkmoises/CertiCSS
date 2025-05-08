@@ -1306,6 +1306,54 @@ def mis_eventos_digitales(page=1):
 
 
 ###
+### Administración de Bases de Datos
+###
+@app.route('/bases-de-datos')
+@app.route('/bases-de-datos/page/<int:page>')
+@login_required
+def db_eventos(page=1):
+    # Verificar si el usuario es administrador
+    if current_user.rol != 'administrador':
+        flash('No tienes permiso para acceder a esta página.', 'error')
+        return redirect(url_for('home'))
+
+    eventos_por_pagina = 20
+
+    # Calcular el número total de eventos
+    total_eventos = collection_eventos.count_documents({})
+    # Calcular el número total de páginas
+    total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
+
+    # Obtener los eventos para la página actual
+    eventos_cursor = collection_eventos.find().sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    eventos = list(eventos_cursor)
+
+    return render_template('bd.html',
+        eventos=eventos,
+        total_eventos=total_eventos,
+        page=page,
+        total_paginas=total_paginas
+    )
+
+
+###
+### Base de datos individual
+###
+@app.route("/base-de-datos/<codigo_evento>")
+def db_individual(codigo_evento):
+    documentos = list(collection_participantes.find({"codigo_evento": codigo_evento}))
+    
+    # Obtener todos los campos usados
+    campos = set()
+    for doc in documentos:
+        campos.update(doc.keys())
+    
+    campos = sorted(campos)  # ordenamos alfabéticamente para la tabla
+    
+    return render_template("bd_individual.html", campos=campos, datos=documentos)
+
+
+###
 ### Aula Digital
 ###
 @app.route('/eventos-digitales')
