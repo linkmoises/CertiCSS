@@ -1475,6 +1475,7 @@ def crear_evento():
         lugar = request.form['lugar']
         tipo = request.form['tipo']
         cupos = request.form['cupos']
+        carga_horaria = request.form['carga_horaria']
         modalidad = request.form['modalidad']
         descripcion = request.form['descripcion']
 
@@ -1546,6 +1547,7 @@ def crear_evento():
             'modalidad': modalidad,
             'descripcion': descripcion,
             'cupos': cupos,
+            'carga_horaria': carga_horaria,
             'fecha_inicio': fecha_inicio,
             'fecha_fin': fecha_fin,
             'estado_evento': estado_evento,
@@ -1585,7 +1587,7 @@ def editar_evento(codigo_evento):
         modalidad = request.form['modalidad']
         descripcion = request.form['descripcion']
         cupos = request.form['cupos']
-
+        carga_horaria = request.form['carga_horaria']
         fecha_inicio_str = request.form['fecha_inicio']
         fecha_fin_str = request.form['fecha_fin']
 
@@ -1650,6 +1652,7 @@ def editar_evento(codigo_evento):
                 'modalidad': modalidad,
                 'descripcion': descripcion,
                 'cupos': cupos,
+                'carga_horaria': carga_horaria,
                 'fecha_inicio': fecha_inicio,
                 'fecha_fin': fecha_fin,
                 'estado_evento': estado_evento,
@@ -2767,7 +2770,7 @@ def generar_pdf_participante(participante, afiche_path):
 
     titulo_evento = evento.get('nombre', 'Título no disponible')
     unidad_evento = evento.get('unidad_ejecutora', 'Unidad ejecutora no disponible')
-
+    carga_horaria_evento = evento.get('carga_horaria', '08')
     fecha_fin_evento = evento.get('fecha_fin')
     fecha_fin_formateada = fecha_fin_evento.strftime('%d de %B de %Y')
 
@@ -2812,7 +2815,7 @@ def generar_pdf_participante(participante, afiche_path):
         draw_centered_text(3.5 * inch, f"Con la ponencia:")
         draw_centered_text(3.2 * inch, f"{participante.get('titulo_ponencia', 'N/A')}", font="Helvetica-Bold", size=16)
     else:
-        draw_centered_text(3.5 * inch, f"Actividad académica con una duración de 08 horas")
+        draw_centered_text(3.5 * inch, f"Actividad académica con una duración de {carga_horaria_evento} horas")
         draw_centered_text(3.2 * inch, f"{fecha_inicio_formateada + ' al ' + fecha_fin_formateada if fecha_inicio_evento != fecha_fin_evento else fecha_fin_formateada}")
 
     draw_centered_text(2.7 * inch, f"Dado en la República de Panamá, Provincia de Panamá, el {fecha_fin_formateada}")
@@ -2927,6 +2930,7 @@ def generar_constancia_asistencia(participante, afiche_path):
     titulo_evento = evento.get('nombre', 'Título no disponible')
     unidad_evento = evento.get('unidad_ejecutora', 'Unidad ejecutora no disponible')
     modalidad_evento = evento.get('modalidad', 'Modalidad no disponible')
+    carga_horaria_evento = evento.get('carga_horaria', '08')
     ue_evento = evento.get('unidad_ejecutora', 'Unidad ejecutora no disponible')
 
     fi_evento = evento.get('fecha_inicio')
@@ -2978,7 +2982,7 @@ def generar_constancia_asistencia(participante, afiche_path):
         f"Se certifica la asistencia de <b>{participante['nombres']} {participante['apellidos']}</b>, "
         f"con cédula <b>{participante['cedula']}</b>, en el evento <b>'{titulo_evento}'</b>, realizado en modalidad "
         f"<b>{modalidad_evento.lower()}</b> y organizado por la unidad ejecutora <b>'{ue_evento}'</b>, "
-        f"{'los días ' + fid_formateada + ' al ' + ff_formateada if fi_evento != ff_evento else 'el día ' + ff_formateada} en el horario de 7:00am a 3:00pm."
+        f"{'los días ' + fid_formateada + ' al ' + ff_formateada if fi_evento != ff_evento else 'el día ' + ff_formateada} con una duración de {carga_horaria_evento} horas académicas."
     )
 
     # Crear un párrafo
