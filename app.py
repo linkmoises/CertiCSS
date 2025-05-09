@@ -1321,7 +1321,7 @@ def db_eventos(page=1):
     skip = (page - 1) * eventos_por_pagina
 
     # Obtener todos los eventos
-    eventos = list(collection_eventos.find().skip(skip).limit(eventos_por_pagina))
+    eventos = list(collection_eventos.find().sort("fecha_inicio", -1).skip(skip).limit(eventos_por_pagina))
     total_eventos = collection_eventos.count_documents({})
     total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina
 
@@ -1337,11 +1337,11 @@ def db_eventos(page=1):
     campos = sorted(campos)  # ordenamos alfabéticamente para la tabla
 
     return render_template('bd.html',
-                         eventos=eventos,
-                         campos=campos,
-                         page=page,
-                         total_paginas=total_paginas,
-                         total_eventos=total_eventos)
+        eventos=eventos,
+        campos=campos,
+        page=page,
+        total_paginas=total_paginas,
+        total_eventos=total_eventos)
 
 
 ###
@@ -1438,7 +1438,7 @@ def actualizar_campo_participante():
             {'$set': {campo: valor}}
         )
 
-        print(f"Resultado de la actualización: modified={result.modified_count}, matched={result.matched_count}")
+        #print(f"Resultado de la actualización: modified={result.modified_count}, matched={result.matched_count}")
 
         if result.modified_count > 0 or result.matched_count > 0:
             return jsonify({'success': True})
