@@ -1405,6 +1405,52 @@ def db_individual(codigo_evento):
 
 
 ###
+### Actualizar campo de participante
+###
+@app.route('/actualizar_campo_participante', methods=['POST'])
+@login_required
+def actualizar_campo_participante():
+    if current_user.rol != 'administrador':
+        return jsonify({'success': False, 'error': 'No tienes permiso para realizar esta acción'})
+
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'error': 'No se recibieron datos JSON'})
+
+        nanoid = data.get('nanoid')
+        campo = data.get('campo')
+        valor = data.get('valor', '')
+
+        print(f"Recibida solicitud para actualizar: nanoid={nanoid}, campo={campo}, valor={valor}")
+
+        if not all([nanoid, campo]):
+            return jsonify({'success': False, 'error': 'Faltan datos requeridos'})
+
+        # Verificar si el participante existe
+        participante = collection_participantes.find_one({'nanoid': nanoid})
+        if not participante:
+            return jsonify({'success': False, 'error': 'Participante no encontrado'})
+
+        # Actualizar el campo específico
+        result = collection_participantes.update_one(
+            {'nanoid': nanoid},
+            {'$set': {campo: valor}}
+        )
+
+        print(f"Resultado de la actualización: modified={result.modified_count}, matched={result.matched_count}")
+
+        if result.modified_count > 0 or result.matched_count > 0:
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False, 'error': 'No se pudo actualizar el campo'})
+
+    except Exception as e:
+        print(f"Error en actualizar_campo_participante: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)})
+
+
+###
 ### Aula Digital
 ###
 @app.route('/eventos-digitales')

@@ -18,10 +18,10 @@
                             <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
                                 <div>
                                     <h2 class="text-xl font-semibold text-gray-800">
-                                        MongoDB - Colección - {{ evento.codigo }}
+                                        MongoDB - Colección - Participantes
                                     </h2>
                                     <p class="text-sm text-gray-600">
-                                        {{ evento.nombre }}
+                                        Vista de edición de campos de los participantes de {{ evento.nombre }}
                                     </p>
                                 </div>
                             </div>
@@ -43,7 +43,14 @@
                                     <tr class="hover:bg-gray-50">
                                         {% for campo in campos %}
                                         <td class="px-4 py-2 text-sm text-gray-800 whitespace-nowrap">
-                                            {{ fila.get(campo, '') }}
+                                            <div class="editable-field" 
+                                                 data-codigo="{{ fila.get('nanoid', '') }}" 
+                                                 data-campo="{{ campo }}" 
+                                                 data-valor="{{ fila.get(campo, '') }}"
+                                                 onclick="makeEditable(this)"
+                                                 style="min-height: 20px; cursor: pointer;">
+                                                {{ fila.get(campo, '') }}
+                                            </div>
                                         </td>
                                         {% endfor %}
                                     </tr>
@@ -61,7 +68,7 @@
 
                                 <div>
                                     <div class="inline-flex gap-x-2">
-                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="{{ url_for('listar_eventos') }}">
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="{{ url_for('db_eventos') }}">
                                             Ver todos los eventos
                                         </a>
                                     </div>
@@ -133,6 +140,86 @@ hiddenInput.value = valor;
 form.appendChild(hiddenInput);
 form.submit();
 });
+
+function makeEditable(element) {
+    if (element.getAttribute('contenteditable') === 'true') return;
+    
+    const originalValue = element.textContent.trim();
+    element.setAttribute('contenteditable', 'true');
+    element.focus();
+    
+    // Crear un rango y seleccionar todo el texto
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    // Manejar la pérdida de foco
+    element.addEventListener('blur', function() {
+        const newValue = element.textContent.trim();
+        if (newValue !== originalValue) {
+            saveChanges(element, newValue);
+        }
+        element.setAttribute('contenteditable', 'false');
+    });
+
+    // Manejar la tecla Enter
+    element.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            element.blur();
+        }
+    });
+}
+
+function saveChanges(element, newValue) {
+    const nanoid = element.getAttribute('data-codigo');
+    const campo = element.getAttribute('data-campo');
+    
+    if (!nanoid) {
+        alert('Error: No se pudo obtener el ID del participante');
+        element.textContent = element.getAttribute('data-valor');
+        return;
+    }
+
+    console.log('Enviando datos:', {
+        nanoid: nanoid,
+        campo: campo,
+        valor: newValue
+    });
+
+    fetch('/actualizar_campo_participante', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            nanoid: nanoid,
+            campo: campo,
+            valor: newValue || ''
+        })
+    })
+    .then(response => {
+        console.log('Respuesta del servidor:', response);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Datos recibidos:', data);
+        if (data.success) {
+            element.textContent = newValue;
+            element.setAttribute('data-valor', newValue);
+        } else {
+            alert('Error al guardar los cambios: ' + (data.error || 'Error desconocido'));
+            element.textContent = element.getAttribute('data-valor');
+        }
+    })
+    .catch(error => {
+        console.error('Error completo:', error);
+        alert('Error al guardar los cambios: ' + error.message);
+        element.textContent = element.getAttribute('data-valor');
+    });
+}
 </script>
 </body>
 </html>
