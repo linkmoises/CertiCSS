@@ -1,31 +1,138 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Participantes</title>
-    <style>
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    </style>
-</head>
-<body>
-    <h1>Lista de Participantes</h1>
-    <table>
-        <thead>
-            <tr>
-                {% for campo in campos %}
-                    <th>{{ campo }}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for fila in datos %}
-                <tr>
-                    {% for campo in campos %}
-                        <td>{{ fila.get(campo, '') }}</td>
-                    {% endfor %}
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+{% include 'tablero-header.html' %}
+
+{% include 'tablero-sidebar.html' %}
+
+    <!-- CONTENIDO -->
+    <div class="w-full lg:ps-64">
+        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+
+            <!-- TABLA RESUMEN EVENTOS -->
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+
+                <!-- Card -->
+                <div class="flex flex-col">
+                    <div class="-m-1.5 overflow-x-auto">
+                        <div class="p-1.5 min-w-full inline-block align-middle">
+                        <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                            <!-- Header -->
+                            <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
+                                <div>
+                                    <h2 class="text-xl font-semibold text-gray-800">
+                                        MongoDB - Colección - {{ evento.codigo }}
+                                    </h2>
+                                    <p class="text-sm text-gray-600">
+                                        {{ evento.nombre }}
+                                    </p>
+                                </div>
+                            </div>
+                            <!-- End Header -->
+
+                            <!-- Table -->
+                            <table class="table-auto min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                    {% for campo in campos %}
+                                        <th scope="col" class="px-4 py-2 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">
+                                        {{ campo }}
+                                        </th>
+                                    {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 bg-white">
+                                    {% for fila in datos %}
+                                    <tr class="hover:bg-gray-50">
+                                        {% for campo in campos %}
+                                        <td class="px-4 py-2 text-sm text-gray-800 whitespace-nowrap">
+                                            {{ fila.get(campo, '') }}
+                                        </td>
+                                        {% endfor %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+
+                            <!-- Footer -->
+                            <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
+                                <div>
+                                    <p class="text-sm text-gray-600 dark:text-neutral-400">
+                                        <span class="font-semibold text-gray-800 dark:text-neutral-200">{{ total_registros }}</span> {{ 'registro en esta colección' if total_registros == 1 else 'registros en esta colección' }}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <div class="inline-flex gap-x-2">
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="{{ url_for('listar_eventos') }}">
+                                            Ver todos los eventos
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- End Footer -->
+
+                        </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+
+            </div>
+
+{% include 'tablero-footer.html' %}
+
+        </div>
+    </div>
+    <!-- FIN CONTENIDO -->
+
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+<script>
+// Limpia campos dinámicos al cargar la página
+document.addEventListener("DOMContentLoaded", function () {
+const hiddenInputs = document.querySelectorAll("#buscadorForm input[type='hidden']");
+hiddenInputs.forEach((input) => input.remove());
+});
+document.getElementById("buscadorForm").addEventListener("submit", function (event) {
+event.preventDefault(); // Prevenir envío estándar del formulario
+
+const valor = document.getElementById("buscador").value.trim();
+const patterns = {
+cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas
+pasaporte: /^[A-Z]{2}\d{6,9}$/,                        // Pasaportes
+id_certificado: /^[a-zA-Z0-9]{8}$/                    // IDs de certificados
+};
+
+let action, field;
+
+if (patterns.cedula.test(valor)) {
+action = "/buscar_certificados";
+field = "cedula";
+} else if (patterns.pasaporte.test(valor)) {
+action = "/buscar_certificados";
+field = "cedula";
+} else if (patterns.id_certificado.test(valor)) {
+action = "/validar_certificado";
+field = "nanoid";
+} else {
+alert("Formato no válido. Introduzca un documento de identificación o un ID de certificado válido.");
+return;
+}
+
+// Crear y enviar el formulario dinámicamente
+const form = event.target;
+form.action = action;
+form.method = "POST";
+
+// Limpiar campos ocultos previos
+const hiddenInputs = form.querySelectorAll("input[type='hidden']");
+hiddenInputs.forEach((input) => input.remove());
+
+const hiddenInput = document.createElement("input");
+hiddenInput.type = "hidden";
+hiddenInput.name = field;
+hiddenInput.value = valor;
+form.appendChild(hiddenInput);
+form.submit();
+});
+</script>
 </body>
 </html>

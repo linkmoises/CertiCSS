@@ -2804,6 +2804,10 @@ select {
   padding-top: 50%;
 }
 
+.text-left {
+  text-align: left;
+}
+
 .text-center {
   text-align: center;
 }

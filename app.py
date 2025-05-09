@@ -1306,7 +1306,7 @@ def mis_eventos_digitales(page=1):
 
 
 ###
-### Administración de Bases de Datos
+### Administración de Colección de Eventos
 ###
 @app.route('/bases-de-datos')
 @app.route('/bases-de-datos/page/<int:page>')
@@ -1317,31 +1317,76 @@ def db_eventos(page=1):
         flash('No tienes permiso para acceder a esta página.', 'error')
         return redirect(url_for('home'))
 
-    eventos_por_pagina = 20
+    eventos_por_pagina = 50
+    skip = (page - 1) * eventos_por_pagina
 
-    # Calcular el número total de eventos
+    # Obtener todos los eventos
+    eventos = list(collection_eventos.find().skip(skip).limit(eventos_por_pagina))
     total_eventos = collection_eventos.count_documents({})
-    # Calcular el número total de páginas
-    total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
+    total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina
 
-    # Obtener los eventos para la página actual
-    eventos_cursor = collection_eventos.find().sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
-    eventos = list(eventos_cursor)
+    # Obtener todos los campos posibles de la colección
+    campos = set()
+    for evento in eventos:
+        campos.update(evento.keys())
+    
+    # Asegurar que campos importantes siempre estén presentes
+    campos_importantes = ['codigo_evento', 'nombre', 'fecha_inicio', 'fecha_fin', 'estado_evento', 'unidad_ejecutora', 'tipo', 'modalidad', 'carga_horaria']
+    campos.update(campos_importantes)
+    
+    campos = sorted(campos)  # ordenamos alfabéticamente para la tabla
 
     return render_template('bd.html',
-        eventos=eventos,
-        total_eventos=total_eventos,
-        page=page,
-        total_paginas=total_paginas
-    )
+                         eventos=eventos,
+                         campos=campos,
+                         page=page,
+                         total_paginas=total_paginas,
+                         total_eventos=total_eventos)
 
 
 ###
-### Base de datos individual
+### Actualizar campo de evento
+###
+@app.route('/actualizar_campo_evento', methods=['POST'])
+@login_required
+def actualizar_campo_evento():
+    if current_user.rol != 'administrador':
+        return jsonify({'success': False, 'error': 'No tienes permiso para realizar esta acción'})
+
+    data = request.get_json()
+    codigo_evento = data.get('codigo_evento')
+    campo = data.get('campo')
+    valor = data.get('valor', '')
+
+    if not all([codigo_evento, campo]):
+        return jsonify({'success': False, 'error': 'Faltan datos requeridos'})
+
+    try:
+        # Actualizar el campo específico
+        result = collection_eventos.update_one(
+            {'codigo': codigo_evento},  # Cambiado de codigo_evento a codigo
+            {'$set': {campo: valor}}
+        )
+
+        if result.modified_count > 0 or result.matched_count > 0:
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False, 'error': 'No se pudo actualizar el campo'})
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
+###
+### Colección de participantes de evento
 ###
 @app.route("/base-de-datos/<codigo_evento>")
 def db_individual(codigo_evento):
     documentos = list(collection_participantes.find({"codigo_evento": codigo_evento}))
+    total_registros = len(documentos)
+    
+    # Obtener el evento para mostrar su título
+    evento = collection_eventos.find_one({"codigo_evento": codigo_evento})
     
     # Obtener todos los campos usados
     campos = set()
@@ -1350,7 +1395,13 @@ def db_individual(codigo_evento):
     
     campos = sorted(campos)  # ordenamos alfabéticamente para la tabla
     
-    return render_template("bd_individual.html", campos=campos, datos=documentos)
+    return render_template("bd_individual.html", 
+        codigo_evento=codigo_evento,
+        campos=campos, 
+        datos=documentos,
+        total_registros=total_registros,
+        evento=evento
+    )
 
 
 ###
