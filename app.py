@@ -3274,7 +3274,7 @@ def get_client_ip():
 
 
 ###
-### Importaciones y blueprints
+### Importaciones de app y blueprints
 ###
 
 ### Logs
