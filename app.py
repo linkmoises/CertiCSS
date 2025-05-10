@@ -117,6 +117,9 @@ class User(UserMixin):
 ### Crear índice único para evitar duplicados
 ###
 try:
+    # Eliminar índices existentes
+    collection_participantes.drop_indexes()
+    # Crear el nuevo índice
     collection_participantes.create_index([("cedula", 1), ("codigo_evento", 1), ("titulo_ponencia", 1), ("indice_registro", 1)], unique=True)
 except Exception as e:
     print(f"Error al crear índice: {e}")
@@ -882,7 +885,7 @@ def registrar():
     es_presencial = evento.get("modalidad", "") == "Presencial"
 
     # Verificar si el participante ya está registrado en este evento
-    if collection_participantes.find_one({"cedula": cedula, "codigo_evento": codigo_evento, "rol": "participante"}):
+    if collection_participantes.find_one({"cedula": cedula, "codigo_evento": codigo_evento, "rol": "participante", "indice_registro": datetime.now().strftime('%Y%m%d')}):
         flash("El participante ya está registrado en este evento.", "error")
         return redirect(url_for('registrar_participante', codigo_evento=codigo_evento))
 
@@ -3274,7 +3277,7 @@ def get_client_ip():
 
 
 ###
-### Importaciones de app y blueprints
+### Importaciones de appy blueprints
 ###
 
 ### Logs
