@@ -1971,18 +1971,16 @@ def obtener_fecha_ordenable(item):
 @app.route('/buscar_certificados', methods=['GET', 'POST'])
 def buscar_certificados():
     if request.method == 'POST':
-        # Obtener el número de cédula del formulario
+        # Obtener la cédula del formulario
         cedula = request.form.get('cedula')
-
         token = generate_token(cedula)
 
-        # Buscar participantes por cédula
+        # Buscar registros del participante
         participantes = list(collection_participantes.find({"cedula": cedula}))
 
-        if not participantes:  # Si no hay participantes encontrados
+        if not participantes:
             return render_template('lista_certificados.html', cedula=cedula, resultados=None)
 
-        # Crear una lista para almacenar los resultados
         resultados = []
 
         for participante in participantes:
@@ -1991,10 +1989,8 @@ def buscar_certificados():
 
             tiene_archivos = collection_repositorio.count_documents({'codigo_evento': codigo_evento}) > 0
 
-            if evento:  # Verificar si el evento fue encontrado
-
+            if evento:
                 fecha_evento = evento.get('fecha_inicio', None)
-                es_no_presencial = evento.get('modalidad') != 'Presencial'
 
                 resultado = {
                     'nombres': participante['nombres'],
@@ -2012,7 +2008,6 @@ def buscar_certificados():
                 }
                 resultados.append(resultado)
             else:
-                # Manejar casos donde no se encuentra el evento
                 resultado = {
                     'cedula': participante['cedula'],
                     'nanoid': participante['nanoid'],
@@ -2022,22 +2017,43 @@ def buscar_certificados():
                 }
                 resultados.append(resultado)
 
-        # Ordenar resultados por fecha_evento
-        from datetime import datetime
+        # ========= FILTRAR DUPLICADOS DE PARTICIPANTE ==========
+        filtrados = []
+        unicos_participantes = {}
+
+        for r in resultados:
+            if r['rol'] == 'participante':
+                clave = (r['cedula'], r['codigo_evento'], r['rol'])
+                if clave not in unicos_participantes:
+                    unicos_participantes[clave] = r
+            else:
+                filtrados.append(r)
+
+        # Añadir los únicos registros de participante
+        filtrados.extend(unicos_participantes.values())
+        resultados = filtrados
+        # ========================================================
+
+        # Ordenar por fecha del evento
         fecha_actual = datetime.now().date()
         hora_actual = datetime.now().time()
 
         def obtener_fecha_ordenable(item):
             fecha = item.get('fecha_evento')
-            return fecha or datetime.min 
-            # datetime.min 
-            # datetime.max
-        
+            return fecha or datetime.min
+
         resultados.sort(key=obtener_fecha_ordenable, reverse=True)
 
-        return render_template('lista_certificados.html', cedula=cedula, resultados=resultados, fecha_actual=fecha_actual, hora_actual=hora_actual, token=token, tiene_archivos=tiene_archivos)
+        return render_template(
+            'lista_certificados.html',
+            cedula=cedula,
+            resultados=resultados,
+            fecha_actual=fecha_actual,
+            hora_actual=hora_actual,
+            token=token
+        )
 
-    return render_template('buscar.html')  # Mostrar el formulario para buscar certificados
+    return render_template('buscar.html')
 
 
 ###
@@ -3128,7 +3144,28 @@ def generar_constancia_asistencia(participante, afiche_path):
     # Texto de la constancia
     texto_constancia = (
         f"Se certifica la asistencia de <b>{participante['nombres']} {participante['apellidos']}</b>, "
-        f"con cédula <b>{participante['cedula']}</b>, en el evento <b>'{titulo_evento}'</b>, realizado en modalidad "
+        f"con cédula <b>{participante['cedula']}</b>, "
+    )
+
+    # Verificar si el participante tiene múltiples registros
+    registros_participante = list(collection_participantes.find({
+        "cedula": participante['cedula'],
+        "codigo_evento": codigo_evento,
+        "rol": "participante"
+    }))
+
+    if len(registros_participante) > 1:
+        # Si tiene múltiples registros, mostrar los días específicos
+        dias_asistencia = []
+        for registro in registros_participante:
+            if registro.get('indice_registro'):
+                fecha = datetime.strptime(registro['indice_registro'], '%Y%m%d')
+                dias_asistencia.append(fecha.strftime('%d de %B de %Y'))
+        
+        texto_constancia += f"participando los días {', '.join(dias_asistencia)}, "
+
+    texto_constancia += (
+        f"en el evento <b>'{titulo_evento}'</b>, realizado en modalidad "
         f"<b>{modalidad_evento.lower()}</b> y organizado por la unidad ejecutora <b>'{ue_evento}'</b>, "
         f"{'los días ' + fid_formateada + ' al ' + ff_formateada if fi_evento != ff_evento else 'el día ' + ff_formateada} con una duración de {carga_horaria_evento} horas académicas."
     )
