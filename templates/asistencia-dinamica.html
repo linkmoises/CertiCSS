@@ -1,0 +1,304 @@
+{% include 'tablero-header.html' %}
+
+{% include 'tablero-sidebar.html' %}
+
+    <!-- CONTENIDO -->
+    <div class="w-full lg:ps-64">
+        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+            
+            <!-- TABLA ASISTENCIA DINÁMICA -->
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <!-- Card -->
+                <div class="flex flex-col">
+                <div class="-m-1.5 overflow-x-auto">
+                    <div class="p-1.5 min-w-full inline-block align-middle">
+                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+
+                        <!-- Header -->
+                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-800">
+                                    Seguimiento de Asistencia
+                                </h2>
+                                <p class="text-sm text-gray-600">
+                                    Ingrese las cédulas y códigos de evento para ver el seguimiento de asistencia
+                                </p>
+                            </div>
+            
+                        </div>
+                        <!-- End Header -->
+
+                        <!-- Formulario para añadir cédulas y códigos de evento -->
+                        <div class="p-6 border-b border-gray-200">
+
+                            <form method="POST" action="{{ url_for('asistencia.asistencia_dinamica') }}">
+                                <div class="grid gap-4 sm:grid-cols-2">
+                                    <!-- Campo para cédulas -->
+                                    <div>
+                                        <label for="cedulas" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Cédulas (una por línea)
+                                        </label>
+                                        <textarea id="cedulas" name="cedulas" rows="5" 
+                                            class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
+                                            placeholder="Ingrese las cédulas a consultar (una por línea)"></textarea>
+                                    </div>
+                    
+                                    <!-- Campo para códigos de evento -->
+                                    <div>
+                                        <label for="eventos" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Códigos de Evento (uno por línea)
+                                        </label>
+                                        <textarea id="eventos" name="eventos" rows="5" 
+                                            class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
+                                            placeholder="Ingrese los códigos de evento a consultar (uno por línea)"></textarea>
+                                    </div>
+                                </div>
+                    
+                                <div class="mt-5 flex justify-between">
+                                    <button type="submit" 
+                                        class="py-2 px-3 inline-flex justify-center items-center gap-2 rounded-md border border-transparent font-semibold bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all text-sm">
+                                        Añadir a la tabla de asistencia dinámica
+                                    </button>
+                                </div>
+                            </form>
+
+                            <!-- Formulario separado para limpiar seguimiento -->
+                            <div class="mt-4">
+                                <form method="POST" action="{{ url_for('asistencia.limpiar_seguimiento') }}" class="inline">
+                                    <button type="submit" 
+                                        class="py-2 px-3 inline-flex justify-center items-center gap-2 rounded-md border border-transparent font-semibold bg-red-500 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all text-sm">
+                                        Borrar todo el seguimiento
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+{% if tabla and eventos %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+                        <div class="my-2">
+                            <ul>
+                            {% for category, message in messages %}
+                                <li class="{{ 'p-2 text-sm bg-red-100 text-red-800 rounded-xl' if category == 'error' else 'p-2 text-sm bg-green-100 text-green-800 rounded-r-xl' }}">
+                                {{ message }}
+                                </li>
+                            {% endfor %}
+                            </ul>
+                        </div>
+{% endif %}
+{% endwith %}
+                        <div class="p-6 border-b border-gray-200 bg-gray-100">
+                            <p class="text-sm text-gray-600 font-bold">Información de seguimiento:</p>
+                            <p class="text-sm text-gray-600">Eventos académicos en seguimiento: {{ eventos|length }}</p>
+                            <p class="text-sm text-gray-600">Participantes en seguimiento: {{ tabla|length }}</p>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Participante
+                                        </th>
+                                        {% for evento in eventos %}
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" 
+                                            title="{{ evento.nombre }}">
+                                            <div class="flex items-center justify-center gap-2">
+                                                {{ evento.codigo }}
+                                                <form method="POST" action="{{ url_for('asistencia.eliminar_evento', codigo=evento.codigo) }}" class="inline">
+                                                    <button type="submit" class="text-red-500 hover:text-red-700">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    {% for fila in tabla %}
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <div class="flex items-center gap-2">
+                                                {{ fila.cedula }}
+                                                <form method="POST" action="{{ url_for('asistencia.eliminar_cedula', cedula=fila.cedula) }}" class="inline">
+                                                    <button type="submit" class="text-red-500 hover:text-red-700">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                        {% for evento in eventos %}
+                                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                                            {% if fila.asistencia[evento.codigo] %}
+                                            <span class="text-green-600">✅</span>
+                                            {% else %}
+                                            <span class="text-red-600">❌</span>
+                                            {% endif %}
+                                        </td>
+                                        {% endfor %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200">
+                            <div>
+                                <p class="text-sm text-gray-600">
+                                <span class="font-semibold text-gray-800">{{ tabla|length }}</span> {{ 'participante en seguimiento' if tabla|length == 1 else 'participantes en seguimiento' }}
+                                </p>
+                            </div>
+                
+                            <div>
+                                <div class="inline-flex gap-x-2">
+                                    <a href="#" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50">
+                                        Descargar tabla de asistencia
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Footer -->
+{% endif %}
+                    </div>
+                    </div>
+                </div>
+                </div>
+
+            </div>
+            <!-- FIN TABLA ASISTENCIA DINÁMICA -->
+
+{% include 'tablero-footer.html' %}
+
+        </div>
+    </div>
+    <!-- FIN CONTENIDO -->
+
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+<script>
+// Limpia campos dinámicos al cargar la página
+document.addEventListener("DOMContentLoaded", function () {
+    const hiddenInputs = document.querySelectorAll("#buscadorForm input[type='hidden']");
+    hiddenInputs.forEach((input) => input.remove());
+});
+document.getElementById("buscadorForm").addEventListener("submit", function (event) {
+    event.preventDefault(); // Prevenir envío estándar del formulario
+
+    const valor = document.getElementById("buscador").value.trim();
+    const patterns = {
+        cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas
+        pasaporte: /^[A-Z]{2}\d{6,9}$/,                        // Pasaportes
+        id_certificado: /^[a-zA-Z0-9]{8}$/                    // IDs de certificados
+    };
+
+    let action, field;
+
+    if (patterns.cedula.test(valor)) {
+        action = "/buscar_certificados";
+        field = "cedula";
+    } else if (patterns.pasaporte.test(valor)) {
+        action = "/buscar_certificados";
+        field = "cedula";
+    } else if (patterns.id_certificado.test(valor)) {
+        action = "/validar_certificado";
+        field = "nanoid";
+    } else {
+        alert("Formato no válido. Introduzca un documento de identificación o un ID de certificado válido.");
+        return;
+    }
+
+    // Crear y enviar el formulario dinámicamente
+    const form = event.target;
+    form.action = action;
+    form.method = "POST";
+
+    // Limpiar campos ocultos previos
+    const hiddenInputs = form.querySelectorAll("input[type='hidden']");
+    hiddenInputs.forEach((input) => input.remove());
+
+    const hiddenInput = document.createElement("input");
+    hiddenInput.type = "hidden";
+    hiddenInput.name = field;
+    hiddenInput.value = valor;
+    form.appendChild(hiddenInput);
+    form.submit();
+});
+
+function makeEditable(element) {
+    if (element.getAttribute('contenteditable') === 'true') return;
+    
+    const originalValue = element.textContent.trim();
+    element.setAttribute('contenteditable', 'true');
+    element.focus();
+    
+    // Crear un rango y seleccionar todo el texto
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    // Manejar la pérdida de foco
+    element.addEventListener('blur', function() {
+        const newValue = element.textContent.trim();
+        if (newValue !== originalValue) {
+            saveChanges(element, newValue);
+        }
+        element.setAttribute('contenteditable', 'false');
+    });
+
+    // Manejar la tecla Enter
+    element.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            element.blur();
+        }
+    });
+}
+
+function saveChanges(element, newValue) {
+    const codigo = element.getAttribute('data-codigo');
+    const campo = element.getAttribute('data-campo');
+    
+    if (!codigo) {
+        alert('Error: No se pudo obtener el código del evento');
+        element.textContent = element.getAttribute('data-valor');
+        return;
+    }
+
+    fetch('/actualizar_campo_evento', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            codigo_evento: codigo,
+            campo: campo,
+            valor: newValue || ''
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            element.textContent = newValue;
+            element.setAttribute('data-valor', newValue);
+        } else {
+            alert('Error al guardar los cambios: ' + data.error);
+            element.textContent = element.getAttribute('data-valor');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al guardar los cambios');
+        element.textContent = element.getAttribute('data-valor');
+    });
+}
+</script>
+</body>
+</html>

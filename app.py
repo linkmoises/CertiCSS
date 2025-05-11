@@ -3325,6 +3325,10 @@ app.register_blueprint(logs_blueprint)
 from app.herramientas import herramientas_bp
 app.register_blueprint(herramientas_bp)
 
+### Asistencia dinámica
+from app.asistencia import asistencia_bp
+app.register_blueprint(asistencia_bp)
+
 
 ###
 ### robots.txt
