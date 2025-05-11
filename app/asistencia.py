@@ -1,9 +1,11 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, session
+from flask import Blueprint, render_template, request, flash, redirect, url_for, session, send_file
 from app import db, collection_eventos, collection_participantes
 from pymongo import MongoClient
 from config import config
 from datetime import datetime
 from flask_login import login_required, current_user
+import csv
+import io
 
 asistencia_bp = Blueprint('asistencia', __name__)
 
@@ -162,4 +164,56 @@ def eliminar_evento(codigo):
             upsert=True
         )
         flash(f'Evento {codigo} eliminado del seguimiento', 'success')
-    return redirect(url_for('asistencia.asistencia_dinamica')) 
+    return redirect(url_for('asistencia.asistencia_dinamica'))
+
+
+###
+### Descargar seguimiento
+###
+@asistencia_bp.route("/descargar-seguimiento", methods=['GET'])
+@login_required
+def descargar_seguimiento():
+    # Obtener los datos del seguimiento
+    seguimiento = collection_seguimiento.find_one({'_id': f'seguimiento_{current_user.id}'})
+    if not seguimiento:
+        flash('No hay datos de seguimiento para descargar', 'warning')
+        return redirect(url_for('asistencia.asistencia_dinamica'))
+
+    # Obtener los eventos
+    eventos = list(collection_eventos.find(
+        {"codigo": {"$in": seguimiento.get('eventos', [])}},
+        {"_id": 0, "codigo": 1, "nombre": 1}
+    ))
+
+    # Crear un buffer en memoria para el CSV
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    # Escribir el encabezado
+    header = ['Cédula'] + [f"{evento['codigo']} ({evento['nombre']})" for evento in eventos]
+    writer.writerow(header)
+
+    # Escribir los datos
+    for cedula in seguimiento.get('cedulas', []):
+        # Buscar registros de asistencia para esta cédula
+        registros = list(collection_participantes.find({
+            "cedula": cedula,
+            "codigo_evento": {"$in": seguimiento.get('eventos', [])}
+        }))
+        
+        # Crear una fila con la asistencia
+        fila = [cedula]
+        for evento in eventos:
+            asistio = any(r["codigo_evento"] == evento["codigo"] for r in registros)
+            fila.append("Sí" if asistio else "No")
+        
+        writer.writerow(fila)
+
+    # Preparar el archivo para descarga
+    output.seek(0)
+    return send_file(
+        io.BytesIO(output.getvalue().encode('utf-8')),
+        mimetype='text/csv',
+        as_attachment=True,
+        download_name=f'seguimiento_asistencia_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
+    ) 
