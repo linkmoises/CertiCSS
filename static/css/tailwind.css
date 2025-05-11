@@ -1982,6 +1982,11 @@ select {
   min-width: 100%;
 }
 
+.min-w-max {
+  min-width: -moz-max-content;
+  min-width: max-content;
+}
+
 .\!max-w-none {
   max-width: none !important;
 }

@@ -69,8 +69,8 @@ def asistencia_dinamica():
     # Consulta 1: Obtener los nombres de eventos por los códigos seleccionados
     eventos = list(collection_eventos.find(
         {"codigo": {"$in": session['eventos_historial']}},
-        {"_id": 0, "codigo": 1, "nombre": 1}
-    ))
+        {"_id": 0, "codigo": 1, "nombre": 1, "fecha_inicio": 1}
+    ).sort("fecha_inicio", 1))
 
     # Validar que todos los códigos de evento existan
     codigos_encontrados = {evento["codigo"] for evento in eventos}

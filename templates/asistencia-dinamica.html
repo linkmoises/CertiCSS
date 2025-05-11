@@ -18,7 +18,7 @@
                         <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
                             <div>
                                 <h2 class="text-xl font-semibold text-gray-800">
-                                    Seguimiento de Asistencia
+                                    Asistencia Dinámica
                                 </h2>
                                 <p class="text-sm text-gray-600">
                                     Ingrese las cédulas y códigos de evento para ver el seguimiento de asistencia
@@ -93,58 +93,60 @@
                             <p class="text-sm text-gray-600">Participantes en seguimiento: {{ tabla|length }}</p>
                         </div>
 
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Participante
-                                        </th>
-                                        {% for evento in eventos %}
-                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" 
-                                            title="{{ evento.nombre }}">
-                                            <div class="flex items-center justify-center gap-2">
-                                                {{ evento.codigo }}
-                                                <form method="POST" action="{{ url_for('asistencia.eliminar_evento', codigo=evento.codigo) }}" class="inline">
-                                                    <button type="submit" class="text-red-500 hover:text-red-700">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                                        </svg>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </th>
+                        <div class="relative">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-10">
+                                                Participante
+                                            </th>
+                                            {% for evento in eventos %}
+                                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" 
+                                                title="{{ evento.nombre }}">
+                                                <div class="flex items-center justify-center gap-2">
+                                                    {{ evento.codigo }}
+                                                    <form method="POST" action="{{ url_for('asistencia.eliminar_evento', codigo=evento.codigo) }}" class="inline">
+                                                        <button type="submit" class="text-red-500 hover:text-red-700">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                            </svg>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </th>
+                                            {% endfor %}
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        {% for fila in tabla %}
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 sticky left-0 bg-white z-10">
+                                                <div class="flex items-center gap-2">
+                                                    {{ fila.cedula }}
+                                                    <form method="POST" action="{{ url_for('asistencia.eliminar_cedula', cedula=fila.cedula) }}" class="inline">
+                                                        <button type="submit" class="text-red-500 hover:text-red-700">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                            </svg>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                            {% for evento in eventos %}
+                                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                                {% if fila.asistencia[evento.codigo] %}
+                                                <span class="text-green-600">✅</span>
+                                                {% else %}
+                                                <span class="text-red-600">❌</span>
+                                                {% endif %}
+                                            </td>
+                                            {% endfor %}
+                                        </tr>
                                         {% endfor %}
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    {% for fila in tabla %}
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            <div class="flex items-center gap-2">
-                                                {{ fila.cedula }}
-                                                <form method="POST" action="{{ url_for('asistencia.eliminar_cedula', cedula=fila.cedula) }}" class="inline">
-                                                    <button type="submit" class="text-red-500 hover:text-red-700">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                                        </svg>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                        {% for evento in eventos %}
-                                        <td class="px-6 py-4 whitespace-nowrap text-center">
-                                            {% if fila.asistencia[evento.codigo] %}
-                                            <span class="text-green-600">✅</span>
-                                            {% else %}
-                                            <span class="text-red-600">❌</span>
-                                            {% endif %}
-                                        </td>
-                                        {% endfor %}
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
 
                         <!-- Footer -->
