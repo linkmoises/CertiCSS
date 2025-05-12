@@ -18,6 +18,7 @@ services:
       - TZ=America/Panama
     depends_on:
       - db
+    restart: always
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000')"]
       interval: 30s
@@ -31,6 +32,7 @@ services:
       - ../db_data:/data/db
     environment:
       - TZ=America/Panama
+    restart: always
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 30s
