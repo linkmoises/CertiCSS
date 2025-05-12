@@ -12,6 +12,9 @@ if ! command -v docker-compose &> /dev/null; then
   exit 1
 fi
 
+# Actualizar cambios en el repositorio
+git pull
+
 # Generar version.txt
 echo "Generando version.txt..."
 BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
