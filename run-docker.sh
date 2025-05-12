@@ -28,4 +28,8 @@ echo "Construyendo y levantando contenedores..."
 #docker-compose up --build -d
 docker-compose up --build --force-recreate -d
 
+# Limpiar imágenes no utilizadas
+echo "Limpiando imágenes no utilizadas..."
+docker image prune -f
+
 echo "¡Despliegue completado!"
