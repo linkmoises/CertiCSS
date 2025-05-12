@@ -29,6 +29,8 @@ services:
     image: mongo:6.0
     volumes:
       - ../db_data:/data/db
+    ports:
+      - "127.0.0.1:27017:27017"
     environment:
       - TZ=America/Panama
     healthcheck:
