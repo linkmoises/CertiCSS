@@ -4,6 +4,7 @@ from pymongo import MongoClient
 from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.middleware.proxy_fix import ProxyFix
 from datetime import datetime, timedelta
 from PIL import Image
 from markupsafe import Markup
@@ -23,6 +24,8 @@ app = Flask(__name__)
 ### Configuraciones comunes
 ###
 app.config.from_object(config)                              # Cargar configuraciones desde config.py
+
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)  # Configura ProxyFix para forzar https
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)     # Crear la carpeta de subida si no existe
 
