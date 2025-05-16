@@ -25,7 +25,7 @@ app = Flask(__name__)
 ###
 app.config.from_object(config)                              # Cargar configuraciones desde config.py
 
-app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)  # Configura ProxyFix para forzar https
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)  # Configura ProxyFix para forzar https cuando se esta detrás de un proxy inverso
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)     # Crear la carpeta de subida si no existe
 
@@ -222,9 +222,16 @@ def verify_token(cedula, token):
     return token_data['token'] == token
 
 def token_required(f):
-    """Decorator para rutas protegidas con token"""
     @wraps(f)
     def decorated_function(codigo_evento, *args, **kwargs):
+
+        # Bypass admins
+        if (current_user.is_authenticated 
+            and current_user.rol == 'administrador' 
+            and request.path.startswith('/plataforma')):
+            return f(codigo_evento, *args, **kwargs)
+
+        # Verificación por token
         token = request.args.get('token')
         cedula = request.args.get('cedula')
         
@@ -2312,7 +2319,7 @@ def mover_contenido(codigo_evento, orden, direccion):
     collection_eva.update_one({'_id': contenido_actual['_id']}, {'$set': {'orden': nuevo_orden}})
     collection_eva.update_one({'_id': contenido_destino['_id']}, {'$set': {'orden': orden}})
 
-    return redirect(url_for('ver_plataforma', codigo_evento=codigo_evento, cedula=cedula, token=token))
+    return redirect(url_for('ver_plataforma', codigo_evento=codigo_evento))
 
 
 @app.route('/plataforma/<codigo_evento>/<int:orden>/eliminar', methods=['POST'])
