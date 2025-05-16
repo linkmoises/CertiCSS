@@ -126,7 +126,7 @@
                                 <td class="h-px w-72 min-w-72">
                                     <div class="px-6 py-2">
                                         <p class="text-sm text-gray-500 mb-2">
-                                            <a class="text-sm text-blue-600 decoration-2 hover:underline" href="{{ url_for('ver_plataforma', codigo_evento=evento.codigo) }}">
+                                            <a class="text-sm text-blue-600 decoration-2 hover:underline" href="{{ url_for('plataforma.ver_plataforma', codigo_evento=evento.codigo) }}">
                                             {{ evento.nombre }}</a>
                                         </p>
                                         <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
@@ -201,7 +201,7 @@ Esperamos%20contar%20con%20su%20participación.">
                                             Resumen
                                         </a><br />
 {% if current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor or evento.es_organizador)) %}
-                                        <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('ver_plataforma', codigo_evento=evento.codigo) }}">
+                                        <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('plataforma.ver_plataforma', codigo_evento=evento.codigo) }}">
                                             Contenidos
                                         </a><br />
                                         <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('editar_evento', codigo_evento=evento.codigo) }}">
