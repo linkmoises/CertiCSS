@@ -1535,7 +1535,8 @@ def exportar_csv(codigo_evento):
 
     # Crear un archivo CSV en memoria
     output = io.StringIO()
-    writer = csv.writer(output)
+    writer = csv.writer(output, delimiter=';')  # se cambia a ; por excel...
+
 
     # Escribir la cabecera del CSV
     writer.writerow(['Nombre', 'Apellido', 'Cédula', 'Rol', 'Perfil', 'Región', 'Unidad Ejecutora'])
@@ -1559,9 +1560,12 @@ def exportar_csv(codigo_evento):
 
     # Preparar la respuesta para descargar el archivo CSV
     output.seek(0)
-    response = make_response(output.getvalue())
+    bom = '\ufeff'  # BOM para UTF-8, este hack es para que excel reconozca el csv como utf-8
+    csv_with_bom = bom + output.getvalue()
+    
+    response = make_response(csv_with_bom)
     response.headers['Content-Disposition'] = f'attachment; filename={codigo_evento}_participantes.csv'
-    response.headers['Content-type'] = 'text/csv'
+    response.headers['Content-type'] = 'text/csv; charset=utf-8'
 
     return response
 
