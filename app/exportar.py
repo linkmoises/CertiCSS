@@ -36,7 +36,7 @@ def exportar_eventos():
         
         if tipo_exportacion == 'evento':
             # Exportar datos del evento
-            headers = ['_id', 'afiche', 'afiche_750', 'autor', 'carga_horaria', 'certificado', 
+            headers = ['afiche', 'afiche_750', 'autor', 'carga_horaria', 'certificado', 
                       'codigo', 'cupos', 'descripcion', 'estado_evento', 'fecha_fin', 
                       'fecha_inicio', 'fondo', 'lugar', 'modalidad', 'nombre', 
                       'programa', 'tipo', 'unidad_ejecutora']
@@ -47,8 +47,8 @@ def exportar_eventos():
             
         else:  # tipo_exportacion == 'participantes'
             # Exportar datos de participantes
-            headers = ['_id', 'apellidos', 'cedula', 'codigo_evento', 'indice_registro', 
-                      'nanoid', 'nombres', 'perfil', 'region', 'rol', 'timestamp', 
+            headers = ['apellidos', 'nombres', 'cedula', 'codigo_evento', 'indice_registro', 
+                      'nanoid', 'perfil', 'region', 'rol', 'timestamp', 
                       'tipo_evento', 'unidad']
             writer.writerow(headers)
             
