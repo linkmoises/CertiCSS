@@ -18,10 +18,10 @@
                         <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
                             <div>
                                 <h2 class="text-xl font-semibold text-gray-800">
-                                    Exportar Eventos
+                                    Importar Eventos
                                 </h2>
                                 <p class="text-sm text-gray-600">
-                                    Utilice esta herramienta para exportar eventos y participantes para su uso en plataforma de respaldo.
+                                    Utilice esta herramienta para importar eventos y participantes para su uso en plataforma de respaldo.
                                 </p>
                             </div>
             
@@ -37,38 +37,43 @@
 {% endwith %}
 
                         <div class="container m-8">
-                            <h2 class="mt-5 font-semibold text-gray-800 dark:text-white">Exportar Evento</h2>
+                            <h2 class="mt-5 font-semibold text-gray-800 dark:text-white">
+                                Importar Eventos
+                            </h2>
                             
                             <div class="card">
                                 <div class="card-body">
-                                    <form method="POST">
+                                    <form method="POST" enctype="multipart/form-data">
                                         <div class="form-group mb-3">
-                                            <label for="codigo_evento">Seleccione un evento:</label>
-                                            <select class="form-control" id="codigo_evento" name="codigo_evento" required>
-                                                <option value="">Seleccione un evento...</option>
-                                                {% for evento in eventos %}
-                                                    <option value="{{ evento.codigo }}">{{ evento.nombre }} ({{ evento.codigo }})</option>
-                                                {% endfor %}
-                                            </select>
+                                            <label for="archivo">Seleccione el archivo CSV:</label>
+                                            <input type="file" class="form-control" id="archivo" name="archivo" accept=".csv" required>
                                         </div>
                                         
                                         <div class="form-group mb-3">
-                                            <label>Tipo de exportación:</label>
+                                            <label>Tipo de importación:</label>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="tipo_exportacion" id="exportar_evento" value="evento" checked>
-                                                <label class="form-check-label" for="exportar_evento">
-                                                    Exportar datos del evento
+                                                <input class="form-check-input" type="radio" name="tipo_importacion" id="importar_evento" value="evento" checked>
+                                                <label class="form-check-label" for="importar_evento">
+                                                    Importar evento
                                                 </label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="tipo_exportacion" id="exportar_participantes" value="participantes">
-                                                <label class="form-check-label" for="exportar_participantes">
-                                                    Exportar participantes del evento
+                                                <input class="form-check-input" type="radio" name="tipo_importacion" id="importar_participantes" value="participantes">
+                                                <label class="form-check-label" for="importar_participantes">
+                                                    Importar participantes
                                                 </label>
                                             </div>
                                         </div>
                                         
-                                        <button type="submit" class="mt-4 py-2 px-3 inline-flex justify-center items-center gap-2 rounded-md border border-transparent font-semibold bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all text-sm">Exportar CSV</button>
+                                        <div class="alert alert-info">
+                                            <strong>Notas:</strong>
+                                            <ul class="mb-0">
+                                                <li>Los eventos con códigos existentes no serán importados</li>
+                                                <li>Los participantes que ya existan (mismo código de evento y cédula) no serán importados</li>
+                                            </ul>
+                                        </div>
+                                        
+                                        <button type="submit" class="mt-4 py-2 px-3 inline-flex justify-center items-center gap-2 rounded-md border border-transparent font-semibold bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all text-sm">Importar CSV</button>
                                     </form>
                                 </div>
                             </div>
