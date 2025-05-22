@@ -1950,7 +1950,7 @@ def buscar_certificados():
             tiene_archivos = collection_repositorio.count_documents({'codigo_evento': codigo_evento}) > 0
 
             if evento:
-                fecha_evento = evento.get('fecha_inicio', None)
+                fecha_evento = evento.get('fecha_fin', None)
 
                 resultado = {
                     'nombres': participante['nombres'],
