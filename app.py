@@ -3093,6 +3093,10 @@ app.register_blueprint(herramientas_bp)
 from app.asistencia import asistencia_bp
 app.register_blueprint(asistencia_bp)
 
+### Exportar eventos
+from app.exportar import exportar_bp
+app.register_blueprint(exportar_bp)
+
 ### Plataforma LMS
 from app.plataforma import plataforma_bp
 app.register_blueprint(plataforma_bp)

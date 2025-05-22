@@ -1,0 +1,214 @@
+{% include 'tablero-header.html' %}
+
+{% include 'tablero-sidebar.html' %}
+    
+    <!-- CONTENIDO -->
+    <div class="w-full lg:ps-64">
+        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+            
+            <!-- TABLA RESUMEN EVENTOS -->
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <!-- Card -->
+                <div class="flex flex-col">
+                <div class="-m-1.5 overflow-x-auto">
+                    <div class="p-1.5 min-w-full inline-block align-middle">
+                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+
+                        <!-- Header -->
+                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-800">
+                                    Exportar Eventos
+                                </h2>
+                                <p class="text-sm text-gray-600">
+                                    Utilice esta herramienta para exportar eventos y participantes para su uso en plataforma de respaldo.
+                                </p>
+                            </div>
+            
+                        </div>
+                        <!-- End Header -->
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+                        <div class="container m-8">
+                            <h2 class="mt-5 font-semibold text-gray-800 dark:text-white">Exportar Evento</h2>
+                            
+                            <div class="card">
+                                <div class="card-body">
+                                    <form method="POST">
+                                        <div class="form-group mb-3">
+                                            <label for="codigo_evento">Seleccione un evento:</label>
+                                            <select class="form-control" id="codigo_evento" name="codigo_evento" required>
+                                                <option value="">Seleccione un evento...</option>
+                                                {% for evento in eventos %}
+                                                    <option value="{{ evento.codigo }}">{{ evento.nombre }} ({{ evento.codigo }})</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="form-group mb-3">
+                                            <label>Tipo de exportación:</label>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="tipo_exportacion" id="exportar_evento" value="evento" checked>
+                                                <label class="form-check-label" for="exportar_evento">
+                                                    Exportar datos del evento
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="tipo_exportacion" id="exportar_participantes" value="participantes">
+                                                <label class="form-check-label" for="exportar_participantes">
+                                                    Exportar participantes del evento
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <button type="submit" class="py-2 px-3 inline-flex justify-center items-center gap-2 rounded-md border border-transparent font-semibold bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all text-sm">Exportar CSV</button>
+                                    </form>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                    </div>
+                </div>
+                </div>
+                <!-- End Card -->
+            </div>
+            <!-- End TABLA RESUMEN EVENTOS -->
+
+{% include 'tablero-footer.html' %}
+
+        </div>
+    </div>
+    <!-- FIN CONTENIDO -->
+
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+<script>
+// Limpia campos dinámicos al cargar la página
+document.addEventListener("DOMContentLoaded", function () {
+const hiddenInputs = document.querySelectorAll("#buscadorForm input[type='hidden']");
+hiddenInputs.forEach((input) => input.remove());
+});
+document.getElementById("buscadorForm").addEventListener("submit", function (event) {
+event.preventDefault(); // Prevenir envío estándar del formulario
+
+const valor = document.getElementById("buscador").value.trim();
+const patterns = {
+    cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas
+    pasaporte: /^[A-Z]{2}\d{6,9}$/,                        // Pasaportes
+    id_certificado: /^[a-zA-Z0-9]{8}$/                    // IDs de certificados
+};
+
+let action, field;
+
+if (patterns.cedula.test(valor)) {
+    action = "/buscar_certificados";
+    field = "cedula";
+} else if (patterns.pasaporte.test(valor)) {
+    action = "/buscar_certificados";
+    field = "cedula";
+} else if (patterns.id_certificado.test(valor)) {
+    action = "/validar_certificado";
+    field = "nanoid";
+} else {
+    alert("Formato no válido. Introduzca un documento de identificación o un ID de certificado válido.");
+    return;
+}
+
+// Crear y enviar el formulario dinámicamente
+const form = event.target;
+form.action = action;
+form.method = "POST";
+
+// Limpiar campos ocultos previos
+const hiddenInputs = form.querySelectorAll("input[type='hidden']");
+hiddenInputs.forEach((input) => input.remove());
+
+const hiddenInput = document.createElement("input");
+hiddenInput.type = "hidden";
+hiddenInput.name = field;
+hiddenInput.value = valor;
+form.appendChild(hiddenInput);
+form.submit();
+});
+
+function makeEditable(element) {
+if (element.getAttribute('contenteditable') === 'true') return;
+
+const originalValue = element.textContent.trim();
+element.setAttribute('contenteditable', 'true');
+element.focus();
+
+// Crear un rango y seleccionar todo el texto
+const range = document.createRange();
+range.selectNodeContents(element);
+const selection = window.getSelection();
+selection.removeAllRanges();
+selection.addRange(range);
+
+// Manejar la pérdida de foco
+element.addEventListener('blur', function() {
+    const newValue = element.textContent.trim();
+    if (newValue !== originalValue) {
+        saveChanges(element, newValue);
+    }
+    element.setAttribute('contenteditable', 'false');
+});
+
+// Manejar la tecla Enter
+element.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        element.blur();
+    }
+});
+}
+
+function saveChanges(element, newValue) {
+const codigo = element.getAttribute('data-codigo');
+const campo = element.getAttribute('data-campo');
+
+if (!codigo) {
+    alert('Error: No se pudo obtener el código del evento');
+    element.textContent = element.getAttribute('data-valor');
+    return;
+}
+
+fetch('/actualizar_campo_evento', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+        codigo_evento: codigo,
+        campo: campo,
+        valor: newValue || ''
+    })
+})
+.then(response => response.json())
+.then(data => {
+    if (data.success) {
+        element.textContent = newValue;
+        element.setAttribute('data-valor', newValue);
+    } else {
+        alert('Error al guardar los cambios: ' + data.error);
+        element.textContent = element.getAttribute('data-valor');
+    }
+})
+.catch(error => {
+    console.error('Error:', error);
+    alert('Error al guardar los cambios');
+    element.textContent = element.getAttribute('data-valor');
+});
+}
+</script>
+</body>
+</html>
