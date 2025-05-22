@@ -123,7 +123,17 @@
                                         <tr>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 sticky left-0 bg-white z-10">
                                                 <div class="flex items-center gap-2">
-                                                    {{ fila.cedula }}
+                                                    <div class="flex flex-col">
+                                                        <span>{{ fila.cedula }}</span>
+                                                        <div class="flex items-center gap-2">
+                                                            <span class="text-gray-500 text-xs" 
+                                                                  onclick="makeEditable(this)"
+                                                                  onblur="updateNombre(this, '{{ fila.cedula }}')"
+                                                                  title="Haga clic para editar">
+                                                                {{ fila.nombre or 'Haga clic para añadir nombre' }}
+                                                            </span>
+                                                        </div>
+                                                    </div>
                                                     <form method="POST" action="{{ url_for('asistencia.eliminar_cedula', cedula=fila.cedula) }}" class="inline">
                                                         <button type="submit" class="text-red-500 hover:text-red-700">
                                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -252,7 +262,10 @@ function makeEditable(element) {
     element.addEventListener('blur', function() {
         const newValue = element.textContent.trim();
         if (newValue !== originalValue) {
-            saveChanges(element, newValue);
+            // Solo usar saveChanges si el elemento tiene un data-codigo
+            if (element.hasAttribute('data-codigo')) {
+                saveChanges(element, newValue);
+            }
         }
         element.setAttribute('contenteditable', 'false');
     });
@@ -302,6 +315,22 @@ function saveChanges(element, newValue) {
         alert('Error al guardar los cambios');
         element.textContent = element.getAttribute('data-valor');
     });
+}
+
+function updateNombre(element, cedula) {
+    const nombre = element.textContent.trim();
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/actualizar-nombre/${cedula}`;
+    
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'nombre';
+    input.value = nombre;
+    
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
 }
 </script>
 </body>

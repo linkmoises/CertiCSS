@@ -27,12 +27,15 @@ def asistencia_dinamica():
         session['cedulas_historial'] = []
     if 'eventos_historial' not in session:
         session['eventos_historial'] = []
+    if 'nombres_historial' not in session:
+        session['nombres_historial'] = {}
     
     # Intentar recuperar el historial de la base de datos
     seguimiento = collection_seguimiento.find_one({'_id': f'seguimiento_{current_user.id}'})
     if seguimiento:
         session['cedulas_historial'] = seguimiento.get('cedulas', [])
         session['eventos_historial'] = seguimiento.get('eventos', [])
+        session['nombres_historial'] = seguimiento.get('nombres', {})
     
     if request.method == 'POST':
         # Obtener las cédulas y códigos de evento del formulario
@@ -54,6 +57,7 @@ def asistencia_dinamica():
                 '$set': {
                     'cedulas': session['cedulas_historial'],
                     'eventos': session['eventos_historial'],
+                    'nombres': session['nombres_historial'],
                     'ultima_actualizacion': datetime.now(),
                     'usuario_id': current_user.id
                 }
@@ -92,6 +96,7 @@ def asistencia_dinamica():
     for cedula in session['cedulas_historial']:
         fila = {
             "cedula": cedula,
+            "nombre": session['nombres_historial'].get(cedula, ''),
             "asistencia": {codigo: False for codigo in session['eventos_historial']}
         }
 
@@ -111,7 +116,27 @@ def asistencia_dinamica():
                          tabla=tabla, 
                          eventos=eventos,
                          cedulas_historial=session['cedulas_historial'],
-                         eventos_historial=session['eventos_historial'])
+                         eventos_historial=session['eventos_historial'],
+                         nombres_historial=session['nombres_historial'])
+
+
+###
+### Actualizar nombre
+###
+@asistencia_bp.route("/actualizar-nombre/<cedula>", methods=['POST'])
+@login_required
+def actualizar_nombre(cedula):
+    nombre = request.form.get('nombre', '').strip()
+    if cedula in session['cedulas_historial']:
+        session['nombres_historial'][cedula] = nombre
+        # Actualizar en la base de datos
+        collection_seguimiento.update_one(
+            {'_id': f'seguimiento_{current_user.id}'},
+            {'$set': {'nombres': session['nombres_historial']}},
+            upsert=True
+        )
+        flash(f'Nombre actualizado para la cédula {cedula}', 'success')
+    return redirect(url_for('asistencia.asistencia_dinamica'))
 
 
 ###
@@ -123,6 +148,7 @@ def limpiar_seguimiento():
     # Limpiar la sesión
     session['cedulas_historial'] = []
     session['eventos_historial'] = []
+    session['nombres_historial'] = {}
     
     # Limpiar la base de datos
     collection_seguimiento.delete_one({'_id': f'seguimiento_{current_user.id}'})
@@ -139,10 +165,17 @@ def limpiar_seguimiento():
 def eliminar_cedula(cedula):
     if cedula in session['cedulas_historial']:
         session['cedulas_historial'].remove(cedula)
+        if cedula in session['nombres_historial']:
+            del session['nombres_historial'][cedula]
         # Actualizar en la base de datos
         collection_seguimiento.update_one(
             {'_id': f'seguimiento_{current_user.id}'},
-            {'$set': {'cedulas': session['cedulas_historial']}},
+            {
+                '$set': {
+                    'cedulas': session['cedulas_historial'],
+                    'nombres': session['nombres_historial']
+                }
+            },
             upsert=True
         )
         flash(f'Cédula {cedula} eliminada del seguimiento', 'success')
@@ -190,7 +223,7 @@ def descargar_seguimiento():
     writer = csv.writer(output)
 
     # Escribir el encabezado
-    header = ['Cédula'] + [f"{evento['codigo']} ({evento['nombre']})" for evento in eventos]
+    header = ['Cédula', 'Nombre'] + [f"{evento['codigo']} ({evento['nombre']})" for evento in eventos]
     writer.writerow(header)
 
     # Escribir los datos
@@ -202,10 +235,10 @@ def descargar_seguimiento():
         }))
         
         # Crear una fila con la asistencia
-        fila = [cedula]
+        fila = [cedula, seguimiento.get('nombres', {}).get(cedula, '')]
         for evento in eventos:
             asistio = any(r["codigo_evento"] == evento["codigo"] for r in registros)
-            fila.append("Sí" if asistio else "No")
+            fila.append("1" if asistio else "0")
         
         writer.writerow(fila)
 
