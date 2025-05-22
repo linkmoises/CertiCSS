@@ -52,8 +52,11 @@ def exportar_eventos():
                       'tipo_evento', 'unidad']
             writer.writerow(headers)
             
-            # Obtener todos los participantes del evento
-            participantes = collection_participantes.find({'codigo_evento': codigo_evento})
+            # Obtener todos los participantes del evento que tengan rol 'participante'
+            participantes = collection_participantes.find({
+                'codigo_evento': codigo_evento,
+                'rol': 'participante'
+            })
             for participante in participantes:
                 row = [participante.get(field, '') for field in headers]
                 writer.writerow(row)
