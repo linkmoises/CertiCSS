@@ -183,6 +183,22 @@ function saveChanges(element, newValue) {
         return;
     }
 
+    // Manejo especial para el campo timestamp
+    if (campo === 'timestamp') {
+        try {
+            // Intentar convertir la fecha a formato ISO
+            const fecha = new Date(newValue);
+            if (isNaN(fecha.getTime())) {
+                throw new Error('Formato de fecha inválido');
+            }
+            newValue = fecha.toISOString();
+        } catch (error) {
+            alert('Por favor ingrese una fecha válida en formato YYYY-MM-DD HH:mm:ss');
+            element.textContent = element.getAttribute('data-valor');
+            return;
+        }
+    }
+
     console.log('Enviando datos:', {
         nanoid: nanoid,
         campo: campo,
