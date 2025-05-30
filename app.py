@@ -1465,6 +1465,15 @@ def listar_participantes(codigo_evento):
     total_participantes = collection_participantes.count_documents({"codigo_evento": codigo_evento})
     participantes = list(participantes_cursor)
 
+    # Convertir el campo timestamp a datetime si es una cadena
+    for participante in participantes:
+        if isinstance(participante.get('timestamp'), str):
+            try:
+                participante['timestamp'] = datetime.fromisoformat(participante['timestamp'].replace('Z', '+00:00'))
+            except (ValueError, AttributeError):
+                # Si hay un error en la conversión, establecer la fecha actual
+                participante['timestamp'] = datetime.now()
+
     estado_evento = evento.get('estado_evento', 'borrador')
 
     es_organizador = collection_participantes.find_one({
