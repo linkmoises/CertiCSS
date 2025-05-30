@@ -191,7 +191,14 @@ function saveChanges(element, newValue) {
             if (isNaN(fecha.getTime())) {
                 throw new Error('Formato de fecha inválido');
             }
-            newValue = fecha.toISOString();
+            // Formatear la fecha en el formato deseado (YYYY-MM-DD HH:mm:ss)
+            const year = fecha.getFullYear();
+            const month = String(fecha.getMonth() + 1).padStart(2, '0');
+            const day = String(fecha.getDate()).padStart(2, '0');
+            const hours = String(fecha.getHours()).padStart(2, '0');
+            const minutes = String(fecha.getMinutes()).padStart(2, '0');
+            const seconds = String(fecha.getSeconds()).padStart(2, '0');
+            newValue = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
         } catch (error) {
             alert('Por favor ingrese una fecha válida en formato YYYY-MM-DD HH:mm:ss');
             element.textContent = element.getAttribute('data-valor');
