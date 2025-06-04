@@ -7,14 +7,30 @@ plataforma_bp = Blueprint('plataforma', __name__)
 
 
 ###
-### LMS - Crear evento
+### LMS - Listado de actividades o contenidos
 ###
-@plataforma_bp.route('/plataforma/<codigo_evento>/nuevo', methods=['GET', 'POST'])
+@plataforma_bp.route('/lms/<codigo_evento>/')
+@login_required
+def listar_contenidos(codigo_evento):
+
+    evento = collection_eventos.find_one({'codigo': codigo_evento})
+    if not evento:
+        abort(404)
+
+    actividades = collection_eva.find({'codigo_evento': codigo_evento}).sort('orden', 1)
+
+    return render_template('listar_contenido.html', codigo_evento=codigo_evento, evento=evento, actividades=actividades)
+
+
+###
+### LMS - Crear actividad
+###
+@plataforma_bp.route('/lms/<codigo_evento>/nuevo', methods=['GET', 'POST'])
 @login_required
 def crear_contenido(codigo_evento):
-    # Obtener cédula y token de los parámetros
-    cedula = request.args.get('cedula')
-    token = request.args.get('token')
+    # # Obtener cédula y token de los parámetros
+    # cedula = request.args.get('cedula')
+    # token = request.args.get('token')
 
     evento = collection_eventos.find_one({'codigo': codigo_evento})
     if not evento:
@@ -61,12 +77,12 @@ def crear_contenido(codigo_evento):
 ###
 ### LMS - Editar evento / contenio
 ###
-@plataforma_bp.route('/plataforma/<codigo_evento>/<int:orden>/editar', methods=['GET', 'POST'])
+@plataforma_bp.route('/lms/<codigo_evento>/<int:orden>/editar', methods=['GET', 'POST'])
 @login_required
 def editar_contenido(codigo_evento, orden):
-    # Obtener cédula y token de los parámetros
-    cedula = request.args.get('cedula')
-    token = request.args.get('token')
+    # # Obtener cédula y token de los parámetros
+    # cedula = request.args.get('cedula')
+    # token = request.args.get('token')
 
     evento = collection_eventos.find_one({'codigo': codigo_evento})
     if not evento:
@@ -109,7 +125,7 @@ def editar_contenido(codigo_evento, orden):
 ###
 ### LMS - mover item de evento
 ###
-@plataforma_bp.route('/plataforma/<codigo_evento>/<int:orden>/mover/<direccion>', methods=['POST'])
+@plataforma_bp.route('/lms/<codigo_evento>/<int:orden>/mover/<direccion>', methods=['POST'])
 @login_required
 def mover_contenido(codigo_evento, orden, direccion):
     evento = collection_eventos.find_one({'codigo': codigo_evento})
@@ -137,7 +153,7 @@ def mover_contenido(codigo_evento, orden, direccion):
 ###
 ### LMS - eliminar item de evento
 ###
-@plataforma_bp.route('/plataforma/<codigo_evento>/<int:orden>/eliminar', methods=['POST'])
+@plataforma_bp.route('/lms/<codigo_evento>/<int:orden>/eliminar', methods=['POST'])
 @login_required
 def eliminar_contenido(codigo_evento, orden):
     evento = collection_eventos.find_one({'codigo': codigo_evento})
@@ -159,7 +175,7 @@ def eliminar_contenido(codigo_evento, orden):
 
 
 ###
-### LMS - evento
+### LMS - Landing page de un evento virtual
 ###
 @plataforma_bp.route('/plataforma/<codigo_evento>')
 # @token_required
@@ -181,7 +197,7 @@ def ver_plataforma(codigo_evento):
 
 
 ###
-### LMS - soporte markdown para campo de evento
+### LMS - Renderiza los contenidos de un evento virtual
 ###
 import markdown
 @plataforma_bp.route('/plataforma/<codigo_evento>/<int:orden>')

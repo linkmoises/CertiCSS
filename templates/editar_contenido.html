@@ -1,185 +1,197 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ evento.nombre }} - Aula Digital - CertiCSS</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- favicons -->
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
-    <meta name="apple-mobile-web-app-title" content="CertiCSS" />
-    <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
-</head>
-<body class="bg-gray-50 dark:bg-neutral-900">
+{% include 'tablero-header.html' %}
 
-    <!-- ========== MAIN CONTENT ========== -->
-    <main id="content">
+{% include 'tablero-sidebar.html' %}
+    
+    <!-- CONTENIDO -->
+    <div class="w-full lg:ps-64">
+        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
 
-        <!-- Card -->
-        <div class="max-w-[90rem] px-8 pt-8 sm:px-6 lg:px-8 lg:pt-8 mx-auto">
-            <!-- Grid -->
-            <div class="bg-white grid sm:grid-cols-2 border border-gray-200 rounded-xl lg:grid-cols-12">
+            <!-- TABLA RESUMEN EVENTOS -->
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <!-- Card -->
+                <div class="flex flex-col">
+                <div class="-m-1.5 overflow-x-auto">
+                    <div class="p-1.5 min-w-full inline-block align-middle">
+                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
 
-                <div class="sm:order-1 lg:col-span-3 border-r border-gray-200">
-                    <div class="relative pt-[100%] sm:pt-[100%]">
-{% if evento.afiche_750 %}
-                        <img class="size-full absolute top-0 start-0 object-cover rounded-l-xl" src="{{ BASE_URL }}{{ evento.afiche_750 }}" alt="{{ evento.nombre }}">
-{% else %}
-                        <img class="size-full absolute top-0 start-0 object-cover rounded-l-xl" src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}" alt="{{ evento.nombre }}">
-{% endif %}
-                    </div>
-                    <div class="m-4">
-                        <h2 class="font-bold text-gray-800 mb-2">{{ evento.nombre }}</h2>
-                        <p class="text-sm text-gray-500">{{ evento.descripcion }}</p>
-                    </div>
-                    <div class="m-6">
-                        <ul class="text-sm text-gray-500">
-{% for contenido in contenidos %}
-                            <li class="gap-x-2 {% if contenido.orden == contenido_actual.orden %}font-bold{% endif %}">
-                                <a href="{{ url_for('ver_contenido', codigo_evento=evento.codigo, orden=contenido.orden) }}">
-                                    {{ contenido.orden|string|zfill(2) }} - {{ contenido.titulo }}
-                                </a>
-{% if current_user.is_authenticated %}
-                                <div>
-                                    <form action="{{ url_for('mover_contenido', codigo_evento=evento.codigo, orden=contenido.orden, direccion='arriba') }}" method="POST" class="inline">
-                                        <button type="submit" class="text-sm text-blue-600 decoration-2 hover:underline disabled:text-gray-200" {% if contenido.orden == 1 %}disabled{% endif %}>
-                                            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-chevron-up"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m8 14 4-4 4 4"/></svg>
-                                        </button>
-                                    </form>
-
-                                    <form action="{{ url_for('mover_contenido', codigo_evento=evento.codigo, orden=contenido.orden, direccion='abajo') }}" method="POST" class="inline">
-                                        <button type="submit" class="text-sm text-blue-600 decoration-2 hover:underline disabled:text-gray-200" {% if contenido.orden == contenidos|length %}disabled{% endif %}>
-                                            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-chevron-down"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m16 10-4 4-4-4"/></svg>
-                                        </button>
-                                    </form>
-
-                                    <a href="{{ url_for('editar_contenido', codigo_evento=evento.codigo, orden=contenido.orden) }}" class="text-sm text-blue-600 decoration-2 inline-flex">
-                                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-pen-line"><path d="m18 5-2.414-2.414A2 2 0 0 0 14.172 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2"/><path d="M21.378 12.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><path d="M8 18h1"/></svg>
-                                    </a>
-
-                                    <form action="{{ url_for('eliminar_contenido', codigo_evento=evento.codigo, orden=contenido.orden) }}" method="POST" class="inline">
-                                        <button type="submit" class="text-sm text-red-600 decoration-2 hover:underline" onclick="return confirm('¿Estás seguro de eliminar este contenido?')">
-                                            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-                                        </button>
-                                    </form>
-                                </div>
-{% endif %}
-                            </li>
-{% endfor %}
-                        </ul>
-{% if current_user.is_authenticated %}
-                        <div class="my-4">
-                            <a href="{{ url_for('crear_contenido', codigo_evento=evento.codigo) }}" class="w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"">
-                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open-text"><path d="M12 7v14"/><path d="M16 12h2"/><path d="M16 8h2"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/><path d="M6 12h2"/><path d="M6 8h2"/></svg>
-                                Añadir contenido
-                            </a>
+                        <!-- Header -->
+                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-800">
+                                    {{ evento.nombre }}
+                                </h2>
+                                <p class="text-sm text-gray-600">
+                                    {{ evento.descripcion}}
+                                </p>
+                            </div>
                         </div>
-{% endif %}
-                    </div>
-                </div>
-                <!-- End Col -->
+                        <!-- End Header -->
 
-                <div class="sm:order-2 lg:col-span-9">
-
-                    <form method="POST" enctype="multipart/form-data">
-                        <!-- Grid -->
-                        <div class="m-8">
-
-                            <h2 class="text-xl font-bold text-gray-800 pb-4">Editar contenido o actividad - {{ evento.nombre }}</h2>
-
-                            <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
+                        <!-- Body -->
+                        <div class="p-8 lg:col-span-9">
                             
-                                <div class="sm:col-span-3">
-                                    <label for="titulo" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
-                                        Título del contenido
-                                    </label>
-                                </div>
-                                <!-- End Col -->
-                        
-                                <div class="sm:col-span-9">
-                                    <input id="titulo" name="titulo" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Título del contenido o actividad..." value="{{ contenido.titulo }}" required>
-                                </div>
-                                <!-- End Col -->
-
-                                <div class="sm:col-span-3">
-                                    <label for="descripcion" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
-                                        Descripción
-                                    </label>
-                                </div>
-                                <!-- End Col -->
-                        
-                                <div class="sm:col-span-9">
-                                    <textarea id="descripcion" name="descripcion" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" rows="3" placeholder="Breve descripción del contenido o actividad docente...">{{ contenido.descripcion }}</textarea>
-                                </div>
-                                <!-- End Col -->
-
-                                <div class="sm:col-span-3">
-                                    <label for="tipo" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
-                                        Seleccione el contenido a agregar
-                                    </label>
-                                </div>
-                                <!-- End Col -->
-
-                                <div class="sm:col-span-9">
-                                    <select class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" id="tipo" name="tipo">
-                                        <option value="video" {% if contenido.tipo == "video" %}selected{% endif %}>Video</option>
-                                        <option value="texto" {% if contenido.tipo == "texto" %}selected{% endif %}>Texto</option>
-                                        <option value="documento" {% if contenido.tipo == "documento" %}selected{% endif %}>Documento</option>
-                                    </select>
-
-                                    <div id="video-section" class="w-full inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200" {% if contenido.tipo != "video" %}style="display:none"{% endif %}>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2.5">URL del Video</label>
-                                        <input type="text" name="url_video" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" value="{{ contenido.url_video if contenido.url_video else '' }}" placeholder="https://youtube.com/embed/...">
-                                    </div>
+                            <form method="POST" enctype="multipart/form-data">
+                                <!-- Grid -->
+                                <div class="grid">
+        
+                                    <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
+                            
+                                        <div class="sm:col-span-3">
+                                            <label for="titulo" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                                Título del contenido
+                                            </label>
+                                        </div>
+                                        <!-- End Col -->
                                 
-                                    <div id="texto-section" class="w-full inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200" {% if contenido.tipo != "texto" %}style="display:none"{% endif %}>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2.5">Contenido de Texto (admite markdown)</label>
-                                        <textarea name="contenido_texto" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" rows="12">{{ contenido.contenido_texto if contenido.contenido_texto else '' }}</textarea>
-                                    </div>
+                                        <div class="sm:col-span-9">
+                                            <input id="titulo" name="titulo" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Título del contenido o actividad..." value="{{ contenido.titulo }}" required>
+                                        </div>
+                                        <!-- End Col -->
+        
+                                        <div class="sm:col-span-3">
+                                            <label for="descripcion" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                                Descripción
+                                            </label>
+                                        </div>
+                                        <!-- End Col -->
                                 
-                                    <div id="documento-section" class="w-full inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200" {% if contenido.tipo != "documento" %}style="display:none"{% endif %}>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2.5">Subir Nuevo Documento</label>
-                                        <input type="file" name="documento" class="w-full border p-2 rounded">
+                                        <div class="sm:col-span-9">
+                                            <textarea id="descripcion" name="descripcion" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" rows="3" placeholder="Breve descripción del contenido o actividad docente...">{{ contenido.descripcion }}</textarea>
+                                        </div>
+                                        <!-- End Col -->
+        
+                                        <div class="sm:col-span-3">
+                                            <label for="tipo" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                                Seleccione el contenido a agregar
+                                            </label>
+                                        </div>
+                                        <!-- End Col -->
+        
+                                        <div class="sm:col-span-9">
+                                            <select class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" id="tipo" name="tipo">
+                                                <option value="video" {% if contenido.tipo == "video" %}selected{% endif %}>Video</option>
+                                                <option value="texto" {% if contenido.tipo == "texto" %}selected{% endif %}>Texto</option>
+                                                <option value="documento" {% if contenido.tipo == "documento" %}selected{% endif %}>Documento</option>
+                                            </select>
+        
+                                            <div id="video-section" class="w-full inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200" {% if contenido.tipo != "video" %}style="display:none"{% endif %}>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2.5">URL del Video</label>
+                                                <input type="text" name="url_video" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" value="{{ contenido.url_video if contenido.url_video else '' }}" placeholder="https://youtube.com/embed/...">
+                                            </div>
+                                        
+                                            <div id="texto-section" class="w-full inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200" {% if contenido.tipo != "texto" %}style="display:none"{% endif %}>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2.5">Contenido de Texto (admite markdown)</label>
+                                                <textarea name="contenido_texto" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" rows="12">{{ contenido.contenido_texto if contenido.contenido_texto else '' }}</textarea>
+                                            </div>
+                                        
+                                            <div id="documento-section" class="w-full inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200" {% if contenido.tipo != "documento" %}style="display:none"{% endif %}>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2.5">Subir Nuevo Documento</label>
+                                                <input type="file" name="documento" class="w-full border p-2 rounded">
+                                            </div>
+                                        </div>
+                                        <!-- End Col -->
+        
                                     </div>
+        
+                                    <button type="submit" class="mt-8 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                                        Guardar Cambios
+                                    </button>
+        
                                 </div>
-                                <!-- End Col -->
+                                <!-- End Grid -->
+                            </form>
 
+                        </div>
+                        <!-- End Body -->
+
+                        <!-- Footer -->
+                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
+                            <div>
+                            <p class="text-sm text-gray-600 dark:text-neutral-400">
+                                <span class="font-semibold text-gray-800 dark:text-neutral-200">X</span> x
+                            </p>
                             </div>
 
-                            <button type="submit" class="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
-                                Guardar Cambios
-                            </button>
-
+                            <div>
+                                <div class="inline-flex gap-x-2">
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="javascript:history.back()">
+                                        Volver
+                                    </a>
+                                </div>
+                            </div>
                         </div>
-                        <!-- End Grid -->
-                    </form>
+                        <!-- End Footer -->
 
+                    </div>
+                    </div>
                 </div>
-                <!-- End Col -->
-
+                </div>
+                <!-- End Card -->
             </div>
-            <!-- End Grid -->
+            <!-- FIN TABLA RESUMEN EVENTOS -->
+
+{% include 'tablero-footer.html' %}
 
         </div>
-        <!-- End Card -->
+    </div>
+    <!-- FIN CONTENIDO -->
 
-    </main>
-
-    <footer class="mt-auto w-full max-w-[85rem] px-4 sm:px-6 lg:px-8 mx-auto">
-        <div class="text-center text-xs text-gray-500 my-8">
-            <p>Este evento es avalado por DENADOI y potenciado por la plataforma CertiCSS.</p>
-        </div>
-    </footer>
-
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
 <script>
+    // Limpia campos dinámicos al cargar la página
+    document.addEventListener("DOMContentLoaded", function () {
+        const hiddenInputs = document.querySelectorAll("#buscadorForm input[type='hidden']");
+        hiddenInputs.forEach((input) => input.remove());
+    });
+    document.getElementById("buscadorForm").addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevenir envío estándar del formulario
+    
+        const valor = document.getElementById("buscador").value.trim();
+        const patterns = {
+            cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas
+            pasaporte: /^[A-Z]{2}\d{6,9}$/,                        // Pasaportes
+            id_certificado: /^[a-zA-Z0-9]{8}$/                    // IDs de certificados
+        };
+    
+        let action, field;
+    
+        if (patterns.cedula.test(valor)) {
+            action = "/buscar_certificados";
+            field = "cedula";
+        } else if (patterns.pasaporte.test(valor)) {
+            action = "/buscar_certificados";
+            field = "cedula";
+        } else if (patterns.id_certificado.test(valor)) {
+            action = "/validar_certificado";
+            field = "nanoid";
+        } else {
+            alert("Formato no válido. Introduzca un documento de identificación o un ID de certificado válido.");
+            return;
+        }
+    
+        // Crear y enviar el formulario dinámicamente
+        const form = event.target;
+        form.action = action;
+        form.method = "POST";
+    
+        // Limpiar campos ocultos previos
+        const hiddenInputs = form.querySelectorAll("input[type='hidden']");
+        hiddenInputs.forEach((input) => input.remove());
+    
+        const hiddenInput = document.createElement("input");
+        hiddenInput.type = "hidden";
+        hiddenInput.name = field;
+        hiddenInput.value = valor;
+        form.appendChild(hiddenInput);
+        form.submit();
+    });
+
     document.querySelector('select[name="tipo"]').addEventListener('change', function() {
         document.getElementById('video-section').style.display = this.value === 'video' ? 'block' : 'none';
         document.getElementById('texto-section').style.display = this.value === 'texto' ? 'block' : 'none';
         document.getElementById('documento-section').style.display = this.value === 'documento' ? 'block' : 'none';
     });
-</script>
+</script>    
 </body>
 </html>
