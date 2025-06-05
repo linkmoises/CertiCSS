@@ -21,7 +21,7 @@
                                     {{ evento.nombre }}
                                 </h2>
                                 <p class="text-sm text-gray-600">
-                                    {{ evento.descripcion}}
+                                    Nueva actividad / contenido
                                 </p>
                             </div>
                         </div>
@@ -108,14 +108,14 @@
                         <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
                             <div>
                             <p class="text-sm text-gray-600 dark:text-neutral-400">
-                                <span class="font-semibold text-gray-800 dark:text-neutral-200">X</span> x
+                                <span class="font-semibold text-gray-800 dark:text-neutral-200">Nueva</span> actividad / contenido
                             </p>
                             </div>
 
                             <div>
                                 <div class="inline-flex gap-x-2">
-                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="javascript:history.back()">
-                                        Volver
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="{{ url_for('plataforma.listar_contenidos', codigo_evento=evento.codigo) }}">
+                                        Volver al listado de actividades / contenidos
                                     </a>
                                 </div>
                             </div>
