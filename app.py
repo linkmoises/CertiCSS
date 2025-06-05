@@ -1787,6 +1787,87 @@ def editar_evento(codigo_evento):
 
 
 ###
+### Eliminar archivos adjuntos del evento
+###
+@app.route('/eliminar_archivo_evento/<codigo_evento>/<tipo_archivo>', methods=['POST'])
+@login_required
+def eliminar_archivo_evento(codigo_evento, tipo_archivo):
+    # Obtener el evento actual de la base de datos
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+
+    if not evento:
+        flash("Evento no encontrado", "error")
+        return redirect(url_for('listar_eventos'))
+
+    # Determinar qué archivo eliminar basado en el tipo
+    archivo_path = None
+    campo_db = None
+    
+    if tipo_archivo == 'afiche':
+        archivo_path = evento.get('afiche')
+        archivo_750_path = evento.get('afiche_750')
+        campo_db = 'afiche'
+        campo_750_db = 'afiche_750'
+    elif tipo_archivo == 'fondo':
+        archivo_path = evento.get('fondo')
+        campo_db = 'fondo'
+    elif tipo_archivo == 'programa':
+        archivo_path = evento.get('programa')
+        campo_db = 'programa'
+    elif tipo_archivo == 'certificado':
+        archivo_path = evento.get('certificado')
+        campo_db = 'certificado'
+    else:
+        flash("Tipo de archivo no válido", "error")
+        return redirect(url_for('editar_evento', codigo_evento=codigo_evento))
+
+    # Eliminar el archivo físico si existe
+    if archivo_path and os.path.exists(archivo_path):
+        try:
+            os.remove(archivo_path)
+            log_event(f"Usuario [{current_user.email}] ha eliminado el afiche de evento: {archivo_path}.")
+        except Exception as e:
+            flash(f"Error al eliminar el archivo: {str(e)}", "error")
+            log_event(f"Error al eliminar archivo físico {archivo_path}: {str(e)}")
+            return redirect(url_for('editar_evento', codigo_evento=codigo_evento))
+
+    # Eliminar el archivo redimensionado si existe (solo para afiche)
+    if tipo_archivo == 'afiche' and archivo_750_path and os.path.exists(archivo_750_path):
+        try:
+            os.remove(archivo_750_path)
+            log_event(f"Usuario [{current_user.email}] ha eliminado el afiche de evento redimensionado: {archivo_750_path}.")
+        except Exception as e:
+            flash(f"Error al eliminar el archivo redimensionado: {str(e)}", "error")
+            log_event(f"Error al eliminar archivo redimensionado {archivo_750_path}: {str(e)}")
+            return redirect(url_for('editar_evento', codigo_evento=codigo_evento))
+
+    # Actualizar la base de datos
+    update_data = {campo_db: None}
+    if tipo_archivo == 'afiche':
+        update_data[campo_750_db] = None
+
+    try:
+        result = collection_eventos.update_one(
+            {"codigo": codigo_evento},
+            {"$set": update_data}
+        )
+        
+        if result.modified_count == 0:
+            flash("Error al actualizar la base de datos", "error")
+            log_event(f"Error: No se pudo actualizar la base de datos para el evento {codigo_evento}")
+            return redirect(url_for('editar_evento', codigo_evento=codigo_evento))
+            
+        log_event(f"Usuario [{current_user.email}] ha actualizado el evento {codigo_evento}: {update_data}.")
+    except Exception as e:
+        flash(f"Error al actualizar la base de datos: {str(e)}", "error")
+        log_event(f"Error al actualizar la base de datos para el evento {codigo_evento}: {str(e)}")
+        return redirect(url_for('editar_evento', codigo_evento=codigo_evento))
+
+    flash(f"Archivo {tipo_archivo} eliminado exitosamente", "success")
+    return redirect(url_for('editar_evento', codigo_evento=codigo_evento))
+
+
+###
 ### Resumen de evento
 ###
 @app.route('/resumen/<codigo_evento>')
