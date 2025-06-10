@@ -67,9 +67,19 @@ def crear_contenido(codigo_evento):
                 documento_file.save(documento_path)
                 contenido['documento'] = documento_filename
 
+        elif tipo == 'caso_chatgpt':
+            try:
+                import json
+                contenido_json_raw = request.form['json_caso']
+                contenido_json = json.loads(contenido_json_raw)
+                contenido['contenido_json'] = contenido_json
+            except Exception as e:
+                flash('El JSON del caso clínico no es válido: ' + str(e), 'error')
+                return redirect(request.url)
+
         collection_eva.insert_one(contenido)
 
-        return redirect(url_for('plataforma.ver_plataforma', codigo_evento=codigo_evento, cedula=cedula, token=token))
+        return redirect(url_for('plataforma.listar_contenidos', codigo_evento=codigo_evento))
 
     return render_template('crear_contenido.html', evento=evento)
 
@@ -239,3 +249,39 @@ def ver_contenido(codigo_evento, orden):
         token=token
     )
 
+
+from flask import jsonify
+import openai
+import os
+
+openai.api_key = os.environ.get("OPENAI_API_KEY")
+
+@plataforma_bp.route('/api/chat_contenido/<codigo_evento>/<int:orden>', methods=['POST'])
+def chat_contenido(codigo_evento, orden):
+    user_input = request.json.get('mensaje')
+    contenido = collection_eva.find_one({'codigo_evento': codigo_evento, 'orden': orden})
+
+    if not contenido or contenido['tipo'] != 'caso_chatgpt':
+        return jsonify({'error': 'Contenido no encontrado o no válido'}), 400
+
+    if 'contenido_json' not in contenido:
+        return jsonify({'error': 'El caso clínico no tiene contenido JSON válido'}), 400
+
+    prompt_base = f"""Este es un caso clínico de un curso en línea. El contenido es el siguiente:
+
+{contenido['contenido_json']}
+
+Actúa como un tutor clínico. Responde a la siguiente pregunta del usuario basada únicamente en este caso:"""
+
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": prompt_base},
+                {"role": "user", "content": user_input}
+            ]
+        )
+        respuesta = response['choices'][0]['message']['content']
+        return jsonify({'respuesta': respuesta})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

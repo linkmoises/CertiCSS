@@ -72,6 +72,7 @@
                                                 <option value="video">Video</option>
                                                 <option value="texto">Texto</option>
                                                 <option value="documento">Documento</option>
+                                                <option value="caso_chatgpt">Caso clínico interactivo</option>
                                             </select>
         
                                             <div id="video_fields" style="display: none;" class="w-full inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
@@ -87,6 +88,12 @@
                                             <div id="documento_fields" style="display: none;" class="w-full inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                                 <label class="block text-sm font-medium text-gray-700 mb-2.5">Subir Nuevo Documento</label>
                                                 <input type="file" id="documento" name="documento" class="w-full border p-2 rounded">
+                                            </div>
+
+                                            <div id="caso_chatgpt_fields" style="display: none;" class="w-full inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                                <label class="block text-sm font-medium text-gray-700 mb-2.5">JSON del caso clínico</label>
+                                                <textarea id="json_caso" name="json_caso" class="py-2 px-3 block w-full border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:focus:ring-neutral-600" rows="16" placeholder='Pega aquí el JSON del caso clínico...'></textarea>
+                                                <p class="mt-2 text-sm text-gray-500">Este caso será interpretado por el una iA durante el evento académico.</p>
                                             </div>
                                         </div>
                                         <!-- End Col -->
@@ -194,6 +201,7 @@
         document.getElementById('video_fields').style.display = 'none';
         document.getElementById('texto_fields').style.display = 'none';
         document.getElementById('documento_fields').style.display = 'none';
+        document.getElementById('caso_chatgpt_fields').style.display = 'none';
         
         // Mostrar solo el campo seleccionado
         if (tipo === 'video') {
@@ -202,6 +210,8 @@
             document.getElementById('texto_fields').style.display = 'block';
         } else if (tipo === 'documento') {
             document.getElementById('documento_fields').style.display = 'block';
+        } else if (tipo === 'caso_chatgpt') {
+            document.getElementById('caso_chatgpt_fields').style.display = 'block';
         }
     }
 
