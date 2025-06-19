@@ -1,10 +1,13 @@
 body.randomizer-bg {
-    background: #111;
-    min-height: 100vh;
+    font-family: Arial, sans-serif;
     margin: 0;
+    padding: 0;
+    background-color: #000;
+    color: #fff;
+    min-height: 100vh;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
+    height: 100vh;
 }
 
 .randomizer-container {
@@ -16,17 +19,53 @@ body.randomizer-bg {
     width: 100vw;
 }
 
-.randomizer-numero {
+.randomizer-config {
+    background-color: #333;
+    padding: 20px 30px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.3);
+}
+
+.randomizer-config label {
     color: #fff;
-    font-size: 8rem;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.randomizer-config input[type="text"],
+.randomizer-config input[type="number"] {
+    font-size: 1.2rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 0.5rem;
+    border: none;
+    outline: none;
+    margin-left: 0.5rem;
+    background: #222;
+    color: #fff;
+    width: auto;
+}
+
+.randomizer-numero {
+    color: #4CAF50;
+    font-size: 18vmin;
     font-weight: bold;
     margin-bottom: 2rem;
-    text-shadow: 0 0 20px #fff, 0 0 40px #fff;
+    text-shadow: 0 0 20px #4CAF50, 0 0 40px #222;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .randomizer-boton {
-    background: #fff;
-    color: #111;
+    background: #4CAF50;
+    color: #fff;
     border: none;
     padding: 1.2rem 2.5rem;
     font-size: 2rem;
@@ -34,10 +73,17 @@ body.randomizer-bg {
     cursor: pointer;
     font-weight: bold;
     transition: background 0.2s, color 0.2s;
+    margin-top: 0.5rem;
 }
 
 .randomizer-boton:hover {
-    background: #222;
+    background: #45a049;
     color: #fff;
     border: 2px solid #fff;
+}
+
+#randomizer-main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 } 

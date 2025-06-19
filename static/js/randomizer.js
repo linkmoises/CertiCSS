@@ -7,11 +7,9 @@ function iniciarRandomizador(event) {
     // Leer exclusiones
     const excluirStr = document.getElementById('excluir').value;
     let excluir = excluirStr.split(',').map(x => parseInt(x.trim())).filter(x => !isNaN(x));
-    // Siempre excluir 1 y 2
-    excluir = [...new Set([1, 2, ...excluir])];
     // Generar lista de números válidos
     numerosDisponibles = [];
-    for (let i = 3; i <= limite; i++) {
+    for (let i = 1; i <= limite; i++) {
         if (!excluir.includes(i)) {
             numerosDisponibles.push(i);
         }
