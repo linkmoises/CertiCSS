@@ -86,4 +86,42 @@ body.randomizer-bg {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.randomizer-barra-superior {
+    width: 100vw;
+    background: #222;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 30px;
+    box-sizing: border-box;
+    min-height: 48px;
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.randomizer-hora {
+    font-size: 1.3rem;
+    font-family: inherit;
+    letter-spacing: 1px;
+}
+
+.randomizer-home-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #4CAF50;
+    border-radius: 8px;
+    padding: 6px 12px;
+    text-decoration: none;
+    transition: background 0.2s;
+    border: none;
+    outline: none;
+}
+
+.randomizer-home-btn:hover {
+    background: #2196F3;
 } 

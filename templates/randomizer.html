@@ -8,6 +8,12 @@
     <link rel="stylesheet" href="/static/css/randomizer.css">
 </head>
 <body class="randomizer-bg">
+    <div class="randomizer-barra-superior">
+        <div id="clock" class="randomizer-hora"></div>
+        <a href="/" class="randomizer-home-btn" title="Ir a la página principal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="#fff" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        </a>
+    </div>
     <div class="randomizer-container">
         <form id="config-form" class="randomizer-config" autocomplete="off">
             <label style="color:white;font-size:1.2rem;margin-bottom:0.5rem;">Excluir números (separados por coma):
@@ -25,5 +31,17 @@
         </div>
     </div>
     <script src="/static/js/randomizer.js"></script>
+    <script>
+    // Reloj en vivo
+    function updateClock() {
+        const now = new Date();
+        const h = now.getHours().toString().padStart(2, '0');
+        const m = now.getMinutes().toString().padStart(2, '0');
+        const s = now.getSeconds().toString().padStart(2, '0');
+        document.getElementById('clock').textContent = `Hora actual: ${h}:${m}:${s}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+    </script>
 </body>
 </html>
