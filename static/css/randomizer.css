@@ -19,39 +19,6 @@ body.randomizer-bg {
     width: 100vw;
 }
 
-.randomizer-config {
-    background-color: #333;
-    padding: 20px 30px;
-    border-radius: 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 18px;
-    margin-bottom: 2rem;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.3);
-}
-
-.randomizer-config label {
-    color: #fff;
-    font-size: 1.2rem;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.randomizer-config input[type="text"],
-.randomizer-config input[type="number"] {
-    font-size: 1.2rem;
-    padding: 0.3rem 0.7rem;
-    border-radius: 0.5rem;
-    border: none;
-    outline: none;
-    margin-left: 0.5rem;
-    background: #222;
-    color: #fff;
-    width: auto;
-}
-
 .randomizer-numero {
     color: #4CAF50;
     font-size: 18vmin;
@@ -125,3 +92,112 @@ body.randomizer-bg {
 .randomizer-home-btn:hover {
     background: #2196F3;
 } 
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #000;
+    color: #fff;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+.config-panel {
+    background-color: #333;
+    padding: 15px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+.timer-display {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 30vmin;
+    font-weight: bold;
+    color: #4CAF50; /* Color verde para tiempo normal */
+    transition: color 0.5s ease;
+}
+.timer-display.warning {
+    color: #FF9800; /* Color naranja para advertencia (2 minutos o menos) */
+}
+.timer-display.overtime {
+    color: #ff0000; /* Color rojo para tiempo agotado */
+}
+.timer-container {
+    text-align: center;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+button {
+    padding: 10px 15px;
+    font-size: 1rem;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+}
+button:hover {
+    background-color: #45a049;
+}
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+#reset, #pause {
+    background-color: #f44336;
+}
+#reset:hover, #pause:hover {
+    background-color: #d32f2f;
+}
+#fullscreen {
+    background-color: #2196F3;
+}
+#fullscreen:hover {
+    background-color: #0b7dda;
+}
+.config-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+#config-form {
+    gap:10px;
+}
+input[type="number"] {
+    width: 60px;
+    padding: 8px;
+    font-size: 1rem;
+}
+input[type="text"] {
+    width: 120px;
+    padding: 8px;
+    font-size: 1rem;
+}
+.fullscreen-mode .config-panel {
+    display: none;
+}
+.fullscreen-mode .timer-display {
+    font-size: 42vmin;
+}
+button svg {
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+}
+.footer-note {
+    position: fixed;
+    bottom: 5px;
+    width: 100%;
+    text-align: center;
+    font-size: 0.75rem;
+    color: white;
+    z-index: 10;
+    margin-bottom: 1rem;
+}

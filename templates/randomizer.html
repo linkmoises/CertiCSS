@@ -3,31 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Randomizador</title>
+    <title>Generador de números aleatorios - CertiCSS</title>
     <link rel="stylesheet" href="/static/css/custom.css">
     <link rel="stylesheet" href="/static/css/randomizer.css">
+    <!-- favicons -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
+    <meta name="apple-mobile-web-app-title" content="CertiCSS" />
+    <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
+{% if UMAMI_URL %}
+    {{ UMAMI_URL | safe }}
+{% endif %}
 </head>
 <body class="randomizer-bg">
-    <div class="randomizer-barra-superior">
-        <div id="clock" class="randomizer-hora"></div>
-        <a href="/" class="randomizer-home-btn" title="Ir a la página principal">
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="#fff" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+    <div style="text-align: center; padding: 10px; font-size: 1.5rem;" id="clock"></div>
+    <div class="config-panel">
+        <form id="config-form" autocomplete="off">
+            <div class="config-item">
+                <label for="limite-inferior">Límite inferior:</label>
+                <input type="number" id="limite-inferior" min="1" max="99" value="1">
+            </div>
+            <div class="config-item">
+                <label for="limite">Límite superior:</label>
+                <input type="number" id="limite" min="1" max="100" value="20">
+            </div>
+            <div class="config-item">
+                <label for="excluir">Excluir números (separados por coma):</label>
+                <input type="text" id="excluir" placeholder="Ej: 5,7,13">
+            </div>
+            <button type="submit" id="start" title="Iniciar">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" fill="white" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+            </button>
+        </form>
+        <a href="https://docenciamedica.org" target="_blank">
+            <button style="background-color: steelblue;">
+                <img src="{{ url_for('static', filename='assets/css-logo-negativo.png') }}"  height="24" width="24" alt="Departamento Nacional de Docencia e Investigación">
+            </button>
         </a>
     </div>
     <div class="randomizer-container">
-        <form id="config-form" class="randomizer-config" autocomplete="off">
-            <label style="color:white;font-size:1.2rem;margin-bottom:0.5rem;">Excluir números (separados por coma):
-                <input type="text" id="excluir" placeholder="Ej: 5,7,13" style="font-size:1.2rem;padding:0.3rem 0.7rem;border-radius:0.5rem;border:none;margin-left:0.5rem;">
-            </label>
-            <label style="color:white;font-size:1.2rem;margin-bottom:1rem;">Límite inferior:
-                <input type="number" id="limite-inferior" min="1" max="99" value="1" style="font-size:1.2rem;width:4rem;padding:0.3rem 0.7rem;border-radius:0.5rem;border:none;margin-left:0.5rem;">
-            </label>
-            <label style="color:white;font-size:1.2rem;margin-bottom:1rem;">Límite superior:
-                <input type="number" id="limite" min="1" max="100" value="20" style="font-size:1.2rem;width:4rem;padding:0.3rem 0.7rem;border-radius:0.5rem;border:none;margin-left:0.5rem;">
-            </label>
-            <button type="submit" class="randomizer-boton" style="margin-bottom:2rem;">Iniciar</button>
-        </form>
-        <br />
         <div id="randomizer-main" style="display:none;flex-direction:column;align-items:center;">
             <div id="numero" class="randomizer-numero">-</div>
             <button id="btn-random" class="randomizer-boton">¡Generar número!</button>
