@@ -28,9 +28,6 @@ def listar_contenidos(codigo_evento):
 @plataforma_bp.route('/lms/<codigo_evento>/nuevo', methods=['GET', 'POST'])
 @login_required
 def crear_contenido(codigo_evento):
-    # # Obtener cédula y token de los parámetros
-    # cedula = request.args.get('cedula')
-    # token = request.args.get('token')
 
     evento = collection_eventos.find_one({'codigo': codigo_evento})
     if not evento:
@@ -71,8 +68,10 @@ def crear_contenido(codigo_evento):
             try:
                 import json
                 contenido_json_raw = request.form['json_caso']
+                # Intentar parsear el JSON para validarlo
                 contenido_json = json.loads(contenido_json_raw)
-                contenido['contenido_json'] = contenido_json
+                # Guardar el contenido como string para evitar problemas de codificación
+                contenido['contenido_json'] = contenido_json_raw
             except Exception as e:
                 flash('El JSON del caso clínico no es válido: ' + str(e), 'error')
                 return redirect(request.url)
@@ -181,7 +180,7 @@ def eliminar_contenido(codigo_evento, orden):
     for i, cont in enumerate(contenidos_restantes, start=1):
         collection_eva.update_one({'_id': cont['_id']}, {'$set': {'orden': i}})
 
-    return redirect(url_for('ver_plataforma', codigo_evento=codigo_evento))
+    return redirect(url_for('plataforma.ver_plataforma', codigo_evento=codigo_evento))
 
 
 ###
@@ -250,38 +249,67 @@ def ver_contenido(codigo_evento, orden):
     )
 
 
-from flask import jsonify
-import openai
+from flask import jsonify, request
+from openai import OpenAI
 import os
 
-openai.api_key = os.environ.get("OPENAI_API_KEY")
+# Inicializar el cliente OpenAI
+## client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+
+client = OpenAI(
+    api_key=os.environ.get("OPENROUTER_API_KEY"),
+    base_url="https://openrouter.ai/api/v1",
+    default_headers={
+        "HTTP-Referer": "http://localhost",  # o el dominio real
+        "X-Title": "Simulador Clínico"
+    }
+)
 
 @plataforma_bp.route('/api/chat_contenido/<codigo_evento>/<int:orden>', methods=['POST'])
 def chat_contenido(codigo_evento, orden):
-    user_input = request.json.get('mensaje')
-    contenido = collection_eva.find_one({'codigo_evento': codigo_evento, 'orden': orden})
-
-    if not contenido or contenido['tipo'] != 'caso_chatgpt':
-        return jsonify({'error': 'Contenido no encontrado o no válido'}), 400
-
-    if 'contenido_json' not in contenido:
-        return jsonify({'error': 'El caso clínico no tiene contenido JSON válido'}), 400
-
-    prompt_base = f"""Este es un caso clínico de un curso en línea. El contenido es el siguiente:
-
-{contenido['contenido_json']}
-
-Actúa como un tutor clínico. Responde a la siguiente pregunta del usuario basada únicamente en este caso:"""
-
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
+        # Verificar que se recibió el JSON
+        if not request.json:
+            return jsonify({'error': 'No se recibió datos JSON'}), 400
+            
+        user_input = request.json.get('mensaje')
+        if not user_input:
+            return jsonify({'error': 'Mensaje vacío'}), 400
+
+        # Buscar el contenido
+        contenido = collection_eva.find_one({'codigo_evento': codigo_evento, 'orden': orden})
+
+        if not contenido or contenido['tipo'] != 'caso_chatgpt':
+            return jsonify({'error': 'Contenido no encontrado o no válido'}), 400
+
+        if 'contenido_json' not in contenido:
+            return jsonify({'error': 'El caso clínico no tiene contenido JSON válido'}), 400
+
+        # Preparar el prompt asegurando codificación UTF-8
+        caso_clinico = contenido['contenido_json']
+        if isinstance(caso_clinico, dict):
+            # Si es un diccionario, convertirlo a string
+            caso_clinico = str(caso_clinico)
+        
+        prompt_base = f"""Este es un caso clínico de un curso en línea. El contenido es el siguiente:
+        José. Masculino de 55 años, DM2 de 8 años de evolución. Usa metformina 850 mg bid. Glicemia capilar en ayunas 425 mg/dl
+        HbA1C 9%.
+        Actúa como un tutor clínico. Responde a la siguiente pregunta del usuario basada únicamente en este caso:"""
+
+        # Llamada a OpenAI con la nueva API
+        response = client.chat.completions.create(
+            model="deepseek/deepseek-r1-0528:free",
             messages=[
                 {"role": "system", "content": prompt_base},
                 {"role": "user", "content": user_input}
-            ]
+            ],
+            max_tokens=1000,
+            temperature=0.7
         )
-        respuesta = response['choices'][0]['message']['content']
+        
+        respuesta = response.choices[0].message.content
         return jsonify({'respuesta': respuesta})
+        
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        print(f"Error en chat_contenido: {str(e)}")  # Para debugging
+        return jsonify({'error': f'Error interno: {str(e)}'}), 500

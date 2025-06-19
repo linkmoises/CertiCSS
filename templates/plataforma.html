@@ -167,9 +167,18 @@
 
 <script>
 function enviarPregunta() {
-    const mensaje = document.getElementById("chat-mensaje").value;
+    const mensaje = document.getElementById("chat-mensaje").value.trim();
     const respuestaDiv = document.getElementById("chat-respuesta");
+    
+    // Validar que hay mensaje
+    if (!mensaje) {
+        respuestaDiv.innerText = "Por favor escribe una pregunta";
+        return;
+    }
+    
+    // Mostrar estado de carga
     respuestaDiv.innerText = "Pensando...";
+    respuestaDiv.style.display = "block";
 
     fetch(`/api/chat_contenido/{{ evento.codigo }}/{{ contenido_actual.orden }}`, {
         method: "POST",
@@ -178,18 +187,32 @@ function enviarPregunta() {
         },
         body: JSON.stringify({ mensaje })
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.respuesta) {
             respuestaDiv.innerText = data.respuesta;
         } else {
-            respuestaDiv.innerText = "Error: " + data.error;
+            respuestaDiv.innerText = "Error: " + (data.error || "Error desconocido");
         }
     })
     .catch(error => {
-        respuestaDiv.innerText = "Error de conexión: " + error;
+        console.error('Error:', error);
+        respuestaDiv.innerText = "Error de conexión: " + error.message;
     });
 }
+
+// Opcional: permitir enviar con Enter
+document.getElementById("chat-mensaje").addEventListener("keypress", function(event) {
+    if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        enviarPregunta();
+    }
+});
 </script>
 </body>
 </html>

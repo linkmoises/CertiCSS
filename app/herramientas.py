@@ -51,3 +51,11 @@ def carrusel():
 @herramientas_bp.route('/temporizador')
 def temporizador():
     return render_template('temporizador.html') 
+
+
+###
+### Generador de números aleatorios
+###
+@herramientas_bp.route('/randomizer')
+def randomizer():
+    return render_template('randomizer.html') 

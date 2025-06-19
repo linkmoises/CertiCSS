@@ -1,0 +1,43 @@
+body.randomizer-bg {
+    background: #111;
+    min-height: 100vh;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.randomizer-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    width: 100vw;
+}
+
+.randomizer-numero {
+    color: #fff;
+    font-size: 8rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+    text-shadow: 0 0 20px #fff, 0 0 40px #fff;
+}
+
+.randomizer-boton {
+    background: #fff;
+    color: #111;
+    border: none;
+    padding: 1.2rem 2.5rem;
+    font-size: 2rem;
+    border-radius: 1rem;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s, color 0.2s;
+}
+
+.randomizer-boton:hover {
+    background: #222;
+    color: #fff;
+    border: 2px solid #fff;
+} 
