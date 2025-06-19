@@ -2,14 +2,20 @@ let numerosDisponibles = [];
 
 function iniciarRandomizador(event) {
     event.preventDefault();
-    // Leer límite
-    const limite = parseInt(document.getElementById('limite').value) || 20;
+    // Leer límites
+    const limiteInferior = parseInt(document.getElementById('limite-inferior').value) || 1;
+    const limiteSuperior = parseInt(document.getElementById('limite').value) || 20;
+    // Validar límites
+    if (limiteInferior > limiteSuperior) {
+        alert('El límite inferior no puede ser mayor que el superior.');
+        return;
+    }
     // Leer exclusiones
     const excluirStr = document.getElementById('excluir').value;
     let excluir = excluirStr.split(',').map(x => parseInt(x.trim())).filter(x => !isNaN(x));
     // Generar lista de números válidos
     numerosDisponibles = [];
-    for (let i = 1; i <= limite; i++) {
+    for (let i = limiteInferior; i <= limiteSuperior; i++) {
         if (!excluir.includes(i)) {
             numerosDisponibles.push(i);
         }
