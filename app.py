@@ -687,6 +687,13 @@ def catalogo(page=1):
     return render_template('catalogo.html', eventos=eventos, page=page, total_pages=total_pages)
 
 
+###
+### Regiones
+###
+@app.route('/catalogo/regiones')
+def catalogo_region():
+    return render_template('catalogo_region.html')
+
 
 ###
 ### Dashboard
