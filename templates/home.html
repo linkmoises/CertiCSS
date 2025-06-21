@@ -15,7 +15,7 @@
     <!-- metadatos -->
     <meta property="og:title" content="CertiCSS"/>
     <meta property="og:description" content="Departamento Nacional de Docencia e Investigación - DENADOI - Eventos académicos de la Caja de Seguro Social"/>
-    <meta property="og:image" content="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}"/>
+    <meta property="og:image" content="{{ BASE_URL}}{{ url_for('static', filename='assets/afiche-generico.jpg') }}"/>
     <meta property="og:url" content="{{ BASE_URL}}"/>
 {% if UMAMI_URL %}
     {{ UMAMI_URL | safe }}
