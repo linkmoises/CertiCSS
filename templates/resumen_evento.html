@@ -12,6 +12,11 @@
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
     <meta name="apple-mobile-web-app-title" content="CertiCSS" />
     <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
+    <!-- metadatos -->
+    <meta property="og:title" content="{{ evento.nombre }}"/>
+    <meta property="og:description" content="{{ evento.descripcion }}"/>
+    <meta property="og:image" content="{% if evento.afiche_750 %}{{ BASE_URL }}{{ evento.afiche_750 }}{% else %}{{ url_for('static', filename='assets/afiche-generico.jpg') }}{% endif %}"/>
+    <meta property="og:url" content="{{ BASE_URL}}resumen/{{ evento.codigo }}"/>
 {% if UMAMI_URL %}
     {{ UMAMI_URL | safe }}
 {% endif %}
