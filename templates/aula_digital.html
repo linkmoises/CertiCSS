@@ -123,7 +123,7 @@
                         <tbody class="divide-y divide-gray-200">
 {% for evento in eventos %}
                             <tr class="bg-white hover:bg-gray-50">
-                                <td class="h-px w-72 min-w-72">
+                                <td class="h-px w-80 min-w-80">
                                     <div class="px-6 py-2">
                                         <p class="text-sm text-gray-500 mb-2">
                                             <a class="text-sm text-blue-600 decoration-2 hover:underline" href="{{ url_for('plataforma.ver_plataforma', codigo_evento=evento.codigo) }}">
@@ -134,7 +134,10 @@
                                         </span>
                                         <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
                                             {{ evento.modalidad }}
-                                        </span><br />
+                                        </span>
+                                        <button onclick="this.innerText='Código copiado'; navigator.clipboard.writeText('{{ evento.codigo }}'); setTimeout(() => this.innerText='{{ evento.codigo }}', 2000);" class="inline-flex items-center justify-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800 hover:bg-gray-200 transition-all">
+                                            {{ evento.codigo }}
+                                        </button><br />
                                         <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
                                             {{ evento.unidad_ejecutora }}
                                         </span>
@@ -147,14 +150,18 @@
                                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-external-link-icon lucide-external-link"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
                                             Resumen
                                         </a><br />
-                                        <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('mostrar_evento', codigo_evento=evento.codigo) }}" target="_blank">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-external-link-icon lucide-external-link"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
-                                            QR registro
+{% if current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor or evento.es_organizador)) %}
+{% if evento.modalidad != 'presencial' %}
+                                        <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('plataforma.listar_contenidos', codigo_evento=evento.codigo) }}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-copy-icon lucide-book-copy"><path d="M2 16V4a2 2 0 0 1 2-2h11"/><path d="M22 18H11a2 2 0 1 0 0 4h10.5a.5.5 0 0 0 .5-.5v-15a.5.5 0 0 0-.5-.5H11a2 2 0 0 0-2 2v12"/><path d="M5 14H4a2 2 0 1 0 0 4h1"/></svg>
+                                            LMS
                                         </a><br />
+{% endif %}
                                         <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('cierre_evento', codigo_evento=evento.codigo) }}" target="_blank">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-external-link-icon lucide-external-link"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
                                             QR cierre
                                         </a>
+{% endif %}
                                     </div>
                                     </a>
                                 </td>
@@ -209,9 +216,6 @@ Esperamos%20contar%20con%20su%20participación.">
                                 <td class="size-px whitespace-nowrap">
                                     <div class="px-6 py-2">
 {% if current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor or evento.es_organizador)) %}
-                                        <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('plataforma.listar_contenidos', codigo_evento=evento.codigo) }}">
-                                            LMS
-                                        </a><br />
                                         <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('editar_evento', codigo_evento=evento.codigo) }}">
                                             Editar
                                         </a><br />
