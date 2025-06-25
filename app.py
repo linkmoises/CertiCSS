@@ -1416,6 +1416,28 @@ def actualizar_campo_participante():
 
 
 ###
+### Eliminar participante desde vista de BD
+###
+@app.route('/eliminar_participante_bd/<codigo_evento>/<id_participante>', methods=['POST'])
+@login_required
+def eliminar_participante_bd(codigo_evento, id_participante):
+    if current_user.rol != 'administrador':
+        flash('No tienes permisos para eliminar participantes.', 'error')
+        return redirect(url_for('db_individual', codigo_evento=codigo_evento))
+
+    try:
+        participante = collection_participantes.find_one({'_id': ObjectId(id_participante), 'codigo_evento': codigo_evento})
+    except Exception:
+        participante = None
+    if participante:
+        collection_participantes.delete_one({'_id': ObjectId(id_participante), 'codigo_evento': codigo_evento})
+        flash('Participante eliminado correctamente.', 'success')
+    else:
+        flash('Participante no encontrado.', 'error')
+    return redirect(url_for('db_individual', codigo_evento=codigo_evento))
+
+
+###
 ### Aula Digital
 ###
 @app.route('/eventos-digitales')

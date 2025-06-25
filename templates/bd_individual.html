@@ -53,6 +53,13 @@
                                             </div>
                                         </td>
                                         {% endfor %}
+                                        <td class="px-4 py-2 text-sm text-gray-800 whitespace-nowrap">
+                                            <form method="POST" action="{{ url_for('eliminar_participante_bd', codigo_evento=codigo_evento, id_participante=fila.get('_id')) }}" style="display:inline;">
+                                                <button type="submit" class="text-red-600 hover:text-red-800 font-bold" onclick="return confirm('¿Estás seguro de que deseas eliminar este registro?');">
+                                                    Eliminar
+                                                </button>
+                                            </form>
+                                        </td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
