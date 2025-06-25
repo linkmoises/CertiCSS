@@ -6,6 +6,7 @@ from datetime import datetime
 from flask_login import login_required, current_user
 import csv
 import io
+from app.utils.agregar_nanoid import generate_nanoid
 
 importar_bp = Blueprint('importar', __name__)
 
@@ -77,6 +78,12 @@ def importar_eventos():
                     for key in row:
                         if row[key] == '':
                             row[key] = None
+                    
+                    # Generar nanoid si no viene en el CSV
+                    if not row.get('nanoid') or not row['nanoid']:
+                        # Si hay título de ponencia, usarlo, si no, None
+                        titulo_ponencia = row.get('titulo_ponencia')
+                        row['nanoid'] = generate_nanoid(cedula, codigo_evento, titulo_ponencia)
                     
                     # Insertar el nuevo participante
                     collection_participantes.insert_one(row)
