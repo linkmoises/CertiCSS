@@ -19,7 +19,7 @@
     <meta property="og:image:width" content="750">
     <meta property="og:image:height" content="750">
     <meta property="og:url" content="{{ BASE_URL}}resumen/{{ evento.codigo }}"/>
-    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="{{ evento.nombre }}">
     <meta name="twitter:description" content="{{ evento.descripcion }}">
     <meta name="twitter:image" content="{% if evento.afiche_750 %}{{ BASE_URL }}{{ evento.afiche_750 }}{% else %}{{ url_for('static', filename='assets/afiche-generico.jpg') }}{% endif %}">
