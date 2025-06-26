@@ -1,8 +1,9 @@
 User-agent: *
 Disallow: /tablero
 Disallow: /buscar_certificados
-Disallow: /static/assets
 Disallow: /static/certificados
 Disallow: /static/resources
+Disallow: /static/assets
+Allow: /static/assets/og-imagen.png
 Allow: /static/uploads
 Allow: /
