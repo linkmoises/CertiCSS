@@ -4,4 +4,5 @@ Disallow: /buscar_certificados
 Disallow: /static/assets
 Disallow: /static/certificados
 Disallow: /static/resources
+Allow: /static/uploads
 Allow: /
