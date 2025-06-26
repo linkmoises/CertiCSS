@@ -249,6 +249,47 @@ def ver_contenido(codigo_evento, orden):
     )
 
 
+###
+### Listado de Bancos de Preguntas
+###
+@plataforma_bp.route('/qbanks/')
+@login_required
+def listar_qbank():
+    return render_template('qbanks_listar.html')
+
+
+###
+### Crear nuevo Banco de Preguntas
+###
+@plataforma_bp.route('/qbanks/nuevo', methods=['GET', 'POST'])
+@login_required
+def nuevo_qbank():
+    if request.method == 'POST':
+        return redirect(url_for('plataforma_bp.listar_qbank'))
+    return render_template('qbanks_nuevo.html')
+
+
+###
+### Ver o editar un Banco de Preguntas
+###
+@plataforma_bp.route('/qbanks/<codigo_qbank>')
+@login_required
+def ver_qbank(codigo_qbank):
+    return render_template('qbanks_ver.html', codigo=codigo_qbank)
+
+
+###
+### Añadir preguntas a un banco
+###
+@plataforma_bp.route('/qbanks/<codigo_qbank>/preguntas', methods=['GET', 'POST'])
+@login_required
+def preguntas_qbank(codigo_qbank):
+    if request.method == 'POST':
+        # lógica para añadir pregunta nueva al banco
+        pass
+    return render_template('qbanks_preguntas.html', codigo=codigo_qbank)
+
+
 from flask import jsonify, request
 from openai import OpenAI
 import os
