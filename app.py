@@ -3147,45 +3147,6 @@ def descargar_constancia(nanoid):
 
 
 ###
-### Imagen metadatos para redes sociales
-###
-from PIL import Image, ImageFilter
-
-@app.route('/imagen_og/<nombre>')
-def imagen_og(nombre):
-    carpeta = os.path.join('static/uploads')
-    path_origen = os.path.join(carpeta, nombre)
-
-    if not os.path.exists(path_origen):
-        abort(404)
-
-    # Generar nombre para imagen OG
-    nombre_salida = f"{nombre.rsplit('.', 1)[0]}-og.jpg"
-    path_salida = os.path.join(carpeta, nombre_salida)
-
-    if not os.path.exists(path_salida):
-        try:
-            # Abrir imagen original
-            imagen = Image.open(path_origen).convert("RGB")
-
-            # Crear fondo difuminado
-            fondo = imagen.resize((1200, 630), Image.Resampling.LANCZOS)
-            fondo = fondo.filter(ImageFilter.GaussianBlur(20))
-
-            # Redimensionar imagen original para centrarla sobre el fondo
-            imagen.thumbnail((900, 630), Image.Resampling.LANCZOS)
-            x = (1200 - imagen.width) // 2
-            y = (630 - imagen.height) // 2
-            fondo.paste(imagen, (x, y))
-
-            # Guardar resultado en disco
-            fondo.save(path_salida, format='JPEG', quality=85)
-        except Exception as e:
-            abort(500, description=f"Error procesando imagen: {e}")
-
-    return send_file(path_salida, mimetype='image/jpeg')
-
-###
 ### Sistema de logs
 ###
 import logging
