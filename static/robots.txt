@@ -1,5 +1,7 @@
 User-agent: *
 Disallow: /tablero
 Disallow: /buscar_certificados
-Disallow: /static
+Disallow: /static/assets
+Disallow: /static/certificados
+Disallow: /static/resources
 Allow: /
