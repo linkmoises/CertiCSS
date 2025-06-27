@@ -917,6 +917,10 @@ def preregistro(codigo_evento):
     # Obtener cédulas existentes de la colección preregistros
     cedulas_guardadas = [registro["cedula"] for registro in collection_preregistro.find({"codigo_evento": codigo_evento}, {"cedula": 1, "_id": 0})]
 
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    nombre_evento = evento['nombre'] if evento else "Evento no encontrado"
+
+
     if request.method == "POST":
         datos_formulario = request.form.get("cedulas", "")
 
@@ -964,7 +968,7 @@ def preregistro(codigo_evento):
 
     return render_template('preregistro.html',
                            codigo_evento=codigo_evento,
-                           nombre_evento="text",
+                           nombre_evento=nombre_evento,
                            cedulas_guardadas=cedulas_guardadas)
 
 
