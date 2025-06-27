@@ -39,6 +39,7 @@ collection_eva = db['eva']
 collection_tokens = db['tokens']
 collection_repositorio = db['repositorio']
 collection_encuestas = db['encuestas'] 
+collection_qbanks = db['qbanks']
 
 
 ###

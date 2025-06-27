@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, abort, flash
-from app import db, collection_eventos, collection_eva
+from app import db, collection_eventos, collection_eva, collection_qbanks
 from flask_login import login_required, current_user
 from app.auth import token_required
+from datetime import datetime
 
 plataforma_bp = Blueprint('plataforma', __name__)
 
@@ -253,9 +254,27 @@ def ver_contenido(codigo_evento, orden):
 ### Listado de Bancos de Preguntas
 ###
 @plataforma_bp.route('/qbanks/')
+@plataforma_bp.route('/qbanks/page/<int:page>')
 @login_required
-def listar_qbank():
-    return render_template('qbanks_listar.html')
+def listar_qbank(page=1):
+    qbanks_por_pagina = 20  # Número de qbanks por página
+
+    # Contar el total de qbanks
+    total_qbanks = collection_qbanks.count_documents({})
+    
+    # Calcular el número total de páginas
+    total_paginas = (total_qbanks + qbanks_por_pagina - 1) // qbanks_por_pagina
+
+    # Obtener los qbanks para la página actual
+    qbanks_cursor = collection_qbanks.find().sort("fecha_creacion", -1).skip((page - 1) * qbanks_por_pagina).limit(qbanks_por_pagina)
+    qbanks = list(qbanks_cursor)
+
+    return render_template('qbanks_listar.html', 
+        qbanks=qbanks,
+        page=page,
+        total_paginas=total_paginas,
+        total_qbanks=total_qbanks
+    )
 
 
 ###
@@ -265,7 +284,71 @@ def listar_qbank():
 @login_required
 def nuevo_qbank():
     if request.method == 'POST':
-        return redirect(url_for('plataforma_bp.listar_qbank'))
+        # Obtener datos del formulario
+        qbank_titulo = request.form.get('qbank_titulo', '').strip()
+        qbank_descripcion = request.form.get('qbank_descripcion', '').strip()
+        qbank_tags = request.form.get('qbank_tags', '').strip()
+        timestamp = request.form.get('timestamp', '')
+        
+        # Validaciones básicas
+        if not qbank_titulo:
+            flash('El título del banco de preguntas es obligatorio.', 'error')
+            return render_template('qbanks_nuevo.html')
+        
+        if not qbank_descripcion:
+            flash('La descripción del banco de preguntas es obligatoria.', 'error')
+            return render_template('qbanks_nuevo.html')
+        
+        # Generar código único para el qbank (similar al de eventos)
+        def generar_codigo_qbank(longitud=8):
+            import random
+            import string
+            caracteres = string.ascii_uppercase + string.digits
+            codigo = ''.join(random.choice(caracteres) for _ in range(longitud))
+            return codigo
+
+        def obtener_codigo_unico_qbank():
+            while True:
+                codigo = generar_codigo_qbank()
+                if collection_qbanks.find_one({"codigo": codigo}) is None:
+                    return codigo
+        
+        codigo_qbank = obtener_codigo_unico_qbank()
+        
+        # Procesar tags (convertir string a lista)
+        tags_list = []
+        if qbank_tags:
+            tags_list = [tag.strip() for tag in qbank_tags.split(',') if tag.strip()]
+        
+        # Crear documento del qbank
+        qbank_data = {
+            'codigo': codigo_qbank,
+            'titulo': qbank_titulo,
+            'descripcion': qbank_descripcion,
+            'tags': tags_list,
+            'autor': current_user.id,
+            'autor_email': current_user.email,
+            'fecha_creacion': datetime.now(),
+            'fecha_modificacion': datetime.now(),
+            'activo': True,
+            'total_preguntas': 0
+        }
+        
+        try:
+            # Insertar en la base de datos
+            result = collection_qbanks.insert_one(qbank_data)
+            
+            if result.inserted_id:
+                flash(f'Banco de preguntas "{qbank_titulo}" creado exitosamente con código: {codigo_qbank}', 'success')
+                return redirect(url_for('plataforma.ver_qbank', codigo_qbank=codigo_qbank))
+            else:
+                flash('Error al crear el banco de preguntas.', 'error')
+                
+        except Exception as e:
+            flash(f'Error al guardar en la base de datos: {str(e)}', 'error')
+            print(f"Error en nuevo_qbank: {str(e)}")  # Para debugging
+    
+    # Para GET o si hay errores, mostrar el formulario
     return render_template('qbanks_nuevo.html')
 
 
@@ -275,7 +358,14 @@ def nuevo_qbank():
 @plataforma_bp.route('/qbanks/<codigo_qbank>')
 @login_required
 def ver_qbank(codigo_qbank):
-    return render_template('qbanks_ver.html', codigo=codigo_qbank)
+    # Buscar el qbank en la base de datos
+    qbank = collection_qbanks.find_one({"codigo": codigo_qbank})
+    
+    if not qbank:
+        flash('Banco de preguntas no encontrado.', 'error')
+        return redirect(url_for('plataforma.listar_qbank'))
+    
+    return render_template('qbanks_ver.html', qbank=qbank)
 
 
 ###
@@ -284,10 +374,53 @@ def ver_qbank(codigo_qbank):
 @plataforma_bp.route('/qbanks/<codigo_qbank>/preguntas', methods=['GET', 'POST'])
 @login_required
 def preguntas_qbank(codigo_qbank):
+    # Buscar el qbank en la base de datos
+    qbank = collection_qbanks.find_one({"codigo": codigo_qbank})
+    
+    if not qbank:
+        flash('Banco de preguntas no encontrado.', 'error')
+        return redirect(url_for('plataforma.listar_qbank'))
+    
     if request.method == 'POST':
         # lógica para añadir pregunta nueva al banco
-        pass
-    return render_template('qbanks_preguntas.html', codigo=codigo_qbank)
+        flash('Funcionalidad de añadir preguntas en desarrollo.', 'info')
+        return redirect(url_for('plataforma.preguntas_qbank', codigo_qbank=codigo_qbank))
+    
+    return render_template('qbanks_preguntas.html', qbank=qbank)
+
+
+###
+### Eliminar un Banco de Preguntas
+###
+@plataforma_bp.route('/qbanks/<codigo_qbank>/eliminar', methods=['POST'])
+@login_required
+def eliminar_qbank(codigo_qbank):
+    # Buscar el qbank en la base de datos
+    qbank = collection_qbanks.find_one({"codigo": codigo_qbank})
+    
+    if not qbank:
+        flash('Banco de preguntas no encontrado.', 'error')
+        return redirect(url_for('plataforma.listar_qbank'))
+    
+    # Verificar que el usuario sea el autor del qbank o administrador
+    if qbank.get('autor') != current_user.id and current_user.rol != 'administrador':
+        flash('No tienes permisos para eliminar este banco de preguntas.', 'error')
+        return redirect(url_for('plataforma.listar_qbank'))
+    
+    try:
+        # Eliminar el qbank
+        result = collection_qbanks.delete_one({"codigo": codigo_qbank})
+        
+        if result.deleted_count > 0:
+            flash(f'Banco de preguntas "{qbank["titulo"]}" eliminado exitosamente.', 'success')
+        else:
+            flash('Error al eliminar el banco de preguntas.', 'error')
+            
+    except Exception as e:
+        flash(f'Error al eliminar el banco de preguntas: {str(e)}', 'error')
+        print(f"Error en eliminar_qbank: {str(e)}")  # Para debugging
+    
+    return redirect(url_for('plataforma.listar_qbank'))
 
 
 from flask import jsonify, request
