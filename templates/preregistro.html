@@ -15,6 +15,13 @@
                         {{ nombre_evento }}
                     </h2>
                     <p class="text-sm text-gray-600 dark:text-neutral-400">
+                        {% if fecha_inicio %}
+                            {{ fecha_inicio.strftime('%d %b, %Y') if fecha_inicio else 'Fecha no disponible' }}
+                        {% else %}
+                            Fecha no disponible
+                        {% endif %}
+                    </p>
+                    <p class="text-sm text-gray-600 dark:text-neutral-400">
                         Formulario de pre-registro
                     </p>
                 </div>

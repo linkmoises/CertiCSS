@@ -919,6 +919,7 @@ def preregistro(codigo_evento):
 
     evento = collection_eventos.find_one({"codigo": codigo_evento})
     nombre_evento = evento['nombre'] if evento else "Evento no encontrado"
+    fecha_inicio = evento.get('fecha_inicio') if evento else None
 
 
     if request.method == "POST":
@@ -969,6 +970,7 @@ def preregistro(codigo_evento):
     return render_template('preregistro.html',
                            codigo_evento=codigo_evento,
                            nombre_evento=nombre_evento,
+                           fecha_inicio=fecha_inicio,
                            cedulas_guardadas=cedulas_guardadas)
 
 
