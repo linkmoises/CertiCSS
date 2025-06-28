@@ -345,7 +345,7 @@ def listar_usuarios(page=1):
 ###
 ### Edición de perfil de usuario
 ###
-@app.route('/tablero/usuario/<user_id>/editar', methods=['GET', 'POST'])
+@app.route('/tablero/usuarios/<user_id>/editar', methods=['GET', 'POST'])
 @login_required
 def editar_usuario(user_id):
     if request.method == 'POST':
@@ -455,7 +455,7 @@ def allowed_file(filename):
 ###
 ### Eliminar foto de perfil
 ###
-@app.route('/tablero/usuario/<user_id>/eliminar_foto', methods=['POST'])
+@app.route('/tablero/usuarios/<user_id>/eliminar_foto', methods=['POST'])
 @login_required
 def eliminar_foto(user_id):
     print(f"Intentando eliminar la foto del usuario: {user_id}")  # Debug
@@ -493,7 +493,7 @@ def eliminar_foto(user_id):
 ###
 ### Perfil de usuario
 ###
-@app.route('/tablero/usuario/<user_id>')
+@app.route('/tablero/usuarios/<user_id>')
 @login_required
 def mostrar_usuario(user_id):
     # Obtener los datos del usuario desde la base de datos usando el user_id
@@ -511,7 +511,7 @@ def mostrar_usuario(user_id):
 ###
 ### Acciones de usuario
 ###
-@app.route('/tablero/usuario/<user_id>/eliminar', methods=['POST'])
+@app.route('/tablero/usuarios/<user_id>/eliminar', methods=['POST'])
 @login_required
 def eliminar_usuario(user_id):
     if current_user.rol != 'administrador':
@@ -536,7 +536,7 @@ def eliminar_usuario(user_id):
     return redirect(url_for('listar_usuarios'))
 
 
-@app.route('/tablero/usuario/<user_id>/toggle_activo', methods=['POST'])
+@app.route('/tablero/usuarios/<user_id>/toggle_activo', methods=['POST'])
 @login_required
 def toggle_activo(user_id):
     if current_user.rol != 'administrador':
@@ -1491,7 +1491,7 @@ def listar_eventos_digitales(page=1):
 ###
 ### Listado de participantes de un evento
 ###
-@app.route('/participantes/<codigo_evento>')
+@app.route('/tablero/eventos/<codigo_evento>/participantes')
 @login_required
 def listar_participantes(codigo_evento):
     # Recuperar participantes registrados para el evento específico
@@ -1718,9 +1718,21 @@ def crear_evento():
 
 
 ###
+### Ver detalles de evento
+###
+@app.route('/tablero/eventos/<codigo_evento>')
+@login_required
+def ver_evento(codigo_evento):
+    # Obtener el evento actual de la base de datos
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+
+    return render_template('ver_evento.html', evento=evento)
+
+
+###
 ### Editar evento
 ###
-@app.route('/editar_evento/<codigo_evento>', methods=['GET', 'POST'])
+@app.route('/tablero/eventos/<codigo_evento>/editar', methods=['GET', 'POST'])
 @login_required
 def editar_evento(codigo_evento):
     # Obtener el evento actual de la base de datos
@@ -2294,7 +2306,7 @@ import os
 import uuid
 from flask import request, render_template, redirect, url_for, abort, flash
 from werkzeug.utils import secure_filename
-@app.route('/subir_archivo/<codigo_evento>', methods=['GET', 'POST'])
+@app.route('/tablero/eventos/<codigo_evento>/repositorio', methods=['GET', 'POST'])
 @login_required
 def subir_archivo(codigo_evento):
     evento = collection_eventos.find_one({'codigo': codigo_evento})
