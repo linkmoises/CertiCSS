@@ -11,19 +11,10 @@
                 <!-- Card -->
                 <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-7 dark:bg-neutral-800">
                 <div class="mb-8">
-                    <h2 class="text-xl font-bold text-gray-800 dark:text-neutral-200">
-                        {{ nombre_evento }}
+                    <h2 class="text-xl mb-2 font-bold text-gray-800 dark:text-neutral-200">
+                        Preregistro: {{ nombre_evento }}
                     </h2>
-                    <p class="text-sm text-gray-600 dark:text-neutral-400">
-                        {% if fecha_inicio %}
-                            {{ fecha_inicio.strftime('%d %b, %Y') if fecha_inicio else 'Fecha no disponible' }}
-                        {% else %}
-                            Fecha no disponible
-                        {% endif %}
-                    </p>
-                    <p class="text-sm text-gray-600 dark:text-neutral-400">
-                        Formulario de pre-registro
-                    </p>
+                    <p class="text-sm text-gray-600 dark:text-neutral-400">{{ fecha_inicio.strftime('%d %b, %Y') if fecha_inicio else 'Fecha no disponible' }}</p>
                 </div>
 
 <!-- Mostrar mensajes -->

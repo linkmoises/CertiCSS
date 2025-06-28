@@ -1086,8 +1086,8 @@ def registrar_organizador(codigo_evento):
 ###
 ### Listado de eventos próximos
 ###
-@app.route('/eventos-proximos')
-@app.route('/eventos-proximos/page/<int:page>')
+@app.route('/eventos/proximos')
+@app.route('/eventos/proximos/page/<int:page>')
 @login_required
 def listar_eventos_proximos(page=1):
     ahora = datetime.utcnow()
@@ -1126,8 +1126,8 @@ def listar_eventos_proximos(page=1):
 ###
 ### Listado de eventos anteriores
 ###
-@app.route('/eventos-anteriores')
-@app.route('/eventos-anteriores/page/<int:page>')
+@app.route('/eventos/anteriores')
+@app.route('/eventos/anteriores/page/<int:page>')
 @login_required
 def listar_eventos_anteriores(page=1):
     ahora = datetime.utcnow()
@@ -1618,7 +1618,7 @@ def exportar_csv(codigo_evento):
 ###
 ### Formulario de creación de evento
 ###
-@app.route('/evento-nuevo', methods=['GET', 'POST'])
+@app.route('/eventos/nuevo', methods=['GET', 'POST'])
 @login_required
 def crear_evento():
     if request.method == 'POST':
