@@ -19,7 +19,7 @@ collection_seguimiento = db['seguimiento_asistencia']
 ###
 ### Asistencia dinámica
 ###
-@asistencia_bp.route("/asistencia-dinamica", methods=['GET', 'POST'])
+@asistencia_bp.route("/tablero/asistencia-dinamica", methods=['GET', 'POST'])
 @login_required
 def asistencia_dinamica():
     # Inicializar las listas en la sesión si no existen
@@ -123,7 +123,7 @@ def asistencia_dinamica():
 ###
 ### Actualizar nombre
 ###
-@asistencia_bp.route("/actualizar-nombre/<cedula>", methods=['POST'])
+@asistencia_bp.route("/tablero/asistencia-dinamica/<cedula>/actualizar-nombre", methods=['POST'])
 @login_required
 def actualizar_nombre(cedula):
     nombre = request.form.get('nombre', '').strip()
@@ -142,7 +142,7 @@ def actualizar_nombre(cedula):
 ###
 ### Limpiar seguimiento
 ###
-@asistencia_bp.route("/limpiar-seguimiento", methods=['POST'])
+@asistencia_bp.route("/tablero/asistencia-dinamica/limpiar-seguimiento", methods=['POST'])
 @login_required
 def limpiar_seguimiento():
     # Limpiar la sesión
@@ -160,7 +160,7 @@ def limpiar_seguimiento():
 ###
 ### Eliminar cédula
 ###
-@asistencia_bp.route("/eliminar-cedula/<cedula>", methods=['POST'])
+@asistencia_bp.route("/tablero/asistencia-dinamica/<cedula>/eliminar-cedula", methods=['POST'])
 @login_required
 def eliminar_cedula(cedula):
     if cedula in session['cedulas_historial']:
@@ -185,7 +185,7 @@ def eliminar_cedula(cedula):
 ###
 ### Eliminar evento del seguimiento
 ###
-@asistencia_bp.route("/eliminar-evento/<codigo>", methods=['POST'])
+@asistencia_bp.route("/tablero/asistencia-dinamica/eliminar-evento/<codigo>", methods=['POST'])
 @login_required
 def eliminar_evento(codigo):
     if codigo in session['eventos_historial']:
@@ -203,7 +203,7 @@ def eliminar_evento(codigo):
 ###
 ### Descargar seguimiento
 ###
-@asistencia_bp.route("/descargar-seguimiento", methods=['GET'])
+@asistencia_bp.route("/tablero/asistencia-dinamica/descargar-seguimiento", methods=['GET'])
 @login_required
 def descargar_seguimiento():
     # Obtener los datos del seguimiento

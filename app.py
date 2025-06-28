@@ -191,7 +191,7 @@ def obtener_codigo_unico():
 ###
 ### Página de registro
 ###
-@app.route('/registrar-usuario', methods=['GET', 'POST'])
+@app.route('/tablero/usuarios/registrar', methods=['GET', 'POST'])
 @login_required
 def registro():
     if request.method == 'POST':
@@ -316,8 +316,8 @@ def login():
 ###
 ### Listado de usuarios
 ###
-@app.route('/usuarios')
-@app.route('/usuarios/page/<int:page>')
+@app.route('/tablero/usuarios')
+@app.route('/tablero/usuarios/page/<int:page>')
 @login_required
 def listar_usuarios(page=1):
     usuarios_por_pagina = 20  # Número de usuarios por página
@@ -345,7 +345,7 @@ def listar_usuarios(page=1):
 ###
 ### Edición de perfil de usuario
 ###
-@app.route('/editar_usuario/<user_id>', methods=['GET', 'POST'])
+@app.route('/tablero/usuario/<user_id>/editar', methods=['GET', 'POST'])
 @login_required
 def editar_usuario(user_id):
     if request.method == 'POST':
@@ -455,7 +455,7 @@ def allowed_file(filename):
 ###
 ### Eliminar foto de perfil
 ###
-@app.route('/eliminar_foto/<user_id>', methods=['POST'])
+@app.route('/tablero/usuario/<user_id>/eliminar_foto', methods=['POST'])
 @login_required
 def eliminar_foto(user_id):
     print(f"Intentando eliminar la foto del usuario: {user_id}")  # Debug
@@ -493,7 +493,7 @@ def eliminar_foto(user_id):
 ###
 ### Perfil de usuario
 ###
-@app.route('/usuario/<user_id>')
+@app.route('/tablero/usuario/<user_id>')
 @login_required
 def mostrar_usuario(user_id):
     # Obtener los datos del usuario desde la base de datos usando el user_id
@@ -511,7 +511,7 @@ def mostrar_usuario(user_id):
 ###
 ### Acciones de usuario
 ###
-@app.route('/eliminar_usuario/<user_id>', methods=['POST'])
+@app.route('/tablero/usuario/<user_id>/eliminar', methods=['POST'])
 @login_required
 def eliminar_usuario(user_id):
     if current_user.rol != 'administrador':
@@ -536,7 +536,7 @@ def eliminar_usuario(user_id):
     return redirect(url_for('listar_usuarios'))
 
 
-@app.route('/toggle_activo/<user_id>', methods=['POST'])
+@app.route('/tablero/usuario/<user_id>/toggle_activo', methods=['POST'])
 @login_required
 def toggle_activo(user_id):
     if current_user.rol != 'administrador':
@@ -1086,8 +1086,8 @@ def registrar_organizador(codigo_evento):
 ###
 ### Listado de eventos próximos
 ###
-@app.route('/eventos/proximos')
-@app.route('/eventos/proximos/page/<int:page>')
+@app.route('/tablero/eventos/proximos')
+@app.route('/tablero/eventos/proximos/page/<int:page>')
 @login_required
 def listar_eventos_proximos(page=1):
     ahora = datetime.utcnow()
@@ -1126,8 +1126,8 @@ def listar_eventos_proximos(page=1):
 ###
 ### Listado de eventos anteriores
 ###
-@app.route('/eventos/anteriores')
-@app.route('/eventos/anteriores/page/<int:page>')
+@app.route('/tablero/eventos/anteriores')
+@app.route('/tablero/eventos/anteriores/page/<int:page>')
 @login_required
 def listar_eventos_anteriores(page=1):
     ahora = datetime.utcnow()
@@ -1163,8 +1163,8 @@ def listar_eventos_anteriores(page=1):
 ###
 ### Todos los eventos
 ###
-@app.route('/eventos')
-@app.route('/eventos/page/<int:page>')
+@app.route('/tablero/eventos')
+@app.route('/tablero/eventos/page/<int:page>')
 @login_required
 def listar_eventos(page=1):
     eventos_por_pagina = 20
@@ -1238,8 +1238,8 @@ def mis_eventos(page=1):
 ###
 ### Mis Eventos
 ###
-@app.route('/mis-eventos-digitales')
-@app.route('/mis-eventos-digitales/page/<int:page>')
+@app.route('/mis-eventos/digitales')
+@app.route('/mis-eventos/digitales/page/<int:page>')
 @login_required
 def mis_eventos_digitales(page=1):
     eventos_por_pagina = 20
@@ -1447,8 +1447,8 @@ def eliminar_participante_bd(codigo_evento, id_participante):
 ###
 ### Aula Digital
 ###
-@app.route('/eventos-digitales')
-@app.route('/eventos-digitales/page/<int:page>')
+@app.route('/tablero/eventos/digitales')
+@app.route('/tablero/eventos/digitales/page/<int:page>')
 @login_required
 def listar_eventos_digitales(page=1):
     eventos_por_pagina = 20
@@ -1618,7 +1618,7 @@ def exportar_csv(codigo_evento):
 ###
 ### Formulario de creación de evento
 ###
-@app.route('/eventos/nuevo', methods=['GET', 'POST'])
+@app.route('/tablero/eventos/nuevo', methods=['GET', 'POST'])
 @login_required
 def crear_evento():
     if request.method == 'POST':
@@ -2145,7 +2145,7 @@ def buscar_certificados():
 ###
 ### Plantilla varias
 ###
-@app.route('/plantillas')
+@app.route('/tablero/plantillas')
 @login_required
 def plantillas():
     return render_template('plantillas.html', active_section='plantillas')
@@ -2154,7 +2154,7 @@ def plantillas():
 ###
 ### Herramientas
 ###
-@app.route('/herramientas')
+@app.route('/tablero/herramientas')
 @login_required
 def herramientas():
     return render_template('herramientas.html', active_section='herramientas')
@@ -2166,8 +2166,8 @@ def herramientas():
 ###
 ### Plantilla varias
 ###
-@app.route('/metricas')
-@app.route('/metricas/page/<int:page>')
+@app.route('/tablero/metricas')
+@app.route('/tablero/metricas/page/<int:page>')
 @login_required
 def tablero_metricas(page=1):
 

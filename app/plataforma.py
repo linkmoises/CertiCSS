@@ -10,7 +10,7 @@ plataforma_bp = Blueprint('plataforma', __name__)
 ###
 ### LMS - Listado de actividades o contenidos
 ###
-@plataforma_bp.route('/lms/<codigo_evento>/')
+@plataforma_bp.route('/tablero/lms/<codigo_evento>/')
 @login_required
 def listar_contenidos(codigo_evento):
 
@@ -26,7 +26,7 @@ def listar_contenidos(codigo_evento):
 ###
 ### LMS - Crear actividad
 ###
-@plataforma_bp.route('/lms/<codigo_evento>/nuevo', methods=['GET', 'POST'])
+@plataforma_bp.route('/tablero/lms/<codigo_evento>/nuevo', methods=['GET', 'POST'])
 @login_required
 def crear_contenido(codigo_evento):
 
@@ -87,7 +87,7 @@ def crear_contenido(codigo_evento):
 ###
 ### LMS - Editar evento / contenio
 ###
-@plataforma_bp.route('/lms/<codigo_evento>/<int:orden>/editar', methods=['GET', 'POST'])
+@plataforma_bp.route('/tablero/lms/<codigo_evento>/<int:orden>/editar', methods=['GET', 'POST'])
 @login_required
 def editar_contenido(codigo_evento, orden):
     # # Obtener cédula y token de los parámetros
@@ -135,7 +135,7 @@ def editar_contenido(codigo_evento, orden):
 ###
 ### LMS - mover item de evento
 ###
-@plataforma_bp.route('/lms/<codigo_evento>/<int:orden>/mover/<direccion>', methods=['POST'])
+@plataforma_bp.route('/tablero/lms/<codigo_evento>/<int:orden>/mover/<direccion>', methods=['POST'])
 @login_required
 def mover_contenido(codigo_evento, orden, direccion):
     evento = collection_eventos.find_one({'codigo': codigo_evento})
@@ -163,7 +163,7 @@ def mover_contenido(codigo_evento, orden, direccion):
 ###
 ### LMS - eliminar item de evento
 ###
-@plataforma_bp.route('/lms/<codigo_evento>/<int:orden>/eliminar', methods=['POST'])
+@plataforma_bp.route('/tablero/lms/<codigo_evento>/<int:orden>/eliminar', methods=['POST'])
 @login_required
 def eliminar_contenido(codigo_evento, orden):
     evento = collection_eventos.find_one({'codigo': codigo_evento})
@@ -253,8 +253,8 @@ def ver_contenido(codigo_evento, orden):
 ###
 ### Listado de Bancos de Preguntas
 ###
-@plataforma_bp.route('/qbanks/')
-@plataforma_bp.route('/qbanks/page/<int:page>')
+@plataforma_bp.route('/tablero/qbanks/')
+@plataforma_bp.route('/tablero/qbanks/page/<int:page>')
 @login_required
 def listar_qbank(page=1):
     qbanks_por_pagina = 20  # Número de qbanks por página
@@ -280,7 +280,7 @@ def listar_qbank(page=1):
 ###
 ### Crear nuevo Banco de Preguntas
 ###
-@plataforma_bp.route('/qbanks/nuevo', methods=['GET', 'POST'])
+@plataforma_bp.route('/tablero/qbanks/nuevo', methods=['GET', 'POST'])
 @login_required
 def nuevo_qbank():
     if request.method == 'POST':
@@ -355,7 +355,7 @@ def nuevo_qbank():
 ###
 ### Ver o editar un Banco de Preguntas
 ###
-@plataforma_bp.route('/qbanks/<codigo_qbank>')
+@plataforma_bp.route('/tablero/qbanks/<codigo_qbank>')
 @login_required
 def ver_qbank(codigo_qbank):
     # Buscar el qbank en la base de datos
@@ -371,7 +371,7 @@ def ver_qbank(codigo_qbank):
 ###
 ### Añadir preguntas a un banco
 ###
-@plataforma_bp.route('/qbanks/<codigo_qbank>/preguntas', methods=['GET', 'POST'])
+@plataforma_bp.route('/tablero/qbanks/<codigo_qbank>/preguntas', methods=['GET', 'POST'])
 @login_required
 def preguntas_qbank(codigo_qbank):
     # Buscar el qbank en la base de datos
@@ -392,7 +392,7 @@ def preguntas_qbank(codigo_qbank):
 ###
 ### Eliminar un Banco de Preguntas
 ###
-@plataforma_bp.route('/qbanks/<codigo_qbank>/eliminar', methods=['POST'])
+@plataforma_bp.route('/tablero/qbanks/<codigo_qbank>/eliminar', methods=['POST'])
 @login_required
 def eliminar_qbank(codigo_qbank):
     # Buscar el qbank en la base de datos
