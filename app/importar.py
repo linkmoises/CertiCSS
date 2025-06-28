@@ -14,7 +14,7 @@ importar_bp = Blueprint('importar', __name__)
 ###
 ### Importar eventos y participantes
 ###
-@importar_bp.route('/importar', methods=['GET', 'POST'])
+@importar_bp.route('/bases-de-datos/importar', methods=['GET', 'POST'])
 @login_required
 def importar_eventos():
     if request.method == 'POST':
