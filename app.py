@@ -1931,7 +1931,7 @@ def resumen_evento(codigo_evento):
 ###
 ###
 ###
-@app.route('/cerrar_evento/<codigo_evento>', methods=['POST'])
+@app.route('/tablero/eventos/<codigo_evento>/cerrar', methods=['POST'])
 @login_required
 def cerrar_evento(codigo_evento):
     # Actualizar el estado del evento a "cerrado"
@@ -1946,7 +1946,7 @@ def cerrar_evento(codigo_evento):
 ###
 ### Validación para eliminar evento
 ###
-@app.route('/eliminar_evento/<codigo_evento>', methods=['POST'])
+@app.route('/tablero/eventos/<codigo_evento>/eliminar', methods=['POST'])
 @login_required
 def eliminar_evento(codigo_evento):
     # Verificar si hay participantes asociados al evento
@@ -2635,7 +2635,7 @@ def cierre_evento(codigo_evento):
                          estado=estado)
 
 
-@app.route('/exportar_encuesta_csv/<codigo_evento>')
+@app.route('/tablero/metricas/<codigo_evento>/exportar_csv')
 @login_required
 def exportar_encuesta_csv(codigo_evento):
     # Obtener las respuestas de la encuesta para el evento
@@ -2713,7 +2713,7 @@ def exportar_encuesta_csv(codigo_evento):
     )
 
 
-@app.route('/informe_avanzado/<codigo_evento>')
+@app.route('/tablero/metricas/<codigo_evento>/informe')
 @login_required
 def informe_avanzado(codigo_evento):
     # Obtener el evento

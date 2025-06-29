@@ -10,7 +10,7 @@ plataforma_bp = Blueprint('plataforma', __name__)
 ###
 ### LMS - Listado de actividades o contenidos
 ###
-@plataforma_bp.route('/tablero/lms/<codigo_evento>/')
+@plataforma_bp.route('/tablero/eventos/<codigo_evento>/lms')
 @login_required
 def listar_contenidos(codigo_evento):
 
@@ -26,7 +26,7 @@ def listar_contenidos(codigo_evento):
 ###
 ### LMS - Crear actividad
 ###
-@plataforma_bp.route('/tablero/lms/<codigo_evento>/nuevo', methods=['GET', 'POST'])
+@plataforma_bp.route('/tablero/eventos/<codigo_evento>/lms/nuevo', methods=['GET', 'POST'])
 @login_required
 def crear_contenido(codigo_evento):
 
@@ -87,7 +87,7 @@ def crear_contenido(codigo_evento):
 ###
 ### LMS - Editar evento / contenio
 ###
-@plataforma_bp.route('/tablero/lms/<codigo_evento>/<int:orden>/editar', methods=['GET', 'POST'])
+@plataforma_bp.route('/tablero/eventos/<codigo_evento>/lms/<int:orden>/editar', methods=['GET', 'POST'])
 @login_required
 def editar_contenido(codigo_evento, orden):
     # # Obtener cédula y token de los parámetros
@@ -127,7 +127,7 @@ def editar_contenido(codigo_evento, orden):
 
         collection_eva.update_one({'codigo_evento': codigo_evento, 'orden': orden}, {'$set': actualizacion})
 
-        return redirect(url_for('ver_contenido', codigo_evento=codigo_evento, orden=orden, cedula=cedula, token=token))
+        return redirect(url_for('plataforma.listar_contenidos', codigo_evento=codigo_evento))
 
     return render_template('editar_contenido.html', evento=evento, contenido=contenido)
 
@@ -135,7 +135,7 @@ def editar_contenido(codigo_evento, orden):
 ###
 ### LMS - mover item de evento
 ###
-@plataforma_bp.route('/tablero/lms/<codigo_evento>/<int:orden>/mover/<direccion>', methods=['POST'])
+@plataforma_bp.route('/tablero/eventos/<codigo_evento>/lms/<int:orden>/mover/<direccion>', methods=['POST'])
 @login_required
 def mover_contenido(codigo_evento, orden, direccion):
     evento = collection_eventos.find_one({'codigo': codigo_evento})
@@ -151,19 +151,19 @@ def mover_contenido(codigo_evento, orden, direccion):
 
     contenido_destino = collection_eva.find_one({'codigo_evento': codigo_evento, 'orden': nuevo_orden})
     if not contenido_destino:
-        return redirect(url_for('plataforma.ver_plataforma', codigo_evento=codigo_evento))  # Si no hay contenido en esa dirección, no hacer nada
+        return redirect(url_for('plataforma.listar_contenidos', codigo_evento=codigo_evento))
 
     # Intercambiar los órdenes en la base de datos
     collection_eva.update_one({'_id': contenido_actual['_id']}, {'$set': {'orden': nuevo_orden}})
     collection_eva.update_one({'_id': contenido_destino['_id']}, {'$set': {'orden': orden}})
 
-    return redirect(url_for('plataforma.ver_plataforma', codigo_evento=codigo_evento))
+    return redirect(url_for('plataforma.listar_contenidos', codigo_evento=codigo_evento))
 
 
 ###
 ### LMS - eliminar item de evento
 ###
-@plataforma_bp.route('/tablero/lms/<codigo_evento>/<int:orden>/eliminar', methods=['POST'])
+@plataforma_bp.route('/tablero/eventos/<codigo_evento>/<int:orden>/eliminar', methods=['POST'])
 @login_required
 def eliminar_contenido(codigo_evento, orden):
     evento = collection_eventos.find_one({'codigo': codigo_evento})
@@ -181,7 +181,7 @@ def eliminar_contenido(codigo_evento, orden):
     for i, cont in enumerate(contenidos_restantes, start=1):
         collection_eva.update_one({'_id': cont['_id']}, {'$set': {'orden': i}})
 
-    return redirect(url_for('plataforma.ver_plataforma', codigo_evento=codigo_evento))
+    return redirect(url_for('plataforma.listar_contenidos', codigo_evento=codigo_evento))
 
 
 ###
