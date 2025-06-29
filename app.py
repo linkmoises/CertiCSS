@@ -3248,6 +3248,10 @@ app.register_blueprint(plataforma_bp)
 from app.auth import auth_bp
 app.register_blueprint(auth_bp)
 
+### Búsqueda avanzada y normalizador
+from app.normalizador import normalizador_bp
+app.register_blueprint(normalizador_bp)
+
 ###
 ### robots.txt
 ###
