@@ -6,181 +6,220 @@
     <div class="w-full lg:ps-64">
         <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
 
-            <!-- Card Section -->
+            <!-- TABLA RESUMEN EVENTO -->
             <div class="max-w-[85rem] px-2 pt-1 mx-auto">
                 <!-- Card -->
-                <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-7 dark:bg-neutral-800">
+                <div class="flex flex-col">
+                <div class="-m-1.5 overflow-x-auto">
+                    <div class="p-1.5 min-w-full inline-block align-middle">
+                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
 
-                    <div class="mb-8">
-                        <h2 class="text-xl font-bold text-gray-800 dark:text-neutral-200">
-                            {{ evento.nombre }}
-                        </h2>
-                        <p class="text-sm text-gray-600 dark:text-neutral-400">
-                            Resumen de evento
-                        </p>
-                    </div>
-
-                    <!-- Grid -->
-                    <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
-                        
-                        <div class="sm:col-span-3">
-                            <label for="nombre" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
-                                Título la actividad docente
-                            </label>
-                        </div>
-                        <!-- End Col -->
-                
-                        <div class="sm:col-span-9">
-                            <p class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">{{ evento.nombre }}</p>
-                        </div>
-                        <!-- End Col -->
-
-                        <div class="sm:col-span-3">
-                            <label for="nombre" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
-                                Identificador de actividad
-                            </label>
-                        </div>
-                        <!-- End Col -->
-                
-                        <div class="sm:col-span-9">
-                            <button type="button" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">
-                                {{ evento.codigo }}
-                                <svg class="shrink-0 size-4 text-gray-400 dark:text-neutral-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path></svg>
-                            </button>
-                        </div>
-                        <!-- End Col -->
-
-                        <div class="sm:col-span-3">
-                            <label for="unidad_ejecutora" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
-                                Unidad ejecutora organizadora
-                            </label>
-                        </div>
-                        <!-- End Col -->
-                
-                        <div class="sm:col-span-9">
-                            <p class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">{{ evento.unidad_ejecutora }}</p>
-                        </div>
-                        <!-- End Col -->
-
-                        <div class="sm:col-span-3">
-                            <label for="lugar" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
-                                Lugar
-                            </label>
-                        </div>
-                        <!-- End Col -->
-                
-                        <div class="sm:col-span-9">
-                            <p class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">{{ evento.lugar }}</p>
-                        </div>
-                        <!-- End Col -->
-
-                        <div class="sm:col-span-3">
-                            <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">Modalidad</label>
-                        </div>
-
-                        <div class="sm:col-span-9">
-                            <p class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">{{ evento.modalidad }}</p>
-                        </div>
-
-                        <div class="sm:col-span-3">
-                            <label for="tipo" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
-                                Categoría
-                            </label>
-                        </div>
-                        <!-- End Col -->
-                
-                        <div class="sm:col-span-9">
-                            <p class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">{{ evento.tipo }}</p>
-                        </div>
-                        <!-- End Col -->
-
-                        <div class="sm:col-span-3">
-                            <label for="cupos" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
-                                Cupos disponibles
-                            </label>
-                        </div>
-                        <!-- End Col -->
-
-                        <div class="sm:col-span-9">
-                            <p class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">{{ evento.cupos }}</p>
-                        </div>
-                        <!-- End Col -->
-
-                        <div class="sm:col-span-3">
-                            <label for="carga_horaria" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
-                                Carga horaria académica
-                            </label>
-                        </div>
-                        <!-- End Col -->
-
-                        <div class="sm:col-span-9">
-                            <p class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">{{ evento.carga_horaria }}</p>
-                        </div>
-                        <!-- End Col -->
-
-
-                        <div class="sm:col-span-3">
-                            <label for="fecha_inicio" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
-                                Fecha de inicio
-                            </label>
-                        </div>
-                        <!-- End Col -->
-                
-                        <div class="sm:col-span-9">
-                            <p class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">{{ evento.fecha_inicio.strftime('%d %b, %Y') }}</p>
-                        </div>
-                        <!-- End Col -->
-
-                        <div class="sm:col-span-3">
-                            <label for="fecha_fin" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
-                                Fecha de finalización
-                            </label>
-                        </div>
-                        <!-- End Col -->
-                
-                        <div class="sm:col-span-9">
-                            <p class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">{{ evento.fecha_fin.strftime('%d %b, %Y') }}</p>
-                        </div>
-                        <!-- End Col -->
+                        <!-- Header -->
+                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-800">
+                                    {{ evento.nombre }}
+                                </h2>
+                                <p class="text-sm text-gray-600">
+                                    Resumen de evento
+                                </p>
+                            </div>
             
-                        <div class="sm:col-span-3">
-                            <label for="descripcion" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
-                                Descripción
-                            </label>
-                        </div>
-                        <!-- End Col -->
-            
-                        <div class="sm:col-span-9">
-                            <p class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">{{ evento.descripcion }}</p>
-                        </div>
-                        <!-- End Col -->
-
-                        <div class="sm:col-span-3">
-                            <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">Estado de evento</label>
-                        </div>
-
-                        <div class="sm:col-span-9">
-                            <p class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">{{ evento.estado_evento }}</p>
-                        </div>
-
-                    </div>
-                    <!-- End Grid -->
-            
-                    <div class="mt-5 flex justify-end gap-x-2">
-                        <button type="button" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50 dark:bg-transparent dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">
-                            Volver a la lista de eventos
-                        </button>
+                            <div>
+                                <div class="inline-flex gap-x-2">
+                                    <button type="button" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">
+                                        {{ evento.codigo }}
+                                        <svg class="shrink-0 size-4 text-gray-400 dark:text-neutral-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path></svg>
+                                    </button>
 {% if current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor or evento.es_organizador)) %}
-                        <a href="{{ url_for('editar_evento', codigo_evento=evento.codigo) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
-                            Editar evento
-                        </a>
+                                    <a href="{{ url_for('editar_evento', codigo_evento=evento.codigo) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                                        Editar evento
+                                    </a>
 {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Header -->
+
+                        <!-- Body -->
+                        <div class="max-w-[85rem] w-full min-h-[400px] flex flex-col px-6 py-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                                <!-- Contenedor 3/4 -->
+                                <div class="md:col-span-2 bg-white p-4">
+                                    <!-- Grid -->
+                                    <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
+                                        
+                                        <div class="sm:col-span-3">
+                                            <label for="nombre" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                                Título la actividad docente
+                                            </label>
+                                        </div>
+                                        <!-- End Col -->
+                                
+                                        <div class="sm:col-span-9">
+                                            <p class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">{{ evento.nombre }}</p>
+                                        </div>
+                                        <!-- End Col -->
+
+                                        <div class="sm:col-span-3">
+                                            <label for="descripcion" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                                Descripción
+                                            </label>
+                                        </div>
+                                        <!-- End Col -->
+                            
+                                        <div class="sm:col-span-9">
+                                            <p class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">{{ evento.descripcion }}</p>
+                                        </div>
+                                        <!-- End Col -->
+
+                                        <div class="sm:col-span-3">
+                                            <label for="unidad_ejecutora" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                                Unidad ejecutora organizadora
+                                            </label>
+                                        </div>
+                                        <!-- End Col -->
+                                
+                                        <div class="sm:col-span-9">
+                                            <p class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">{{ evento.unidad_ejecutora }}</p>
+                                        </div>
+                                        <!-- End Col -->
+
+                                        <div class="sm:col-span-3">
+                                            <label for="lugar" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                                Lugar
+                                            </label>
+                                        </div>
+                                        <!-- End Col -->
+                                
+                                        <div class="sm:col-span-9">
+                                            <p class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">{{ evento.lugar }}</p>
+                                        </div>
+                                        <!-- End Col -->
+
+                                        <div class="sm:col-span-3">
+                                            <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">Modalidad</label>
+                                        </div>
+
+                                        <div class="sm:col-span-9">
+                                            <p class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">{{ evento.modalidad }}</p>
+                                        </div>
+
+                                        <div class="sm:col-span-3">
+                                            <label for="tipo" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                                Categoría
+                                            </label>
+                                        </div>
+                                        <!-- End Col -->
+                                
+                                        <div class="sm:col-span-9">
+                                            <p class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">{{ evento.tipo }}</p>
+                                        </div>
+                                        <!-- End Col -->
+
+                                        <div class="sm:col-span-3">
+                                            <label for="cupos" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                                Cupos disponibles
+                                            </label>
+                                        </div>
+                                        <!-- End Col -->
+
+                                        <div class="sm:col-span-9">
+                                            <p class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">{{ evento.cupos }}</p>
+                                        </div>
+                                        <!-- End Col -->
+
+                                        <div class="sm:col-span-3">
+                                            <label for="carga_horaria" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                                Carga horaria académica
+                                            </label>
+                                        </div>
+                                        <!-- End Col -->
+
+                                        <div class="sm:col-span-9">
+                                            <p class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">{{ evento.carga_horaria }}</p>
+                                        </div>
+                                        <!-- End Col -->
+
+
+                                        <div class="sm:col-span-3">
+                                            <label for="fecha_inicio" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                                Fecha de inicio
+                                            </label>
+                                        </div>
+                                        <!-- End Col -->
+                                
+                                        <div class="sm:col-span-9">
+                                            <p class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">{{ evento.fecha_inicio.strftime('%d %b, %Y') }}</p>
+                                        </div>
+                                        <!-- End Col -->
+
+                                        <div class="sm:col-span-3">
+                                            <label for="fecha_fin" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                                Fecha de finalización
+                                            </label>
+                                        </div>
+                                        <!-- End Col -->
+                                
+                                        <div class="sm:col-span-9">
+                                            <p class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">{{ evento.fecha_fin.strftime('%d %b, %Y') }}</p>
+                                        </div>
+                                        <!-- End Col -->
+
+                                        <div class="sm:col-span-3">
+                                            <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">Estado de evento</label>
+                                        </div>
+
+                                        <div class="sm:col-span-9">
+                                            <p class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">{{ evento.estado_evento }}</p>
+                                        </div>
+
+                                    </div>
+                                    <!-- End Grid -->
+                                </div>
+                            
+                                <!-- Contenedor 1/4 -->
+                                <div class="md:col-span-1 bg-gray-100 p-4">
+                                    <h2 class="text-lg font-medium mb-2">Afiches y documentos</h2>
+                                    <div class="relative pt-[100%] sm:pt-[100%]">
+{% if evento.afiche_750 %}
+                                        <img class="size-full absolute top-0 start-0 object-cover rounded-r-xl" src="{{ BASE_URL }}{{ evento.afiche_750 }}" alt="{{ evento.nombre }}">
+{% else %}
+                                        <img class="size-full absolute top-0 start-0 object-cover rounded-r-xl" src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}" alt="{{ evento.nombre }}">
+{% endif %}
+                                    </div>
+                                </div>
+                            
+                              </div>
+                        </div>
+                        <!-- End Body -->
+
+                        <!-- Footer -->
+                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
+                            <div>
+                            <p class="text-sm text-gray-600 dark:text-neutral-400">
+                                <span class="font-semibold text-gray-800 dark:text-neutral-200">{{ evento.cupos }}</span> espacios disponibles
+                            </p>
+                            </div>
+
+                            <div>
+                                <div class="inline-flex gap-x-2">
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="#">
+                                        Botón
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Footer -->
+
                     </div>
-                
+                    </div>
+                </div>
                 </div>
                 <!-- End Card -->
             </div>
-            <!-- End Card Section -->
+            <!-- FIN TABLA RESUMEN EVENTO -->
 
 {% include 'tablero-footer.html' %}
 

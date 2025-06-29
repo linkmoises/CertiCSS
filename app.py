@@ -3252,6 +3252,10 @@ app.register_blueprint(auth_bp)
 from app.normalizador import normalizador_bp
 app.register_blueprint(normalizador_bp)
 
+### Búsqueda avanzada y normalizador
+from app.regiones import regiones_bp
+app.register_blueprint(regiones_bp)
+
 ###
 ### robots.txt
 ###
