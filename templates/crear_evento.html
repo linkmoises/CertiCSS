@@ -168,7 +168,10 @@
                         <!-- End Col -->
             
                         <div class="sm:col-span-9">
-                            <textarea id="descripcion" name="descripcion" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" rows="6" placeholder="Breve descripción de la actividad docente..."></textarea>
+                            <textarea id="descripcion" name="descripcion" maxlength="255" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" rows="6" placeholder="Breve descripción de la actividad docente..."></textarea>
+                            <div class="mt-1 text-right">
+                                <span id="contador_descripcion" class="text-xs text-gray-500">0/255</span>
+                            </div>
                         </div>
                         <!-- End Col -->
 
@@ -367,6 +370,34 @@
         hiddenInput.value = valor;
         form.appendChild(hiddenInput);
         form.submit();
+    });
+
+    // Contador de caracteres para el textarea de descripción
+    document.addEventListener('DOMContentLoaded', function() {
+        const textarea = document.getElementById('descripcion');
+        const contador = document.getElementById('contador_descripcion');
+        const maxLength = 255;
+
+        function actualizarContador() {
+            const longitud = textarea.value.length;
+            const restantes = maxLength - longitud;
+            contador.textContent = `${longitud}/${maxLength}`;
+            
+            // Cambiar color cuando se acerca al límite
+            if (restantes <= 10) {
+                contador.className = 'text-xs text-red-500';
+            } else if (restantes <= 50) {
+                contador.className = 'text-xs text-yellow-500';
+            } else {
+                contador.className = 'text-xs text-gray-500';
+            }
+        }
+
+        // Actualizar contador al escribir
+        textarea.addEventListener('input', actualizarContador);
+        
+        // Actualizar contador al cargar la página
+        actualizarContador();
     });
 </script>    
 </body>
