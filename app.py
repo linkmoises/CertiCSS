@@ -1199,8 +1199,8 @@ def listar_eventos(page=1):
 ###
 ### Mis Eventos
 ###
-@app.route('/mis-eventos')
-@app.route('/mis-eventos/page/<int:page>')
+@app.route('/tablero/eventos/mios')
+@app.route('/tablero/eventos/mios/page/<int:page>')
 @login_required
 def mis_eventos(page=1):
     eventos_por_pagina = 20
@@ -1238,8 +1238,8 @@ def mis_eventos(page=1):
 ###
 ### Mis Eventos
 ###
-@app.route('/mis-eventos/digitales')
-@app.route('/mis-eventos/digitales/page/<int:page>')
+@app.route('/tablero/eventos/mios/digitales')
+@app.route('/tablero/eventos/mios/digitales/page/<int:page>')
 @login_required
 def mis_eventos_digitales(page=1):
     eventos_por_pagina = 20

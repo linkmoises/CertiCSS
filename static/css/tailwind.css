@@ -3741,6 +3741,11 @@ select {
   background-color: rgb(15 118 110 / var(--tw-bg-opacity, 1));
 }
 
+.focus\:bg-green-700:focus {
+  --tw-bg-opacity: 1;
+  background-color: rgb(21 128 61 / var(--tw-bg-opacity, 1));
+}
+
 .focus\:text-blue-600:focus {
   --tw-text-opacity: 1;
   color: rgb(37 99 235 / var(--tw-text-opacity, 1));
@@ -3951,6 +3956,14 @@ select {
 
   .sm\:col-span-9 {
     grid-column: span 9 / span 9;
+  }
+
+  .sm\:col-span-4 {
+    grid-column: span 4 / span 4;
+  }
+
+  .sm\:col-span-8 {
+    grid-column: span 8 / span 8;
   }
 
   .sm\:mx-0 {

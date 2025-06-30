@@ -96,7 +96,7 @@
                 
                                 <th scope="col" class="px-6 py-3 text-start">
                                     <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
-                                        Fecha inicio
+                                        Fecha(s)
                                     </a>
                                 </th>
                 
@@ -120,9 +120,18 @@
                                 <td class="h-px w-72 min-w-72">
                                     <div class="px-6 py-2">
                                         <p class="text-sm text-gray-500 mb-2">
-                                            <a class="text-sm text-blue-600 decoration-2 hover:underline" href="{{ url_for('mostrar_evento', codigo_evento=evento.codigo) }}">
-                                            {{ evento.nombre }}</a>
+                                            <strong><a class="text-sm text-blue-600 decoration-2 hover:underline" href="{{ url_for('mostrar_evento', codigo_evento=evento.codigo) }}">
+                                            {{ evento.nombre }}</a></strong>
                                         </p>
+                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                            {{ evento.tipo }}
+                                        </span>
+                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                            {{ evento.modalidad }}
+                                        </span>
+                                        <button onclick="this.innerText='Código copiado'; navigator.clipboard.writeText('{{ evento.codigo }}'); setTimeout(() => this.innerText='{{ evento.codigo }}', 2000);" class="inline-flex items-center justify-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800 hover:bg-gray-200 transition-all">
+                                            {{ evento.codigo }}
+                                        </button><br />
                                         <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
                                             {{ evento.unidad_ejecutora }}
                                         </span>

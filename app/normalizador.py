@@ -71,3 +71,68 @@ def busqueda_avanzada():
                          total_resultados=total_resultados,
                          termino_busqueda=termino_busqueda,
                          resaltar_termino=resaltar_termino) 
+
+
+@normalizador_bp.route('/tablero/normalizador', methods=['GET', 'POST'])
+@login_required
+def normalizador():
+    participante = None
+    registros_encontrados = []
+    mensaje = ""
+    tipo_mensaje = ""
+    
+    if request.method == 'POST':
+        cedula = request.form.get('cedula', '').strip()
+        
+        if cedula:
+            # Buscar todos los registros de la cédula en la colección participantes
+            registros_encontrados = list(collection_participantes.find({"cedula": cedula}))
+            
+            if registros_encontrados:
+                # Tomar el primer registro como referencia para mostrar en el formulario
+                participante = registros_encontrados[0]
+                mensaje = f"Se encontraron {len(registros_encontrados)} registros para la cédula {cedula}"
+                tipo_mensaje = "success"
+            else:
+                mensaje = f"No se encontraron registros para la cédula {cedula}"
+                tipo_mensaje = "error"
+        
+        # Si se envió el formulario de corrección
+        if 'corregir' in request.form:
+            cedula_corregir = request.form.get('cedula_corregir')
+            nombres_corregidos = request.form.get('nombres_corregidos', '').strip()
+            apellidos_corregidos = request.form.get('apellidos_corregidos', '').strip()
+            
+            if cedula_corregir and (nombres_corregidos or apellidos_corregidos):
+                # Actualizar todos los registros de esa cédula
+                update_data = {}
+                if nombres_corregidos:
+                    update_data['nombres'] = nombres_corregidos
+                if apellidos_corregidos:
+                    update_data['apellidos'] = apellidos_corregidos
+                
+                # Actualizar todos los registros de la cédula
+                result = collection_participantes.update_many(
+                    {"cedula": cedula_corregir},
+                    {"$set": update_data}
+                )
+                
+                if result.modified_count > 0:
+                    mensaje = f"Se corrigieron {result.modified_count} registros exitosamente"
+                    tipo_mensaje = "success"
+                    # Limpiar los registros para mostrar el estado actualizado
+                    registros_encontrados = list(collection_participantes.find({"cedula": cedula_corregir}))
+                    if registros_encontrados:
+                        participante = registros_encontrados[0]
+                else:
+                    mensaje = "No se pudieron actualizar los registros"
+                    tipo_mensaje = "error"
+            else:
+                mensaje = "Debe proporcionar al menos nombres o apellidos para corregir"
+                tipo_mensaje = "error"
+    
+    return render_template('normalizador.html', 
+                         participante=participante,
+                         registros_encontrados=registros_encontrados,
+                         mensaje=mensaje,
+                         tipo_mensaje=tipo_mensaje)
