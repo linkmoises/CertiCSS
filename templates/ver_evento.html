@@ -45,7 +45,7 @@
                         <div class="max-w-[85rem] w-full min-h-[400px] flex flex-col px-6 py-4">
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-                                <!-- Contenedor 3/4 -->
+                                <!-- Contenedor -->
                                 <div class="md:col-span-2 bg-white p-4">
                                     <!-- Grid -->
                                     <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
@@ -179,16 +179,46 @@
                                     <!-- End Grid -->
                                 </div>
                             
-                                <!-- Contenedor 1/4 -->
-                                <div class="md:col-span-1 bg-gray-100 p-4">
+                                <!-- Contenedor -->
+                                <div class="md:col-span-1 bg-gray-100 p-4 rounded-xl">
                                     <h2 class="text-lg font-medium mb-2">Afiches y documentos</h2>
                                     <div class="relative pt-[100%] sm:pt-[100%]">
 {% if evento.afiche_750 %}
-                                        <img class="size-full absolute top-0 start-0 object-cover rounded-xl" src="{{ BASE_URL }}{{ evento.afiche_750 }}" alt="{{ evento.nombre }}">
+                                        <a href="{{ BASE_URL }}{{ evento.afiche }}" target="_blank"><img class="size-full absolute top-0 start-0 object-cover rounded-xl" src="{{ BASE_URL }}{{ evento.afiche_750 }}" alt="{{ evento.nombre }}"></a>
 {% else %}
                                         <img class="size-full absolute top-0 start-0 object-cover rounded-xl" src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}" alt="{{ evento.nombre }}">
 {% endif %}
                                     </div>
+{% if evento.programa %}
+                                    <div class="sm:col-span-12 gap-2">
+                                        <a href="{{ BASE_URL }}{{ evento.programa }}" class="mt-4 w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"">
+                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open-text"><path d="M12 7v14"/><path d="M16 12h2"/><path d="M16 8h2"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/><path d="M6 12h2"/><path d="M6 8h2"/></svg>
+                                            Descargar programa del evento
+                                        </a>
+                                    </div>
+{% else %}
+                                    <div class="sm:col-span-12 gap-2">
+                                        <button class="mt-4 w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" disabled>
+                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open-text"><path d="M12 7v14"/><path d="M16 12h2"/><path d="M16 8h2"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/><path d="M6 12h2"/><path d="M6 8h2"/></svg>
+                                            Programa de evento no disponible
+                                        </button>
+                                    </div>
+{% endif %}
+{% if evento.certificado %}
+                                    <div class="sm:col-span-12 gap-2">
+                                        <a href="{{ BASE_URL }}{{ evento.certificado }}" class="mt-4 w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-teal-600 text-white hover:bg-teal-700 focus:outline-none focus:bg-teal-700 disabled:opacity-50 disabled:pointer-events-none"">
+                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open-text"><path d="M12 7v14"/><path d="M16 12h2"/><path d="M16 8h2"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/><path d="M6 12h2"/><path d="M6 8h2"/></svg>
+                                            Descargar plantilla de certificado
+                                        </a>
+                                    </div>
+{% else %}
+                                    <div class="sm:col-span-12 gap-2">
+                                        <button class="mt-4 w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-teal-600 text-white hover:bg-teal-700 focus:outline-none focus:bg-teal-700 disabled:opacity-50 disabled:pointer-events-none" disabled>
+                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scroll-text-icon lucide-scroll-text"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg>
+                                            Plantilla de certificado no disponible
+                                        </button>
+                                    </div>
+{% endif %}
                                 </div>
                             
                               </div>
@@ -205,8 +235,8 @@
 
                             <div>
                                 <div class="inline-flex gap-x-2">
-                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="#">
-                                        Botón
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="javascript:history.back()">
+                                        Volver
                                     </a>
                                 </div>
                             </div>
