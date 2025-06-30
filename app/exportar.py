@@ -13,7 +13,7 @@ exportar_bp = Blueprint('exportar', __name__)
 ###
 ### Exportar eventos y participantes
 ###
-@exportar_bp.route('/bases-de-datos/exportar', methods=['GET', 'POST'])
+@exportar_bp.route('/tablero/bases-de-datos/exportar', methods=['GET', 'POST'])
 @login_required
 def exportar_eventos():
     if request.method == 'POST':

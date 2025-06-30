@@ -5,9 +5,9 @@
 ### 
 ###
 ###
-from flask import Flask, Blueprint, render_template, render_template_string, send_file, request, redirect, url_for
+from flask import Flask, Blueprint, render_template, flash, render_template_string, send_file, request, redirect, url_for
 from app import db, collection_participantes
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 normalizador_bp = Blueprint('normalizador', __name__)
 
@@ -76,6 +76,11 @@ def busqueda_avanzada():
 @normalizador_bp.route('/tablero/normalizador', methods=['GET', 'POST'])
 @login_required
 def normalizador():
+    # Verificar si el usuario es administrador
+    if current_user.rol != 'administrador':
+        #log_event(f"Usuario [{current_user.email}] intentó ingresar al normalizador.")
+        return redirect(url_for('normalizador.busqueda_avanzada'))
+
     participante = None
     registros_encontrados = []
     mensaje = ""

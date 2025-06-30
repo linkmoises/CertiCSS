@@ -6,125 +6,121 @@
     <div class="w-full lg:ps-64">
         <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
 
-            <!-- Card Section -->
+            <!-- NORMALIZADOR -->
             <div class="max-w-[85rem] px-2 pt-1 mx-auto">
                 <!-- Card -->
-                <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-7 dark:bg-neutral-800">
-                <div class="mb-8">
-                    <h2 class="text-xl font-bold text-gray-800 dark:text-neutral-200">
-                        Normalizador de Datos
-                    </h2>
-                    <p class="text-sm text-gray-600 dark:text-neutral-400">
-                        Buscar por cédula y corregir nombres y apellidos en todos los eventos
-                    </p>
-                </div>
+                <div class="flex flex-col">
+                <div class="-m-1.5 overflow-x-auto">
+                    <div class="p-1.5 min-w-full inline-block align-middle">
+                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
 
-                <!-- Mostrar mensajes -->
-                {% if mensaje %}
-                    <div class="mb-4">
-                        <div class="p-3 text-sm rounded-lg {{ 'bg-green-100 text-green-800' if tipo_mensaje == 'success' else 'bg-red-100 text-red-800' }}">
-                            {{ mensaje }}
+                        <!-- Header -->
+                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-800">
+                                    Normalizador
+                                </h2>
+                                <p class="text-sm text-gray-600">
+                                    Corrige y unifica nombres de participantes usando su documento de identidad
+                                </p>
+                            </div>
+            
+                            <div>
+                                <div class="inline-flex gap-x-2">
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="{{ url_for('normalizador.normalizador') }}">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil-icon lucide-pencil"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg> 
+                                        Reiniciar normalizador
+                                    </a>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                {% endif %}
+                        <!-- End Header -->
 
-                <!-- Formulario de búsqueda -->
-                <form method="POST" class="mb-8">
-                    <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
-                        <div class="sm:col-span-8">
-                            <label for="cedula" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
-                                Cédula a buscar
-                            </label>
+                        <!-- Formulario de búsqueda -->
+                        <div class="p-6 border-b border-gray-200">
+                            <form method="POST" class="flex gap-2">
+                                <div class="flex-1">
+                                    <input type="text" id="cedula"
+                                        name="cedula" 
+                                        value="{{ participante.cedula if participante else '' }}"
+                                        class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" 
+                                        placeholder="Escriba el documento de identificacion del participante a corregir...">
+                                </div>
+                                <button type="submit" 
+                                        class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700">
+                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                                    Buscar
+                                </button>
+                            </form>
+{% if mensaje %}
+                            <div class="mt-6 p-3 text-sm rounded-lg {{ 'bg-green-100 text-green-800' if tipo_mensaje == 'success' else 'bg-red-100 text-red-800' }}">
+                                {{ mensaje }}
+                            </div>
+{% endif %}
                         </div>
-                        <div class="sm:col-span-4">
-                            <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
-                                &nbsp;
-                            </label>
-                        </div>
-                        
-                        <div class="sm:col-span-8">
-                            <input id="cedula" name="cedula" type="text" 
-                                   value="{{ participante.cedula if participante else '' }}"
-                                   class="py-2 px-3 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" 
-                                   placeholder="Ingrese la cédula a buscar...">
-                        </div>
-                        <div class="sm:col-span-4">
-                            <button type="submit" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
-                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                                Buscar
-                            </button>
-                        </div>
-                    </div>
-                </form>
+{% if participante %}
+                        <!-- Formulario de corrección -->
+                        <div class="p-6 border-b border-gray-200">
+                            <form method="POST">
+                                <input type="hidden" name="corregir" value="1">
+                                <input type="hidden" name="cedula_corregir" value="{{ participante.cedula }}">
+                                
+                                <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
+                                    <div class="sm:col-span-3">
+                                        <label for="nombres_corregidos" class="inline-block text-sm font-semibold text-gray-800 mt-2.5 dark:text-neutral-200">
+                                            Nombres a corregir
+                                        </label>
+                                    </div>
+                                    <div class="sm:col-span-9">
+                                        <input id="nombres_corregidos" name="nombres_corregidos" type="text" 
+                                            value="{{ participante.nombres }}"
+                                            class="py-2 px-3 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" 
+                                            placeholder="Nombres corregidos...">
+                                    </div>
 
-                <!-- Formulario de corrección -->
-                {% if participante %}
-                <form method="POST" class="mb-8">
-                    <input type="hidden" name="corregir" value="1">
-                    <input type="hidden" name="cedula_corregir" value="{{ participante.cedula }}">
-                    
-                    <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
-                        <div class="sm:col-span-3">
-                            <label for="nombres_corregidos" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
-                                Nombres corregidos
-                            </label>
-                        </div>
-                        <div class="sm:col-span-9">
-                            <input id="nombres_corregidos" name="nombres_corregidos" type="text" 
-                                   value="{{ participante.nombres }}"
-                                   class="py-2 px-3 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" 
-                                   placeholder="Nombres corregidos...">
-                        </div>
+                                    <div class="sm:col-span-3">
+                                        <label for="apellidos_corregidos" class="inline-block text-sm font-semibold text-gray-800 mt-2.5 dark:text-neutral-200">
+                                            Apellidos a corregir
+                                        </label>
+                                    </div>
+                                    <div class="sm:col-span-9">
+                                        <input id="apellidos_corregidos" name="apellidos_corregidos" type="text" 
+                                            value="{{ participante.apellidos }}"
+                                            class="py-2 px-3 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" 
+                                            placeholder="Apellidos corregidos...">
+                                    </div>
+                                </div>
 
-                        <div class="sm:col-span-3">
-                            <label for="apellidos_corregidos" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
-                                Apellidos corregidos
-                            </label>
+                                <div class="mt-5 flex justify-end gap-x-2">
+                                    <button type="submit" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:bg-green-700 disabled:opacity-50 disabled:pointer-events-none">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 9.3 9 20.9l-6.6-6.6"/></svg>
+                                        Corregir {{ registros_encontrados|length }} registros
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                        <div class="sm:col-span-9">
-                            <input id="apellidos_corregidos" name="apellidos_corregidos" type="text" 
-                                   value="{{ participante.apellidos }}"
-                                   class="py-2 px-3 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" 
-                                   placeholder="Apellidos corregidos...">
-                        </div>
-                    </div>
-
-                    <div class="mt-5 flex justify-end gap-x-2">
-                        <button type="submit" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:bg-green-700 disabled:opacity-50 disabled:pointer-events-none">
-                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 9.3 9 20.9l-6.6-6.6"/></svg>
-                            Corregir {{ registros_encontrados|length }} registros
-                        </button>
-                    </div>
-                </form>
-                {% endif %}
-
-                <!-- Tabla de registros encontrados -->
-                {% if registros_encontrados %}
-                <div class="mt-8">
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-neutral-200 mb-4">
-                        Registros encontrados ({{ registros_encontrados|length }})
-                    </h3>
-                    
-                    <div class="overflow-x-auto">
+{% endif %}
+{% if registros_encontrados %}
+                        <!-- Tabla resultados -->
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Evento
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Rol
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase text-gray-800 hover:text-gray-500">
                                         Nombres
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase text-gray-800 hover:text-gray-500">
                                         Apellidos
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Cédula
+                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase text-gray-800 hover:text-gray-500">
+                                        Identificación
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase text-gray-800 hover:text-gray-500">
+                                        Evento
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase text-gray-800 hover:text-gray-500">
+                                        Rol
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase text-gray-800 hover:text-gray-500">
                                         nanoid
                                     </th>
                                 </tr>
@@ -132,6 +128,15 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 {% for registro in registros_encontrados %}
                                 <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ registro.nombres or 'N/A' }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ registro.apellidos or 'N/A' }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ registro.cedula }}
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {{ registro.codigo_evento }}
                                     </td>
@@ -144,15 +149,6 @@
                                             {{ registro.rol }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ registro.nombres or 'N/A' }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ registro.apellidos or 'N/A' }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ registro.cedula }}
-                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">
                                         {{ registro.nanoid }}
                                     </td>
@@ -160,14 +156,27 @@
                                 {% endfor %}
                             </tbody>
                         </table>
+                        <!-- fin tabla resultados -->
+{% endif %}
+                        <!-- Footer -->
+                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
+                            <div>
+                                <div class="inline-flex gap-x-2">
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="{{ url_for('normalizador.busqueda_avanzada') }}">
+                                        Ir a búsqueda avanzada
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Footer -->
+
+                    </div>
                     </div>
                 </div>
-                {% endif %}
-
                 </div>
                 <!-- End Card -->
             </div>
-            <!-- End Card Section -->
+            <!-- FIN NORMALIZADOR -->
 
 {% include 'tablero-footer.html' %}
 

@@ -1280,8 +1280,8 @@ def mis_eventos_digitales(page=1):
 ###
 ### Administración de Colección de Eventos
 ###
-@app.route('/bases-de-datos')
-@app.route('/bases-de-datos/page/<int:page>')
+@app.route('/tablero/bases-de-datos')
+@app.route('/tablero/bases-de-datos/page/<int:page>')
 @login_required
 def db_eventos(page=1):
     # Verificar si el usuario es administrador
