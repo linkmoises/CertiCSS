@@ -27,7 +27,8 @@
             
                             <div>
                                 <div class="inline-flex gap-x-2">
-                                    <button type="button" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">
+                                    <button type="button" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800"
+                                    onclick="this.innerText='Código copiado'; navigator.clipboard.writeText('{{ evento.codigo }}'); setTimeout(() => this.innerText='{{ evento.codigo }}', 2000);" >
                                         {{ evento.codigo }}
                                         <svg class="shrink-0 size-4 text-gray-400 dark:text-neutral-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path></svg>
                                     </button>
@@ -181,13 +182,25 @@
                             
                                 <!-- Contenedor -->
                                 <div class="md:col-span-1 bg-gray-100 p-4 rounded-xl">
-                                    <h2 class="text-lg font-medium mb-2">Afiches y documentos</h2>
+                                    <h2 class="text-lg font-medium mb-2">Afiches, enlaces y documentos</h2>
                                     <div class="relative pt-[100%] sm:pt-[100%]">
 {% if evento.afiche_750 %}
                                         <a href="{{ BASE_URL }}{{ evento.afiche }}" target="_blank"><img class="size-full absolute top-0 start-0 object-cover rounded-xl" src="{{ BASE_URL }}{{ evento.afiche_750 }}" alt="{{ evento.nombre }}"></a>
 {% else %}
                                         <img class="size-full absolute top-0 start-0 object-cover rounded-xl" src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}" alt="{{ evento.nombre }}">
 {% endif %}
+                                    </div>
+                                    <div class="sm:col-span-12 gap-2">
+                                        <a href="{{ url_for('mostrar_evento', codigo_evento=evento.codigo) }}" target="_blank" class="mt-4 w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-sky-600 text-white hover:bg-sky-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"">
+                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-qr-code-icon lucide-qr-code"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg>
+                                            QR formulario de registro
+                                        </a>
+                                    </div>
+                                    <div class="sm:col-span-12 gap-2">
+                                        <a href="{{ url_for('cierre_evento', codigo_evento=evento.codigo) }}" target="_blank" class="mt-4 w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-cyan-600 text-white hover:bg-cyan-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"">
+                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-qr-code-icon lucide-qr-code"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg>
+                                            QR encuesta de cierre
+                                        </a>
                                     </div>
 {% if evento.programa %}
                                     <div class="sm:col-span-12 gap-2">
