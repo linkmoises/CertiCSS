@@ -1442,6 +1442,10 @@ select {
   top: 100%;
 }
 
+.-top-1\.5 {
+  top: -0.375rem;
+}
+
 .z-10 {
   z-index: 10;
 }
@@ -1790,6 +1794,10 @@ select {
 
 .mt-auto {
   margin-top: auto;
+}
+
+.ml-5 {
+  margin-left: 1.25rem;
 }
 
 .block {
@@ -2995,6 +3003,10 @@ select {
 
 .text-end {
   text-align: end;
+}
+
+.align-top {
+  vertical-align: top;
 }
 
 .align-middle {

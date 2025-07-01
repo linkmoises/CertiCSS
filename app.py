@@ -199,6 +199,7 @@ def registro():
         apellidos = request.form['apellidos']
         genero = request.form['genero']
         cedula = request.form['cedula']
+        orcid = request.form['orcid']
         email = request.form['email']
         password = request.form['password']
         rol = request.form['rol']
@@ -222,6 +223,7 @@ def registro():
             'genero': genero,
             'cedula': cedula,
             'email': email,
+            'orcid': orcid,
             'phone': phone,
             'password': hashed_password,
             'rol': rol,
@@ -358,6 +360,7 @@ def editar_usuario(user_id):
         apellidos = request.form.get('apellidos')
         genero = request.form.get('genero')
         cedula = request.form.get('cedula')
+        orcid = request.form.get('orcid')
         rol = request.form.get('rol')
         cargo = request.form.get('cargo')
         region = request.form.get('region')
@@ -376,6 +379,7 @@ def editar_usuario(user_id):
             "apellidos": apellidos,
             "genero": genero,
             "cedula": cedula,
+            "orcid": orcid,
             "region": region,
             "phone": phone,
             "unidad_ejecutora": unidad_ejecutora,
