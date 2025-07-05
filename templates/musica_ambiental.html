@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Música ambiental - CertiCSS</title>
+    <link rel="stylesheet" href="/static/css/audio.css">
+    <!-- favicons -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
+    <meta name="apple-mobile-web-app-title" content="CertiCSS" />
+    <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
+{% if UMAMI_URL %}
+    {{ UMAMI_URL | safe }}
+{% endif %}
+</head>
+<body>    
+    <!-- Logo -->
+    <div class="logo">
+        <img src="{{ url_for('static', filename='assets/css-logo-192x192.png') }}" alt="CertiCSS" class="logo">
+    </div>
+
+    <!-- Top Info -->
+    <div id="title">
+        <span id="track"></span>
+        <div id="timer">0:00</div>
+        <div id="duration">0:00</div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controlsOuter">
+        <div class="controlsInner">
+        <div id="loading"></div>
+        <div class="btn" id="playBtn"></div>
+        <div class="btn" id="pauseBtn"></div>
+        <div class="btn" id="prevBtn"></div>
+        <div class="btn" id="nextBtn"></div>
+        </div>
+        <div class="btn" id="playlistBtn"></div>
+        <div class="btn" id="volumeBtn"></div>
+    </div>
+
+    <!-- Progress -->
+    <div id="waveform"></div>
+    <div id="bar"></div>
+    <div id="progress"></div>
+
+    <!-- Playlist -->
+    <div id="playlist">
+        <div id="list"></div>
+    </div>
+
+    <!-- Volume -->
+    <div id="volume" class="fadeout">
+        <div id="barFull" class="bar"></div>
+        <div id="barEmpty" class="bar"></div>
+        <div id="sliderBtn"></div>
+    </div>
+
+<!-- Scripts -->
+<script src="/static/js/howler.js"></script>
+<script src="/static/js/siriwave.js"></script>
+<script src="/static/js/player.js"></script>
+<script>
+var player = new Player([
+  {
+    title: 'Bach - Complete Cello Suites',
+    file: '{{ url_for('static', filename='audio/audio1.m4a') }}',
+    howl: null
+  },
+  {
+    title: 'Bach - Sonatas & Partitas for Solo Violin',
+    file: '{{ url_for('static', filename='audio/audio2.m4a') }}',
+    howl: null
+  },
+]);
+</script>
+<script>
+// Reloj en vivo
+function updateClock() {
+    const now = new Date();
+    const h = now.getHours().toString().padStart(2, '0');
+    const m = now.getMinutes().toString().padStart(2, '0');
+    const s = now.getSeconds().toString().padStart(2, '0');
+    document.getElementById('clock').textContent = `Hora actual: ${h}:${m}:${s}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+</script>
+</body>
+</html>
+
+

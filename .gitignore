@@ -169,3 +169,4 @@ tailwindcss
 /static/uploads/*
 /static/usuarios/*
 version.txt
+*.m4a

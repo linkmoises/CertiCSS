@@ -59,3 +59,11 @@ def temporizador():
 @herramientas_bp.route('/randomizer')
 def randomizer():
     return render_template('randomizer.html') 
+
+
+###
+### Música ambiental
+###
+@herramientas_bp.route('/musica-ambiental')
+def musica_ambiental():
+    return render_template('musica_ambiental.html')
