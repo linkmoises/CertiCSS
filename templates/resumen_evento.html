@@ -41,9 +41,9 @@
                 <div class="sm:order-2">
                     <div class="relative pt-[100%] sm:pt-[100%]">
 {% if evento.afiche_750 %}
-                        <img class="size-full absolute top-0 start-0 object-cover rounded-r-xl" src="{{ BASE_URL }}{{ evento.afiche_750 }}" alt="{{ evento.nombre }}">
+                        <img class="size-full absolute top-0 start-0 object-cover rounded-xl" src="{{ BASE_URL }}{{ evento.afiche_750 }}" alt="{{ evento.nombre }}">
 {% else %}
-                        <img class="size-full absolute top-0 start-0 object-cover rounded-r-xl" src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}" alt="{{ evento.nombre }}">
+                        <img class="size-full absolute top-0 start-0 object-cover rounded-xl" src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}" alt="{{ evento.nombre }}">
 {% endif %}
                     </div>
                 </div>
