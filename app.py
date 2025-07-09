@@ -1502,7 +1502,10 @@ def listar_participantes(codigo_evento):
     evento = collection_eventos.find_one({"codigo": codigo_evento})
 
     participantes_cursor = collection_participantes.find({"codigo_evento": codigo_evento})
-    total_participantes = collection_participantes.count_documents({"codigo_evento": codigo_evento})
+
+    total_participantes = collection_participantes.count_documents({"codigo_evento": codigo_evento, "rol": "participante"})
+    total_ponentes = collection_participantes.count_documents({"codigo_evento": codigo_evento, "rol": "ponente"})
+
     participantes = list(participantes_cursor)
 
     # Convertir el campo timestamp a datetime si es una cadena
@@ -1525,6 +1528,7 @@ def listar_participantes(codigo_evento):
     return render_template('participantes.html',
         participantes=participantes,
         total_participantes=total_participantes,
+        total_ponentes=total_ponentes,
         evento=evento,
         nombre_evento=evento['nombre'],
         estado_evento=estado_evento,
