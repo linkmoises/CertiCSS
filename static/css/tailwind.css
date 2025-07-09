@@ -4144,6 +4144,15 @@ select {
     row-gap: 3rem;
   }
 
+  .md\:rounded-none {
+    border-radius: 0px;
+  }
+
+  .md\:rounded-r-xl {
+    border-top-right-radius: 0.75rem;
+    border-bottom-right-radius: 0.75rem;
+  }
+
   .md\:p-5 {
     padding: 1.25rem;
   }
@@ -4256,6 +4265,11 @@ select {
 
   .lg\:gap-6 {
     gap: 1.5rem;
+  }
+
+  .lg\:rounded-r-xl {
+    border-top-right-radius: 0.75rem;
+    border-bottom-right-radius: 0.75rem;
   }
 
   .lg\:px-28 {
