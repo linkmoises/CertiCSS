@@ -153,7 +153,7 @@ def get_otp(codigo_evento):
         otp_code = generate_otp()
         otp_storage[codigo_evento] = {
             'code': otp_code,
-            'valid_until': datetime.now() + timedelta(minutes=1)
+            'valid_until': datetime.now() + timedelta(seconds=90)
         }
 
     # Devolver el OTP en formato JSON
