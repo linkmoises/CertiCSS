@@ -46,7 +46,7 @@
             <!-- TARJETAS RESUMEN -->
             <div class="max-w-[85rem] px-2 pt-1 mx-auto">
                 <!-- Grid -->
-                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
                     <!-- Card -->
                     <div class="flex flex-col bg-white border shadow-sm rounded-xl">
                         <div class="p-4 md:p-5">
@@ -123,7 +123,94 @@
                 </div>
                 <!-- End Card -->
                 </div>
-                <!-- End Grid -->
+                <!-- fin grid -->
+
+                <!-- Grid -->
+                <div class="grid grid-cols-4 gap-4 sm:gap-6 mb-6">
+                    <!-- Card que ocupa 3 columnas -->
+                    <div class="col-span-2 flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="p-4 md:p-5">
+                            <h4 class="text-base font-semibold text-gray-800 mb-4">Descripción, Informe e Incidencias de Actividad</h4>
+                            <p class="text-sm py-1">
+                                <span class="font-semibold">Descripción:</span> 
+                                {{ evento.descripcion | default("N/D") }}
+                            </p>
+                            <p class="text-sm py-1">
+                                <span class="font-semibold">Informe:</span> 
+                                {{ evento.informe | default("N/D") }}
+                            </p>
+                            <p class="text-sm py-1">
+                                <span class="font-semibold">Incidencias:</span>
+                                {{ evento.incidencias | default("N/D") }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Card que ocupa 1 columna -->
+                    <div class="col-span-2 flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="overflow-x-auto p-4">
+                            <h4 class="text-base font-semibold text-gray-800 mb-4">Tablero FODA</h4>
+                            <table class="min-w-full divide-y divide-gray-200 border border-gray-300 text-xs rounded-xl">
+                                <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="px-4 py-2 text-left font-semibold text-gray-700 border-r">Fortalezas</th>
+                                    <th class="px-4 py-2 text-left font-semibold text-gray-700">Oportunidades</th>
+                                </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-4 py-2 border-r text-gray-700">{{ evento.fortalezas | default("N/D") }}</td>
+                                    <td class="px-4 py-2 text-gray-700">{{ evento.oportunidades | default("N/D") }}</td>
+                                </tr>
+                                </tbody>
+                                <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="px-4 py-2 text-left font-semibold text-gray-700 border-r">Debilidades</th>
+                                    <th class="px-4 py-2 text-left font-semibold text-gray-700">Amenazas</th>
+                                </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-4 py-2 border-r text-gray-700">{{ evento.debilidades | default("N/D") }}</td>
+                                    <td class="px-4 py-2 text-gray-700">{{ evento.amenazas | default("N/D") }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>                          
+                    </div>
+                </div>
+                <!-- fin grid -->
+
+                <!-- Grid -->
+                <div class="grid">
+                    <div class="flex flex-col bg-white border shadow-sm rounded-xl mb-6">
+                        <div class="p-4 md:p-5">
+                            <h4 class="text-base font-semibold text-gray-800 mb-4">Participantes según perfil profesional</h4>
+                            <img src="https://placehold.co/1200x300?text=En+construcción..." />
+                        </div>
+                    </div>
+                </div>
+                <!-- fin grid -->
+
+                <!-- Grid -->
+                <div class="grid grid-cols-4 gap-4 sm:gap-6 mb-6">
+                    <!-- Card que ocupa 3 columnas -->
+                    <div class="col-span-3 flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="p-4 md:p-5">
+                            <h4 class="text-base font-semibold text-gray-800 mb-4">Participantes según región/provincia de procedencia</h4>
+                            <img src="https://placehold.co/1200x400?text=En+construcción..." />
+                        </div>
+                    </div>
+
+                    <!-- Card que ocupa 1 columna -->
+                    <div class="col-span-1 flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="overflow-x-auto p-4">
+                            <h4 class="text-base font-semibold text-gray-800 mb-2">Tarjeta vacía</h4>
+                        </div>                          
+                    </div>
+                </div>
+                <!-- fin grid -->
+
             </div>
             <!-- FIN TARJETAS RESUMEN -->
 
