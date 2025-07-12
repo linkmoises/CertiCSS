@@ -2860,14 +2860,12 @@ def generar_grafica_perfil(participantes, evento_nombre):
     # Crear la figura
     plt.figure(figsize=(12, 6))
     
-    # Preparar datos para la gráfica
-    labels = []
-    values = []
-    
-    for perfil, count in perfiles_count.items():
-        nombre_perfil = PERFILES_MAP.get(perfil, perfil.title())
-        labels.append(nombre_perfil)
-        values.append(count)
+    # Ordenar por frecuencia descendente
+    perfiles_ordenados = sorted(perfiles_count.items(), key=lambda x: x[1], reverse=True)
+
+    # Extraer datos ordenados
+    labels = [PERFILES_MAP.get(perfil, perfil.title()) for perfil, _ in perfiles_ordenados]
+    values = [count for _, count in perfiles_ordenados]
     
     # Crear gráfica de barras
     bars = plt.bar(labels, values, color='#0058A6', alpha=0.8)
@@ -2938,14 +2936,12 @@ def generar_grafica_region(participantes, evento_nombre):
     # Crear la figura
     plt.figure(figsize=(12, 6))
     
-    # Preparar datos para la gráfica
-    labels = []
-    values = []
-    
-    for region, count in regiones_count.items():
-        nombre_region = REGION_MAP.get(region, region.title())
-        labels.append(nombre_region)
-        values.append(count)
+    # Ordenar por frecuencia descendente
+    regiones_ordenadas = sorted(regiones_count.items(), key=lambda x: x[1], reverse=True)
+
+    # Preparar datos ordenados
+    labels = [REGION_MAP.get(region, region.title()) for region, _ in regiones_ordenadas]
+    values = [count for _, count in regiones_ordenadas]
     
     # Crear gráfica de barras
     bars = plt.bar(labels, values, color='#10B981', alpha=0.8)  # Color verde para diferenciar
