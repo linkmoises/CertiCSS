@@ -1,7 +1,7 @@
 Flask==3.1.1
 Flask_Login==0.6.3
 Flask_PyMongo==2.3.0
-locustio==0.999
+locust==1.0
 Markdown==3.7
 MarkupSafe==3.0.2
 matplotlib==3.9.4
