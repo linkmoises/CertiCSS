@@ -4,7 +4,7 @@ Flask_PyMongo==2.3.0
 locustio==0.999
 Markdown==3.7
 MarkupSafe==3.0.2
-matplotlib==3.10.3
+matplotlib==3.9.4
 openai==1.95.1
 pdfrw==0.4
 Pillow==11.3.0
