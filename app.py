@@ -2736,6 +2736,15 @@ def informe_avanzado(codigo_evento):
         "rol": "participante"
     })
 
+    # Obtener todos los participantes del evento para generar gráfica de perfil
+    participantes = list(collection_participantes.find({
+        "codigo_evento": codigo_evento,
+        "rol": "participante"
+    }))
+
+    # Generar gráfica de perfil profesional
+    grafica_perfil = generar_grafica_perfil(participantes)
+
     # Obtener las respuestas de la encuesta
     respuestas = list(collection_encuestas.find({'codigo_evento': codigo_evento}))
     if not respuestas:
@@ -2803,7 +2812,87 @@ def informe_avanzado(codigo_evento):
 
     return render_template('metrica_avanzada.html', 
                          evento=evento,
-                         metricas=metricas)
+                         metricas=metricas,
+                         grafica_perfil=grafica_perfil)
+
+
+def generar_grafica_perfil(participantes):
+    """
+    Genera una gráfica de barras con la distribución de participantes por perfil profesional
+    """
+    # Mapeo de códigos de perfil a nombres legibles
+    PERFILES_MAP = {
+        "medico_general": "Médico General",
+        "medico_urgencias": "Médico Urgencias", 
+        "medico_especialista": "Médico Especialista",
+        "odontologo": "Odontólogo",
+        "odontologo_especialista": "Odontólogo Especialista",
+        "enfermero": "Enfermero(a)",
+        "tecnico_enfermeria": "Técnico Enfermería",
+        "laboratorista": "Laboratorista",
+        "tecnico_laboratorio": "Técnico Laboratorio",
+        "farmaceutico": "Farmacéutico(a)",
+        "tecnico_farmacia": "Técnico Farmacia",
+        "reges": "Estadístico de Salud",
+        "fisioterapeuta": "Fisioterapeuta",
+        "fonoaudiologo": "Fonoaudiólogo(a)",
+        "psicologo": "Psicólogo(a)",
+        "nutricionista": "Nutricionista",
+        "estudiante_salud": "Estudiante",
+        "administrativo": "Administrativo",
+        "otro": "Otro"
+    }
+    
+    # Contar participantes por perfil
+    perfiles_count = {}
+    for participante in participantes:
+        perfil = participante.get('perfil', 'otro')
+        perfiles_count[perfil] = perfiles_count.get(perfil, 0) + 1
+    
+    # Si no hay datos, retornar None
+    if not perfiles_count:
+        return None
+    
+    # Crear la figura
+    plt.figure(figsize=(12, 6))
+    
+    # Preparar datos para la gráfica
+    labels = []
+    values = []
+    
+    for perfil, count in perfiles_count.items():
+        nombre_perfil = PERFILES_MAP.get(perfil, perfil.title())
+        labels.append(nombre_perfil)
+        values.append(count)
+    
+    # Crear gráfica de barras
+    bars = plt.bar(labels, values, color='#3B82F6', alpha=0.8)
+    
+    # Personalizar la gráfica
+    plt.title('Distribución de Participantes por Perfil Profesional', fontsize=16, fontweight='bold', pad=20)
+    plt.xlabel('Perfil Profesional', fontsize=12)
+    plt.ylabel('Número de Participantes', fontsize=12)
+    
+    # Rotar etiquetas del eje X para mejor legibilidad
+    plt.xticks(rotation=45, ha='right')
+    
+    # Agregar valores en las barras
+    for bar, value in zip(bars, values):
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2., height + 0.1,
+                f'{value}', ha='center', va='bottom', fontweight='bold')
+    
+    # Ajustar layout
+    plt.tight_layout()
+    
+    # Convertir la gráfica a imagen base64
+    img_buffer = io.BytesIO()
+    plt.savefig(img_buffer, format='png', dpi=300, bbox_inches='tight')
+    img_buffer.seek(0)
+    img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
+    plt.close()
+    
+    return f"data:image/png;base64,{img_base64}"
 
 
 ###
@@ -3263,6 +3352,16 @@ app.register_blueprint(normalizador_bp)
 ### Búsqueda avanzada y normalizador
 from app.regiones import regiones_bp
 app.register_blueprint(regiones_bp)
+
+### Importaciones para gráficas
+import matplotlib
+matplotlib.use('Agg')  # Configurar matplotlib para usar backend no interactivo
+import matplotlib.pyplot as plt
+import seaborn as sns
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+import io
+import base64
 
 ###
 ### robots.txt

@@ -182,18 +182,24 @@
                 <!-- fin grid -->
 
                 <!-- Grid -->
-                <div class="grid">
+                <div id="grafico-perfil" class="grid">
                     <div class="flex flex-col bg-white border shadow-sm rounded-xl mb-6">
                         <div class="p-4 md:p-5">
                             <h4 class="text-base font-semibold text-gray-800 mb-4">Participantes según perfil profesional</h4>
-                            <img src="https://placehold.co/1200x300?text=En+construcción..." />
+{% if grafica_perfil %}
+                            <img src="{{ grafica_perfil }}" alt="Gráfica de perfil profesional" class="w-full h-auto" />
+{% else %}
+                            <div class="flex justify-center items-center h-64 bg-gray-50 rounded-lg">
+                                <p class="text-gray-500">No hay datos de participantes disponibles para generar la gráfica.</p>
+                            </div>
+{% endif %}
                         </div>
                     </div>
                 </div>
                 <!-- fin grid -->
 
                 <!-- Grid -->
-                <div class="grid grid-cols-4 gap-4 sm:gap-6 mb-6">
+                <div id="grafico-region" class="grid grid-cols-4 gap-4 sm:gap-6 mb-6">
                     <!-- Card que ocupa 3 columnas -->
                     <div class="col-span-3 flex flex-col bg-white border shadow-sm rounded-xl">
                         <div class="p-4 md:p-5">
