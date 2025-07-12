@@ -2743,7 +2743,7 @@ def informe_avanzado(codigo_evento):
     }))
 
     # Generar gráfica de perfil profesional
-    grafica_perfil = generar_grafica_perfil(participantes)
+    grafica_perfil = generar_grafica_perfil(participantes, evento.get('nombre', 'Evento'))
 
     # Obtener las respuestas de la encuesta
     respuestas = list(collection_encuestas.find({'codigo_evento': codigo_evento}))
@@ -2814,7 +2814,7 @@ def informe_avanzado(codigo_evento):
                          grafica_perfil=grafica_perfil)
 
 
-def generar_grafica_perfil(participantes):
+def generar_grafica_perfil(participantes, evento_nombre):
     """
     Genera una gráfica de barras con la distribución de participantes por perfil profesional
     """
@@ -2866,15 +2866,22 @@ def generar_grafica_perfil(participantes):
         values.append(count)
     
     # Crear gráfica de barras
-    bars = plt.bar(labels, values, color='#3B82F6', alpha=0.8)
+    bars = plt.bar(labels, values, color='#0058A6', alpha=0.8)
     
     # Personalizar la gráfica
-    # plt.title('Distribución de Participantes por Perfil Profesional', fontsize=16, fontweight='bold', pad=20)
-    plt.xlabel('Perfil Profesional', fontsize=12)
-    plt.ylabel('Número de Participantes', fontsize=12)
+    plt.title(f'Distribución de Participantes por Perfil Profesional', 
+          fontsize=10, fontweight='bold', pad=20)
+
+    # Subtítulo: por ejemplo, fecha o lugar
+    plt.text(0.5, 1.15, evento_nombre, 
+            ha='center', va='bottom', transform=plt.gca().transAxes,
+            fontsize=12, style='italic')
+    
+    plt.xlabel('Perfil Profesional de Participantes', fontsize=10, fontweight='bold')
+    plt.ylabel('Número de Participantes', fontsize=10, fontweight='bold')
     
     # Rotar etiquetas del eje X para mejor legibilidad
-    plt.xticks(rotation=15, ha='right')
+    plt.xticks(rotation=20, ha='right')
     
     # Agregar valores en las barras
     for bar, value in zip(bars, values):
