@@ -2874,7 +2874,7 @@ def generar_grafica_perfil(participantes):
     plt.ylabel('Número de Participantes', fontsize=12)
     
     # Rotar etiquetas del eje X para mejor legibilidad
-    plt.xticks(rotation=45, ha='right')
+    plt.xticks(rotation=15, ha='right')
     
     # Agregar valores en las barras
     for bar, value in zip(bars, values):
