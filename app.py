@@ -2822,9 +2822,11 @@ def generar_grafica_perfil(participantes):
     """
     # Mapeo de códigos de perfil a nombres legibles
     PERFILES_MAP = {
-        "medico_general": "Médico General",
-        "medico_urgencias": "Médico Urgencias", 
+        "medico_general": "Médico General - Consulta Externa",
+        "medico_urgencias": "Médico General - Urgencias", 
         "medico_especialista": "Médico Especialista",
+        "medico_residente": "Médico Residente",
+        "medico_interno": "Médico Interno",
         "odontologo": "Odontólogo",
         "odontologo_especialista": "Odontólogo Especialista",
         "enfermero": "Enfermero(a)",
@@ -2869,7 +2871,7 @@ def generar_grafica_perfil(participantes):
     bars = plt.bar(labels, values, color='#3B82F6', alpha=0.8)
     
     # Personalizar la gráfica
-    plt.title('Distribución de Participantes por Perfil Profesional', fontsize=16, fontweight='bold', pad=20)
+    # plt.title('Distribución de Participantes por Perfil Profesional', fontsize=16, fontweight='bold', pad=20)
     plt.xlabel('Perfil Profesional', fontsize=12)
     plt.ylabel('Número de Participantes', fontsize=12)
     
