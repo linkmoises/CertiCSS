@@ -125,6 +125,102 @@
                 </div>
                 <!-- fin grid -->
 
+{% if metricas.total_respuestas > 0 %}
+                <!-- Grid para métricas de encuesta -->
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+                    <!-- Card -->
+                    <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="p-4 md:p-5">
+                            <div class="flex items-center gap-x-2">
+                                <p class="text-xs uppercase tracking-wide text-gray-500">
+                                    Promedio Plataforma
+                                </p>
+                            </div>
+                            <div class="mt-1 flex items-center gap-x-2">
+                                <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                    {{ metricas.promedio_plataforma }}/5
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End Card -->
+                
+                    <!-- Card -->
+                    <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="p-4 md:p-5">
+                            <div class="flex items-center gap-x-2">
+                                <p class="text-xs uppercase tracking-wide text-gray-500">
+                                    Promedio Evento
+                                </p>
+                            </div>
+                            <div class="mt-1 flex items-center gap-x-2">
+                                <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                    {{ metricas.promedio_evento }}/5
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End Card -->
+                
+                    <!-- Card -->
+                    <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="p-4 md:p-5">
+                            <div class="flex items-center gap-x-2">
+                                <p class="text-xs uppercase tracking-wide text-gray-500">
+                                    Satisfacción Global
+                                </p>
+                            </div>
+                            <div class="mt-1 flex items-center gap-x-2">
+                                <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                    {{ metricas.promedio_satisfaccion }}/10
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End Card -->
+                
+                    <!-- Card -->
+                    <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="p-4 md:p-5">
+                            <div class="flex items-center gap-x-2">
+                                <p class="text-xs uppercase tracking-wide text-gray-500">
+                                    % Respuesta
+                                </p>
+                            </div>
+                            <div class="mt-1 flex items-center gap-x-2">
+                                <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+{% if metricas.total_participantes > 0 %}
+                                    {{ ((metricas.total_respuestas / metricas.total_participantes) * 100) | round(1) }}%
+{% else %}
+                                    N/D
+{% endif %}
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End Card -->
+                </div>
+                <!-- fin grid métricas encuesta -->
+{% else %}
+                <!-- Mensaje cuando no hay respuestas de encuesta -->
+                <div class="mb-6">
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-blue-700">
+                                    No hay respuestas de encuesta disponibles para este evento. Las métricas de satisfacción se mostrarán cuando los participantes completen la encuesta.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+{% endif %}
+
                 <!-- Grid -->
                 <div class="grid grid-cols-4 gap-4 sm:gap-6 mb-6">
                     <!-- Card que ocupa 3 columnas -->

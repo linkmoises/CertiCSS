@@ -2747,10 +2747,7 @@ def informe_avanzado(codigo_evento):
 
     # Obtener las respuestas de la encuesta
     respuestas = list(collection_encuestas.find({'codigo_evento': codigo_evento}))
-    if not respuestas:
-        flash('No hay respuestas de encuesta disponibles para este evento.', 'error')
-        return redirect(url_for('resumen_evento', codigo_evento=codigo_evento))
-
+    
     # Procesar los datos para las métricas
     total_respuestas = len(respuestas)
     
@@ -2770,35 +2767,36 @@ def informe_avanzado(codigo_evento):
         'D5': {'<5': 0, '5–10': 0, '11–20': 0, '21–30': 0, '31–40': 0, '+40': 0}
     }
 
-    # Procesar cada respuesta
-    for respuesta in respuestas:
-        respuestas_data = respuesta.get('respuestas', {})
-        
-        # Calcular promedios de secciones A, B y N
-        for seccion in ['A', 'B']:
-            for i in range(1, 8):  # A1-A7 y B1-B7
-                key = f'{seccion}{i}'
+    # Procesar cada respuesta solo si existen
+    if respuestas:
+        for respuesta in respuestas:
+            respuestas_data = respuesta.get('respuestas', {})
+            
+            # Calcular promedios de secciones A, B y N
+            for seccion in ['A', 'B']:
+                for i in range(1, 8):  # A1-A7 y B1-B7
+                    key = f'{seccion}{i}'
+                    if key in respuestas_data:
+                        valor = int(respuestas_data[key])
+                        promedios[seccion]['total'] += valor
+                        promedios[seccion]['count'] += 1
+
+            # Calcular promedio de sección N
+            for i in range(1, 3):  # N1 y N2
+                key = f'N{i}'
                 if key in respuestas_data:
                     valor = int(respuestas_data[key])
-                    promedios[seccion]['total'] += valor
-                    promedios[seccion]['count'] += 1
+                    promedios['N']['total'] += valor
+                    promedios['N']['count'] += 1
 
-        # Calcular promedio de sección N
-        for i in range(1, 3):  # N1 y N2
-            key = f'N{i}'
-            if key in respuestas_data:
-                valor = int(respuestas_data[key])
-                promedios['N']['total'] += valor
-                promedios['N']['count'] += 1
-
-        # Contar datos demográficos
-        for key in demograficos:
-            if key in respuestas_data:
-                valor = respuestas_data[key]
-                if key == 'D3':  # Perfiles profesionales
-                    demograficos[key][valor] = demograficos[key].get(valor, 0) + 1
-                else:
-                    demograficos[key][valor] = demograficos[key].get(valor, 0) + 1
+            # Contar datos demográficos
+            for key in demograficos:
+                if key in respuestas_data:
+                    valor = respuestas_data[key]
+                    if key == 'D3':  # Perfiles profesionales
+                        demograficos[key][valor] = demograficos[key].get(valor, 0) + 1
+                    else:
+                        demograficos[key][valor] = demograficos[key].get(valor, 0) + 1
 
     # Calcular promedios finales
     metricas = {
