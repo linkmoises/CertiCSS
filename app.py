@@ -2744,6 +2744,9 @@ def informe_avanzado(codigo_evento):
 
     # Generar gráfica de perfil profesional
     grafica_perfil = generar_grafica_perfil(participantes, evento.get('nombre', 'Evento'))
+    
+    # Generar gráfica de regiones
+    grafica_region = generar_grafica_region(participantes, evento.get('nombre', 'Evento'))
 
     # Obtener las respuestas de la encuesta
     respuestas = list(collection_encuestas.find({'codigo_evento': codigo_evento}))
@@ -2811,7 +2814,8 @@ def informe_avanzado(codigo_evento):
     return render_template('metrica_avanzada.html', 
                          evento=evento,
                          metricas=metricas,
-                         grafica_perfil=grafica_perfil)
+                         grafica_perfil=grafica_perfil,
+                         grafica_region=grafica_region)
 
 
 def generar_grafica_perfil(participantes, evento_nombre):
@@ -2878,6 +2882,84 @@ def generar_grafica_perfil(participantes, evento_nombre):
             fontsize=12, style='italic')
     
     plt.xlabel('Perfil Profesional de Participantes', fontsize=10, fontweight='bold')
+    plt.ylabel('Número de Participantes', fontsize=10, fontweight='bold')
+    
+    # Rotar etiquetas del eje X para mejor legibilidad
+    plt.xticks(rotation=20, ha='right')
+    
+    # Agregar valores en las barras
+    for bar, value in zip(bars, values):
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2., height + 0.1,
+                f'{value}', ha='center', va='bottom', fontweight='bold')
+    
+    # Ajustar layout
+    plt.tight_layout()
+    
+    # Convertir la gráfica a imagen base64
+    img_buffer = io.BytesIO()
+    plt.savefig(img_buffer, format='png', dpi=300, bbox_inches='tight')
+    img_buffer.seek(0)
+    img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
+    plt.close()
+    
+    return f"data:image/png;base64,{img_base64}"
+
+
+def generar_grafica_region(participantes, evento_nombre):
+    """
+    Genera una gráfica de barras con la distribución de participantes por región/provincia
+    """
+    # Mapeo de códigos de región a nombres legibles
+    REGION_MAP = {
+        "panama": "Panamá Metro",
+        "sanmiguelito": "San Miguelito",
+        "panamaoeste": "Panamá Oeste",
+        "panamaeste": "Panamá Este",
+        "bocasdeltoro": "Bocas del Toro",
+        "cocle": "Coclé",
+        "colon": "Colón",
+        "chiriqui": "Chiriquí",
+        "herrera": "Herrera",
+        "lossantos": "Los Santos",
+        "veraguas": "Veraguas"
+    }
+    
+    # Contar participantes por región
+    regiones_count = {}
+    for participante in participantes:
+        region = participante.get('region', 'otro')
+        regiones_count[region] = regiones_count.get(region, 0) + 1
+    
+    # Si no hay datos, retornar None
+    if not regiones_count:
+        return None
+    
+    # Crear la figura
+    plt.figure(figsize=(12, 6))
+    
+    # Preparar datos para la gráfica
+    labels = []
+    values = []
+    
+    for region, count in regiones_count.items():
+        nombre_region = REGION_MAP.get(region, region.title())
+        labels.append(nombre_region)
+        values.append(count)
+    
+    # Crear gráfica de barras
+    bars = plt.bar(labels, values, color='#10B981', alpha=0.8)  # Color verde para diferenciar
+    
+    # Personalizar la gráfica
+    plt.title(f'Distribución de Participantes por Región/Provincia', 
+           fontsize=10, fontweight='bold', pad=20)
+
+    # Subtítulo: por ejemplo, fecha o lugar
+    plt.text(0.5, 1.15, evento_nombre, 
+            ha='center', va='bottom', transform=plt.gca().transAxes,
+            fontsize=12, style='italic')
+    
+    plt.xlabel('Región/Provincia de Procedencia', fontsize=10, fontweight='bold')
     plt.ylabel('Número de Participantes', fontsize=10, fontweight='bold')
     
     # Rotar etiquetas del eje X para mejor legibilidad
