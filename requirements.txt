@@ -9,8 +9,8 @@ Flask==3.1.0
 Flask-Login==0.6.3
 Flask-PyMongo==2.3.0
 matplotlib==3.9.4
-pandas==2.3.1
-numpy==2.3.1
+pandas==2.2.6
+numpy==2.0.2
 idna==3.10
 itsdangerous==2.2.0
 Jinja2==3.1.4
