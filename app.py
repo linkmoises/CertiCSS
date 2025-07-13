@@ -1579,7 +1579,7 @@ REGION_MAP = {
     "veraguas": "Veraguas"
 }
 
-@app.route('/exportar_csv/<codigo_evento>')
+@app.route('/tablero/eventos/<codigo_evento>/participantes/exportar_csv')
 @login_required
 def exportar_csv(codigo_evento):
     # Recuperar participantes registrados para el evento específico
@@ -3133,12 +3133,17 @@ def generar_grafica_demografia_sexo(sexo_data, evento_nombre):
 
     fig, ax = plt.subplots(figsize=(7, 5)) # Ajustar tamaño para un solo gráfico
 
-    # Crear gráfica de barras
-    bars = ax.bar(valid_labels, valid_values, color='#6C5B7B', alpha=0.8) # Color diferente para demografía
+    # Definir colores: celeste para masculino, rosado para femenino
+    color_map = {'Masculino': '#4FC3F7', 'Femenino': '#F06292'}
+    bar_colors = [color_map.get(label, '#BDBDBD') for label in valid_labels]
+
+    bars = ax.bar(valid_labels, valid_values, color=bar_colors, alpha=0.8)
     
     # Personalizar el subplot
-    ax.set_title(title, fontsize=12, fontweight='bold')
-    ax.set_ylabel('Número de Participantes', fontsize=10)
+    ax.set_title(title, fontsize=10, fontweight='bold', pad=20)
+    # Subtítulo con el nombre del evento en cursiva
+    plt.text(0.5, 1.15, evento_nombre, ha='center', va='bottom', transform=ax.transAxes, fontsize=12, style='italic')
+    ax.set_ylabel('Número de encuestados', fontsize=10)
     
     ax.tick_params(axis='x', rotation=0, labelsize=9) # No rotar si son pocas categorías
     ax.tick_params(axis='y', labelsize=9)
@@ -3149,11 +3154,7 @@ def generar_grafica_demografia_sexo(sexo_data, evento_nombre):
         ax.text(bar.get_x() + bar.get_width()/2., height + 0.1,
                 f'{value}', ha='center', va='bottom', fontweight='bold', fontsize=8)
     
-    # Título general de la figura (opcional, si se quiere repetir el nombre del evento)
-    fig.suptitle(f'Demografía de Participantes del Evento: {evento_nombre}', 
-                 fontsize=14, fontweight='bold', y=1.05) 
-
-    plt.tight_layout(rect=[0, 0, 1, 0.95]) # Ajustar rect para dejar espacio al suptitle
+    plt.tight_layout(rect=[0, 0, 1, 0.95]) # Ajustar rect para dejar espacio al subtítulo
 
     # Convertir la gráfica a imagen base64
     img_buffer = io.BytesIO()
@@ -3163,6 +3164,7 @@ def generar_grafica_demografia_sexo(sexo_data, evento_nombre):
     plt.close(fig) # Cierra la figura para liberar memoria
     
     return f"data:image/png;base64,{img_base64}"
+
 
 def generar_grafica_demografia_grupoetario(edad_data, evento_nombre):
     """
@@ -3172,16 +3174,29 @@ def generar_grafica_demografia_grupoetario(edad_data, evento_nombre):
         return None
 
     title = 'Distribución por Grupo Etario'
-    labels_map = {'20-30': '20-30', '31-40': '31-40', '41-50': '41-50', '51-60': '51-60', '61+': '61+'}
+    # Mapeo para aceptar ambos tipos de guion
+    labels_map = {
+        '20–30': '20-30', '20-30': '20-30',
+        '31–40': '31-40', '31-40': '31-40',
+        '41–50': '41-50', '41-50': '41-50',
+        '51–60': '51-60', '51-60': '51-60',
+        '61+': '61+'
+    }
 
     # Asegurar el orden de las categorías de edad
     ordered_keys = ['20-30', '31-40', '41-50', '51-60', '61+']
-    
-    # Obtener datos y mapear etiquetas, manteniendo el orden
-    data_counts = {k: edad_data.get(k, 0) for k in ordered_keys}
-    
+
+    # Sumar los valores de ambas variantes de cada grupo
+    data_counts = {}
+    for k in ordered_keys:
+        suma = 0
+        for key, label in labels_map.items():
+            if label == k:
+                suma += edad_data.get(key, 0)
+        data_counts[k] = suma
+
     # Filtrar categorías con 0 conteo para no mostrarlas si no hay datos
-    valid_labels = [labels_map[k] for k, v in data_counts.items() if v > 0]
+    valid_labels = [k for k, v in data_counts.items() if v > 0]
     valid_values = [v for k, v in data_counts.items() if v > 0]
 
     if not valid_values: # Si no hay datos válidos, retornar None
@@ -3189,30 +3204,26 @@ def generar_grafica_demografia_grupoetario(edad_data, evento_nombre):
 
     fig, ax = plt.subplots(figsize=(7, 5)) # Ajustar tamaño para un solo gráfico
 
-    # Crear gráfica de barras
-    bars = ax.bar(valid_labels, valid_values, color='#6C5B7B', alpha=0.8) # Color diferente para demografía
-    
+    bars = ax.bar(valid_labels, valid_values, color='#8e24aa', alpha=0.8)
+
     # Personalizar el subplot
-    ax.set_title(title, fontsize=12, fontweight='bold')
-    ax.set_ylabel('Número de Participantes', fontsize=10)
-    
+    ax.set_title(title, fontsize=10, fontweight='bold', pad=20)
+    # Subtítulo con el nombre del evento en cursiva
+    plt.text(0.5, 1.15, evento_nombre, ha='center', va='bottom', transform=ax.transAxes, fontsize=12, style='italic')
+    ax.set_ylabel('Número de encuestados', fontsize=10)
+
     # Use ax.set_xticklabels for horizontal alignment
     ax.tick_params(axis='x', rotation=30, labelsize=9) 
     ax.tick_params(axis='y', labelsize=9)
     ax.set_xticklabels(valid_labels, rotation=30, ha='right', fontsize=9)
-
 
     # Agregar valores en las barras
     for bar, value in zip(bars, valid_values):
         height = bar.get_height()
         ax.text(bar.get_x() + bar.get_width()/2., height + 0.1,
                 f'{value}', ha='center', va='bottom', fontweight='bold', fontsize=8)
-    
-    # Título general de la figura (opcional, si se quiere repetir el nombre del evento)
-    fig.suptitle(f'Demografía de Participantes del Evento: {evento_nombre}', 
-                 fontsize=14, fontweight='bold', y=1.05) 
 
-    plt.tight_layout(rect=[0, 0, 1, 0.95]) # Ajustar rect para dejar espacio al suptitle
+    plt.tight_layout(rect=[0, 0, 1, 0.95]) # Ajustar rect para dejar espacio al subtítulo
 
     # Convertir la gráfica a imagen base64
     img_buffer = io.BytesIO()
@@ -3220,8 +3231,9 @@ def generar_grafica_demografia_grupoetario(edad_data, evento_nombre):
     img_buffer.seek(0)
     img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
     plt.close(fig) # Cierra la figura para liberar memoria
-    
+
     return f"data:image/png;base64,{img_base64}"
+
 
 ###
 ### Etiqueta filtro de fecha
