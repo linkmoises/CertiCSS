@@ -2811,11 +2811,15 @@ def informe_avanzado(codigo_evento):
         'demograficos': demograficos
     }
 
+    # Generar gráfica de araña
+    grafica_spider = generar_grafica_spider(respuestas, evento.get('nombre', 'Evento'))
+
     return render_template('metrica_avanzada.html', 
                          evento=evento,
                          metricas=metricas,
                          grafica_perfil=grafica_perfil,
-                         grafica_region=grafica_region)
+                         grafica_region=grafica_region,
+                         grafica_spider=grafica_spider)
 
 
 def generar_grafica_perfil(participantes, evento_nombre):
@@ -2978,6 +2982,127 @@ def generar_grafica_region(participantes, evento_nombre):
     plt.close()
     
     return f"data:image/png;base64,{img_base64}"
+
+
+def generar_grafica_spider(respuestas, evento_nombre):
+    """
+    Genera una gráfica radial (de araña) con la evaluación del evento académico
+    basada en los promedios de las respuestas.
+    """
+    if not respuestas:
+        return None # No hay datos para generar la gráfica
+
+    # Convertir las respuestas a un DataFrame de Pandas para facilitar el procesamiento
+    # Extraer solo la parte de 'respuestas' de cada documento
+    respuestas_data_list = [r.get('respuestas', {}) for r in respuestas]
+    df = pd.DataFrame(respuestas_data_list)
+
+    # Limpieza de datos: asegurar que las columnas B1-B7 sean numéricas
+    # y manejar valores no válidos (NaN)
+    for col in ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7']:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+        else:
+            df[col] = np.nan # Si la columna no existe, llenarla con NaN
+
+    # Eliminar filas que tengan NaN en las columnas B relevantes para los cálculos
+    df.dropna(subset=['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7'], inplace=True)
+
+    if df.empty:
+        return None # No hay datos válidos después de la limpieza
+
+    # Calcular los promedios para los ejes del gráfico de araña
+    # Asegúrate de que las columnas existan y no estén vacías antes de calcular el promedio
+    # Si una columna no existe o está vacía, su promedio será NaN, lo que se manejará
+    # al calcular la media de las series.
+
+    # pertinencia y aplicabilidad -> B1
+    pert_aplic = df['B1'].mean()
+
+    # claridad y coherencia -> promedio B2 B4
+    clar_coh = df[['B2', 'B4']].mean(axis=1).mean()
+
+    # actualización -> B2
+    actualiz = df['B2'].mean()
+
+    # calidad de ponencias -> promedio B3 B4
+    cal_pon = df[['B3', 'B4']].mean(axis=1).mean()
+
+    # organización -> promedio B5 B6 B7
+    organiz = df[['B5', 'B6', 'B7']].mean(axis=1).mean()
+
+    # Nombres de las categorías (ejes)
+    categories = [
+        'Pertinencia y Aplicabilidad',
+        'Claridad y Coherencia',
+        'Actualización Científica',
+        'Calidad de Ponencias',
+        'Organización Logística'
+    ]
+
+    # Valores de los promedios
+    values = [pert_aplic, clar_coh, actualiz, cal_pon, organiz]
+    
+    # Filtrar valores NaN que puedan resultar de promedios de columnas vacías
+    # Si algún valor es NaN, el gráfico no se generará correctamente.
+    # Podrías optar por imputar o simplemente no mostrar el eje si es NaN.
+    # Para este ejemplo, si hay un NaN, lo convertiremos a 0 o manejaremos el error.
+    # Una mejor práctica sería asegurar que `df.dropna` ya haya limpiado esto.
+    values = [0 if pd.isna(v) else v for v in values] # Reemplazar NaN con 0 para evitar errores de plot
+
+    # Número de variables
+    num_vars = len(categories)
+
+    # Calcular el ángulo para cada eje
+    angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
+    # Para cerrar el círculo en el gráfico de araña, el primer punto se repite al final
+    values = values + values[:1]
+    angles = angles + angles[:1]
+
+    # Crear la figura y los ejes polares
+    fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(polar=True))
+
+    # Trazar la línea del gráfico de araña
+    ax.plot(angles, values, color='#0058A6', linewidth=2, linestyle='solid', label='Promedio General')
+    ax.fill(angles, values, color='#0058A6', alpha=0.25)
+
+    # Configurar los ejes
+    ax.set_theta_offset(np.pi / 2) # Rotar para que el primer eje esté arriba
+    ax.set_theta_direction(-1) # Sentido horario
+
+    # Etiquetas de los ejes
+    ax.set_xticks(angles[:-1])
+    ax.set_xticklabels(categories, fontsize=10, fontweight='bold')
+
+    # Rango del eje radial (escala Likert de 1 a 5)
+    ax.set_ylim(1, 5)
+    ax.set_yticks(np.arange(1, 6)) # Mostrar ticks en 1, 2, 3, 4, 5
+    ax.set_yticklabels([f'{i}' for i in np.arange(1, 6)], color="gray", size=8)
+    ax.tick_params(axis='y', pad=10) # Ajustar el padding de los ticks del eje Y
+
+    # Título y subtítulo
+    ax.set_title(f'Evaluación del Evento Académico', 
+                 fontsize=14, fontweight='bold', pad=20)
+    
+    plt.text(0.5, 1.2, evento_nombre, 
+             horizontalalignment='center', verticalalignment='center', 
+             transform=ax.transAxes, fontsize=12, style='italic')
+
+    # Leyenda
+    ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1))
+
+    # Ajustar layout
+    plt.tight_layout()
+
+    # Convertir la gráfica a imagen base64
+    img_buffer = io.BytesIO()
+    plt.savefig(img_buffer, format='png', dpi=300, bbox_inches='tight')
+    img_buffer.seek(0)
+    img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
+    plt.close(fig) # Cierra la figura para liberar memoria
+    
+    return f"data:image/png;base64,{img_base64}"
+
 
 
 ###
@@ -3445,6 +3570,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+import numpy as np
+import pandas as pd
 import io
 import base64
 
