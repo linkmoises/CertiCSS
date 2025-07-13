@@ -156,9 +156,9 @@
                             <div class="mt-1 flex items-center gap-x-2">
                                 <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
 {% if alfa_cronbach is not none %}
-                                {{ alfa_cronbach }}
+                                    {{ alfa_cronbach }}
 {% else %}
-                                No hay datos suficientes para calcular.
+                                    Datos insuficientes
 {% endif %}
                                 </h3>
                             </div>
@@ -179,7 +179,7 @@
 {% if nps is not none %}
                                     {{ nps }}
 {% else %}
-                                    No hay datos suficientes para calcular.
+                                    Datos insuficientes
 {% endif %}
                                 </h3>
                             </div>
@@ -221,7 +221,7 @@
                             </div>
                             <div class="ml-3">
                                 <p class="text-sm text-blue-700">
-                                    No hay respuestas de encuesta disponibles para este evento. Las métricas de satisfacción se mostrarán cuando los participantes completen la encuesta.
+                                    No hay respuestas de encuesta disponibles para este evento. Las métricas de satisfacción se mostrarán solo cuando existan participantes que completen la encuesta.
                                 </p>
                             </div>
                         </div>
@@ -446,18 +446,33 @@
                                 integral del evento.
                             </p>
                             <p class="py-2 text-sm text-gray-500">
-                                Si usted está interesado en realizar análisis más profundos y personalizados, el 
-                                conjunto de datos completo de la encuesta y los registros de participantes están 
-                                disponibles para su descarga.
+                                Si está interesado en realizar análisis más profundos y personalizados, necesitará el 
+                                conjunto de datos completo de la encuesta y los registros de participantes. Estos documentos
+                                están disponibles para su descarga solo si hay participantes registrados y/o se aplicó la 
+                                encuesta de satisfacción del evento.
                             </p>
+{% if metricas.total_participantes > 0 %}
                             <a href="{{ url_for('exportar_csv', codigo_evento=evento.codigo) }}" class="mt-4 w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"">
                                 <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-database-icon lucide-database"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
                                 Descargar dataset de participantes
                             </a>
+{% else %}
+                            <div class="mt-4 w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed">
+                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-database-icon lucide-database"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
+                                No hay participantes registrados
+                            </div>
+{% endif %}
+{% if metricas.total_respuestas > 0 %}
                             <a href="{{ url_for('exportar_encuesta_csv', codigo_evento=evento.codigo) }}" class="mt-4 w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"">
                                 <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-database-icon lucide-database"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
                                 Descargar dataset de encuesta
                             </a>
+{% else %}
+                            <div class="mt-4 w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed">
+                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-database-icon lucide-database"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
+                                No hay datos de encuesta disponibles
+                            </div>
+{% endif %}
                             
                         </div>
                     </div>
