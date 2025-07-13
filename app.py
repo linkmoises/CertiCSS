@@ -2814,12 +2814,19 @@ def informe_avanzado(codigo_evento):
     # Generar gráfica de araña
     grafica_spider = generar_grafica_spider(respuestas, evento.get('nombre', 'Evento'))
 
+    # Generar gráficas demográficas específicas
+    grafica_demografia_sexo = generar_grafica_demografia_sexo(metricas['demograficos']['D1'], evento.get('nombre', 'Evento'))
+    grafica_demografia_grupoetario = generar_grafica_demografia_grupoetario(metricas['demograficos']['D2'], evento.get('nombre', 'Evento'))
+
+
     return render_template('metrica_avanzada.html', 
                          evento=evento,
                          metricas=metricas,
                          grafica_perfil=grafica_perfil,
                          grafica_region=grafica_region,
-                         grafica_spider=grafica_spider)
+                         grafica_spider=grafica_spider,
+                         grafica_demografia_sexo=grafica_demografia_sexo,
+                         grafica_demografia_grupoetario=grafica_demografia_grupoetario)
 
 
 def generar_grafica_perfil(participantes, evento_nombre):
@@ -3037,7 +3044,7 @@ def generar_grafica_spider(respuestas, evento_nombre):
         'Claridad y Coherencia',
         'Actualización Científica',
         'Calidad de Ponencias',
-        'Organización Logística'
+        'Organización y Logística'
     ]
 
     # Valores de los promedios
@@ -3103,6 +3110,116 @@ def generar_grafica_spider(respuestas, evento_nombre):
     
     return f"data:image/png;base64,{img_base64}"
 
+
+def generar_grafica_demografia_sexo(sexo_data, evento_nombre):
+    """
+    Genera una gráfica de barras con la distribución por Sexo.
+    """
+    if not sexo_data or all(v == 0 for v in sexo_data.values()):
+        return None
+
+    title = 'Distribución por Sexo'
+    labels_map = {'Masculino': 'Masculino', 'Femenino': 'Femenino'}
+
+    # Obtener datos y mapear etiquetas
+    data_counts = {k: sexo_data.get(k, 0) for k in labels_map.keys()}
+    
+    # Filtrar categorías con 0 conteo para no mostrarlas si no hay datos
+    valid_labels = [labels_map[k] for k, v in data_counts.items() if v > 0]
+    valid_values = [v for k, v in data_counts.items() if v > 0]
+
+    if not valid_values: # Si no hay datos válidos, retornar None
+        return None
+
+    fig, ax = plt.subplots(figsize=(7, 5)) # Ajustar tamaño para un solo gráfico
+
+    # Crear gráfica de barras
+    bars = ax.bar(valid_labels, valid_values, color='#6C5B7B', alpha=0.8) # Color diferente para demografía
+    
+    # Personalizar el subplot
+    ax.set_title(title, fontsize=12, fontweight='bold')
+    ax.set_ylabel('Número de Participantes', fontsize=10)
+    
+    ax.tick_params(axis='x', rotation=0, labelsize=9) # No rotar si son pocas categorías
+    ax.tick_params(axis='y', labelsize=9)
+
+    # Agregar valores en las barras
+    for bar, value in zip(bars, valid_values):
+        height = bar.get_height()
+        ax.text(bar.get_x() + bar.get_width()/2., height + 0.1,
+                f'{value}', ha='center', va='bottom', fontweight='bold', fontsize=8)
+    
+    # Título general de la figura (opcional, si se quiere repetir el nombre del evento)
+    fig.suptitle(f'Demografía de Participantes del Evento: {evento_nombre}', 
+                 fontsize=14, fontweight='bold', y=1.05) 
+
+    plt.tight_layout(rect=[0, 0, 1, 0.95]) # Ajustar rect para dejar espacio al suptitle
+
+    # Convertir la gráfica a imagen base64
+    img_buffer = io.BytesIO()
+    plt.savefig(img_buffer, format='png', dpi=300, bbox_inches='tight')
+    img_buffer.seek(0)
+    img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
+    plt.close(fig) # Cierra la figura para liberar memoria
+    
+    return f"data:image/png;base64,{img_base64}"
+
+
+def generar_grafica_demografia_grupoetario(edad_data, evento_nombre):
+    """
+    Genera una gráfica de barras con la distribución por Grupo Etario.
+    """
+    if not edad_data or all(v == 0 for v in edad_data.values()):
+        return None
+
+    title = 'Distribución por Grupo Etario'
+    labels_map = {'20-30': '20-30', '31-40': '31-40', '41-50': '41-50', '51-60': '51-60', '61+': '61+'}
+
+    # Asegurar el orden de las categorías de edad
+    ordered_keys = ['20-30', '31-40', '41-50', '51-60', '61+']
+    
+    # Obtener datos y mapear etiquetas, manteniendo el orden
+    data_counts = {k: edad_data.get(k, 0) for k in ordered_keys}
+    
+    # Filtrar categorías con 0 conteo para no mostrarlas si no hay datos
+    valid_labels = [labels_map[k] for k, v in data_counts.items() if v > 0]
+    valid_values = [v for k, v in data_counts.items() if v > 0]
+
+    if not valid_values: # Si no hay datos válidos, retornar None
+        return None
+
+    fig, ax = plt.subplots(figsize=(7, 5)) # Ajustar tamaño para un solo gráfico
+
+    # Crear gráfica de barras
+    bars = ax.bar(valid_labels, valid_values, color='#6C5B7B', alpha=0.8) # Color diferente para demografía
+    
+    # Personalizar el subplot
+    ax.set_title(title, fontsize=12, fontweight='bold')
+    ax.set_ylabel('Número de Participantes', fontsize=10)
+    
+    ax.tick_params(axis='x', rotation=30, ha='right', labelsize=9) # Rotar etiquetas si son muchas
+    ax.tick_params(axis='y', labelsize=9)
+
+    # Agregar valores en las barras
+    for bar, value in zip(bars, valid_values):
+        height = bar.get_height()
+        ax.text(bar.get_x() + bar.get_width()/2., height + 0.1,
+                f'{value}', ha='center', va='bottom', fontweight='bold', fontsize=8)
+    
+    # Título general de la figura (opcional, si se quiere repetir el nombre del evento)
+    fig.suptitle(f'Demografía de Participantes del Evento: {evento_nombre}', 
+                 fontsize=14, fontweight='bold', y=1.05) 
+
+    plt.tight_layout(rect=[0, 0, 1, 0.95]) # Ajustar rect para dejar espacio al suptitle
+
+    # Convertir la gráfica a imagen base64
+    img_buffer = io.BytesIO()
+    plt.savefig(img_buffer, format='png', dpi=300, bbox_inches='tight')
+    img_buffer.seek(0)
+    img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
+    plt.close(fig) # Cierra la figura para liberar memoria
+    
+    return f"data:image/png;base64,{img_base64}"
 
 
 ###

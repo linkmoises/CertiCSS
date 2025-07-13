@@ -369,6 +369,10 @@
                             <h4 class="text-base font-semibold text-gray-800 mb-4">Gráfico No. 3. Evaluación del evento</h4>
 {% if grafica_spider %}
                             <img src="{{ grafica_spider }}" alt="Gráfica de evaluación del evento" class="w-full h-auto" />
+                            <p class="pt-4 text-xs text-gray-500">
+                                La calidad de los datos para generar esta gráfica depende de que los participantes envíen
+                                la encuesta de satisfacción. (n = {{ metricas.total_respuestas | default("S/D") }})
+                            </p>
 {% else %}
                             <div class="flex justify-center items-center h-64 bg-gray-50 rounded-lg">
                                 <p class="text-gray-500">No hay datos disponibles en encuesta para generar la gráfica.</p>
@@ -381,9 +385,20 @@
                     <div class="col-span-2 flex flex-col bg-white border shadow-sm rounded-xl">
                         <div class="p-4 md:p-5">
                             <h4 class="text-base font-semibold text-gray-800 mb-4">Gráfica No. 4. Demografía</h4>
-                            <p class="text-sm py-1">
-                                por desarrollar
-                            </p>
+{% if grafica_demografia_sexo %}
+                            <img src="{{ grafica_demografia_sexo }}" alt="Gráfica de evaluación del evento" class="w-full h-auto" />
+{% else %}
+                            <div class="flex justify-center items-center h-64 bg-gray-50 rounded-lg">
+                                <p class="text-gray-500">No hay datos disponibles en encuesta para generar la gráfica.</p>
+                            </div>
+{% endif %}
+{% if grafica_demografia_grupoetario %}
+                            <img src="{{ grafica_demografia_grupoetario }}" alt="Gráfica de evaluación del evento" class="w-full h-auto" />
+{% else %}
+                            <div class="flex justify-center items-center h-64 bg-gray-50 rounded-lg">
+                                <p class="text-gray-500">No hay datos disponibles en encuesta para generar la gráfica.</p>
+                            </div>
+{% endif %}
                         </div>                          
                     </div>
                 </div>
