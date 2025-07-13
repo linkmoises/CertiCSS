@@ -3164,7 +3164,6 @@ def generar_grafica_demografia_sexo(sexo_data, evento_nombre):
     
     return f"data:image/png;base64,{img_base64}"
 
-
 def generar_grafica_demografia_grupoetario(edad_data, evento_nombre):
     """
     Genera una gráfica de barras con la distribución por Grupo Etario.
@@ -3197,8 +3196,11 @@ def generar_grafica_demografia_grupoetario(edad_data, evento_nombre):
     ax.set_title(title, fontsize=12, fontweight='bold')
     ax.set_ylabel('Número de Participantes', fontsize=10)
     
-    ax.tick_params(axis='x', rotation=30, ha='right', labelsize=9) # Rotar etiquetas si son muchas
+    # Use ax.set_xticklabels for horizontal alignment
+    ax.tick_params(axis='x', rotation=30, labelsize=9) 
     ax.tick_params(axis='y', labelsize=9)
+    ax.set_xticklabels(valid_labels, rotation=30, ha='right', fontsize=9)
+
 
     # Agregar valores en las barras
     for bar, value in zip(bars, valid_values):
@@ -3220,7 +3222,6 @@ def generar_grafica_demografia_grupoetario(edad_data, evento_nombre):
     plt.close(fig) # Cierra la figura para liberar memoria
     
     return f"data:image/png;base64,{img_base64}"
-
 
 ###
 ### Etiqueta filtro de fecha
