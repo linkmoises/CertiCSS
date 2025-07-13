@@ -2875,6 +2875,10 @@ def calcular_alfa_cronbach(respuestas):
 
     alpha = (k / (k - 1)) * (1 - (sum_variances_item / variance_total_score))
 
+    print("N observaciones válidas:", len(df_items))
+    print(df_items.head())
+    print(df_items.corr())
+    
     return round(alpha, 2)
 
 
