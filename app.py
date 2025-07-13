@@ -2818,15 +2818,129 @@ def informe_avanzado(codigo_evento):
     grafica_demografia_sexo = generar_grafica_demografia_sexo(metricas['demograficos']['D1'], evento.get('nombre', 'Evento'))
     grafica_demografia_grupoetario = generar_grafica_demografia_grupoetario(metricas['demograficos']['D2'], evento.get('nombre', 'Evento'))
 
+    # Calcular Alfa de Cronbach
+    alfa_cronbach = calcular_alfa_cronbach(respuestas)
+
+    # Calcular Net Promoter Score (NPS)
+    nps = calcular_nps(respuestas)
 
     return render_template('metrica_avanzada.html', 
-                         evento=evento,
-                         metricas=metricas,
-                         grafica_perfil=grafica_perfil,
-                         grafica_region=grafica_region,
-                         grafica_spider=grafica_spider,
-                         grafica_demografia_sexo=grafica_demografia_sexo,
-                         grafica_demografia_grupoetario=grafica_demografia_grupoetario)
+        evento=evento,
+        metricas=metricas,
+        grafica_perfil=grafica_perfil,
+        grafica_region=grafica_region,
+        grafica_spider=grafica_spider,
+        grafica_demografia_sexo=grafica_demografia_sexo,
+        grafica_demografia_grupoetario=grafica_demografia_grupoetario,
+        alfa_cronbach=alfa_cronbach,
+        nps=nps)
+
+
+def calcular_alfa_cronbach(respuestas):
+    """
+    Calcula el Alfa de Cronbach para las preguntas B1 a B7.
+    
+    Args:
+        respuestas (list): Lista de diccionarios con las respuestas de la encuesta.
+                           Cada diccionario debe contener una clave 'respuestas'
+                           con las claves B1 a B7.
+                           Ej: [{'respuestas': {'B1': '4', 'B2': '5', ...}}, ...]
+
+    Returns:
+        float: El valor del Alfa de Cronbach, o None si no hay suficientes datos.
+    """
+    if not respuestas:
+        return None
+
+    # Extraer solo la parte de 'respuestas' de cada documento
+    respuestas_data_list = [r.get('respuestas', {}) for r in respuestas]
+    df = pd.DataFrame(respuestas_data_list)
+
+    # Definir las columnas de interés para el cálculo del Alfa de Cronbach
+    items_b = [f'B{i}' for i in range(1, 8)]
+
+    # Filtrar el DataFrame para incluir solo las columnas B1-B7
+    df_items = df[items_b]
+
+    # Convertir las columnas a numéricas, forzando errores a NaN
+    for col in items_b:
+        df_items[col] = pd.to_numeric(df_items[col], errors='coerce')
+
+    # Eliminar filas con valores nulos en cualquiera de los ítems B
+    df_items.dropna(inplace=True)
+
+    # Si no quedan datos después de eliminar nulos, no se puede calcular
+    if df_items.empty or len(df_items.columns) < 2:
+        return None
+
+    k = len(items_b) # Número de ítems
+
+    # Varianza de cada ítem
+    variances_item = df_items.var(axis=0, ddof=1) # ddof=1 para varianza muestral
+    sum_variances_item = variances_item.sum()
+
+    # Varianza de la suma total de los ítems
+    total_score = df_items.sum(axis=1)
+    variance_total_score = total_score.var(ddof=1) # ddof=1 para varianza muestral
+
+    # Evitar división por cero si la varianza total es 0 (todos los encuestados respondieron igual)
+    if variance_total_score == 0:
+        return 1.0 # Si todos responden igual, la consistencia es perfecta
+
+    # Calcular Alfa de Cronbach
+    alpha = (k / (k - 1)) * (1 - (sum_variances_item / variance_total_score))
+
+    return round(alpha, 2) # Redondear a 2 decimales para presentación
+
+
+def calcular_nps(respuestas):
+    """
+    Calcula el Net Promoter Score (NPS) basado en la pregunta N1.
+
+    Args:
+        respuestas (list): Lista de diccionarios con las respuestas de la encuesta.
+                           Cada diccionario debe contener una clave 'respuestas'
+                           con la clave N1 (escala 0-10).
+
+    Returns:
+        float: El valor del NPS (entre -100 y 100), o None si no hay suficientes datos.
+    """
+    if not respuestas:
+        return None
+
+    promoters = 0
+    passives = 0
+    detractors = 0
+    total_valid_responses = 0
+
+    for respuesta in respuestas:
+        respuestas_data = respuesta.get('respuestas', {})
+        n1_value_str = respuestas_data.get('N1')
+        
+        if n1_value_str is not None:
+            try:
+                n1_value = int(n1_value_str)
+                if 0 <= n1_value <= 10: # Asegurarse de que el valor esté en el rango esperado
+                    total_valid_responses += 1
+                    if n1_value >= 9:
+                        promoters += 1
+                    elif n1_value >= 7:
+                        passives += 1
+                    else: # 0-6
+                        detractors += 1
+            except ValueError:
+                # Ignorar valores que no se pueden convertir a int
+                pass
+
+    if total_valid_responses == 0:
+        return None # No hay respuestas válidas para calcular el NPS
+
+    # Calcular porcentajes
+    percent_promoters = (promoters / total_valid_responses) * 100
+    percent_detractors = (detractors / total_valid_responses) * 100
+
+    nps_score = percent_promoters - percent_detractors
+    return round(nps_score, 2) # Redondear a 2 decimales para presentación
 
 
 def generar_grafica_perfil(participantes, evento_nombre):

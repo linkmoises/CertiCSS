@@ -133,7 +133,7 @@
                         <div class="p-4 md:p-5">
                             <div class="flex items-center gap-x-2">
                                 <p class="text-xs uppercase tracking-wide text-gray-500">
-                                    Promedio Plataforma
+                                    Alfa de Cronbach (global)
                                 </p>
                             </div>
                             <div class="mt-1 flex items-center gap-x-2">
@@ -150,12 +150,16 @@
                         <div class="p-4 md:p-5">
                             <div class="flex items-center gap-x-2">
                                 <p class="text-xs uppercase tracking-wide text-gray-500">
-                                    Promedio Evento
+                                    Alfa de Cronbach (evento)
                                 </p>
                             </div>
                             <div class="mt-1 flex items-center gap-x-2">
                                 <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
-                                    {{ metricas.promedio_evento }}/5.0
+{% if alfa_cronbach is not none %}
+                                {{ alfa_cronbach }}
+{% else %}
+                                No hay datos suficientes para calcular.
+{% endif %}
                                 </h3>
                             </div>
                         </div>
@@ -167,12 +171,16 @@
                         <div class="p-4 md:p-5">
                             <div class="flex items-center gap-x-2">
                                 <p class="text-xs uppercase tracking-wide text-gray-500">
-                                    Satisfacción Global del Evento
+                                    NPS Evento
                                 </p>
                             </div>
                             <div class="mt-1 flex items-center gap-x-2">
                                 <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
-                                    {{ metricas.promedio_satisfaccion }}/10
+{% if nps is not none %}
+                                    {{ nps }}
+{% else %}
+                                    No hay datos suficientes para calcular.
+{% endif %}
                                 </h3>
                             </div>
                         </div>
