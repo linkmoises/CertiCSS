@@ -2839,58 +2839,43 @@ def informe_avanzado(codigo_evento):
 def calcular_alfa_cronbach(respuestas):
     """
     Calcula el Alfa de Cronbach para las preguntas B1 a B7.
-    
-    Args:
-        respuestas (list): Lista de diccionarios con las respuestas de la encuesta.
-                           Cada diccionario debe contener una clave 'respuestas'
-                           con las claves B1 a B7.
-                           Ej: [{'respuestas': {'B1': '4', 'B2': '5', ...}}, ...]
-
-    Returns:
-        float: El valor del Alfa de Cronbach, o None si no hay suficientes datos.
     """
     if not respuestas:
         return None
 
-    # Extraer solo la parte de 'respuestas' de cada documento
+    # Extraer respuestas
     respuestas_data_list = [r.get('respuestas', {}) for r in respuestas]
     df = pd.DataFrame(respuestas_data_list)
 
-    # Definir las columnas de interés para el cálculo del Alfa de Cronbach
     items_b = [f'B{i}' for i in range(1, 8)]
 
-    # Filtrar el DataFrame para incluir solo las columnas B1-B7
-    df_items = df[items_b]
-
-    # Convertir las columnas a numéricas, forzando errores a NaN
-    for col in items_b:
-        df_items[col] = pd.to_numeric(df_items[col], errors='coerce')
-
-    # Eliminar filas con valores nulos en cualquiera de los ítems B
-    df_items.dropna(inplace=True)
-
-    # Si no quedan datos después de eliminar nulos, no se puede calcular
-    if df_items.empty or len(df_items.columns) < 2:
+    # Verificar que las columnas existan
+    if not all(col in df.columns for col in items_b):
         return None
 
-    k = len(items_b) # Número de ítems
+    # Seleccionar solo las columnas B1-B7 y convertir a numérico
+    df_items = df[items_b].apply(pd.to_numeric, errors='coerce')
 
-    # Varianza de cada ítem
-    variances_item = df_items.var(axis=0, ddof=1) # ddof=1 para varianza muestral
+    # Eliminar filas con valores faltantes
+    df_items.dropna(inplace=True)
+
+    if df_items.empty or df_items.shape[1] < 2:
+        return None
+
+    k = df_items.shape[1]  # Número real de ítems presentes
+
+    variances_item = df_items.var(axis=0, ddof=1)
     sum_variances_item = variances_item.sum()
 
-    # Varianza de la suma total de los ítems
     total_score = df_items.sum(axis=1)
-    variance_total_score = total_score.var(ddof=1) # ddof=1 para varianza muestral
+    variance_total_score = total_score.var(ddof=1)
 
-    # Evitar división por cero si la varianza total es 0 (todos los encuestados respondieron igual)
     if variance_total_score == 0:
-        return 1.0 # Si todos responden igual, la consistencia es perfecta
+        return 1.0
 
-    # Calcular Alfa de Cronbach
     alpha = (k / (k - 1)) * (1 - (sum_variances_item / variance_total_score))
 
-    return round(alpha, 2) # Redondear a 2 decimales para presentación
+    return round(alpha, 2)
 
 
 def calcular_nps(respuestas):
