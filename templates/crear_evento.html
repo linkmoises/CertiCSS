@@ -51,16 +51,44 @@
                         <!-- End Col -->
 
                         <div class="sm:col-span-3">
-                            <label for="unidad_ejecutora" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
-                                Unidad ejecutora organizadora
+                            <label for="region" class="inline-block text-sm text-gray-800 mt-2.5">
+                                Provincia / Región
                             </label>
                         </div>
                         <!-- End Col -->
-                
+
                         <div class="sm:col-span-9">
-                            <input id="unidad_ejecutora" name="unidad_ejecutora" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Escriba la unidad ejecutora organizadora...">
+                            <select id="region" name="region" onchange="actualizarUnidades()"
+                                class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" required>
+                                <option value="">Seleccione una provincia / región</option>
+                                <option value="administrativas">Coordinaciones y Programas</option>
+                                <option value="panama">Panamá Metro</option>
+                                <option value="sanmiguelito">San Miguelito</option>
+                                <option value="panamaoeste">Panamá Oeste</option>
+                                <option value="panamaeste">Panamá Este</option>
+                                <option value="bocasdeltoro">Bocas del Toro</option>
+                                <option value="cocle">Coclé</option>
+                                <option value="colon">Colón</option>
+                                <option value="chiriqui">Chiriquí</option>
+                                <option value="herrera">Herrera</option>
+                                <option value="lossantos">Los Santos</option>
+                                <option value="veraguas">Veraguas</option>
+                            </select>
                         </div>
                         <!-- End Col -->
+
+                        <div class="sm:col-span-3">
+                            <label for="unidad_ejecutora" class="inline-block text-sm text-gray-800 mt-2.5">
+                                Unidad ejecutora organizadora
+                            </label>
+                        </div>
+
+                        <div class="sm:col-span-9">
+                            <select id="unidad_ejecutora" name="unidad_ejecutora"
+                                class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" required>
+                                <option value="">Seleccione una unidad ejecutora</option>
+                            </select>
+                        </div>
 
                         <div class="sm:col-span-3">
                             <label for="lugar" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
@@ -399,6 +427,133 @@
         // Actualizar contador al cargar la página
         actualizarContador();
     });
-</script>    
+</script>
+<script>
+    const unidadesPorProvincia = {
+        administrativas: [
+            "Departamento Nacional de Docencia e Investigación",
+            "---",
+            "Coordinación Nacional de los Servicios de Urgencias",
+            "Centro de Simulación Avanzada",
+            "Subdirección Nacional de Atención Primaria en Salud",
+            "Programa de Salud de Adultos",
+        ],
+        panama: [
+            "Ciudad De La Salud",
+            "Complejo Hospitalario Metropolitano Dr. Arnulfo Arias Madrid",
+            "Hospital de Especialidades Pediátricas Omar Torrijos Herrera",
+            "Policlínica Presidente Remón",
+            "Policlínica Dr. Manuel Ferrer Valdés",
+            "Policlínica Dr. Carlos N. Brin",
+            "Policlínica Don Alejandro De La Guardia Hijo",
+            "Policlínica Don Joaquín José Vallarino",
+            "ULAPS Máximo Herrera",
+            "ULAPS Prof. Carlos Velarde",
+            "CAPPS Plaza Tocumen",
+            "CAPPS Pedregal"
+        ],
+        sanmiguelito: [
+            "Hospital Dra. Susana Jones Cano",
+            "Policlínica Lic. Manuel María Valdés",
+            "Policlínica Don Generoso Guardia",
+            "Policlínica Dr. Edilberto Culiolis",
+            "Policlínica Dra. Cecilia Guerra",
+            "CAPPS Torrijos Carter"
+        ],
+        panamaoeste: [
+            "Hospital Hogar de La Esperanza",
+            "Policlínica Dr. Santiago Barraza",
+            "Policlínica Dr. Blas Gómez Chetro",
+            "Policlínica Dr. Juan Vega Méndez",
+            "ULAPS Vista Alegre",
+            "ULAPS Guadalupe",
+            "ULAPS San José",
+            "CAPPS Capira",
+            "CAPPS Vacamonte",
+            "CAPPS El Tecal"
+        ],
+        panamaeste: [
+            "Hospital Regional de Chepo",
+            "Hospital Irma de Lourdes Tzanetatos",
+            "Policlínica de Cañitas",
+            "CAPPS Los Nogales"
+        ],
+        bocasdeltoro: [
+            "Hospital Regional de Changuinola",
+            "Hospital Regional de Almirante",
+            "Hospital de Chiriquí Grande",
+            "Policlínica de Guabito",
+            "ULAPS Las Tablas"
+        ],
+        cocle: [
+            "Hospital Regional Dr. Rafael Estévez",
+            "Policlínica Dr. Manuel De Jesús Rojas",
+            "Policlínica San Juan De Dios",
+            "Policlínica Dr. Manuel Paulino Ocaña"
+        ],
+        colon: [
+            "Complejo Hospitalario Dr. Manuel Amador Guerrero",
+            "Policlínica de Nuevo San Juan",
+            "Policlínica de Sabanitas",
+            "Policlínica Dr. Hugo Spadafora",
+            "ULAPS Portobelo"
+        ],
+        chiriqui: [
+            "Hospital Regional Dr. Rafael Hernández",
+            "Hospital Dr. Dionisio Arrocha",
+            "Policlínica Dr. Gustavo Adolfo Ross",
+            "Policlínica Dr. Pablo Espinosa",
+            "Policlínica Dr. Ernesto Perez Balladares",
+            "Policlínica de Divalá",
+            "ULAPS Nuevo Vedado",
+            "ULAPS Volcán",
+            "ULAPS Dolega",
+            "CAPPS Barú",
+            "CAPPS Jobito",
+            "CAPPS Balsa",
+            "CAPPS Blanco",
+            "CAPPS Caoba",
+            "CAPPS Corredor",
+            "CAPPS Zapatero"
+        ],
+        herrera: [
+            "Hospital Dr. Gustavo Nelson Collado",
+            "Policlínica Dr. Roberto Ramírez De Diego",
+            "CAPPS Los Pozos",
+            "CAPPS Ocú",
+            "CAPPS Pesé"
+        ],
+        lossantos: [
+            "Policlínica Dr. Miguel Cárdenas Barahona",
+            "Policlínica San Juan de Dios",
+            "CAPPS Guararé",
+            "CAPPS Tonosí",
+            "CAPPS Macaracas"
+        ],
+        veraguas: [
+            "Hospital Dr. Ezequiel Abadía",
+            "Policlínica Dr. Horacio Díaz Gómez",
+            "ULAPS Alberto León",
+            "CAPPS Zapotillo"
+        ]
+    };
+    
+    function actualizarUnidades() {
+        const provinciaSeleccionada = document.getElementById("region").value;
+        const unidadSelect = document.getElementById("unidad_ejecutora");
+        
+        // Limpiar opciones previas
+        unidadSelect.innerHTML = '<option value="">-- Selecciona una unidad --</option>';
+        
+        if (provinciaSeleccionada && unidadesPorProvincia[provinciaSeleccionada]) {
+            unidadesPorProvincia[provinciaSeleccionada].forEach(unidad => {
+                const option = document.createElement("option");
+                option.value = unidad;
+                option.textContent = unidad;
+                unidadSelect.appendChild(option);
+            });
+        }
+    }
+</script>
 </body>
 </html>

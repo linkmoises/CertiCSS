@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const minutesInput = document.getElementById('minutes');
     const secondsInput = document.getElementById('seconds');
 
-    const alarmSound = new Audio("{{ url_for('static', filename='assets/ding.mp3') }}");
+    const alarmSound = new Audio("{{ url_for('static', filename='assets/universe-bell.mp3') }}");
 
     let countdown;
     let totalSeconds = 0;
