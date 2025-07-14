@@ -261,6 +261,13 @@ document.addEventListener('DOMContentLoaded', function() {
             overtimeSeconds++;
             timerDisplay.classList.add('overtime');
             updateDisplay();
+
+            // Reproducir sonido cada minuto extra (excepto el primer segundo)
+            if (overtimeSeconds > 0 && overtimeSeconds % 60 === 0) {
+                alarmSound.play().catch(error => {
+                    console.log("No se pudo reproducir el sonido:", error);
+                });
+            }
         }, 1000);
     }
 
