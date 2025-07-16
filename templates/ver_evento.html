@@ -76,14 +76,26 @@
                                         <!-- End Col -->
 
                                         <div class="sm:col-span-3">
+                                            <label for="region" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                                Región / Provincia
+                                            </label>
+                                        </div>
+                                        <!-- End Col -->
+
+                                        <div class="sm:col-span-9">
+                                            <p class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">{{ evento.region | default("S/D") }}</p>
+                                        </div>
+                                        <!-- End Col -->
+
+                                        <div class="sm:col-span-3">
                                             <label for="unidad_ejecutora" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
-                                                Unidad ejecutora organizadora
+                                                Unidad organizadora
                                             </label>
                                         </div>
                                         <!-- End Col -->
                                 
                                         <div class="sm:col-span-9">
-                                            <p class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">{{ evento.unidad_ejecutora }}</p>
+                                            <p class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">{{ evento.unidad_ejecutora | default("S/D") }}</p>
                                         </div>
                                         <!-- End Col -->
 

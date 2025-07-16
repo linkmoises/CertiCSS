@@ -1631,6 +1631,7 @@ def exportar_csv(codigo_evento):
 def crear_evento():
     if request.method == 'POST':
         nombre = request.form['nombre']
+        region = request.form['region']
         unidad_ejecutora = request.form['unidad_ejecutora']
         lugar = request.form['lugar']
         tipo = request.form['tipo']
@@ -1701,6 +1702,7 @@ def crear_evento():
         collection_eventos.insert_one({
             'nombre': nombre,
             'codigo': codigo,
+            'region': region,
             'unidad_ejecutora': unidad_ejecutora,
             'lugar': lugar,
             'tipo': tipo,
@@ -1753,6 +1755,7 @@ def editar_evento(codigo_evento):
     if request.method == 'POST':
         # Recoger los datos del formulario
         nombre = request.form['nombre']
+        region = request.form['region']
         unidad_ejecutora = request.form['unidad_ejecutora']
         lugar = request.form['lugar']
         tipo = request.form['tipo']
@@ -1818,6 +1821,7 @@ def editar_evento(codigo_evento):
             {"codigo": codigo_evento},
             {"$set": {
                 'nombre': nombre,
+                'region': region,
                 'unidad_ejecutora': unidad_ejecutora,
                 'lugar': lugar,
                 'tipo': tipo,
