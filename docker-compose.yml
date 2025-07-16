@@ -10,6 +10,7 @@ services:
       - ../static_certificados:/app/static/certificados
       - ../static_uploads:/app/static/uploads
       - ../static_usuarios:/app/static/usuarios
+      - ../static_audio:/app/static/audio
       - ../logs:/app/logs
     environment:
       - FLASK_HOST=0.0.0.0

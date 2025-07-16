@@ -693,14 +693,6 @@ def catalogo(page=1):
 
 
 ###
-### Regiones
-###
-@app.route('/catalogo/regiones')
-def catalogo_region():
-    return render_template('catalogo_region.html')
-
-
-###
 ### Dashboard
 ###
 @app.route('/tablero')
@@ -3869,6 +3861,10 @@ app.register_blueprint(normalizador_bp)
 ### Búsqueda avanzada y normalizador
 from app.regiones import regiones_bp
 app.register_blueprint(regiones_bp)
+
+### Catálogo de eventos
+from app.catalogo import catalogo_bp
+app.register_blueprint(catalogo_bp)
 
 ### Importaciones para gráficas
 import matplotlib
