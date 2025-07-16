@@ -21,7 +21,7 @@
                                     {{ titulo_region }}
                                 </h2>
                                 <p class="text-sm text-gray-600">
-                                    Listado de eventos en {{ titulo_region }}
+                                    Listado de eventos en {{ titulo_region }} {% if titulo_region == 'Panamá' %}(Incluye Panamá Metro, Panamá Este y San Miguelito){% endif %}
                                 </p>
                             </div>
             
@@ -44,6 +44,25 @@
                             </div>
                         </div>
                         <!-- End Header -->
+
+{% if titulo_region == 'Panamá' %}
+                    <div class="py-2 px-3 border-b border-gray-200">
+                        <div class="flex flex-wrap gap-3 py-2 justify-center">
+                            <a href="{{ url_for('regiones.eventos_region_panama') }}" class="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-blue-400 bg-blue-500 text-white shadow-md hover:bg-blue-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                <svg class="w-4 h-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pinned-icon lucide-map-pinned"><path d="M18 8c0 3.613-3.869 7.429-5.393 8.795a1 1 0 0 1-1.214 0C9.87 15.429 6 11.613 6 8a6 6 0 0 1 12 0"/><circle cx="12" cy="8" r="2"/><path d="M8.714 14h-3.71a1 1 0 0 0-.948.683l-2.004 6A1 1 0 0 0 3 22h18a1 1 0 0 0 .948-1.316l-2-6a1 1 0 0 0-.949-.684h-3.712"/></svg>
+                                Panamá Metro
+                            </a>
+                            <a href="{{ url_for('regiones.eventos_region_sanmiguelito') }}" class="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-pink-400 bg-pink-500 text-white shadow-md hover:bg-pink-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-pink-300">
+                                <svg class="w-4 h-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pinned-icon lucide-map-pinned"><path d="M18 8c0 3.613-3.869 7.429-5.393 8.795a1 1 0 0 1-1.214 0C9.87 15.429 6 11.613 6 8a6 6 0 0 1 12 0"/><circle cx="12" cy="8" r="2"/><path d="M8.714 14h-3.71a1 1 0 0 0-.948.683l-2.004 6A1 1 0 0 0 3 22h18a1 1 0 0 0 .948-1.316l-2-6a1 1 0 0 0-.949-.684h-3.712"/></svg>
+                                San Miguelito
+                            </a>
+                            <a href="{{ url_for('regiones.eventos_region_panamaeste') }}" class="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-green-400 bg-green-500 text-white shadow-md hover:bg-green-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-300">
+                                <svg class="w-4 h-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pinned-icon lucide-map-pinned"><path d="M18 8c0 3.613-3.869 7.429-5.393 8.795a1 1 0 0 1-1.214 0C9.87 15.429 6 11.613 6 8a6 6 0 0 1 12 0"/><circle cx="12" cy="8" r="2"/><path d="M8.714 14h-3.71a1 1 0 0 0-.948.683l-2.004 6A1 1 0 0 0 3 22h18a1 1 0 0 0 .948-1.316l-2-6a1 1 0 0 0-.949-.684h-3.712"/></svg>
+                                Panamá Este
+                            </a>
+                        </div>
+                    </div>
+{% endif %}
 
     {% if eventos|length == 0 %}
                         

@@ -257,7 +257,7 @@ def eventos_region_los_santos(page=1):
 
 
 ###
-### 8 - Panamá
+### 8 - Panamá (Incluye Panamá Metro, Este y San Miguelito)
 ###
 @regiones_bp.route('/tablero/eventos/panama')
 @regiones_bp.route('/tablero/eventos/panama/page/<int:page>')
@@ -267,12 +267,12 @@ def eventos_region_panama(page=1):
     eventos_por_pagina = 20
 
     # Calcular el número total de eventos
-    total_eventos = collection_eventos.count_documents({"region": "panama"})
+    total_eventos = collection_eventos.count_documents({"region": {"$in": ["panama", "sanmiguelito", "panamaeste"]}})
     # Calcular el número total de páginas
     total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
 
     # Obtener los eventos para la página actual
-    eventos_cursor = collection_eventos.find({"region": "panama"}).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    eventos_cursor = collection_eventos.find({"region": {"$in": ["panama", "sanmiguelito", "panamaeste"]}}).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
 
     # Verificar si el usuario es organizador en cada evento
@@ -349,6 +349,120 @@ def eventos_region_panamaoeste(page=1):
 
     # Obtener los eventos para la página actual
     eventos_cursor = collection_eventos.find({"region": "panamaoeste"}).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    eventos = list(eventos_cursor)
+
+    # Verificar si el usuario es organizador en cada evento
+    for evento in eventos:
+        es_organizador = collection_participantes.find_one({
+            "codigo_evento": evento["codigo"],
+            "cedula": str(current_user.cedula),
+            "rol": "coorganizador"
+        }) is not None 
+
+        evento["es_organizador"] = es_organizador
+
+    return render_template('eventos-provincias.html',
+        eventos=eventos,
+        page=page,
+        titulo_region=titulo_region,
+        total_paginas=total_paginas,
+        total_eventos=total_eventos
+    )
+
+
+###
+### Subregión - Panamá Este
+###
+@regiones_bp.route('/tablero/eventos/panama-este')
+@regiones_bp.route('/tablero/eventos/panama-este/page/<int:page>')
+@login_required
+def eventos_region_panamaeste(page=1):
+    titulo_region = "Panamá Este"
+    eventos_por_pagina = 20
+
+    # Calcular el número total de eventos
+    total_eventos = collection_eventos.count_documents({"region": "panamaeste"})
+    # Calcular el número total de páginas
+    total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
+
+    # Obtener los eventos para la página actual
+    eventos_cursor = collection_eventos.find({"region": "panamaeste"}).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    eventos = list(eventos_cursor)
+
+    # Verificar si el usuario es organizador en cada evento
+    for evento in eventos:
+        es_organizador = collection_participantes.find_one({
+            "codigo_evento": evento["codigo"],
+            "cedula": str(current_user.cedula),
+            "rol": "coorganizador"
+        }) is not None 
+
+        evento["es_organizador"] = es_organizador
+
+    return render_template('eventos-provincias.html',
+        eventos=eventos,
+        page=page,
+        titulo_region=titulo_region,
+        total_paginas=total_paginas,
+        total_eventos=total_eventos
+    )
+
+
+###
+### Subregión - San Miguelito
+###
+@regiones_bp.route('/tablero/eventos/san-miguelito')
+@regiones_bp.route('/tablero/eventos/san-miguelito/page/<int:page>')
+@login_required
+def eventos_region_sanmiguelito(page=1):
+    titulo_region = "San Miguelito"
+    eventos_por_pagina = 20
+
+    # Calcular el número total de eventos
+    total_eventos = collection_eventos.count_documents({"region": "sanmiguelito"})
+    # Calcular el número total de páginas
+    total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
+
+    # Obtener los eventos para la página actual
+    eventos_cursor = collection_eventos.find({"region": "sanmiguelito"}).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    eventos = list(eventos_cursor)
+
+    # Verificar si el usuario es organizador en cada evento
+    for evento in eventos:
+        es_organizador = collection_participantes.find_one({
+            "codigo_evento": evento["codigo"],
+            "cedula": str(current_user.cedula),
+            "rol": "coorganizador"
+        }) is not None 
+
+        evento["es_organizador"] = es_organizador
+
+    return render_template('eventos-provincias.html',
+        eventos=eventos,
+        page=page,
+        titulo_region=titulo_region,
+        total_paginas=total_paginas,
+        total_eventos=total_eventos
+    )
+
+
+###
+### Subregión - Panamá Metro
+###
+@regiones_bp.route('/tablero/eventos/panama-metro')
+@regiones_bp.route('/tablero/eventos/panama-metro/page/<int:page>')
+@login_required
+def eventos_region_panama(page=1):
+    titulo_region = "Panamá Metro"
+    eventos_por_pagina = 20
+
+    # Calcular el número total de eventos
+    total_eventos = collection_eventos.count_documents({"region": "panama"})
+    # Calcular el número total de páginas
+    total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
+
+    # Obtener los eventos para la página actual
+    eventos_cursor = collection_eventos.find({"region": "panama"}).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
 
     # Verificar si el usuario es organizador en cada evento
