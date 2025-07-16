@@ -229,12 +229,12 @@ def eventos_region_los_santos(page=1):
     eventos_por_pagina = 20
 
     # Calcular el número total de eventos
-    total_eventos = collection_eventos.count_documents({"region": "los-santos"})
+    total_eventos = collection_eventos.count_documents({"region": "lossantos"})
     # Calcular el número total de páginas
     total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
 
     # Obtener los eventos para la página actual
-    eventos_cursor = collection_eventos.find({"region": "los-santos"}).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    eventos_cursor = collection_eventos.find({"region": "lossantos"}).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
 
     # Verificar si el usuario es organizador en cada evento
