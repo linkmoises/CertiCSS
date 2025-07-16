@@ -452,7 +452,7 @@ def eventos_region_sanmiguelito(page=1):
 @regiones_bp.route('/tablero/eventos/panama-metro')
 @regiones_bp.route('/tablero/eventos/panama-metro/page/<int:page>')
 @login_required
-def eventos_region_panama(page=1):
+def eventos_region_panamametro(page=1):
     titulo_region = "Panamá Metro"
     eventos_por_pagina = 20
 
