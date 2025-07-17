@@ -192,7 +192,7 @@ def catalogo_region_los_santos(page=1):
 ###
 ### 9 - Veraguas
 ###
-@catalogo_bp.route('/catalogo/verguas')
+@catalogo_bp.route('/catalogo/veraguas')
 @catalogo_bp.route('/catalogo/veraguas/page/<int:page>')
 def catalogo_region_veraguas(page=1):
     titulo_region = "Veraguas"
