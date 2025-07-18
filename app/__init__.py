@@ -19,6 +19,7 @@ collection_participantes = db['participantes']  # importado de config.py
 collection_eva = db['eva']
 collection_tokens = db['tokens']
 collection_qbanks = db['qbanks']
+collection_qbanks_data = db['qbanks_data']
 
 # Exportar variables necesarias
 BASE_URL = config.BASE_URL                      # importado de config.py

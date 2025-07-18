@@ -1,0 +1,241 @@
+{% include 'tablero-header.html' %}
+
+{% include 'tablero-sidebar.html' %}
+    
+    <!-- CONTENIDO -->
+    <div class="w-full lg:ps-64">
+        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+
+            <!-- TABLA RESUMEN EVENTOS -->
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <!-- Card -->
+                <div class="flex flex-col">
+                <div class="-m-1.5 overflow-x-auto">
+                    <div class="p-1.5 min-w-full inline-block align-middle">
+                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+
+                        <!-- Header -->
+                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-800">
+                                    Nueva pregunta
+                                </h2>
+                                <p class="text-sm text-gray-600">
+                                    {{ qbank.titulo }}
+                                </p>
+                            </div>
+            
+                            <div>
+                                <div class="inline-flex gap-x-2">
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="#">
+                                        Boton
+                                    </a>
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="#">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                        Boton
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Header -->
+
+                        <!-- Body -->
+                        <div class="max-w-sm w-full min-h-[400px] flex flex-col justify-center mx-auto px-6 py-4">
+
+
+    <h2 class="text-2xl font-bold mb-4">Nueva Pregunta para el Banco</h2>
+    <form method="POST" enctype="multipart/form-data" id="formPregunta">
+        <div class="mb-4">
+            <label class="block font-semibold mb-1">Tipo de pregunta</label>
+            <select name="tipo" id="tipoPregunta" class="w-full border rounded p-2" required>
+                <option value="seleccion_simple">Selección simple (una respuesta correcta)</option>
+                <option value="seleccion_multiple">Selección múltiple (varias respuestas correctas)</option>
+                <option value="verdadero_falso">Verdadero / Falso</option>
+            </select>
+        </div>
+        <div class="mb-4">
+            <label class="block font-semibold mb-1">Pregunta (HTML permitido)</label>
+            <textarea name="pregunta_html" id="pregunta_html" class="w-full border rounded p-2" rows="4" required></textarea>
+        </div>
+        <div class="mb-4">
+            <label class="block font-semibold mb-1">Imágenes de la pregunta (opcional)</label>
+            <input type="file" name="imagenes_pregunta" multiple accept="image/*" class="w-full border rounded p-2">
+        </div>
+        <div class="mb-4" id="opcionesContainer">
+            <label class="block font-semibold mb-1">Opciones</label>
+            <!-- Opciones dinámicas aquí -->
+        </div>
+        <input type="hidden" name="num_opciones" id="num_opciones" value="0">
+        <div class="mb-4">
+            <button type="button" id="agregarOpcion" class="bg-blue-500 text-white px-3 py-1 rounded">Agregar opción</button>
+        </div>
+        <div class="mb-4">
+            <label class="block font-semibold mb-1">Justificación (HTML permitido)</label>
+            <textarea name="justificacion_html" class="w-full border rounded p-2" rows="3"></textarea>
+        </div>
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Guardar Pregunta</button>
+        <a href="{{ url_for('plataforma.ver_qbank', codigo_qbank=codigo_qbank) }}" class="ml-2 text-blue-600">Cancelar</a>
+    </form>
+
+
+
+
+                        </div>
+                        <!-- End Body -->
+
+                        <!-- Footer -->
+                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
+                            <div>
+                            <p class="text-sm text-gray-600 dark:text-neutral-400">
+                                <span class="font-semibold text-gray-800 dark:text-neutral-200">X</span> x
+                            </p>
+                            </div>
+
+                            <div>
+                                <div class="inline-flex gap-x-2">
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="{{ url_for('plataforma.ver_qbank', codigo_qbank=codigo_qbank) }}">
+                                        Botón
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Footer -->
+
+                    </div>
+                    </div>
+                </div>
+                </div>
+                <!-- End Card -->
+            </div>
+            <!-- FIN TABLA RESUMEN EVENTOS -->
+
+{% include 'tablero-footer.html' %}
+
+        </div>
+    </div>
+    <!-- FIN CONTENIDO -->
+
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+<script>
+// Limpia campos dinámicos al cargar la página
+document.addEventListener("DOMContentLoaded", function () {
+const hiddenInputs = document.querySelectorAll("#buscadorForm input[type='hidden']");
+hiddenInputs.forEach((input) => input.remove());
+});
+document.getElementById("buscadorForm").addEventListener("submit", function (event) {
+event.preventDefault(); // Prevenir envío estándar del formulario
+
+const valor = document.getElementById("buscador").value.trim();
+const patterns = {
+cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas
+pasaporte: /^[A-Z]{2}\d{6,9}$/,                        // Pasaportes
+id_certificado: /^[a-zA-Z0-9]{8}$/                    // IDs de certificados
+};
+
+let action, field;
+
+if (patterns.cedula.test(valor)) {
+action = "/buscar_certificados";
+field = "cedula";
+} else if (patterns.pasaporte.test(valor)) {
+action = "/buscar_certificados";
+field = "cedula";
+} else if (patterns.id_certificado.test(valor)) {
+action = "/validar_certificado";
+field = "nanoid";
+} else {
+alert("Formato no válido. Introduzca un documento de identificación o un ID de certificado válido.");
+return;
+}
+
+// Crear y enviar el formulario dinámicamente
+const form = event.target;
+form.action = action;
+form.method = "POST";
+
+// Limpiar campos ocultos previos
+const hiddenInputs = form.querySelectorAll("input[type='hidden']");
+hiddenInputs.forEach((input) => input.remove());
+
+const hiddenInput = document.createElement("input");
+hiddenInput.type = "hidden";
+hiddenInput.name = field;
+hiddenInput.value = valor;
+form.appendChild(hiddenInput);
+form.submit();
+});
+</script>
+<script>
+    let opcionIndex = 0;
+    
+    function crearOpcion(tipo) {
+        const div = document.createElement('div');
+        div.className = "flex items-center gap-2 mb-2";
+        div.id = "opcion_" + opcionIndex;
+    
+        let inputRespuesta;
+        if (tipo === "seleccion_simple") {
+            inputRespuesta = `<input type=\"radio\" name=\"respuestas_correctas\" value=\"${opcionIndex}\" required>`;
+        } else if (tipo === "seleccion_multiple") {
+            inputRespuesta = `<input type=\"checkbox\" name=\"respuestas_correctas\" value=\"${opcionIndex}\">`;
+        } else if (tipo === "verdadero_falso") {
+            // Se generan solo dos opciones: Verdadero y Falso
+            return;
+        }
+    
+        div.innerHTML = `
+            ${inputRespuesta}
+            <input type="text" name="opcion_texto_${opcionIndex}" placeholder="Texto de la opción" class="border rounded p-1" required>
+            <input type="file" name="opcion_imagen_${opcionIndex}" accept="image/*">
+            <button type="button" onclick="eliminarOpcion(${opcionIndex})" class="text-red-600 ml-2">Eliminar</button>
+        `;
+        document.getElementById('opcionesContainer').appendChild(div);
+        opcionIndex++;
+        document.getElementById('num_opciones').value = opcionIndex;
+    }
+    
+    function eliminarOpcion(idx) {
+        const div = document.getElementById('opcion_' + idx);
+        if (div) div.remove();
+    }
+    
+    function renderOpciones() {
+        const tipo = document.getElementById('tipoPregunta').value;
+        const cont = document.getElementById('opcionesContainer');
+        cont.innerHTML = '<label class="block font-semibold mb-1">Opciones</label>';
+        opcionIndex = 0;
+        document.getElementById('num_opciones').value = 0;
+    
+        if (tipo === "verdadero_falso") {
+            // Solo dos opciones, no editables
+            cont.innerHTML += `
+                <div class="flex items-center gap-2 mb-2">
+                    <input type="radio" name="respuestas_correctas" value="0" required>
+                    <input type="hidden" name="opcion_texto_0" value="Verdadero">
+                    <span>Verdadero</span>
+                </div>
+                <div class="flex items-center gap-2 mb-2">
+                    <input type="radio" name="respuestas_correctas" value="1" required>
+                    <input type="hidden" name="opcion_texto_1" value="Falso">
+                    <span>Falso</span>
+                </div>
+            `;
+            document.getElementById('num_opciones').value = 2;
+        } else {
+            // Por defecto, dos opciones
+            crearOpcion(tipo);
+            crearOpcion(tipo);
+        }
+    }
+    
+    document.getElementById('tipoPregunta').addEventListener('change', renderOpciones);
+    document.getElementById('agregarOpcion').addEventListener('click', function() {
+        const tipo = document.getElementById('tipoPregunta').value;
+        if (tipo !== "verdadero_falso") crearOpcion(tipo);
+    });
+    
+    window.onload = renderOpciones;
+</script>
+</body>
+</html>

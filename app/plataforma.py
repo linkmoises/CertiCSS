@@ -1,8 +1,10 @@
 from flask import Blueprint, render_template, request, redirect, url_for, abort, flash
-from app import db, collection_eventos, collection_eva, collection_qbanks
+from app import db, collection_eventos, collection_eva, collection_qbanks, collection_qbanks_data
 from flask_login import login_required, current_user
 from app.auth import token_required
 from datetime import datetime
+from werkzeug.utils import secure_filename
+import os
 
 plataforma_bp = Blueprint('plataforma', __name__)
 
@@ -353,7 +355,7 @@ def nuevo_qbank():
 
 
 ###
-### Ver o editar un Banco de Preguntas
+### Ver un Banco de Preguntas
 ###
 @plataforma_bp.route('/tablero/qbanks/<codigo_qbank>')
 @login_required
@@ -365,28 +367,10 @@ def ver_qbank(codigo_qbank):
         flash('Banco de preguntas no encontrado.', 'error')
         return redirect(url_for('plataforma.listar_qbank'))
     
-    return render_template('qbanks_ver.html', qbank=qbank)
-
-
-###
-### Añadir preguntas a un banco
-###
-@plataforma_bp.route('/tablero/qbanks/<codigo_qbank>/preguntas', methods=['GET', 'POST'])
-@login_required
-def preguntas_qbank(codigo_qbank):
-    # Buscar el qbank en la base de datos
-    qbank = collection_qbanks.find_one({"codigo": codigo_qbank})
-    
-    if not qbank:
-        flash('Banco de preguntas no encontrado.', 'error')
-        return redirect(url_for('plataforma.listar_qbank'))
-    
-    if request.method == 'POST':
-        # lógica para añadir pregunta nueva al banco
-        flash('Funcionalidad de añadir preguntas en desarrollo.', 'info')
-        return redirect(url_for('plataforma.preguntas_qbank', codigo_qbank=codigo_qbank))
-    
-    return render_template('qbanks_preguntas.html', qbank=qbank)
+    # Buscar las preguntas asociadas a este banco
+    preguntas = list(collection_qbanks_data.find({"codigo_qbank": codigo_qbank}))
+        
+    return render_template('qbanks_ver.html', qbank=qbank, preguntas=preguntas)
 
 
 ###
@@ -487,3 +471,53 @@ def chat_contenido(codigo_evento, orden):
     except Exception as e:
         print(f"Error en chat_contenido: {str(e)}")  # Para debugging
         return jsonify({'error': f'Error interno: {str(e)}'}), 500
+
+
+@plataforma_bp.route('/tablero/qbanks/<codigo_qbank>/nueva_pregunta', methods=['GET', 'POST'])
+@login_required
+def nueva_pregunta_qbank(codigo_qbank):
+    if request.method == 'POST':
+        tipo = request.form['tipo']
+        pregunta_html = request.form['pregunta_html']
+        justificacion_html = request.form['justificacion_html']
+        opciones = []
+        respuestas_correctas = request.form.getlist('respuestas_correctas')
+        imagenes_pregunta = request.files.getlist('imagenes_pregunta')
+        imagenes_opciones = request.files.getlist('imagenes_opciones')
+        
+        # Procesar opciones y sus imágenes
+        for i in range(int(request.form['num_opciones'])):
+            texto = request.form.get(f'opcion_texto_{i}', '')
+            imagen = None
+            if f'opcion_imagen_{i}' in request.files:
+                file = request.files[f'opcion_imagen_{i}']
+                if file and file.filename:
+                    filename = secure_filename(file.filename)
+                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                    imagen = filename
+            opciones.append({'texto': texto, 'imagen': imagen})
+        
+        # Guardar imágenes de la pregunta
+        imagenes = []
+        for file in imagenes_pregunta:
+            if file and file.filename:
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                imagenes.append(filename)
+        
+        # Guardar en MongoDB
+        collection_qbanks_data.insert_one({
+            "codigo_qbank": codigo_qbank,
+            "tipo": tipo,
+            "pregunta_html": pregunta_html,
+            "opciones": opciones,
+            "respuestas_correctas": [int(idx) for idx in respuestas_correctas],
+            "justificacion_html": justificacion_html,
+            "imagenes": imagenes
+        })
+        flash('Pregunta guardada correctamente', 'success')
+        return redirect(url_for('plataforma.ver_qbank', codigo_qbank=codigo_qbank))
+    
+    qbank = collection_qbanks.find_one({"codigo": codigo_qbank})
+
+    return render_template('qbanks_pregunta_nueva.html', codigo_qbank=codigo_qbank, qbank=qbank)
