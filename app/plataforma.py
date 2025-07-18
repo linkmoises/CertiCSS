@@ -5,6 +5,8 @@ from app.auth import token_required
 from datetime import datetime
 from werkzeug.utils import secure_filename
 import os
+import re
+from bson import ObjectId
 
 plataforma_bp = Blueprint('plataforma', __name__)
 
@@ -79,6 +81,9 @@ def crear_contenido(codigo_evento):
                 flash('El JSON del caso clínico no es válido: ' + str(e), 'error')
                 return redirect(request.url)
 
+        elif tipo == 'examen':
+            contenido['qbank_config'] = request.form['qbank_config']
+
         collection_eva.insert_one(contenido)
 
         return redirect(url_for('plataforma.listar_contenidos', codigo_evento=codigo_evento))
@@ -126,6 +131,8 @@ def editar_contenido(codigo_evento, orden):
                 documento_path = os.path.join(app.config['UPLOAD_FOLDER'], documento_filename)
                 documento_file.save(documento_path)
                 actualizacion['documento'] = documento_filename
+        elif tipo == 'examen':
+            actualizacion['qbank_config'] = request.form['qbank_config']
 
         collection_eva.update_one({'codigo_evento': codigo_evento, 'orden': orden}, {'$set': actualizacion})
 
@@ -212,7 +219,7 @@ def ver_plataforma(codigo_evento):
 ### LMS - Renderiza los contenidos de un evento virtual
 ###
 import markdown
-@plataforma_bp.route('/plataforma/<codigo_evento>/<int:orden>')
+@plataforma_bp.route('/plataforma/<codigo_evento>/<int:orden>', methods=['GET', 'POST'])
 @token_required
 def ver_contenido(codigo_evento, orden):
     # Obtener cédula y token de los parámetros
@@ -234,6 +241,33 @@ def ver_contenido(codigo_evento, orden):
     # Convertir Markdown a HTML solo si el tipo es 'texto'
     if contenido_actual.get('tipo') == 'texto' and 'contenido_texto' in contenido_actual:
         contenido_actual['contenido_texto'] = markdown.markdown(contenido_actual['contenido_texto'])
+
+    # Mostrar examen si el tipo es 'examen' y tiene qbank_config
+    if contenido_actual.get('tipo') == 'examen' and 'qbank_config' in contenido_actual:
+        codigo_qbank, num_preguntas, aleatorio = parse_qbank_config(contenido_actual['qbank_config'])
+        if codigo_qbank:
+            if request.method == 'POST':
+                # Recuperar los IDs de las preguntas del campo oculto
+                preguntas_ids = request.form.get('preguntas_ids', '').split(',')
+                preguntas = [collection_qbanks_data.find_one({'_id': ObjectId(pid)}) for pid in preguntas_ids if pid]
+            else:
+                preguntas = list(collection_qbanks_data.find({'codigo_qbank': codigo_qbank}))
+                import random
+                if aleatorio:
+                    preguntas = random.sample(preguntas, min(num_preguntas, len(preguntas)))
+                else:
+                    preguntas = preguntas[:num_preguntas]
+            puntaje = None
+            if request.method == 'POST':
+                correctas = 0
+                for i, pregunta in enumerate(preguntas):
+                    respuesta_usuario = request.form.getlist(f'resp_{i}')
+                    if set(map(str, pregunta['respuestas_correctas'])) == set(respuesta_usuario):
+                        correctas += 1
+                puntaje = (correctas, len(preguntas))
+            # Pasar los IDs de las preguntas al template para el campo oculto
+            preguntas_ids = ','.join([str(p['_id']) for p in preguntas])
+            return render_template('examen.html', preguntas=preguntas, puntaje=puntaje, contenido=contenido_actual, evento=evento, cedula=cedula, token=token, preguntas_ids=preguntas_ids)
 
     # Encontrar el contenido anterior y el siguiente
     indice_actual = contenidos.index(contenido_actual)
@@ -407,70 +441,70 @@ def eliminar_qbank(codigo_qbank):
     return redirect(url_for('plataforma.listar_qbank'))
 
 
-from flask import jsonify, request
-from openai import OpenAI
-import os
+# from flask import jsonify, request
+# from openai import OpenAI
+# import os
 
-# Inicializar el cliente OpenAI
-## client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+# # Inicializar el cliente OpenAI
+# ## client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
-client = OpenAI(
-    api_key=os.environ.get("OPENROUTER_API_KEY"),
-    base_url="https://openrouter.ai/api/v1",
-    default_headers={
-        "HTTP-Referer": "http://localhost",  # o el dominio real
-        "X-Title": "Simulador Clínico"
-    }
-)
+# client = OpenAI(
+#     api_key=os.environ.get("OPENROUTER_API_KEY"),
+#     base_url="https://openrouter.ai/api/v1",
+#     default_headers={
+#         "HTTP-Referer": "http://localhost",  # o el dominio real
+#         "X-Title": "Simulador Clínico"
+#     }
+# )
 
-@plataforma_bp.route('/api/chat_contenido/<codigo_evento>/<int:orden>', methods=['POST'])
-def chat_contenido(codigo_evento, orden):
-    try:
-        # Verificar que se recibió el JSON
-        if not request.json:
-            return jsonify({'error': 'No se recibió datos JSON'}), 400
+# @plataforma_bp.route('/api/chat_contenido/<codigo_evento>/<int:orden>', methods=['POST'])
+# def chat_contenido(codigo_evento, orden):
+#     try:
+#         # Verificar que se recibió el JSON
+#         if not request.json:
+#             return jsonify({'error': 'No se recibió datos JSON'}), 400
             
-        user_input = request.json.get('mensaje')
-        if not user_input:
-            return jsonify({'error': 'Mensaje vacío'}), 400
+#         user_input = request.json.get('mensaje')
+#         if not user_input:
+#             return jsonify({'error': 'Mensaje vacío'}), 400
 
-        # Buscar el contenido
-        contenido = collection_eva.find_one({'codigo_evento': codigo_evento, 'orden': orden})
+#         # Buscar el contenido
+#         contenido = collection_eva.find_one({'codigo_evento': codigo_evento, 'orden': orden})
 
-        if not contenido or contenido['tipo'] != 'caso_chatgpt':
-            return jsonify({'error': 'Contenido no encontrado o no válido'}), 400
+#         if not contenido or contenido['tipo'] != 'caso_chatgpt':
+#             return jsonify({'error': 'Contenido no encontrado o no válido'}), 400
 
-        if 'contenido_json' not in contenido:
-            return jsonify({'error': 'El caso clínico no tiene contenido JSON válido'}), 400
+#         if 'contenido_json' not in contenido:
+#             return jsonify({'error': 'El caso clínico no tiene contenido JSON válido'}), 400
 
-        # Preparar el prompt asegurando codificación UTF-8
-        caso_clinico = contenido['contenido_json']
-        if isinstance(caso_clinico, dict):
-            # Si es un diccionario, convertirlo a string
-            caso_clinico = str(caso_clinico)
+#         # Preparar el prompt asegurando codificación UTF-8
+#         caso_clinico = contenido['contenido_json']
+#         if isinstance(caso_clinico, dict):
+#             # Si es un diccionario, convertirlo a string
+#             caso_clinico = str(caso_clinico)
         
-        prompt_base = f"""Este es un caso clínico de un curso en línea. El contenido es el siguiente:
-        José. Masculino de 55 años, DM2 de 8 años de evolución. Usa metformina 850 mg bid. Glicemia capilar en ayunas 425 mg/dl
-        HbA1C 9%.
-        Actúa como un tutor clínico. Responde a la siguiente pregunta del usuario basada únicamente en este caso:"""
+#         prompt_base = f"""Este es un caso clínico de un curso en línea. El contenido es el siguiente:
+#         José. Masculino de 55 años, DM2 de 8 años de evolución. Usa metformina 850 mg bid. Glicemia capilar en ayunas 425 mg/dl
+#         HbA1C 9%.
+#         Actúa como un tutor clínico. Responde a la siguiente pregunta del usuario basada únicamente en este caso:"""
 
-        # Llamada a OpenAI con la nueva API
-        response = client.chat.completions.create(
-            model="deepseek/deepseek-r1-0528:free",
-            messages=[
-                {"role": "system", "content": prompt_base},
-                {"role": "user", "content": user_input}
-            ],
-            max_tokens=1000,
-            temperature=0.7
-        )
+#         # Llamada a OpenAI con la nueva API
+#         response = client.chat.completions.create(
+#             model="deepseek/deepseek-r1-0528:free",
+#             messages=[
+#                 {"role": "system", "content": prompt_base},
+#                 {"role": "user", "content": user_input}
+#             ],
+#             max_tokens=1000,
+#             temperature=0.7
+#         )
         
-        respuesta = response.choices[0].message.content
-        return jsonify({'respuesta': respuesta})
+#         respuesta = response.choices[0].message.content
+#         return jsonify({'respuesta': respuesta})
         
-    except Exception as e:
-        print(f"Error en chat_contenido: {str(e)}")  # Para debugging
-        return jsonify({'error': f'Error interno: {str(e)}'}), 500
+#     except Exception as e:
+#         print(f"Error en chat_contenido: {str(e)}")  # Para debugging
+#         return jsonify({'error': f'Error interno: {str(e)}'}), 500
 
 
 @plataforma_bp.route('/tablero/qbanks/<codigo_qbank>/nueva_pregunta', methods=['GET', 'POST'])
@@ -521,3 +555,14 @@ def nueva_pregunta_qbank(codigo_qbank):
     qbank = collection_qbanks.find_one({"codigo": codigo_qbank})
 
     return render_template('qbanks_pregunta_nueva.html', codigo_qbank=codigo_qbank, qbank=qbank)
+
+
+def parse_qbank_config(config_str):
+    # Ejemplo: [O5W4YTK2 preguntas=3 aleatorio=no]
+    match = re.match(r'\[(\w+) preguntas=(\d+) aleatorio=(si|no)\]', config_str)
+    if match:
+        codigo = match.group(1)
+        num_preguntas = int(match.group(2))
+        aleatorio = match.group(3) == 'si'
+        return codigo, num_preguntas, aleatorio
+    return None, None, None

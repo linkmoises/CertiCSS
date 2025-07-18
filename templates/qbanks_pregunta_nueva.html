@@ -43,40 +43,39 @@
                         <div class="max-w-sm w-full min-h-[400px] flex flex-col justify-center mx-auto px-6 py-4">
 
 
-    <h2 class="text-2xl font-bold mb-4">Nueva Pregunta para el Banco</h2>
-    <form method="POST" enctype="multipart/form-data" id="formPregunta">
-        <div class="mb-4">
-            <label class="block font-semibold mb-1">Tipo de pregunta</label>
-            <select name="tipo" id="tipoPregunta" class="w-full border rounded p-2" required>
-                <option value="seleccion_simple">Selección simple (una respuesta correcta)</option>
-                <option value="seleccion_multiple">Selección múltiple (varias respuestas correctas)</option>
-                <option value="verdadero_falso">Verdadero / Falso</option>
-            </select>
-        </div>
-        <div class="mb-4">
-            <label class="block font-semibold mb-1">Pregunta (HTML permitido)</label>
-            <textarea name="pregunta_html" id="pregunta_html" class="w-full border rounded p-2" rows="4" required></textarea>
-        </div>
-        <div class="mb-4">
-            <label class="block font-semibold mb-1">Imágenes de la pregunta (opcional)</label>
-            <input type="file" name="imagenes_pregunta" multiple accept="image/*" class="w-full border rounded p-2">
-        </div>
-        <div class="mb-4" id="opcionesContainer">
-            <label class="block font-semibold mb-1">Opciones</label>
-            <!-- Opciones dinámicas aquí -->
-        </div>
-        <input type="hidden" name="num_opciones" id="num_opciones" value="0">
-        <div class="mb-4">
-            <button type="button" id="agregarOpcion" class="bg-blue-500 text-white px-3 py-1 rounded">Agregar opción</button>
-        </div>
-        <div class="mb-4">
-            <label class="block font-semibold mb-1">Justificación (HTML permitido)</label>
-            <textarea name="justificacion_html" class="w-full border rounded p-2" rows="3"></textarea>
-        </div>
-        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Guardar Pregunta</button>
-        <a href="{{ url_for('plataforma.ver_qbank', codigo_qbank=codigo_qbank) }}" class="ml-2 text-blue-600">Cancelar</a>
-    </form>
-
+<h2 class="text-2xl font-bold mb-4">Nueva Pregunta para el Banco</h2>
+<form method="POST" enctype="multipart/form-data" id="formPregunta">
+    <div class="mb-4">
+        <label class="block font-semibold mb-1">Tipo de pregunta</label>
+        <select name="tipo" id="tipoPregunta" class="w-full border rounded p-2" required>
+            <option value="seleccion_simple">Selección simple (una respuesta correcta)</option>
+            <option value="seleccion_multiple">Selección múltiple (varias respuestas correctas)</option>
+            <option value="verdadero_falso">Verdadero / Falso</option>
+        </select>
+    </div>
+    <div class="mb-4">
+        <label class="block font-semibold mb-1">Pregunta (HTML permitido)</label>
+        <textarea name="pregunta_html" id="pregunta_html" class="w-full border rounded p-2" rows="4" required></textarea>
+    </div>
+    <div class="mb-4">
+        <label class="block font-semibold mb-1">Imágenes de la pregunta (opcional)</label>
+        <input type="file" name="imagenes_pregunta" multiple accept="image/*" class="w-full border rounded p-2">
+    </div>
+    <div class="mb-4" id="opcionesContainer">
+        <label class="block font-semibold mb-1">Opciones</label>
+        <!-- Opciones dinámicas aquí -->
+    </div>
+    <input type="hidden" name="num_opciones" id="num_opciones" value="0">
+    <div class="mb-4">
+        <button type="button" id="agregarOpcion" class="bg-blue-500 text-white px-3 py-1 rounded">Agregar opción</button>
+    </div>
+    <div class="mb-4">
+        <label class="block font-semibold mb-1">Justificación (HTML permitido)</label>
+        <textarea name="justificacion_html" class="w-full border rounded p-2" rows="3"></textarea>
+    </div>
+    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Guardar Pregunta</button>
+    <a href="{{ url_for('plataforma.ver_qbank', codigo_qbank=codigo_qbank) }}" class="ml-2 text-blue-600">Cancelar</a>
+</form>
 
 
 

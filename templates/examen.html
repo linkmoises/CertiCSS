@@ -88,54 +88,87 @@
                 <div class="sm:order-2 lg:col-span-9">
 
                     <div class="m-8">
-
-{% if contenido_actual %}
-
-{% if contenido_actual.tipo == 'video' %}
-                        <h2 class="text-xl font-bold text-gray-800 pb-4">{{ contenido_actual.titulo }}</h2>
-                        <div style="display: flex; justify-content: center;">
-                            <iframe style="aspect-ratio: 16 / 9; width: 100% !important;" src="{{ contenido_actual.url_video }}" title="{{ contenido_actual.titulo }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        <div class="max-w-2xl mx-auto py-8">
+                            <h2 class="text-2xl font-bold mb-4">Examen</h2>
+                            {% if puntaje is not none %}
+                                {% set porcentaje = (puntaje[0] / puntaje[1] * 100) if puntaje[1] > 0 else 0 %}
+                                <div class="mb-4 p-4 rounded {{ 'bg-green-100 text-green-800' if porcentaje >= 80 else 'bg-red-100 text-red-800' }}">
+                                    Puntaje: <b>{{ puntaje[0] }}</b> de <b>{{ puntaje[1] }}</b> correctas
+                                    <br>
+                                    Nota: <b>{{ '%.1f' % porcentaje }}%</b>
+                                    {% if porcentaje >= 80 %}
+                                        <span class="ml-2">✔️ Aprobado</span>
+                                    {% else %}
+                                        <span class="ml-2">❌ No aprobado</span>
+                                    {% endif %}
+                                </div>
+                                {% for pregunta in preguntas %}
+                                    <div class="mb-6 border-b pb-4">
+                                        <div class="mb-2 font-semibold">{{ loop.index }}. {{ pregunta.pregunta_html|safe }}</div>
+                                        <div class="space-y-2">
+                                            {% set idx = loop.index0 %}
+                                            {% set seleccion = request.form.getlist('resp_' ~ idx) %}
+                                            {% for opcion in pregunta.opciones %}
+                                                {% set es_correcta = (loop.index0 in pregunta.respuestas_correctas) %}
+                                                {% set fue_seleccionada = (loop.index0|string) in seleccion %}
+                                                <label class="flex items-center gap-2">
+                                                    <input type="{{ 'checkbox' if pregunta.tipo == 'seleccion_multiple' else 'radio' }}" disabled {% if fue_seleccionada %}checked{% endif %}>
+                                                    <span class="px-2 py-1 rounded
+                                                        {% if fue_seleccionada and es_correcta %}bg-green-200 text-green-800
+                                                        {% elif fue_seleccionada and not es_correcta %}bg-red-200 text-red-800
+                                                        {% elif es_correcta %}bg-green-50 text-green-700
+                                                        {% endif %}">
+                                                        {{ opcion.texto }}
+                                                    </span>
+                                                    {% if opcion.imagen %}
+                                                        <img src="{{ url_for('static', filename=opcion.imagen) }}" alt="img" class="h-8 inline">
+                                                    {% endif %}
+                                                </label>
+                                            {% endfor %}
+                                        </div>
+                                        {% if pregunta.justificacion_html %}
+                                            <div class="mt-2 text-xs text-gray-500">Justificación: {{ pregunta.justificacion_html|safe }}</div>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                            <form method="POST">
+                                {% for pregunta in preguntas %}
+                                    {% set idx = loop.index0 %}
+                                    <div class="mb-6 border-b pb-4">
+                                        <div class="mb-2 font-semibold">{{ loop.index }}. {{ pregunta.pregunta_html|safe }}</div>
+                                        <div class="space-y-2">
+                                            {% if pregunta.tipo == 'seleccion_simple' or pregunta.tipo == 'verdadero_falso' %}
+                                                {% for opcion in pregunta.opciones %}
+                                                    <label class="flex items-center gap-2">
+                                                        <input type="radio" name="resp_{{ idx }}" value="{{ loop.index0 }}" required>
+                                                        {{ opcion.texto }}
+                                                        {% if opcion.imagen %}
+                                                            <img src="{{ url_for('static', filename=opcion.imagen) }}" alt="img" class="h-8 inline">
+                                                        {% endif %}
+                                                    </label>
+                                                {% endfor %}
+                                            {% elif pregunta.tipo == 'seleccion_multiple' %}
+                                                {% for opcion in pregunta.opciones %}
+                                                    <label class="flex items-center gap-2">
+                                                        <input type="checkbox" name="resp_{{ idx }}" value="{{ loop.index0 }}">
+                                                        {{ opcion.texto }}
+                                                        {% if opcion.imagen %}
+                                                            <img src="{{ url_for('static', filename=opcion.imagen) }}" alt="img" class="h-8 inline">
+                                                        {% endif %}
+                                                    </label>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                                <input type="hidden" name="preguntas_ids" value="{{ preguntas_ids }}">
+                                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Enviar examen</button>
+                            </form>
+                            {% endif %}
                         </div>
-                        <br />
-                        <p>{{ contenido_actual.descripcion }}</p>
-{% elif contenido_actual.tipo == 'texto' %}
-                        <div class="prose text-gray-600 w-full text-sm !max-w-none">
-{{ contenido_actual.contenido_texto | safe }}
-                        </div>
-{% elif contenido_actual.tipo == 'documento' %}
-<a href="{{ url_for('static', filename=contenido_actual.documento) }}" target="_blank">📄 Descargar Documento</a>
-{% endif %}
-{% else %}
-                        <p>Selecciona un recurso del listado.</p>
-{% endif %}
-
-                        <div class="mt-6 flex justify-between">
-{% if contenido_anterior %}
-                            <a href="{{ url_for('plataforma.ver_contenido', codigo_evento=evento.codigo, orden=contenido_anterior.orden, cedula=cedula, token=token) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
-                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-                                Anterior
-                            </a>
-{% else %}
-                            <button disabled class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
-                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-                                Anterior
-                            </button>
-{% endif %}
-
-{% if contenido_siguiente %}
-                            <a href="{{ url_for('plataforma.ver_contenido', codigo_evento=evento.codigo, orden=contenido_siguiente.orden, cedula=cedula, token=token) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
-                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
-                                Siguiente
-                            </a>
-{% else %}
-                            <button disabled class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
-                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
-                                Siguiente
-                            </button>
-{% endif %}
-                        </div>
-
                     </div>
+
                 </div>
                 <!-- End Col -->
 
@@ -156,3 +189,10 @@
 
 </body>
 </html>
+
+
+
+
+
+
+
