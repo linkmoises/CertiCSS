@@ -425,6 +425,12 @@ def eliminar_qbank(codigo_qbank):
         flash('No tienes permisos para eliminar este banco de preguntas.', 'error')
         return redirect(url_for('plataforma.listar_qbank'))
     
+    # Verificar si hay preguntas asociadas al qbank
+    preguntas_count = collection_qbanks_data.count_documents({"codigo_qbank": codigo_qbank})
+    if preguntas_count > 0:
+        flash(f'No se puede eliminar el banco de preguntas porque tiene {preguntas_count} pregunta(s) asociada(s). Elimine todas las preguntas primero.', 'error')
+        return redirect(url_for('plataforma.listar_qbank'))
+    
     try:
         # Eliminar el qbank
         result = collection_qbanks.delete_one({"codigo": codigo_qbank})
@@ -444,7 +450,7 @@ def eliminar_qbank(codigo_qbank):
 ###
 ### Editar una pregunta de un Banco de Preguntas
 ###
-@plataforma_bp.route('/tablero/qbanks/<codigo_qbank>/pregunta/<pregunta_id>/editar', methods=['GET', 'POST'])
+@plataforma_bp.route('/tablero/qbanks/<codigo_qbank>/editar_pregunta/<pregunta_id>', methods=['GET', 'POST'])
 @login_required
 def editar_pregunta_qbank(codigo_qbank, pregunta_id):
     # Buscar el qbank en la base de datos
@@ -524,7 +530,7 @@ def editar_pregunta_qbank(codigo_qbank, pregunta_id):
 ###
 ### Eliminar una pregunta de un Banco de Preguntas
 ###
-@plataforma_bp.route('/tablero/qbanks/<codigo_qbank>/pregunta/<pregunta_id>/eliminar', methods=['POST'])
+@plataforma_bp.route('/tablero/qbanks/<codigo_qbank>/eliminar_pregunta/<pregunta_id>', methods=['POST'])
 @login_required
 def eliminar_pregunta_qbank(codigo_qbank, pregunta_id):
     # Buscar el qbank en la base de datos
