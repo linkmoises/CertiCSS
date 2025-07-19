@@ -1,0 +1,309 @@
+{% include 'tablero-header.html' %}
+
+{% include 'tablero-sidebar.html' %}
+    
+    <!-- CONTENIDO -->
+    <div class="w-full lg:ps-64">
+        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+
+            <!-- TABLA RESUMEN EVENTOS -->
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <!-- Card -->
+                <div class="flex flex-col">
+                <div class="-m-1.5 overflow-x-auto">
+                    <div class="p-1.5 min-w-full inline-block align-middle">
+                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+
+                        <!-- Header -->
+                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-800">
+                                    Editar pregunta
+                                </h2>
+                                <p class="text-sm text-gray-600">
+                                    {{ qbank.titulo }}
+                                </p>
+                            </div>
+            
+                            <div>
+                                <div class="inline-flex gap-x-2">
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="#">
+                                        Boton
+                                    </a>
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="#">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                        Boton
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Header -->
+
+                        <!-- Body -->
+                        <div class="p-6">
+
+                            <form method="POST" enctype="multipart/form-data" id="formPregunta">
+                                <!-- Grid -->
+                                <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
+                                    
+                                    <div class="sm:col-span-3">
+                                        <label for="tipoPregunta" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                            Tipo de pregunta
+                                        </label>
+                                    </div>
+                                    <!-- End Col -->
+                            
+                                    <div class="sm:col-span-9">
+                                        <select name="tipo" id="tipoPregunta" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" required>
+                                            <option value="seleccion_simple" {% if pregunta.tipo == 'seleccion_simple' %}selected{% endif %}>Selección simple (una respuesta correcta)</option>
+                                            <option value="seleccion_multiple" {% if pregunta.tipo == 'seleccion_multiple' %}selected{% endif %}>Selección múltiple (varias respuestas correctas)</option>
+                                            <option value="verdadero_falso" {% if pregunta.tipo == 'verdadero_falso' %}selected{% endif %}>Verdadero / Falso</option>
+                                        </select>
+                                    </div>
+                                    <!-- End Col -->
+
+                                    <div class="sm:col-span-3">
+                                        <label for="pregunta_html" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                            Pregunta (HTML permitido)
+                                        </label>
+                                    </div>
+                                    <!-- End Col -->
+                            
+                                    <div class="sm:col-span-9">
+                                        <textarea name="pregunta_html" id="pregunta_html" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" rows="4" placeholder="Escriba la pregunta aquí..." required>{{ pregunta.pregunta_html }}</textarea>
+                                    </div>
+                                    <!-- End Col -->
+
+                                    <div class="sm:col-span-3">
+                                        <label for="imagenes_pregunta" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                            Imágenes de la pregunta (opcional)
+                                        </label>
+                                    </div>
+                                    <!-- End Col -->
+                            
+                                    <div class="sm:col-span-9">
+                                        <input type="file" name="imagenes_pregunta" id="imagenes_pregunta" multiple accept="image/*" class="py-2 px-3 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
+                                        {% if pregunta.imagenes %}
+                                        <p class="text-sm text-gray-500 mt-1">Imágenes actuales: {{ pregunta.imagenes|join(', ') }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <!-- End Col -->
+
+                                    <div class="sm:col-span-3">
+                                        <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                            Opciones
+                                        </label>
+                                    </div>
+                                    <!-- End Col -->
+                            
+                                    <div class="sm:col-span-9" id="opcionesContainer">
+                                        <!-- Opciones dinámicas aquí -->
+                                    </div>
+                                    <!-- End Col -->
+
+                                    <div class="sm:col-span-3">
+                                        <!-- Espacio vacío para alineación -->
+                                    </div>
+                                    <!-- End Col -->
+                            
+                                    <div class="sm:col-span-9">
+                                        <button type="button" id="agregarOpcion" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50">
+                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                            Agregar opción
+                                        </button>
+                                    </div>
+                                    <!-- End Col -->
+
+                                    <div class="sm:col-span-3">
+                                        <label for="justificacion_html" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                            Justificación (HTML permitido)
+                                        </label>
+                                    </div>
+                                    <!-- End Col -->
+                            
+                                    <div class="sm:col-span-9">
+                                        <textarea name="justificacion_html" id="justificacion_html" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" rows="3" placeholder="Explicación de la respuesta correcta...">{{ pregunta.justificacion_html or '' }}</textarea>
+                                    </div>
+                                    <!-- End Col -->
+
+                                    <input type="hidden" name="num_opciones" id="num_opciones" value="0">
+
+                                </div>
+                                <!-- End Grid -->
+                        
+                                <div class="mt-5 flex justify-end gap-x-2">
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="{{ url_for('plataforma.ver_qbank', codigo_qbank=codigo_qbank) }}">
+                                        Cancelar
+                                    </a>
+                                    <button type="submit" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                                        Actualizar Pregunta
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        <!-- End Body -->
+
+                        <!-- Footer -->
+                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
+                            <div>
+                            <p class="text-sm text-gray-600 dark:text-neutral-400">
+                                <span class="font-semibold text-gray-800 dark:text-neutral-200">X</span> x
+                            </p>
+                            </div>
+
+                            <div>
+                                <div class="inline-flex gap-x-2">
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="{{ url_for('plataforma.ver_qbank', codigo_qbank=codigo_qbank) }}">
+                                        Botón
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Footer -->
+
+                    </div>
+                    </div>
+                </div>
+                </div>
+                <!-- End Card -->
+            </div>
+            <!-- FIN TABLA RESUMEN EVENTOS -->
+
+{% include 'tablero-footer.html' %}
+
+        </div>
+    </div>
+    <!-- FIN CONTENIDO -->
+
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+<script>
+// Limpia campos dinámicos al cargar la página
+document.addEventListener("DOMContentLoaded", function () {
+const hiddenInputs = document.querySelectorAll("#buscadorForm input[type='hidden']");
+hiddenInputs.forEach((input) => input.remove());
+});
+document.getElementById("buscadorForm").addEventListener("submit", function (event) {
+event.preventDefault(); // Prevenir envío estándar del formulario
+
+const valor = document.getElementById("buscador").value.trim();
+const patterns = {
+cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas
+pasaporte: /^[A-Z]{2}\d{6,9}$/,                        // Pasaportes
+id_certificado: /^[a-zA-Z0-9]{8}$/                    // IDs de certificados
+};
+
+let action, field;
+
+if (patterns.cedula.test(valor)) {
+action = "/buscar_certificados";
+field = "cedula";
+} else if (patterns.pasaporte.test(valor)) {
+action = "/buscar_certificados";
+field = "cedula";
+} else if (patterns.id_certificado.test(valor)) {
+action = "/validar_certificado";
+field = "nanoid";
+} else {
+alert("Formato no válido. Introduzca un documento de identificación o un ID de certificado válido.");
+return;
+}
+
+// Crear y enviar el formulario dinámicamente
+const form = event.target;
+form.action = action;
+form.method = "POST";
+
+// Limpiar campos ocultos previos
+const hiddenInputs = form.querySelectorAll("input[type='hidden']");
+hiddenInputs.forEach((input) => input.remove());
+
+const hiddenInput = document.createElement("input");
+hiddenInput.type = "hidden";
+hiddenInput.name = field;
+hiddenInput.value = valor;
+form.appendChild(hiddenInput);
+form.submit();
+});
+</script>
+<script>
+    let opcionIndex = 0;
+    
+    function crearOpcion(tipo, texto = '', esCorrecta = false) {
+        const div = document.createElement('div');
+        div.className = "flex items-center gap-2 mb-2";
+        div.id = "opcion_" + opcionIndex;
+    
+        let inputRespuesta;
+        if (tipo === "seleccion_simple") {
+            inputRespuesta = `<input type=\"radio\" name=\"respuestas_correctas\" value=\"${opcionIndex}\" ${esCorrecta ? 'checked' : ''} required>`;
+        } else if (tipo === "seleccion_multiple") {
+            inputRespuesta = `<input type=\"checkbox\" name=\"respuestas_correctas\" value=\"${opcionIndex}\" ${esCorrecta ? 'checked' : ''}>`;
+        } else if (tipo === "verdadero_falso") {
+            return;
+        }
+    
+        div.innerHTML = `
+            ${inputRespuesta}
+            <input type="text" name="opcion_texto_${opcionIndex}" placeholder="Texto de la opción" value="${texto}" class="py-2 px-3 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" required>
+            <button type="button" onclick="eliminarOpcion(${opcionIndex})" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-red-200 bg-white text-red-600 shadow-sm hover:bg-red-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-red-50">
+                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                Eliminar
+            </button>
+        `;
+        document.getElementById('opcionesContainer').appendChild(div);
+        opcionIndex++;
+        document.getElementById('num_opciones').value = opcionIndex;
+    }
+    
+    function eliminarOpcion(idx) {
+        const div = document.getElementById('opcion_' + idx);
+        if (div) div.remove();
+    }
+    
+    function renderOpciones() {
+        const tipo = document.getElementById('tipoPregunta').value;
+        const cont = document.getElementById('opcionesContainer');
+        cont.innerHTML = '';
+        opcionIndex = 0;
+        document.getElementById('num_opciones').value = 0;
+    
+        if (tipo === "verdadero_falso") {
+            const respuestasCorrectas = [{{ pregunta.respuestas_correctas|join(',') }}];
+            cont.innerHTML = `
+                <div class="flex items-center gap-2 mb-2">
+                    <input type="radio" name="respuestas_correctas" value="0" ${respuestasCorrectas.includes(0) ? 'checked' : ''} required>
+                    <input type="hidden" name="opcion_texto_0" value="Verdadero">
+                    <span class="text-sm text-gray-800 dark:text-neutral-200">Verdadero</span>
+                </div>
+                <div class="flex items-center gap-2 mb-2">
+                    <input type="radio" name="respuestas_correctas" value="1" ${respuestasCorrectas.includes(1) ? 'checked' : ''} required>
+                    <input type="hidden" name="opcion_texto_1" value="Falso">
+                    <span class="text-sm text-gray-800 dark:text-neutral-200">Falso</span>
+                </div>
+            `;
+            document.getElementById('num_opciones').value = 2;
+        } else {
+            // Cargar opciones existentes
+            {% if pregunta.opciones %}
+                {% for opcion in pregunta.opciones %}
+                    {% set es_correcta = loop.index0 in pregunta.respuestas_correctas %}
+                    crearOpcion('{{ pregunta.tipo }}', '{{ opcion.texto }}', {{ 'true' if es_correcta else 'false' }});
+                {% endfor %}
+            {% else %}
+                crearOpcion(tipo);
+                crearOpcion(tipo);
+            {% endif %}
+        }
+    }
+    
+    document.getElementById('tipoPregunta').addEventListener('change', renderOpciones);
+    document.getElementById('agregarOpcion').addEventListener('click', function() {
+        const tipo = document.getElementById('tipoPregunta').value;
+        if (tipo !== "verdadero_falso") crearOpcion(tipo);
+    });
+    
+    window.onload = renderOpciones;
+</script>
+</body>
+</html>

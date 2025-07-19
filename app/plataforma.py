@@ -441,6 +441,134 @@ def eliminar_qbank(codigo_qbank):
     return redirect(url_for('plataforma.listar_qbank'))
 
 
+###
+### Editar una pregunta de un Banco de Preguntas
+###
+@plataforma_bp.route('/tablero/qbanks/<codigo_qbank>/pregunta/<pregunta_id>/editar', methods=['GET', 'POST'])
+@login_required
+def editar_pregunta_qbank(codigo_qbank, pregunta_id):
+    # Buscar el qbank en la base de datos
+    qbank = collection_qbanks.find_one({"codigo": codigo_qbank})
+    
+    if not qbank:
+        flash('Banco de preguntas no encontrado.', 'error')
+        return redirect(url_for('plataforma.listar_qbank'))
+    
+    # Verificar que el usuario sea el autor del qbank o administrador
+    if qbank.get('autor') != current_user.id and current_user.rol != 'administrador':
+        flash('No tienes permisos para editar preguntas de este banco de preguntas.', 'error')
+        return redirect(url_for('plataforma.ver_qbank', codigo_qbank=codigo_qbank))
+    
+    # Buscar la pregunta
+    pregunta = collection_qbanks_data.find_one({"_id": ObjectId(pregunta_id), "codigo_qbank": codigo_qbank})
+    
+    if not pregunta:
+        flash('Pregunta no encontrada.', 'error')
+        return redirect(url_for('plataforma.ver_qbank', codigo_qbank=codigo_qbank))
+    
+    if request.method == 'POST':
+        tipo = request.form['tipo']
+        pregunta_html = request.form['pregunta_html']
+        justificacion_html = request.form['justificacion_html']
+        respuestas_correctas = request.form.getlist('respuestas_correctas')
+        imagenes_pregunta = request.files.getlist('imagenes_pregunta')
+        
+        # Procesar opciones
+        opciones = []
+        for i in range(int(request.form['num_opciones'])):
+            texto = request.form.get(f'opcion_texto_{i}', '')
+            opciones.append({'texto': texto})
+        
+        # Guardar imágenes de la pregunta (solo si se suben nuevas)
+        imagenes = pregunta.get('imagenes', [])  # Mantener imágenes existentes
+        for file in imagenes_pregunta:
+            if file and file.filename:
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                imagenes.append(filename)
+        
+        # Actualizar en MongoDB
+        actualizacion = {
+            "tipo": tipo,
+            "pregunta_html": pregunta_html,
+            "opciones": opciones,
+            "respuestas_correctas": [int(idx) for idx in respuestas_correctas],
+            "justificacion_html": justificacion_html,
+            "imagenes": imagenes
+        }
+        
+        try:
+            result = collection_qbanks_data.update_one(
+                {"_id": ObjectId(pregunta_id)}, 
+                {"$set": actualizacion}
+            )
+            
+            if result.modified_count > 0:
+                flash('Pregunta actualizada exitosamente.', 'success')
+            else:
+                flash('No se realizaron cambios en la pregunta.', 'info')
+                
+        except Exception as e:
+            flash(f'Error al actualizar la pregunta: {str(e)}', 'error')
+            print(f"Error en editar_pregunta_qbank: {str(e)}")  # Para debugging
+        
+        return redirect(url_for('plataforma.ver_qbank', codigo_qbank=codigo_qbank))
+    
+    # Para GET, mostrar el formulario con los datos existentes
+    return render_template('qbanks_pregunta_editar.html', 
+                         codigo_qbank=codigo_qbank, 
+                         qbank=qbank, 
+                         pregunta=pregunta)
+
+
+###
+### Eliminar una pregunta de un Banco de Preguntas
+###
+@plataforma_bp.route('/tablero/qbanks/<codigo_qbank>/pregunta/<pregunta_id>/eliminar', methods=['POST'])
+@login_required
+def eliminar_pregunta_qbank(codigo_qbank, pregunta_id):
+    # Buscar el qbank en la base de datos
+    qbank = collection_qbanks.find_one({"codigo": codigo_qbank})
+    
+    if not qbank:
+        flash('Banco de preguntas no encontrado.', 'error')
+        return redirect(url_for('plataforma.listar_qbank'))
+    
+    # Verificar que el usuario sea el autor del qbank o administrador
+    if qbank.get('autor') != current_user.id and current_user.rol != 'administrador':
+        flash('No tienes permisos para eliminar preguntas de este banco de preguntas.', 'error')
+        return redirect(url_for('plataforma.ver_qbank', codigo_qbank=codigo_qbank))
+    
+    try:
+        # Buscar la pregunta
+        pregunta = collection_qbanks_data.find_one({"_id": ObjectId(pregunta_id), "codigo_qbank": codigo_qbank})
+        
+        if not pregunta:
+            flash('Pregunta no encontrada.', 'error')
+            return redirect(url_for('plataforma.ver_qbank', codigo_qbank=codigo_qbank))
+        
+        # Eliminar la pregunta
+        result = collection_qbanks_data.delete_one({"_id": ObjectId(pregunta_id)})
+        
+        if result.deleted_count > 0:
+            # Actualizar el contador de preguntas en el qbank
+            total_preguntas = collection_qbanks_data.count_documents({"codigo_qbank": codigo_qbank})
+            collection_qbanks.update_one(
+                {"codigo": codigo_qbank}, 
+                {"$set": {"total_preguntas": total_preguntas}}
+            )
+            
+            flash('Pregunta eliminada exitosamente.', 'success')
+        else:
+            flash('Error al eliminar la pregunta.', 'error')
+            
+    except Exception as e:
+        flash(f'Error al eliminar la pregunta: {str(e)}', 'error')
+        print(f"Error en eliminar_pregunta_qbank: {str(e)}")  # Para debugging
+    
+    return redirect(url_for('plataforma.ver_qbank', codigo_qbank=codigo_qbank))
+
+
 # from flask import jsonify, request
 # from openai import OpenAI
 # import os

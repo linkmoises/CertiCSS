@@ -102,12 +102,14 @@
                                     </td>
                                     <td class="size-px whitespace-nowrap">
                                         <div class="px-6 py-2">
-                                            <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="#">
+                                            <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('plataforma.editar_pregunta_qbank', codigo_qbank=qbank.codigo, pregunta_id=pregunta._id) }}">
                                                 Editar
                                             </a><br />
-                                            <a class="inline-flex items-center gap-x-1 text-sm text-red-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="#">
-                                                Eliminar
-                                            </a>
+                                            <form action="{{ url_for('plataforma.eliminar_pregunta_qbank', codigo_qbank=qbank.codigo, pregunta_id=pregunta._id) }}" method="post" style="display:inline;">
+                                                <button class="text-sm text-red-600 decoration-2 hover:underline" type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar esta pregunta?');">
+                                                    Eliminar
+                                                </button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>
