@@ -66,19 +66,49 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pregunta</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
+                                        Tipo
+                                    </a>
+                                </th>
+                
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
+                                        Pregunta
+                                    </a>
+                                </th>
+                
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
+                                        Acciones
+                                    </a>
+                                </th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
+                            <tbody class="divide-y divide-gray-200">
                                 {% for pregunta in preguntas %}
-                                <tr>
-                                    <td class="px-4 py-2 text-sm text-gray-700">{{ pregunta.tipo }}</td>
-                                    <td class="px-4 py-2 text-sm text-gray-700">{{ pregunta.pregunta_html|safe }}</td>
-                                    <td class="px-4 py-2 text-sm text-gray-700">
-                                        <a href="#" class="text-blue-600 hover:underline mr-2">Editar</a>
-                                        <a href="#" class="text-red-600 hover:underline">Eliminar</a>
+                                <tr class="bg-white hover:bg-gray-50">
+                                    <td class="size-px whitespace-nowrap">
+                                        <div class="px-6 py-2">
+                                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                                {{ pregunta.tipo }}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td class="h-px w-72 min-w-72">
+                                        <div class="px-6 py-2">
+                                            <p class="text-sm text-gray-500 mb-2">{{ pregunta.pregunta_html|safe|truncate(100) }}</p>
+                                        </div>
+                                    </td>
+                                    <td class="size-px whitespace-nowrap">
+                                        <div class="px-6 py-2">
+                                            <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="#">
+                                                Editar
+                                            </a><br />
+                                            <a class="inline-flex items-center gap-x-1 text-sm text-red-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="#">
+                                                Eliminar
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -90,7 +120,7 @@
                         <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
                             <div>
                             <p class="text-sm text-gray-600 dark:text-neutral-400">
-                                <span class="font-semibold text-gray-800 dark:text-neutral-200">0</span> preguntas
+                                <span class="font-semibold text-gray-800 dark:text-neutral-200">{{ preguntas|length }}</span> {{ 'pregunta' if preguntas|length == 1 else 'preguntas' }}
                             </p>
                             </div>
 
