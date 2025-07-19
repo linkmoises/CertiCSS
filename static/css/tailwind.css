@@ -1990,6 +1990,10 @@ select {
   min-width: 100%;
 }
 
+.min-w-24 {
+  min-width: 6rem;
+}
+
 .\!max-w-none {
   max-width: none !important;
 }

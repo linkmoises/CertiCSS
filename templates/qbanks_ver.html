@@ -88,16 +88,16 @@
                             <tbody class="divide-y divide-gray-200">
                                 {% for pregunta in preguntas %}
                                 <tr class="bg-white hover:bg-gray-50">
-                                    <td class="size-px whitespace-nowrap">
+                                    <td class="w-32 whitespace-nowrap">
                                         <div class="px-6 py-2">
                                             <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
                                                 {{ pregunta.tipo }}
                                             </span>
                                         </div>
                                     </td>
-                                    <td class="h-px w-72 min-w-72">
+                                    <td class="h-px w-80 min-w-80">
                                         <div class="px-6 py-2">
-                                            <p class="text-sm text-gray-500 mb-2">{{ pregunta.pregunta_html|safe|truncate(100) }}</p>
+                                            <p class="text-sm text-gray-500 mb-2">{{ pregunta.pregunta_html|safe|truncate(150) }}</p>
                                         </div>
                                     </td>
                                     <td class="size-px whitespace-nowrap">
