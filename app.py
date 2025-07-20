@@ -3867,6 +3867,10 @@ app.register_blueprint(regiones_bp)
 from app.catalogo import catalogo_bp
 app.register_blueprint(catalogo_bp)
 
+### Acerca de
+from app.creditos import creditos_bp
+app.register_blueprint(creditos_bp)
+
 ### Importaciones para gráficas
 import matplotlib
 matplotlib.use('Agg')  # Configurar matplotlib para usar backend no interactivo

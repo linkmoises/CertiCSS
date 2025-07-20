@@ -1,0 +1,118 @@
+{% include 'tablero-header.html' %}
+
+{% include 'tablero-sidebar.html' %}
+    
+    <!-- CONTENIDO -->
+    <div class="w-full lg:ps-64">
+        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+
+            <!-- TABLA RESUMEN EVENTOS -->
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <!-- Card -->
+                <div class="flex flex-col">
+                <div class="-m-1.5 overflow-x-auto">
+                    <div class="p-1.5 min-w-full inline-block align-middle">
+                    
+
+                        <div id="informe-descripcion" class="grid">
+                            <div class="flex flex-col p-4 bg-white border shadow-sm rounded-xl">
+                                <div class="overflow-x-auto p-4">
+                                    <h4 class="text-xl font-semibold text-gray-800 border-b pb-2 mb-2">Créditos</h4>
+                                    <p class="text-sm py-1">
+                                        Esta plataforma fue desarrollada a medida para el <strong>Departamento Nacional de Docencia e Investigación</strong> de la Caja de Seguro Social de Panamá, con el objetivo de optimizar la gestión de eventos académicos y científicos en el ámbito de la salud.
+                                    </p>
+                                
+                                    <p class="text-sm py-1">
+                                        <strong>Desarrollador principal:</strong><br />
+                                        Dr. Moisés Serrano Samudio<br />
+                                        Médico con formación en informática en salud<br />
+                                        Miembro de la American Medical Informatics Association (AMIA)
+                                    </p>
+                                
+                                    <p class="text-sm py-1">
+                                        <strong>Colaboración:</strong><br />
+                                        Dra. Michele Ocampo Aparicio<br />
+                                        Coordinadora Nacional de Atención Primaria en Salud, DENADOI.<br />
+                                        Colaboradora en diseño funcional y mejora de reportes de métricas.<br />
+                                        Aportes clave en la definición de procesos, visualización de informes y experiencia de usuario.
+                                    </p>
+                                
+                                    <p class="text-sm py-1">
+                                        <strong>Asistencia tecnológica:</strong><br />
+                                        Algunas secciones del código fueron desarrolladas con el apoyo de herramientas de inteligencia artificial, como <strong>Anthropic Claude Code</strong> y el entorno de desarrollo asistido <strong>Cursor</strong>, lo que permitió optimizar tiempos de codificación y depuración. Todas las decisiones de diseño y revisión final fueron realizadas por el autor.
+                                    </p>
+                                
+                                    <p class="text-sm py-1">
+                                        Esta aplicación ha sido liberada como <strong>software libre</strong> bajo licencia AGPL v3, promoviendo su uso, adaptación y mejora por parte de la comunidad.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                    
+                    </div>
+                </div>
+                </div>
+                <!-- End Card -->
+            </div>
+            <!-- FIN TABLA RESUMEN EVENTOS -->
+
+{% include 'tablero-footer.html' %}
+
+        </div>
+    </div>
+    <!-- FIN CONTENIDO -->
+
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+<script>
+    // Limpia campos dinámicos al cargar la página
+    document.addEventListener("DOMContentLoaded", function () {
+        const hiddenInputs = document.querySelectorAll("#buscadorForm input[type='hidden']");
+        hiddenInputs.forEach((input) => input.remove());
+    });
+    document.getElementById("buscadorForm").addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevenir envío estándar del formulario
+    
+        const valor = document.getElementById("buscador").value.trim();
+        const patterns = {
+            cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas
+            pasaporte: /^[A-Z]{2}\d{6,9}$/,                        // Pasaportes
+            id_certificado: /^[a-zA-Z0-9]{8}$/                    // IDs de certificados
+        };
+    
+        let action, field;
+    
+        if (patterns.cedula.test(valor)) {
+            action = "/buscar_certificados";
+            field = "cedula";
+        } else if (patterns.pasaporte.test(valor)) {
+            action = "/buscar_certificados";
+            field = "cedula";
+        } else if (patterns.id_certificado.test(valor)) {
+            action = "/validar_certificado";
+            field = "nanoid";
+        } else {
+            alert("Formato no válido. Introduzca un documento de identificación o un ID de certificado válido.");
+            return;
+        }
+    
+        // Crear y enviar el formulario dinámicamente
+        const form = event.target;
+        form.action = action;
+        form.method = "POST";
+    
+        // Limpiar campos ocultos previos
+        const hiddenInputs = form.querySelectorAll("input[type='hidden']");
+        hiddenInputs.forEach((input) => input.remove());
+    
+        const hiddenInput = document.createElement("input");
+        hiddenInput.type = "hidden";
+        hiddenInput.name = field;
+        hiddenInput.value = valor;
+        form.appendChild(hiddenInput);
+        form.submit();
+    });
+</script>    
+</body>
+</html>
