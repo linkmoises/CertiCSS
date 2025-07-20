@@ -2304,7 +2304,7 @@ import os
 
 ### Extensiones permitidas para archivos del repositorio
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'pdf', 'ppt', 'pptx', 'doc', 'docx'}
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'pdf', 'ppt', 'pptx', 'doc', 'docx'}
 
 
 import os

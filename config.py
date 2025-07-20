@@ -17,7 +17,7 @@ class Config:
     PORT = int(os.getenv('FLASK_PORT', 5000))                       # Puerto por defecto
     UMAMI_URL = os.getenv('UMAMI_URL', '')                          # URL seguimiento UMAMI
     PERMANENT_SESSION_LIFETIME = timedelta(minutes=30)              # duración de sesión a 30 minutos
-    ALLOWED_EXTENSIONS = ('png', 'jpg', 'jpeg', 'gif')
+    ALLOWED_EXTENSIONS = ('png', 'jpg', 'jpeg', 'pdf', 'ppt', 'pptx', 'doc', 'docx')
 
 
 class DevelopmentConfig(Config):
