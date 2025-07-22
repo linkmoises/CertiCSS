@@ -3189,9 +3189,6 @@ def generar_grafica_spider(respuestas, evento_nombre):
         return None # No hay datos válidos después de la limpieza
 
     # Calcular los promedios para los ejes del gráfico de araña
-    # Asegúrate de que las columnas existan y no estén vacías antes de calcular el promedio
-    # Si una columna no existe o está vacía, su promedio será NaN, lo que se manejará
-    # al calcular la media de las series.
 
     # pertinencia y aplicabilidad -> B1
     pert_aplic = df['B1'].mean()
@@ -3210,11 +3207,11 @@ def generar_grafica_spider(respuestas, evento_nombre):
 
     # Nombres de las categorías (ejes)
     categories = [
-        'Pertinencia y Aplicabilidad',
-        'Claridad y Coherencia',
-        'Actualización Científica',
-        'Calidad de Ponencias',
-        'Organización y Logística'
+        f'Pertinencia y Aplicabilidad\n({pert_aplic:.1f})',
+        f'Claridad y Coherencia\n({clar_coh:.1f})',
+        f'Actualización Científica\n({actualiz:.1f})',
+        f'Calidad de Ponencias\n({cal_pon:.1f})',
+        f'Organización y Logística\n({organiz:.1f})'
     ]
 
     # Valores de los promedios
@@ -3222,9 +3219,7 @@ def generar_grafica_spider(respuestas, evento_nombre):
     
     # Filtrar valores NaN que puedan resultar de promedios de columnas vacías
     # Si algún valor es NaN, el gráfico no se generará correctamente.
-    # Podrías optar por imputar o simplemente no mostrar el eje si es NaN.
-    # Para este ejemplo, si hay un NaN, lo convertiremos a 0 o manejaremos el error.
-    # Una mejor práctica sería asegurar que `df.dropna` ya haya limpiado esto.
+    # Si hay un NaN, se convierte a 0 o manejaremos el error.
     values = [0 if pd.isna(v) else v for v in values] # Reemplazar NaN con 0 para evitar errores de plot
 
     # Número de variables
@@ -3249,7 +3244,7 @@ def generar_grafica_spider(respuestas, evento_nombre):
 
     # Etiquetas de los ejes
     ax.set_xticks(angles[:-1])
-    ax.set_xticklabels(categories, fontsize=10, fontweight='bold')
+    ax.set_xticklabels(categories, fontsize=10, fontweight='bold', wrap=True)
 
     # Rango del eje radial (escala Likert de 1 a 5)
     ax.set_ylim(1, 5)
