@@ -964,11 +964,18 @@ def preregistro(codigo_evento):
     # Actualizar la lista de cédulas guardadas después de posibles cambios
     cedulas_guardadas = [registro["cedula"] for registro in collection_preregistro.find({"codigo_evento": codigo_evento}, {"cedula": 1, "_id": 0})]
 
+    cupos = evento.get('cupos') if evento else None
+    total_registrados = collection_participantes.count_documents({"codigo_evento": codigo_evento, "rol": "participante"})
+    total_preregistrados = len(cedulas_guardadas)
+
     return render_template('preregistro.html',
                            codigo_evento=codigo_evento,
                            nombre_evento=nombre_evento,
                            fecha_inicio=fecha_inicio,
-                           cedulas_guardadas=cedulas_guardadas)
+                           cedulas_guardadas=cedulas_guardadas,
+                           total_preregistrados=total_preregistrados,
+                           cupos=cupos,
+                           total_registrados=total_registrados)
 
 
 ###
