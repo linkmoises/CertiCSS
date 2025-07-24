@@ -1,0 +1,413 @@
+{% include 'tablero-header.html' %}
+
+{% include 'tablero-sidebar.html' %}
+
+    <!-- Content -->
+    <div class="w-full lg:ps-64">
+        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+        
+            <!-- Page Header -->
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <div class="mb-6">
+                    <h1 class="text-2xl font-bold text-gray-800 sm:text-3xl">Métricas LMS - {{ evento.titulo }}</h1>
+                    <p class="text-gray-600">Dashboard detallado de métricas para el evento {{ evento.codigo }}</p>
+                </div>
+                
+                <!-- Navigation Links -->
+                <div class="mb-6">
+                    <nav class="flex space-x-4">
+                        <a href="{{ url_for('tablero_metricas_lms') }}" class="text-blue-600 hover:text-blue-800 font-medium">← Métricas LMS</a>
+                        <a href="{{ url_for('ver_evento', codigo_evento=evento.codigo) }}" class="text-blue-600 hover:text-blue-800 font-medium">Ver Evento</a>
+                    </nav>
+                </div>
+            </div>
+        
+            <!-- TARJETAS RESUMEN PRINCIPALES -->
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <!-- Grid -->
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                    <!-- Card -->
+                    <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
+                                Total Participantes
+                            </p>
+                        </div>
+                
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                {{ total_participantes }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+            
+                <!-- Card -->
+                <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                    <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
+                                Total Exámenes
+                            </p>
+                        </div>
+            
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                {{ total_examenes }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+            
+                <!-- Card -->
+                <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                    <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
+                                Resultados Totales
+                            </p>
+                        </div>
+            
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                {{ total_resultados }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+            
+                <!-- Card -->
+                <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                    <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
+                                Participantes con Exámenes
+                            </p>
+                        </div>
+            
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                {{ participantes_con_examenes }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+            </div>
+            <!-- End Grid -->
+        </div>
+
+        <!-- MÉTRICAS DE CALIFICACIONES -->
+        <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <!-- Card -->
+                <div class="flex flex-col bg-blue-50 border border-blue-200 shadow-sm rounded-xl">
+                    <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-blue-600">
+                                Promedio General
+                            </p>
+                        </div>
+            
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-blue-800">
+                                {{ promedio_calificacion }}%
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+                
+                <!-- Card -->
+                <div class="flex flex-col bg-green-50 border border-green-200 shadow-sm rounded-xl">
+                    <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-green-600">
+                                Calificación Máxima
+                            </p>
+                        </div>
+            
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-green-800">
+                                {{ calificacion_maxima }}%
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+                
+                <!-- Card -->
+                <div class="flex flex-col bg-red-50 border border-red-200 shadow-sm rounded-xl">
+                    <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-red-600">
+                                Calificación Mínima
+                            </p>
+                        </div>
+            
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-red-800">
+                                {{ calificacion_minima }}%
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+                
+                <!-- Card -->
+                <div class="flex flex-col bg-purple-50 border border-purple-200 shadow-sm rounded-xl">
+                    <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-purple-600">
+                                Promedio de Intentos
+                            </p>
+                        </div>
+            
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-purple-800">
+                                {{ promedio_intentos }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+            </div>
+        </div>
+
+        <!-- DISTRIBUCIÓN DE CALIFICACIONES -->
+        {% if distribucion_calificaciones %}
+        <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-800">
+                        Distribución de Calificaciones
+                    </h2>
+                    <p class="text-sm text-gray-600">
+                        Rangos de calificaciones obtenidas por los participantes
+                    </p>
+                </div>
+                
+                <div class="p-6">
+                    <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                        {% for rango in distribucion_calificaciones %}
+                        <div class="text-center p-4 bg-gray-50 rounded-lg">
+                            <div class="text-2xl font-bold text-gray-800">{{ rango.count }}</div>
+                            <div class="text-sm text-gray-600">
+                                {% if rango._id == 0 %}0-59%
+                                {% elif rango._id == 60 %}60-69%
+                                {% elif rango._id == 70 %}70-79%
+                                {% elif rango._id == 80 %}80-89%
+                                {% elif rango._id == 90 %}90-100%
+                                {% else %}{{ rango._id }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- TABLA DE EXÁMENES -->
+        {% if examenes %}
+        <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+            <div class="flex flex-col">
+                <div class="-m-1.5 overflow-x-auto">
+                    <div class="p-1.5 min-w-full inline-block align-middle">
+                        <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                            <!-- Header -->
+                            <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
+                                <div>
+                                    <h2 class="text-xl font-semibold text-gray-800">
+                                        Exámenes del Evento
+                                    </h2>
+                                    <p class="text-sm text-gray-600">
+                                        Detalles de cada examen y sus métricas
+                                    </p>
+                                </div>
+                            </div>
+                            <!-- End Header -->
+
+                            <!-- Table -->
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="ps-6 py-3 text-start">
+                                            <div class="flex items-center gap-x-2">
+                                                <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
+                                                    Examen
+                                                </span>
+                                            </div>
+                                        </th>
+
+                                        <th scope="col" class="px-6 py-3 text-start">
+                                            <div class="flex items-center gap-x-2">
+                                                <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
+                                                    Orden
+                                                </span>
+                                            </div>
+                                        </th>
+
+                                        <th scope="col" class="px-6 py-3 text-start">
+                                            <div class="flex items-center gap-x-2">
+                                                <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
+                                                    Resultados
+                                                </span>
+                                            </div>
+                                        </th>
+
+                                        <th scope="col" class="px-6 py-3 text-start">
+                                            <div class="flex items-center gap-x-2">
+                                                <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
+                                                    Promedio
+                                                </span>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                </thead>
+
+                                <tbody class="divide-y divide-gray-200">
+                                    {% for examen in examenes %}
+                                    <tr>
+                                        <td class="size-px whitespace-nowrap">
+                                            <div class="ps-6 py-3">
+                                                <div class="flex items-center gap-x-3">
+                                                    <div class="grow">
+                                                        <span class="block text-sm font-semibold text-gray-800">{{ examen.titulo }}</span>
+                                                        <span class="block text-sm text-gray-500">{{ examen.descripcion[:50] }}{% if examen.descripcion|length > 50 %}...{% endif %}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        
+                                        <td class="size-px whitespace-nowrap">
+                                            <div class="px-6 py-3">
+                                                <span class="text-sm text-gray-800">{{ examen.orden }}</span>
+                                            </div>
+                                        </td>
+                                        
+                                        <td class="size-px whitespace-nowrap">
+                                            <div class="px-6 py-3">
+                                                <span class="text-sm text-gray-800">{{ examen.total_resultados }}</span>
+                                            </div>
+                                        </td>
+                                        
+                                        <td class="size-px whitespace-nowrap">
+                                            <div class="px-6 py-3">
+                                                <span class="text-sm text-gray-800">{{ examen.promedio_calificacion }}%</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            <!-- End Table -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End Card -->
+        </div>
+        {% endif %}
+
+        <!-- TABLA DE PARTICIPANTES -->
+        {% if datos_participantes %}
+        <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+            <div class="flex flex-col">
+                <div class="-m-1.5 overflow-x-auto">
+                    <div class="p-1.5 min-w-full inline-block align-middle">
+                        <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                            <!-- Header -->
+                            <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
+                                <div>
+                                    <h2 class="text-xl font-semibold text-gray-800">
+                                        Resumen por Participante
+                                    </h2>
+                                    <p class="text-sm text-gray-600">
+                                        Intentos y mejor calificación de cada participante
+                                    </p>
+                                </div>
+                            </div>
+                            <!-- End Header -->
+
+                            <!-- Table -->
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="ps-6 py-3 text-start">
+                                            <div class="flex items-center gap-x-2">
+                                                <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
+                                                    Cédula
+                                                </span>
+                                            </div>
+                                        </th>
+
+                                        <th scope="col" class="px-6 py-3 text-start">
+                                            <div class="flex items-center gap-x-2">
+                                                <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
+                                                    Total Intentos
+                                                </span>
+                                            </div>
+                                        </th>
+
+                                        <th scope="col" class="px-6 py-3 text-start">
+                                            <div class="flex items-center gap-x-2">
+                                                <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
+                                                    Mejor Calificación
+                                                </span>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                </thead>
+
+                                <tbody class="divide-y divide-gray-200">
+                                    {% for participante in datos_participantes %}
+                                    <tr>
+                                        <td class="size-px whitespace-nowrap">
+                                            <div class="ps-6 py-3">
+                                                <span class="text-sm font-semibold text-gray-800">{{ participante._id }}</span>
+                                            </div>
+                                        </td>
+                                        
+                                        <td class="size-px whitespace-nowrap">
+                                            <div class="px-6 py-3">
+                                                <span class="text-sm text-gray-800">{{ participante.total_intentos }}</span>
+                                            </div>
+                                        </td>
+                                        
+                                        <td class="size-px whitespace-nowrap">
+                                            <div class="px-6 py-3">
+                                                <span class="text-sm text-gray-800 
+                                                    {% if participante.mejor_calificacion >= 90 %}text-green-600
+                                                    {% elif participante.mejor_calificacion >= 80 %}text-blue-600
+                                                    {% elif participante.mejor_calificacion >= 70 %}text-yellow-600
+                                                    {% elif participante.mejor_calificacion >= 60 %}text-orange-600
+                                                    {% else %}text-red-600
+                                                    {% endif %}">
+                                                    {{ participante.mejor_calificacion }}%
+                                                </span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            <!-- End Table -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End Card -->
+        </div>
+        {% endif %}
+
+        </div>
+    </div>
+    <!-- End Content -->
+
+{% include 'tablero-footer.html' %}

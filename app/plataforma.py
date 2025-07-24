@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, request, redirect, url_for, abort, flash
-from app import db, collection_eventos, collection_eva, collection_qbanks, collection_qbanks_data
+from flask import Blueprint, render_template, request, redirect, url_for, abort, flash, jsonify
+from app import db, collection_eventos, collection_eva, collection_qbanks, collection_qbanks_data, collection_exam_results, collection_participantes
 from flask_login import login_required, current_user
 from app.auth import token_required
 from datetime import datetime
@@ -700,3 +700,157 @@ def parse_qbank_config(config_str):
         aleatorio = match.group(3) == 'si'
         return codigo, num_preguntas, aleatorio
     return None, None, None
+
+
+###
+### Endpoint para enviar resultados de exámenes
+###
+@plataforma_bp.route('/api/examen/enviar', methods=['POST'])
+@token_required
+def enviar_resultado_examen():
+    """
+    Endpoint para almacenar los resultados de un examen.
+    Espera los siguientes datos en JSON:
+    - codigo_evento: código del evento
+    - orden_examen: orden del examen en el evento
+    - respuestas: lista de respuestas del usuario
+    - calificacion: calificación obtenida (0-100)
+    - cedula_participante: cédula del participante
+    """
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({'error': 'No se recibieron datos'}), 400
+        
+        codigo_evento = data.get('codigo_evento')
+        orden_examen = data.get('orden_examen')
+        respuestas = data.get('respuestas', [])
+        calificacion = data.get('calificacion', 0)
+        cedula_participante = data.get('cedula_participante')
+        
+        # Validar datos requeridos
+        if not all([codigo_evento, orden_examen is not None, cedula_participante]):
+            return jsonify({'error': 'Faltan datos requeridos'}), 400
+        
+        # Verificar que el evento existe y es Virtual asincrónica
+        evento = collection_eventos.find_one({
+            'codigo': codigo_evento,
+            'modalidad': 'Virtual asincrónica'
+        })
+        
+        if not evento:
+            return jsonify({'error': 'Evento no encontrado o no es Virtual asincrónica'}), 404
+        
+        # Verificar que el examen existe
+        examen = collection_eva.find_one({
+            'codigo_evento': codigo_evento,
+            'orden': orden_examen,
+            'tipo': 'examen'
+        })
+        
+        if not examen:
+            return jsonify({'error': 'Examen no encontrado'}), 404
+        
+        # Verificar que el participante está registrado en el evento
+        participante = collection_participantes.find_one({
+            'codigo_evento': codigo_evento,
+            'cedula': cedula_participante,
+            'rol': 'participante'
+        })
+        
+        if not participante:
+            return jsonify({'error': 'Participante no registrado en el evento'}), 403
+        
+        # Obtener el número de intento (contar intentos previos + 1)
+        intentos_previos = collection_exam_results.count_documents({
+            'codigo_evento': codigo_evento,
+            'orden_examen': orden_examen,
+            'cedula_participante': cedula_participante
+        })
+        
+        numero_intento = intentos_previos + 1
+        
+        # Crear el documento de resultado
+        resultado_examen = {
+            'codigo_evento': codigo_evento,
+            'orden_examen': orden_examen,
+            'cedula_participante': cedula_participante,
+            'numero_intento': numero_intento,
+            'calificacion': float(calificacion),
+            'respuestas': respuestas,
+            'fecha_envio': datetime.now(),
+            'titulo_examen': examen.get('titulo', 'Sin título'),
+            'titulo_evento': evento.get('titulo', 'Sin título')
+        }
+        
+        # Insertar el resultado en la base de datos
+        result = collection_exam_results.insert_one(resultado_examen)
+        
+        if result.inserted_id:
+            return jsonify({
+                'success': True,
+                'message': 'Resultado guardado correctamente',
+                'numero_intento': numero_intento,
+                'calificacion': calificacion
+            }), 200
+        else:
+            return jsonify({'error': 'Error al guardar el resultado'}), 500
+            
+    except Exception as e:
+        return jsonify({'error': f'Error interno: {str(e)}'}), 500
+
+
+###
+### Endpoint para obtener historial de intentos de un participante
+###
+@plataforma_bp.route('/api/examen/historial/<codigo_evento>/<int:orden_examen>/<cedula_participante>')
+@token_required
+def obtener_historial_examen(codigo_evento, orden_examen, cedula_participante):
+    """
+    Obtiene el historial de intentos de un participante en un examen específico.
+    """
+    try:
+        # Verificar que el evento existe
+        evento = collection_eventos.find_one({'codigo': codigo_evento})
+        if not evento:
+            return jsonify({'error': 'Evento no encontrado'}), 404
+        
+        # Obtener todos los intentos del participante para este examen
+        intentos = list(collection_exam_results.find({
+            'codigo_evento': codigo_evento,
+            'orden_examen': orden_examen,
+            'cedula_participante': cedula_participante
+        }).sort('numero_intento', 1))
+        
+        # Formatear los datos para la respuesta
+        historial = []
+        for intento in intentos:
+            historial.append({
+                'numero_intento': intento['numero_intento'],
+                'calificacion': intento['calificacion'],
+                'fecha_envio': intento['fecha_envio'].isoformat() if intento.get('fecha_envio') else None,
+                'respuestas': intento.get('respuestas', [])
+            })
+        
+        # Calcular estadísticas
+        if historial:
+            mejor_calificacion = max(h['calificacion'] for h in historial)
+            promedio_calificacion = sum(h['calificacion'] for h in historial) / len(historial)
+            total_intentos = len(historial)
+        else:
+            mejor_calificacion = 0
+            promedio_calificacion = 0
+            total_intentos = 0
+        
+        return jsonify({
+            'historial': historial,
+            'estadisticas': {
+                'total_intentos': total_intentos,
+                'mejor_calificacion': mejor_calificacion,
+                'promedio_calificacion': round(promedio_calificacion, 2)
+            }
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': f'Error interno: {str(e)}'}), 500

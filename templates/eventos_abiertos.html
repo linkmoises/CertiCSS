@@ -1,0 +1,249 @@
+{% include 'tablero-header.html' %}
+
+{% include 'tablero-sidebar.html' %}
+
+    <!-- Content -->
+    <div class="w-full lg:ps-64">
+        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+        
+            <!-- Page Header -->
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <div class="mb-6">
+                    <h1 class="text-2xl font-bold text-gray-800 sm:text-3xl">Eventos Abiertos - Virtual Asincrónica</h1>
+                    <p class="text-gray-600">Gestión de eventos virtuales asincrónicos activos con capacidades LMS</p>
+                </div>
+                
+                <!-- Stats Cards -->
+                <div class="grid sm:grid-cols-1 lg:grid-cols-1 gap-4 sm:gap-6 mb-6">
+                    <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="p-4 md:p-5">
+                            <div class="flex items-center gap-x-2">
+                                <p class="text-xs uppercase tracking-wide text-gray-500">
+                                    Total Eventos Abiertos
+                                </p>
+                            </div>
+                            <div class="mt-1 flex items-center gap-x-2">
+                                <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                    {{ total_eventos }}
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+            <!-- TABLA DE EVENTOS -->
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <!-- Card -->
+                <div class="flex flex-col">
+                    <div class="-m-1.5 overflow-x-auto">
+                        <div class="p-1.5 min-w-full inline-block align-middle">
+                            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                                <!-- Header -->
+                                <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
+                                    <div>
+                                        <h2 class="text-xl font-semibold text-gray-800">
+                                            Eventos Virtuales Asincrónicos Abiertos
+                                        </h2>
+                                        <p class="text-sm text-gray-600">
+                                            Lista de eventos activos con capacidades de plataforma LMS
+                                        </p>
+                                    </div>
+                                    
+                                    <div>
+                                        <a href="{{ url_for('crear_evento') }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                                            <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                            Nuevo Evento
+                                        </a>
+                                    </div>
+                                </div>
+                                <!-- End Header -->
+
+                                <!-- Table -->
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="ps-6 py-3 text-start">
+                                                <div class="flex items-center gap-x-2">
+                                                    <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
+                                                        Evento
+                                                    </span>
+                                                </div>
+                                            </th>
+
+                                            <th scope="col" class="px-6 py-3 text-start">
+                                                <div class="flex items-center gap-x-2">
+                                                    <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
+                                                        Participantes
+                                                    </span>
+                                                </div>
+                                            </th>
+
+                                            <th scope="col" class="px-6 py-3 text-start">
+                                                <div class="flex items-center gap-x-2">
+                                                    <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
+                                                        Contenidos LMS
+                                                    </span>
+                                                </div>
+                                            </th>
+
+                                            <th scope="col" class="px-6 py-3 text-start">
+                                                <div class="flex items-center gap-x-2">
+                                                    <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
+                                                        Exámenes
+                                                    </span>
+                                                </div>
+                                            </th>
+
+                                            <th scope="col" class="px-6 py-3 text-start">
+                                                <div class="flex items-center gap-x-2">
+                                                    <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
+                                                        Estado LMS
+                                                    </span>
+                                                </div>
+                                            </th>
+
+                                            <th scope="col" class="px-6 py-3 text-end">Acciones</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody class="divide-y divide-gray-200">
+                                        {% for evento in eventos %}
+                                        <tr>
+                                            <td class="size-px whitespace-nowrap">
+                                                <div class="ps-6 py-3">
+                                                    <div class="flex items-center gap-x-3">
+                                                        <div class="grow">
+                                                            <span class="block text-sm font-semibold text-gray-800">{{ evento.titulo }}</span>
+                                                            <span class="block text-sm text-gray-500">{{ evento.codigo }}</span>
+                                                            <span class="block text-xs text-gray-400">
+                                                                {% if evento.fecha_inicio %}
+                                                                    {{ evento.fecha_inicio.strftime('%d/%m/%Y') }}
+                                                                {% else %}
+                                                                    Sin fecha
+                                                                {% endif %}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            
+                                            <td class="size-px whitespace-nowrap">
+                                                <div class="px-6 py-3">
+                                                    <span class="text-sm text-gray-800">{{ evento.total_participantes }}</span>
+                                                </div>
+                                            </td>
+                                            
+                                            <td class="size-px whitespace-nowrap">
+                                                <div class="px-6 py-3">
+                                                    <span class="text-sm text-gray-800">{{ evento.total_contenidos }}</span>
+                                                </div>
+                                            </td>
+                                            
+                                            <td class="size-px whitespace-nowrap">
+                                                <div class="px-6 py-3">
+                                                    <span class="text-sm text-gray-800">{{ evento.total_examenes }}</span>
+                                                </div>
+                                            </td>
+                                            
+                                            <td class="size-px whitespace-nowrap">
+                                                <div class="px-6 py-3">
+                                                    {% if evento.tiene_lms %}
+                                                        <span class="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                            <span class="size-1.5 inline-block rounded-full bg-green-800"></span>
+                                                            Configurado
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                            <span class="size-1.5 inline-block rounded-full bg-yellow-800"></span>
+                                                            Sin contenido
+                                                        </span>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+
+                                            <td class="size-px whitespace-nowrap">
+                                                <div class="px-6 py-1.5">
+                                                    <div class="flex items-center gap-x-2">
+                                                        <!-- Ver evento -->
+                                                        <a href="{{ url_for('ver_evento', codigo_evento=evento.codigo) }}" 
+                                                           class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline font-medium"
+                                                           title="Ver evento">
+                                                            <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                                        </a>
+                                                        
+                                                        <!-- Gestionar LMS -->
+                                                        <a href="{{ url_for('plataforma.listar_contenidos', codigo_evento=evento.codigo) }}" 
+                                                           class="inline-flex items-center gap-x-1 text-sm text-green-600 decoration-2 hover:underline font-medium"
+                                                           title="Gestionar LMS">
+                                                            <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                                                        </a>
+                                                        
+                                                        <!-- Métricas LMS (solo si tiene contenido) -->
+                                                        {% if evento.tiene_lms %}
+                                                        <a href="{{ url_for('tablero_metricas_lms_evento', codigo_evento=evento.codigo) }}" 
+                                                           class="inline-flex items-center gap-x-1 text-sm text-purple-600 decoration-2 hover:underline font-medium"
+                                                           title="Métricas LMS">
+                                                            <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                                                        </a>
+                                                        {% endif %}
+                                                        
+                                                        <!-- Editar evento (solo organizadores) -->
+                                                        {% if evento.es_organizador or current_user.rol == 'administrador' %}
+                                                        <a href="{{ url_for('editar_evento', codigo_evento=evento.codigo) }}" 
+                                                           class="inline-flex items-center gap-x-1 text-sm text-gray-600 decoration-2 hover:underline font-medium"
+                                                           title="Editar evento">
+                                                            <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h.01"/><path d="M2 18h18l4-4V8a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2Z"/><path d="M7 7h.01"/><path d="M2 18h18l4-4V8a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2Z"/></svg>
+                                                        </a>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                <!-- End Table -->
+
+                                <!-- Footer -->
+                                {% if total_paginas > 1 %}
+                                <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200">
+                                    <div>
+                                        <p class="text-sm text-gray-600">
+                                            Página <span class="font-semibold text-gray-800">{{ page }}</span> de <span class="font-semibold text-gray-800">{{ total_paginas }}</span>
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <div class="inline-flex gap-x-2">
+                                            {% if page > 1 %}
+                                            <a href="{{ url_for('listar_eventos_abiertos', page=page-1) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none">
+                                                <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                                                Anterior
+                                            </a>
+                                            {% endif %}
+
+                                            {% if page < total_paginas %}
+                                            <a href="{{ url_for('listar_eventos_abiertos', page=page+1) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none">
+                                                Siguiente
+                                                <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                <!-- End Footer -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+            </div>
+            <!-- End TABLA DE EVENTOS -->
+
+        </div>
+    </div>
+    <!-- End Content -->
+
+{% include 'tablero-footer.html' %}

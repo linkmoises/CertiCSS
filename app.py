@@ -41,6 +41,7 @@ collection_repositorio = db['repositorio']
 collection_encuestas = db['encuestas'] 
 collection_qbanks = db['qbanks']
 collection_qbanks_data = db['qbanks_data']
+collection_exam_results = db['exam_results']
 
 
 ###
@@ -2252,6 +2253,325 @@ def tablero_metricas(page=1):
         total_eventos_cerrados=total_eventos_cerrados,
         total_ponentes=total_ponentes,
         total_participantes=total_participantes,
+        eventos=eventos,
+    )
+
+
+###
+### LMS Metrics Dashboard - General
+###
+@app.route('/tablero/metricas/lms')
+@app.route('/tablero/metricas/lms/page/<int:page>')
+@login_required
+def tablero_metricas_lms(page=1):
+    
+    # Filtrar eventos con modalidad Virtual asincrónica
+    eventos_lms_query = {"modalidad": "Virtual asincrónica"}
+    
+    # Obtener métricas generales de LMS
+    total_eventos_lms = collection_eventos.count_documents(eventos_lms_query)
+    total_eventos_lms_cerrados = collection_eventos.count_documents({
+        **eventos_lms_query, 
+        "estado_evento": "cerrado"
+    })
+    
+    # Contar participantes en eventos LMS
+    eventos_lms = list(collection_eventos.find(eventos_lms_query, {"codigo": 1}))
+    codigos_eventos_lms = [evento["codigo"] for evento in eventos_lms]
+    
+    total_participantes_lms = collection_participantes.count_documents({
+        "codigo_evento": {"$in": codigos_eventos_lms},
+        "rol": "participante"
+    })
+    
+    # Contar exámenes realizados
+    total_examenes_realizados = collection_exam_results.count_documents({
+        "codigo_evento": {"$in": codigos_eventos_lms}
+    })
+    
+    # Calcular promedio de intentos por examen
+    pipeline_intentos = [
+        {"$match": {"codigo_evento": {"$in": codigos_eventos_lms}}},
+        {"$group": {
+            "_id": None,
+            "promedio_intentos": {"$avg": "$numero_intento"}
+        }}
+    ]
+    resultado_intentos = list(collection_exam_results.aggregate(pipeline_intentos))
+    promedio_intentos = round(resultado_intentos[0]["promedio_intentos"], 2) if resultado_intentos else 0
+    
+    # Calcular promedio de calificaciones
+    pipeline_calificaciones = [
+        {"$match": {"codigo_evento": {"$in": codigos_eventos_lms}}},
+        {"$group": {
+            "_id": None,
+            "promedio_calificacion": {"$avg": "$calificacion"}
+        }}
+    ]
+    resultado_calificaciones = list(collection_exam_results.aggregate(pipeline_calificaciones))
+    promedio_calificacion = round(resultado_calificaciones[0]["promedio_calificacion"], 2) if resultado_calificaciones else 0
+    
+    # Paginación para eventos LMS
+    eventos_por_pagina = 20
+    total_paginas = (total_eventos_lms_cerrados + eventos_por_pagina - 1) // eventos_por_pagina
+    
+    # Obtener eventos LMS cerrados para la página actual
+    eventos_cursor = collection_eventos.find({
+        **eventos_lms_query,
+        "estado_evento": "cerrado"
+    }).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    
+    eventos = list(eventos_cursor)
+    
+    # Añadir métricas específicas para cada evento
+    for evento in eventos:
+        codigo_evento = evento["codigo"]
+        
+        # Verificar si el usuario es organizador
+        es_organizador = collection_participantes.find_one({
+            "codigo_evento": codigo_evento,
+            "cedula": str(current_user.cedula),
+            "rol": "coorganizador"
+        }) is not None
+        evento["es_organizador"] = es_organizador
+        
+        # Métricas de participantes
+        evento["total_participantes"] = collection_participantes.count_documents({
+            "codigo_evento": codigo_evento,
+            "rol": "participante"
+        })
+        
+        # Métricas de exámenes
+        evento["total_examenes"] = collection_eva.count_documents({
+            "codigo_evento": codigo_evento,
+            "tipo": "examen"
+        })
+        
+        evento["total_resultados_examenes"] = collection_exam_results.count_documents({
+            "codigo_evento": codigo_evento
+        })
+        
+        # Promedio de calificación para este evento
+        pipeline_evento = [
+            {"$match": {"codigo_evento": codigo_evento}},
+            {"$group": {
+                "_id": None,
+                "promedio": {"$avg": "$calificacion"}
+            }}
+        ]
+        resultado_evento = list(collection_exam_results.aggregate(pipeline_evento))
+        evento["promedio_calificacion"] = round(resultado_evento[0]["promedio"], 2) if resultado_evento else 0
+    
+    return render_template(
+        'metricas_lms.html',
+        active_section='metricas',
+        page=page,
+        total_paginas=total_paginas,
+        total_eventos_lms=total_eventos_lms,
+        total_eventos_lms_cerrados=total_eventos_lms_cerrados,
+        total_participantes_lms=total_participantes_lms,
+        total_examenes_realizados=total_examenes_realizados,
+        promedio_intentos=promedio_intentos,
+        promedio_calificacion=promedio_calificacion,
+        eventos=eventos,
+    )
+
+
+###
+### LMS Metrics Dashboard - Specific Event
+###
+@app.route('/tablero/metricas/lms/<codigo_evento>')
+@login_required
+def tablero_metricas_lms_evento(codigo_evento):
+    
+    # Verificar que el evento existe y es Virtual asincrónica
+    evento = collection_eventos.find_one({
+        "codigo": codigo_evento,
+        "modalidad": "Virtual asincrónica"
+    })
+    
+    if not evento:
+        abort(404)
+    
+    # Verificar si el usuario es organizador
+    es_organizador = collection_participantes.find_one({
+        "codigo_evento": codigo_evento,
+        "cedula": str(current_user.cedula),
+        "rol": "coorganizador"
+    }) is not None
+    
+    # Métricas generales del evento
+    total_participantes = collection_participantes.count_documents({
+        "codigo_evento": codigo_evento,
+        "rol": "participante"
+    })
+    
+    total_examenes = collection_eva.count_documents({
+        "codigo_evento": codigo_evento,
+        "tipo": "examen"
+    })
+    
+    total_resultados = collection_exam_results.count_documents({
+        "codigo_evento": codigo_evento
+    })
+    
+    # Métricas de calificaciones
+    pipeline_calificaciones = [
+        {"$match": {"codigo_evento": codigo_evento}},
+        {"$group": {
+            "_id": None,
+            "promedio": {"$avg": "$calificacion"},
+            "maximo": {"$max": "$calificacion"},
+            "minimo": {"$min": "$calificacion"}
+        }}
+    ]
+    resultado_calificaciones = list(collection_exam_results.aggregate(pipeline_calificaciones))
+    
+    if resultado_calificaciones:
+        promedio_calificacion = round(resultado_calificaciones[0]["promedio"], 2)
+        calificacion_maxima = resultado_calificaciones[0]["maximo"]
+        calificacion_minima = resultado_calificaciones[0]["minimo"]
+    else:
+        promedio_calificacion = 0
+        calificacion_maxima = 0
+        calificacion_minima = 0
+    
+    # Distribución de calificaciones
+    pipeline_distribucion = [
+        {"$match": {"codigo_evento": codigo_evento}},
+        {"$bucket": {
+            "groupBy": "$calificacion",
+            "boundaries": [0, 60, 70, 80, 90, 100],
+            "default": "100+",
+            "output": {"count": {"$sum": 1}}
+        }}
+    ]
+    distribucion_calificaciones = list(collection_exam_results.aggregate(pipeline_distribucion))
+    
+    # Métricas de intentos
+    pipeline_intentos = [
+        {"$match": {"codigo_evento": codigo_evento}},
+        {"$group": {
+            "_id": "$cedula_participante",
+            "total_intentos": {"$max": "$numero_intento"},
+            "mejor_calificacion": {"$max": "$calificacion"}
+        }}
+    ]
+    datos_participantes = list(collection_exam_results.aggregate(pipeline_intentos))
+    
+    # Promedio de intentos por participante
+    promedio_intentos = round(sum(p["total_intentos"] for p in datos_participantes) / len(datos_participantes), 2) if datos_participantes else 0
+    
+    # Participantes que han realizado exámenes
+    participantes_con_examenes = len(datos_participantes)
+    
+    # Obtener detalles de exámenes del evento
+    examenes = list(collection_eva.find({
+        "codigo_evento": codigo_evento,
+        "tipo": "examen"
+    }).sort("orden", 1))
+    
+    # Añadir estadísticas por examen
+    for examen in examenes:
+        examen_resultados = collection_exam_results.count_documents({
+            "codigo_evento": codigo_evento,
+            "orden_examen": examen["orden"]
+        })
+        examen["total_resultados"] = examen_resultados
+        
+        # Promedio de calificación para este examen específico
+        pipeline_examen = [
+            {"$match": {
+                "codigo_evento": codigo_evento,
+                "orden_examen": examen["orden"]
+            }},
+            {"$group": {
+                "_id": None,
+                "promedio": {"$avg": "$calificacion"}
+            }}
+        ]
+        resultado_examen = list(collection_exam_results.aggregate(pipeline_examen))
+        examen["promedio_calificacion"] = round(resultado_examen[0]["promedio"], 2) if resultado_examen else 0
+    
+    return render_template(
+        'metricas_lms_evento.html',
+        active_section='metricas',
+        evento=evento,
+        es_organizador=es_organizador,
+        total_participantes=total_participantes,
+        total_examenes=total_examenes,
+        total_resultados=total_resultados,
+        promedio_calificacion=promedio_calificacion,
+        calificacion_maxima=calificacion_maxima,
+        calificacion_minima=calificacion_minima,
+        distribucion_calificaciones=distribucion_calificaciones,
+        promedio_intentos=promedio_intentos,
+        participantes_con_examenes=participantes_con_examenes,
+        examenes=examenes,
+        datos_participantes=datos_participantes
+    )
+
+
+###
+### Eventos Abiertos - Virtual Asincrónico
+###
+@app.route('/tablero/eventos/abiertos')
+@app.route('/tablero/eventos/abiertos/page/<int:page>')
+@login_required
+def listar_eventos_abiertos(page=1):
+    
+    # Filtrar eventos con modalidad Virtual asincrónica
+    eventos_query = {
+        "modalidad": "Virtual asincrónica"
+    }
+    
+    # Paginación
+    eventos_por_pagina = 20
+    total_eventos = collection_eventos.count_documents(eventos_query)
+    total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina
+    
+    # Obtener eventos para la página actual
+    eventos_cursor = collection_eventos.find(eventos_query).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    eventos = list(eventos_cursor)
+    
+    # Añadir información adicional para cada evento
+    for evento in eventos:
+        codigo_evento = evento["codigo"]
+        
+        # Verificar si el usuario es organizador
+        es_organizador = collection_participantes.find_one({
+            "codigo_evento": codigo_evento,
+            "cedula": str(current_user.cedula),
+            "rol": "coorganizador"
+        }) is not None
+        evento["es_organizador"] = es_organizador
+        
+        # Contar participantes
+        evento["total_participantes"] = collection_participantes.count_documents({
+            "codigo_evento": codigo_evento,
+            "rol": "participante"
+        })
+        
+        # Contar contenidos LMS
+        evento["total_contenidos"] = collection_eva.count_documents({
+            "codigo_evento": codigo_evento
+        })
+        
+        # Contar exámenes
+        evento["total_examenes"] = collection_eva.count_documents({
+            "codigo_evento": codigo_evento,
+            "tipo": "examen"
+        })
+        
+        # Verificar si tiene contenidos LMS
+        evento["tiene_lms"] = evento["total_contenidos"] > 0
+    
+    return render_template(
+        'eventos_abiertos.html',
+        active_section='eventos',
+        page=page,
+        total_paginas=total_paginas,
+        total_eventos=total_eventos,
         eventos=eventos,
     )
 
