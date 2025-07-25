@@ -260,55 +260,11 @@ def ver_contenido(codigo_evento, orden):
             puntaje = None
             if request.method == 'POST':
                 correctas = 0
-                respuestas_usuario = []
                 for i, pregunta in enumerate(preguntas):
                     respuesta_usuario = request.form.getlist(f'resp_{i}')
-                    respuestas_usuario.append({
-                        'pregunta_id': str(pregunta['_id']),
-                        'respuesta': respuesta_usuario,
-                        'correcta': set(map(str, pregunta['respuestas_correctas'])) == set(respuesta_usuario)
-                    })
                     if set(map(str, pregunta['respuestas_correctas'])) == set(respuesta_usuario):
                         correctas += 1
                 puntaje = (correctas, len(preguntas))
-                
-                # Calcular calificación como porcentaje
-                calificacion = (correctas / len(preguntas)) * 100 if len(preguntas) > 0 else 0
-                
-                # Obtener cédula del participante desde los parámetros
-                cedula_participante = request.args.get('cedula')
-                
-                # Verificar que el evento es Virtual asincrónica antes de guardar
-                if evento.get('modalidad') == 'Virtual asincrónica' and cedula_participante:
-                    # Obtener el número de intento (contar intentos previos + 1)
-                    intentos_previos = collection_exam_results.count_documents({
-                        'codigo_evento': codigo_evento,
-                        'orden_examen': orden,
-                        'cedula_participante': cedula_participante
-                    })
-                    
-                    numero_intento = intentos_previos + 1
-                    
-                    # Crear el documento de resultado
-                    resultado_examen = {
-                        'codigo_evento': codigo_evento,
-                        'orden_examen': orden,
-                        'cedula_participante': cedula_participante,
-                        'numero_intento': numero_intento,
-                        'calificacion': calificacion,
-                        'respuestas': respuestas_usuario,
-                        'fecha_envio': datetime.now(),
-                        'titulo_examen': contenido_actual.get('titulo', 'Sin título'),
-                        'titulo_evento': evento.get('titulo', 'Sin título'),
-                        'total_preguntas': len(preguntas),
-                        'respuestas_correctas': correctas
-                    }
-                    
-                    # Insertar el resultado en la base de datos
-                    try:
-                        collection_exam_results.insert_one(resultado_examen)
-                    except Exception as e:
-                        print(f"Error al guardar resultado del examen: {e}")
             # Pasar los IDs de las preguntas al template para el campo oculto
             preguntas_ids = ','.join([str(p['_id']) for p in preguntas])
             return render_template('examen.html', preguntas=preguntas, puntaje=puntaje, contenido=contenido_actual, evento=evento, cedula=cedula, token=token, preguntas_ids=preguntas_ids)
