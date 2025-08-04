@@ -8,7 +8,6 @@
 
             <!-- TABLA RESUMEN USUARIOS -->
             <div class="max-w-[85rem] px-2 pt-1 mx-auto">
-                <!-- Card -->
                 <div class="flex flex-col">
                     <div class="-m-1.5 overflow-x-auto">
                         <div class="p-1.5 min-w-full inline-block align-middle">
@@ -30,6 +29,11 @@
                                             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                                             Añadir usuario
                                         </a>
+{% if usuarios|length != 0 %}
+                                        <div>
+                                            <input class="text-gray-500 py-2 block w-full bg-white border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-blue-500" type="text" id="search" placeholder="Filtrar usuarios...">
+                                        </div>
+{% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -86,7 +90,7 @@
                                         <div class="flex items-center gap-x-3">
                                             <img class="shrink-0 size-[38px] rounded-full" src="{{ usuario.foto_url }}" alt="Avatar de {{ usuario.nombres }} {{ usuario.apellidos }}">
                                             <div class="grow">
-                                                <span class="block text-sm font-semibold text-gray-800">{{ usuario.nombres }} {{ usuario.apellidos }}
+                                                <span class="block text-sm font-semibold text-gray-800 usuario-nombre">{{ usuario.nombres }} {{ usuario.apellidos }}
 {% if usuario.orcid %}
                                                     <a href="https://orcid.org/{{ usuario.orcid }}" target="_blank" title="Ver perfil ORCID" class="inline-block align-top">
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="inline-block" width="18" height="18" viewBox="0 0 256 256"><circle cx="128" cy="128" r="128" fill="#A6CE39"/><path fill="#fff" d="M86.3,186.2H70.9V79.1h15.4V186.2z M78.4,66.9c-5.6,0-10.1-4.6-10.1-10.1c0-5.6,4.5-10.1,10.1-10.1c5.6,0,10.1,4.6,10.1,10.1C88.5,62.3,84,66.9,78.4,66.9z M108.9,79.1h41.6c39.6,0,57,28.3,57,53.6c0,27.5-21.5,53.6-56.8,53.6h-41.8V79.1z M124.3,172.4h24.5c34.9,0,42.9-26.5,42.9-39.7c0-21.5-13.7-39.7-43.7-39.7h-23.7V172.4z"/></svg>
@@ -101,7 +105,7 @@
                                     </td>
                                     <td class="w-80 min-w-80">
                                         <div class="px-6 py-3">
-                                        <span class="block text-sm font-semibold text-gray-800">{% if usuario.rol == 'coordinador-regional' %}Coordinador Regional de Docencia e Investigación{% endif %}{% if usuario.rol == 'coordinador-local' %}Coordinador Local de Docencia e Investigación{% endif %}{% if usuario.rol == 'coordinador-departamental' %}Coordinador Departamental de Docencia{% endif %}{% if usuario.rol in ['simulacion', 'denadoi'] %}{{ usuario.cargo }}{% endif %}</span>
+                                        <span class="block text-sm font-semibold text-gray-800 usuario-rol">{% if usuario.rol == 'coordinador-regional' %}Coordinador Regional de Docencia e Investigación{% endif %}{% if usuario.rol == 'coordinador-local' %}Coordinador Local de Docencia e Investigación{% endif %}{% if usuario.rol == 'coordinador-departamental' %}Coordinador Departamental de Docencia{% endif %}{% if usuario.rol in ['simulacion', 'denadoi'] %}{{ usuario.cargo }}{% endif %}</span>
                                         <span class="block text-sm italic text-gray-800">{% if usuario.rol == 'coordinador-regional' %}
                                             {% set regiones = {
                                                 'css01': 'Región de Salud de Bocas Del Toro',
@@ -302,6 +306,41 @@
         form.appendChild(hiddenInput);
         form.submit();
     });
+</script>
+<script>
+    document.getElementById('search').addEventListener('input', function () {
+        const searchText = this.value.trim().toLowerCase(); // Texto de búsqueda
+        const rows = document.querySelectorAll('tr.bg-white'); // Todas las filas de la tabla
+
+        rows.forEach(row => {
+            const nombre = row.querySelector('.usuario-nombre').textContent.toLowerCase();
+            const rol = row.querySelector('.usuario-rol').textContent.toLowerCase();
+
+            // Verificar si el texto de búsqueda coincide con nombre o rol
+            if (nombre.includes(searchText) || rol.includes(searchText)) {
+                row.style.display = ''; // Mostrar la fila
+                // Resaltar coincidencias en nombre y rol
+                highlightText(row.querySelector('.usuario-nombre'), searchText);
+                highlightText(row.querySelector('.usuario-rol'), searchText);
+            } else {
+                row.style.display = 'none'; // Ocultar la fila
+            }
+        });
+    });
+
+    // Función para resaltar el texto coincidente
+    function highlightText(element, searchText) {
+        if (!searchText) {
+            // Si no hay texto de búsqueda, restaurar el contenido original
+            element.innerHTML = element.textContent;
+            return;
+        }
+        
+        const text = element.textContent;
+        const regex = new RegExp(`(${searchText})`, 'gi'); // Expresión regular para buscar coincidencias
+        const highlightedText = text.replace(regex, '<span class="bg-yellow-200">$1</span>'); // Resaltar coincidencias
+        element.innerHTML = highlightedText; // Actualizar el contenido del elemento
+    }
 </script>    
 </body>
 </html>
