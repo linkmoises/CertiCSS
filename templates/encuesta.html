@@ -41,6 +41,11 @@
                     <p class="mt-1 text-justify text-gray-600 dark:text-neutral-400">
                         La encuesta no tomará más de 5 minutos. Agradecemos de antemano su tiempo y colaboración.
                     </p>
+                    {% if encuesta_disponible %}
+                    <p class="mt-2 text-sm text-blue-600 dark:text-blue-400">
+                        <strong>Período de disponibilidad:</strong> Desde el inicio del evento hasta 48 horas después de su finalización.
+                    </p>
+                    {% endif %}
                 </div>
             </div>
             <!-- Mostrar mensajes -->

@@ -99,7 +99,7 @@
                         <!-- End Col -->
                 
                         <div class="sm:col-span-9">
-                            <select class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" id="region" name="region" required>
+                            <select class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" id="region" name="region" onchange="actualizarUnidadesUsuario()" required>
                                 <option value="">Seleccione la región de salud</option>
                                 <option value="css01">Región de Salud de Bocas Del Toro</option>
                                 <option value="css02">Región de Salud de Coclé</option>
@@ -111,6 +111,7 @@
                                 <option value="css13">Región de Salud de Panamá Oeste</option>
                                 <option value="css082">Región de Salud de Panamá Este</option>
                                 <option value="css081">Región de Salud de Panamá Metro</option>
+                                <option value="css088">Región de Salud de San Miguelito</option>
                             </select>
                         </div>
                         <!-- End Col -->
@@ -123,7 +124,10 @@
                         <!-- End Col -->
                 
                         <div class="sm:col-span-9">
-                            <input id="unidad_ejecutora" name="unidad_ejecutora" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Escriba su unidad ejecutora...">
+                            <select id="unidad_ejecutora" name="unidad_ejecutora" onchange="actualizarUnidadesUsuario()"
+                                class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" required>
+                                <option value="">Seleccione una unidad ejecutora</option>
+                            </select>
                         </div>
                         <!-- End Col -->
 
@@ -306,6 +310,132 @@ document.getElementById('phone').addEventListener('input', function (e) {
 
     e.target.value = value; // Actualizar el valor del campo
 });
+</script>
+<script>
+    const unidadesPorRegion = {
+        css01: [ // Bocas del Toro
+            "Coordinación Regional - Bocas del Toro",
+            "Hospital Regional de Changuinola",
+            "Hospital Regional de Almirante",
+            "Hospital de Chiriquí Grande",
+            "Policlínica de Guabito",
+            "ULAPS Las Tablas"
+        ],
+        css02: [ // Coclé
+            "Coordinación Regional - Coclé",
+            "Hospital Regional Dr. Rafael Estévez",
+            "Policlínica Dr. Manuel De Jesús Rojas",
+            "Policlínica San Juan De Dios",
+            "Policlínica Dr. Manuel Paulino Ocaña"
+        ],
+        css03: [ // Colón
+            "Coordinación Regional - Colón",
+            "Complejo Hospitalario Dr. Manuel Amador Guerrero",
+            "Policlínica de Nuevo San Juan",
+            "Policlínica de Sabanitas",
+            "Policlínica Dr. Hugo Spadafora",
+            "ULAPS Portobelo"
+        ],
+        css04: [ // Chiriquí
+            "Coordinación Regional - Chiriquí",
+            "Hospital Regional Dr. Rafael Hernández",
+            "Hospital Dr. Dionisio Arrocha",
+            "Policlínica Dr. Gustavo Adolfo Ross",
+            "Policlínica Dr. Pablo Espinosa",
+            "Policlínica Dr. Ernesto Perez Balladares",
+            "Policlínica de Divalá",
+            "ULAPS Nuevo Vedado",
+            "ULAPS Volcán",
+            "ULAPS Dolega",
+            "CAPPS Barú",
+            "CAPPS Jobito",
+            "CAPPS Balsa",
+            "CAPPS Blanco",
+            "CAPPS Caoba",
+            "CAPPS Corredor",
+            "CAPPS Zapatero"
+        ],
+        css06: [ // Herrera
+            "Coordinación Regional - Herrera",
+            "Hospital Dr. Gustavo Nelson Collado",
+            "Policlínica Dr. Roberto Ramírez De Diego",
+            "CAPPS Los Pozos",
+            "CAPPS Ocú",
+            "CAPPS Pesé"
+        ],
+        css07: [ // Los Santos
+            "Coordinación Regional - Los Santos",
+            "Policlínica Dr. Miguel Cárdenas Barahona",
+            "Policlínica San Juan de Dios",
+            "CAPPS Guararé",
+            "CAPPS Tonosí",
+            "CAPPS Macaracas"
+        ],
+        css09: [ // Veraguas
+            "Coordinación Regional - Veraguas",
+            "Hospital Dr. Ezequiel Abadía",
+            "Policlínica Dr. Horacio Díaz Gómez",
+            "ULAPS Alberto León",
+            "CAPPS Zapotillo"
+        ],
+        css13: [ // Panamá Oeste
+            "Hospital Hogar de La Esperanza",
+            "Policlínica Dr. Santiago Barraza",
+            "Policlínica Dr. Blas Gómez Chetro",
+            "Policlínica Dr. Juan Vega Méndez",
+            "ULAPS Vista Alegre",
+            "ULAPS Guadalupe",
+            "ULAPS San José",
+            "CAPPS Capira",
+            "CAPPS Vacamonte",
+            "CAPPS El Tecal"
+        ],
+        css082: [ // Panamá Este
+            "Hospital Regional de Chepo",
+            "Hospital Irma de Lourdes Tzanetatos",
+            "Policlínica de Cañitas",
+            "CAPPS Los Nogales"
+        ],
+        css081: [ // Panamá Metro
+            "Ciudad De La Salud",
+            "Complejo Hospitalario Metropolitano Dr. Arnulfo Arias Madrid",
+            "Hospital de Especialidades Pediátricas Omar Torrijos Herrera",
+            "Policlínica Presidente Remón",
+            "Policlínica Dr. Manuel Ferrer Valdés",
+            "Policlínica Dr. Carlos N. Brin",
+            "Policlínica Don Alejandro De La Guardia Hijo",
+            "Policlínica Don Joaquín José Vallarino",
+            "ULAPS Máximo Herrera",
+            "ULAPS Prof. Carlos Velarde",
+            "CAPPS Plaza Tocumen",
+            "CAPPS Pedregal"
+        ],
+        css088: [ // San Miguelito
+            "Hospital Dra. Susana Jones Cano",
+            "Policlínica Lic. Manuel María Valdés",
+            "Policlínica Don Generoso Guardia",
+            "Policlínica Dr. Edilberto Culiolis",
+            "Policlínica Dra. Cecilia Guerra",
+            "CAPPS Torrijos Carter"
+        ]
+    };
+    
+    function actualizarUnidadesUsuario() {
+        const regionSeleccionada = document.getElementById("region").value;
+        const unidadSelect = document.getElementById("unidad_ejecutora");
+        
+        // Limpiar opciones previas
+        unidadSelect.innerHTML = '<option value="">Seleccione una unidad ejecutora</option>';
+        
+        if (regionSeleccionada && unidadesPorRegion[regionSeleccionada]) {
+            unidadesPorRegion[regionSeleccionada].forEach(unidad => {
+                const option = document.createElement("option");
+                option.value = unidad;
+                option.textContent = unidad;
+                unidadSelect.appendChild(option);
+            });
+        }
+    }
 </script>
 </body>
 </html>
