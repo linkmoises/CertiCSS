@@ -132,30 +132,6 @@
                         <!-- End Col -->
 
                         <div class="sm:col-span-3">
-                            <label for="departamento" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
-                                Servicio o departamento adscrito
-                            </label>
-                        </div>
-                        <!-- End Col -->
-                
-                        <div class="sm:col-span-9">
-                            <input id="departamento" name="departamento" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Escriba el servicio o departamento al que pertenece...">
-                        </div>
-                        <!-- End Col -->
-
-                        <div class="sm:col-span-3">
-                            <label for="cargo" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
-                                Cargo
-                            </label>
-                        </div>
-                        <!-- End Col -->
-                
-                        <div class="sm:col-span-9">
-                            <input id="cargo" name="cargo" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
-                        </div>
-                        <!-- End Col -->
-
-                        <div class="sm:col-span-3">
                             <label for="rol" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                 Rol
                             </label>
@@ -163,7 +139,7 @@
                         <!-- End Col -->
                 
                         <div class="sm:col-span-9">
-                            <select class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" id="rol" name="rol" required>
+                            <select class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" id="rol" name="rol" onchange="mostrarOcultarDepartamento()" required>
                                 <option value="">Seleccione el rol de usuario</option>
 {% if current_user.rol in ['coordinador-local', 'coordinador-regional', 'coordinador-nacional', 'denadoi', 'administrador'] %}
                                 <option value="coordinador-departamental">Coordinador de Docencia Departamental</option>
@@ -180,6 +156,30 @@
                                 <option value="simulacion">Centro de Simulación Avanzada</option>
 {% endif %}
                             </select>
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-3" id="departamento-label">
+                            <label for="departamento" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                Servicio o departamento adscrito
+                            </label>
+                        </div>
+                        <!-- End Col -->
+                
+                        <div class="sm:col-span-9" id="departamento-container">
+                            <input id="departamento" name="departamento" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Escriba el servicio o departamento donde es coordinador de docencia...">
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-3">
+                            <label for="cargo" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                Cargo
+                            </label>
+                        </div>
+                        <!-- End Col -->
+                
+                        <div class="sm:col-span-9">
+                            <input id="cargo" name="cargo" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
                         </div>
                         <!-- End Col -->
 
@@ -436,6 +436,28 @@ document.getElementById('phone').addEventListener('input', function (e) {
             });
         }
     }
+
+    function mostrarOcultarDepartamento() {
+        const rolSelect = document.getElementById('rol');
+        const departamentoContainer = document.getElementById('departamento-container');
+        const departamentoInput = document.getElementById('departamento');
+        const departamentoLabel = document.getElementById('departamento-label');
+
+        if (rolSelect.value === 'coordinador-departamental') {
+            departamentoContainer.style.display = 'block';
+            departamentoInput.setAttribute('required', 'required');
+            departamentoLabel.style.display = 'block';
+        } else {
+            departamentoContainer.style.display = 'none';
+            departamentoInput.removeAttribute('required');
+            departamentoLabel.style.display = 'none';
+        }
+    }
+
+    // Ocultar campo departamento al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+        mostrarOcultarDepartamento();
+    });
 </script>
 </body>
 </html>
