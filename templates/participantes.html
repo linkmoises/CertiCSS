@@ -177,7 +177,7 @@ current_user.id == evento.autor %}
                                 </td>
                                 <td class="size-px whitespace-nowrap">
                                     <div class="px-6 py-2">
-{% if evento.estado_evento != 'cerrado' or current_user.rol == 'administrador' %}
+{% if puede_editar and (evento.estado_evento != 'cerrado' or current_user.rol == 'administrador') %}
 {% if participante.rol == 'ponente' %}
                                         <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('editar_ponente', nanoid=participante.nanoid) }}">
                                             Corregir ponente
@@ -213,9 +213,13 @@ current_user.id == evento.autor %}
                                             </button>
                                         </form>
 {% endif %}
-{% else %}
+{% elif evento.estado_evento == 'cerrado' %}
                                         <a class="inline-flex items-center gap-x-1 text-sm text-gray-300 decoration-2 hover:underline focus:outline-none focus:underline font-medium">
                                             Evento cerrado
+                                        </a><br />
+{% else %}
+                                        <a class="inline-flex items-center gap-x-1 text-sm text-gray-300 decoration-2 hover:underline focus:outline-none focus:underline font-medium">
+                                            Sin permisos de edición
                                         </a><br />
 {% endif %}
                                     </div>

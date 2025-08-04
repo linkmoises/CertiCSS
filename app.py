@@ -1520,6 +1520,21 @@ def listar_participantes(codigo_evento):
 
     estado_evento = evento.get('estado_evento', 'borrador')
 
+    # Verificar permisos de edición
+    puede_editar = False
+    
+    # Si el usuario es denadoi o administrador, puede editar sin restricciones
+    if current_user.rol in ['denadoi', 'administrador']:
+        puede_editar = True
+    else:
+        # Verificar si el usuario tiene rol de organizador, coorganizador o apoyo operativo en este evento
+        participante_usuario = collection_participantes.find_one({
+            "codigo_evento": codigo_evento,
+            "cedula": str(current_user.cedula),
+            "rol": {"$in": ["organizador", "coorganizador", "apoyo operativo"]}
+        })
+        puede_editar = participante_usuario is not None
+
     es_organizador = collection_participantes.find_one({
         "codigo_evento": codigo_evento,
         "cedula": str(current_user.cedula),
@@ -1534,6 +1549,7 @@ def listar_participantes(codigo_evento):
         nombre_evento=evento['nombre'],
         estado_evento=estado_evento,
         es_organizador=es_organizador,
+        puede_editar=puede_editar,
     )
 
 
