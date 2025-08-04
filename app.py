@@ -1547,9 +1547,14 @@ import io
 PERFILES_MAP = {
     "medico_general": "Médico General - Consulta Externa",
     "medico_urgencias": "Médico General - Urgencias",
+    "medico_administrativo": "Médico Administrativo",
     "medico_especialista": "Médico Especialista",
+    "medico_residente": "Medico Residente",
+    "medico_interno": "Médico Interno",
     "odontologo": "Odontólogo(a)",
     "odontologo_especialista": "Odontólogo(a) Especialista",
+    "odontologo_interno": "Odontólogo interno",
+    "tao": "Técnico en asistencia dental",
     "enfermero": "Enfermera(o)",
     "tecnico_enfermeria": "Técnico en Enfermería",
     "laboratorista": "Laboratorista",
@@ -2973,8 +2978,17 @@ def exportar_encuesta_csv(codigo_evento):
     # Obtener las respuestas de la encuesta para el evento
     respuestas = list(collection_encuestas.find({'codigo_evento': codigo_evento}))
     
-    if not respuestas:
-        flash('No hay respuestas de encuesta disponibles para este evento.', 'error')
+    # Filtrar solo respuestas válidas (que tengan el campo 'respuestas' y no esté vacío)
+    respuestas_validas = []
+    for respuesta in respuestas:
+        if respuesta.get('respuestas') and isinstance(respuesta['respuestas'], dict) and len(respuesta['respuestas']) > 0:
+            respuestas_validas.append(respuesta)
+    
+    # Log para diagnóstico (puede ser removido en producción)
+    print(f"Exportar CSV - Evento {codigo_evento}: Total documentos encontrados: {len(respuestas)}, Respuestas válidas: {len(respuestas_validas)}")
+    
+    if not respuestas_validas:
+        flash('No hay respuestas de encuesta válidas disponibles para este evento.', 'error')
         return redirect(url_for('resumen_evento', codigo_evento=codigo_evento))
     
     # Crear el archivo CSV en memoria
@@ -2992,7 +3006,7 @@ def exportar_encuesta_csv(codigo_evento):
     writer.writerow(headers)
     
     # Escribir datos
-    for respuesta in respuestas:
+    for respuesta in respuestas_validas:
         # Obtener fecha y hora por separado
         fecha_hora = respuesta.get('fecha', datetime.now())
         if isinstance(fecha_hora, str):
@@ -3075,8 +3089,17 @@ def informe_avanzado(codigo_evento):
     # Obtener las respuestas de la encuesta
     respuestas = list(collection_encuestas.find({'codigo_evento': codigo_evento}))
     
+    # Filtrar solo respuestas válidas (que tengan el campo 'respuestas' y no esté vacío)
+    respuestas_validas = []
+    for respuesta in respuestas:
+        if respuesta.get('respuestas') and isinstance(respuesta['respuestas'], dict) and len(respuesta['respuestas']) > 0:
+            respuestas_validas.append(respuesta)
+    
+    # Log para diagnóstico (puede ser removido en producción)
+    print(f"Evento {codigo_evento}: Total documentos encontrados: {len(respuestas)}, Respuestas válidas: {len(respuestas_validas)}")
+    
     # Procesar los datos para las métricas
-    total_respuestas = len(respuestas)
+    total_respuestas = len(respuestas_validas)
     
     # Calcular promedios por sección
     promedios = {
@@ -3095,8 +3118,8 @@ def informe_avanzado(codigo_evento):
     }
 
     # Procesar cada respuesta solo si existen
-    if respuestas:
-        for respuesta in respuestas:
+    if respuestas_validas:
+        for respuesta in respuestas_validas:
             respuestas_data = respuesta.get('respuestas', {})
             
             # Calcular promedios de secciones A, B y N
@@ -3136,17 +3159,17 @@ def informe_avanzado(codigo_evento):
     }
 
     # Generar gráfica de araña
-    grafica_spider = generar_grafica_spider(respuestas, evento.get('nombre', 'Evento'))
+    grafica_spider = generar_grafica_spider(respuestas_validas, evento.get('nombre', 'Evento'))
 
     # Generar gráficas demográficas específicas
     grafica_demografia_sexo = generar_grafica_demografia_sexo(metricas['demograficos']['D1'], evento.get('nombre', 'Evento'))
     grafica_demografia_grupoetario = generar_grafica_demografia_grupoetario(metricas['demograficos']['D2'], evento.get('nombre', 'Evento'))
 
     # Calcular Alfa de Cronbach
-    alfa_cronbach = calcular_alfa_cronbach(respuestas)
+    alfa_cronbach = calcular_alfa_cronbach(respuestas_validas)
 
     # Calcular Net Promoter Score (NPS)
-    nps = calcular_nps(respuestas)
+    nps = calcular_nps(respuestas_validas)
 
     # Calcular Net Promoter Score (NPS) CertiCSS
     nps_certicss = calcular_nps_certicss()

@@ -91,9 +91,13 @@
                                         <option value="">Seleccione su perfil profesional</option>
                                         <option value="medico_general" {% if participante.perfil == 'medico_general' %}selected{% endif %}>Médico General - Consulta Externa</option>
                                         <option value="medico_urgencias" {% if participante.perfil == 'medico_urgencias' %}selected{% endif %}>Médico General - Urgencias</option>
+                                        <option value="medico_administrativo" {% if participante.perfil == 'medico_administrativo' %}selected{% endif %}>Médico Administrativo</option>
                                         <option value="medico_especialista" {% if participante.perfil == 'medico_especialista' %}selected{% endif %}>Médico Especialista</option>
+                                        <option value="medico_residente" {% if participante.perfil == 'medico_residente' %}selected{% endif %}>Medico Residente</option>
+                                        <option value="medico_interno" {% if participante.perfil == 'medico_interno' %}selected{% endif %}>Médico Interno</option>
                                         <option value="odontologo" {% if participante.perfil == 'odontologo' %}selected{% endif %}>Odontólogo(a)</option>
                                         <option value="odontologo_especialista" {% if participante.perfil == 'odontologo_especialista' %}selected{% endif %}>Odontólogo(a) Especialista</option>
+                                        <option value="tao" {% if participante.perfil == 'tao' %}selected{% endif %}>Técnico en asistencia dental</option>
                                         <option value="enfermero" {% if participante.perfil == 'enfermero' %}selected{% endif %}>Enfermera(o)</option>
                                         <option value="tecnico_enfermeria" {% if participante.perfil == 'tecnico_enfermeria' %}selected{% endif %}>Técnico en Enfermería</option>
                                         <option value="laboratorista" {% if participante.perfil == 'laboratorista' %}selected{% endif %}>Laboratorista</option>
@@ -104,6 +108,7 @@
                                         <option value="psicologo" {% if participante.perfil == 'psicologo' %}selected{% endif %}>Psicólogo(a)</option>
                                         <option value="nutricionista" {% if participante.perfil == 'nutricionista' %}selected{% endif %}>Nutricionista</option>
                                         <option value="estudiante_salud" {% if participante.perfil == 'estudiante_salud' %}selected{% endif %}>Estudiante de Ciencias de la Salud</option>
+                                        <option value="administrativo" {% if participante.perfil == 'administrativo' %}selected{% endif %}>Personal administrativo</option>
                                         <option value="otro" {% if participante.perfil == 'otro' %}selected{% endif %}>Otro</option>
                                     </select>
                                 </div>
