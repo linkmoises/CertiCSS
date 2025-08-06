@@ -173,13 +173,13 @@
                                     <div class="px-6 py-2">
                                         <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium {% if evento.estado_evento == 'publicado' %}bg-blue-100 text-blue-800{% elif evento.estado_evento == 'cerrado' %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">{% if evento.estado_evento == 'publicado' %}Publicado{% elif evento.estado_evento == 'cerrado' %}Cerrado{% else %}Borrador{% endif %}
                                         </span><br />
-                                        {{ evento.fecha_inicio|estado }}
+                                        {{ evento|estado_evento }}
                                     </div>
                                     </a>
                                 </td>
                                 <td class="size-px whitespace-nowrap text-center">
                                     <a class="block relative z-10" href="#">
-                                        <span class="text-sm text-gray-500">{% if evento.fecha_inicio == evento.fecha_fin %}{{ evento.fecha_inicio.strftime('%d %b, %Y') }}{% else %}{{ evento.fecha_inicio.strftime('%d') }} - {{ evento.fecha_fin.strftime('%d %b, %Y') }}{% endif %}</span>
+                                        <span class="text-sm text-gray-500">{% if evento.fecha_inicio.date() == evento.fecha_fin.date() %}{{ evento.fecha_inicio.strftime('%d %b, %Y') }}{% else %}{{ evento.fecha_inicio.strftime('%d') }} - {{ evento.fecha_fin.strftime('%d %b, %Y') }}{% endif %}</span>
                                     </a>
                                 </td>
                                 <td class="size-px whitespace-nowrap">

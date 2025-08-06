@@ -116,7 +116,7 @@
                             {{ evento.nombre }} <!-- Nombre del evento -->
                         </h3>
                         <p class="mt-3 text-gray-500 dark:text-neutral-500">
-                            Fecha: {% if evento.fecha_inicio == evento.fecha_fin %}{{ evento.fecha_inicio.strftime('%d de %B de %Y') }}{% elif evento.fecha_fin %}{{ evento.fecha_inicio.strftime('%d') }} - {{ evento.fecha_fin.strftime('%d de %B de %Y') }}{% else %}{{ evento.fecha_inicio.strftime('%d de %B de %Y') }}{% endif %} <!-- Fecha de inicio -->
+                            Fecha: {% if evento.fecha_inicio.date() == evento.fecha_fin.date() %}{{ evento.fecha_inicio.strftime('%d de %B de %Y') }}{% elif evento.fecha_fin %}{{ evento.fecha_inicio.strftime('%d') }} - {{ evento.fecha_fin.strftime('%d de %B de %Y') }}{% else %}{{ evento.fecha_inicio.strftime('%d de %B de %Y') }}{% endif %} <!-- Fecha de inicio -->
                         </p>
                     </div>
                     <div class="mt-auto flex border-t border-gray-200 divide-x divide-gray-200 dark:border-neutral-700 dark:divide-neutral-700">

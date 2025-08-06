@@ -3775,19 +3775,67 @@ def generar_grafica_demografia_grupoetario(edad_data, evento_nombre):
 ###
 from datetime import date
 
-def calcular_estado(fecha):
+def calcular_estado(fecha_inicio, fecha_fin=None):
+    ahora = datetime.now()
+    
+    # Si solo se pasa un parámetro (compatibilidad hacia atrás)
+    if fecha_fin is None:
+        hoy = date.today()
+        # Convertir fecha a date si es datetime
+        if isinstance(fecha_inicio, datetime):
+            fecha_inicio = fecha_inicio.date()
+        if fecha_inicio == hoy:
+            return Markup('<span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-red-100 text-red-800">En curso</span>')
+        elif fecha_inicio < hoy:
+            return Markup('<span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-green-100 text-green-800">Finalizado</span>')
+        else:
+            return ""
+    
+    # Lógica nueva: verificar si estamos dentro del rango de tiempo del evento
+    if isinstance(fecha_inicio, datetime) and isinstance(fecha_fin, datetime):
+        if fecha_inicio <= ahora <= fecha_fin:
+            return Markup('<span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-red-100 text-red-800">En curso</span>')
+        elif ahora > fecha_fin:
+            return Markup('<span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-green-100 text-green-800">Finalizado</span>')
+        else:
+            return ""
+    
+    # Fallback a la lógica original si no hay datetime completos
     hoy = date.today()
-    # Convertir fecha a date si es datetime
-    if isinstance(fecha, datetime):
-        fecha = fecha.date()
-    if fecha == hoy:
+    fecha_inicio_date = fecha_inicio.date() if isinstance(fecha_inicio, datetime) else fecha_inicio
+    if fecha_inicio_date == hoy:
         return Markup('<span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-red-100 text-red-800">En curso</span>')
-    elif fecha < hoy:
+    elif fecha_inicio_date < hoy:
         return Markup('<span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-green-100 text-green-800">Finalizado</span>')
     else:
         return ""
 
 app.jinja_env.filters['estado'] = calcular_estado
+
+# Nuevo filtro que acepta tanto fecha de inicio como de fin
+def estado_evento(evento):
+    """Filtro que calcula el estado del evento basado en fecha y hora de inicio y fin"""
+    # Manejar tanto objetos con atributos como diccionarios de MongoDB
+    fecha_inicio = None
+    fecha_fin = None
+    
+    # Intentar acceso como diccionario (MongoDB)
+    if isinstance(evento, dict):
+        fecha_inicio = evento.get('fecha_inicio')
+        fecha_fin = evento.get('fecha_fin')
+    # Intentar acceso como objeto con atributos
+    elif hasattr(evento, 'fecha_inicio'):
+        fecha_inicio = evento.fecha_inicio
+        fecha_fin = getattr(evento, 'fecha_fin', None)
+    
+    if fecha_inicio and fecha_fin:
+        return calcular_estado(fecha_inicio, fecha_fin)
+    elif fecha_inicio:
+        return calcular_estado(fecha_inicio)
+    else:
+        return ""
+
+app.jinja_env.filters['estado_evento'] = estado_evento
 
 
 ###

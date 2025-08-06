@@ -44,7 +44,7 @@
                 </div>
                   
                 <h1 class="block text-3xl font-bold dark:text-gray-800 sm:text-4xl lg:text-6xl lg:leading-tight mb-8">{{ evento.nombre }}</h1>
-{% if evento.fecha_inicio == evento.fecha_fin %}
+{% if evento.fecha_inicio.date() == evento.fecha_fin.date() %}
                 <h3 class="my-3 text-lg dark:text-gray-800">{{ evento.fecha_inicio.strftime('%d de %B de %Y') }}</h3>
 {% elif evento.fecha_fin %}
                 <h3 class="my-3 text-lg dark:text-gray-800">{{ evento.fecha_inicio.strftime('%d') }} - {{ evento.fecha_fin.strftime('%d de %B de %Y') }}</h3>
