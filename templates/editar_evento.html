@@ -169,7 +169,7 @@
                         <!-- End Col -->
                 
                         <div class="sm:col-span-9">
-                            <input class="border-gray-200 rounded-lg inline-block text-gray-800 mt-2.5 dark:text-neutral-200" type="date" id="fecha_inicio" name="fecha_inicio" value="{{ evento.fecha_inicio.strftime('%Y-%m-%d') }}">
+                            <input class="border-gray-200 rounded-lg inline-block text-gray-800 mt-2.5 dark:text-neutral-200" type="datetime-local" id="fecha_inicio" name="fecha_inicio" value="{{ evento.fecha_inicio.strftime('%Y-%m-%dT%H:%M') }}">
                         </div>
                         <!-- End Col -->
 
@@ -181,7 +181,7 @@
                         <!-- End Col -->
                 
                         <div class="sm:col-span-9">
-                            <input class="border-gray-200 rounded-lg inline-block text-gray-800 mt-2.5 dark:text-neutral-200" type="date" id="fecha_fin" name="fecha_fin" value="{{ evento.fecha_fin.strftime('%Y-%m-%d') }}">
+                            <input class="border-gray-200 rounded-lg inline-block text-gray-800 mt-2.5 dark:text-neutral-200" type="datetime-local" id="fecha_fin" name="fecha_fin" value="{{ evento.fecha_fin.strftime('%Y-%m-%dT%H:%M') }}">
                         </div>
                         <!-- End Col -->
             

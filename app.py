@@ -1665,8 +1665,8 @@ def crear_evento():
         fecha_inicio_str = request.form['fecha_inicio']
         fecha_fin_str = request.form['fecha_fin']
 
-        fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d')
-        fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d')
+        fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%dT%H:%M')
+        fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%dT%H:%M')
 
         estado_evento = request.form['estado_evento']
 
@@ -1788,8 +1788,8 @@ def editar_evento(codigo_evento):
         fecha_inicio_str = request.form['fecha_inicio']
         fecha_fin_str = request.form['fecha_fin']
 
-        fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d')
-        fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d')
+        fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%dT%H:%M')
+        fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%dT%H:%M')
 
         estado_evento = request.form['estado_evento']
 
@@ -2973,8 +2973,12 @@ def cierre_evento(codigo_evento):
     qr_base64 = base64.b64encode(buffer.getvalue()).decode()
     
     # Obtener el afiche del evento
-    afiche_path = os.path.join(app.config['UPLOAD_FOLDER'], evento.get('afiche', 'default.png'))
-    if not os.path.exists(afiche_path):
+    afiche_filename = evento.get('afiche')
+    if afiche_filename and afiche_filename != 'None':
+        afiche_path = os.path.join(app.config['UPLOAD_FOLDER'], afiche_filename)
+        if not os.path.exists(afiche_path):
+            afiche_path = os.path.join(app.config['UPLOAD_FOLDER'], 'default.png')
+    else:
         afiche_path = os.path.join(app.config['UPLOAD_FOLDER'], 'default.png')
     
     # Obtener el estado del evento
