@@ -105,7 +105,7 @@
                                     </td>
                                     <td class="w-80 min-w-80">
                                         <div class="px-6 py-3">
-                                        <span class="block text-sm font-semibold text-gray-800 usuario-rol">{% if usuario.rol == 'coordinador-regional' %}Coordinador Regional de Docencia e Investigación{% endif %}{% if usuario.rol == 'coordinador-local' %}Coordinador Local de Docencia e Investigación{% endif %}{% if usuario.rol == 'coordinador-departamental' %}Coordinador Departamental de Docencia{% endif %}{% if usuario.rol in ['simulacion', 'denadoi'] %}{{ usuario.cargo }}{% endif %}</span>
+                                        <span class="block text-sm font-semibold text-gray-800 usuario-rol">{% if usuario.rol == 'coordinador-regional' %}Coordinador Regional de Docencia e Investigación{% endif %}{% if usuario.rol == 'coordinador-local' %}Coordinador Local de Docencia e Investigación{% endif %}{% if usuario.rol == 'subdirector-docencia' %}Subdirector de Docencia e Investigación{% endif %}{% if usuario.rol == 'coordinador-departamental' %}Coordinador Departamental de Docencia{% endif %}{% if usuario.rol in ['simulacion', 'denadoi'] %}{{ usuario.cargo }}{% endif %}</span>
                                         <span class="block text-sm italic text-gray-800">{% if usuario.rol == 'coordinador-regional' %}
                                             {% set regiones = {
                                                 'css01': 'Región de Salud de Bocas Del Toro',
