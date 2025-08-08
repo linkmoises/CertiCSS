@@ -109,7 +109,7 @@
                                         <div class="px-6 py-2">
 {% set certificado_disponible = true %}
 {% if resultado.fecha_evento %}
-    {% if resultado.fecha_evento.date() == fecha_actual and hora_actual.hour < 12 %}
+    {% if resultado.fecha_evento.date() == fecha_actual and hora_actual.hour < 13 %}
         {% set certificado_disponible = false %}
     {% elif resultado.fecha_evento.date() > fecha_actual %}
         {% set certificado_disponible = false %}
