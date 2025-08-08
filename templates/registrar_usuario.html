@@ -143,13 +143,14 @@
                                 <option value="">Seleccione el rol de usuario</option>
 {% if current_user.rol in ['coordinador-local', 'coordinador-regional', 'coordinador-nacional', 'denadoi', 'administrador'] %}
                                 <option value="coordinador-departamental">Coordinador de Docencia Departamental</option>
-                                <option value="coordinador-local">Coordinador Local de Docencia</option>
+                                <option value="coordinador-local">Coordinador Local de Docencia e Investigación</option>
 {% endif %}
 {% if current_user.rol in ['coordinador-nacional', 'denadoi', 'administrador'] %}
-                                <option value="coordinador-regional">Coordinador Regional de Docencia</option>
+                                <option value="coordinador-regional">Coordinador Regional de Docencia e Investigación</option>
 {% endif %}
 {% if current_user.rol in ['denadoi', 'administrador'] %}
                                 <option value="coordinador-nacional">Coordinador Nacional de Docencia</option>
+                                <option value="subdirector-docencia">Subdirector de Docencia e Investigación</option>
 {% endif %}
 {% if current_user.rol == 'administrador' %}
                                 <option value="denadoi">DENADOI</option>
