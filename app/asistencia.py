@@ -127,6 +127,13 @@ def asistencia_dinamica():
         )
         return redirect(url_for('asistencia.asistencia_dinamica'))
 
+    # Obtener listas guardadas del usuario actual
+    collection_listas = db['listas_seguimiento']
+    listas_guardadas = list(collection_listas.find(
+        {'usuario_id': current_user.id},
+        sort=[('fecha_creacion', -1)]  # Ordenar por fecha de creación descendente
+    ))
+
     # Construir la tabla de seguimiento
     tabla = []
     for cedula in session['cedulas_historial']:
@@ -153,7 +160,8 @@ def asistencia_dinamica():
                          eventos=eventos,
                          cedulas_historial=session['cedulas_historial'],
                          eventos_historial=session['eventos_historial'],
-                         nombres_historial=session['nombres_historial'])
+                         nombres_historial=session['nombres_historial'],
+                         listas_guardadas=listas_guardadas)
 
 
 ###
@@ -217,6 +225,92 @@ def eliminar_cedula(cedula):
         flash(f'Cédula {cedula} eliminada del seguimiento', 'success')
     return redirect(url_for('asistencia.asistencia_dinamica'))
 
+
+###
+### Guardar lista de seguimiento
+###
+@asistencia_bp.route("/tablero/asistencia-dinamica/guardar-lista", methods=['POST'])
+@login_required
+def guardar_lista():
+    if 'cedulas_historial' not in session or not session['cedulas_historial']:
+        flash('No hay datos para guardar', 'warning')
+        return redirect(url_for('asistencia.asistencia_dinamica'))
+    
+    nombre_lista = request.form.get('nombre_lista', '').strip()
+    if not nombre_lista:
+        flash('Debe ingresar un nombre para la lista', 'warning')
+        return redirect(url_for('asistencia.asistencia_dinamica'))
+    
+    # Guardar la lista en la base de datos
+    lista_data = {
+        'nombre': nombre_lista,
+        'cedulas': session['cedulas_historial'],
+        'eventos': session.get('eventos_historial', []),
+        'nombres': session.get('nombres_historial', {}),
+        'fecha_creacion': datetime.now(),
+        'usuario_id': current_user.id
+    }
+    
+    # Usar el nombre como _id para evitar duplicados por usuario
+    lista_id = f"lista_{current_user.id}_{nombre_lista.lower().replace(' ', '_')}"
+    
+    collection_listas = db['listas_seguimiento']
+    collection_listas.update_one(
+        {'_id': lista_id},
+        {'$set': lista_data},
+        upsert=True
+    )
+    
+    flash(f'Lista "{nombre_lista}" guardada correctamente', 'success')
+    return redirect(url_for('asistencia.asistencia_dinamica'))
+
+###
+### Cargar lista de seguimiento
+###
+@asistencia_bp.route("/tablero/asistencia-dinamica/cargar-lista/<lista_id>")
+@login_required
+def cargar_lista(lista_id):
+    collection_listas = db['listas_seguimiento']
+    lista = collection_listas.find_one({'_id': lista_id, 'usuario_id': current_user.id})
+    
+    if not lista:
+        flash('Lista no encontrada', 'error')
+        return redirect(url_for('asistencia.asistencia_dinamica'))
+    
+    # Actualizar la sesión con los datos de la lista
+    session['cedulas_historial'] = lista.get('cedulas', [])
+    session['eventos_historial'] = lista.get('eventos', [])
+    session['nombres_historial'] = lista.get('nombres', {})
+    
+    # Actualizar en la colección de seguimiento
+    collection_seguimiento.update_one(
+        {'_id': f'seguimiento_{current_user.id}'},
+        {'$set': {
+            'cedulas': lista.get('cedulas', []),
+            'eventos': lista.get('eventos', []),
+            'nombres': lista.get('nombres', {})
+        }},
+        upsert=True
+    )
+    
+    flash(f'Lista "{lista.get("nombre")}" cargada correctamente', 'success')
+    return redirect(url_for('asistencia.asistencia_dinamica'))
+
+###
+### Eliminar lista de seguimiento
+###
+@asistencia_bp.route("/tablero/asistencia-dinamica/eliminar-lista/<lista_id>")
+@login_required
+def eliminar_lista(lista_id):
+    collection_listas = db['listas_seguimiento']
+    result = collection_listas.delete_one({'_id': lista_id, 'usuario_id': current_user.id})
+    
+    if result.deleted_count > 0:
+        flash('Lista eliminada correctamente', 'success')
+    else:
+        flash('No se pudo eliminar la lista', 'error')
+    
+    return redirect(url_for('asistencia.asistencia_dinamica'))
 
 ###
 ### Eliminar evento del seguimiento

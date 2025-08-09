@@ -26,30 +26,54 @@
                             <div class="grid gap-4 sm:grid-cols-2">
                                 <!-- Campo para cédulas -->
                                 <div>
-                                    <label for="cedulas" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Cédulas (una por línea)
-                                    </label>
+                                    <div class="flex items-center mb-2">
+                                        <label for="cedulas" class="block text-sm font-medium text-gray-700">
+                                            Cédulas (una por línea)
+                                        </label>
+                                        <div class="ml-2 relative group">
+                                            <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            <div class="invisible group-hover:visible absolute z-10 w-64 p-2 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg shadow-lg -left-32 -top-2 transform -translate-y-full">
+                                                <p>Formato: <code>1-2-34, Nombre Apellido</code> o solo <code>1-2-34</code></p>
+                                                <p class="mt-1">Si incluye una coma, el texto después se guardará como nombre.</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <textarea id="cedulas" name="cedulas" rows="5" 
                                         class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
-                                        placeholder="Ingrese las cédulas a consultar (una por línea)"></textarea>
+                                        placeholder="Ej: 1-2-34, Juan Pérez"></textarea>
                                 </div>
                 
                                 <!-- Campo para códigos de evento -->
                                 <div>
-                                    <label for="eventos" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Códigos de Evento (uno por línea)
-                                    </label>
+                                    <div class="flex items-center mb-2">
+                                        <label for="eventos" class="block text-sm font-medium text-gray-700">
+                                            Códigos de Evento (uno por línea)
+                                        </label>
+                                        <div class="ml-2 relative group">
+                                            <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            <div class="invisible group-hover:visible absolute z-10 w-64 p-2 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg shadow-lg -left-32 -top-2 transform -translate-y-full">
+                                                <p>Ingrese un código de evento por línea.</p>
+                                                <p class="mt-1">Ejemplo: <code>EVENTO123</code></p>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <textarea id="eventos" name="eventos" rows="5" 
                                         class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
                                         placeholder="Ingrese los códigos de evento a consultar (uno por línea)"></textarea>
                                 </div>
                             </div>
                 
-                            <div class="mt-5 flex justify-between items-center">
-                                <button type="submit" 
-                                    class="py-2 px-3 inline-flex justify-center items-center gap-2 rounded-md border border-transparent font-semibold bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all text-sm">
-                                    Añadir a la tabla de asistencia dinámica
-                                </button>
+                            <div class="mt-5 flex flex-col sm:flex-row justify-between gap-4">
+                                <div class="flex gap-2">
+                                    <button type="submit" 
+                                        class="py-2 px-3 inline-flex justify-center items-center gap-2 rounded-md border border-transparent font-semibold bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all text-sm">
+                                        Actualizar seguimiento
+                                    </button>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -60,134 +84,232 @@
 {% if tabla and eventos %}
             <!-- TABLA DE SEGUIMIENTO -->
             <div class="max-w-[85rem] px-2 pt-1 mx-auto">
-            
-            <div class="mb-6 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                <!-- Header de la tabla -->
-                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                    <div class="flex justify-between items-center">
+                <div class="mb-6 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                    <!-- Header de la tabla -->
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-800">
+                                    Seguimiento de Asistencia
+                                </h2>
+                                <div class="mt-1">
+                                    <p class="text-sm text-gray-600 inline-block mr-4"><span class="font-medium">Eventos:</span> {{ eventos|length }}</p>
+                                    <p class="text-sm text-gray-600 inline-block"><span class="font-medium">Participantes:</span> {{ tabla|length }}</p>
+                                </div>
+                            </div>
+                            <form method="POST" action="{{ url_for('asistencia.limpiar_seguimiento') }}" class="inline">
+                                <button type="submit" 
+                                    class="py-2 px-3 inline-flex justify-center items-center gap-2 rounded-md border border-transparent font-semibold bg-red-500 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all text-sm">
+                                    Borrar todo el seguimiento
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div>
+        <ul>
+        {% for category, message in messages %}
+            <li class="{{ 'p-2 text-sm bg-red-100 text-red-800' if category == 'error' else 'p-2 text-sm bg-green-100 text-green-800' }}">
+            {{ message }}
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    {% endwith %}
+
+                    <div class="relative">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-10">
+                                            Participante
+                                        </th>
+                                        {% for evento in eventos %}
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" 
+                                            title="{{ evento.nombre }}">
+                                            <div class="flex items-center justify-center gap-2">
+                                                {{ evento.codigo }} <br /> ({{ evento.fecha_formateada }})
+                                                <form method="POST" action="{{ url_for('asistencia.eliminar_evento', codigo=evento.codigo) }}" class="inline">
+                                                    <button type="submit" class="text-red-500 hover:text-red-700">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    {% for fila in tabla %}
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 sticky left-0 bg-white z-10">
+                                            <div class="flex items-center gap-2">
+                                                <div class="flex flex-col">
+                                                    <span>{{ fila.cedula }}</span>
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="text-gray-500 text-xs" 
+                                                                onclick="makeEditable(this)"
+                                                                onblur="updateNombre(this, '{{ fila.cedula }}')"
+                                                                title="Haga clic para editar">
+                                                            {{ fila.nombre or 'Haga clic para añadir nombre' }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <form method="POST" action="{{ url_for('asistencia.eliminar_cedula', cedula=fila.cedula) }}" class="inline">
+                                                    <button type="submit" class="text-red-500 hover:text-red-700">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                        {% for evento in eventos %}
+                                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                                            {% if fila.asistencia[evento.codigo] %}
+                                            <span class="text-green-600">✅</span>
+                                            {% else %}
+                                            <span class="text-red-600">❌</span>
+                                            {% endif %}
+                                        </td>
+                                        {% endfor %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200">
                         <div>
-                            <h2 class="text-xl font-semibold text-gray-800">
-                                Seguimiento de Asistencia
-                            </h2>
-                            <div class="mt-1">
-                                <p class="text-sm text-gray-600 inline-block mr-4"><span class="font-medium">Eventos:</span> {{ eventos|length }}</p>
-                                <p class="text-sm text-gray-600 inline-block"><span class="font-medium">Participantes:</span> {{ tabla|length }}</p>
+                            <p class="text-sm text-gray-600">
+                            <span class="font-semibold text-gray-800">{{ tabla|length }}</span> {{ 'participante en seguimiento' if tabla|length == 1 else 'participantes en seguimiento' }}
+                            </p>
+                        </div>
+            
+                        <div>
+                            <div class="inline-flex gap-x-2">
+                                <a href="{{ url_for('asistencia.descargar_seguimiento') }}" 
+                                    class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50">
+                                    <svg class="flex-shrink-0 w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                                    Descargar tabla de asistencia
+                                </a>
                             </div>
                         </div>
-                        <form method="POST" action="{{ url_for('asistencia.limpiar_seguimiento') }}" class="inline">
-                            <button type="submit" 
-                                class="py-2 px-3 inline-flex justify-center items-center gap-2 rounded-md border border-transparent font-semibold bg-red-500 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all text-sm">
-                                Borrar todo el seguimiento
-                            </button>
-                        </form>
                     </div>
-                </div>
+                    <!-- End Footer -->
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-<div>
-    <ul>
-    {% for category, message in messages %}
-        <li class="{{ 'p-2 text-sm bg-red-100 text-red-800' if category == 'error' else 'p-2 text-sm bg-green-100 text-green-800' }}">
-        {{ message }}
-        </li>
-    {% endfor %}
-    </ul>
-</div>
+                </div>
+                <!-- Fin del contenedor de la tabla -->
+            </div>            
+            <!-- FIN TABLA DE SEGUIMIENTO -->
 {% endif %}
-{% endwith %}
 
-                <div class="relative">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-10">
-                                        Participante
-                                    </th>
-                                    {% for evento in eventos %}
-                                    <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" 
-                                        title="{{ evento.nombre }}">
-                                        <div class="flex items-center justify-center gap-2">
-                                            {{ evento.codigo }} <br /> ({{ evento.fecha_formateada }})
-                                            <form method="POST" action="{{ url_for('asistencia.eliminar_evento', codigo=evento.codigo) }}" class="inline">
-                                                <button type="submit" class="text-red-500 hover:text-red-700">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                                    </svg>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </th>
-                                    {% endfor %}
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                {% for fila in tabla %}
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 sticky left-0 bg-white z-10">
-                                        <div class="flex items-center gap-2">
-                                            <div class="flex flex-col">
-                                                <span>{{ fila.cedula }}</span>
-                                                <div class="flex items-center gap-2">
-                                                    <span class="text-gray-500 text-xs" 
-                                                            onclick="makeEditable(this)"
-                                                            onblur="updateNombre(this, '{{ fila.cedula }}')"
-                                                            title="Haga clic para editar">
-                                                        {{ fila.nombre or 'Haga clic para añadir nombre' }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <form method="POST" action="{{ url_for('asistencia.eliminar_cedula', cedula=fila.cedula) }}" class="inline">
-                                                <button type="submit" class="text-red-500 hover:text-red-700">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                                    </svg>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                    {% for evento in eventos %}
-                                    <td class="px-6 py-4 whitespace-nowrap text-center">
-                                        {% if fila.asistencia[evento.codigo] %}
-                                        <span class="text-green-600">✅</span>
-                                        {% else %}
-                                        <span class="text-red-600">❌</span>
-                                        {% endif %}
-                                    </td>
-                                    {% endfor %}
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Footer -->
-                <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200">
-                    <div>
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto mb-6">
+                <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                    <!-- Header -->
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-xl font-semibold text-gray-800">
+                            Listas Guardadas
+                        </h2>
                         <p class="text-sm text-gray-600">
-                        <span class="font-semibold text-gray-800">{{ tabla|length }}</span> {{ 'participante en seguimiento' if tabla|length == 1 else 'participantes en seguimiento' }}
+                            Administre sus listas de seguimiento guardadas
                         </p>
                     </div>
-        
-                    <div>
-                        <div class="inline-flex gap-x-2">
-                            <a href="{{ url_for('asistencia.descargar_seguimiento') }}" 
-                                class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50">
-                                <svg class="flex-shrink-0 w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                                Descargar tabla de asistencia
-                            </a>
+                    <!-- Contenido -->
+                    <div class="p-6">
+                        <!-- Formulario para guardar lista actual -->
+                        <div id="saveListSection" class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900 mb-3">Guardar lista actual</h3>
+                            <form id="saveListForm" action="{{ url_for('asistencia.guardar_lista') }}" method="POST" class="flex gap-2">
+                                <div class="flex-grow">
+                                    <label for="nombre_lista" class="sr-only">Nombre de la lista</label>
+                                    <input type="text" name="nombre_lista" id="nombre_lista" 
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" 
+                                        placeholder="Ingrese un nombre para la lista" required>
+                                </div>
+                                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    <span id="saveButtonText">Guardar</span>
+                                    <svg id="saveSpinner" class="hidden -ml-1 mr-2 h-4 w-4 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Lista de listas guardadas -->
+                        <div id="savedListsSection">
+                            <h3 class="text-lg font-medium text-gray-900 mb-3">Tus listas guardadas</h3>
+                            {% if listas_guardadas %}
+                                <div class="overflow-hidden border border-gray-200 rounded-lg">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre de lista</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Participantes</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"># Eventos</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha de creación</th>
+                                                <th scope="col" class="relative px-6 py-3">
+                                                    <span class="sr-only">Acciones</span>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            {% for lista in listas_guardadas %}
+                                            <tr class="hover:bg-gray-50">
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                    {{ lista.nombre }}
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                    {{ lista.cedulas|length }}
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                    {{ lista.eventos|length }}
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                    {{ lista.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                    <a href="{{ url_for('asistencia.cargar_lista', lista_id=lista._id) }}" 
+                                                       class="text-blue-600 hover:text-blue-900 mr-4 inline-flex items-center"
+                                                       onclick="this.querySelector('svg').classList.add('animate-spin')">
+                                                        <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                                        </svg>
+                                                        Cargar lista y editar
+                                                    </a><br />
+                                                    <a href="{{ url_for('asistencia.eliminar_lista', lista_id=lista._id) }}" 
+                                                       class="text-red-600 hover:text-red-900"
+                                                       onclick="return confirm('¿Está seguro de que desea eliminar esta lista?')">
+                                                        Eliminar lista
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <h3 class="mt-2 text-sm font-medium text-gray-900">No hay listas guardadas</h3>
+                                    <p class="mt-1 text-sm text-gray-500">Guarde su primera lista para verla aquí.</p>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
-                <!-- End Footer -->
-
             </div>
-            <!-- Fin del contenedor de la tabla -->
-            </div>
-            {% endif %}
-            <!-- FIN TABLA DE SEGUIMIENTO -->
 
 {% include 'tablero-footer.html' %}
 
@@ -195,7 +317,7 @@
     </div>
     <!-- FIN CONTENIDO -->
 
-<!-- JS PLUGINS -->
+<!-- Scripts -->
 <script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
 <script>
 // Limpia campos dinámicos al cargar la página
@@ -334,6 +456,53 @@ function updateNombre(element, cedula) {
     document.body.appendChild(form);
     form.submit();
 }
+
+// Mostrar/ocultar listas guardadas
+function toggleSavedLists() {
+    const listsSection = document.getElementById('listas');
+    const toggleButton = document.querySelector('button[onclick="toggleSavedLists()"]');
+    const toggleText = document.getElementById('toggleListsText');
+    const toggleIcon = document.getElementById('toggleListsIcon');
+    
+    if (listsSection.classList.contains('hidden')) {
+        listsSection.classList.remove('hidden');
+        toggleText.textContent = 'Ocultar listas guardadas';
+        toggleIcon.classList.remove('rotate-0');
+        toggleIcon.classList.add('rotate-180');
+    } else {
+        listsSection.classList.add('hidden');
+        toggleText.textContent = 'Mostrar listas guardadas';
+        toggleIcon.classList.remove('rotate-180');
+        toggleIcon.classList.add('rotate-0');
+    }
+}
+
+// Manejar el envío del formulario de guardar lista
+document.addEventListener('DOMContentLoaded', function() {
+    const saveListForm = document.getElementById('saveListForm');
+    if (saveListForm) {
+        saveListForm.addEventListener('submit', function(e) {
+            const saveButton = this.querySelector('button[type="submit"]');
+            const saveButtonText = document.getElementById('saveButtonText');
+            const saveSpinner = document.getElementById('saveSpinner');
+            
+            if (saveButton && saveButtonText && saveSpinner) {
+                saveButton.disabled = true;
+                saveButtonText.textContent = 'Guardando...';
+                saveSpinner.classList.remove('hidden');
+            }
+        });
+    }
+    
+    // Mostrar mensajes flash si existen
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                showFlashMessage('{{ message }}', '{{ category }}');
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+});
 </script>
 </body>
 </html>
