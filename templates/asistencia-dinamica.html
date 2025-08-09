@@ -71,7 +71,7 @@
                                 <div class="flex gap-2">
                                     <button type="submit" 
                                         class="py-2 px-3 inline-flex justify-center items-center gap-2 rounded-md border border-transparent font-semibold bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all text-sm">
-                                        Actualizar seguimiento
+                                        Añadir al seguimiento
                                     </button>
                                 </div>
                             </div>
@@ -254,12 +254,10 @@
                                         <thead class="bg-gray-50">
                                             <tr>
                                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre de lista</th>
-                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Participantes</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"># Participantes</th>
                                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"># Eventos</th>
                                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha de creación</th>
-                                                <th scope="col" class="relative px-6 py-3">
-                                                    <span class="sr-only">Acciones</span>
-                                                </th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                                             </tr>
                                         </thead>
                                         <tbody class="bg-white divide-y divide-gray-200">
@@ -277,18 +275,13 @@
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                     {{ lista.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}
                                                 </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                    <a href="{{ url_for('asistencia.cargar_lista', lista_id=lista._id) }}" 
-                                                       class="text-blue-600 hover:text-blue-900 mr-4 inline-flex items-center"
-                                                       onclick="this.querySelector('svg').classList.add('animate-spin')">
-                                                        <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                                                        </svg>
+                                                <td class="px-6 py-4 whitespace-nowrap text-left text-sm font-medium">
+                                                    <a href="{{ url_for('asistencia.cargar_lista', lista_id=lista._id) }}" class="text-blue-600 hover:text-blue-900 mr-4 inline-flex items-center">
+                                                        <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list-restart-icon lucide-list-restart"><path d="M21 6H3"/><path d="M7 12H3"/><path d="M7 18H3"/><path d="M12 18a5 5 0 0 0 9-3 4.5 4.5 0 0 0-4.5-4.5c-1.33 0-2.54.54-3.41 1.41L11 14"/><path d="M11 10v4h4"/></svg>
                                                         Cargar lista y editar
                                                     </a><br />
-                                                    <a href="{{ url_for('asistencia.eliminar_lista', lista_id=lista._id) }}" 
-                                                       class="text-red-600 hover:text-red-900"
-                                                       onclick="return confirm('¿Está seguro de que desea eliminar esta lista?')">
+                                                    <a href="{{ url_for('asistencia.eliminar_lista', lista_id=lista._id) }}" class="text-red-600 hover:text-red-900 mr-4 inline-flex items-center" onclick="return confirm('¿Está seguro de que desea eliminar esta lista?')">
+                                                        <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list-x-icon lucide-list-x"><path d="M11 12H3"/><path d="M16 6H3"/><path d="M16 18H3"/><path d="m19 10-4 4"/><path d="m15 10 4 4"/></svg>
                                                         Eliminar lista
                                                     </a>
                                                 </td>
