@@ -3858,12 +3858,23 @@ def generar_pdf_participante(participante, afiche_path):
     unidad_evento = evento.get('unidad_ejecutora', 'Unidad ejecutora no disponible')
     carga_horaria_evento = evento.get('carga_horaria', '08')
     fecha_fin_evento = evento.get('fecha_fin')
-    fecha_fin_formateada = fecha_fin_evento.strftime('%d de %B de %Y')
-
     fecha_inicio_evento = evento.get('fecha_inicio')
-    fecha_inicio_formateada = fecha_inicio_evento.strftime('%d')
-
-    fecha_evento = evento.get('fecha_fin', 'Fecha no disponible')
+    
+    # Convert to date objects for comparison if they're strings
+    if isinstance(fecha_inicio_evento, str):
+        fecha_inicio_evento = datetime.strptime(fecha_inicio_evento, '%Y-%m-%d %H:%M:%S')
+    if isinstance(fecha_fin_evento, str):
+        fecha_fin_evento = datetime.strptime(fecha_fin_evento, '%Y-%m-%d %H:%M:%S')
+    
+    # Format dates based on same/different months
+    if fecha_inicio_evento.month == fecha_fin_evento.month:
+        # Same month: "05 al 06 de agosto de 2025"
+        fecha_inicio_formateada = fecha_inicio_evento.strftime('%d')
+        fecha_fin_formateada = f"{fecha_inicio_formateada} al {fecha_fin_evento.strftime('%d')} de {fecha_fin_evento.strftime('%B de %Y')}"
+    else:
+        # Different months: "31 de agosto al 02 de septiembre de 2025"
+        fecha_inicio_formateada = fecha_inicio_evento.strftime('%d de %B')
+        fecha_fin_formateada = f"{fecha_inicio_formateada} al {fecha_fin_evento.strftime('%d de %B de %Y')}"
 
     # Definir la ruta donde se guardará el PDF
     pdf_directory = 'static/certificados/'
@@ -3902,9 +3913,12 @@ def generar_pdf_participante(participante, afiche_path):
         draw_centered_text(3.2 * inch, f"{participante.get('titulo_ponencia', 'N/A')}", font="Helvetica-Bold", size=16)
     else:
         draw_centered_text(3.5 * inch, f"Actividad académica con una duración de {carga_horaria_evento} horas")
-        draw_centered_text(3.2 * inch, f"{fecha_inicio_formateada + ' al ' + fecha_fin_formateada if fecha_inicio_evento != fecha_fin_evento else fecha_fin_formateada}")
+        # Show the pre-formatted date range
+        draw_centered_text(3.2 * inch, fecha_fin_formateada)
 
-    draw_centered_text(2.7 * inch, f"Dado en la República de Panamá, Provincia de Panamá, el {fecha_fin_formateada}")
+    # Format just the end date for the 'Dado en...' line
+    fecha_fin_simple = fecha_fin_evento.strftime('%d de %B de %Y')
+    draw_centered_text(2.7 * inch, f"Dado en la República de Panamá, Provincia de Panamá, el {fecha_fin_simple}")
 
     # Código de certificado en la esquina superior derecha
     c.setFillColor("white")
@@ -4019,18 +4033,24 @@ def generar_constancia_asistencia(participante, afiche_path):
     carga_horaria_evento = evento.get('carga_horaria', '08')
     ue_evento = evento.get('unidad_ejecutora', 'Unidad ejecutora no disponible')
 
+    # Get start and end datetimes, converting from string if needed
     fi_evento = evento.get('fecha_inicio')
     if isinstance(fi_evento, str):
         fi_evento = datetime.strptime(fi_evento, '%Y-%m-%d %H:%M:%S')
-    # Formatear la fecha
-    fi_formateada = fi_evento.strftime('%d de %B de %Y')
-    fid_formateada = fi_evento.strftime('%d')
-
+    
     ff_evento = evento.get('fecha_fin')
     if isinstance(ff_evento, str):
         ff_evento = datetime.strptime(ff_evento, '%Y-%m-%d %H:%M:%S')
-    # Formatear la fecha
-    ff_formateada = ff_evento.strftime('%d de %B de %Y')
+    
+    # Format dates for display based on same/different months
+    if fi_evento.month == ff_evento.month:
+        # Same month: "05 al 06 de agosto de 2025"
+        fi_formateada = fi_evento.strftime('%d')
+        ff_formateada = f"{fi_formateada} al {ff_evento.strftime('%d')} de {ff_evento.strftime('%B de %Y')}"
+    else:
+        # Different months: "31 de agosto al 02 de septiembre de 2025"
+        fi_formateada = fi_evento.strftime('%d de %B')
+        ff_formateada = f"{fi_formateada} al {ff_evento.strftime('%d de %B de %Y')}"
 
     # fecha_inicio = datetime.strptime(fi_evento, '%Y-%m-%d')
     # fecha_fin = datetime.strptime(ff_evento, '%Y-%m-%d')
@@ -4086,10 +4106,11 @@ def generar_constancia_asistencia(participante, afiche_path):
         
         texto_constancia += f"participando los días {', '.join(dias_asistencia)}, "
 
+    # Always use the pre-formatted date range
     texto_constancia += (
         f"en el evento <b>'{titulo_evento}'</b>, realizado en modalidad "
         f"<b>{modalidad_evento.lower()}</b> y organizado por la unidad ejecutora <b>'{ue_evento}'</b>, "
-        f"{'los días ' + fid_formateada + ' al ' + ff_formateada if fi_evento != ff_evento else 'el día ' + ff_formateada} con una duración de {carga_horaria_evento} horas académicas."
+        f"el {ff_formateada} con una duración de {carga_horaria_evento} horas académicas."
     )
 
     # Crear un párrafo
