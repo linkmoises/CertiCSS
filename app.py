@@ -16,6 +16,8 @@ import hashlib
 import base64
 from io import BytesIO, StringIO
 import csv
+from enum import Enum
+from functools import wraps
 
 app = Flask(__name__)
 
@@ -42,6 +44,29 @@ collection_encuestas = db['encuestas']
 collection_qbanks = db['qbanks']
 collection_qbanks_data = db['qbanks_data']
 collection_exam_results = db['exam_results']
+
+# Roles de usuario
+class UserRole(str, Enum):
+    COORDINADOR_DEPARTAMENTAL = 'coordinador-departamental'
+    COORDINADOR_LOCAL = 'coordinador-local'
+    COORDINADOR_REGIONAL = 'coordinador-regional'
+    COORDINADOR_NACIONAL = 'coordinador-nacional'
+    SUBDIRECTOR_DOCENCIA = 'subdirector-docencia'
+    COORDINADOR_ADMINISTRATIVO = 'coordinador-administrativo'
+    DENADOI = 'denadoi'
+    SIMULACION = 'simulacion'
+    ADMINISTRADOR = 'administrador'  # Reservado, no se crea desde el formulario
+
+ALLOWED_USER_ROLES = {
+    UserRole.COORDINADOR_DEPARTAMENTAL.value,
+    UserRole.COORDINADOR_LOCAL.value,
+    UserRole.COORDINADOR_REGIONAL.value,
+    UserRole.COORDINADOR_NACIONAL.value,
+    UserRole.SUBDIRECTOR_DOCENCIA.value,
+    UserRole.COORDINADOR_ADMINISTRATIVO.value,
+    UserRole.DENADOI.value,
+    UserRole.SIMULACION.value,
+}
 
 
 ###
@@ -106,6 +131,23 @@ class User(UserMixin):
         self.foto = foto
         self.id = None
 
+    @property
+    def role(self):
+        try:
+            return UserRole(self.rol)
+        except ValueError:
+            return None
+
+    def has_role(self, role):
+        role_str = role.value if isinstance(role, UserRole) else str(role)
+        return self.rol == role_str
+
+    def has_any_role(self, roles):
+        return any(self.has_role(r) for r in roles)
+
+    def is_admin(self):
+        return self.rol == UserRole.ADMINISTRADOR.value
+
     def is_authenticated(self):
         return True
 
@@ -117,6 +159,24 @@ class User(UserMixin):
 
     def get_id(self):
         return str(self.id)
+
+
+def roles_required(*roles):
+    allowed = {r.value if isinstance(r, UserRole) else str(r) for r in roles}
+    def decorator(view_func):
+        @wraps(view_func)
+        def wrapped_view(*args, **kwargs):
+            if not current_user.is_authenticated:
+                return login_manager.unauthorized()
+            if current_user.rol not in allowed:
+                abort(403)
+            return view_func(*args, **kwargs)
+        return wrapped_view
+    return decorator
+
+
+def role_required(role):
+    return roles_required(role)
 
 
 ###
@@ -211,6 +271,11 @@ def registro():
         departamento = request.form['departamento']
         phone = request.form['phone']
         timestamp = datetime.now()
+
+        # Validar rol permitido
+        if rol not in ALLOWED_USER_ROLES and rol != UserRole.ADMINISTRADOR.value:
+            flash('Rol inválido.', 'error')
+            return redirect(url_for('registro'))
 
         # Verificar si el usuario ya existe
         if collection_usuarios.find_one({"email": email}):
@@ -374,6 +439,11 @@ def editar_usuario(user_id):
 
         jefe = request.form.get('jefe') == 'on' if 'jefe' in request.form else usuario.get('jefe', False)
         subjefe = request.form.get('subjefe') == 'on' if 'subjefe' in request.form else usuario.get('subjefe', False)
+
+        # Validar rol permitido
+        if rol not in ALLOWED_USER_ROLES and rol != UserRole.ADMINISTRADOR.value:
+            flash('Rol inválido.', 'error')
+            return redirect(url_for('editar_usuario', user_id=user_id))
 
         # Crear un diccionario con los nuevos datos
         updated_user_data = {
@@ -699,75 +769,53 @@ def catalogo(page=1):
 ###
 @app.route('/tablero')
 @login_required
+# Ejemplo: restringir tablero a varios roles (ajustable según lógica de negocio)
+@roles_required(
+    UserRole.COORDINADOR_DEPARTAMENTAL,
+    UserRole.COORDINADOR_LOCAL,
+    UserRole.COORDINADOR_REGIONAL,
+    UserRole.COORDINADOR_NACIONAL,
+    UserRole.SUBDIRECTOR_DOCENCIA,
+    UserRole.COORDINADOR_ADMINISTRATIVO,
+    UserRole.DENADOI,
+    UserRole.SIMULACION,
+    UserRole.ADMINISTRADOR,
+)
 def tablero_coordinadores():
 
-    ## Tarjetas
-
-    # Obtener el número total de usuarios
-    total_usuarios = collection_usuarios.count_documents({"rol": {"$ne": "administrador"}})
-    # Obtener el número total de eventos
+    # Tarjetas
+    total_usuarios = collection_usuarios.count_documents({"rol": {"$ne": UserRole.ADMINISTRADOR.value}})
     total_eventos = collection_eventos.count_documents({})
-    # Contar el número total de ponentes
     total_ponentes = collection_participantes.count_documents({"rol": "ponente"})
-    # Contar el número total de participantes
     total_participantes = collection_participantes.count_documents({"rol": "participante"})
 
-    ## Resumen Eventos
-
-    # Consulta de eventos próximos y en curso si hay alguno en la consulta
-    ahora = datetime.utcnow()
-    # Normaliza al inicio del día actual
+    # Próximos eventos (no borrador) desde el inicio del día
     inicio_hoy = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    # Consulta a MongoDB para incluir desde el inicio del día actual en adelante
-    eventos_prox = collection_eventos.find({ 'fecha_inicio': {'$gte': inicio_hoy} }).sort('fecha_inicio').limit(5)
-    eventos_prox_list = list(eventos_prox)
+    eventos_cursor = collection_eventos.find({
+        "fecha_inicio": {"$gte": inicio_hoy},
+        "estado_evento": {"$ne": "borrador"}
+    }).sort("fecha_inicio", 1).limit(5)
 
-    #Etiqueta de estado
-    eventos_prox_list_estado = []
-    for evento in eventos_prox_list:
-        fecha_inicio = evento['fecha_inicio']
-        if fecha_inicio.date() == ahora.date():
-            evento['estado'] = 'En curso'
-        elif fecha_inicio.date() < ahora.date():
-            evento['estado'] = 'Finalizado'
-        else:
-            evento['estado'] = 'Publicado'
+    eventos = list(eventos_cursor)
 
-        # Verificar si el usuario es organizador o coorganizador en cada evento
+    # Marcar si el usuario es organizador de cada evento
+    for evento in eventos:
         es_organizador = collection_participantes.find_one({
-            "codigo_evento": evento["codigo"],
+            "codigo_evento": evento.get("codigo"),
             "cedula": str(current_user.cedula),
             "rol": "coorganizador",
-        }) is not None 
-
+        }) is not None or (str(current_user.id) == str(evento.get("autor")))
         evento["es_organizador"] = es_organizador
-        
-        # Para depuración
-        print(f"Evento {evento['codigo']}, es_organizador: {es_organizador}")
-        
-        eventos_prox_list_estado.append(evento)  # CORREGIDO: añadir el evento solo una vez
 
-    num_eventos = len(eventos_prox_list)
-
-    usuarios_recientes = list(collection_usuarios.find({"rol": {"$ne": "administrador"}}).sort("fecha_registro", 1).limit(5))
-
-    num_usuarios_recientes = len(usuarios_recientes)
-
-    for usuario in usuarios_recientes:
-        usuario['foto_url'] = f"/static/usuarios/{usuario['foto']}" if usuario.get('foto') else "/static/assets/user-avatar.png"
+    num_eventos = len(eventos)
 
     return render_template('tablero.html',
-        eventos=eventos_prox_list,
-        eventos_estado=eventos_prox_list_estado,
-        ahora=ahora,
-        num_eventos=num_eventos,
-        usuarios=usuarios_recientes,
-        num_usuarios=num_usuarios_recientes,
-        active_section='tablero',
         total_usuarios=total_usuarios,
         total_eventos=total_eventos,
         total_ponentes=total_ponentes,
         total_participantes=total_participantes,
+        eventos=eventos,
+        num_eventos=num_eventos
     )
 
 
