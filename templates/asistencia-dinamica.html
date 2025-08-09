@@ -92,10 +92,10 @@
                                 <h2 class="text-xl font-semibold text-gray-800">
                                     Seguimiento de Asistencia
                                 </h2>
-                                <div class="mt-1">
-                                    <p class="text-sm text-gray-600 inline-block mr-4"><span class="font-medium">Eventos:</span> {{ eventos|length }}</p>
-                                    <p class="text-sm text-gray-600 inline-block"><span class="font-medium">Participantes:</span> {{ tabla|length }}</p>
-                                </div>
+                                <p class="text-sm text-gray-600">
+                                    <span class="font-semibold text-gray-800">{{ tabla|length }}</span> {{ 'participante y' if tabla|length == 1 else 'participantes y' }}
+                                    <span class="font-semibold text-gray-800">{{ eventos|length }}</span> {{ 'evento en seguimiento' if eventos|length == 1 else 'eventos en seguimiento' }}
+                                </p>
                             </div>
                             <form method="POST" action="{{ url_for('asistencia.limpiar_seguimiento') }}" class="inline">
                                 <button type="submit" 
@@ -190,7 +190,8 @@
                     <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200">
                         <div>
                             <p class="text-sm text-gray-600">
-                            <span class="font-semibold text-gray-800">{{ tabla|length }}</span> {{ 'participante en seguimiento' if tabla|length == 1 else 'participantes en seguimiento' }}
+                                <span class="font-semibold text-gray-800">{{ tabla|length }}</span> {{ 'participante y' if tabla|length == 1 else 'participantes y' }}
+                                <span class="font-semibold text-gray-800">{{ eventos|length }}</span> {{ 'evento en seguimiento' if eventos|length == 1 else 'eventos en seguimiento' }}
                             </p>
                         </div>
             
