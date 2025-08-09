@@ -42,11 +42,31 @@ def asistencia_dinamica():
         cedulas_texto = request.form.get('cedulas', '').strip()
         eventos_texto = request.form.get('eventos', '').strip()
         
-        # Convertir el texto en listas, eliminando líneas vacías
-        cedulas_nuevas = [c.strip() for c in cedulas_texto.split('\n') if c.strip()]
+        # Procesar cada línea de cédulas
+        cedulas_nuevas = []
+        for line in cedulas_texto.split('\n'):
+            line = line.strip()
+            if not line:
+                continue
+                
+            # Verificar si la línea tiene el formato "cedula, nombre"
+            if ',' in line:
+                parts = [p.strip() for p in line.split(',', 1)]  # Dividir solo en la primera coma
+                if len(parts) == 2 and parts[0] and parts[1]:
+                    cedula = parts[0]
+                    nombre = parts[1]
+                    # Agregar al historial de nombres
+                    session['nombres_historial'][cedula] = nombre
+                    cedulas_nuevas.append(cedula)
+                    continue
+            
+            # Si no tiene formato de nombre, agregar como está
+            cedulas_nuevas.append(line)
+        
+        # Procesar códigos de evento
         codigos_evento_nuevos = [e.strip() for e in eventos_texto.split('\n') if e.strip()]
         
-        # Combinar con el historial existente
+        # Combinar con el historial existente (usar set para evitar duplicados)
         session['cedulas_historial'] = list(set(session['cedulas_historial'] + cedulas_nuevas))
         session['eventos_historial'] = list(set(session['eventos_historial'] + codigos_evento_nuevos))
         
