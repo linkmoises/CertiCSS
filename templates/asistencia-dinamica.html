@@ -109,7 +109,7 @@
                                     <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" 
                                         title="{{ evento.nombre }}">
                                         <div class="flex items-center justify-center gap-2">
-                                            {{ evento.codigo }}
+                                            {{ evento.codigo }} <br /> ({{ evento.fecha_formateada }})
                                             <form method="POST" action="{{ url_for('asistencia.eliminar_evento', codigo=evento.codigo) }}" class="inline">
                                                 <button type="submit" class="text-red-500 hover:text-red-700">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

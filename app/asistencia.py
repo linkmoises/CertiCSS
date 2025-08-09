@@ -75,6 +75,22 @@ def asistencia_dinamica():
         {"codigo": {"$in": session['eventos_historial']}},
         {"_id": 0, "codigo": 1, "nombre": 1, "fecha_inicio": 1}
     ).sort("fecha_inicio", 1))
+    
+    # Formatear fechas
+    for evento in eventos:
+        if 'fecha_inicio' in evento and evento['fecha_inicio']:
+            if isinstance(evento['fecha_inicio'], str):
+                try:
+                    fecha = datetime.strptime(evento['fecha_inicio'], '%Y-%m-%d')
+                    evento['fecha_formateada'] = fecha.strftime('%d/%m/%y')
+                except (ValueError, TypeError):
+                    evento['fecha_formateada'] = evento['fecha_inicio']
+            elif hasattr(evento['fecha_inicio'], 'strftime'):
+                evento['fecha_formateada'] = evento['fecha_inicio'].strftime('%d/%m/%y')
+            else:
+                evento['fecha_formateada'] = str(evento['fecha_inicio'])
+        else:
+            evento['fecha_formateada'] = ''
 
     # Validar que todos los códigos de evento existan
     codigos_encontrados = {evento["codigo"] for evento in eventos}
@@ -212,18 +228,33 @@ def descargar_seguimiento():
         flash('No hay datos de seguimiento para descargar', 'warning')
         return redirect(url_for('asistencia.asistencia_dinamica'))
 
-    # Obtener los eventos
+    # Obtener los eventos con su fecha de inicio
     eventos = list(collection_eventos.find(
         {"codigo": {"$in": seguimiento.get('eventos', [])}},
-        {"_id": 0, "codigo": 1, "nombre": 1}
+        {"_id": 0, "codigo": 1, "nombre": 1, "fecha_inicio": 1}
     ))
 
     # Crear un buffer en memoria para el CSV
     output = io.StringIO()
     writer = csv.writer(output)
 
-    # Escribir el encabezado
-    header = ['Cédula', 'Nombre'] + [f"{evento['codigo']} ({evento['nombre']})" for evento in eventos]
+    # Escribir el encabezado con la fecha de inicio formateada
+    header = ['Cédula', 'Nombre']
+    for evento in eventos:
+        fecha_str = ''
+        if 'fecha_inicio' in evento and evento['fecha_inicio']:
+            if isinstance(evento['fecha_inicio'], str):
+                # Si es string, intentar convertir a datetime
+                try:
+                    fecha = datetime.strptime(evento['fecha_inicio'], '%Y-%m-%d')
+                    fecha_str = fecha.strftime('%d/%m/%y')
+                except (ValueError, TypeError):
+                    fecha_str = 'Fecha no disponible'
+            elif isinstance(evento['fecha_inicio'], datetime):
+                # Si ya es un objeto datetime
+                fecha_str = evento['fecha_inicio'].strftime('%d/%m/%y')
+        
+        header.append(f"{evento['codigo']} ({fecha_str})")
     writer.writerow(header)
 
     # Escribir los datos

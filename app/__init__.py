@@ -1,12 +1,31 @@
 from flask import Flask
 from pymongo import MongoClient
 from config import config
+from datetime import datetime
 # from app.auth import token_required
 # from flask_login import login_required, current_user
 
 # Inicializar Flask
 app = Flask(__name__)
 app.config.from_object(config)                  # importado de config.py
+
+# Filtro personalizado para formatear fechas
+def format_date(value, format='%d/%m/%y'):
+    if not value:
+        return ''
+    if isinstance(value, str):
+        try:
+            # Intentar convertir de string a datetime
+            value = datetime.strptime(value, '%Y-%m-%d')
+        except (ValueError, TypeError):
+            return value
+    try:
+        return value.strftime(format)
+    except (AttributeError, ValueError):
+        return value
+
+# Registrar el filtro en la aplicación
+app.jinja_env.filters['date'] = format_date                  # importado de config.py
 
 # Configuración de MongoDB
 client = MongoClient(config.MONGO_URI)          # importado de config.py
