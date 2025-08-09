@@ -3866,8 +3866,11 @@ def generar_pdf_participante(participante, afiche_path):
     if isinstance(fecha_fin_evento, str):
         fecha_fin_evento = datetime.strptime(fecha_fin_evento, '%Y-%m-%d %H:%M:%S')
     
-    # Format dates based on same/different months
-    if fecha_inicio_evento.month == fecha_fin_evento.month:
+    # Format dates based on same/different months and days
+    if fecha_inicio_evento.date() == fecha_fin_evento.date():
+        # Single day event: "05 de agosto de 2025"
+        fecha_fin_formateada = fecha_fin_evento.strftime('%d de %B de %Y')
+    elif fecha_inicio_evento.month == fecha_fin_evento.month:
         # Same month: "05 al 06 de agosto de 2025"
         fecha_inicio_formateada = fecha_inicio_evento.strftime('%d')
         fecha_fin_formateada = f"{fecha_inicio_formateada} al {fecha_fin_evento.strftime('%d')} de {fecha_fin_evento.strftime('%B de %Y')}"
