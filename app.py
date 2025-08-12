@@ -44,6 +44,7 @@ collection_encuestas = db['encuestas']
 collection_qbanks = db['qbanks']
 collection_qbanks_data = db['qbanks_data']
 collection_exam_results = db['exam_results']
+collection_participantes_temporales = db['participantes_temporales']
 
 # Roles de usuario
 class UserRole(str, Enum):
@@ -955,6 +956,548 @@ def redirigir_ruta_corta(codigo_evento):
 
 
 ###
+### Check-in system for large events (100+ people)
+###
+@app.route('/checkin/<codigo_evento>')
+@login_required
+def checkin_evento(codigo_evento):
+    # Verificar si el evento existe
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+    
+    # Verificar si el usuario tiene permisos para gestionar este evento
+    if not (current_user.rol == 'administrador' or 
+            current_user.rol == 'denadoi' or 
+            str(current_user.id) == str(evento.get("autor")) or
+            collection_participantes.find_one({
+                "codigo_evento": codigo_evento,
+                "cedula": str(current_user.cedula),
+                "rol": "coorganizador"
+            })):
+        abort(403)
+    
+    # Obtener estadísticas del evento
+    total_temporales = collection_participantes_temporales.count_documents({"codigo_evento": codigo_evento})
+    total_confirmados = collection_participantes.count_documents({
+        "codigo_evento": codigo_evento, 
+        "rol": "participante",
+        "origen": "checkin"
+    })
+    
+    # Estadísticas de material educativo
+    material_entregado = collection_participantes.count_documents({
+        "codigo_evento": codigo_evento,
+        "rol": "participante", 
+        "origen": "checkin",
+        "material_entregado": True
+    })
+    
+    return render_template('checkin_evento.html', 
+                         evento=evento, 
+                         total_temporales=total_temporales,
+                         total_confirmados=total_confirmados,
+                         material_entregado=material_entregado)
+
+
+@app.route('/checkin/<codigo_evento>/upload', methods=['GET', 'POST'])
+@login_required
+def upload_participantes_csv(codigo_evento):
+    # Verificar si el evento existe
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+    
+    # Verificar permisos
+    if not (current_user.rol == 'administrador' or 
+            current_user.rol == 'denadoi' or 
+            str(current_user.id) == str(evento.get("autor")) or
+            collection_participantes.find_one({
+                "codigo_evento": codigo_evento,
+                "cedula": str(current_user.cedula),
+                "rol": "coorganizador"
+            })):
+        abort(403)
+    
+    if request.method == 'POST':
+        if 'csv_file' not in request.files:
+            flash('No se seleccionó ningún archivo.', 'error')
+            return redirect(request.url)
+        
+        file = request.files['csv_file']
+        if file.filename == '':
+            flash('No se seleccionó ningún archivo.', 'error')
+            return redirect(request.url)
+        
+        if file and file.filename.lower().endswith('.csv'):
+            try:
+                # Leer el archivo CSV
+                stream = StringIO(file.stream.read().decode("UTF8"), newline=None)
+                csv_input = csv.DictReader(stream)
+                
+                participantes_insertados = 0
+                participantes_duplicados = 0
+                
+                for row in csv_input:
+                    # Validar campos requeridos
+                    if not all(key in row and row[key].strip() for key in ['nombres', 'apellidos', 'cedula', 'perfil', 'region', 'unidad']):
+                        continue
+                    
+                    # Verificar si ya existe
+                    if collection_participantes_temporales.find_one({
+                        "codigo_evento": codigo_evento,
+                        "cedula": row['cedula'].strip()
+                    }):
+                        participantes_duplicados += 1
+                        continue
+                    
+                    # Insertar participante temporal
+                    collection_participantes_temporales.insert_one({
+                        'nombres': row['nombres'].strip(),
+                        'apellidos': row['apellidos'].strip(),
+                        'cedula': row['cedula'].strip(),
+                        'perfil': row['perfil'].strip(),
+                        'region': row['region'].strip(),
+                        'unidad': row['unidad'].strip(),
+                        'codigo_evento': codigo_evento,
+                        'timestamp': datetime.now(),
+                        'asistencia_confirmada': False,
+                        'material_entregado': False,
+                        'fecha_checkin': None
+                    })
+                    participantes_insertados += 1
+                
+                flash(f'Se cargaron {participantes_insertados} participantes. {participantes_duplicados} duplicados omitidos.', 'success')
+                log_event(f"Usuario [{current_user.email}] cargó {participantes_insertados} participantes temporales para evento {codigo_evento}.")
+                
+            except Exception as e:
+                flash(f'Error al procesar el archivo CSV: {str(e)}', 'error')
+                
+            return redirect(url_for('checkin_evento', codigo_evento=codigo_evento))
+    
+    return render_template('upload_csv.html', evento=evento)
+
+
+@app.route('/checkin/<codigo_evento>/validar', methods=['GET', 'POST'])
+@login_required
+def validar_asistencia(codigo_evento):
+    # Verificar si el evento existe
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+    
+    # Verificar permisos
+    if not (current_user.rol == 'administrador' or 
+            current_user.rol == 'denadoi' or 
+            str(current_user.id) == str(evento.get("autor")) or
+            collection_participantes.find_one({
+                "codigo_evento": codigo_evento,
+                "cedula": str(current_user.cedula),
+                "rol": "coorganizador"
+            })):
+        abort(403)
+    
+    if request.method == 'POST':
+        cedula = request.form.get('cedula', '').strip()
+        material_entregado = request.form.get('material_entregado') == 'on'
+        
+        if not cedula:
+            flash('Debe ingresar un número de cédula.', 'error')
+            return redirect(request.url)
+        
+        # Buscar en participantes temporales
+        participante_temporal = collection_participantes_temporales.find_one({
+            "codigo_evento": codigo_evento,
+            "cedula": cedula
+        })
+        
+        if not participante_temporal:
+            flash('Participante no encontrado en la lista de preregistrados.', 'error')
+            return redirect(request.url)
+        
+        # Verificar si ya fue confirmado hoy
+        hoy = datetime.now().strftime('%Y%m%d')
+        participante_confirmado_hoy = collection_participantes.find_one({
+            "codigo_evento": codigo_evento,
+            "cedula": cedula,
+            "indice_registro": hoy,
+            "origen": "checkin"
+        })
+        
+        if participante_confirmado_hoy:
+            flash('Este participante ya confirmó su asistencia hoy.', 'warning')
+            return redirect(request.url)
+        
+        # Verificar si ya recibió material educativo en días anteriores
+        material_ya_entregado = collection_participantes.find_one({
+            "codigo_evento": codigo_evento,
+            "cedula": cedula,
+            "origen": "checkin",
+            "material_entregado": True
+        })
+        
+        # Si ya recibió material, no permitir marcarlo nuevamente
+        if material_ya_entregado:
+            material_entregado = False  # Forzar a False porque ya lo recibió antes
+        else:
+            material_entregado = request.form.get('material_entregado') == 'on'
+        
+        # Generar nanoid
+        nanoid = generate_nanoid(cedula, codigo_evento)
+        
+        # Insertar en participantes confirmados
+        collection_participantes.insert_one({
+            'nombres': participante_temporal['nombres'],
+            'apellidos': participante_temporal['apellidos'],
+            'cedula': participante_temporal['cedula'],
+            'rol': 'participante',
+            'perfil': participante_temporal['perfil'],
+            'region': participante_temporal['region'],
+            'unidad': participante_temporal['unidad'],
+            'codigo_evento': codigo_evento,
+            'nanoid': nanoid,
+            'timestamp': datetime.now(),
+            'indice_registro': hoy,
+            'tipo_evento': 'Presencial',
+            'origen': 'checkin',
+            'material_entregado': material_entregado,
+            'fecha_checkin': datetime.now()
+        })
+        
+        # Actualizar participante temporal
+        collection_participantes_temporales.update_one(
+            {"_id": participante_temporal["_id"]},
+            {"$set": {
+                "asistencia_confirmada": True,
+                "material_entregado": material_entregado,
+                "fecha_checkin": datetime.now()
+            }}
+        )
+        
+        # Mensaje personalizado según entrega de material
+        if material_ya_entregado:
+            flash(f'Asistencia confirmada para {participante_temporal["nombres"]} {participante_temporal["apellidos"]}. Material educativo ya fue entregado anteriormente.', 'success')
+        elif material_entregado:
+            flash(f'Asistencia confirmada para {participante_temporal["nombres"]} {participante_temporal["apellidos"]}. Material educativo entregado.', 'success')
+        else:
+            flash(f'Asistencia confirmada para {participante_temporal["nombres"]} {participante_temporal["apellidos"]}.', 'success')
+        
+        log_event(f"Usuario [{current_user.email}] confirmó asistencia de {cedula} en evento {codigo_evento}. Material: {'Ya entregado' if material_ya_entregado else 'Entregado' if material_entregado else 'No entregado'}.")
+        
+        return redirect(request.url)
+    
+    return render_template('validar_asistencia.html', evento=evento)
+
+
+@app.route('/checkin/<codigo_evento>/participantes')
+@login_required
+def listar_participantes_temporales(codigo_evento):
+    # Verificar si el evento existe
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+    
+    # Verificar permisos
+    if not (current_user.rol == 'administrador' or 
+            current_user.rol == 'denadoi' or 
+            str(current_user.id) == str(evento.get("autor")) or
+            collection_participantes.find_one({
+                "codigo_evento": codigo_evento,
+                "cedula": str(current_user.cedula),
+                "rol": "coorganizador"
+            })):
+        abort(403)
+    
+    # Obtener participantes temporales
+    participantes_temporales = list(collection_participantes_temporales.find(
+        {"codigo_evento": codigo_evento}
+    ).sort("apellidos", 1))
+    
+    return render_template('participantes_temporales.html', 
+                         evento=evento, 
+                         participantes=participantes_temporales)
+
+
+@app.route('/api/checkin/<codigo_evento>/buscar/<cedula>')
+@login_required
+def buscar_participante_temporal(codigo_evento, cedula):
+    # Verificar si el evento existe
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        return jsonify({"error": "Evento no encontrado"}), 404
+    
+    # Verificar permisos
+    if not (current_user.rol == 'administrador' or 
+            current_user.rol == 'denadoi' or 
+            str(current_user.id) == str(evento.get("autor")) or
+            collection_participantes.find_one({
+                "codigo_evento": codigo_evento,
+                "cedula": str(current_user.cedula),
+                "rol": "coorganizador"
+            })):
+        return jsonify({"error": "Sin permisos"}), 403
+    
+    # Buscar participante temporal
+    participante = collection_participantes_temporales.find_one({
+        "codigo_evento": codigo_evento,
+        "cedula": cedula
+    })
+    
+    if not participante:
+        return jsonify({"encontrado": False})
+    
+    # Verificar si ya fue confirmado hoy
+    hoy = datetime.now().strftime('%Y%m%d')
+    ya_confirmado_hoy = collection_participantes.find_one({
+        "codigo_evento": codigo_evento,
+        "cedula": cedula,
+        "indice_registro": hoy,
+        "origen": "checkin"
+    })
+    
+    # Verificar si ya recibió material educativo en cualquier día
+    material_ya_entregado = collection_participantes.find_one({
+        "codigo_evento": codigo_evento,
+        "cedula": cedula,
+        "origen": "checkin",
+        "material_entregado": True
+    })
+    
+    return jsonify({
+        "encontrado": True,
+        "nombres": participante["nombres"],
+        "apellidos": participante["apellidos"],
+        "perfil": participante["perfil"],
+        "region": participante["region"],
+        "unidad": participante["unidad"],
+        "ya_confirmado": bool(ya_confirmado_hoy),
+        "material_ya_entregado": bool(material_ya_entregado),
+        "asistencia_confirmada": participante.get("asistencia_confirmada", False)
+    })
+
+
+@app.route('/checkin/<codigo_evento>/export')
+@login_required
+def export_checkin_data(codigo_evento):
+    # Verificar si el evento existe
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+    
+    # Verificar permisos
+    if not (current_user.rol == 'administrador' or 
+            current_user.rol == 'denadoi' or 
+            str(current_user.id) == str(evento.get("autor")) or
+            collection_participantes.find_one({
+                "codigo_evento": codigo_evento,
+                "cedula": str(current_user.cedula),
+                "rol": "coorganizador"
+            })):
+        abort(403)
+    
+    # Obtener datos de check-in
+    participantes_temporales = list(collection_participantes_temporales.find(
+        {"codigo_evento": codigo_evento}
+    ).sort("apellidos", 1))
+    
+    participantes_confirmados = list(collection_participantes.find({
+        "codigo_evento": codigo_evento,
+        "origen": "checkin"
+    }).sort("apellidos", 1))
+    
+    # Crear CSV
+    output = StringIO()
+    writer = csv.writer(output)
+    
+    # Encabezados
+    writer.writerow([
+        'Nombres', 'Apellidos', 'Cedula', 'Perfil', 'Region', 'Unidad',
+        'Estado', 'Material_Entregado', 'Fecha_Checkin', 'Fecha_Preregistro'
+    ])
+    
+    # Crear diccionario de confirmados para búsqueda rápida
+    confirmados_dict = {p['cedula']: p for p in participantes_confirmados}
+    
+    # Escribir datos
+    for temp in participantes_temporales:
+        confirmado = confirmados_dict.get(temp['cedula'])
+        
+        writer.writerow([
+            temp['nombres'],
+            temp['apellidos'],
+            temp['cedula'],
+            temp['perfil'],
+            temp['region'],
+            temp['unidad'],
+            'Confirmado' if confirmado else 'Pendiente',
+            'Sí' if confirmado and confirmado.get('material_entregado') else 'No',
+            confirmado['fecha_checkin'].strftime('%Y-%m-%d %H:%M:%S') if confirmado and confirmado.get('fecha_checkin') else '',
+            temp['timestamp'].strftime('%Y-%m-%d %H:%M:%S')
+        ])
+    
+    # Preparar respuesta
+    output.seek(0)
+    
+    return Response(
+        output.getvalue(),
+        mimetype='text/csv',
+        headers={
+            'Content-Disposition': f'attachment; filename=checkin_{codigo_evento}_{datetime.now().strftime("%Y%m%d")}.csv'
+        }
+    )
+
+
+@app.route('/api/checkin/<codigo_evento>/stats')
+@login_required
+def checkin_stats(codigo_evento):
+    # Verificar si el evento existe
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        return jsonify({"error": "Evento no encontrado"}), 404
+    
+    # Verificar permisos
+    if not (current_user.rol == 'administrador' or 
+            current_user.rol == 'denadoi' or 
+            str(current_user.id) == str(evento.get("autor")) or
+            collection_participantes.find_one({
+                "codigo_evento": codigo_evento,
+                "cedula": str(current_user.cedula),
+                "rol": "coorganizador"
+            })):
+        return jsonify({"error": "Sin permisos"}), 403
+    
+    # Obtener estadísticas
+    total_temporales = collection_participantes_temporales.count_documents({"codigo_evento": codigo_evento})
+    total_confirmados = collection_participantes.count_documents({
+        "codigo_evento": codigo_evento, 
+        "rol": "participante",
+        "origen": "checkin"
+    })
+    
+    # Estadísticas por día (últimos 7 días)
+    stats_por_dia = []
+    for i in range(7):
+        fecha = datetime.now() - timedelta(days=i)
+        indice = fecha.strftime('%Y%m%d')
+        confirmados_dia = collection_participantes.count_documents({
+            "codigo_evento": codigo_evento,
+            "rol": "participante", 
+            "origen": "checkin",
+            "indice_registro": indice
+        })
+        stats_por_dia.append({
+            "fecha": fecha.strftime('%Y-%m-%d'),
+            "confirmados": confirmados_dia
+        })
+    
+    return jsonify({
+        "total_temporales": total_temporales,
+        "total_confirmados": total_confirmados,
+        "porcentaje_asistencia": round((total_confirmados / total_temporales * 100) if total_temporales > 0 else 0, 1),
+        "stats_por_dia": stats_por_dia
+    })
+
+
+@app.route('/checkin/<codigo_evento>/material')
+@login_required
+def listado_material_educativo(codigo_evento):
+    # Verificar si el evento existe
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+    
+    # Verificar permisos
+    if not (current_user.rol == 'administrador' or 
+            current_user.rol == 'denadoi' or 
+            str(current_user.id) == str(evento.get("autor")) or
+            collection_participantes.find_one({
+                "codigo_evento": codigo_evento,
+                "cedula": str(current_user.cedula),
+                "rol": "coorganizador"
+            })):
+        abort(403)
+    
+    # Obtener participantes confirmados con información de material
+    participantes_confirmados = list(collection_participantes.find({
+        "codigo_evento": codigo_evento,
+        "rol": "participante",
+        "origen": "checkin"
+    }).sort([("fecha_checkin", -1), ("apellidos", 1)]))
+    
+    # Estadísticas de material
+    total_confirmados = len(participantes_confirmados)
+    material_entregado = len([p for p in participantes_confirmados if p.get('material_entregado', False)])
+    material_pendiente = total_confirmados - material_entregado
+    
+    return render_template('listado_material.html', 
+                         evento=evento, 
+                         participantes=participantes_confirmados,
+                         total_confirmados=total_confirmados,
+                         material_entregado=material_entregado,
+                         material_pendiente=material_pendiente)
+
+
+@app.route('/api/checkin/<codigo_evento>/marcar-material', methods=['POST'])
+@login_required
+def marcar_material_entregado(codigo_evento):
+    # Verificar si el evento existe
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        return jsonify({"error": "Evento no encontrado"}), 404
+    
+    # Verificar permisos
+    if not (current_user.rol == 'administrador' or 
+            current_user.rol == 'denadoi' or 
+            str(current_user.id) == str(evento.get("autor")) or
+            collection_participantes.find_one({
+                "codigo_evento": codigo_evento,
+                "cedula": str(current_user.cedula),
+                "rol": "coorganizador"
+            })):
+        return jsonify({"error": "Sin permisos"}), 403
+    
+    data = request.get_json()
+    cedula = data.get('cedula')
+    
+    if not cedula:
+        return jsonify({"error": "Cédula requerida"}), 400
+    
+    # Buscar y actualizar el participante
+    result = collection_participantes.update_one(
+        {
+            "codigo_evento": codigo_evento,
+            "cedula": cedula,
+            "rol": "participante",
+            "origen": "checkin"
+        },
+        {
+            "$set": {
+                "material_entregado": True
+            }
+        }
+    )
+    
+    if result.modified_count > 0:
+        # También actualizar en participantes temporales si existe
+        collection_participantes_temporales.update_one(
+            {
+                "codigo_evento": codigo_evento,
+                "cedula": cedula
+            },
+            {
+                "$set": {
+                    "material_entregado": True
+                }
+            }
+        )
+        
+        log_event(f"Usuario [{current_user.email}] marcó material entregado para {cedula} en evento {codigo_evento}.")
+        return jsonify({"success": True})
+    else:
+        return jsonify({"error": "Participante no encontrado"}), 404
+
+
+###
 ### Formulario de preregistro
 ###
 @app.route('/preregistro/<codigo_evento>', methods=['GET', 'POST'])
@@ -1709,6 +2252,7 @@ def crear_evento():
         carga_horaria = request.form['carga_horaria']
         modalidad = request.form['modalidad']
         descripcion = request.form['descripcion']
+        checkin_masivo = request.form.get('checkin_masivo') == 'on'
 
         fecha_inicio_str = request.form['fecha_inicio']
         fecha_fin_str = request.form['fecha_fin']
@@ -1789,7 +2333,8 @@ def crear_evento():
             'programa': programa_path if programa_file else None,
             'certificado': certificado_path if certificado_file else None,
             'timestamp': timestamp,
-            'autor': current_user.id
+            'autor': current_user.id,
+            'checkin_masivo': checkin_masivo
         })
         log_event(f"Usuario [{current_user.email}] ha creado el evento {codigo} exitosamente.")
         return redirect(url_for('mis_eventos'))  # Redirigir a la lista de eventos
@@ -1833,6 +2378,7 @@ def editar_evento(codigo_evento):
         descripcion = request.form['descripcion']
         cupos = request.form['cupos']
         carga_horaria = request.form['carga_horaria']
+        checkin_masivo = request.form.get('checkin_masivo') == 'on'
         fecha_inicio_str = request.form['fecha_inicio']
         fecha_fin_str = request.form['fecha_fin']
 
@@ -1899,6 +2445,7 @@ def editar_evento(codigo_evento):
                 'descripcion': descripcion,
                 'cupos': cupos,
                 'carga_horaria': carga_horaria,
+                'checkin_masivo': checkin_masivo,
                 'fecha_inicio': fecha_inicio,
                 'fecha_fin': fecha_fin,
                 'estado_evento': estado_evento,

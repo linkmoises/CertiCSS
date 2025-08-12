@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Cargar Participantes CSV - {{ evento.nombre }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- favicons -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
+    <meta name="apple-mobile-web-app-title" content="CertiCSS" />
+    <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
+{% if UMAMI_URL %}
+    {{ UMAMI_URL | safe }}
+{% endif %}
+</head>
+<body class="bg-gray-50 dark:bg-neutral-900">
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main id="content">
+        <div class="max-w-4xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
+            
+            <!-- Card -->
+            <div class="bg-white rounded-xl shadow p-4 sm:p-7 dark:bg-neutral-800">
+                <div class="mb-8">
+                    <h2 class="text-xl font-bold text-gray-800 dark:text-neutral-200">
+                        Cargar Lista de Participantes
+                    </h2>
+                    <p class="text-sm text-gray-600 dark:text-neutral-400">
+                        {{ evento.nombre }}
+                    </p>
+                </div>
+
+                <!-- Mostrar mensajes -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div class="mb-6">
+                    {% for category, message in messages %}
+                    <div class="{{ 'bg-red-100 border border-red-200 text-red-800' if category == 'error' else 'bg-green-100 border border-green-200 text-green-800' if category == 'success' else 'bg-yellow-100 border border-yellow-200 text-yellow-800' }} px-4 py-3 rounded-lg text-sm mb-2">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endwith %}
+
+                <!-- Instrucciones -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <h3 class="text-sm font-semibold text-blue-800 mb-2">Formato del archivo CSV</h3>
+                    <p class="text-sm text-blue-700 mb-3">
+                        El archivo CSV debe contener las siguientes columnas (en este orden exacto):
+                    </p>
+                    <ul class="text-sm text-blue-700 list-disc list-inside space-y-1">
+                        <li><strong>nombres</strong> - Nombres del participante</li>
+                        <li><strong>apellidos</strong> - Apellidos del participante</li>
+                        <li><strong>cedula</strong> - Número de cédula (formato: 8-123-456)</li>
+                        <li><strong>perfil</strong> - Perfil profesional</li>
+                        <li><strong>region</strong> - Región o provincia</li>
+                        <li><strong>unidad</strong> - Unidad ejecutora</li>
+                    </ul>
+                    <div class="mt-3 p-3 bg-blue-100 rounded text-xs text-blue-800">
+                        <strong>Ejemplo de fila CSV:</strong><br>
+                        Juan,Pérez,8-123-456,medico_general,panama,Hospital Nacional
+                    </div>
+                </div>
+
+                <!-- Formulario de carga -->
+                <form action="{{ url_for('upload_participantes_csv', codigo_evento=evento.codigo) }}" method="post" enctype="multipart/form-data">
+                    <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
+                        
+                        <div class="sm:col-span-3">
+                            <label for="csv_file" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                Archivo CSV
+                            </label>
+                        </div>
+                        
+                        <div class="sm:col-span-9">
+                            <input type="file" 
+                                   id="csv_file" 
+                                   name="csv_file" 
+                                   accept=".csv"
+                                   class="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400
+                                          file:bg-gray-50 file:border-0 file:me-4 file:py-3 file:px-4 dark:file:bg-neutral-700 dark:file:text-neutral-400"
+                                   required>
+                            <p class="mt-2 text-xs text-gray-500 dark:text-neutral-400">
+                                Solo archivos CSV. Tamaño máximo: 10MB
+                            </p>
+                        </div>
+
+                        <div class="sm:col-span-12">
+                            <div class="flex gap-x-2">
+                                <button type="submit" 
+                                        class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="7,10 12,15 17,10"/>
+                                        <line x1="12" x2="12" y1="15" y2="3"/>
+                                    </svg>
+                                    Cargar Participantes
+                                </button>
+                                
+                                <a href="{{ url_for('checkin_evento', codigo_evento=evento.codigo) }}" 
+                                   class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                                    Cancelar
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+
+                <!-- Plantilla CSV descargable -->
+                <div class="mt-8 pt-6 border-t border-gray-200 dark:border-neutral-700">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-neutral-200 mb-4">
+                        Plantilla CSV
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-neutral-400 mb-4">
+                        Descarga esta plantilla para asegurar el formato correcto:
+                    </p>
+                    <button onclick="descargarPlantilla()" 
+                            class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7,10 12,15 17,10"/>
+                            <line x1="12" x2="12" y1="15" y2="3"/>
+                        </svg>
+                        Descargar Plantilla CSV
+                    </button>
+                </div>
+
+            </div>
+            <!-- End Card -->
+        </div>
+    </main>
+
+    <script>
+    function descargarPlantilla() {
+        const csvContent = "nombres,apellidos,cedula,perfil,region,unidad\n" +
+                          "Juan,Pérez,8-123-456,medico_general,panama,Hospital Nacional\n" +
+                          "María,González,8-987-654,enfermero,sanmiguelito,Policlínica Central\n" +
+                          "Carlos,Rodríguez,8-456-789,medico_especialista,chiriqui,Hospital Regional";
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", "plantilla_participantes.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+    </script>
+
+</body>
+</html>

@@ -170,3 +170,4 @@ tailwindcss
 /static/usuarios/*
 version.txt
 *.m4a
+.vscode
