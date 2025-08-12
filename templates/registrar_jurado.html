@@ -1,0 +1,118 @@
+{% block title %}Registro de Jurado - {{ evento.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="text-center mb-6">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Registro de Jurado</h1>
+                <h2 class="text-xl text-gray-600">{{ evento.nombre }}</h2>
+                <p class="text-sm text-gray-500 mt-2">Concurso de Póster Científico</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="mb-4 p-4 rounded-md {% if category == 'error' %}bg-red-100 border border-red-400 text-red-700{% else %}bg-green-100 border border-green-400 text-green-700{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="nombres" class="block text-sm font-medium text-gray-700 mb-1">Nombres *</label>
+                        <input type="text" id="nombres" name="nombres" required 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="apellidos" class="block text-sm font-medium text-gray-700 mb-1">Apellidos *</label>
+                        <input type="text" id="apellidos" name="apellidos" required 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="cedula" class="block text-sm font-medium text-gray-700 mb-1">Cédula *</label>
+                        <input type="text" id="cedula" name="cedula" required 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                        <input type="email" id="email" name="email" required 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="institucion" class="block text-sm font-medium text-gray-700 mb-1">Institución</label>
+                    <input type="text" id="institucion" name="institucion" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label for="especialidad" class="block text-sm font-medium text-gray-700 mb-1">Especialidad/Área de Expertise *</label>
+                    <input type="text" id="especialidad" name="especialidad" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label for="passphrase" class="block text-sm font-medium text-gray-700 mb-1">Passphrase *</label>
+                    <input type="password" id="passphrase" name="passphrase" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <p class="text-sm text-gray-500 mt-1">Cree una passphrase segura para acceder al panel de evaluación.</p>
+                </div>
+
+                <div class="bg-blue-50 p-4 rounded-md">
+                    <h3 class="font-semibold text-blue-800 mb-2">Responsabilidades del Jurado:</h3>
+                    <ul class="text-sm text-blue-700 space-y-1">
+                        <li>• Evaluar pósters científicos de manera objetiva e imparcial</li>
+                        <li>• Utilizar los criterios de evaluación establecidos</li>
+                        <li>• Proporcionar comentarios constructivos</li>
+                        <li>• Mantener la confidencialidad del proceso</li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-50 p-4 rounded-md">
+                    <h3 class="font-semibold text-gray-800 mb-2">Criterios de Evaluación:</h3>
+                    <div class="text-sm text-gray-700 space-y-2">
+                        <div><strong>I. Contenido (60%)</strong></div>
+                        <ul class="ml-4 space-y-1">
+                            <li>• Introducción y Objetivos (15%)</li>
+                            <li>• Metodología (15%)</li>
+                            <li>• Resultados (15%)</li>
+                            <li>• Conclusiones (15%)</li>
+                        </ul>
+                        <div><strong>II. Presentación Visual (20%)</strong></div>
+                        <ul class="ml-4 space-y-1">
+                            <li>• Diseño y Organización (10%)</li>
+                            <li>• Imágenes y Gráficos (10%)</li>
+                        </ul>
+                        <div><strong>III. Presentación Oral (20%)</strong></div>
+                        <ul class="ml-4 space-y-1">
+                            <li>• Claridad y Comunicación (10%)</li>
+                            <li>• Dominio del Tema (10%)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <button type="submit" 
+                        class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200">
+                    Registrarse como Jurado
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-600">
+                    ¿Ya estás registrado como jurado? 
+                    <a href="{{ url_for('jurado_login', codigo_evento=evento.codigo) }}" 
+                       class="text-green-600 hover:text-green-800 font-medium">Inicia sesión aquí</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

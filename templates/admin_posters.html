@@ -1,0 +1,205 @@
+{% block title %}Administrar Pósters - {{ evento.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-7xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">Administrar Pósters</h1>
+                    <h2 class="text-lg text-gray-600">{{ evento.nombre }}</h2>
+                </div>
+                <div class="flex space-x-2">
+                    <a href="{{ url_for('resultados_poster', codigo_evento=evento.codigo) }}" 
+                       class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors">
+                        Ver Resultados Finales
+                    </a>
+                    <a href="{{ url_for('listar_participantes', codigo_evento=evento.codigo) }}" 
+                       class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors">
+                        Volver al Evento
+                    </a>
+                </div>
+            </div>
+
+            <!-- Estadísticas -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-blue-800">Total Pósters</h3>
+                    <p class="text-2xl font-bold text-blue-600">{{ posters|length }}</p>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-green-800">Jurados</h3>
+                    <p class="text-2xl font-bold text-green-600">{{ jurados|length }}</p>
+                </div>
+                <div class="bg-yellow-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-yellow-800">Evaluaciones</h3>
+                    <p class="text-2xl font-bold text-yellow-600">
+                        {{ evaluaciones_por_poster.values() | sum(attribute='length') | default(0) }}
+                    </p>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-purple-800">Completados</h3>
+                    <p class="text-2xl font-bold text-purple-600">
+                        {{ promedios_poster|length }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Lista de Jurados -->
+            {% if jurados %}
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">Jurados Registrados</h3>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                        {% for jurado in jurados %}
+                        <div class="text-sm">
+                            <strong>{{ jurado.nombres }} {{ jurado.apellidos }}</strong>
+                            <br>
+                            <span class="text-gray-600">{{ jurado.especialidad }}</span>
+                            {% if jurado.institucion %}
+                            <br>
+                            <span class="text-gray-500 text-xs">{{ jurado.institucion }}</span>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Lista de Pósters -->
+            {% if posters %}
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">Pósters Registrados</h3>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white border border-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Autor</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Archivo</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Evaluaciones</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Promedio</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for poster in posters %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    {{ "%02d"|format(poster.numero_poster) }}
+                                </td>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                                    <div>
+                                        <strong>{{ poster.nombres }} {{ poster.apellidos }}</strong>
+                                        {% if poster.institucion %}
+                                        <br>
+                                        <span class="text-xs text-gray-500">{{ poster.institucion }}</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="px-4 py-2 text-sm text-gray-900">
+                                    <div class="max-w-xs">
+                                        {{ poster.titulo_poster[:100] }}{% if poster.titulo_poster|length > 100 %}...{% endif %}
+                                    </div>
+                                </td>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                                    {% if poster.archivo_poster %}
+                                        <a href="{{ url_for('static', filename='uploads/' + evento.codigo + '/posters/' + poster.archivo_poster) }}" 
+                                           target="_blank" 
+                                           class="text-blue-600 hover:text-blue-800 text-xs">
+                                            Ver PDF
+                                        </a>
+                                    {% else %}
+                                        <span class="text-gray-400 text-xs">Sin archivo</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                                    {% set num_evals = evaluaciones_por_poster.get(poster.nanoid, [])|length %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        {% if num_evals == 0 %}bg-red-100 text-red-800
+                                        {% elif num_evals < jurados|length %}bg-yellow-100 text-yellow-800
+                                        {% else %}bg-green-100 text-green-800{% endif %}">
+                                        {{ num_evals }}/{{ jurados|length }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                                    {% if poster.nanoid in promedios_poster %}
+                                        <span class="font-semibold text-blue-600">
+                                            {{ "%.2f"|format(promedios_poster[poster.nanoid]) }}/10
+                                        </span>
+                                    {% else %}
+                                        <span class="text-gray-400">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Evaluaciones Detalladas -->
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">Estado de Evaluaciones</h3>
+                
+                {% for poster in posters %}
+                {% set evaluaciones = evaluaciones_por_poster.get(poster.nanoid, []) %}
+                {% if evaluaciones %}
+                <div class="border border-gray-200 rounded-lg p-4 mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="font-medium text-gray-800">
+                            Póster #{{ "%02d"|format(poster.numero_poster) }} - {{ poster.nombres }} {{ poster.apellidos }}
+                        </h4>
+                        {% if poster.nanoid in promedios_poster %}
+                        <span class="text-lg font-bold text-blue-600">
+                            {{ "%.2f"|format(promedios_poster[poster.nanoid]) }}/10
+                        </span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {% for eval in evaluaciones %}
+                        {% set jurado = jurados | selectattr('cedula', 'equalto', eval.cedula_jurado) | first %}
+                        <div class="bg-gray-50 p-3 rounded">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-sm font-medium">
+                                    {% if jurado %}{{ jurado.nombres }} {{ jurado.apellidos }}{% else %}Jurado {{ eval.cedula_jurado }}{% endif %}
+                                </span>
+                                <span class="text-sm font-bold text-blue-600">{{ "%.2f"|format(eval.puntuacion_final) }}/10</span>
+                            </div>
+                            <div class="text-xs text-gray-600">
+                                <div>Contenido: {{ "%.1f"|format(eval.contenido_score) }}/6.0</div>
+                                <div>Visual: {{ "%.1f"|format(eval.presentacion_visual_score) }}/2.0</div>
+                                <div>Oral: {{ "%.1f"|format(eval.presentacion_oral_score) }}/2.0</div>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">
+                                {{ eval.timestamp.strftime('%d/%m/%Y %H:%M') }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+
+            {% else %}
+            <div class="text-center py-8">
+                <p class="text-gray-500">No hay pósters registrados para este evento aún.</p>
+                <div class="mt-4 space-y-2">
+                    <p class="text-sm text-gray-600">Enlaces de registro:</p>
+                    <div class="space-x-4">
+                        <a href="{{ url_for('registrar_poster', codigo_evento=evento.codigo) }}" 
+                           class="text-blue-600 hover:text-blue-800 font-medium">Registrar Póster</a>
+                        <a href="{{ url_for('registrar_jurado', codigo_evento=evento.codigo) }}" 
+                           class="text-green-600 hover:text-green-800 font-medium">Registrar Jurado</a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

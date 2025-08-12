@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Panel de Evaluación - {{ evento.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="text-center mb-6">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Panel de Evaluación</h1>
+                <h2 class="text-xl text-gray-600">{{ evento.nombre }}</h2>
+                <p class="text-sm text-gray-500">Concurso de Póster Científico</p>
+            </div>
+
+            {% if posters %}
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Pósters para Evaluar ({{ posters|length }})</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for poster in posters %}
+                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-semibold text-gray-800">Póster #{{ "%02d"|format(poster.numero_poster) }}</h4>
+                            {% if poster.nanoid in evaluaciones_existentes %}
+                                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Evaluado</span>
+                            {% else %}
+                                <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Pendiente</span>
+                            {% endif %}
+                        </div>
+                        
+                        <p class="text-sm text-gray-600 mb-2">
+                            <strong>Autor:</strong> {{ poster.nombres }} {{ poster.apellidos }}
+                        </p>
+                        
+                        <p class="text-sm text-gray-600 mb-3">
+                            <strong>Título:</strong> {{ poster.titulo_poster[:100] }}{% if poster.titulo_poster|length > 100 %}...{% endif %}
+                        </p>
+                        
+                        {% if poster.institucion %}
+                        <p class="text-xs text-gray-500 mb-3">{{ poster.institucion }}</p>
+                        {% endif %}
+                        
+                        <div class="flex justify-between items-center">
+                            {% if poster.archivo_poster %}
+                                <a href="{{ url_for('static', filename='uploads/' + evento.codigo + '/posters/' + poster.archivo_poster) }}" 
+                                   target="_blank" 
+                                   class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                    Ver PDF
+                                </a>
+                            {% else %}
+                                <span class="text-gray-400 text-sm">Sin archivo</span>
+                            {% endif %}
+                            
+                            <a href="{{ url_for('evaluar_poster', codigo_evento=evento.codigo, nanoid_poster=poster.nanoid) }}" 
+                               class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors">
+                                {% if poster.nanoid in evaluaciones_existentes %}Editar{% else %}Evaluar{% endif %}
+                            </a>
+                        </div>
+                        
+                        {% if poster.nanoid in evaluaciones_existentes %}
+                        <div class="mt-2 pt-2 border-t border-gray-100">
+                            <p class="text-xs text-gray-600">
+                                Puntuación: {{ "%.1f"|format(evaluaciones_existentes[poster.nanoid].puntuacion_final) }}/10
+                            </p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="bg-gray-50 p-4 rounded-md">
+                <h3 class="font-semibold text-gray-800 mb-2">Criterios de Evaluación:</h3>
+                <div class="text-sm text-gray-700 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <strong>I. Contenido (60%)</strong>
+                        <ul class="mt-1 space-y-1">
+                            <li>• Introducción y Objetivos (15%)</li>
+                            <li>• Metodología (15%)</li>
+                            <li>• Resultados (15%)</li>
+                            <li>• Conclusiones (15%)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <strong>II. Presentación Visual (20%)</strong>
+                        <ul class="mt-1 space-y-1">
+                            <li>• Diseño y Organización (10%)</li>
+                            <li>• Imágenes y Gráficos (10%)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <strong>III. Presentación Oral (20%)</strong>
+                        <ul class="mt-1 space-y-1">
+                            <li>• Claridad y Comunicación (10%)</li>
+                            <li>• Dominio del Tema (10%)</li>
+                        </ul>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-600 mt-2">Cada criterio se evalúa en una escala de 1-10 puntos.</p>
+            </div>
+
+            {% else %}
+            <div class="text-center py-8">
+                <p class="text-gray-500">No hay pósters registrados para este evento aún.</p>
+            </div>
+            {% endif %}
+
+            <div class="mt-6 text-center">
+                <a href="{{ url_for('jurado_login', codigo_evento=evento.codigo) }}" 
+                   class="text-gray-600 hover:text-gray-800 font-medium">Cerrar Sesión</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

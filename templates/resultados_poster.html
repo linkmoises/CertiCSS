@@ -1,0 +1,180 @@
+{% block title %}Resultados del Concurso - {{ evento.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+                <div class="text-center flex-1">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Resultados del Concurso</h1>
+                    <h2 class="text-xl text-gray-600">{{ evento.nombre }}</h2>
+                    <p class="text-sm text-gray-500">Concurso de Póster Científico</p>
+                </div>
+                <a href="{{ url_for('admin_posters', codigo_evento=evento.codigo) }}" 
+                   class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors">
+                    Volver a Administrar
+                </a>
+            </div>
+
+            {% if resultados %}
+            <!-- Podio -->
+            {% if resultados|length >= 3 %}
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4 text-center">🏆 Podio de Ganadores</h3>
+                <div class="flex justify-center items-end space-x-4">
+                    <!-- Segundo Lugar -->
+                    {% if resultados|length >= 2 %}
+                    <div class="bg-gray-100 p-4 rounded-lg text-center" style="height: 200px;">
+                        <div class="bg-gray-400 text-white rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-2 text-xl font-bold">2</div>
+                        <h4 class="font-semibold text-gray-800 text-sm">{{ resultados[1].poster.nombres }} {{ resultados[1].poster.apellidos }}</h4>
+                        <p class="text-xs text-gray-600 mt-1">{{ resultados[1].poster.titulo_poster[:50] }}{% if resultados[1].poster.titulo_poster|length > 50 %}...{% endif %}</p>
+                        <p class="text-lg font-bold text-gray-600 mt-2">{{ "%.2f"|format(resultados[1].promedio) }}/10</p>
+                        <p class="text-xs text-gray-500">{{ resultados[1].num_evaluaciones }} evaluaciones</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Primer Lugar -->
+                    <div class="bg-yellow-100 p-4 rounded-lg text-center" style="height: 250px;">
+                        <div class="bg-yellow-500 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2 text-2xl font-bold">1</div>
+                        <h4 class="font-semibold text-gray-800">{{ resultados[0].poster.nombres }} {{ resultados[0].poster.apellidos }}</h4>
+                        <p class="text-sm text-gray-600 mt-1">{{ resultados[0].poster.titulo_poster[:60] }}{% if resultados[0].poster.titulo_poster|length > 60 %}...{% endif %}</p>
+                        <p class="text-2xl font-bold text-yellow-600 mt-2">{{ "%.2f"|format(resultados[0].promedio) }}/10</p>
+                        <p class="text-sm text-gray-500">{{ resultados[0].num_evaluaciones }} evaluaciones</p>
+                    </div>
+
+                    <!-- Tercer Lugar -->
+                    {% if resultados|length >= 3 %}
+                    <div class="bg-orange-100 p-4 rounded-lg text-center" style="height: 150px;">
+                        <div class="bg-orange-500 text-white rounded-full w-10 h-10 flex items-center justify-center mx-auto mb-2 text-lg font-bold">3</div>
+                        <h4 class="font-semibold text-gray-800 text-sm">{{ resultados[2].poster.nombres }} {{ resultados[2].poster.apellidos }}</h4>
+                        <p class="text-xs text-gray-600 mt-1">{{ resultados[2].poster.titulo_poster[:40] }}{% if resultados[2].poster.titulo_poster|length > 40 %}...{% endif %}</p>
+                        <p class="text-lg font-bold text-orange-600 mt-2">{{ "%.2f"|format(resultados[2].promedio) }}/10</p>
+                        <p class="text-xs text-gray-500">{{ resultados[2].num_evaluaciones }} evaluaciones</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Tabla Completa de Resultados -->
+            <div class="mb-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Clasificación Completa</h3>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white border border-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posición</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"># Póster</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Autor</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Institución</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Puntuación</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Evaluaciones</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Archivo</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for resultado in resultados %}
+                            <tr class="hover:bg-gray-50 {% if loop.index <= 3 %}bg-yellow-50{% endif %}">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    <div class="flex items-center">
+                                        {% if loop.index == 1 %}
+                                            <span class="bg-yellow-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-2">1</span>
+                                        {% elif loop.index == 2 %}
+                                            <span class="bg-gray-400 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-2">2</span>
+                                        {% elif loop.index == 3 %}
+                                            <span class="bg-orange-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-2">3</span>
+                                        {% else %}
+                                            <span class="text-gray-500 w-6 h-6 flex items-center justify-center text-sm mr-2">{{ loop.index }}</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    {{ "%02d"|format(resultado.poster.numero_poster) }}
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                                    <div>
+                                        <strong>{{ resultado.poster.nombres }} {{ resultado.poster.apellidos }}</strong>
+                                        {% if resultado.poster.email %}
+                                        <br>
+                                        <span class="text-xs text-gray-500">{{ resultado.poster.email }}</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-900">
+                                    <div class="max-w-xs">
+                                        {{ resultado.poster.titulo_poster }}
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-900">
+                                    {{ resultado.poster.institucion or '-' }}
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                                    <span class="text-lg font-bold {% if loop.index == 1 %}text-yellow-600{% elif loop.index == 2 %}text-gray-600{% elif loop.index == 3 %}text-orange-600{% else %}text-blue-600{% endif %}">
+                                        {{ "%.2f"|format(resultado.promedio) }}/10
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        {{ resultado.num_evaluaciones }} jurados
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                                    {% if resultado.poster.archivo_poster %}
+                                        <a href="{{ url_for('static', filename='uploads/' + evento.codigo + '/posters/' + resultado.poster.archivo_poster) }}" 
+                                           target="_blank" 
+                                           class="text-blue-600 hover:text-blue-800 text-xs">
+                                            Ver PDF
+                                        </a>
+                                    {% else %}
+                                        <span class="text-gray-400 text-xs">Sin archivo</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Estadísticas del Concurso -->
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="font-semibold text-gray-800 mb-3">Estadísticas del Concurso</h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                    <div>
+                        <span class="font-medium text-gray-700">Total de pósters:</span>
+                        <span class="text-gray-900">{{ resultados|length }}</span>
+                    </div>
+                    <div>
+                        <span class="font-medium text-gray-700">Puntuación más alta:</span>
+                        <span class="text-gray-900">{{ "%.2f"|format(resultados[0].promedio) }}/10</span>
+                    </div>
+                    <div>
+                        <span class="font-medium text-gray-700">Promedio general:</span>
+                        <span class="text-gray-900">{{ "%.2f"|format(resultados | sum(attribute='promedio') / resultados|length) }}/10</span>
+                    </div>
+                    <div>
+                        <span class="font-medium text-gray-700">Total evaluaciones:</span>
+                        <span class="text-gray-900">{{ resultados | sum(attribute='num_evaluaciones') }}</span>
+                    </div>
+                </div>
+            </div>
+
+            {% else %}
+            <div class="text-center py-8">
+                <p class="text-gray-500">No hay resultados disponibles aún.</p>
+                <p class="text-sm text-gray-400 mt-2">Los resultados aparecerán cuando se completen las evaluaciones.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    .no-print { display: none !important; }
+    body { background: white !important; }
+}
+</style>
+{% endblock %}

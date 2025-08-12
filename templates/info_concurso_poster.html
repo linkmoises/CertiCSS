@@ -1,0 +1,175 @@
+{% block title %}Concurso de Póster Científico - {{ evento.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-gray-800 mb-4">🏆 Concurso de Póster Científico</h1>
+                <h2 class="text-2xl text-gray-600 mb-2">{{ evento.nombre }}</h2>
+                {% if evento.afiche_750 %}
+                <img src="{{ url_for('static', filename='uploads/' + evento.afiche_750.split('/')[-1]) }}" 
+                     alt="Afiche del evento" class="mx-auto mt-4 rounded-lg shadow-md max-w-sm">
+                {% endif %}
+            </div>
+
+            <!-- Estadísticas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-blue-50 p-6 rounded-lg text-center">
+                    <h3 class="text-lg font-semibold text-blue-800 mb-2">Pósters Registrados</h3>
+                    <p class="text-3xl font-bold text-blue-600">{{ total_posters }}</p>
+                </div>
+                <div class="bg-green-50 p-6 rounded-lg text-center">
+                    <h3 class="text-lg font-semibold text-green-800 mb-2">Jurados Registrados</h3>
+                    <p class="text-3xl font-bold text-green-600">{{ total_jurados }}</p>
+                </div>
+            </div>
+
+            <!-- Información del Evento -->
+            <div class="mb-8">
+                <h3 class="text-2xl font-semibold text-gray-800 mb-4">Información del Evento</h3>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    {% if evento.fecha_inicio %}
+                    <p class="mb-2"><strong>Fecha:</strong> {{ evento.fecha_inicio.strftime('%d de %B de %Y') }}</p>
+                    {% endif %}
+                    {% if evento.modalidad %}
+                    <p class="mb-2"><strong>Modalidad:</strong> {{ evento.modalidad }}</p>
+                    {% endif %}
+                    {% if evento.descripcion %}
+                    <p class="mb-2"><strong>Descripción:</strong> {{ evento.descripcion }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Criterios de Evaluación -->
+            <div class="mb-8">
+                <h3 class="text-2xl font-semibold text-gray-800 mb-4">Criterios de Evaluación</h3>
+                <div class="space-y-4">
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h4 class="text-lg font-semibold text-blue-800 mb-3">I. Contenido (60%)</h4>
+                        <div class="space-y-2 text-sm text-gray-700">
+                            <div class="flex justify-between">
+                                <span><strong>Introducción y Objetivos (15%):</strong> Claridad del problema, contexto y objetivos específicos</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span><strong>Metodología (15%):</strong> Adecuación y descripción clara de los métodos de investigación</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span><strong>Resultados (15%):</strong> Presentación clara y organizada con gráficos y tablas apropiados</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span><strong>Conclusiones (15%):</strong> Coherencia con resultados y discusión de limitaciones</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h4 class="text-lg font-semibold text-green-800 mb-3">II. Presentación Visual (20%)</h4>
+                        <div class="space-y-2 text-sm text-gray-700">
+                            <div class="flex justify-between">
+                                <span><strong>Diseño y Organización (10%):</strong> Estructura lógica y diseño atractivo</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span><strong>Imágenes y Gráficos (10%):</strong> Calidad y relevancia de elementos visuales</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h4 class="text-lg font-semibold text-purple-800 mb-3">III. Presentación Oral (20%)</h4>
+                        <div class="space-y-2 text-sm text-gray-700">
+                            <div class="flex justify-between">
+                                <span><strong>Claridad y Comunicación (10%):</strong> Explicación clara y lenguaje apropiado</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span><strong>Dominio del Tema (10%):</strong> Conocimiento demostrado y respuestas satisfactorias</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600 mt-4">
+                    <strong>Sistema de Puntuación:</strong> Cada criterio se evalúa en una escala de 1-10 puntos. 
+                    La puntuación final es el promedio ponderado de todas las evaluaciones de los jurados.
+                </p>
+            </div>
+
+            <!-- Proceso de Participación -->
+            <div class="mb-8">
+                <h3 class="text-2xl font-semibold text-gray-800 mb-4">Proceso de Participación</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Para Presentadores -->
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h4 class="text-lg font-semibold text-blue-800 mb-3">Para Presentadores</h4>
+                        <ol class="text-sm text-blue-700 space-y-2">
+                            <li><strong>1.</strong> Registrarse con datos personales y título del póster</li>
+                            <li><strong>2.</strong> Crear una passphrase segura para proteger su póster</li>
+                            <li><strong>3.</strong> Subir el póster en formato PDF</li>
+                            <li><strong>4.</strong> Presentar el póster ante los jurados</li>
+                            <li><strong>5.</strong> Ver las calificaciones una vez completadas las evaluaciones</li>
+                        </ol>
+                    </div>
+
+                    <!-- Para Jurados -->
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h4 class="text-lg font-semibold text-green-800 mb-3">Para Jurados</h4>
+                        <ol class="text-sm text-green-700 space-y-2">
+                            <li><strong>1.</strong> Registrarse con datos profesionales y especialidad</li>
+                            <li><strong>2.</strong> Crear una passphrase para acceder al panel de evaluación</li>
+                            <li><strong>3.</strong> Revisar todos los pósters registrados</li>
+                            <li><strong>4.</strong> Evaluar cada póster según los criterios establecidos</li>
+                            <li><strong>5.</strong> Proporcionar comentarios constructivos</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="text-center space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-blue-50 p-6 rounded-lg">
+                        <h4 class="text-lg font-semibold text-blue-800 mb-3">¿Tienes un póster científico?</h4>
+                        <p class="text-sm text-blue-700 mb-4">Participa en el concurso y compite por los primeros lugares</p>
+                        <div class="space-y-2">
+                            <a href="{{ url_for('registrar_poster', codigo_evento=evento.codigo) }}" 
+                               class="block w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
+                                Registrar Póster
+                            </a>
+                            <a href="{{ url_for('poster_login', codigo_evento=evento.codigo) }}" 
+                               class="block w-full bg-blue-100 text-blue-800 py-2 px-4 rounded-md hover:bg-blue-200 transition-colors">
+                                Ya tengo póster registrado
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="bg-green-50 p-6 rounded-lg">
+                        <h4 class="text-lg font-semibold text-green-800 mb-3">¿Eres experto en el área?</h4>
+                        <p class="text-sm text-green-700 mb-4">Únete como jurado y ayuda a evaluar los pósters científicos</p>
+                        <div class="space-y-2">
+                            <a href="{{ url_for('registrar_jurado', codigo_evento=evento.codigo) }}" 
+                               class="block w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors">
+                                Registrarse como Jurado
+                            </a>
+                            <a href="{{ url_for('jurado_login', codigo_evento=evento.codigo) }}" 
+                               class="block w-full bg-green-100 text-green-800 py-2 px-4 rounded-md hover:bg-green-200 transition-colors">
+                                Ya soy jurado registrado
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información Adicional -->
+            <div class="mt-8 bg-yellow-50 p-4 rounded-lg">
+                <h4 class="font-semibold text-yellow-800 mb-2">Información Importante:</h4>
+                <ul class="text-sm text-yellow-700 space-y-1">
+                    <li>• Los pósters deben subirse únicamente en formato PDF</li>
+                    <li>• Cada presentador debe crear una passphrase única para proteger su póster</li>
+                    <li>• Los jurados evaluarán de forma anónima e imparcial</li>
+                    <li>• Las calificaciones serán visibles para los presentadores una vez completadas</li>
+                    <li>• El resultado final es el promedio de todas las evaluaciones de los jurados</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

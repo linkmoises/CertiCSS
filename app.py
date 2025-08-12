@@ -45,6 +45,8 @@ collection_qbanks = db['qbanks']
 collection_qbanks_data = db['qbanks_data']
 collection_exam_results = db['exam_results']
 collection_participantes_temporales = db['participantes_temporales']
+collection_posters = db['posters']
+collection_evaluaciones_poster = db['evaluaciones_poster']
 
 # Roles de usuario
 class UserRole(str, Enum):
@@ -818,6 +820,605 @@ def tablero_coordinadores():
         eventos=eventos,
         num_eventos=num_eventos
     )
+
+
+###
+### Registro de presentadores de póster
+###
+@app.route('/registrar_poster/<codigo_evento>', methods=['GET', 'POST'])
+def registrar_poster(codigo_evento):
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    
+    if evento is None:
+        abort(404)
+    
+    # Verificar que el concurso de póster esté habilitado
+    if not evento.get('concurso_poster', False):
+        flash('El concurso de póster no está habilitado para este evento.', 'error')
+        return redirect(url_for('home'))
+    
+    if evento.get('estado_evento') == 'cerrado':
+        return render_template('registrar_poster.html',
+            evento_cerrado=True,
+            nombre_evento=evento['nombre'],
+            afiche_url=url_for('static', filename='uploads/' + evento['afiche_750'].split('/')[-1])
+        )
+    
+    if request.method == 'POST':
+        nombres = request.form.get('nombres', '').strip()
+        apellidos = request.form.get('apellidos', '').strip()
+        cedula = request.form.get('cedula', '').strip()
+        email = request.form.get('email', '').strip()
+        telefono = request.form.get('telefono', '').strip()
+        institucion = request.form.get('institucion', '').strip()
+        titulo_poster = request.form.get('titulo_poster', '').strip()
+        passphrase = request.form.get('passphrase', '').strip()
+        
+        # Validaciones básicas
+        if not all([nombres, apellidos, cedula, email, titulo_poster, passphrase]):
+            flash('Todos los campos son obligatorios.', 'error')
+            return render_template('registrar_poster.html', evento=evento)
+        
+        # Verificar si ya existe un póster con la misma cédula y evento
+        poster_existente = collection_posters.find_one({
+            "cedula": cedula,
+            "codigo_evento": codigo_evento
+        })
+        
+        if poster_existente:
+            flash('Ya existe un registro de póster para esta cédula en este evento.', 'error')
+            return render_template('registrar_poster.html', evento=evento)
+        
+        # Generar nanoid y número de póster
+        nanoid = generate_nanoid(cedula, codigo_evento, titulo_poster)
+        
+        # Contar pósters existentes para generar número progresivo
+        count_posters = collection_posters.count_documents({"codigo_evento": codigo_evento})
+        numero_poster = count_posters + 1
+        
+        # Insertar en la colección de pósters
+        collection_posters.insert_one({
+            'nombres': nombres,
+            'apellidos': apellidos,
+            'cedula': cedula,
+            'email': email,
+            'telefono': telefono,
+            'institucion': institucion,
+            'titulo_poster': titulo_poster,
+            'passphrase': generate_password_hash(passphrase),
+            'codigo_evento': codigo_evento,
+            'nanoid': nanoid,
+            'numero_poster': numero_poster,
+            'archivo_poster': None,
+            'timestamp': datetime.now(),
+            'rol': 'presentador_poster'
+        })
+        
+        # También registrar en participantes
+        collection_participantes.insert_one({
+            'nombres': nombres,
+            'apellidos': apellidos,
+            'cedula': cedula,
+            'rol': 'presentador_poster',
+            'perfil': institucion,
+            'region': '',
+            'unidad': '',
+            'codigo_evento': codigo_evento,
+            'nanoid': nanoid,
+            'timestamp': datetime.now(),
+            'indice_registro': datetime.now().strftime('%Y%m%d'),
+            'tipo_evento': evento.get('modalidad', 'Virtual')
+        })
+        
+        flash(f'Registro exitoso. Su número de póster es: {numero_poster:02d}. Guarde su passphrase para futuras ediciones.', 'success')
+        return redirect(url_for('registrar_poster', codigo_evento=codigo_evento))
+    
+    return render_template('registrar_poster.html', evento=evento)
+
+
+###
+### Login para presentadores de póster
+###
+@app.route('/poster_login/<codigo_evento>', methods=['GET', 'POST'])
+def poster_login(codigo_evento):
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    
+    if evento is None:
+        abort(404)
+    
+    # Verificar que el concurso de póster esté habilitado
+    if not evento.get('concurso_poster', False):
+        flash('El concurso de póster no está habilitado para este evento.', 'error')
+        return redirect(url_for('home'))
+    
+    if request.method == 'POST':
+        cedula = request.form.get('cedula', '').strip()
+        passphrase = request.form.get('passphrase', '').strip()
+        
+        poster = collection_posters.find_one({
+            "cedula": cedula,
+            "codigo_evento": codigo_evento
+        })
+        
+        if poster and check_password_hash(poster['passphrase'], passphrase):
+            session['poster_user'] = {
+                'cedula': cedula,
+                'codigo_evento': codigo_evento,
+                'nanoid': poster['nanoid']
+            }
+            return redirect(url_for('editar_poster', codigo_evento=codigo_evento))
+        else:
+            flash('Cédula o passphrase incorrectos.', 'error')
+    
+    return render_template('poster_login.html', evento=evento)
+
+
+###
+### Editar póster
+###
+@app.route('/editar_poster/<codigo_evento>', methods=['GET', 'POST'])
+def editar_poster(codigo_evento):
+    if 'poster_user' not in session or session['poster_user']['codigo_evento'] != codigo_evento:
+        return redirect(url_for('poster_login', codigo_evento=codigo_evento))
+    
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    poster = collection_posters.find_one({
+        "cedula": session['poster_user']['cedula'],
+        "codigo_evento": codigo_evento
+    })
+    
+    if not poster:
+        flash('Póster no encontrado.', 'error')
+        return redirect(url_for('poster_login', codigo_evento=codigo_evento))
+    
+    if request.method == 'POST':
+        # Actualizar datos básicos
+        nombres = request.form.get('nombres', '').strip()
+        apellidos = request.form.get('apellidos', '').strip()
+        email = request.form.get('email', '').strip()
+        telefono = request.form.get('telefono', '').strip()
+        institucion = request.form.get('institucion', '').strip()
+        titulo_poster = request.form.get('titulo_poster', '').strip()
+        
+        update_data = {
+            'nombres': nombres,
+            'apellidos': apellidos,
+            'email': email,
+            'telefono': telefono,
+            'institucion': institucion,
+            'titulo_poster': titulo_poster
+        }
+        
+        # Manejar subida de archivo PDF
+        poster_file = request.files.get('poster_file')
+        if poster_file and poster_file.filename.endswith('.pdf'):
+            # Crear carpeta del evento si no existe
+            carpeta_posters = os.path.join(app.config['UPLOAD_FOLDER'], codigo_evento, 'posters')
+            os.makedirs(carpeta_posters, exist_ok=True)
+            
+            # Nombre del archivo
+            nombre_archivo = f"{codigo_evento}_poster_{poster['numero_poster']:02d}.pdf"
+            ruta_archivo = os.path.join(carpeta_posters, nombre_archivo)
+            
+            # Guardar archivo
+            poster_file.save(ruta_archivo)
+            update_data['archivo_poster'] = nombre_archivo
+            
+            flash('Póster actualizado exitosamente.', 'success')
+        elif poster_file and not poster_file.filename.endswith('.pdf'):
+            flash('Solo se permiten archivos PDF.', 'error')
+            return render_template('editar_poster.html', evento=evento, poster=poster)
+        
+        # Actualizar en base de datos
+        collection_posters.update_one(
+            {"nanoid": poster['nanoid']},
+            {"$set": update_data}
+        )
+        
+        # Actualizar también en participantes
+        collection_participantes.update_one(
+            {"nanoid": poster['nanoid']},
+            {"$set": {
+                'nombres': nombres,
+                'apellidos': apellidos,
+                'perfil': institucion
+            }}
+        )
+        
+        # Recargar datos del póster
+        poster = collection_posters.find_one({"nanoid": poster['nanoid']})
+    
+    return render_template('editar_poster.html', evento=evento, poster=poster)
+
+
+###
+### Registro de jurados
+###
+@app.route('/registrar_jurado/<codigo_evento>', methods=['GET', 'POST'])
+def registrar_jurado(codigo_evento):
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    
+    if evento is None:
+        abort(404)
+    
+    # Verificar que el concurso de póster esté habilitado
+    if not evento.get('concurso_poster', False):
+        flash('El concurso de póster no está habilitado para este evento.', 'error')
+        return redirect(url_for('home'))
+    
+    if request.method == 'POST':
+        nombres = request.form.get('nombres', '').strip()
+        apellidos = request.form.get('apellidos', '').strip()
+        cedula = request.form.get('cedula', '').strip()
+        email = request.form.get('email', '').strip()
+        institucion = request.form.get('institucion', '').strip()
+        especialidad = request.form.get('especialidad', '').strip()
+        passphrase = request.form.get('passphrase', '').strip()
+        
+        # Validaciones básicas
+        if not all([nombres, apellidos, cedula, email, especialidad, passphrase]):
+            flash('Todos los campos son obligatorios.', 'error')
+            return render_template('registrar_jurado.html', evento=evento)
+        
+        # Verificar si ya existe un jurado con la misma cédula y evento
+        jurado_existente = collection_participantes.find_one({
+            "cedula": cedula,
+            "codigo_evento": codigo_evento,
+            "rol": "jurado_poster"
+        })
+        
+        if jurado_existente:
+            flash('Ya existe un registro de jurado para esta cédula en este evento.', 'error')
+            return render_template('registrar_jurado.html', evento=evento)
+        
+        # Generar nanoid
+        nanoid = generate_nanoid(cedula, codigo_evento, "jurado")
+        
+        # Insertar en participantes con rol de jurado
+        collection_participantes.insert_one({
+            'nombres': nombres,
+            'apellidos': apellidos,
+            'cedula': cedula,
+            'email': email,
+            'institucion': institucion,
+            'especialidad': especialidad,
+            'passphrase': generate_password_hash(passphrase),
+            'rol': 'jurado_poster',
+            'perfil': especialidad,
+            'region': '',
+            'unidad': '',
+            'codigo_evento': codigo_evento,
+            'nanoid': nanoid,
+            'timestamp': datetime.now(),
+            'indice_registro': datetime.now().strftime('%Y%m%d'),
+            'tipo_evento': evento.get('modalidad', 'Virtual')
+        })
+        
+        flash('Registro de jurado exitoso. Guarde su passphrase para acceder a las evaluaciones.', 'success')
+        return redirect(url_for('registrar_jurado', codigo_evento=codigo_evento))
+    
+    return render_template('registrar_jurado.html', evento=evento)
+
+
+###
+### Login para jurados
+###
+@app.route('/jurado_login/<codigo_evento>', methods=['GET', 'POST'])
+def jurado_login(codigo_evento):
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    
+    if evento is None:
+        abort(404)
+    
+    # Verificar que el concurso de póster esté habilitado
+    if not evento.get('concurso_poster', False):
+        flash('El concurso de póster no está habilitado para este evento.', 'error')
+        return redirect(url_for('home'))
+    
+    if request.method == 'POST':
+        cedula = request.form.get('cedula', '').strip()
+        passphrase = request.form.get('passphrase', '').strip()
+        
+        jurado = collection_participantes.find_one({
+            "cedula": cedula,
+            "codigo_evento": codigo_evento,
+            "rol": "jurado_poster"
+        })
+        
+        if jurado and check_password_hash(jurado['passphrase'], passphrase):
+            session['jurado_user'] = {
+                'cedula': cedula,
+                'codigo_evento': codigo_evento,
+                'nanoid': jurado['nanoid']
+            }
+            return redirect(url_for('evaluar_posters', codigo_evento=codigo_evento))
+        else:
+            flash('Cédula o passphrase incorrectos.', 'error')
+    
+    return render_template('jurado_login.html', evento=evento)
+
+
+###
+### Panel de evaluación de pósters
+###
+@app.route('/evaluar_posters/<codigo_evento>')
+def evaluar_posters(codigo_evento):
+    if 'jurado_user' not in session or session['jurado_user']['codigo_evento'] != codigo_evento:
+        return redirect(url_for('jurado_login', codigo_evento=codigo_evento))
+    
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    posters = list(collection_posters.find({"codigo_evento": codigo_evento}).sort("numero_poster"))
+    
+    # Obtener evaluaciones existentes del jurado
+    evaluaciones_existentes = {}
+    evaluaciones = collection_evaluaciones_poster.find({
+        "codigo_evento": codigo_evento,
+        "cedula_jurado": session['jurado_user']['cedula']
+    })
+    
+    for eval in evaluaciones:
+        evaluaciones_existentes[eval['nanoid_poster']] = eval
+    
+    return render_template('evaluar_posters.html', 
+                         evento=evento, 
+                         posters=posters, 
+                         evaluaciones_existentes=evaluaciones_existentes)
+
+
+###
+### Formulario de evaluación individual
+###
+@app.route('/evaluar_poster/<codigo_evento>/<nanoid_poster>', methods=['GET', 'POST'])
+def evaluar_poster(codigo_evento, nanoid_poster):
+    if 'jurado_user' not in session or session['jurado_user']['codigo_evento'] != codigo_evento:
+        return redirect(url_for('jurado_login', codigo_evento=codigo_evento))
+    
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    poster = collection_posters.find_one({"nanoid": nanoid_poster})
+    
+    if not poster:
+        abort(404)
+    
+    # Verificar evaluación existente
+    evaluacion_existente = collection_evaluaciones_poster.find_one({
+        "codigo_evento": codigo_evento,
+        "nanoid_poster": nanoid_poster,
+        "cedula_jurado": session['jurado_user']['cedula']
+    })
+    
+    if request.method == 'POST':
+        # Recoger puntuaciones
+        introduccion_objetivos = int(request.form.get('introduccion_objetivos', 0))
+        metodologia = int(request.form.get('metodologia', 0))
+        resultados = int(request.form.get('resultados', 0))
+        conclusiones = int(request.form.get('conclusiones', 0))
+        diseno_organizacion = int(request.form.get('diseno_organizacion', 0))
+        imagenes_graficos = int(request.form.get('imagenes_graficos', 0))
+        claridad_comunicacion = int(request.form.get('claridad_comunicacion', 0))
+        dominio_tema = int(request.form.get('dominio_tema', 0))
+        comentarios = request.form.get('comentarios', '').strip()
+        
+        # Calcular puntuaciones ponderadas
+        contenido_score = (introduccion_objetivos + metodologia + resultados + conclusiones) * 0.15
+        presentacion_visual_score = (diseno_organizacion + imagenes_graficos) * 0.10
+        presentacion_oral_score = (claridad_comunicacion + dominio_tema) * 0.10
+        
+        puntuacion_final = contenido_score + presentacion_visual_score + presentacion_oral_score
+        
+        evaluacion_data = {
+            'codigo_evento': codigo_evento,
+            'nanoid_poster': nanoid_poster,
+            'cedula_jurado': session['jurado_user']['cedula'],
+            'introduccion_objetivos': introduccion_objetivos,
+            'metodologia': metodologia,
+            'resultados': resultados,
+            'conclusiones': conclusiones,
+            'diseno_organizacion': diseno_organizacion,
+            'imagenes_graficos': imagenes_graficos,
+            'claridad_comunicacion': claridad_comunicacion,
+            'dominio_tema': dominio_tema,
+            'contenido_score': contenido_score,
+            'presentacion_visual_score': presentacion_visual_score,
+            'presentacion_oral_score': presentacion_oral_score,
+            'puntuacion_final': puntuacion_final,
+            'comentarios': comentarios,
+            'timestamp': datetime.now()
+        }
+        
+        if evaluacion_existente:
+            # Actualizar evaluación existente
+            collection_evaluaciones_poster.update_one(
+                {"_id": evaluacion_existente["_id"]},
+                {"$set": evaluacion_data}
+            )
+            flash('Evaluación actualizada exitosamente.', 'success')
+        else:
+            # Crear nueva evaluación
+            collection_evaluaciones_poster.insert_one(evaluacion_data)
+            flash('Evaluación guardada exitosamente.', 'success')
+        
+        return redirect(url_for('evaluar_posters', codigo_evento=codigo_evento))
+    
+    return render_template('evaluar_poster.html', 
+                         evento=evento, 
+                         poster=poster, 
+                         evaluacion=evaluacion_existente)
+
+
+###
+### Ver calificaciones (para presentadores)
+###
+@app.route('/ver_calificaciones/<codigo_evento>')
+def ver_calificaciones(codigo_evento):
+    if 'poster_user' not in session or session['poster_user']['codigo_evento'] != codigo_evento:
+        return redirect(url_for('poster_login', codigo_evento=codigo_evento))
+    
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    poster = collection_posters.find_one({
+        "cedula": session['poster_user']['cedula'],
+        "codigo_evento": codigo_evento
+    })
+    
+    if not poster:
+        abort(404)
+    
+    # Obtener todas las evaluaciones del póster
+    evaluaciones = list(collection_evaluaciones_poster.find({
+        "codigo_evento": codigo_evento,
+        "nanoid_poster": poster['nanoid']
+    }))
+    
+    # Obtener datos de jurados
+    jurados_data = {}
+    for eval in evaluaciones:
+        jurado = collection_participantes.find_one({
+            "cedula": eval['cedula_jurado'],
+            "codigo_evento": codigo_evento,
+            "rol": "jurado_poster"
+        })
+        if jurado:
+            jurados_data[eval['cedula_jurado']] = f"{jurado['nombres']} {jurado['apellidos']}"
+    
+    # Calcular promedio final
+    promedio_final = 0
+    if evaluaciones:
+        promedio_final = sum(eval['puntuacion_final'] for eval in evaluaciones) / len(evaluaciones)
+    
+    return render_template('ver_calificaciones.html', 
+                         evento=evento, 
+                         poster=poster, 
+                         evaluaciones=evaluaciones,
+                         jurados_data=jurados_data,
+                         promedio_final=promedio_final)
+
+
+###
+### Información del concurso de póster
+###
+@app.route('/concurso_poster/<codigo_evento>')
+def info_concurso_poster(codigo_evento):
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+    
+    # Verificar que el concurso de póster esté habilitado
+    if not evento.get('concurso_poster', False):
+        flash('El concurso de póster no está habilitado para este evento.', 'error')
+        return redirect(url_for('home'))
+    
+    # Contar pósters registrados
+    total_posters = collection_posters.count_documents({"codigo_evento": codigo_evento})
+    
+    # Contar jurados registrados
+    total_jurados = collection_participantes.count_documents({
+        "codigo_evento": codigo_evento,
+        "rol": "jurado_poster"
+    })
+    
+    return render_template('info_concurso_poster.html', 
+                         evento=evento, 
+                         total_posters=total_posters,
+                         total_jurados=total_jurados)
+
+
+###
+### Cerrar sesión de póster/jurado
+###
+@app.route('/poster_logout/<codigo_evento>')
+def poster_logout(codigo_evento):
+    session.pop('poster_user', None)
+    session.pop('jurado_user', None)
+    return redirect(url_for('home'))
+
+
+###
+### Panel administrativo de pósters
+###
+@app.route('/tablero/posters/<codigo_evento>')
+@login_required
+def admin_posters(codigo_evento):
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+    
+    # Verificar que el concurso de póster esté habilitado
+    if not evento.get('concurso_poster', False):
+        flash('El concurso de póster no está habilitado para este evento.', 'error')
+        return redirect(url_for('listar_participantes', codigo_evento=codigo_evento))
+    
+    # Obtener todos los pósters del evento
+    posters = list(collection_posters.find({"codigo_evento": codigo_evento}).sort("numero_poster"))
+    
+    # Obtener todas las evaluaciones
+    evaluaciones = list(collection_evaluaciones_poster.find({"codigo_evento": codigo_evento}))
+    
+    # Organizar evaluaciones por póster
+    evaluaciones_por_poster = {}
+    for eval in evaluaciones:
+        if eval['nanoid_poster'] not in evaluaciones_por_poster:
+            evaluaciones_por_poster[eval['nanoid_poster']] = []
+        evaluaciones_por_poster[eval['nanoid_poster']].append(eval)
+    
+    # Calcular promedios
+    promedios_poster = {}
+    for nanoid, evals in evaluaciones_por_poster.items():
+        if evals:
+            promedio = sum(e['puntuacion_final'] for e in evals) / len(evals)
+            promedios_poster[nanoid] = promedio
+    
+    # Obtener jurados
+    jurados = list(collection_participantes.find({
+        "codigo_evento": codigo_evento,
+        "rol": "jurado_poster"
+    }))
+    
+    return render_template('admin_posters.html', 
+                         evento=evento, 
+                         posters=posters, 
+                         evaluaciones_por_poster=evaluaciones_por_poster,
+                         promedios_poster=promedios_poster,
+                         jurados=jurados)
+
+
+###
+### Resultados finales del concurso
+###
+@app.route('/tablero/resultados_poster/<codigo_evento>')
+@login_required
+def resultados_poster(codigo_evento):
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+    
+    # Verificar que el concurso de póster esté habilitado
+    if not evento.get('concurso_poster', False):
+        flash('El concurso de póster no está habilitado para este evento.', 'error')
+        return redirect(url_for('listar_participantes', codigo_evento=codigo_evento))
+    
+    # Obtener pósters con sus promedios
+    posters = list(collection_posters.find({"codigo_evento": codigo_evento}))
+    
+    resultados = []
+    for poster in posters:
+        evaluaciones = list(collection_evaluaciones_poster.find({
+            "codigo_evento": codigo_evento,
+            "nanoid_poster": poster['nanoid']
+        }))
+        
+        if evaluaciones:
+            promedio = sum(e['puntuacion_final'] for e in evaluaciones) / len(evaluaciones)
+            resultados.append({
+                'poster': poster,
+                'promedio': promedio,
+                'num_evaluaciones': len(evaluaciones)
+            })
+    
+    # Ordenar por promedio descendente
+    resultados.sort(key=lambda x: x['promedio'], reverse=True)
+    
+    return render_template('resultados_poster.html', 
+                         evento=evento, 
+                         resultados=resultados)
 
 
 ###
@@ -2253,6 +2854,7 @@ def crear_evento():
         modalidad = request.form['modalidad']
         descripcion = request.form['descripcion']
         checkin_masivo = request.form.get('checkin_masivo') == 'on'
+        concurso_poster = request.form.get('concurso_poster') == 'on'
 
         fecha_inicio_str = request.form['fecha_inicio']
         fecha_fin_str = request.form['fecha_fin']
@@ -2334,7 +2936,8 @@ def crear_evento():
             'certificado': certificado_path if certificado_file else None,
             'timestamp': timestamp,
             'autor': current_user.id,
-            'checkin_masivo': checkin_masivo
+            'checkin_masivo': checkin_masivo,
+            'concurso_poster': concurso_poster
         })
         log_event(f"Usuario [{current_user.email}] ha creado el evento {codigo} exitosamente.")
         return redirect(url_for('mis_eventos'))  # Redirigir a la lista de eventos
@@ -2379,6 +2982,7 @@ def editar_evento(codigo_evento):
         cupos = request.form['cupos']
         carga_horaria = request.form['carga_horaria']
         checkin_masivo = request.form.get('checkin_masivo') == 'on'
+        concurso_poster = request.form.get('concurso_poster') == 'on'
         fecha_inicio_str = request.form['fecha_inicio']
         fecha_fin_str = request.form['fecha_fin']
 
@@ -2446,6 +3050,7 @@ def editar_evento(codigo_evento):
                 'cupos': cupos,
                 'carga_horaria': carga_horaria,
                 'checkin_masivo': checkin_masivo,
+                'concurso_poster': concurso_poster,
                 'fecha_inicio': fecha_inicio,
                 'fecha_fin': fecha_fin,
                 'estado_evento': estado_evento,

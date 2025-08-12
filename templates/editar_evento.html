@@ -171,6 +171,28 @@
                         <!-- End Col -->
 
                         <div class="sm:col-span-3">
+                            <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                Concurso de Póster
+                            </label>
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-9">
+                            <div class="flex items-center mt-2.5">
+                                <input type="checkbox" id="concurso_poster" name="concurso_poster" 
+                                       {% if evento.get('concurso_poster', False) %}checked{% endif %}
+                                       class="shrink-0 border-gray-200 rounded text-purple-600 focus:ring-purple-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-purple-500 dark:checked:border-purple-500 dark:focus:ring-offset-gray-800">
+                                <label for="concurso_poster" class="text-sm text-gray-500 ms-3 dark:text-neutral-400">
+                                    Habilitar concurso de póster científico con sistema de evaluación por jurados
+                                </label>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-neutral-400">
+                                Permite registro de presentadores, jurados y evaluación de pósters con criterios científicos
+                            </p>
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-3">
                             <label for="carga_horaria" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                 Carga horaria académica
                             </label>
