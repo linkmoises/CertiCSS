@@ -101,6 +101,7 @@
                         <div class="sm:col-span-9">
                             <select class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" id="region" name="region" onchange="actualizarUnidadesUsuario()" required>
                                 <option value="">Seleccione la región de salud</option>
+                                <option value="css00">Unidades administrativas</option>
                                 <option value="css01">Región de Salud de Bocas Del Toro</option>
                                 <option value="css02">Región de Salud de Coclé</option>
                                 <option value="css03">Región de Salud de Colón</option>
@@ -315,6 +316,15 @@ document.getElementById('phone').addEventListener('input', function (e) {
 </script>
 <script>
     const unidadesPorRegion = {
+        css00: [
+            "Departamento Nacional de Docencia e Investigación",
+            "---",
+            "Subdirección Nacional de Atención Primaria en Salud",
+            "Departamento Nacional de Odontología",
+            "Coordinación Nacional de los Servicios de Urgencias",
+            "Programa de Salud de Adultos",
+            "Centro de Simulación Avanzada",
+        ],
         css01: [ // Bocas del Toro
             "Coordinación Regional - Bocas del Toro",
             "Hospital Regional de Changuinola",
