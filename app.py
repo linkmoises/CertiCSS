@@ -1559,7 +1559,7 @@ def redirigir_ruta_corta(codigo_evento):
 ###
 ### Check-in system for large events (100+ people)
 ###
-@app.route('/checkin/<codigo_evento>')
+@app.route('/tablero/asistencia-controlada/<codigo_evento>')
 @login_required
 def checkin_evento(codigo_evento):
     # Verificar si el evento existe
@@ -1601,7 +1601,7 @@ def checkin_evento(codigo_evento):
                          material_entregado=material_entregado)
 
 
-@app.route('/checkin/<codigo_evento>/upload', methods=['GET', 'POST'])
+@app.route('/tablero/asistencia-controlada/<codigo_evento>/upload', methods=['GET', 'POST'])
 @login_required
 def upload_participantes_csv(codigo_evento):
     # Verificar si el evento existe
@@ -1664,7 +1664,8 @@ def upload_participantes_csv(codigo_evento):
                         'timestamp': datetime.now(),
                         'asistencia_confirmada': False,
                         'material_entregado': False,
-                        'fecha_checkin': None
+                        'fecha_checkin': None,
+                        'origen_preregistro': 'csv'  # Para distinguir del manual
                     })
                     participantes_insertados += 1
                 
@@ -1679,7 +1680,7 @@ def upload_participantes_csv(codigo_evento):
     return render_template('upload_csv.html', evento=evento)
 
 
-@app.route('/checkin/<codigo_evento>/validar', methods=['GET', 'POST'])
+@app.route('/tablero/asistencia-controlada/<codigo_evento>/validar', methods=['GET', 'POST'])
 @login_required
 def validar_asistencia(codigo_evento):
     # Verificar si el evento existe
@@ -1790,7 +1791,7 @@ def validar_asistencia(codigo_evento):
     return render_template('validar_asistencia.html', evento=evento)
 
 
-@app.route('/checkin/<codigo_evento>/participantes')
+@app.route('/tablero/asistencia-controlada/<codigo_evento>/listado-preregistro')
 @login_required
 def listar_participantes_temporales(codigo_evento):
     # Verificar si el evento existe
@@ -1817,6 +1818,70 @@ def listar_participantes_temporales(codigo_evento):
     return render_template('participantes_temporales.html', 
                          evento=evento, 
                          participantes=participantes_temporales)
+
+
+@app.route('/tablero/asistencia-controlada/<codigo_evento>/preregistro', methods=['GET', 'POST'])
+@login_required
+def preregistro_manual(codigo_evento):
+    # Verificar si el evento existe
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+    
+    # Verificar permisos
+    if not (current_user.rol == 'administrador' or 
+            current_user.rol == 'denadoi' or 
+            str(current_user.id) == str(evento.get("autor")) or
+            collection_participantes.find_one({
+                "codigo_evento": codigo_evento,
+                "cedula": str(current_user.cedula),
+                "rol": "coorganizador"
+            })):
+        abort(403)
+    
+    if request.method == 'POST':
+        nombres = request.form.get('nombres', '').strip()
+        apellidos = request.form.get('apellidos', '').strip()
+        cedula = request.form.get('cedula', '').strip()
+        perfil = request.form.get('perfil_profesional', '').strip()
+        region = request.form.get('region', '').strip()
+        unidad = request.form.get('unidad', '').strip()
+        
+        # Validar campos requeridos
+        if not all([nombres, apellidos, cedula, perfil, region, unidad]):
+            flash('Todos los campos son requeridos.', 'error')
+            return redirect(request.url)
+        
+        # Verificar si ya existe
+        if collection_participantes_temporales.find_one({
+            "codigo_evento": codigo_evento,
+            "cedula": cedula
+        }):
+            flash('Este participante ya está preregistrado.', 'error')
+            return redirect(request.url)
+        
+        # Insertar participante temporal
+        collection_participantes_temporales.insert_one({
+            'nombres': nombres,
+            'apellidos': apellidos,
+            'cedula': cedula,
+            'perfil': perfil,
+            'region': region,
+            'unidad': unidad,
+            'codigo_evento': codigo_evento,
+            'timestamp': datetime.now(),
+            'asistencia_confirmada': False,
+            'material_entregado': False,
+            'fecha_checkin': None,
+            'origen_preregistro': 'manual'  # Para distinguir del CSV
+        })
+        
+        flash(f'Participante {nombres} {apellidos} preregistrado exitosamente.', 'success')
+        log_event(f"Usuario [{current_user.email}] preregistró manualmente a {cedula} en evento {codigo_evento}.")
+        
+        return redirect(request.url)
+    
+    return render_template('preregistro_manual.html', evento=evento)
 
 
 @app.route('/api/checkin/<codigo_evento>/buscar/<cedula>')
@@ -1877,7 +1942,7 @@ def buscar_participante_temporal(codigo_evento, cedula):
     })
 
 
-@app.route('/checkin/<codigo_evento>/export')
+@app.route('/tablero/asistencia-controlada/<codigo_evento>/exportar')
 @login_required
 def export_checkin_data(codigo_evento):
     # Verificar si el evento existe
@@ -1999,7 +2064,7 @@ def checkin_stats(codigo_evento):
     })
 
 
-@app.route('/checkin/<codigo_evento>/material')
+@app.route('/tablero/asistencia-controlada/<codigo_evento>/material')
 @login_required
 def listado_material_educativo(codigo_evento):
     # Verificar si el evento existe
