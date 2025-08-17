@@ -1,22 +1,67 @@
-{% block title %}Concurso de Póster Científico - {{ evento.nombre }}{% endblock %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ nombre_evento }} - Concurso de Trabajos de Investigación</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- favicons -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
+    <meta name="apple-mobile-web-app-title" content="CertiCSS" />
+    <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
+{% if UMAMI_URL %}
+    {{ UMAMI_URL | safe }}
+{% endif %}
+</head>
+<body class="bg-gray-50 dark:bg-neutral-900">
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main id="content">
 
 {% block content %}
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-4xl mx-auto">
         <div class="bg-white rounded-lg shadow-lg p-6">
-            <div class="text-center mb-8">
-                <h1 class="text-4xl font-bold text-gray-800 mb-4">🏆 Concurso de Póster Científico</h1>
-                <h2 class="text-2xl text-gray-600 mb-2">{{ evento.nombre }}</h2>
-                {% if evento.afiche_750 %}
-                <img src="{{ url_for('static', filename='uploads/' + evento.afiche_750.split('/')[-1]) }}" 
-                     alt="Afiche del evento" class="mx-auto mt-4 rounded-lg shadow-md max-w-sm">
-                {% endif %}
+
+            <!-- TABLA RESUMEN EVENTOS -->
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto mb-6">
+                <!-- Card -->
+                <div class="flex flex-col">
+                    <div class="-m-1.5 overflow-x-auto">
+                        <div class="p-1.5 min-w-full inline-block align-middle">
+                            <div class="bg-white overflow-hidden">
+                                <!-- Header -->
+                                <div class="flex items-center gap-x-3">
+                                    <div class="relative h-32 w-32 shrink-0">
+{% if evento.afiche_750 %}
+                                        <img src="{{ url_for('static', filename='uploads/' + evento.afiche_750.split('/')[-1]) }}" alt="{{ evento.nombre }}" class="w-32 h-32 object-cover rounded-lg absolute top-0 start-0">
+{% else %}
+                                        <img class="size-full absolute top-0 start-0 object-cover rounded-lg" src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}" alt="{{ evento.nombre }}">
+{% endif %}                                        
+                                    </div>
+                                    
+                                    <div class="grow">
+                                        <h2 class="text-2xl text-gray-600 mt-2">{{ evento.nombre }}</h2>
+                                        <h3 class="block text-xl font-bold">Concurso de Trabajos de Investigación</h3>
+                                        <h4 class="block italic mb-2">{{ evento.unidad_ejecutora }}</h4>
+                                    </div>
+                                </div>
+                                <!-- End Header -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
             </div>
+            <!-- End TABLA RESUMEN EVENTOS -->
 
             <!-- Estadísticas -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div class="bg-blue-50 p-6 rounded-lg text-center">
-                    <h3 class="text-lg font-semibold text-blue-800 mb-2">Pósters Registrados</h3>
+                    <h3 class="text-lg font-semibold text-blue-800 mb-2">Trabajos Registrados</h3>
                     <p class="text-3xl font-bold text-blue-600">{{ total_posters }}</p>
                 </div>
                 <div class="bg-green-50 p-6 rounded-lg text-center">
@@ -173,3 +218,14 @@
     </div>
 </div>
 {% endblock %}
+
+    </main>
+
+    <footer class="mt-auto w-full max-w-[85rem] px-4 sm:px-6 lg:px-8 mx-auto">
+        <div class="text-center text-xs text-gray-500 my-8">
+            <p>Este evento es avalado por DENADOI y potenciado por la plataforma CertiCSS.</p>
+        </div>
+    </footer>
+
+</body>
+</html>

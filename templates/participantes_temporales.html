@@ -1,185 +1,251 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Lista de Participantes - {{ evento.nombre }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- favicons -->
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
-    <meta name="apple-mobile-web-app-title" content="CertiCSS" />
-    <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
-{% if UMAMI_URL %}
-    {{ UMAMI_URL | safe }}
-{% endif %}
-</head>
-<body class="bg-gray-50 dark:bg-neutral-900">
+{% include 'tablero-header.html' %}
 
-    <!-- ========== MAIN CONTENT ========== -->
-    <main id="content">
-        <div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
-            
-            <!-- Header -->
-            <div class="max-w-2xl mx-auto text-center mb-10 lg:mb-14">
-                <h2 class="text-2xl font-bold md:text-4xl md:leading-tight text-gray-800 dark:text-neutral-200">
-                    Lista de Participantes Preregistrados
-                </h2>
-                <p class="mt-1 text-gray-600 dark:text-neutral-400">
-                    {{ evento.nombre }}
-                </p>
-            </div>
+{% include 'tablero-sidebar.html' %}
+    
+    <!-- CONTENIDO -->
+    <div class="w-full lg:ps-64">
+        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
 
-            <!-- Acciones -->
-            <div class="flex flex-col sm:flex-row gap-2 mb-6">
-                <a href="{{ url_for('checkin_evento', codigo_evento=evento.codigo) }}" 
-                   class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
-                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m12 19-7-7 7-7"/>
-                        <path d="M19 12H5"/>
-                    </svg>
-                    Volver al Check-in
-                </a>
-                
-                <div class="flex-1"></div>
-                
-                <div class="flex items-center gap-x-2">
-                    <span class="text-sm text-gray-600 dark:text-neutral-400">
-                        Total: {{ participantes|length }} participantes
-                    </span>
-                </div>
-            </div>
-
-            <!-- Tabla -->
-            <div class="flex flex-col">
-                <div class="-m-1.5 overflow-x-auto">
-                    <div class="p-1.5 min-w-full inline-block align-middle">
-                        <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden dark:bg-neutral-800 dark:border-neutral-700">
-                            
-                            <!-- Header -->
-                            <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200 dark:border-neutral-700">
-                                <div>
-                                    <h2 class="text-xl font-semibold text-gray-800 dark:text-neutral-200">
-                                        Participantes
-                                    </h2>
-                                    <p class="text-sm text-gray-600 dark:text-neutral-400">
-                                        Lista completa de participantes preregistrados
-                                    </p>
+            <!-- TABLA RESUMEN EVENTOS -->
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <!-- Card -->
+                <div class="flex flex-col">
+                    <div class="-m-1.5 overflow-x-auto">
+                        <div class="p-1.5 min-w-full inline-block align-middle">
+                            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                                <!-- Header -->
+                                <div class="flex items-center gap-x-3">
+                                    <div class="relative h-32 w-32 shrink-0">
+{% if evento.afiche_750 %}
+                                        <img src="{{ url_for('static', filename='uploads/' + evento.afiche_750.split('/')[-1]) }}" alt="{{ evento.nombre }}" class="w-32 h-32 object-cover rounded-lg absolute top-0 start-0">
+{% else %}
+                                        <img class="size-full absolute top-0 start-0 object-cover rounded-l-xl" src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}" alt="{{ evento.nombre }}">
+{% endif %}                                        
+                                    </div>
+                                    
+                                    <div class="grow">
+                                        <h2 class="block text-3xl font-bold mt-2">{{ evento.tipo }}</h2>
+                                        <h4 class="block italic mb-2">{{ evento.unidad_ejecutora }}</h4>
+                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                            {{ evento.tipo }}
+                                        </span>
+                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                            {{ evento.modalidad }}
+                                        </span>
+                                    </div>
                                 </div>
+                                <!-- End Header -->
                             </div>
-
-                            <!-- Table -->
-                            <table class="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
-                                <thead class="bg-gray-50 dark:bg-neutral-800">
-                                    <tr>
-                                        <th scope="col" class="ps-6 py-3 text-start">
-                                            <span class="text-xs font-medium uppercase tracking-wide text-gray-800 dark:text-neutral-200">
-                                                Participante
-                                            </span>
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-start">
-                                            <span class="text-xs font-medium uppercase tracking-wide text-gray-800 dark:text-neutral-200">
-                                                Cédula
-                                            </span>
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-start">
-                                            <span class="text-xs font-medium uppercase tracking-wide text-gray-800 dark:text-neutral-200">
-                                                Perfil
-                                            </span>
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-start">
-                                            <span class="text-xs font-medium uppercase tracking-wide text-gray-800 dark:text-neutral-200">
-                                                Región
-                                            </span>
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-start">
-                                            <span class="text-xs font-medium uppercase tracking-wide text-gray-800 dark:text-neutral-200">
-                                                Estado
-                                            </span>
-                                        </th>
-                                    </tr>
-                                </thead>
-
-                                <tbody class="divide-y divide-gray-200 dark:divide-neutral-700">
-                                    {% for participante in participantes %}
-                                    <tr class="bg-white hover:bg-gray-50 dark:bg-neutral-800 dark:hover:bg-neutral-700">
-                                        <td class="size-px whitespace-nowrap">
-                                            <div class="ps-6 py-2">
-                                                <div class="flex items-center gap-x-2">
-                                                    <div class="grow">
-                                                        <span class="text-sm font-semibold text-gray-800 dark:text-neutral-200">
-                                                            {{ participante.nombres }} {{ participante.apellidos }}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="h-px w-72 min-w-72">
-                                            <div class="px-6 py-2">
-                                                <span class="text-sm text-gray-600 dark:text-neutral-400">
-                                                    {{ participante.cedula }}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td class="size-px whitespace-nowrap">
-                                            <div class="px-6 py-2">
-                                                <span class="text-sm text-gray-600 dark:text-neutral-400">
-                                                    {{ participante.perfil }}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td class="size-px whitespace-nowrap">
-                                            <div class="px-6 py-2">
-                                                <span class="text-sm text-gray-600 dark:text-neutral-400">
-                                                    {{ participante.region }}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td class="size-px whitespace-nowrap">
-                                            <div class="px-6 py-2">
-                                                {% if participante.asistencia_confirmada %}
-                                                    <span class="py-1 px-1.5 inline-flex items-center gap-x-1 text-xs font-medium bg-green-100 text-green-800 rounded-full dark:bg-green-500/10 dark:text-green-500">
-                                                        <svg class="size-2.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.061L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
-                                                        </svg>
-                                                        Confirmado
-                                                    </span>
-                                                {% else %}
-                                                    <span class="py-1 px-1.5 inline-flex items-center gap-x-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full dark:bg-yellow-500/10 dark:text-yellow-500">
-                                                        <svg class="size-2.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                                            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
-                                                        </svg>
-                                                        Pendiente
-                                                    </span>
-                                                {% endif %}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% else %}
-                                    <tr>
-                                        <td colspan="5" class="text-center py-8">
-                                            <div class="text-gray-500 dark:text-neutral-400">
-                                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                                                </svg>
-                                                <p class="mt-2 text-sm">No hay participantes preregistrados</p>
-                                                <p class="text-xs text-gray-400">Carga un archivo CSV para comenzar</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-
                         </div>
                     </div>
                 </div>
+                <!-- End Card -->
             </div>
+            <!-- End TABLA RESUMEN EVENTOS -->
+
+            <!-- TABLA RESUMEN EVENTOS -->
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <!-- Card -->
+                <div class="flex flex-col">
+                    <div class="-m-1.5 overflow-x-auto">
+                        <div class="p-1.5 min-w-full inline-block align-middle">
+                            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden dark:bg-neutral-800 dark:border-neutral-700">
+                                
+                                <!-- Header -->
+                                <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200 dark:border-neutral-700">
+                                    <div>
+                                        <h2 class="text-xl font-semibold text-gray-800 dark:text-neutral-200">
+                                            Participantes preregistrados
+                                        </h2>
+                                        <p class="text-sm text-gray-600 dark:text-neutral-400">
+                                            Lista completa de participantes preregistrados
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Table -->
+                                <table class="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
+                                    <thead class="bg-gray-50 dark:bg-neutral-800">
+                                        <tr>
+                                            <th scope="col" class="ps-6 py-3 text-start">
+                                                <span class="text-xs font-medium uppercase tracking-wide text-gray-800 dark:text-neutral-200">
+                                                    Participante
+                                                </span>
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-start">
+                                                <span class="text-xs font-medium uppercase tracking-wide text-gray-800 dark:text-neutral-200">
+                                                    Cédula
+                                                </span>
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-start">
+                                                <span class="text-xs font-medium uppercase tracking-wide text-gray-800 dark:text-neutral-200">
+                                                    Perfil
+                                                </span>
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-start">
+                                                <span class="text-xs font-medium uppercase tracking-wide text-gray-800 dark:text-neutral-200">
+                                                    Región
+                                                </span>
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-start">
+                                                <span class="text-xs font-medium uppercase tracking-wide text-gray-800 dark:text-neutral-200">
+                                                    Estado
+                                                </span>
+                                            </th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody class="divide-y divide-gray-200 dark:divide-neutral-700">
+                                        {% for participante in participantes %}
+                                        <tr class="bg-white hover:bg-gray-50 dark:bg-neutral-800 dark:hover:bg-neutral-700">
+                                            <td class="size-px whitespace-nowrap">
+                                                <div class="ps-6 py-2">
+                                                    <div class="flex items-center gap-x-2">
+                                                        <div class="grow">
+                                                            <span class="text-sm font-semibold text-gray-800 dark:text-neutral-200">
+                                                                {{ participante.nombres }} {{ participante.apellidos }}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="h-px w-72 min-w-72">
+                                                <div class="px-6 py-2">
+                                                    <span class="text-sm text-gray-600 dark:text-neutral-400">
+                                                        {{ participante.cedula }}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td class="size-px whitespace-nowrap">
+                                                <div class="px-6 py-2">
+                                                    <span class="text-sm text-gray-600 dark:text-neutral-400">
+                                                        {{ participante.perfil }}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td class="size-px whitespace-nowrap">
+                                                <div class="px-6 py-2">
+                                                    <span class="text-sm text-gray-600 dark:text-neutral-400">
+                                                        {{ participante.region }}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td class="size-px whitespace-nowrap">
+                                                <div class="px-6 py-2">
+                                                    {% if participante.asistencia_confirmada %}
+                                                        <span class="py-1 px-1.5 inline-flex items-center gap-x-1 text-xs font-medium bg-green-100 text-green-800 rounded-full dark:bg-green-500/10 dark:text-green-500">
+                                                            <svg class="size-2.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.061L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                                                            </svg>
+                                                            Confirmado
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="py-1 px-1.5 inline-flex items-center gap-x-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full dark:bg-yellow-500/10 dark:text-yellow-500">
+                                                            <svg class="size-2.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                                                <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                                                            </svg>
+                                                            Pendiente
+                                                        </span>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% else %}
+                                        <tr>
+                                            <td colspan="5" class="text-center py-8">
+                                                <div class="text-gray-500 dark:text-neutral-400">
+                                                    <svg class="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users-round-icon lucide-users-round"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
+                                                    <p class="mt-2 text-sm">No hay participantes preregistrados</p>
+                                                    <p class="text-xs text-gray-400">Registra un participante manualmente o carga un archivo CSV para comenzar</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+
+                                <!-- Footer -->
+                                <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
+                                    <div>
+                                        <p class="text-sm text-gray-600 dark:text-neutral-400">
+                                            <span class="font-semibold text-gray-800 dark:text-neutral-200">{{ participantes|length }}</span> participantes preregistrados
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <div class="inline-flex gap-x-2">
+                                            <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="{{ url_for('checkin_evento', codigo_evento=evento.codigo) }}">
+                                                Volver al sistema de asistencia controlada
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- End Footer -->
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+            </div>
+            <!-- FIN TABLA RESUMEN EVENTOS -->
+
+{% include 'tablero-footer.html' %}
 
         </div>
-    </main>
+    </div>
+    <!-- FIN CONTENIDO -->
 
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+<script>
+    // Limpia campos dinámicos al cargar la página
+    document.addEventListener("DOMContentLoaded", function () {
+        const hiddenInputs = document.querySelectorAll("#buscadorForm input[type='hidden']");
+        hiddenInputs.forEach((input) => input.remove());
+    });
+    document.getElementById("buscadorForm").addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevenir envío estándar del formulario
+    
+        const valor = document.getElementById("buscador").value.trim();
+        const patterns = {
+            cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas
+            pasaporte: /^[A-Z]{2}\d{6,9}$/,                        // Pasaportes
+            id_certificado: /^[a-zA-Z0-9]{8}$/                    // IDs de certificados
+        };
+    
+        let action, field;
+    
+        if (patterns.cedula.test(valor)) {
+            action = "/buscar_certificados";
+            field = "cedula";
+        } else if (patterns.pasaporte.test(valor)) {
+            action = "/buscar_certificados";
+            field = "cedula";
+        } else if (patterns.id_certificado.test(valor)) {
+            action = "/validar_certificado";
+            field = "nanoid";
+        } else {
+            alert("Formato no válido. Introduzca un documento de identificación o un ID de certificado válido.");
+            return;
+        }
+    
+        // Crear y enviar el formulario dinámicamente
+        const form = event.target;
+        form.action = action;
+        form.method = "POST";
+    
+        // Limpiar campos ocultos previos
+        const hiddenInputs = form.querySelectorAll("input[type='hidden']");
+        hiddenInputs.forEach((input) => input.remove());
+    
+        const hiddenInput = document.createElement("input");
+        hiddenInput.type = "hidden";
+        hiddenInput.name = field;
+        hiddenInput.value = valor;
+        form.appendChild(hiddenInput);
+        form.submit();
+    });
+</script>    
 </body>
 </html>

@@ -20,17 +20,52 @@
 
     <!-- ========== MAIN CONTENT ========== -->
     <main id="content">
-        <div class="max-w-2xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
+        <div class="max-w-2xl px-4 py-10 sm:px-6 lg:px-8 lg:py-10 mx-auto">
             
             <!-- Card -->
             <div class="bg-white rounded-xl shadow p-4 sm:p-7 dark:bg-neutral-800">
+
+                <!-- TABLA RESUMEN EVENTOS -->
+                <div class="mb-6">
+                    <!-- Card -->
+                    <div class="flex flex-col">
+                        <div class="-m-1.5 overflow-x-auto">
+                            <div class="p-1.5 min-w-full inline-block align-middle">
+                                <div class="bg-white rounded-xl overflow-hidden">
+                                    <!-- Header -->
+                                    <div class="flex items-center gap-x-3">
+                                        <div class="relative h-32 w-32 shrink-0">
+    {% if evento.afiche_750 %}
+                                            <img src="{{ url_for('static', filename='uploads/' + evento.afiche_750.split('/')[-1]) }}" alt="{{ evento.nombre }}" class="w-32 h-32 object-cover rounded-lg absolute top-0 start-0">
+    {% else %}
+                                            <img class="size-full absolute top-0 start-0 object-cover rounded-l-xl" src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}" alt="{{ evento.nombre }}">
+    {% endif %}                                        
+                                        </div>
+                                        
+                                        <div class="grow">
+                                            <h2 class="block text-xl font-bold mt-2">{{ evento.nombre }}</h2>
+                                            <h4 class="block text-sm italic mb-2">{{ evento.unidad_ejecutora }}</h4>
+                                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                                {{ evento.tipo }}
+                                            </span>
+                                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                                {{ evento.modalidad }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <!-- End Header -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End Card -->
+                </div>
+                <!-- End TABLA RESUMEN EVENTOS -->
+
                 <div class="mb-8">
-                    <h2 class="text-xl font-bold text-gray-800 dark:text-neutral-200">
-                        Validar Asistencia
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-neutral-200">
+                        Validar Asistencia de Participante
                     </h2>
-                    <p class="text-sm text-gray-600 dark:text-neutral-400">
-                        {{ evento.nombre }}
-                    </p>
                 </div>
 
                 <!-- Mostrar mensajes -->
@@ -97,24 +132,22 @@
                                        name="material_entregado"
                                        class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800">
                                 <label for="material_entregado" class="text-sm text-gray-500 ms-3 dark:text-neutral-400">
-                                    Marcar si se entregó material educativo al participante
+                                    Marcar si se entregó kit de participante
                                 </label>
                             </div>
                         </div>
 
                         <div class="sm:col-span-12">
                             <div class="flex gap-x-2">
-                                <button type="submit" 
-                                        class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                                <button type="submit" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
                                     <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <polyline points="20,6 9,17 4,12"/>
                                     </svg>
                                     Confirmar Asistencia
                                 </button>
                                 
-                                <a href="{{ url_for('checkin_evento', codigo_evento=evento.codigo) }}" 
-                                   class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
-                                    Volver
+                                <a href="{{ url_for('checkin_evento', codigo_evento=evento.codigo) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                                    Volver a tablero de asistencia controlada
                                 </a>
                             </div>
                         </div>
@@ -163,6 +196,13 @@
             <!-- End Card -->
         </div>
     </main>
+
+    <footer class="mt-auto w-full max-w-[85rem] px-4 sm:px-6 lg:px-8 mx-auto">
+        <div class="text-center text-xs text-gray-500 my-8">
+            <p>Este evento es potenciado por la plataforma CertiCSS.</p>
+        </div>
+    </footer>
+
 
     <script>
     function validarCedula(input) {

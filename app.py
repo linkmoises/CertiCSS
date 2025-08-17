@@ -919,7 +919,7 @@ def registrar_poster(codigo_evento):
 ###
 ### Login para presentadores de póster
 ###
-@app.route('/poster_login/<codigo_evento>', methods=['GET', 'POST'])
+@app.route('/concurso_login/<codigo_evento>', methods=['GET', 'POST'])
 def poster_login(codigo_evento):
     evento = collection_eventos.find_one({"codigo": codigo_evento})
     
@@ -1324,7 +1324,7 @@ def info_concurso_poster(codigo_evento):
 ###
 ### Cerrar sesión de póster/jurado
 ###
-@app.route('/poster_logout/<codigo_evento>')
+@app.route('/concurso_logout/<codigo_evento>')
 def poster_logout(codigo_evento):
     session.pop('poster_user', None)
     session.pop('jurado_user', None)
