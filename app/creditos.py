@@ -10,4 +10,13 @@ creditos_bp = Blueprint('creditos', __name__)
 @creditos_bp.route('/tablero/acerca-de')
 @login_required
 def creditos():
-    return render_template('acerca-de.html') 
+    return render_template('acerca-de.html')
+
+
+###
+### Marco Legal
+###
+@creditos_bp.route('/tablero/marco-legal')
+@login_required
+def marco_legal():
+    return render_template('marco-legal.html')
