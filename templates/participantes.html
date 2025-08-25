@@ -253,7 +253,7 @@
                                 <td class="size-px whitespace-nowrap">
                                     <div class="px-6 py-2">
 {% if puede_editar and (evento.estado_evento != 'cerrado' or current_user.rol == 'administrador') %}
-{% if participante.rol == 'ponente' %}
+{% if current_user.rol == 'organizador' %}
                                         <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('editar_ponente', nanoid=participante.nanoid) }}">
                                             Corregir ponente
                                         </a><br />
@@ -262,14 +262,14 @@
                                                 Eliminar ponente
                                             </button>
                                         </form>
-{% elif participante.rol == "organizador" %}
+{% elif current_user.rol == "organizador" %}
                                         <a class="inline-flex items-center gap-x-1 text-sm">Organizador del evento</a><br />
                                         <form action="{{ url_for('eliminar_participante', nanoid=participante.nanoid) }}" method="post" style="display:inline;">
                                             <button class="text-sm text-red-600 decoration-2 hover:underline" type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este participante? Esta acción no se puede deshacer.');">
                                                 Eliminar organizador
                                             </button>
                                         </form>
-{% elif participante.rol == "coorganizador" %}
+{% elif current_user.rol == "coorganizador" %}
                                         <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('editar_ponente', nanoid=participante.nanoid) }}">
                                             Corregir coorganizador
                                         </a><br />
