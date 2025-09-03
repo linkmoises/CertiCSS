@@ -1,0 +1,202 @@
+{% include 'tablero-header.html' %}
+
+{% include 'tablero-sidebar.html' %}
+    
+    <!-- CONTENIDO -->
+    <div class="w-full lg:ps-64">
+        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+
+            <!-- ARCHIVOS COMPARTIDOS -->
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <div class="flex flex-col">
+                    <div class="-m-1.5 overflow-x-auto">
+                        <div class="p-1.5 min-w-full inline-block align-middle">
+                            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                                <!-- Header -->
+                                <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
+                                    <div>
+                                        <h2 class="text-xl font-semibold text-gray-800">
+                                            Nube pública de archivos
+                                        </h2>
+                                        <p class="text-sm text-gray-600">
+                                            Archivos compartidos públicamente por otros usuarios
+                                        </p>
+                                    </div>
+                    
+                                    <div>
+                                        <div class="inline-flex gap-x-2">
+                                            <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50" href="{{ url_for('nube.nube_dashboard') }}">
+                                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+                                                Volver a Mi Nube
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {% if archivos %}
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Archivo</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Propietario</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tamaño</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            {% for archivo in archivos %}
+                                            <tr>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="flex items-center">
+                                                        <div class="flex-shrink-0 h-8 w-8">
+                                                            {% if archivo.tipo in ['.pdf'] %}
+                                                                <div class="h-8 w-8 bg-red-100 rounded-lg flex items-center justify-center">
+                                                                    <svg class="h-4 w-4 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path d="M4 18h12V6l-4-4H4v16z"/>
+                                                                    </svg>
+                                                                </div>
+                                                            {% elif archivo.tipo in ['.doc', '.docx'] %}
+                                                                <div class="h-8 w-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                                                    <svg class="h-4 w-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path d="M4 18h12V6l-4-4H4v16z"/>
+                                                                    </svg>
+                                                                </div>
+                                                            {% elif archivo.tipo in ['.ppt', '.pptx'] %}
+                                                                <div class="h-8 w-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                                                                    <svg class="h-4 w-4 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path d="M4 18h12V6l-4-4H4v16z"/>
+                                                                    </svg>
+                                                                </div>
+                                                            {% elif archivo.tipo in ['.xls', '.xlsx'] %}
+                                                                <div class="h-8 w-8 bg-green-100 rounded-lg flex items-center justify-center">
+                                                                    <svg class="h-4 w-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path d="M4 18h12V6l-4-4H4v16z"/>
+                                                                    </svg>
+                                                                </div>
+                                                            {% elif archivo.tipo in ['.jpg', '.png'] %}
+                                                                <div class="h-8 w-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                                                    <svg class="h-4 w-4 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
+                                                                    </svg>
+                                                                </div>
+                                                            {% else %}
+                                                                <div class="h-8 w-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                                                                    <svg class="h-4 w-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path d="M4 18h12V6l-4-4H4v16z"/>
+                                                                    </svg>
+                                                                </div>
+                                                            {% endif %}
+                                                        </div>
+                                                        <div class="ml-3">
+                                                            <div class="text-sm font-medium text-gray-900">{{ archivo.nombre_original }}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="text-sm text-gray-900">{{ archivo.propietario_nombre }}</div>
+                                                    <div class="text-sm text-gray-500">{{ archivo.propietario_email }}</div>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                    {{ (archivo.tamano / 1024 / 1024) | round(2) }} MB
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                    {{ archivo.fecha_subida.strftime('%d/%m/%Y %H:%M') }}
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                    <div class="flex justify-end space-x-2">
+                                                        <a href="{{ url_for('nube.archivo_publico', enlace=archivo.enlace_publico) }}" class="text-blue-600 hover:text-blue-900">Descargar</a>
+                                                        <button onclick="copiarEnlace('{{ url_for('nube.archivo_publico', enlace=archivo.enlace_publico, _external=True) }}')" class="text-green-600 hover:text-green-900">Copiar enlace</button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <div class="max-w-sm w-full min-h-[400px] flex flex-col justify-center mx-auto px-6 py-4">
+                                    <div class="flex justify-center items-center size-[46px] bg-gray-100 rounded-lg mx-auto">
+                                        <svg class="shrink-0 size-6 text-gray-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 6l2 2l-8 8l-2-2z"/><path d="M12 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M12 6H8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4"/></svg>
+                                    </div>
+                                    <h2 class="mt-5 font-semibold text-gray-800 text-center">
+                                        No hay archivos compartidos
+                                    </h2>
+                                    <p class="mt-2 text-sm text-gray-600 text-center">
+                                        Aún no hay archivos compartidos públicamente por otros usuarios.
+                                    </p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function copiarEnlace(enlace) {
+            navigator.clipboard.writeText(enlace).then(function() {
+                alert('Enlace copiado al portapapeles');
+            });
+        }
+    </script>
+
+{% include 'tablero-footer.html' %}
+
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+<script>
+// Limpia campos dinámicos al cargar la página
+document.addEventListener("DOMContentLoaded", function () {
+const hiddenInputs = document.querySelectorAll("#buscadorForm input[type='hidden']");
+hiddenInputs.forEach((input) => input.remove());
+});
+document.getElementById("buscadorForm").addEventListener("submit", function (event) {
+event.preventDefault(); // Prevenir envío estándar del formulario
+
+const valor = document.getElementById("buscador").value.trim();
+const patterns = {
+    cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas
+    pasaporte: /^[A-Z]{2}\d{6,9}$/,                        // Pasaportes
+    id_certificado: /^[a-zA-Z0-9]{8}$/                    // IDs de certificados
+};
+
+let action, field;
+
+if (patterns.cedula.test(valor)) {
+    action = "/buscar_certificados";
+    field = "cedula";
+} else if (patterns.pasaporte.test(valor)) {
+    action = "/buscar_certificados";
+    field = "cedula";
+} else if (patterns.id_certificado.test(valor)) {
+    action = "/validar_certificado";
+    field = "nanoid";
+} else {
+    alert("Formato no válido. Introduzca un documento de identificación o un ID de certificado válido.");
+    return;
+}
+
+// Crear y enviar el formulario dinámicamente
+const form = event.target;
+form.action = action;
+form.method = "POST";
+
+// Limpiar campos ocultos previos
+const hiddenInputs = form.querySelectorAll("input[type='hidden']");
+hiddenInputs.forEach((input) => input.remove());
+
+const hiddenInput = document.createElement("input");
+hiddenInput.type = "hidden";
+hiddenInput.name = field;
+hiddenInput.value = valor;
+form.appendChild(hiddenInput);
+form.submit();
+});
+</script>
+</body>
+</html>

@@ -5580,6 +5580,10 @@ app.register_blueprint(catalogo_bp)
 from app.creditos import creditos_bp
 app.register_blueprint(creditos_bp)
 
+### Nube personal
+from app.nube import nube_bp
+app.register_blueprint(nube_bp)
+
 ### Importaciones para gráficas
 import matplotlib
 matplotlib.use('Agg')  # Configurar matplotlib para usar backend no interactivo
