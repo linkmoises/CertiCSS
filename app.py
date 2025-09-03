@@ -3406,11 +3406,18 @@ def buscar_certificados():
                 resultados.append(resultado)
             else:
                 resultado = {
+                    'nombres': participante.get('nombres', 'N/A'),
+                    'apellidos': participante.get('apellidos', 'N/A'),
                     'cedula': participante['cedula'],
                     'nanoid': participante['nanoid'],
+                    'rol': participante.get('rol', 'participante'),
+                    'ponencia': participante.get('titulo_ponencia', 'N/A'),
                     'codigo_evento': codigo_evento,
+                    'certificado_evento': None,
                     'titulo_evento': 'Evento no encontrado',
-                    'fecha_evento': None
+                    'fecha_evento': None,
+                    'modalidad_evento': 'No disponible',
+                    'tiene_archivos': False,
                 }
                 resultados.append(resultado)
 
