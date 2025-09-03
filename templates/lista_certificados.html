@@ -102,7 +102,13 @@
                                     </td>
                                     <td class="h-px w-1/6">
                                         <div class="px-6 py-2">
-                                            <p class="text-sm text-gray-500 mb-2">{{ resultado['fecha_evento'].strftime('%d de %B de %Y') }}</p>
+                                            <p class="text-sm text-gray-500 mb-2">
+                                                {% if resultado['fecha_evento'] %}
+                                                    {{ resultado['fecha_evento'].strftime('%d de %B de %Y') }}
+                                                {% else %}
+                                                    Fecha no disponible
+                                                {% endif %}
+                                            </p>
                                         </div>
                                     </td>
                                     <td class="h-px w-1/6">
