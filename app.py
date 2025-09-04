@@ -2612,6 +2612,91 @@ def actualizar_campo_evento():
 
 
 ###
+### Participantes huérfanos (sin evento asociado)
+###
+@app.route('/tablero/bases-de-datos/participantes-huerfanos')
+@app.route('/tablero/bases-de-datos/participantes-huerfanos/page/<int:page>')
+@login_required
+def participantes_huerfanos(page=1):
+    # Verificar si el usuario es administrador
+    if current_user.rol != 'administrador':
+        flash('No tienes permiso para acceder a esta página.', 'error')
+        return redirect(url_for('home'))
+
+    participantes_por_pagina = 50
+    skip = (page - 1) * participantes_por_pagina
+
+    # Obtener todos los códigos de eventos existentes
+    codigos_eventos_existentes = set()
+    for evento in collection_eventos.find({}, {"codigo": 1}):
+        codigos_eventos_existentes.add(evento.get('codigo'))
+
+    # Obtener participantes cuyo codigo_evento no existe en la colección de eventos
+    participantes_huerfanos = []
+    total_participantes = 0
+    
+    # Obtener todos los participantes
+    todos_participantes = collection_participantes.find()
+    
+    for participante in todos_participantes:
+        codigo_evento = participante.get('codigo_evento')
+        if codigo_evento not in codigos_eventos_existentes:
+            participantes_huerfanos.append(participante)
+    
+    total_participantes = len(participantes_huerfanos)
+    
+    # Aplicar paginación
+    participantes_paginados = participantes_huerfanos[skip:skip + participantes_por_pagina]
+    total_paginas = (total_participantes + participantes_por_pagina - 1) // participantes_por_pagina
+
+    # Obtener todos los campos posibles
+    campos = set()
+    for participante in participantes_paginados:
+        campos.update(participante.keys())
+    
+    campos = sorted(campos)
+
+    return render_template('bd_huerfanos.html',
+        participantes=participantes_paginados,
+        campos=campos,
+        page=page,
+        total_paginas=total_paginas,
+        total_participantes=total_participantes)
+
+
+###
+### Eliminar participantes huérfanos en lote
+###
+@app.route('/tablero/bases-de-datos/eliminar-huerfanos-lote', methods=['POST'])
+@login_required
+def eliminar_huerfanos_lote():
+    if current_user.rol != 'administrador':
+        return jsonify({'success': False, 'error': 'No tienes permiso para realizar esta acción'})
+
+    try:
+        # Obtener todos los códigos de eventos existentes
+        codigos_eventos_existentes = set()
+        for evento in collection_eventos.find({}, {"codigo": 1}):
+            codigos_eventos_existentes.add(evento.get('codigo'))
+
+        # Eliminar participantes cuyo codigo_evento no existe
+        result = collection_participantes.delete_many({
+            "codigo_evento": {"$nin": list(codigos_eventos_existentes)}
+        })
+
+        log_event(f"Usuario [{current_user.email}] eliminó {result.deleted_count} participantes huérfanos.")
+        
+        return jsonify({
+            'success': True, 
+            'deleted_count': result.deleted_count,
+            'message': f'Se eliminaron {result.deleted_count} participantes huérfanos.'
+        })
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
+###
 ### Colección de participantes de evento
 ###
 @app.route("/base-de-datos/<codigo_evento>")

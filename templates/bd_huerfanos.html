@@ -6,7 +6,7 @@
     <div class="w-full lg:ps-64">
         <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
             
-            <!-- TABLA RESUMEN EVENTOS -->
+            <!-- TABLA PARTICIPANTES HUÉRFANOS -->
             <div class="max-w-[85rem] px-2 pt-1 mx-auto">
                 <!-- Card -->
                 <div class="flex flex-col">
@@ -18,53 +18,58 @@
                         <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
                             <div>
                                 <h2 class="text-xl font-semibold text-gray-800">
-                                    MongoDB - Colección - Eventos
+                                    Participantes Huérfanos
                                 </h2>
                                 <p class="text-sm text-gray-600">
-                                    Vista de edición de campos de los eventos
+                                    Participantes asociados a eventos que ya no existen en la base de datos
                                 </p>
                             </div>
             
                             <div>
                                 <div class="inline-flex gap-x-2">
-                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50" href="{{ url_for('participantes_huerfanos') }}">
-                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                                        Participantes Huérfanos
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50" href="{{ url_for('db_eventos') }}">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+                                        Volver a Eventos
                                     </a>
+                                    {% if total_participantes > 0 %}
+                                    <button type="button" onclick="eliminarTodosHuerfanos()" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-red-600 text-white hover:bg-red-700">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                        Eliminar Todos
+                                    </button>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
                         <!-- End Header -->
 
-        {% if eventos|length == 0 %}
+        {% if total_participantes == 0 %}
                         
                         <!-- Body -->
                         <div class="max-w-sm w-full min-h-[400px] flex flex-col justify-center mx-auto px-6 py-4">
-                            <div class="flex justify-center items-center size-[46px] bg-gray-100 rounded-lg dark:bg-neutral-800">
-                                <svg class="shrink-0 size-6 text-gray-600 dark:text-neutral-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-off"><path d="M4.2 4.2A2 2 0 0 0 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 1.82-1.18"/><path d="M21 15.5V6a2 2 0 0 0-2-2H9.5"/><path d="M16 2v4"/><path d="M3 10h7"/><path d="M21 10h-5.5"/><path d="m2 2 20 20"/></svg>
+                            <div class="flex justify-center items-center size-[46px] bg-green-100 rounded-lg">
+                                <svg class="shrink-0 size-6 text-green-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg>
                             </div>
 
-                            <h2 class="mt-5 font-semibold text-gray-800 dark:text-white">
-                                No hay eventos
+                            <h2 class="mt-5 font-semibold text-gray-800">
+                                No hay participantes huérfanos
                             </h2>
-                            <p class="mt-2 text-sm text-gray-600 dark:text-neutral-400">
-                                Sin eventos disponibles para fechas próximas.
+                            <p class="mt-2 text-sm text-gray-600">
+                                Todos los participantes están asociados a eventos existentes.
                             </p>
                             
                             <div class="mt-5 flex flex-col sm:flex-row gap-2">
-                                <a href="{{ url_for('crear_evento') }}" class="py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
-                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                                    Nuevo evento
+                                <a href="{{ url_for('db_eventos') }}" class="py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50">
+                                    Volver a Eventos
                                 </a>
                             </div>
                         </div>
                         <!-- End Body -->
 
                         <!-- Footer -->
-                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
+                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200">
                             <div>
-                                <p class="text-sm text-gray-600 dark:text-neutral-400">
-                                    <span class="font-semibold text-gray-800 dark:text-neutral-200">0</span> resultados
+                                <p class="text-sm text-gray-600">
+                                    <span class="font-semibold text-gray-800">0</span> participantes huérfanos
                                 </p>
                             </div>
                         </div>
@@ -77,7 +82,7 @@
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th scope="col" class="px-4 py-2 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">
-                                        Colección participantes
+                                        Acciones
                                     </th>
                                 {% for campo in campos %}
                                     <th scope="col" class="px-4 py-2 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">
@@ -87,23 +92,24 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 bg-white">
-                                {% for evento in eventos %}
+                                {% for participante in participantes %}
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-4 py-2 text-sm text-gray-800 whitespace-nowrap">
-                                        <a href="{{ url_for('db_individual', codigo_evento=evento.get('codigo', '')) }}" 
-                                           class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline">
-                                            BD: {{ evento.get('nombre', '') }}
-                                        </a>
+                                        <form method="POST" action="{{ url_for('eliminar_participante_bd', codigo_evento=participante.get('codigo_evento', ''), id_participante=participante.get('_id')) }}" style="display:inline;">
+                                            <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium" onclick="return confirm('¿Estás seguro de que deseas eliminar este participante huérfano?');">
+                                                Eliminar
+                                            </button>
+                                        </form>
                                     </td>
                                     {% for campo in campos %}
                                     <td class="px-4 py-2 text-sm text-gray-800 whitespace-nowrap">
                                         <div class="editable-field" 
-                                             data-codigo="{{ evento.get('codigo', '') }}" 
+                                             data-codigo="{{ participante.get('nanoid', '') }}" 
                                              data-campo="{{ campo }}" 
-                                             data-valor="{{ evento.get(campo, '') }}"
+                                             data-valor="{{ participante.get(campo, '') }}"
                                              onclick="makeEditable(this)"
                                              style="min-height: 20px; cursor: pointer;">
-                                            {{ evento.get(campo, '') }}
+                                            {{ participante.get(campo, '') }}
                                         </div>
                                     </td>
                                     {% endfor %}
@@ -117,14 +123,14 @@
                         <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200">
                             <div>
                                 <p class="text-sm text-gray-600">
-                                <span class="font-semibold text-gray-800">{{ total_eventos }}</span> {{ 'registro en esta colección' if num_eventos == 1 else 'registros en esta colección' }}
+                                <span class="font-semibold text-gray-800">{{ total_participantes }}</span> {{ 'participante huérfano' if total_participantes == 1 else 'participantes huérfanos' }}
                                 </p>
                             </div>
                 
                             <div>
                                 <div class="inline-flex gap-x-2"> 
 {% if page > 1 %}
-                                    <a href="{{ url_for('listar_eventos', page=page-1) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                                    <a href="{{ url_for('participantes_huerfanos', page=page-1) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50">
                                         <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
                                         Anterior
                                     </a>
@@ -133,7 +139,7 @@
                                         Página {{ page }} de {{ total_paginas }}
                                     </p>
 {% if page < total_paginas %}
-                                    <a href="{{ url_for('listar_eventos', page=page+1) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                                    <a href="{{ url_for('participantes_huerfanos', page=page+1) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50">
                                         Siguiente
                                         <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                                     </a>
@@ -150,7 +156,7 @@
                 </div>
                 <!-- End Card -->
             </div>
-            <!-- FIN TABLA RESUMEN EVENTOS -->
+            <!-- FIN TABLA PARTICIPANTES HUÉRFANOS -->
 
 {% include 'tablero-footer.html' %}
 
@@ -161,54 +167,6 @@
 <!-- JS PLUGINS -->
 <script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
 <script>
-// Limpia campos dinámicos al cargar la página
-document.addEventListener("DOMContentLoaded", function () {
-    const hiddenInputs = document.querySelectorAll("#buscadorForm input[type='hidden']");
-    hiddenInputs.forEach((input) => input.remove());
-});
-document.getElementById("buscadorForm").addEventListener("submit", function (event) {
-    event.preventDefault(); // Prevenir envío estándar del formulario
-
-    const valor = document.getElementById("buscador").value.trim();
-    const patterns = {
-        cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas
-        pasaporte: /^[A-Z]{2}\d{6,9}$/,                        // Pasaportes
-        id_certificado: /^[a-zA-Z0-9]{8}$/                    // IDs de certificados
-    };
-
-    let action, field;
-
-    if (patterns.cedula.test(valor)) {
-        action = "/buscar_certificados";
-        field = "cedula";
-    } else if (patterns.pasaporte.test(valor)) {
-        action = "/buscar_certificados";
-        field = "cedula";
-    } else if (patterns.id_certificado.test(valor)) {
-        action = "/validar_certificado";
-        field = "nanoid";
-    } else {
-        alert("Formato no válido. Introduzca un documento de identificación o un ID de certificado válido.");
-        return;
-    }
-
-    // Crear y enviar el formulario dinámicamente
-    const form = event.target;
-    form.action = action;
-    form.method = "POST";
-
-    // Limpiar campos ocultos previos
-    const hiddenInputs = form.querySelectorAll("input[type='hidden']");
-    hiddenInputs.forEach((input) => input.remove());
-
-    const hiddenInput = document.createElement("input");
-    hiddenInput.type = "hidden";
-    hiddenInput.name = field;
-    hiddenInput.value = valor;
-    form.appendChild(hiddenInput);
-    form.submit();
-});
-
 function makeEditable(element) {
     if (element.getAttribute('contenteditable') === 'true') return;
     
@@ -246,18 +204,18 @@ function saveChanges(element, newValue) {
     const campo = element.getAttribute('data-campo');
     
     if (!codigo) {
-        alert('Error: No se pudo obtener el código del evento');
+        alert('Error: No se pudo obtener el código del participante');
         element.textContent = element.getAttribute('data-valor');
         return;
     }
 
-    fetch('/actualizar_campo_evento', {
+    fetch('/actualizar_campo_participante', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            codigo_evento: codigo,
+            nanoid: codigo,
             campo: campo,
             valor: newValue || ''
         })
@@ -276,6 +234,36 @@ function saveChanges(element, newValue) {
         console.error('Error:', error);
         alert('Error al guardar los cambios');
         element.textContent = element.getAttribute('data-valor');
+    });
+}
+
+function eliminarTodosHuerfanos() {
+    if (!confirm('¿Estás seguro de que deseas eliminar TODOS los participantes huérfanos? Esta acción no se puede deshacer.')) {
+        return;
+    }
+
+    if (!confirm('Esta acción eliminará permanentemente todos los participantes sin evento asociado. ¿Continuar?')) {
+        return;
+    }
+
+    fetch('/tablero/bases-de-datos/eliminar-huerfanos-lote', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error al eliminar participantes: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al eliminar participantes');
     });
 }
 </script>
