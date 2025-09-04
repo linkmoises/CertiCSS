@@ -2773,21 +2773,37 @@ def actualizar_campo_participante():
 ### Eliminar participante desde vista de BD
 ###
 @app.route('/eliminar_participante_bd/<codigo_evento>/<id_participante>', methods=['POST'])
+@app.route('/eliminar_participante_bd/<codigo_evento>/<id_participante>/<origen>', methods=['POST'])
 @login_required
-def eliminar_participante_bd(codigo_evento, id_participante):
+def eliminar_participante_bd(codigo_evento, id_participante, origen=None):
     if current_user.rol != 'administrador':
         flash('No tienes permisos para eliminar participantes.', 'error')
+        if origen == 'huerfanos':
+            # Mantener la página actual si viene de huérfanos
+            page = request.args.get('page', 1, type=int)
+            return redirect(url_for('participantes_huerfanos', page=page))
         return redirect(url_for('db_individual', codigo_evento=codigo_evento))
 
     try:
         participante = collection_participantes.find_one({'_id': ObjectId(id_participante), 'codigo_evento': codigo_evento})
     except Exception:
         participante = None
+    
     if participante:
         collection_participantes.delete_one({'_id': ObjectId(id_participante), 'codigo_evento': codigo_evento})
+        if origen == 'huerfanos':
+            log_event(f"Usuario [{current_user.email}] eliminó participante huérfano {participante.get('nombres', '')} {participante.get('apellidos', '')} del evento inexistente {codigo_evento}.")
+        else:
+            log_event(f"Usuario [{current_user.email}] eliminó participante {participante.get('nombres', '')} {participante.get('apellidos', '')} del evento {codigo_evento}.")
         flash('Participante eliminado correctamente.', 'success')
     else:
         flash('Participante no encontrado.', 'error')
+    
+    # Redirigir según el origen
+    if origen == 'huerfanos':
+        # Mantener la página actual si viene de huérfanos
+        page = request.args.get('page', 1, type=int)
+        return redirect(url_for('participantes_huerfanos', page=page))
     return redirect(url_for('db_individual', codigo_evento=codigo_evento))
 
 

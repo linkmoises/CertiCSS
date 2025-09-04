@@ -95,7 +95,7 @@
                                 {% for participante in participantes %}
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-4 py-2 text-sm text-gray-800 whitespace-nowrap">
-                                        <form method="POST" action="{{ url_for('eliminar_participante_bd', codigo_evento=participante.get('codigo_evento', ''), id_participante=participante.get('_id')) }}" style="display:inline;">
+                                        <form method="POST" action="{{ url_for('eliminar_participante_bd', codigo_evento=participante.get('codigo_evento', ''), id_participante=participante.get('_id'), origen='huerfanos') }}?page={{ page }}" style="display:inline;">
                                             <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium" onclick="return confirm('¿Estás seguro de que deseas eliminar este participante huérfano?');">
                                                 Eliminar
                                             </button>
@@ -256,7 +256,8 @@ function eliminarTodosHuerfanos() {
     .then(data => {
         if (data.success) {
             alert(data.message);
-            location.reload();
+            // Redirigir a la primera página después de eliminar todos
+            window.location.href = '{{ url_for("participantes_huerfanos") }}';
         } else {
             alert('Error al eliminar participantes: ' + data.error);
         }
