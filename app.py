@@ -5418,6 +5418,9 @@ def generar_constancia_asistencia(participante, afiche_path):
     if isinstance(ff_evento, str):
         ff_evento = datetime.strptime(ff_evento, '%Y-%m-%d %H:%M:%S')
     
+    # Calcular la duración del evento en días
+    duracion_evento_dias = (ff_evento.date() - fi_evento.date()).days + 1
+    
     # Format dates for display based on same/different months
     if fi_evento.month == ff_evento.month:
         # Same month: "05 al 06 de agosto de 2025"
@@ -5427,9 +5430,6 @@ def generar_constancia_asistencia(participante, afiche_path):
         # Different months: "31 de agosto al 02 de septiembre de 2025"
         fi_formateada = fi_evento.strftime('%d de %B')
         ff_formateada = f"{fi_formateada} al {ff_evento.strftime('%d de %B de %Y')}"
-
-    # fecha_inicio = datetime.strptime(fi_evento, '%Y-%m-%d')
-    # fecha_fin = datetime.strptime(ff_evento, '%Y-%m-%d')
 
     # Configurar fuentes y colores
     c.setFont("Helvetica", 14)
@@ -5472,22 +5472,77 @@ def generar_constancia_asistencia(participante, afiche_path):
         "rol": "participante"
     }))
 
-    if len(registros_participante) > 1:
-        # Si tiene múltiples registros, mostrar los días específicos
-        dias_asistencia = []
-        for registro in registros_participante:
-            if registro.get('indice_registro'):
-                fecha = datetime.strptime(registro['indice_registro'], '%Y%m%d')
-                dias_asistencia.append(fecha.strftime('%d de %B de %Y'))
-        
-        texto_constancia += f"participando los días {', '.join(dias_asistencia)}, "
-
-    # Always use the pre-formatted date range
-    texto_constancia += (
-        f"en el evento <b>'{titulo_evento}'</b>, realizado en modalidad "
-        f"<b>{modalidad_evento.lower()}</b> y organizado por la unidad ejecutora <b>'{ue_evento}'</b>, "
-        f"el {ff_formateada} con una duración de {carga_horaria_evento} horas académicas."
-    )
+    # Lógica mejorada para manejar asistencia parcial vs completa
+    if duracion_evento_dias == 1:
+        # Evento de un solo día
+        texto_constancia += (
+            f"en el evento <b>'{titulo_evento}'</b>, realizado en modalidad "
+            f"<b>{modalidad_evento.lower()}</b> y organizado por la unidad ejecutora <b>'{ue_evento}'</b>, "
+            f"el {ff_formateada} con una duración de {carga_horaria_evento} horas académicas."
+        )
+    else:
+        # Evento de múltiples días
+        if len(registros_participante) == 1:
+            # Solo un registro de asistencia en evento de múltiples días
+            fecha_asistencia = datetime.strptime(participante['indice_registro'], '%Y%m%d')
+            fecha_asistencia_formateada = fecha_asistencia.strftime('%d de %B de %Y')
+            
+            # Calcular horas proporcionales (asumiendo distribución equitativa por día)
+            try:
+                horas_totales = int(carga_horaria_evento)
+                horas_por_dia = horas_totales / duracion_evento_dias
+                horas_asistencia = round(horas_por_dia)
+            except (ValueError, ZeroDivisionError):
+                horas_asistencia = "N/A"
+            
+            texto_constancia += (
+                f"por su participación el día <b>{fecha_asistencia_formateada}</b> "
+                f"en el evento <b>'{titulo_evento}'</b>, realizado en modalidad "
+                f"<b>{modalidad_evento.lower()}</b> y organizado por la unidad ejecutora <b>'{ue_evento}'</b>, "
+                f"programado del {ff_formateada}. "
+                f"Horas de asistencia: <b>{horas_asistencia} horas académicas</b>."
+            )
+        elif len(registros_participante) > 1:
+            # Múltiples registros de asistencia
+            dias_asistencia = []
+            for registro in registros_participante:
+                if registro.get('indice_registro'):
+                    fecha = datetime.strptime(registro['indice_registro'], '%Y%m%d')
+                    dias_asistencia.append(fecha.strftime('%d de %B de %Y'))
+            
+            # Calcular horas proporcionales
+            try:
+                horas_totales = int(carga_horaria_evento)
+                horas_por_dia = horas_totales / duracion_evento_dias
+                horas_asistencia = round(horas_por_dia * len(registros_participante))
+            except (ValueError, ZeroDivisionError):
+                horas_asistencia = "N/A"
+            
+            if len(registros_participante) == duracion_evento_dias:
+                # Asistió todos los días
+                texto_constancia += (
+                    f"por su participación completa "
+                    f"en el evento <b>'{titulo_evento}'</b>, realizado en modalidad "
+                    f"<b>{modalidad_evento.lower()}</b> y organizado por la unidad ejecutora <b>'{ue_evento}'</b>, "
+                    f"del {ff_formateada} con una duración de {carga_horaria_evento} horas académicas."
+                )
+            else:
+                # Asistió parcialmente
+                dias_texto = ', '.join(dias_asistencia[:-1]) + f" y {dias_asistencia[-1]}" if len(dias_asistencia) > 1 else dias_asistencia[0]
+                texto_constancia += (
+                    f"por su participación los días <b>{dias_texto}</b> "
+                    f"en el evento <b>'{titulo_evento}'</b>, realizado en modalidad "
+                    f"<b>{modalidad_evento.lower()}</b> y organizado por la unidad ejecutora <b>'{ue_evento}'</b>, "
+                    f"programado del {ff_formateada}. "
+                    f"Horas de asistencia: <b>{horas_asistencia} horas académicas</b>."
+                )
+        else:
+            # Fallback - no debería ocurrir, pero por seguridad
+            texto_constancia += (
+                f"en el evento <b>'{titulo_evento}'</b>, realizado en modalidad "
+                f"<b>{modalidad_evento.lower()}</b> y organizado por la unidad ejecutora <b>'{ue_evento}'</b>, "
+                f"del {ff_formateada} con una duración de {carga_horaria_evento} horas académicas."
+            )
 
     # Crear un párrafo
     constancia_paragraph = Paragraph(texto_constancia, style)
