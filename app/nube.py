@@ -16,31 +16,8 @@ from app import db, collection_usuarios, collection_nube
 
 nube_bp = Blueprint('nube', __name__)
 
-# Función de logging local
-def log_event(message):
-    """Función de logging para eventos de la nube"""
-    import logging
-    from flask import request
-    
-    def get_client_ip():
-        """Obtiene la dirección IP del cliente."""
-        if request.headers.get('X-Forwarded-For'):
-            return request.headers.get('X-Forwarded-For').split(',')[0]
-        else:
-            return request.environ.get('REMOTE_ADDR', 'unknown')
-    
-    # Configurar logger si no existe
-    logger = logging.getLogger('certicss')
-    if not logger.handlers:
-        handler = logging.FileHandler('logs/app.log')
-        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-        logger.setLevel(logging.INFO)
-    
-    client_ip = get_client_ip()
-    log_message = f"{message} {client_ip}."
-    logger.info(log_message)
+# Importar función de logging centralizada
+from app.logs import log_event
 
 # Configuración específica para la nube
 NUBE_FOLDER = 'static/nube'

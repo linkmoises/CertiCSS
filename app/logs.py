@@ -9,13 +9,60 @@
 ###     directorio de logs.
 ###
 ###
-from flask import Flask, Blueprint, render_template, render_template_string, send_file
+from flask import Flask, Blueprint, render_template, render_template_string, send_file, request
 from flask_login import login_required
 from datetime import datetime
 import os
+import logging
+from logging.handlers import RotatingFileHandler
 
 
 logs_blueprint = Blueprint('logs', __name__)
+
+# Configuración del logger centralizado
+def setup_logger():
+    """Configura el logger centralizado para toda la aplicación"""
+    # Crear la carpeta /logs si no existe
+    if not os.path.exists('logs'):
+        os.makedirs('logs')
+
+    # Nombre del archivo de log basado en la fecha actual
+    log_filename = datetime.now().strftime('logs/app-%Y-%m-%d.log')
+
+    # Configuración del logging
+    logger = logging.getLogger('certicss_logger')
+    
+    # Evitar duplicar handlers si ya existe
+    if not logger.handlers:
+        logger.setLevel(logging.INFO)
+
+        # Formato del log
+        formatter = logging.Formatter('%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+
+        # Manejador para rotar archivos cada 250 registros
+        handler = RotatingFileHandler(
+            log_filename,
+            maxBytes=0,
+            backupCount=250,
+        )
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+    
+    return logger
+
+def get_client_ip():
+    """Obtiene la dirección IP del cliente."""
+    if request.headers.get('X-Forwarded-For'):
+        return request.headers.get('X-Forwarded-For').split(',')[0]
+    else:
+        return request.environ.get('REMOTE_ADDR', 'unknown')
+
+def log_event(message):
+    """Función centralizada para logging de eventos"""
+    logger = setup_logger()
+    client_ip = get_client_ip()
+    log_message = f"{message} {client_ip}."
+    logger.info(log_message)
 
 
 ###

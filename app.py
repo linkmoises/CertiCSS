@@ -5482,38 +5482,10 @@ def descargar_constancia(nanoid):
 
 
 ###
-### Sistema de logs
+### Sistema de logs centralizado
 ###
-import logging
-from logging.handlers import RotatingFileHandler
-
-# Crear la carpeta /logs si no existe
-if not os.path.exists('logs'):
-    os.makedirs('logs')
-
-# Nombre del archivo de log basado en la fecha actual
-log_filename = datetime.now().strftime('logs/app-%Y-%m-%d.log')
-
-# Configuración del logging
-logger = logging.getLogger('app_logger')
-logger.setLevel(logging.INFO)  # Nivel de logging (INFO, WARNING, ERROR, etc.)
-
-# Formato del log
-formatter = logging.Formatter('%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-
-# Manejador para rotar archivos cada 250 registros
-handler = RotatingFileHandler(
-    log_filename,  # Nombre del archivo de log
-    maxBytes=0,  # No usar tamaño máximo (usamos backupCount en su lugar)
-    backupCount=250,  # Número máximo de registros por archivo
-)
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
-def log_event(message):
-    client_ip = get_client_ip()  # Obtener la dirección IP del cliente
-    log_message = f"{message} {client_ip}."
-    logger.info(log_message)
+# Importar función de logging desde el módulo centralizado
+from app.logs import log_event
 
 
 ###
