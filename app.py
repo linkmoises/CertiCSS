@@ -773,6 +773,36 @@ def catalogo(page=1):
 
 
 ###
+### Catálogo eventos abiertos
+###
+@app.route('/catalogo/abiertos')
+@app.route('/catalogo/abiertos/<int:page>', methods=['GET'])
+def catalogo_abiertos(page=1):
+    per_page = 15  # Número máximo de eventos por página
+    skip = (page - 1) * per_page
+
+    # Filtro para eventos con registro abierto y estado publicado
+    filtro_catalogo = {
+        "registro_abierto": True,
+        "estado_evento": "publicado"
+    }
+
+    # Contar total de eventos abiertos
+    total_eventos = collection_eventos.count_documents(filtro_catalogo)
+    total_pages = (total_eventos + per_page - 1) // per_page  # Calcular el total de páginas
+
+    # Verificar si la página solicitada es válida
+    if page < 1 or (total_pages > 0 and page > total_pages):
+        abort(404)  # Forzar un error 404 si la página no existe
+
+    # Obtener eventos paginados
+    eventos_cursor = collection_eventos.find(filtro_catalogo).sort("fecha_inicio", -1).skip(skip).limit(per_page)
+    eventos = list(eventos_cursor)
+
+    return render_template('catalogo_abiertos.html', eventos=eventos, page=page, total_pages=total_pages)
+
+
+###
 ### Dashboard
 ###
 @app.route('/tablero')

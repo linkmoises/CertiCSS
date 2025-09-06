@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>{{ evento.nombre }}</title>
@@ -7,27 +8,32 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- favicons -->
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}"
+        sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
+    <link rel="apple-touch-icon" sizes="180x180"
+        href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
     <meta name="apple-mobile-web-app-title" content="CertiCSS" />
     <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
     <!-- metadatos redes sociales -->
-    <meta property="og:title" content="{{ evento.nombre }}"/>
-    <meta property="og:description" content="{{ evento.descripcion }}"/>
-    <meta property="og:image" content="{% if evento.afiche_750 %}{{ BASE_URL }}{{ evento.afiche_750 }}{% else %}{{ url_for('static', filename='assets/afiche-generico.jpg') }}{% endif %}"/>
+    <meta property="og:title" content="{{ evento.nombre }}" />
+    <meta property="og:description" content="{{ evento.descripcion }}" />
+    <meta property="og:image"
+        content="{% if evento.afiche_750 %}{{ BASE_URL }}{{ evento.afiche_750 }}{% else %}{{ url_for('static', filename='assets/afiche-generico.jpg') }}{% endif %}" />
     <meta property="og:image:width" content="750">
     <meta property="og:image:height" content="750">
-    <meta property="og:url" content="{{ BASE_URL}}resumen/{{ evento.codigo }}"/>
+    <meta property="og:url" content="{{ BASE_URL}}resumen/{{ evento.codigo }}" />
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="{{ evento.nombre }}">
     <meta name="twitter:description" content="{{ evento.descripcion }}">
-    <meta name="twitter:image" content="{% if evento.afiche_750 %}{{ BASE_URL }}{{ evento.afiche_750 }}{% else %}{{ url_for('static', filename='assets/afiche-generico.jpg') }}{% endif %}">
+    <meta name="twitter:image"
+        content="{% if evento.afiche_750 %}{{ BASE_URL }}{{ evento.afiche_750 }}{% else %}{{ url_for('static', filename='assets/afiche-generico.jpg') }}{% endif %}">
     <meta name="twitter:url" content="{{ BASE_URL }}resumen/{{ evento.codigo }}">
-{% if UMAMI_URL %}
+    {% if UMAMI_URL %}
     {{ UMAMI_URL | safe }}
-{% endif %}
+    {% endif %}
 </head>
+
 <body class="bg-gray-50 dark:bg-neutral-900">
 
     <!-- ========== MAIN CONTENT ========== -->
@@ -40,11 +46,14 @@
 
                 <div class="sm:order-2">
                     <div class="relative pt-[100%] sm:pt-[100%]">
-{% if evento.afiche_750 %}
-                        <img class="size-full absolute top-0 start-0 object-cover rounded-xl md:rounded-none md:rounded-r-xl" src="{{ BASE_URL }}{{ evento.afiche_750 }}" alt="{{ evento.nombre }}">
-{% else %}
-                        <img class="size-full absolute top-0 start-0 object-cover rounded-xl md:rounded-none md:rounded-r-xl" src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}" alt="{{ evento.nombre }}">
-{% endif %}
+                        {% if evento.afiche_750 %}
+                        <img class="size-full absolute top-0 start-0 object-cover rounded-xl md:rounded-none md:rounded-r-xl"
+                            src="{{ BASE_URL }}{{ evento.afiche_750 }}" alt="{{ evento.nombre }}">
+                        {% else %}
+                        <img class="size-full absolute top-0 start-0 object-cover rounded-xl md:rounded-none md:rounded-r-xl"
+                            src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}"
+                            alt="{{ evento.nombre }}">
+                        {% endif %}
                     </div>
                 </div>
                 <!-- End Col -->
@@ -55,14 +64,14 @@
                         <h2 class="text-xl font-bold text-gray-800">{{ evento.nombre }}</h2>
 
                         <div class="mt-4 grid sm:grid-cols-12 gap-2 sm:gap-6">
-                            
+
                             <div class="sm:col-span-3">
                                 <span class="inline-block text-sm text-gray-800 justify-normal">
                                     Descripción
                                 </span>
                             </div>
                             <!-- End Col -->
-                        
+
                             <div class="sm:col-span-9">
                                 <p class="text-gray-500 text-sm mt-0.5">{{ evento.descripcion }}</p>
                             </div>
@@ -74,19 +83,60 @@
                                 </span>
                             </div>
                             <!-- End Col -->
-                        
+
                             <div class="sm:col-span-9">
                                 <p class="text-gray-500 text-sm mt-0.5">{{ evento.modalidad }}</p>
                             </div>
                             <!-- End Col -->
 
+{% if evento.registro_abierto %}
+                            <div class="sm:col-span-3">
+                                <span class="inline-block text-sm text-gray-800">
+                                    Acreditación
+                                </span>
+                            </div>
+                            <!-- End Col -->
+
+                            <div class="sm:col-span-9">
+                                <p class="text-gray-500 text-sm mt-0.5">{{ evento.carga_horaria }} horas-crédito (avaladas por el Colegio Médico de Panamá)</p>
+                            </div>
+                            <!-- End Col -->
+
+                            <div class="sm:col-span-3">
+                                <span class="inline-block text-sm text-gray-800">
+                                    Código de Honor
+                                </span>
+                            </div>
+                            <!-- End Col -->
+
+                            <div class="sm:col-span-9">
+                                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                                    <div class="flex">
+                                        <div class="flex-shrink-0">
+                                            <svg class="h-4 w-4 text-yellow-400 mt-0.5"
+                                                xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                fill="currentColor" viewBox="0 0 16 16">
+                                                <path
+                                                    d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+                                            </svg>
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm text-yellow-800">
+                                                Me comprometo a participar de forma personal y honesta, sin asistencia externa, y confirmo que soy funcionario de la CSS cumpliendo los requisitos de acceso.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- End Col -->
+{% else %}
                             <div class="sm:col-span-3">
                                 <span class="inline-block text-sm text-gray-800">
                                     Lugar
                                 </span>
                             </div>
                             <!-- End Col -->
-                        
+
                             <div class="sm:col-span-9">
                                 <p class="text-gray-500 text-sm mt-0.5">{{ evento.lugar or 'Por determinar' }}</p>
                             </div>
@@ -98,19 +148,21 @@
                                 </span>
                             </div>
                             <!-- End Col -->
-                        
+
                             <div class="sm:col-span-9">
                                 <p class="text-gray-500 text-sm mt-0.5">
-{% if evento.fecha_inicio.date() == evento.fecha_fin.date() %}
+                                    {% if evento.fecha_inicio.date() == evento.fecha_fin.date() %}
                                     {{ evento.fecha_inicio.strftime('%d de %B de %Y') }}
-{% elif evento.fecha_fin %}
-                                    {{ evento.fecha_inicio.strftime('%d') }} - {{ evento.fecha_fin.strftime('%d de %B de %Y') }}
-{% else %}
+                                    {% elif evento.fecha_fin %}
+                                    {{ evento.fecha_inicio.strftime('%d') }} - {{ evento.fecha_fin.strftime('%d de %B de
+                                    %Y') }}
+                                    {% else %}
                                     {{ evento.fecha_inicio.strftime('%d de %B de %Y') }}
-{% endif %}
+                                    {% endif %}
                                 </p>
                             </div>
                             <!-- End Col -->
+{% endif %}
 
                             <div class="sm:col-span-3">
                                 <span class="inline-block text-sm text-gray-800">
@@ -121,37 +173,95 @@
 
                             <div class="sm:col-span-9 space-x-3">
                                 <!-- Compartir por WhatsApp -->
-                                <a class="inline-block text-gray-500 hover:text-green-500 transition-colors duration-200" href="https://wa.me/?text={{ evento.nombre | urlencode }}%20{{ BASE_URL }}resumen/{{ evento.codigo }}" target="_blank" rel="noopener" title="Compartir por WhatsApp">
-                                    <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7 .9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
+                                <a class="inline-block text-gray-500 hover:text-green-500 transition-colors duration-200"
+                                    href="https://wa.me/?text={{ evento.nombre | urlencode }}%20{{ BASE_URL }}resumen/{{ evento.codigo }}"
+                                    target="_blank" rel="noopener" title="Compartir por WhatsApp">
+                                    <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg"
+                                        fill="currentColor" viewBox="0 0 448 512">
+                                        <path
+                                            d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7 .9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z" />
+                                    </svg>
                                 </a>
                                 <!-- Compartir por Twitter -->
-                                <a class="inline-block text-gray-500 hover:text-black transition-colors duration-200" href="https://twitter.com/intent/tweet?text={{ evento.nombre | urlencode }}&url={{ BASE_URL }}resumen/{{ evento.codigo }}" target="_blank" rel="noopener" title="Compartir por X (Twitter)">
-                                    <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 512 512"><path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z"/></svg>
+                                <a class="inline-block text-gray-500 hover:text-black transition-colors duration-200"
+                                    href="https://twitter.com/intent/tweet?text={{ evento.nombre | urlencode }}&url={{ BASE_URL }}resumen/{{ evento.codigo }}"
+                                    target="_blank" rel="noopener" title="Compartir por X (Twitter)">
+                                    <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg"
+                                        fill="currentColor" viewBox="0 0 512 512">
+                                        <path
+                                            d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z" />
+                                    </svg>
                                 </a>
                                 <!-- Compartir por Facebook -->
-                                <a class="inline-block text-gray-500 hover:text-blue-600 transition-colors duration-200" href="https://www.facebook.com/sharer/sharer.php?u={{ BASE_URL }}resumen/{{ evento.codigo }}" target="_blank" rel="noopener" title="Compartir por Facebook">
-                                    <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 512 512"><path d="M512 256C512 114.6 397.4 0 256 0S0 114.6 0 256C0 376 82.7 476.8 194.2 504.5V334.2H141.4V256h52.8V222.3c0-87.1 39.4-127.5 125-127.5c16.2 0 44.2 3.2 55.7 6.4V172c-6-.6-16.5-1-29.6-1c-42 0-58.2 15.9-58.2 57.2V256h83.6l-14.4 78.2H287V510.1C413.8 494.8 512 386.9 512 256h0z"/></svg>
+                                <a class="inline-block text-gray-500 hover:text-blue-600 transition-colors duration-200"
+                                    href="https://www.facebook.com/sharer/sharer.php?u={{ BASE_URL }}resumen/{{ evento.codigo }}"
+                                    target="_blank" rel="noopener" title="Compartir por Facebook">
+                                    <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg"
+                                        fill="currentColor" viewBox="0 0 512 512">
+                                        <path
+                                            d="M512 256C512 114.6 397.4 0 256 0S0 114.6 0 256C0 376 82.7 476.8 194.2 504.5V334.2H141.4V256h52.8V222.3c0-87.1 39.4-127.5 125-127.5c16.2 0 44.2 3.2 55.7 6.4V172c-6-.6-16.5-1-29.6-1c-42 0-58.2 15.9-58.2 57.2V256h83.6l-14.4 78.2H287V510.1C413.8 494.8 512 386.9 512 256h0z" />
+                                    </svg>
                                 </a>
                                 <!-- Compartir por correo -->
-                                <a class="inline-block text-gray-500 hover:text-red-500 transition-colors duration-200" href="mailto:?subject={{ evento.nombre | urlencode }}&body={{ evento.nombre | urlencode }}%0A%0A{{ BASE_URL }}resumen/{{ evento.codigo }}" title="Compartir por correo">
-                                    <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 512 512"><path d="M64 112c-8.8 0-16 7.2-16 16l0 22.1L220.5 291.7c20.7 17 50.4 17 71.1 0L464 150.1l0-22.1c0-8.8-7.2-16-16-16L64 112zM48 212.2L48 384c0 8.8 7.2 16 16 16l384 0c8.8 0 16-7.2 16-16l0-171.8L322 328.8c-38.4 31.5-93.7 31.5-132 0L48 212.2zM0 128C0 92.7 28.7 64 64 64l384 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 448c-35.3 0-64-28.7-64-64L0 128z"/></svg>
+                                <a class="inline-block text-gray-500 hover:text-red-500 transition-colors duration-200"
+                                    href="mailto:?subject={{ evento.nombre | urlencode }}&body={{ evento.nombre | urlencode }}%0A%0A{{ BASE_URL }}resumen/{{ evento.codigo }}"
+                                    title="Compartir por correo">
+                                    <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg"
+                                        fill="currentColor" viewBox="0 0 512 512">
+                                        <path
+                                            d="M64 112c-8.8 0-16 7.2-16 16l0 22.1L220.5 291.7c20.7 17 50.4 17 71.1 0L464 150.1l0-22.1c0-8.8-7.2-16-16-16L64 112zM48 212.2L48 384c0 8.8 7.2 16 16 16l384 0c8.8 0 16-7.2 16-16l0-171.8L322 328.8c-38.4 31.5-93.7 31.5-132 0L48 212.2zM0 128C0 92.7 28.7 64 64 64l384 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 448c-35.3 0-64-28.7-64-64L0 128z" />
+                                    </svg>
                                 </a>
                             </div>
 
+{% if evento.registro_abierto %}
+                            <div class="sm:col-span-12 gap-2">
+                                <a href="#"
+                                    class="mt-4 w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"">
+                                    <svg class=" shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil-line-icon lucide-pencil-line"><path d="M13 21h8"/><path d="m15 5 4 4"/><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/></svg>
+                                    Inscribirme en la actividad
+                                </a>
+                            </div>
+{% else %}
 {% if evento.programa %}
                             <div class="sm:col-span-12 gap-2">
-                                <a href="{{ BASE_URL }}{{ evento.programa }}" class="mt-4 w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"">
-                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open-text"><path d="M12 7v14"/><path d="M16 12h2"/><path d="M16 8h2"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/><path d="M6 12h2"/><path d="M6 8h2"/></svg>
+                                <a href="{{ BASE_URL }}{{ evento.programa }}"
+                                    class="mt-4 w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"">
+                                    <svg class=" shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                    height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open-text">
+                                    <path d="M12 7v14" />
+                                    <path d="M16 12h2" />
+                                    <path d="M16 8h2" />
+                                    <path
+                                        d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
+                                    <path d="M6 12h2" />
+                                    <path d="M6 8h2" /></svg>
                                     Descargar programa del evento
                                 </a>
                             </div>
 {% else %}
                             <div class="sm:col-span-12 gap-2">
-                                <button class="mt-4 w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" disabled>
-                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open-text"><path d="M12 7v14"/><path d="M16 12h2"/><path d="M16 8h2"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/><path d="M6 12h2"/><path d="M6 8h2"/></svg>
+                                <button
+                                    class="mt-4 w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
+                                    disabled>
+                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                        class="lucide lucide-book-open-text">
+                                        <path d="M12 7v14" />
+                                        <path d="M16 12h2" />
+                                        <path d="M16 8h2" />
+                                        <path
+                                            d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
+                                        <path d="M6 12h2" />
+                                        <path d="M6 8h2" />
+                                    </svg>
                                     Programa de evento no disponible
                                 </button>
                             </div>
+{% endif %}
+
 {% endif %}
 
                         </div>
@@ -172,4 +282,5 @@
     </footer>
 
 </body>
+
 </html>
