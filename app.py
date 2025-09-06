@@ -737,7 +737,8 @@ def home():
     inicio_hoy = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     eventos_futuros = collection_eventos.find({
         "fecha_inicio": {"$gte": inicio_hoy},
-        "estado_evento": {"$ne": "borrador"}
+        "estado_evento": {"$ne": "borrador"},
+        'registro_abierto': {'$ne': True}
     }).sort("fecha_inicio").limit(3)
 
     return render_template('home.html', eventos=eventos_futuros)
@@ -751,18 +752,22 @@ def catalogo(page=1):
     per_page = 15  # Número máximo de eventos por página
     skip = (page - 1) * per_page
 
-    # Contar total de eventos
-    total_eventos = collection_eventos.count_documents({})  # Contar el total de eventos
+    # Filtro para excluir eventos con registro abierto
+    filtro_catalogo = {
+        "estado_evento": {"$ne": "borrador"},
+        'registro_abierto': {'$ne': True}
+    }
+
+    # Contar total de eventos (excluyendo registro abierto)
+    total_eventos = collection_eventos.count_documents(filtro_catalogo)
     total_pages = (total_eventos + per_page - 1) // per_page  # Calcular el total de páginas
 
     # Verificar si la página solicitada es válida
     if page < 1 or page > total_pages:
         abort(404)  # Forzar un error 404 si la página no existe
 
-    # Obtener eventos paginados
-    eventos = collection_eventos.find(
-        {"estado_evento": {"$ne": "borrador"}}
-    ).sort("fecha_inicio", -1).skip(skip).limit(per_page)
+    # Obtener eventos paginados (excluyendo registro abierto)
+    eventos = collection_eventos.find(filtro_catalogo).sort("fecha_inicio", -1).skip(skip).limit(per_page)
 
     return render_template('catalogo.html', eventos=eventos, page=page, total_pages=total_pages)
 
@@ -786,17 +791,18 @@ def catalogo(page=1):
 )
 def tablero_coordinadores():
 
-    # Tarjetas
+    # Tarjetas (excluyendo eventos con registro abierto)
     total_usuarios = collection_usuarios.count_documents({"rol": {"$ne": UserRole.ADMINISTRADOR.value}})
-    total_eventos = collection_eventos.count_documents({})
+    total_eventos = collection_eventos.count_documents({'registro_abierto': {'$ne': True}})
     total_ponentes = collection_participantes.count_documents({"rol": "ponente"})
     total_participantes = collection_participantes.count_documents({"rol": "participante"})
 
-    # Próximos eventos (no borrador) desde el inicio del día
+    # Próximos eventos (no borrador, sin registro abierto) desde el inicio del día
     inicio_hoy = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     eventos_cursor = collection_eventos.find({
         "fecha_inicio": {"$gte": inicio_hoy},
-        "estado_evento": {"$ne": "borrador"}
+        "estado_evento": {"$ne": "borrador"},
+        'registro_abierto': {'$ne': True}
     }).sort("fecha_inicio", 1).limit(5)
 
     eventos = list(eventos_cursor)
@@ -2356,14 +2362,20 @@ def listar_eventos_proximos(page=1):
     inicio_hoy = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     eventos_por_pagina = 20
 
-    # Contar el total de eventos próximos
-    total_eventos = collection_eventos.count_documents({'fecha_inicio': {'$gte': inicio_hoy}})
+    # Filtro para excluir eventos con registro abierto
+    filtro_eventos = {
+        'fecha_inicio': {'$gte': inicio_hoy},
+        'registro_abierto': {'$ne': True}
+    }
+
+    # Contar el total de eventos próximos (excluyendo registro abierto)
+    total_eventos = collection_eventos.count_documents(filtro_eventos)
 
     # Calcular el número total de páginas
     total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
 
     # Obtener los eventos próximos para la página actual
-    eventos_cursor = collection_eventos.find({'fecha_inicio': {'$gte': inicio_hoy}}).sort('fecha_inicio').skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    eventos_cursor = collection_eventos.find(filtro_eventos).sort('fecha_inicio').skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
 
     # Verificar si el usuario es organizador en cada evento
@@ -2395,13 +2407,19 @@ def listar_eventos_anteriores(page=1):
     ahora = datetime.utcnow()
     eventos_por_pagina = 20
 
-    # Contar el total de eventos pasados
-    total_eventos = collection_eventos.count_documents({"fecha_inicio": {"$lt": ahora}})
+    # Filtro para excluir eventos con registro abierto
+    filtro_eventos = {
+        "fecha_inicio": {"$lt": ahora},
+        'registro_abierto': {'$ne': True}
+    }
+
+    # Contar el total de eventos pasados (excluyendo registro abierto)
+    total_eventos = collection_eventos.count_documents(filtro_eventos)
     # Calcular el número total de páginas
     total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
 
     # Obtener los eventos pasados para la página actual
-    eventos_cursor = collection_eventos.find({"fecha_inicio": {"$lt": ahora}}).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    eventos_cursor = collection_eventos.find(filtro_eventos).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
 
     # Verificar si el usuario es organizador en cada evento
@@ -2431,13 +2449,16 @@ def listar_eventos_anteriores(page=1):
 def listar_eventos(page=1):
     eventos_por_pagina = 20
 
-    # Calcular el número total de eventos
-    total_eventos = collection_eventos.count_documents({})
+    # Filtro para excluir eventos con registro abierto
+    filtro_eventos = {'registro_abierto': {'$ne': True}}
+
+    # Calcular el número total de eventos (excluyendo registro abierto)
+    total_eventos = collection_eventos.count_documents(filtro_eventos)
     # Calcular el número total de páginas
     total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
 
     # Obtener los eventos para la página actual
-    eventos_cursor = collection_eventos.find().sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    eventos_cursor = collection_eventos.find(filtro_eventos).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
 
     # Verificar si el usuario es organizador en cada evento
@@ -2467,10 +2488,13 @@ def listar_eventos(page=1):
 def mis_eventos(page=1):
     eventos_por_pagina = 20
 
-    # Filtrar eventos donde el autor sea el usuario actual
-    filtro = {"autor": current_user.id}
+    # Filtrar eventos donde el autor sea el usuario actual y excluir registro abierto
+    filtro = {
+        "autor": current_user.id,
+        'registro_abierto': {'$ne': True}
+    }
 
-    # Calcular el número total de eventos del usuario
+    # Calcular el número total de eventos del usuario (excluyendo registro abierto)
     total_eventos = collection_eventos.count_documents(filtro)
     # Calcular el número total de páginas
     total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
@@ -2506,13 +2530,14 @@ def mis_eventos(page=1):
 def mis_eventos_digitales(page=1):
     eventos_por_pagina = 20
 
-    # Filtrar eventos donde el autor sea el usuario actual y modalidad != presencial
+    # Filtrar eventos donde el autor sea el usuario actual, modalidad != presencial y excluir registro abierto
     filtro = {
         "autor": current_user.id,
-        "modalidad": {"$ne": "Presencial"}
+        "modalidad": {"$ne": "Presencial"},
+        'registro_abierto': {'$ne': True}
     }
 
-    # Calcular el número total de eventos del usuario
+    # Calcular el número total de eventos del usuario (excluyendo registro abierto)
     total_eventos = collection_eventos.count_documents(filtro)
     # Calcular el número total de páginas
     total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
@@ -2816,10 +2841,13 @@ def eliminar_participante_bd(codigo_evento, id_participante, origen=None):
 def listar_eventos_digitales(page=1):
     eventos_por_pagina = 20
 
-    # Filtrar eventos que no sean presenciales
-    filtro = {"modalidad": {"$ne": "Presencial"}}
+    # Filtrar eventos que no sean presenciales y excluir registro abierto
+    filtro = {
+        "modalidad": {"$ne": "Presencial"},
+        'registro_abierto': {'$ne': True}
+    }
 
-    # Calcular el número total de eventos que cumplen la condición
+    # Calcular el número total de eventos que cumplen la condición (excluyendo registro abierto)
     total_eventos = collection_eventos.count_documents(filtro)
     total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondeo hacia arriba
 
@@ -3021,6 +3049,7 @@ def crear_evento():
         descripcion = request.form['descripcion']
         checkin_masivo = request.form.get('checkin_masivo') == 'on'
         concurso_poster = request.form.get('concurso_poster') == 'on'
+        registro_abierto = request.form.get('registro_abierto') == 'on'
 
         fecha_inicio_str = request.form['fecha_inicio']
         fecha_fin_str = request.form['fecha_fin']
@@ -3103,7 +3132,8 @@ def crear_evento():
             'timestamp': timestamp,
             'autor': current_user.id,
             'checkin_masivo': checkin_masivo,
-            'concurso_poster': concurso_poster
+            'concurso_poster': concurso_poster,
+            'registro_abierto': registro_abierto
         })
         log_event(f"Usuario [{current_user.email}] ha creado el evento {codigo} exitosamente.")
         return redirect(url_for('mis_eventos'))  # Redirigir a la lista de eventos
@@ -3149,6 +3179,7 @@ def editar_evento(codigo_evento):
         carga_horaria = request.form['carga_horaria']
         checkin_masivo = request.form.get('checkin_masivo') == 'on'
         concurso_poster = request.form.get('concurso_poster') == 'on'
+        registro_abierto = request.form.get('registro_abierto') == 'on'
         fecha_inicio_str = request.form['fecha_inicio']
         fecha_fin_str = request.form['fecha_fin']
 
@@ -3217,6 +3248,7 @@ def editar_evento(codigo_evento):
                 'carga_horaria': carga_horaria,
                 'checkin_masivo': checkin_masivo,
                 'concurso_poster': concurso_poster,
+                'registro_abierto': registro_abierto,
                 'fecha_inicio': fecha_inicio,
                 'fecha_fin': fecha_fin,
                 'estado_evento': estado_evento,
@@ -3592,10 +3624,13 @@ def tablero_metricas(page=1):
 
     # Obtener el número total de usuarios
     total_usuarios = collection_usuarios.count_documents({"rol": {"$ne": "administrador"}})
-    # Obtener el número total de eventos
-    total_eventos = collection_eventos.count_documents({})
-    # Obtener el número total de eventos cerrados
-    total_eventos_cerrados = collection_eventos.count_documents({"estado_evento": "cerrado"})
+    # Obtener el número total de eventos (excluyendo registro abierto)
+    total_eventos = collection_eventos.count_documents({'registro_abierto': {'$ne': True}})
+    # Obtener el número total de eventos cerrados (excluyendo registro abierto)
+    total_eventos_cerrados = collection_eventos.count_documents({
+        "estado_evento": "cerrado",
+        'registro_abierto': {'$ne': True}
+    })
     # Contar el número total de ponentes
     total_ponentes = collection_participantes.count_documents({"rol": "ponente"})
     # Contar el número total de participantes
@@ -3603,12 +3638,13 @@ def tablero_metricas(page=1):
 
     ## Tablero de Métricas de Eventos
     eventos_por_pagina = 20
-    total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina
+    total_paginas = (total_eventos_cerrados + eventos_por_pagina - 1) // eventos_por_pagina
 
-    # Obtener los eventos con estado cerrado para la página actual
-    eventos_cursor = collection_eventos.find(
-        {"estado_evento": "cerrado"}
-    ).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    # Obtener los eventos con estado cerrado para la página actual (excluyendo registro abierto)
+    eventos_cursor = collection_eventos.find({
+        "estado_evento": "cerrado",
+        'registro_abierto': {'$ne': True}
+    }).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     
     eventos = list(eventos_cursor)
 
@@ -3659,17 +3695,20 @@ def tablero_metricas(page=1):
 @login_required
 def tablero_metricas_lms(page=1):
     
-    # Filtrar eventos con modalidad Virtual asincrónica
-    eventos_lms_query = {"modalidad": "Virtual asincrónica"}
+    # Filtrar eventos con modalidad Virtual asincrónica y excluir registro abierto
+    eventos_lms_query = {
+        "modalidad": "Virtual asincrónica",
+        'registro_abierto': {'$ne': True}
+    }
     
-    # Obtener métricas generales de LMS
+    # Obtener métricas generales de LMS (excluyendo registro abierto)
     total_eventos_lms = collection_eventos.count_documents(eventos_lms_query)
     total_eventos_lms_cerrados = collection_eventos.count_documents({
         **eventos_lms_query, 
         "estado_evento": "cerrado"
     })
     
-    # Contar participantes en eventos LMS
+    # Contar participantes en eventos LMS (excluyendo registro abierto)
     eventos_lms = list(collection_eventos.find(eventos_lms_query, {"codigo": 1}))
     codigos_eventos_lms = [evento["codigo"] for evento in eventos_lms]
     
@@ -3907,16 +3946,16 @@ def tablero_metricas_lms_evento(codigo_evento):
 
 
 ###
-### Eventos Abiertos - Virtual Asincrónico
+### Eventos Abiertos - Con Registro Abierto
 ###
 @app.route('/tablero/eventos/abiertos')
 @app.route('/tablero/eventos/abiertos/page/<int:page>')
 @login_required
 def listar_eventos_abiertos(page=1):
     
-    # Filtrar eventos con modalidad Virtual asincrónica
+    # Filtrar eventos que tienen registro abierto habilitado
     eventos_query = {
-        "modalidad": "Virtual asincrónica"
+        "registro_abierto": True
     }
     
     # Paginación
@@ -3946,19 +3985,22 @@ def listar_eventos_abiertos(page=1):
             "rol": "participante"
         })
         
-        # Contar contenidos LMS
+        # Contar contenidos LMS (mantener para compatibilidad)
         evento["total_contenidos"] = collection_eva.count_documents({
             "codigo_evento": codigo_evento
         })
         
-        # Contar exámenes
+        # Contar exámenes (mantener para compatibilidad)
         evento["total_examenes"] = collection_eva.count_documents({
             "codigo_evento": codigo_evento,
             "tipo": "examen"
         })
         
-        # Verificar si tiene contenidos LMS
+        # Verificar si tiene contenidos LMS (mantener para compatibilidad)
         evento["tiene_lms"] = evento["total_contenidos"] > 0
+        
+        # Verificar si tiene registro abierto habilitado
+        evento["registro_abierto"] = evento.get("registro_abierto", False)
     
     return render_template(
         'eventos_abiertos.html',

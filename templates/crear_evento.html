@@ -1,15 +1,15 @@
 {% include 'tablero-header.html' %}
 
 {% include 'tablero-sidebar.html' %}
-    
-    <!-- CONTENIDO -->
-    <div class="w-full lg:ps-64">
-        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
 
-            <!-- Card Section -->
-            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
-                <!-- Card -->
-                <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-7 dark:bg-neutral-800">
+<!-- CONTENIDO -->
+<div class="w-full lg:ps-64">
+    <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+
+        <!-- Card Section -->
+        <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+            <!-- Card -->
+            <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-7 dark:bg-neutral-800">
                 <div class="mb-8">
                     <h2 class="text-xl font-bold text-gray-800 dark:text-neutral-200">
                         Nuevo evento
@@ -19,34 +19,37 @@
                     </p>
                 </div>
 
-<!-- Mostrar mensajes -->
-{% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-                    <div class="mb-4">
-                        <ul>
+                <!-- Mostrar mensajes -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div class="mb-4">
+                    <ul>
                         {% for category, message in messages %}
-                            <li class="{{ 'p-2 text-sm bg-red-100 text-red-800 rounded-xl' if category == 'error' else 'p-2 text-sm bg-green-100 text-green-800 rounded-xl' }}">
+                        <li
+                            class="{{ 'p-2 text-sm bg-red-100 text-red-800 rounded-xl' if category == 'error' else 'p-2 text-sm bg-green-100 text-green-800 rounded-xl' }}">
                             {{ message }}
-                            </li>
+                        </li>
                         {% endfor %}
-                        </ul>
-                    </div>
-{% endif %}
-{% endwith %}
-            
+                    </ul>
+                </div>
+                {% endif %}
+                {% endwith %}
+
                 <form action="{{ url_for('crear_evento') }}" method="post" enctype="multipart/form-data">
                     <!-- Grid -->
                     <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
-                        
+
                         <div class="sm:col-span-3">
                             <label for="nombre" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                 Título la actividad docente
                             </label>
                         </div>
                         <!-- End Col -->
-                
+
                         <div class="sm:col-span-9">
-                            <input id="nombre" name="nombre" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Título de la actividad docente...">
+                            <input id="nombre" name="nombre" type="text"
+                                class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                                placeholder="Título de la actividad docente...">
                         </div>
                         <!-- End Col -->
 
@@ -59,9 +62,11 @@
 
                         <div class="sm:col-span-9">
                             <select id="region" name="region" onchange="actualizarUnidades()"
-                                class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" required>
+                                class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                                required>
                                 <option value="">Seleccione una provincia / región / unidad administrativa</option>
-                                <option value="administrativas">Direcciones / Departamentos / Coordinaciones / Programas</option>
+                                <option value="administrativas">Direcciones / Departamentos / Coordinaciones / Programas
+                                </option>
                                 <option value="panama">Panamá Metro</option>
                                 <option value="sanmiguelito">San Miguelito</option>
                                 <option value="panamaoeste">Panamá Oeste</option>
@@ -85,7 +90,8 @@
 
                         <div class="sm:col-span-9">
                             <select id="unidad_ejecutora" name="unidad_ejecutora"
-                                class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" required>
+                                class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                                required>
                                 <option value="">Seleccione una unidad ejecutora</option>
                             </select>
                         </div>
@@ -96,18 +102,23 @@
                             </label>
                         </div>
                         <!-- End Col -->
-                
+
                         <div class="sm:col-span-9">
-                            <input id="lugar" name="lugar" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Sitio donde se realizará el evento...">
+                            <input id="lugar" name="lugar" type="text"
+                                class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                                placeholder="Sitio donde se realizará el evento...">
                         </div>
                         <!-- End Col -->
 
                         <div class="sm:col-span-3">
-                            <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">Modalidad</label>
+                            <label
+                                class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">Modalidad</label>
                         </div>
 
                         <div class="sm:col-span-9">
-                            <select class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" id="modalidad" name="modalidad" required>
+                            <select
+                                class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                                id="modalidad" name="modalidad" required>
                                 <option value="">Seleccione la modalidad del evento académico</option>
                                 <option value="Presencial">Presencial</option>
                                 <option value="Híbrida">Híbrida</option>
@@ -122,9 +133,11 @@
                             </label>
                         </div>
                         <!-- End Col -->
-                
+
                         <div class="sm:col-span-9">
-                            <select class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" id="tipo" name="tipo" required>
+                            <select
+                                class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                                id="tipo" name="tipo" required>
                                 <option value="">Seleccione la categoría del evento</option>
                                 <option value="Congreso">Congreso</option>
                                 <option value="Seminario">Seminario</option>
@@ -148,7 +161,9 @@
                         <!-- End Col -->
 
                         <div class="sm:col-span-9">
-                            <input class="py-2 px-3 pe-11 border-gray-200 rounded-lg inline-block text-gray-800 mt-2.5 dark:text-neutral-200" type="text"  inputmode="numeric" pattern="[0-9]*" id="cupos" name="cupos" required>
+                            <input
+                                class="py-2 px-3 pe-11 border-gray-200 rounded-lg inline-block text-gray-800 mt-2.5 dark:text-neutral-200"
+                                type="text" inputmode="numeric" pattern="[0-9]*" id="cupos" name="cupos" required>
                         </div>
                         <!-- End Col -->
 
@@ -161,14 +176,15 @@
 
                         <div class="sm:col-span-9">
                             <div class="flex items-center mt-2.5">
-                                <input type="checkbox" id="checkin_masivo" name="checkin_masivo" 
-                                       class="shrink-0 border-gray-200 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800">
+                                <input type="checkbox" id="checkin_masivo" name="checkin_masivo"
+                                    class="shrink-0 border-gray-200 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800">
                                 <label for="checkin_masivo" class="text-sm text-gray-500 ms-3 dark:text-neutral-400">
                                     Habilitar sistema de asistencia controlada
                                 </label>
                             </div>
                             <p class="mt-1 text-xs text-gray-500 dark:text-neutral-400">
-                                Permite preregistro por carga masiva de participantes vía CSV y validación de asistencia por cédula
+                                Permite preregistro por carga masiva de participantes vía CSV y validación de asistencia
+                                por cédula
                             </p>
                         </div>
                         <!-- End Col -->
@@ -182,62 +198,98 @@
 
                         <div class="sm:col-span-9">
                             <div class="flex items-center mt-2.5">
-                                <input type="checkbox" id="concurso_poster" name="concurso_poster" class="shrink-0 border-gray-200 rounded text-purple-600 focus:ring-purple-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-purple-500 dark:checked:border-purple-500 dark:focus:ring-offset-gray-800">
+                                <input type="checkbox" id="concurso_poster" name="concurso_poster"
+                                    class="shrink-0 border-gray-200 rounded text-purple-600 focus:ring-purple-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-purple-500 dark:checked:border-purple-500 dark:focus:ring-offset-gray-800">
                                 <label for="concurso_poster" class="text-sm text-gray-500 ms-3 dark:text-neutral-400">
                                     Habilitar concurso de investigación con sistema de evaluación por jurados
                                 </label>
                             </div>
                             <p class="mt-1 text-xs text-gray-500 dark:text-neutral-400">
-                                Permite registro de presentadores, jurados y evaluación de trabajos de investigación con criterios científicos
+                                Permite registro de presentadores, jurados y evaluación de trabajos de investigación con
+                                criterios científicos
                             </p>
                         </div>
                         <!-- End Col -->
 
                         <div class="sm:col-span-3">
-                            <label for="carga_horaria" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                            <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                Evento de Registro Abierto
+                            </label>
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-9">
+                            <div class="flex items-center mt-2.5">
+                                <input type="checkbox" id="registro_abierto" name="registro_abierto"
+                                    class="shrink-0 border-gray-200 rounded text-green-600 focus:ring-green-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-green-500 dark:checked:border-green-500 dark:focus:ring-offset-gray-800">
+                                <label for="registro_abierto" class="text-sm text-gray-500 ms-3 dark:text-neutral-400">
+                                    Habilitar registro abierto para colaboradores de la CSS en actividades acreditadas
+                                </label>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-neutral-400">
+                                Permite registro directo de colaboradores sin necesidad de preregistro (compara cédulas contra la planilla institucional)
+                            </p>
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-3">
+                            <label for="carga_horaria"
+                                class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                 Carga horaria académica
                             </label>
                         </div>
                         <!-- End Col -->
 
                         <div class="sm:col-span-9">
-                            <input class="py-2 px-3 pe-11 border-gray-200 rounded-lg inline-block text-gray-800 mt-2.5 dark:text-neutral-200" type="text"  inputmode="numeric" pattern="[0-9]*" id="carga_horaria" name="carga_horaria" required>
+                            <input
+                                class="py-2 px-3 pe-11 border-gray-200 rounded-lg inline-block text-gray-800 mt-2.5 dark:text-neutral-200"
+                                type="text" inputmode="numeric" pattern="[0-9]*" id="carga_horaria" name="carga_horaria"
+                                required>
                         </div>
                         <!-- End Col -->
 
                         <div class="sm:col-span-3">
-                            <label for="fecha_inicio" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                            <label for="fecha_inicio"
+                                class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                 Fecha de inicio
                             </label>
                         </div>
                         <!-- End Col -->
-                
+
                         <div class="sm:col-span-9">
-                            <input class="border-gray-200 rounded-lg inline-block text-gray-800 mt-2.5 dark:text-neutral-200" type="datetime-local" id="fecha_inicio" name="fecha_inicio" required>
+                            <input
+                                class="border-gray-200 rounded-lg inline-block text-gray-800 mt-2.5 dark:text-neutral-200"
+                                type="datetime-local" id="fecha_inicio" name="fecha_inicio" required>
                         </div>
                         <!-- End Col -->
 
                         <div class="sm:col-span-3">
-                            <label for="fecha_fin" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                            <label for="fecha_fin"
+                                class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                 Fecha de finalización
                             </label>
                         </div>
                         <!-- End Col -->
-                
+
                         <div class="sm:col-span-9">
-                            <input class="border-gray-200 rounded-lg inline-block text-gray-800 mt-2.5 dark:text-neutral-200" type="datetime-local" id="fecha_fin" name="fecha_fin" required>
+                            <input
+                                class="border-gray-200 rounded-lg inline-block text-gray-800 mt-2.5 dark:text-neutral-200"
+                                type="datetime-local" id="fecha_fin" name="fecha_fin" required>
                         </div>
                         <!-- End Col -->
-            
+
                         <div class="sm:col-span-3">
-                            <label for="descripcion" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                            <label for="descripcion"
+                                class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                 Descripción
                             </label>
                         </div>
                         <!-- End Col -->
-            
+
                         <div class="sm:col-span-9">
-                            <textarea id="descripcion" name="descripcion" maxlength="255" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" rows="6" placeholder="Breve descripción de la actividad docente..."></textarea>
+                            <textarea id="descripcion" name="descripcion" maxlength="255"
+                                class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                                rows="6" placeholder="Breve descripción de la actividad docente..."></textarea>
                             <div class="mt-1 text-right">
                                 <span id="contador_descripcion" class="text-xs text-gray-500">0/255</span>
                             </div>
@@ -253,19 +305,20 @@
                             </label>
                         </div>
                         <!-- End Col -->
-            
+
                         <div class="sm:col-span-9">
                             <div class="flex items-center gap-5">
-                            <img class="inline-block size-16 rounded-full ring-2 ring-white dark:ring-neutral-900" src="{{ url_for('static', filename='assets/image-art.png') }}" alt="Avatar">
-                            <div class="flex gap-x-2">
-                                <div class="upload-container">
-                                    <input type="file" name="afiche_evento" id="afiche_evento" class="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400
+                                <img class="inline-block size-16 rounded-full ring-2 ring-white dark:ring-neutral-900"
+                                    src="{{ url_for('static', filename='assets/image-art.png') }}" alt="Avatar">
+                                <div class="flex gap-x-2">
+                                    <div class="upload-container">
+                                        <input type="file" name="afiche_evento" id="afiche_evento" class="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400
                                     file:bg-gray-50 file:border-0
                                     file:bg-gray-100 file:me-4
                                     file:py-2 file:px-4
                                     dark:file:bg-neutral-700 dark:file:text-neutral-400" accept=".jpg, .jpeg" />
+                                    </div>
                                 </div>
-                            </div>
                             </div>
                         </div>
                         <!-- End Col -->
@@ -279,19 +332,20 @@
                             </label>
                         </div>
                         <!-- End Col -->
-            
+
                         <div class="sm:col-span-9">
                             <div class="flex items-center gap-5">
-                            <img class="inline-block size-16 rounded-full ring-2 ring-white dark:ring-neutral-900" src="{{ url_for('static', filename='assets/image-art.png') }}" alt="Avatar">
-                            <div class="flex gap-x-2">
-                                <div class="upload-container">
-                                    <input type="file" name="fondo_evento" id="fondo_evento" class="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400
+                                <img class="inline-block size-16 rounded-full ring-2 ring-white dark:ring-neutral-900"
+                                    src="{{ url_for('static', filename='assets/image-art.png') }}" alt="Avatar">
+                                <div class="flex gap-x-2">
+                                    <div class="upload-container">
+                                        <input type="file" name="fondo_evento" id="fondo_evento" class="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400
                                     file:bg-gray-50 file:border-0
                                     file:bg-gray-100 file:me-4
                                     file:py-2 file:px-4
                                     dark:file:bg-neutral-700 dark:file:text-neutral-400" accept=".jpg, .jpeg" />
+                                    </div>
                                 </div>
-                            </div>
                             </div>
                         </div>
                         <!-- End Col -->
@@ -305,19 +359,20 @@
                             </label>
                         </div>
                         <!-- End Col -->
-            
+
                         <div class="sm:col-span-9">
                             <div class="flex items-center gap-5">
-                            <img class="inline-block size-16 rounded-full ring-2 ring-white dark:ring-neutral-900" src="{{ url_for('static', filename='assets/program-art.png') }}" alt="Avatar">
-                            <div class="flex gap-x-2">
-                                <div class="upload-container">
-                                    <input type="file" name="programa_evento" id="programa_evento" class="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400
+                                <img class="inline-block size-16 rounded-full ring-2 ring-white dark:ring-neutral-900"
+                                    src="{{ url_for('static', filename='assets/program-art.png') }}" alt="Avatar">
+                                <div class="flex gap-x-2">
+                                    <div class="upload-container">
+                                        <input type="file" name="programa_evento" id="programa_evento" class="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400
                                     file:bg-gray-50 file:border-0
                                     file:bg-gray-100 file:me-4
                                     file:py-2 file:px-4
                                     dark:file:bg-neutral-700 dark:file:text-neutral-400" accept=".pdf" />
+                                    </div>
                                 </div>
-                            </div>
                             </div>
                         </div>
                         <!-- End Col -->
@@ -331,29 +386,33 @@
                             </label>
                         </div>
                         <!-- End Col -->
-            
+
                         <div class="sm:col-span-9">
                             <div class="flex items-center gap-5">
-                            <img class="inline-block size-16 rounded-full ring-2 ring-white dark:ring-neutral-900" src="{{ url_for('static', filename='assets/program-art.png') }}" alt="Avatar">
-                            <div class="flex gap-x-2">
-                                <div class="upload-container">
-                                    <input type="file" name="certificado_evento" id="certificado_evento" class="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400
+                                <img class="inline-block size-16 rounded-full ring-2 ring-white dark:ring-neutral-900"
+                                    src="{{ url_for('static', filename='assets/program-art.png') }}" alt="Avatar">
+                                <div class="flex gap-x-2">
+                                    <div class="upload-container">
+                                        <input type="file" name="certificado_evento" id="certificado_evento" class="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400
                                     file:bg-gray-50 file:border-0
                                     file:bg-gray-100 file:me-4
                                     file:py-2 file:px-4
                                     dark:file:bg-neutral-700 dark:file:text-neutral-400" accept=".pdf" />
+                                    </div>
                                 </div>
-                            </div>
                             </div>
                         </div>
                         <!-- End Col -->
 
                         <div class="sm:col-span-3">
-                            <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">Estado de publicación</label>
+                            <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">Estado de
+                                publicación</label>
                         </div>
 
                         <div class="sm:col-span-9">
-                            <select class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" id="estado_evento" name="estado_evento">
+                            <select
+                                class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                                id="estado_evento" name="estado_evento">
                                 <option value="">Seleccione el estado de la publicación</option>
                                 <option value="publicado">Publicado</option>
                                 <option value="borrador">Borrador</option>
@@ -368,27 +427,29 @@
 
                     </div>
                     <!-- End Grid -->
-            
+
                     <div class="mt-5 flex justify-end gap-x-2">
-                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="{{ url_for('listar_eventos') }}">
+                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50"
+                            href="{{ url_for('listar_eventos') }}">
                             Ver todos los eventos
                         </a>
-                        <button type="submit" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                        <button type="submit"
+                            class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
                             Crear evento
                         </button>
                     </div>
                 </form>
-                
-                </div>
-                <!-- End Card -->
+
             </div>
-            <!-- End Card Section -->
-
-{% include 'tablero-footer.html' %}
-
+            <!-- End Card -->
         </div>
+        <!-- End Card Section -->
+
+        {% include 'tablero-footer.html' %}
+
     </div>
-    <!-- FIN CONTENIDO -->
+</div>
+<!-- FIN CONTENIDO -->
 
 <!-- JS PLUGINS -->
 <script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
@@ -400,16 +461,16 @@
     });
     document.getElementById("buscadorForm").addEventListener("submit", function (event) {
         event.preventDefault(); // Prevenir envío estándar del formulario
-    
+
         const valor = document.getElementById("buscador").value.trim();
         const patterns = {
             cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas
             pasaporte: /^[A-Z]{2}\d{6,9}$/,                        // Pasaportes
             id_certificado: /^[a-zA-Z0-9]{8}$/                    // IDs de certificados
         };
-    
+
         let action, field;
-    
+
         if (patterns.cedula.test(valor)) {
             action = "/buscar_certificados";
             field = "cedula";
@@ -423,16 +484,16 @@
             alert("Formato no válido. Introduzca un documento de identificación o un ID de certificado válido.");
             return;
         }
-    
+
         // Crear y enviar el formulario dinámicamente
         const form = event.target;
         form.action = action;
         form.method = "POST";
-    
+
         // Limpiar campos ocultos previos
         const hiddenInputs = form.querySelectorAll("input[type='hidden']");
         hiddenInputs.forEach((input) => input.remove());
-    
+
         const hiddenInput = document.createElement("input");
         hiddenInput.type = "hidden";
         hiddenInput.name = field;
@@ -442,7 +503,7 @@
     });
 
     // Contador de caracteres para el textarea de descripción
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const textarea = document.getElementById('descripcion');
         const contador = document.getElementById('contador_descripcion');
         const maxLength = 255;
@@ -451,7 +512,7 @@
             const longitud = textarea.value.length;
             const restantes = maxLength - longitud;
             contador.textContent = `${longitud}/${maxLength}`;
-            
+
             // Cambiar color cuando se acerca al límite
             if (restantes <= 10) {
                 contador.className = 'text-xs text-red-500';
@@ -464,7 +525,7 @@
 
         // Actualizar contador al escribir
         textarea.addEventListener('input', actualizarContador);
-        
+
         // Actualizar contador al cargar la página
         actualizarContador();
     });
@@ -582,14 +643,14 @@
             "CAPPS Zapotillo"
         ]
     };
-    
+
     function actualizarUnidades() {
         const provinciaSeleccionada = document.getElementById("region").value;
         const unidadSelect = document.getElementById("unidad_ejecutora");
-        
+
         // Limpiar opciones previas
         unidadSelect.innerHTML = '<option value="">-- Selecciona una unidad --</option>';
-        
+
         if (provinciaSeleccionada && unidadesPorProvincia[provinciaSeleccionada]) {
             unidadesPorProvincia[provinciaSeleccionada].forEach(unidad => {
                 const option = document.createElement("option");
@@ -601,4 +662,5 @@
     }
 </script>
 </body>
+
 </html>
