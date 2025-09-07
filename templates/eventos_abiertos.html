@@ -170,7 +170,7 @@
 
                                         <td class="size-px whitespace-nowrap text-center">
                                             <a class="block relative z-10" href="#">
-                                                <span class="text-sm text-gray-500">{% if evento.fecha_inicio.date() == evento.fecha_fin.date() %}{{ evento.fecha_inicio.strftime('%d %b, %Y') }}{% else %}{{ evento.fecha_inicio.strftime('%d') }} - {{ evento.fecha_fin.strftime('%d %b, %Y') }}{% endif %}</span>
+                                                <span class="text-sm text-gray-500">i: {{ evento.fecha_inicio.strftime('%d %b, %Y') }}<br />f: {{ evento.fecha_fin.strftime('%d %b, %Y') }}</span>
                                             </a>
                                         </td>
 
