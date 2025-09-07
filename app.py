@@ -1585,6 +1585,138 @@ def registrar():
 
 
 ###
+### Cache para cédulas de funcionarios CSS
+###
+_funcionarios_cache = None
+_funcionarios_cache_timestamp = None
+
+def cargar_funcionarios_css():
+    """Carga las cédulas de funcionarios CSS desde MongoDB en un set para búsqueda rápida."""
+    global _funcionarios_cache, _funcionarios_cache_timestamp
+    
+    try:
+        # Obtener el timestamp de la última actualización en MongoDB
+        ultima_actualizacion = db['planilla'].find_one({}, sort=[("timestamp", -1)])
+        current_timestamp = ultima_actualizacion['timestamp'] if ultima_actualizacion else None
+        
+        # Si el cache no existe o la base de datos ha sido actualizada, recargar
+        if _funcionarios_cache is None or _funcionarios_cache_timestamp != current_timestamp:
+            funcionarios_set = set()
+            
+            # Cargar cédulas desde MongoDB
+            for doc in db['planilla'].find({}, {"cedula": 1}):
+                funcionarios_set.add(doc["cedula"])
+            
+            _funcionarios_cache = funcionarios_set
+            _funcionarios_cache_timestamp = current_timestamp
+            
+            if len(funcionarios_set) == 0:
+                print("ADVERTENCIA: Base de datos de funcionarios está vacía. Cargue la planilla desde /tablero/opciones")
+            else:
+                print(f"Cache de funcionarios actualizado desde MongoDB: {len(_funcionarios_cache)} cédulas cargadas")
+        
+        return _funcionarios_cache
+        
+    except Exception as e:
+        print(f"Error al cargar funcionarios desde MongoDB: {e}")
+        return set()
+
+###
+### Registro de participantes en eventos abiertos
+###
+@app.route('/inscripcion/<codigo_evento>', methods=['GET', 'POST'])
+def registrar_abierto(codigo_evento):
+    print(f"DEBUG: Accediendo a registro abierto para evento {codigo_evento}, método: {request.method}")
+    
+    # Verificar si el evento existe y tiene registro abierto
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        print(f"DEBUG: Evento {codigo_evento} no encontrado")
+        abort(404)
+    
+    # Verificar que el evento tenga registro abierto habilitado
+    if not evento.get('registro_abierto', False):
+        flash('Este evento no tiene registro abierto habilitado.', 'error')
+        return redirect(url_for('home'))
+    
+    # Verificar si el evento está cerrado
+    evento_cerrado = evento.get('estado_evento') == 'cerrado'
+    
+    if request.method == 'POST':
+        print(f"DEBUG: Procesando POST para evento {codigo_evento}")
+        print(f"DEBUG: Form data: {dict(request.form)}")
+        
+        if evento_cerrado:
+            flash('Este evento está cerrado y no acepta más registros.', 'error')
+            return redirect(url_for('registrar_abierto', codigo_evento=codigo_evento))
+        
+        # Obtener datos del formulario
+        nombres = request.form['nombres'].strip()
+        apellidos = request.form['apellidos'].strip()
+        cedula = request.form['cedula'].strip()
+        perfil_profesional = request.form['perfil_profesional']
+        region = request.form['region']
+        unidad = request.form['unidad']
+        timestamp = datetime.now()
+        
+        print(f"DEBUG: Datos procesados - Cédula: {cedula}, Nombres: {nombres} {apellidos}")
+        
+        # Verificar si ya está registrado
+        if collection_participantes.find_one({
+            "cedula": cedula, 
+            "codigo_evento": codigo_evento, 
+            "rol": "participante"
+        }):
+            flash("Ya está registrado en esta actividad.", "error")
+            return redirect(url_for('registrar_abierto', codigo_evento=codigo_evento))
+        
+        # Verificar cédula contra el cache de funcionarios CSS (búsqueda O(1))
+        funcionarios_css = cargar_funcionarios_css()
+        
+        if not funcionarios_css:
+            flash('La base de datos de funcionarios está vacía. Contacte al administrador para cargar la planilla de funcionarios.', 'error')
+            return redirect(url_for('registrar_abierto', codigo_evento=codigo_evento))
+        
+        if cedula not in funcionarios_css:
+            flash('No encontramos sus datos en la base de datos de funcionarios de la CSS. Por favor verifique que esten correctamente escritos.', 'error')
+            return redirect(url_for('registrar_abierto', codigo_evento=codigo_evento))
+        
+        # Generar nanoid
+        nanoid = generate_nanoid(cedula, codigo_evento)
+        
+        # Insertar datos en la colección de MongoDB
+        collection_participantes.insert_one({
+            'nombres': nombres,
+            'apellidos': apellidos,
+            'cedula': cedula,
+            'rol': 'participante',
+            'perfil': perfil_profesional,
+            'region': region,
+            'unidad': unidad,
+            'codigo_evento': codigo_evento,
+            'nanoid': nanoid,
+            'timestamp': timestamp,
+            'indice_registro': datetime.now().strftime('%Y%m%d'),
+            'tipo_evento': 'Abierto',
+            'origen': 'registro_abierto'
+        })
+        
+        flash("Registro exitoso. El certificado se podrá descargar al completar las actividades del evento.", "success")
+        return redirect(url_for('registrar_abierto', codigo_evento=codigo_evento))
+    
+    # Preparar datos para el template
+    nombre_evento = evento.get('nombre', 'Evento')
+    afiche_url = evento.get('afiche_750', '')
+    
+    return render_template('registrar_abierto.html', 
+                         evento=evento,
+                         codigo_evento=codigo_evento,
+                         nombre_evento=nombre_evento,
+                         afiche_url=afiche_url,
+                         evento_cerrado=evento_cerrado)
+
+
+###
 ### Redirección corta (solo registro de evento)
 ###
 @app.route('/<codigo_evento>')
@@ -5814,6 +5946,10 @@ app.register_blueprint(creditos_bp)
 ### Nube personal
 from app.nube import nube_bp
 app.register_blueprint(nube_bp)
+
+### Opciones globales
+from app.opciones import opciones_bp
+app.register_blueprint(opciones_bp)
 
 ### Importaciones para gráficas
 import matplotlib

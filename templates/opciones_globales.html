@@ -1,0 +1,135 @@
+{% include 'tablero-header.html' %}
+{% include 'tablero-sidebar.html' %}
+
+<!-- Content -->
+<div class="w-full lg:ps-64">
+    <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+        
+        <!-- Page Header -->
+        <div class="max-w-4xl mx-auto">
+            <div class="mb-8">
+                <h1 class="text-2xl font-bold text-gray-800 sm:text-3xl">Opciones Globales</h1>
+                <p class="mt-2 text-gray-600">Configuración y gestión de la plataforma CertiCSS</p>
+            </div>
+
+            <!-- Advertencia si no hay funcionarios -->
+            {% if total_funcionarios == 0 %}
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="w-5 h-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-red-800">Base de Datos Vacía</h3>
+                        <div class="mt-2 text-sm text-red-700">
+                            <p>No hay funcionarios registrados en el sistema. Los eventos con registro abierto no funcionarán hasta que cargue la primera planilla de funcionarios.</p>
+                        </div>
+                        <div class="mt-4">
+                            <a href="{{ url_for('opciones.cargar_planilla') }}" 
+                               class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                Cargar Primera Planilla
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Gestión de Planilla -->
+            <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-800">Gestión de Planilla de Funcionarios</h2>
+                        <p class="text-sm text-gray-600">Administrar la base de datos de cédulas de funcionarios CSS</p>
+                    </div>
+                    <div class="flex space-x-3">
+                        <a href="{{ url_for('opciones.cargar_planilla') }}" 
+                           class="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700">
+                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                            </svg>
+                            Cargar CSV
+                        </a>
+                        <a href="{{ url_for('opciones.exportar_planilla') }}" 
+                           class="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
+                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Exportar CSV
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Estadísticas -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <svg class="w-8 h-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                </svg>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-blue-600">Total de Funcionarios</p>
+                                <p class="text-2xl font-bold text-blue-900">{{ total_funcionarios | default(0) }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <svg class="w-8 h-8 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-green-600">Última Actualización</p>
+                                <p class="text-sm font-bold text-green-900">
+                                    {% if ultima_actualizacion %}
+                                        {{ ultima_actualizacion.timestamp.strftime('%d/%m/%Y %H:%M') }}
+                                    {% else %}
+                                        No disponible
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if ultima_actualizacion %}
+                <div class="mt-4 text-xs text-gray-500">
+                    Última actualización realizada por: {{ ultima_actualizacion.usuario }}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Información adicional -->
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="w-5 h-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-yellow-800">Información Importante</h3>
+                        <div class="mt-2 text-sm text-yellow-700">
+                            <ul class="list-disc pl-5 space-y-1">
+                                <li>El archivo CSV debe contener una cédula por línea</li>
+                                <li>Al cargar un nuevo archivo, se actualizarán automáticamente las diferencias</li>
+                                <li>Los cambios afectan inmediatamente el registro de eventos abiertos</li>
+                                <li>Se mantiene un historial de quién realizó cada actualización</li>
+                                <li>MongoDB es la fuente única de verdad (no se requiere archivo CSV)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'tablero-footer.html' %}

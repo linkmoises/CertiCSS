@@ -98,7 +98,8 @@
                             <!-- End Col -->
 
                             <div class="sm:col-span-9">
-                                <p class="text-gray-500 text-sm mt-0.5">{{ evento.carga_horaria }} horas-crédito (avaladas por el Colegio Médico de Panamá)</p>
+                                <p class="text-gray-500 text-sm mt-0.5">{{ evento.carga_horaria }} horas-crédito
+                                    (avaladas por el Colegio Médico de Panamá)</p>
                             </div>
                             <!-- End Col -->
 
@@ -122,7 +123,9 @@
                                         </div>
                                         <div class="ml-3">
                                             <p class="text-sm text-yellow-800">
-                                                Me comprometo a participar de forma personal y honesta, sin asistencia externa, y confirmo que soy funcionario de la CSS cumpliendo los requisitos de acceso.
+                                                Me comprometo a participar de forma personal y honesta, sin asistencia
+                                                externa, y confirmo que soy funcionario de la CSS cumpliendo los
+                                                requisitos de acceso.
                                             </p>
                                         </div>
                                     </div>
@@ -216,9 +219,17 @@
 
 {% if evento.registro_abierto %}
                             <div class="sm:col-span-12 gap-2">
-                                <a href="#"
+                                <a href="{{ url_for('registrar_abierto', codigo_evento=evento.codigo) }}"
                                     class="mt-4 w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"">
-                                    <svg class=" shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil-line-icon lucide-pencil-line"><path d="M13 21h8"/><path d="m15 5 4 4"/><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/></svg>
+                                    <svg class=" shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                    height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round"
+                                    class="lucide lucide-pencil-line-icon lucide-pencil-line">
+                                    <path d="M13 21h8" />
+                                    <path d="m15 5 4 4" />
+                                    <path
+                                        d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+                                    </svg>
                                     Inscribirme en la actividad
                                 </a>
                             </div>
