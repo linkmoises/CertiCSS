@@ -118,7 +118,7 @@
                                 {% else %}
                                 <div class="max-w-sm w-full min-h-[400px] flex flex-col justify-center mx-auto px-6 py-4">
                                     <div class="flex justify-center items-center size-[46px] bg-gray-100 rounded-lg mx-auto">
-                                        <svg class="shrink-0 size-6 text-gray-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 6l2 2l-8 8l-2-2z"/><path d="M12 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M12 6H8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4"/></svg>
+                                        <svg class="shrink-0 size-6 text-gray-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-link2-off-icon lucide-link-2-off"><path d="M9 17H7A5 5 0 0 1 7 7"/><path d="M15 7h2a5 5 0 0 1 4 8"/><line x1="8" x2="12" y1="12" y2="12"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
                                     </div>
                                     <h2 class="mt-5 font-semibold text-gray-800 text-center">
                                         No hay archivos compartidos
@@ -134,18 +134,19 @@
                 </div>
             </div>
 
+{% include 'tablero-footer.html' %}
+
         </div>
     </div>
 
-    <script>
-        function copiarEnlace(enlace) {
-            navigator.clipboard.writeText(enlace).then(function() {
-                alert('Enlace copiado al portapapeles');
-            });
-        }
-    </script>
+<script>
+function copiarEnlace(enlace) {
+    navigator.clipboard.writeText(enlace).then(function() {
+        alert('Enlace copiado al portapapeles');
+    });
+}
+</script>
 
-{% include 'tablero-footer.html' %}
 
 <!-- JS PLUGINS -->
 <script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>

@@ -6,21 +6,42 @@
     <div class="w-full lg:ps-64">
         <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
         
-            <!-- Page Header -->
+            <!-- TABLA RESUMEN EVENTOS -->
             <div class="max-w-[85rem] px-2 pt-1 mx-auto">
-                <div class="mb-6">
-                    <h1 class="text-2xl font-bold text-gray-800 sm:text-3xl">Métricas LMS - {{ evento.titulo }}</h1>
-                    <p class="text-gray-600">Dashboard detallado de métricas para el evento {{ evento.codigo }}</p>
+                <!-- Card -->
+                <div class="flex flex-col">
+                    <div class="-m-1.5 overflow-x-auto">
+                        <div class="p-1.5 min-w-full inline-block align-middle">
+                            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                                <!-- Header -->
+                                <div class="flex items-center gap-x-3">
+                                    <div class="relative h-32 w-32 shrink-0">
+{% if evento.afiche_750 %}
+                                        <img src="{{ url_for('static', filename='uploads/' + evento.afiche_750.split('/')[-1]) }}" alt="{{ evento.nombre }}" class="w-32 h-32 object-cover rounded-lg absolute top-0 start-0">
+{% else %}
+                                        <img class="size-full absolute top-0 start-0 object-cover rounded-l-xl" src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}" alt="{{ evento.nombre }}">
+{% endif %}                                        
+                                    </div>
+                                    
+                                    <div class="grow">
+                                        <h2 class="block text-3xl font-bold mt-2">{{ evento.tipo }}</h2>
+                                        <h4 class="block italic mb-2">{{ evento.unidad_ejecutora }}</h4>
+                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                            {{ evento.tipo }}
+                                        </span>
+                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                            {{ evento.modalidad }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <!-- End Header -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                
-                <!-- Navigation Links -->
-                <div class="mb-6">
-                    <nav class="flex space-x-4">
-                        <a href="{{ url_for('tablero_metricas_lms') }}" class="text-blue-600 hover:text-blue-800 font-medium">← Métricas LMS</a>
-                        <a href="{{ url_for('ver_evento', codigo_evento=evento.codigo) }}" class="text-blue-600 hover:text-blue-800 font-medium">Ver Evento</a>
-                    </nav>
-                </div>
+                <!-- End Card -->
             </div>
+            <!-- End TABLA RESUMEN EVENTOS -->
         
             <!-- TARJETAS RESUMEN PRINCIPALES -->
             <div class="max-w-[85rem] px-2 pt-1 mx-auto">
@@ -406,8 +427,63 @@
         </div>
         {% endif %}
 
+{% include 'tablero-footer.html' %}
+
         </div>
     </div>
     <!-- End Content -->
 
-{% include 'tablero-footer.html' %}
+
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+<script>
+    // Limpia campos dinámicos al cargar la página
+    document.addEventListener("DOMContentLoaded", function () {
+        const hiddenInputs = document.querySelectorAll("#buscadorForm input[type='hidden']");
+        hiddenInputs.forEach((input) => input.remove());
+    });
+    document.getElementById("buscadorForm").addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevenir envío estándar del formulario
+    
+        const valor = document.getElementById("buscador").value.trim();
+        const patterns = {
+            cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas
+            pasaporte: /^[A-Z]{2}\d{6,9}$/,                        // Pasaportes
+            id_certificado: /^[a-zA-Z0-9]{8}$/                    // IDs de certificados
+        };
+    
+        let action, field;
+    
+        if (patterns.cedula.test(valor)) {
+            action = "/buscar_certificados";
+            field = "cedula";
+        } else if (patterns.pasaporte.test(valor)) {
+            action = "/buscar_certificados";
+            field = "cedula";
+        } else if (patterns.id_certificado.test(valor)) {
+            action = "/validar_certificado";
+            field = "nanoid";
+        } else {
+            alert("Formato no válido. Introduzca un documento de identificación o un ID de certificado válido.");
+            return;
+        }
+    
+        // Crear y enviar el formulario dinámicamente
+        const form = event.target;
+        form.action = action;
+        form.method = "POST";
+    
+        // Limpiar campos ocultos previos
+        const hiddenInputs = form.querySelectorAll("input[type='hidden']");
+        hiddenInputs.forEach((input) => input.remove());
+    
+        const hiddenInput = document.createElement("input");
+        hiddenInput.type = "hidden";
+        hiddenInput.name = field;
+        hiddenInput.value = valor;
+        form.appendChild(hiddenInput);
+        form.submit();
+    });
+</script>    
+</body>
+</html>

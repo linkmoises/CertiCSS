@@ -283,8 +283,63 @@
         </div>
         <!-- End TABLA DE EVENTOS -->
 
+{% include 'tablero-footer.html' %}
+
     </div>
 </div>
 <!-- End Content -->
 
-{% include 'tablero-footer.html' %}
+
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+<script>
+    // Limpia campos dinámicos al cargar la página
+    document.addEventListener("DOMContentLoaded", function () {
+        const hiddenInputs = document.querySelectorAll("#buscadorForm input[type='hidden']");
+        hiddenInputs.forEach((input) => input.remove());
+    });
+    document.getElementById("buscadorForm").addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevenir envío estándar del formulario
+    
+        const valor = document.getElementById("buscador").value.trim();
+        const patterns = {
+            cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas
+            pasaporte: /^[A-Z]{2}\d{6,9}$/,                        // Pasaportes
+            id_certificado: /^[a-zA-Z0-9]{8}$/                    // IDs de certificados
+        };
+    
+        let action, field;
+    
+        if (patterns.cedula.test(valor)) {
+            action = "/buscar_certificados";
+            field = "cedula";
+        } else if (patterns.pasaporte.test(valor)) {
+            action = "/buscar_certificados";
+            field = "cedula";
+        } else if (patterns.id_certificado.test(valor)) {
+            action = "/validar_certificado";
+            field = "nanoid";
+        } else {
+            alert("Formato no válido. Introduzca un documento de identificación o un ID de certificado válido.");
+            return;
+        }
+    
+        // Crear y enviar el formulario dinámicamente
+        const form = event.target;
+        form.action = action;
+        form.method = "POST";
+    
+        // Limpiar campos ocultos previos
+        const hiddenInputs = form.querySelectorAll("input[type='hidden']");
+        hiddenInputs.forEach((input) => input.remove());
+    
+        const hiddenInput = document.createElement("input");
+        hiddenInput.type = "hidden";
+        hiddenInput.name = field;
+        hiddenInput.value = valor;
+        form.appendChild(hiddenInput);
+        form.submit();
+    });
+</script>    
+</body>
+</html>
