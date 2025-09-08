@@ -47,6 +47,7 @@ collection_exam_results = db['exam_results']
 collection_participantes_temporales = db['participantes_temporales']
 collection_posters = db['posters']
 collection_evaluaciones_poster = db['evaluaciones_poster']
+collection_progreso = db['progreso']
 
 # Roles de usuario
 class UserRole(str, Enum):
@@ -3684,6 +3685,20 @@ def buscar_certificados():
             if evento:
                 fecha_evento = evento.get('fecha_fin', None)
 
+                # Verificar si el participante completó el examen (para eventos de registro abierto)
+                examen_completado = False
+                puntaje_examen = 0
+                if evento.get('registro_abierto', False):
+                    # Buscar el progreso del participante en el examen
+                    progreso = collection_progreso.find_one({
+                        'codigo_evento': codigo_evento,
+                        'cedula': participante['cedula'],
+                        'tipo': 'examen'
+                    })
+                    if progreso:
+                        examen_completado = progreso.get('completado', False)
+                        puntaje_examen = progreso.get('puntaje', 0)
+
                 resultado = {
                     'nombres': participante['nombres'],
                     'apellidos': participante['apellidos'],
@@ -3697,6 +3712,11 @@ def buscar_certificados():
                     'fecha_evento': fecha_evento,
                     'modalidad_evento': evento.get('modalidad', 'No disponible'),
                     'tiene_archivos': tiene_archivos,
+                    'hora_inicio': evento.get('hora_inicio', 8),
+                    'hora_fin': evento.get('hora_fin', 15),
+                    'registro_abierto': evento.get('registro_abierto', False),
+                    'examen_completado': examen_completado,
+                    'puntaje_examen': puntaje_examen,
                 }
                 resultados.append(resultado)
             else:
@@ -3713,6 +3733,11 @@ def buscar_certificados():
                     'fecha_evento': None,
                     'modalidad_evento': 'No disponible',
                     'tiene_archivos': False,
+                    'hora_inicio': 8,
+                    'hora_fin': 15,
+                    'registro_abierto': False,
+                    'examen_completado': False,
+                    'puntaje_examen': 0,
                 }
                 resultados.append(resultado)
 
