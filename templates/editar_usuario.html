@@ -197,10 +197,12 @@
 {% if current_user.rol in ['coordinador-nacional', 'denadoi', 'administrador'] %}
                                 <option value="coordinador-regional" {% if usuario.rol == 'coordinador-regional' %}selected{% endif %}>Coordinador Regional de Docencia e Investigación</option>
 {% endif %}
+{% if current_user.rol in ['coordinador-administrativo', 'denadoi', 'administrador'] %}
+                                <option value="coordinador-administrativo" {% if usuario.rol == 'coordinador-administrativo' %}selected{% endif %}>Coordinador de Docencia de Unidad Administrativa</option>
+{% endif %}
 {% if current_user.rol in ['denadoi', 'administrador'] %}
                                 <option value="coordinador-nacional" {% if usuario.rol == 'coordinador-nacional' %}selected{% endif %}>Coordinador Nacional de Docencia</option>
                                 <option value="subdirector-docencia" {% if usuario.rol == 'subdirector-docencia' %}selected{% endif %}>Subdirector de Docencia e Investigación</option>
-                                <option value="coordinador-administrativo" {% if usuario.rol == 'coordinador-administrativo' %}selected{% endif %}>Coordinador de Docencia de Unidad Administrativa</option>
 {% endif %}
 {% if current_user.rol == 'administrador' %}
                                 <option value="denadoi" {% if usuario.rol == 'denadoi' %}selected{% endif %}>DENADOI</option>
