@@ -211,6 +211,7 @@
                         </div>
                         <!-- End Col -->
 
+{% if current_user.rol == 'administrador' or current_user.rol == 'denadoi' %}
                         <div class="sm:col-span-3">
                             <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                 Evento de Registro Abierto
@@ -227,10 +228,12 @@
                                 </label>
                             </div>
                             <p class="mt-1 text-xs text-gray-500 dark:text-neutral-400">
-                                Permite registro directo de colaboradores sin necesidad de preregistro (compara cédulas contra la planilla institucional)
+                                Permite registro directo de colaboradores sin necesidad de preregistro (compara cédulas
+                                contra la planilla institucional)
                             </p>
                         </div>
                         <!-- End Col -->
+{% endif %}
 
                         <div class="sm:col-span-3">
                             <label for="carga_horaria"
