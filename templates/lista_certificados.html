@@ -119,6 +119,11 @@
                                                     {% if resultado['fecha_inicio'].date() ==
                                                     resultado['fecha_evento'].date() %}
                                                     {{ resultado['fecha_inicio'].strftime('%d de %B de %Y') }}
+                                                    {% elif resultado['fecha_inicio'].month !=
+                                                    resultado['fecha_evento'].month or resultado['fecha_inicio'].year !=
+                                                    resultado['fecha_evento'].year %}
+                                                    {{ resultado['fecha_inicio'].strftime('%d de %B') }}- <br />{{
+                                                    resultado['fecha_evento'].strftime('%d de %B de %Y') }}
                                                     {% else %}
                                                     {{ resultado['fecha_inicio'].strftime('%d') }} - {{
                                                     resultado['fecha_evento'].strftime('%d de %B de %Y') }}
