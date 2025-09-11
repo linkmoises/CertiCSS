@@ -115,7 +115,15 @@
                                         <td class="h-px w-1/6">
                                             <div class="px-6 py-2">
                                                 <p class="text-sm text-gray-500 mb-2">
-                                                    {% if resultado['fecha_evento'] %}
+                                                    {% if resultado['fecha_evento'] and resultado['fecha_inicio'] %}
+                                                    {% if resultado['fecha_inicio'].date() ==
+                                                    resultado['fecha_evento'].date() %}
+                                                    {{ resultado['fecha_inicio'].strftime('%d de %B de %Y') }}
+                                                    {% else %}
+                                                    {{ resultado['fecha_inicio'].strftime('%d') }} - {{
+                                                    resultado['fecha_evento'].strftime('%d de %B de %Y') }}
+                                                    {% endif %}
+                                                    {% elif resultado['fecha_evento'] %}
                                                     {{ resultado['fecha_evento'].strftime('%d de %B de %Y') }}
                                                     {% else %}
                                                     Fecha no disponible
