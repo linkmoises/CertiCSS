@@ -5652,8 +5652,11 @@ def generar_constancia_asistencia(participante, afiche_path):
     # Calcular la duración del evento en días
     duracion_evento_dias = (ff_evento.date() - fi_evento.date()).days + 1
     
-    # Format dates for display based on same/different months
-    if fi_evento.month == ff_evento.month:
+    # Format dates for display based on duration and same/different months
+    if duracion_evento_dias == 1:
+        # Single day event: "05 de septiembre de 2025"
+        ff_formateada = ff_evento.strftime('%d de %B de %Y')
+    elif fi_evento.month == ff_evento.month:
         # Same month: "05 al 06 de agosto de 2025"
         fi_formateada = fi_evento.strftime('%d')
         ff_formateada = f"{fi_formateada} al {ff_evento.strftime('%d')} de {ff_evento.strftime('%B de %Y')}"
