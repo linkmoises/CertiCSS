@@ -5557,8 +5557,9 @@ def generar_pdf_participante(participante, afiche_path):
         # Usar ancho máximo de 7 pulgadas para el título de la ponencia
         final_y = draw_centered_text(ponencia_y - 0.3 * inch, f"{participante.get('titulo_ponencia', 'N/A')}", 
                                    font="Helvetica-Bold", size=16, max_width=9.5 * inch)
-        # Ajustar la posición Y para el texto siguiente basado en cuántas líneas se usaron
-        next_y = final_y - 0.3 * inch
+        # Asegurar un espaciado mínimo consistente
+        min_next_y = ponencia_y - 0.9 * inch  # Espaciado mínimo para títulos cortos
+        next_y = min(final_y - 0.3 * inch, min_next_y)
     elif participante['rol'] == 'presentador_poster':
         # Buscar el título del póster en la colección de pósters
         poster_data = collection_posters.find_one({
@@ -5571,8 +5572,9 @@ def generar_pdf_participante(participante, afiche_path):
         # Usar ancho máximo de 9.5 pulgadas para el título del póster
         final_y = draw_centered_text(poster_y - 0.3 * inch, f"{titulo_poster}", 
                                    font="Helvetica-Bold", size=16, max_width=9.5 * inch)
-        # Ajustar la posición Y para el texto siguiente basado en cuántas líneas se usaron
-        next_y = final_y - 0.3 * inch
+        # Asegurar un espaciado mínimo consistente
+        min_next_y = poster_y - 0.9 * inch  # Espaciado mínimo para títulos cortos
+        next_y = min(final_y - 0.3 * inch, min_next_y)
     else:
         actividad_y = draw_centered_text(base_y, f"Actividad académica con una duración de {carga_horaria_evento} horas")
         # Show the pre-formatted date range
