@@ -5502,30 +5502,74 @@ def generar_pdf_participante(participante, afiche_path):
     page_width = landscape(letter)[0]
 
     # Escribir los datos del participante centrados en la página
-    def draw_centered_text(y_position, text, font="Helvetica", size=12):
+    def draw_centered_text(y_position, text, font="Helvetica", size=12, max_width=None):
         c.setFont(font, size)  # Cambiar fuente y tamaño
-        text_width = c.stringWidth(text, font, size)
-        x_position = (page_width - text_width) / 2  # Calcular posición X para centrar
-        c.drawString(x_position, y_position, text)
+        
+        # Si no se especifica ancho máximo o el texto cabe en una línea
+        if not max_width or c.stringWidth(text, font, size) <= max_width:
+            text_width = c.stringWidth(text, font, size)
+            x_position = (page_width - text_width) / 2  # Calcular posición X para centrar
+            c.drawString(x_position, y_position, text)
+            return y_position  # Retornar la posición Y final
+        
+        # Si el texto es muy largo, dividirlo en múltiples líneas
+        words = text.split()
+        lines = []
+        current_line = ""
+        
+        for word in words:
+            test_line = current_line + (" " if current_line else "") + word
+            if c.stringWidth(test_line, font, size) <= max_width:
+                current_line = test_line
+            else:
+                if current_line:
+                    lines.append(current_line)
+                current_line = word
+        
+        if current_line:
+            lines.append(current_line)
+        
+        # Dibujar cada línea centrada
+        line_height = size * 1.2  # Espaciado entre líneas
+        current_y = y_position
+        
+        for line in lines:
+            text_width = c.stringWidth(line, font, size)
+            x_position = (page_width - text_width) / 2
+            c.drawString(x_position, current_y, line)
+            current_y -= line_height
+        
+        return current_y  # Retornar la posición Y final después de todas las líneas
 
     draw_centered_text(6 * inch, f"{unidad_evento}", font='Helvetica-Bold', size=15)
     draw_centered_text(5.7 * inch, f"confiere el presente certificado a:")
     draw_centered_text(5.2 * inch, f"{participante['nombres']} {participante['apellidos']}", font="Helvetica-Bold", size=18)
     draw_centered_text(4.8 * inch, f"Cédula: {participante['cedula']}", font="Helvetica-Oblique", size=14)
     draw_centered_text(4.4 * inch, f"Por su asistencia en calidad de {participante['rol']} en:")
-    draw_centered_text(4 * inch, f"{titulo_evento}", font="Helvetica-Bold", size=14)
+    # Usar ancho máximo de 7 pulgadas para el título del evento
+    final_y_titulo = draw_centered_text(4 * inch, f"{titulo_evento}", font="Helvetica-Bold", size=14, max_width=9.5 * inch)
 
+    # Ajustar la posición inicial basada en el título del evento
+    base_y = final_y_titulo - 0.2 * inch
+    
     if participante['rol'] == 'ponente':
-        draw_centered_text(3.5 * inch, f"Con la ponencia:")
-        draw_centered_text(3.2 * inch, f"{participante.get('titulo_ponencia', 'N/A')}", font="Helvetica-Bold", size=16)
+        ponencia_y = draw_centered_text(base_y, f"Con la ponencia:")
+        # Usar ancho máximo de 7 pulgadas para el título de la ponencia
+        final_y = draw_centered_text(ponencia_y - 0.3 * inch, f"{participante.get('titulo_ponencia', 'N/A')}", 
+                                   font="Helvetica-Bold", size=16, max_width=9.5 * inch)
+        # Ajustar la posición Y para el texto siguiente basado en cuántas líneas se usaron
+        next_y = final_y - 0.3 * inch
     else:
-        draw_centered_text(3.5 * inch, f"Actividad académica con una duración de {carga_horaria_evento} horas")
+        actividad_y = draw_centered_text(base_y, f"Actividad académica con una duración de {carga_horaria_evento} horas")
         # Show the pre-formatted date range
-        draw_centered_text(3.2 * inch, fecha_fin_formateada)
+        fecha_y = draw_centered_text(actividad_y - 0.3 * inch, fecha_fin_formateada)
+        next_y = fecha_y - 0.3 * inch
 
     # Format just the end date for the 'Dado en...' line
     fecha_fin_simple = fecha_fin_evento.strftime('%d de %B de %Y')
-    draw_centered_text(2.7 * inch, f"Dado en la República de Panamá, Provincia de Panamá, el {fecha_fin_simple}")
+    # Usar next_y si está definido (para ponentes) o la posición fija para participantes
+    final_position = next_y if 'next_y' in locals() else 2.7 * inch
+    draw_centered_text(final_position, f"Dado en la República de Panamá, Provincia de Panamá, el {fecha_fin_simple}")
 
     # Código de certificado en la esquina superior derecha
     c.setFillColor("white")
