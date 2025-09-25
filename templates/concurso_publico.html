@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{{ evento.nombre }} - Concurso de Trabajos de Investigación - CertiCSS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- favicons -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}"
+        sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
+    <link rel="apple-touch-icon" sizes="180x180"
+        href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
+    <meta name="apple-mobile-web-app-title" content="CertiCSS" />
+    <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
+    {% if UMAMI_URL %}
+    {{ UMAMI_URL | safe }}
+    {% endif %}
+</head>
+
+<body class="bg-gray-50 dark:bg-neutral-900">
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main id="content">
+
+        <!-- Card -->
+        <div class="max-w-[90rem] px-8 pt-8 sm:px-6 lg:px-8 lg:pt-8 mx-auto">
+            <!-- Grid -->
+            <div class="bg-white grid sm:grid-cols-2 border border-gray-200 rounded-xl lg:grid-cols-12">
+
+                <div class="sm:order-1 lg:col-span-3 border-r border-gray-200">
+                    <div class="relative pt-[100%] sm:pt-[100%]">
+                        {% if evento.afiche_750 %}
+                        <img class="size-full absolute top-0 start-0 object-cover rounded-l-xl"
+                            src="{{ BASE_URL }}{{ evento.afiche_750 }}" alt="{{ evento.nombre }}">
+                        {% else %}
+                        <img class="size-full absolute top-0 start-0 object-cover rounded-l-xl"
+                            src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}"
+                            alt="{{ evento.nombre }}">
+                        {% endif %}
+                    </div>
+                    <div class="m-4">
+                        <h2 class="font-bold text-gray-800 mb-2">{{ evento.nombre }}</h2>
+                        <p class="text-sm text-gray-500">{{ evento.descripcion }}</p>
+                    </div>
+                </div>
+                <!-- End Col -->
+
+                <div class="sm:order-2 lg:col-span-9">
+
+                    <div class="m-8">
+
+                        <div class="pb-4">
+                            <h2 class="text-xl font-semibold text-gray-800">
+                                {{ evento.nombre }}
+                            </h2>
+                            <p class="text-sm text-gray-600">
+                                Concurso de Trabajos de Investigación - Posters Científicos
+                            </p>
+                        </div>
+
+                        <div class="card mb-4">
+                            {% if posters %}
+                            <div class="border border-gray-200 rounded-lg overflow-hidden dark:border-neutral-700">
+                                <table class="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3 text-start">
+                                                <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500"
+                                                    href="#">
+                                                    Título
+                                                </a>
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-start">
+                                                <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500"
+                                                    href="#">
+                                                    Acciones
+                                                </a>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        {% for poster in posters %}
+                                        <tr class="bg-white hover:bg-gray-50">
+                                            <td class="px-6 py-2">
+                                                <p class="text-sm text-gray-500 mb-2">
+                                                    <span class="font-semibold">{{ poster.titulo_poster }}</span><br />
+                                                    — {{ poster.nombres }} {{ poster.apellidos }}
+                                                </p>
+                                            </td>
+                                            <td class="px-6 py-2">
+                                                {% if poster.archivo_poster %}
+                                                <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium"
+                                                    href="{{ url_for('static', filename='uploads/' + evento.codigo + '/posters/' + poster.archivo_poster) }}"
+                                                    target="_blank">
+                                                    Ver Poster
+                                                </a><br />
+                                                {% endif %}
+                                                {% if poster.archivo_resumen %}
+                                                <a class="inline-flex items-center gap-x-1 text-sm text-green-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium"
+                                                    href="{{ BASE_URL }}/static/posters/{{ poster.archivo_resumen }}"
+                                                    target="_blank">
+                                                    Descargar Resumen
+                                                </a><br />
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="mt-2 bg-yellow-100 border border-yellow-200 text-sm text-yellow-800 rounded-lg p-4 dark:bg-yellow-800/10 dark:border-yellow-900 dark:text-yellow-500"
+                                role="alert" tabindex="-1">
+                                <div class="flex">
+                                    <div class="shrink-0">
+                                        <svg class="shrink-0 size-4 mt-0.5" xmlns="http://www.w3.org/2000/svg"
+                                            width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path
+                                                d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z">
+                                            </path>
+                                            <path d="M12 9v4"></path>
+                                            <path d="M12 17h.01"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="ms-4">
+                                        <h3 class="text-sm font-semibold">
+                                            Sin posters disponibles
+                                        </h3>
+                                        <div class="mt-1 text-sm">
+                                            Aún no se han subido posters científicos para este concurso.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                    </div>
+
+                </div>
+                <!-- End Col -->
+
+            </div>
+            <!-- End Grid -->
+
+        </div>
+        <!-- End Card -->
+
+    </main>
+
+    <footer class="mt-auto w-full max-w-[85rem] px-4 sm:px-6 lg:px-8 mx-auto">
+        <div class="text-center text-xs text-gray-500 my-8">
+            <p>Este evento es avalado por DENADOI y potenciado por la plataforma CertiCSS.</p>
+        </div>
+    </footer>
+
+</body>
+
+</html>

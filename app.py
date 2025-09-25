@@ -1369,6 +1369,26 @@ def poster_logout(codigo_evento):
 
 
 ###
+### Vista pública de posters
+###
+@app.route('/concurso_investigacion/<codigo_evento>')
+def concurso_investigacion_publico(codigo_evento):
+    # Obtener el evento
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+    
+    # Verificar que el concurso de póster esté habilitado
+    if not evento.get('concurso_poster', False):
+        abort(404)
+    
+    # Obtener los posters del evento
+    posters = list(collection_posters.find({"codigo_evento": codigo_evento}).sort("timestamp", -1))
+    
+    return render_template('concurso_publico.html', evento=evento, posters=posters)
+
+
+###
 ### Panel administrativo de pósters
 ###
 @app.route('/tablero/posters/<codigo_evento>')
