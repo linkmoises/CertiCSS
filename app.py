@@ -1365,7 +1365,7 @@ def info_concurso_poster(codigo_evento):
 def poster_logout(codigo_evento):
     session.pop('poster_user', None)
     session.pop('jurado_user', None)
-    return redirect(url_for('home'))
+    return redirect(url_for('info_concurso_poster', codigo_evento=codigo_evento))
 
 
 ###

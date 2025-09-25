@@ -191,11 +191,17 @@
                               placeholder="Proporcione comentarios constructivos para el presentador...">{% if evaluacion %}{{ evaluacion.comentarios }}{% endif %}</textarea>
                 </div>
 
-                <div class="flex justify-between">
-                    <a href="{{ url_for('evaluar_posters', codigo_evento=evento.codigo) }}" 
-                       class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors">
-                        Volver al Panel
-                    </a>
+                <div class="flex justify-between items-center">
+                    <div class="flex space-x-3">
+                        <a href="{{ url_for('evaluar_posters', codigo_evento=evento.codigo) }}" 
+                           class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors">
+                            Volver al Panel
+                        </a>
+                        <a href="{{ url_for('poster_logout', codigo_evento=evento.codigo) }}" 
+                           class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors">
+                            Cerrar Sesión
+                        </a>
+                    </div>
                     <button type="submit" 
                             class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200">
                         {% if evaluacion %}Actualizar Evaluación{% else %}Guardar Evaluación{% endif %}
@@ -206,5 +212,11 @@
     </div>
 </div>
 {% endblock %}
+
+<footer class="mt-auto w-full max-w-[85rem] px-4 sm:px-6 lg:px-8 mx-auto">
+    <div class="text-center text-xs text-gray-500 my-8">
+        <p>Este evento es potenciado por la plataforma CertiCSS.</p>
+    </div>
+</footer>
 
 </body>
