@@ -5560,9 +5560,16 @@ def generar_pdf_participante(participante, afiche_path):
         # Ajustar la posición Y para el texto siguiente basado en cuántas líneas se usaron
         next_y = final_y - 0.3 * inch
     elif participante['rol'] == 'presentador_poster':
+        # Buscar el título del póster en la colección de pósters
+        poster_data = collection_posters.find_one({
+            "codigo_evento": codigo_evento,
+            "cedula": participante['cedula']
+        })
+        titulo_poster = poster_data.get('titulo_poster', 'N/A') if poster_data else 'N/A'
+        
         poster_y = draw_centered_text(base_y, f"Con el trabajo de investigación:")
         # Usar ancho máximo de 9.5 pulgadas para el título del póster
-        final_y = draw_centered_text(poster_y - 0.3 * inch, f"{participante.get('titulo_poster', 'N/A')}", 
+        final_y = draw_centered_text(poster_y - 0.3 * inch, f"{titulo_poster}", 
                                    font="Helvetica-Bold", size=16, max_width=9.5 * inch)
         # Ajustar la posición Y para el texto siguiente basado en cuántas líneas se usaron
         next_y = final_y - 0.3 * inch
