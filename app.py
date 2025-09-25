@@ -5545,7 +5545,15 @@ def generar_pdf_participante(participante, afiche_path):
     draw_centered_text(5.7 * inch, f"confiere el presente certificado a:")
     draw_centered_text(5.2 * inch, f"{participante['nombres']} {participante['apellidos']}", font="Helvetica-Bold", size=18)
     draw_centered_text(4.8 * inch, f"Cédula: {participante['cedula']}", font="Helvetica-Oblique", size=14)
-    draw_centered_text(4.4 * inch, f"Por su asistencia en calidad de {participante['rol']} en:")
+    
+    # Mostrar "concursante" en lugar de "presentador_poster"
+    rol_mostrar = "concursante" if participante['rol'] == 'presentador_poster' else participante['rol']
+
+    if participante['rol'] == 'presentador_poster':
+        draw_centered_text(4.4 * inch, f"Por su participación en el concurso de trabajos de investigación realizado en:")
+    else:
+        draw_centered_text(4.4 * inch, f"Por su asistencia en calidad de {rol_mostrar} en:")
+    
     # Usar ancho máximo de 7 pulgadas para el título del evento
     final_y_titulo = draw_centered_text(4 * inch, f"{titulo_evento}", font="Helvetica-Bold", size=14, max_width=9.5 * inch)
 
