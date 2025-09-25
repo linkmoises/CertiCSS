@@ -5559,6 +5559,13 @@ def generar_pdf_participante(participante, afiche_path):
                                    font="Helvetica-Bold", size=16, max_width=9.5 * inch)
         # Ajustar la posición Y para el texto siguiente basado en cuántas líneas se usaron
         next_y = final_y - 0.3 * inch
+    elif participante['rol'] == 'presentador_poster':
+        poster_y = draw_centered_text(base_y, f"Con el trabajo de investigación:")
+        # Usar ancho máximo de 9.5 pulgadas para el título del póster
+        final_y = draw_centered_text(poster_y - 0.3 * inch, f"{participante.get('titulo_poster', 'N/A')}", 
+                                   font="Helvetica-Bold", size=16, max_width=9.5 * inch)
+        # Ajustar la posición Y para el texto siguiente basado en cuántas líneas se usaron
+        next_y = final_y - 0.3 * inch
     else:
         actividad_y = draw_centered_text(base_y, f"Actividad académica con una duración de {carga_horaria_evento} horas")
         # Show the pre-formatted date range
