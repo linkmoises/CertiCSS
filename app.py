@@ -5549,8 +5549,9 @@ def generar_pdf_participante(participante, afiche_path):
     # Usar ancho máximo de 7 pulgadas para el título del evento
     final_y_titulo = draw_centered_text(4 * inch, f"{titulo_evento}", font="Helvetica-Bold", size=14, max_width=9.5 * inch)
 
-    # Ajustar la posición inicial basada en el título del evento
-    base_y = final_y_titulo - 0.2 * inch
+    # Ajustar la posición inicial basada en el título del evento con espaciado mínimo consistente
+    min_base_y = 4 * inch - 0.5 * inch  # Espaciado mínimo para títulos cortos
+    base_y = min(final_y_titulo - 0.2 * inch, min_base_y)
     
     if participante['rol'] == 'ponente':
         ponencia_y = draw_centered_text(base_y, f"Con la ponencia:")
