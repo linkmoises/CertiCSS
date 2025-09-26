@@ -1481,6 +1481,55 @@ def resultados_poster(codigo_evento):
 
 
 ###
+### Resultados públicos del concurso
+###
+@app.route('/concurso/<codigo_evento>')
+def resultados_concurso_publico(codigo_evento):
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+    
+    # Verificar que el concurso de póster esté habilitado
+    if not evento.get('concurso_poster', False):
+        abort(404)
+    
+    # Obtener pósters con sus promedios
+    posters = list(collection_posters.find({"codigo_evento": codigo_evento}))
+    
+    resultados = []
+    for poster in posters:
+        evaluaciones = list(collection_evaluaciones_poster.find({
+            "codigo_evento": codigo_evento,
+            "nanoid_poster": poster['nanoid']
+        }))
+        
+        if evaluaciones:
+            promedio = sum(e['puntuacion_final'] for e in evaluaciones) / len(evaluaciones)
+            # Crear una copia del poster sin información sensible
+            poster_publico = {
+                'nombres': poster['nombres'],
+                'apellidos': poster['apellidos'],
+                'institucion': poster.get('institucion', ''),
+                'titulo_poster': poster['titulo_poster'],
+                'numero_poster': poster['numero_poster'],
+                'archivo_poster': poster.get('archivo_poster'),
+                'nanoid': poster['nanoid']
+            }
+            resultados.append({
+                'poster': poster_publico,
+                'promedio': promedio,
+                'num_evaluaciones': len(evaluaciones)
+            })
+    
+    # Ordenar por promedio descendente
+    resultados.sort(key=lambda x: x['promedio'], reverse=True)
+    
+    return render_template('resultados_concurso_publico.html', 
+                         evento=evento, 
+                         resultados=resultados)
+
+
+###
 ### Formulario de registro de participantes
 ###
 @app.route('/registrar_participante/<codigo_evento>')

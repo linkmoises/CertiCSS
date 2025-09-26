@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Resultados del Concurso de Investigación - {{ evento.nombre }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- favicons -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
+    <meta name="apple-mobile-web-app-title" content="CertiCSS" />
+    <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
+{% if UMAMI_URL %}
+    {{ UMAMI_URL | safe }}
+{% endif %}
+</head>
+<body class="bg-gray-50">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-4">
+                    <img src="{{ url_for('static', filename='assets/css-logo-192x192.png') }}" alt="CSS Logo"
+                        class="h-12 w-auto">
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900">Resultados del Concurso</h1>
+                        <p class="text-sm text-gray-600">{{ evento.nombre }}</p>
+                    </div>
+                </div>
+                {% if evento.afiche_750 %}
+                <div class="hidden md:block">
+                    <img src="{{ url_for('static', filename='uploads/' + evento.afiche_750.split('/')[-1]) }}"
+                        alt="{{ evento.nombre }}" class="h-16 w-auto rounded-lg shadow-sm">
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        {% if resultados %}
+
+        <!-- Podio -->
+        {% if resultados|length >= 3 %}
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">🏆 Podio de Ganadores</h2>
+            <div class="flex justify-center items-end space-x-6">
+                <!-- Segundo Lugar -->
+                {% if resultados|length >= 2 %}
+                <div class="bg-white border border-gray-200 rounded-xl p-6 text-center shadow-lg"
+                    style="min-height: 280px;">
+                    <div
+                        class="bg-gray-400 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 text-2xl font-bold shadow-lg">
+                        2</div>
+                    <h3 class="font-bold text-gray-900 text-lg mb-2">{{ resultados[1].poster.nombres }} {{
+                        resultados[1].poster.apellidos }}</h3>
+                    {% if resultados[1].poster.institucion %}
+                    <p class="text-sm text-gray-600 mb-3">{{ resultados[1].poster.institucion }}</p>
+                    {% endif %}
+                    <p class="text-sm text-gray-700 mb-4 line-clamp-3">{{ resultados[1].poster.titulo_poster[:80] }}{%
+                        if resultados[1].poster.titulo_poster|length > 80 %}...{% endif %}</p>
+                    <p class="text-2xl font-bold text-gray-600 mb-2">{{ "%.2f"|format(resultados[1].promedio) }}/10</p>
+                    <p class="text-sm text-gray-500">{{ resultados[1].num_evaluaciones }} evaluaciones</p>
+                </div>
+                {% endif %}
+
+                <!-- Primer Lugar -->
+                <div class="bg-gradient-to-br from-yellow-100 to-yellow-200 border border-yellow-300 rounded-xl p-8 text-center shadow-xl"
+                    style="min-height: 320px;">
+                    <div
+                        class="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 text-3xl font-bold shadow-lg">
+                        1</div>
+                    <h3 class="font-bold text-gray-900 text-xl mb-2">{{ resultados[0].poster.nombres }} {{
+                        resultados[0].poster.apellidos }}</h3>
+                    {% if resultados[0].poster.institucion %}
+                    <p class="text-sm text-gray-700 mb-3 font-medium">{{ resultados[0].poster.institucion }}</p>
+                    {% endif %}
+                    <p class="text-sm text-gray-800 mb-4 line-clamp-3 font-medium">{{
+                        resultados[0].poster.titulo_poster[:90] }}{% if resultados[0].poster.titulo_poster|length > 90
+                        %}...{% endif %}</p>
+                    <p class="text-3xl font-bold text-yellow-700 mb-2">{{ "%.2f"|format(resultados[0].promedio) }}/10
+                    </p>
+                    <p class="text-sm text-gray-600">{{ resultados[0].num_evaluaciones }} evaluaciones</p>
+                </div>
+
+                <!-- Tercer Lugar -->
+                {% if resultados|length >= 3 %}
+                <div class="bg-white border border-gray-200 rounded-xl p-6 text-center shadow-lg"
+                    style="min-height: 240px;">
+                    <div
+                        class="bg-orange-500 text-white rounded-full w-14 h-14 flex items-center justify-center mx-auto mb-4 text-xl font-bold shadow-lg">
+                        3</div>
+                    <h3 class="font-bold text-gray-900 text-lg mb-2">{{ resultados[2].poster.nombres }} {{
+                        resultados[2].poster.apellidos }}</h3>
+                    {% if resultados[2].poster.institucion %}
+                    <p class="text-sm text-gray-600 mb-3">{{ resultados[2].poster.institucion }}</p>
+                    {% endif %}
+                    <p class="text-sm text-gray-700 mb-4 line-clamp-3">{{ resultados[2].poster.titulo_poster[:70] }}{%
+                        if resultados[2].poster.titulo_poster|length > 70 %}...{% endif %}</p>
+                    <p class="text-2xl font-bold text-orange-600 mb-2">{{ "%.2f"|format(resultados[2].promedio) }}/10
+                    </p>
+                    <p class="text-sm text-gray-500">{{ resultados[2].num_evaluaciones }} evaluaciones</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Tabla Completa de Resultados -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-900">Clasificación Completa</h2>
+                <p class="text-gray-600 mt-1">Todos los participantes ordenados por puntuación</p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Posición</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#
+                                Trabajo</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Autor</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Título</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Institución</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Puntuación</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Evaluaciones</th>
+                            {% if resultados[0].poster.archivo_poster %}
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Trabajo</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for resultado in resultados %}
+                        <tr
+                            class="hover:bg-gray-50 {% if loop.index <= 3 %}bg-gradient-to-r from-yellow-50 to-transparent{% endif %}">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                <div class="flex items-center">
+                                    {% if loop.index == 1 %}
+                                    <span
+                                        class="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-3 shadow-md">1</span>
+                                    {% elif loop.index == 2 %}
+                                    <span
+                                        class="bg-gray-400 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-3 shadow-md">2</span>
+                                    {% elif loop.index == 3 %}
+                                    <span
+                                        class="bg-orange-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-3 shadow-md">3</span>
+                                    {% else %}
+                                    <span class="text-gray-500 w-8 h-8 flex items-center justify-center text-sm mr-3">{{
+                                        loop.index }}</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
+                                    {{ "%02d"|format(resultado.poster.numero_poster) }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <div class="font-semibold">{{ resultado.poster.nombres }} {{ resultado.poster.apellidos
+                                    }}</div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-900">
+                                <div class="max-w-md">
+                                    <p class="font-medium">{{ resultado.poster.titulo_poster }}</p>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-600">
+                                {{ resultado.poster.institucion or '-' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <span
+                                    class="text-xl font-bold {% if loop.index == 1 %}text-yellow-600{% elif loop.index == 2 %}text-gray-600{% elif loop.index == 3 %}text-orange-600{% else %}text-blue-600{% endif %}">
+                                    {{ "%.2f"|format(resultado.promedio) }}/10
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <span
+                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    {{ resultado.num_evaluaciones }} jurados
+                                </span>
+                            </td>
+                            {% if resultado.poster.archivo_poster %}
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <a href="{{ url_for('static', filename='uploads/' + evento.codigo + '/posters/' + resultado.poster.archivo_poster) }}"
+                                    target="_blank"
+                                    class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                        </path>
+                                    </svg>
+                                    Ver PDF
+                                </a>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Estadísticas del Concurso -->
+        <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">Estadísticas del Concurso</h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-blue-600">{{ resultados|length }}</div>
+                    <div class="text-sm text-gray-600 font-medium">Trabajos participantes</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-green-600">{{ "%.2f"|format(resultados[0].promedio) }}</div>
+                    <div class="text-sm text-gray-600 font-medium">Puntuación más alta</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-purple-600">{{ "%.2f"|format(resultados |
+                        sum(attribute='promedio') / resultados|length) }}</div>
+                    <div class="text-sm text-gray-600 font-medium">Promedio general</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-orange-600">{{ resultados | sum(attribute='num_evaluaciones') }}
+                    </div>
+                    <div class="text-sm text-gray-600 font-medium">Total evaluaciones</div>
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- No hay resultados -->
+        <div class="text-center py-16">
+            <div class="max-w-md mx-auto">
+                <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <h3 class="mt-4 text-lg font-medium text-gray-900">No hay resultados disponibles</h3>
+                <p class="mt-2 text-sm text-gray-500">Los resultados aparecerán cuando se completen las evaluaciones del
+                    concurso.</p>
+            </div>
+        </div>
+        {% endif %}
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center space-x-4 mb-4 md:mb-0">
+                    <img src="{{ url_for('static', filename='assets/css-logo-192x192.png') }}" alt="CSS Logo"
+                        class="h-8 w-auto">
+                    <div class="text-sm text-gray-600">
+                        <p class="font-medium">Caja de Seguro Social</p>
+                        <p>Departamento Nacional de Docencia e Investigación</p>
+                    </div>
+                </div>
+                <div class="text-sm text-gray-500">
+                    <p>Resultados del concurso de investigación</p>
+                    <p class="text-center md:text-right">{{ evento.fecha_fin.strftime('%B %Y') if evento.fecha_fin else
+                        '' }}</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+</html>
