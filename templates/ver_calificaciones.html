@@ -1,164 +1,215 @@
-{% block title %}Calificaciones - {{ evento.nombre }}{% endblock %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ evento.nombre }} - Evaluación de Trabajo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- favicons -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
+    <meta name="apple-mobile-web-app-title" content="CertiCSS" />
+    <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
+{% if UMAMI_URL %}
+    {{ UMAMI_URL | safe }}
+{% endif %}
+</head>
+<body class="bg-gray-50 dark:bg-neutral-900">
 
-{% block content %}
-<div class="container mx-auto px-4 py-8">
-    <div class="max-w-4xl mx-auto">
-        <div class="bg-white rounded-lg shadow-lg p-6">
-            <div class="text-center mb-6">
-                <h1 class="text-2xl font-bold text-gray-800 mb-2">Calificaciones del Póster</h1>
-                <h2 class="text-lg text-gray-600">{{ evento.nombre }}</h2>
-            </div>
+    <!-- ========== MAIN CONTENT ========== -->
+    <main id="content">
 
-            <div class="bg-blue-50 p-4 rounded-md mb-6">
-                <h3 class="font-semibold text-blue-800 mb-2">Información del Póster</h3>
-                <p><strong>Póster #{{ "%02d"|format(poster.numero_poster) }}</strong></p>
-                <p><strong>Autor:</strong> {{ poster.nombres }} {{ poster.apellidos }}</p>
-                <p><strong>Título:</strong> {{ poster.titulo_poster }}</p>
-                {% if poster.institucion %}
-                <p><strong>Institución:</strong> {{ poster.institucion }}</p>
-                {% endif %}
-            </div>
+        <!-- Card -->
+        <div class="max-w-[75rem] px-4 pt-10 sm:px-6 lg:px-8 lg:pt-14 mx-auto">
+            <!-- Grid -->
+            <div class="bg-white grid sm:grid-cols-2 sm:items-center gap-8 border border-gray-200 rounded-xl">
 
-            {% if evaluaciones %}
-            <!-- Resumen de Calificación Final -->
-            <div class="bg-green-50 p-4 rounded-md mb-6 text-center">
-                <h3 class="text-xl font-bold text-green-800 mb-2">Calificación Final</h3>
-                <div class="text-3xl font-bold text-green-600">{{ "%.2f"|format(promedio_final) }}/10</div>
-                <p class="text-sm text-green-700 mt-1">Promedio de {{ evaluaciones|length }} jurado(s)</p>
-            </div>
-
-            <!-- Evaluaciones por Jurado -->
-            <div class="space-y-6">
-                <h3 class="text-lg font-semibold text-gray-800">Evaluaciones Detalladas</h3>
-                
-                {% for evaluacion in evaluaciones %}
-                <div class="border border-gray-200 rounded-lg p-4">
-                    <div class="flex justify-between items-center mb-4">
-                        <h4 class="font-semibold text-gray-800">
-                            Jurado: {{ jurados_data.get(evaluacion.cedula_jurado, 'Jurado ' + evaluacion.cedula_jurado) }}
-                        </h4>
-                        <div class="text-lg font-bold text-blue-600">
-                            {{ "%.2f"|format(evaluacion.puntuacion_final) }}/10
-                        </div>
+                <div class="sm:order-2">
+                    <div class="relative pt-[100%] sm:pt-[100%]">
+{% if evento.afiche_750 %}
+                        <img class="size-full absolute top-0 start-0 object-cover rounded-xl" src="{{ url_for('static', filename='uploads/' + evento.afiche_750.split('/')[-1]) }}" alt="{{ evento.nombre }}">
+{% else %}
+                        <img class="size-full absolute top-0 start-0 object-cover rounded-xl" src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}" alt="{{ evento.nombre }}">
+{% endif %}
                     </div>
+                </div>
+                <!-- End Col -->
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <!-- Contenido -->
-                        <div class="bg-gray-50 p-3 rounded">
-                            <h5 class="font-medium text-gray-700 mb-2">I. Contenido (60%)</h5>
-                            <div class="text-sm space-y-1">
-                                <div class="flex justify-between">
-                                    <span>Introducción y Objetivos:</span>
-                                    <span class="font-medium">{{ evaluacion.introduccion_objetivos }}/10</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span>Metodología:</span>
-                                    <span class="font-medium">{{ evaluacion.metodologia }}/10</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span>Resultados:</span>
-                                    <span class="font-medium">{{ evaluacion.resultados }}/10</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span>Conclusiones:</span>
-                                    <span class="font-medium">{{ evaluacion.conclusiones }}/10</span>
-                                </div>
-                                <div class="border-t pt-1 mt-2">
-                                    <div class="flex justify-between font-semibold">
-                                        <span>Subtotal:</span>
-                                        <span class="text-blue-600">{{ "%.1f"|format(evaluacion.contenido_score) }}/6.0</span>
+                <div class="sm:order-1">
+                    <div class="container mx-auto px-8 py-8">
+
+                        <div class="text-center mb-6">
+                            <h1 class="text-2xl font-bold text-gray-800 mb-2">Calificaciones del Póster</h1>
+                            <h2 class="text-lg text-gray-600">{{ evento.nombre }}</h2>
+                        </div>
+
+                        <div class="bg-blue-50 p-4 rounded-md mb-6">
+                            <h3 class="font-semibold text-blue-800 mb-2">Información del Póster</h3>
+                            <p><strong>Póster #{{ "%02d"|format(poster.numero_poster) }}</strong></p>
+                            <p><strong>Autor:</strong> {{ poster.nombres }} {{ poster.apellidos }}</p>
+                            <p><strong>Título:</strong> {{ poster.titulo_poster }}</p>
+                            {% if poster.institucion %}
+                            <p><strong>Institución:</strong> {{ poster.institucion }}</p>
+                            {% endif %}
+                        </div>
+
+                        {% if evaluaciones %}
+                        <!-- Resumen de Calificación Final -->
+                        <div class="bg-green-50 p-4 rounded-md mb-6 text-center">
+                            <h3 class="text-xl font-bold text-green-800 mb-2">Calificación Final</h3>
+                            <div class="text-3xl font-bold text-green-600">{{ "%.2f"|format(promedio_final) }}/10</div>
+                            <p class="text-sm text-green-700 mt-1">Promedio de {{ evaluaciones|length }} jurado(s)</p>
+                        </div>
+
+                        <!-- Evaluaciones por Jurado -->
+                        <div class="space-y-6">
+                            <h3 class="text-lg font-semibold text-gray-800">Evaluaciones Detalladas</h3>
+                            
+                            {% for evaluacion in evaluaciones %}
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h4 class="font-semibold text-gray-800">
+                                        Jurado: {{ jurados_data.get(evaluacion.cedula_jurado, 'Jurado ' + evaluacion.cedula_jurado) }}
+                                    </h4>
+                                    <div class="text-lg font-bold text-blue-600">
+                                        {{ "%.2f"|format(evaluacion.puntuacion_final) }}/10
                                     </div>
                                 </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                    <!-- Contenido -->
+                                    <div class="bg-gray-50 p-3 rounded">
+                                        <h5 class="font-medium text-gray-700 mb-2">I. Contenido (60%)</h5>
+                                        <div class="text-sm space-y-1">
+                                            <div class="flex justify-between">
+                                                <span>Introducción y Objetivos:</span>
+                                                <span class="font-medium">{{ evaluacion.introduccion_objetivos }}/10</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Metodología:</span>
+                                                <span class="font-medium">{{ evaluacion.metodologia }}/10</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Resultados:</span>
+                                                <span class="font-medium">{{ evaluacion.resultados }}/10</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Conclusiones:</span>
+                                                <span class="font-medium">{{ evaluacion.conclusiones }}/10</span>
+                                            </div>
+                                            <div class="border-t pt-1 mt-2">
+                                                <div class="flex justify-between font-semibold">
+                                                    <span>Subtotal:</span>
+                                                    <span class="text-blue-600">{{ "%.1f"|format(evaluacion.contenido_score) }}/6.0</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Presentación Visual -->
+                                    <div class="bg-gray-50 p-3 rounded">
+                                        <h5 class="font-medium text-gray-700 mb-2">II. Presentación Visual (20%)</h5>
+                                        <div class="text-sm space-y-1">
+                                            <div class="flex justify-between">
+                                                <span>Diseño y Organización:</span>
+                                                <span class="font-medium">{{ evaluacion.diseno_organizacion }}/10</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Imágenes y Gráficos:</span>
+                                                <span class="font-medium">{{ evaluacion.imagenes_graficos }}/10</span>
+                                            </div>
+                                            <div class="border-t pt-1 mt-2">
+                                                <div class="flex justify-between font-semibold">
+                                                    <span>Subtotal:</span>
+                                                    <span class="text-blue-600">{{ "%.1f"|format(evaluacion.presentacion_visual_score) }}/2.0</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Presentación Oral -->
+                                    <div class="bg-gray-50 p-3 rounded">
+                                        <h5 class="font-medium text-gray-700 mb-2">III. Presentación Oral (20%)</h5>
+                                        <div class="text-sm space-y-1">
+                                            <div class="flex justify-between">
+                                                <span>Claridad y Comunicación:</span>
+                                                <span class="font-medium">{{ evaluacion.claridad_comunicacion }}/10</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Dominio del Tema:</span>
+                                                <span class="font-medium">{{ evaluacion.dominio_tema }}/10</span>
+                                            </div>
+                                            <div class="border-t pt-1 mt-2">
+                                                <div class="flex justify-between font-semibold">
+                                                    <span>Subtotal:</span>
+                                                    <span class="text-blue-600">{{ "%.1f"|format(evaluacion.presentacion_oral_score) }}/2.0</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {% if evaluacion.comentarios %}
+                                <div class="bg-yellow-50 p-3 rounded">
+                                    <h5 class="font-medium text-yellow-800 mb-2">Comentarios del Jurado:</h5>
+                                    <p class="text-sm text-yellow-700">{{ evaluacion.comentarios }}</p>
+                                </div>
+                                {% endif %}
+
+                                <div class="text-xs text-gray-500 mt-2">
+                                    Evaluado el: {{ evaluacion.timestamp.strftime('%d/%m/%Y a las %H:%M') }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Explicación del Sistema de Puntuación -->
+                        <div class="bg-gray-50 p-4 rounded-md mt-6">
+                            <h3 class="font-semibold text-gray-800 mb-2">Sistema de Puntuación:</h3>
+                            <div class="text-sm text-gray-700 space-y-1">
+                                <p>• <strong>Contenido (60%):</strong> Cada criterio se evalúa de 1-10 puntos, multiplicado por 0.15</p>
+                                <p>• <strong>Presentación Visual (20%):</strong> Cada criterio se evalúa de 1-10 puntos, multiplicado por 0.10</p>
+                                <p>• <strong>Presentación Oral (20%):</strong> Cada criterio se evalúa de 1-10 puntos, multiplicado por 0.10</p>
+                                <p>• <strong>Puntuación máxima:</strong> 10 puntos</p>
+                                <p>• <strong>Calificación final:</strong> Promedio de todas las evaluaciones de los jurados</p>
                             </div>
                         </div>
 
-                        <!-- Presentación Visual -->
-                        <div class="bg-gray-50 p-3 rounded">
-                            <h5 class="font-medium text-gray-700 mb-2">II. Presentación Visual (20%)</h5>
-                            <div class="text-sm space-y-1">
-                                <div class="flex justify-between">
-                                    <span>Diseño y Organización:</span>
-                                    <span class="font-medium">{{ evaluacion.diseno_organizacion }}/10</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span>Imágenes y Gráficos:</span>
-                                    <span class="font-medium">{{ evaluacion.imagenes_graficos }}/10</span>
-                                </div>
-                                <div class="border-t pt-1 mt-2">
-                                    <div class="flex justify-between font-semibold">
-                                        <span>Subtotal:</span>
-                                        <span class="text-blue-600">{{ "%.1f"|format(evaluacion.presentacion_visual_score) }}/2.0</span>
-                                    </div>
-                                </div>
+                        {% else %}
+                        <div class="text-center py-8">
+                            <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
+                                <p class="font-medium">Aún no hay evaluaciones disponibles</p>
+                                <p class="text-sm mt-1">Las calificaciones aparecerán aquí una vez que los jurados completen sus evaluaciones.</p>
                             </div>
                         </div>
+                        {% endif %}
 
-                        <!-- Presentación Oral -->
-                        <div class="bg-gray-50 p-3 rounded">
-                            <h5 class="font-medium text-gray-700 mb-2">III. Presentación Oral (20%)</h5>
-                            <div class="text-sm space-y-1">
-                                <div class="flex justify-between">
-                                    <span>Claridad y Comunicación:</span>
-                                    <span class="font-medium">{{ evaluacion.claridad_comunicacion }}/10</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span>Dominio del Tema:</span>
-                                    <span class="font-medium">{{ evaluacion.dominio_tema }}/10</span>
-                                </div>
-                                <div class="border-t pt-1 mt-2">
-                                    <div class="flex justify-between font-semibold">
-                                        <span>Subtotal:</span>
-                                        <span class="text-blue-600">{{ "%.1f"|format(evaluacion.presentacion_oral_score) }}/2.0</span>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="mt-6 text-center">
+                            <a href="{{ url_for('editar_poster', codigo_evento=evento.codigo) }}" 
+                            class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors mr-4">
+                                Volver a Mi Póster
+                            </a>
+                            <a href="{{ url_for('poster_login', codigo_evento=evento.codigo) }}" 
+                            class="text-gray-600 hover:text-gray-800 font-medium">Cerrar Sesión</a>
                         </div>
-                    </div>
 
-                    {% if evaluacion.comentarios %}
-                    <div class="bg-yellow-50 p-3 rounded">
-                        <h5 class="font-medium text-yellow-800 mb-2">Comentarios del Jurado:</h5>
-                        <p class="text-sm text-yellow-700">{{ evaluacion.comentarios }}</p>
-                    </div>
-                    {% endif %}
-
-                    <div class="text-xs text-gray-500 mt-2">
-                        Evaluado el: {{ evaluacion.timestamp.strftime('%d/%m/%Y a las %H:%M') }}
                     </div>
                 </div>
-                {% endfor %}
+                <!-- End Col -->
             </div>
-
-            <!-- Explicación del Sistema de Puntuación -->
-            <div class="bg-gray-50 p-4 rounded-md mt-6">
-                <h3 class="font-semibold text-gray-800 mb-2">Sistema de Puntuación:</h3>
-                <div class="text-sm text-gray-700 space-y-1">
-                    <p>• <strong>Contenido (60%):</strong> Cada criterio se evalúa de 1-10 puntos, multiplicado por 0.15</p>
-                    <p>• <strong>Presentación Visual (20%):</strong> Cada criterio se evalúa de 1-10 puntos, multiplicado por 0.10</p>
-                    <p>• <strong>Presentación Oral (20%):</strong> Cada criterio se evalúa de 1-10 puntos, multiplicado por 0.10</p>
-                    <p>• <strong>Puntuación máxima:</strong> 10 puntos</p>
-                    <p>• <strong>Calificación final:</strong> Promedio de todas las evaluaciones de los jurados</p>
-                </div>
-            </div>
-
-            {% else %}
-            <div class="text-center py-8">
-                <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
-                    <p class="font-medium">Aún no hay evaluaciones disponibles</p>
-                    <p class="text-sm mt-1">Las calificaciones aparecerán aquí una vez que los jurados completen sus evaluaciones.</p>
-                </div>
-            </div>
-            {% endif %}
-
-            <div class="mt-6 text-center">
-                <a href="{{ url_for('editar_poster', codigo_evento=evento.codigo) }}" 
-                   class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors mr-4">
-                    Volver a Mi Póster
-                </a>
-                <a href="{{ url_for('poster_login', codigo_evento=evento.codigo) }}" 
-                   class="text-gray-600 hover:text-gray-800 font-medium">Cerrar Sesión</a>
-            </div>
+            <!-- End Grid -->
         </div>
-    </div>
-</div>
-{% endblock %}
+        <!-- End Card -->
+
+    </main>
+
+    <footer class="mt-auto w-full max-w-[85rem] px-4 sm:px-6 lg:px-8 mx-auto">
+        <div class="text-center text-xs text-gray-500 my-8">
+            <p>Este evento es potenciado por la plataforma CertiCSS.</p>
+        </div>
+    </footer>
+
+</body>
+</html>

@@ -57,7 +57,11 @@
 
                             <div class="mt-1 flex items-center gap-x-2">
                                 <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
-                                    {{ evaluaciones_por_poster.values() | sum(attribute='length') | default(0) }}
+                                    {% set total_evaluaciones = 0 %}
+                                    {% for evals in evaluaciones_por_poster.values() %}
+                                        {% set total_evaluaciones = total_evaluaciones + (evals|length) %}
+                                    {% endfor %}
+                                    {{ total_evaluaciones }}
                                 </h3>
                             </div>
                         </div>

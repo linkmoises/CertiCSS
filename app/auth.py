@@ -1,7 +1,7 @@
 from functools import wraps
 import secrets
 from flask_login import current_user
-from flask import request, Blueprint
+from flask import request, Blueprint, abort
 from datetime import datetime, timedelta
 from app import db, collection_tokens
 
@@ -15,7 +15,7 @@ auth_bp = Blueprint('auth', __name__)
 def generate_token(cedula):
     """Genera un token único para una cédula"""
     token = secrets.token_urlsafe(32)
-    expiry = datetime.now() + timedelta(hours=24)
+    expiry = datetime.now() + timedelta(hours=2)
     
     # Almacenar token en MongoDB
     collection_tokens.update_one(

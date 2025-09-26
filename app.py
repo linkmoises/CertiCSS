@@ -1371,7 +1371,9 @@ def poster_logout(codigo_evento):
 ###
 ### Vista pública de posters
 ###
-@app.route('/concurso_investigacion/<codigo_evento>')
+from app.auth import token_required
+@app.route('/concurso_investigacion/<codigo_evento>', methods=['GET'])
+@token_required
 def concurso_investigacion_publico(codigo_evento):
     # Obtener el evento
     evento = collection_eventos.find_one({"codigo": codigo_evento})
