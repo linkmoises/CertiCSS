@@ -1530,6 +1530,64 @@ def resultados_concurso_publico(codigo_evento):
 
 
 ###
+### Eliminar jurado y sus evaluaciones
+###
+@app.route('/tablero/eliminar_jurado/<codigo_evento>/<cedula_jurado>', methods=['POST'])
+@login_required
+def eliminar_jurado_poster(codigo_evento, cedula_jurado):
+    # Verificar permisos (solo administradores o coordinadores)
+    if current_user.rol not in ['administrador', 'denadoi']:
+        flash('No tienes permisos para realizar esta acción.', 'error')
+        return redirect(url_for('admin_posters', codigo_evento=codigo_evento))
+    
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+    
+    # Verificar que el concurso de póster esté habilitado
+    if not evento.get('concurso_poster', False):
+        flash('El concurso de póster no está habilitado para este evento.', 'error')
+        return redirect(url_for('admin_posters', codigo_evento=codigo_evento))
+    
+    # Obtener información del jurado antes de eliminarlo
+    jurado = collection_participantes.find_one({
+        "codigo_evento": codigo_evento,
+        "cedula": cedula_jurado,
+        "rol": "jurado_poster"
+    })
+    
+    if not jurado:
+        flash('Jurado no encontrado.', 'error')
+        return redirect(url_for('admin_posters', codigo_evento=codigo_evento))
+    
+    try:
+        # Eliminar todas las evaluaciones del jurado
+        result_evaluaciones = collection_evaluaciones_poster.delete_many({
+            "codigo_evento": codigo_evento,
+            "cedula_jurado": cedula_jurado
+        })
+        
+        # Eliminar el jurado de la colección de participantes
+        result_jurado = collection_participantes.delete_one({
+            "codigo_evento": codigo_evento,
+            "cedula": cedula_jurado,
+            "rol": "jurado_poster"
+        })
+        
+        if result_jurado.deleted_count > 0:
+            log_event(f"Usuario [{current_user.email}] eliminó al jurado {jurado['nombres']} {jurado['apellidos']} (cédula: {cedula_jurado}) del evento {codigo_evento}. Se eliminaron {result_evaluaciones.deleted_count} evaluaciones.")
+            flash(f'Jurado {jurado["nombres"]} {jurado["apellidos"]} eliminado exitosamente. Se eliminaron {result_evaluaciones.deleted_count} evaluaciones.', 'success')
+        else:
+            flash('Error al eliminar el jurado.', 'error')
+            
+    except Exception as e:
+        flash(f'Error al eliminar el jurado: {str(e)}', 'error')
+        log_event(f"Error al eliminar jurado {cedula_jurado} del evento {codigo_evento}: {str(e)}")
+    
+    return redirect(url_for('admin_posters', codigo_evento=codigo_evento))
+
+
+###
 ### Formulario de registro de participantes
 ###
 @app.route('/registrar_participante/<codigo_evento>')

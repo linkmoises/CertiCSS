@@ -164,16 +164,34 @@
                             <div class="mb-6">
                                 <h3 class="text-lg font-semibold text-gray-800 mb-3">Jurados Registrados</h3>
                                 <div class="bg-gray-50 p-4 rounded-lg">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                         {% for jurado in jurados %}
-                                        <div class="text-sm">
-                                            <strong>{{ jurado.nombres }} {{ jurado.apellidos }}</strong>
-                                            <br>
-                                            <span class="text-gray-600">{{ jurado.especialidad }}</span>
-                                            {% if jurado.institucion %}
-                                            <br>
-                                            <span class="text-gray-500 text-xs">{{ jurado.institucion }}</span>
-                                            {% endif %}
+                                        <div class="bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
+                                            <div class="flex justify-between items-start">
+                                                <div class="flex-1">
+                                                    <div class="text-sm">
+                                                        <strong>{{ jurado.nombres }} {{ jurado.apellidos }}</strong>
+                                                        <br>
+                                                        <span class="text-gray-600">{{ jurado.especialidad }}</span>
+                                                        {% if jurado.institucion %}
+                                                        <br>
+                                                        <span class="text-gray-500 text-xs">{{ jurado.institucion }}</span>
+                                                        {% endif %}
+                                                        <br>
+                                                        <span class="text-gray-400 text-xs">Cédula: {{ jurado.cedula }}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="ml-2">
+                                                    <button type="button" 
+                                                            onclick="confirmarEliminacionJurado('{{ jurado.cedula }}', '{{ jurado.nombres }} {{ jurado.apellidos }}')"
+                                                            class="inline-flex items-center p-1 text-red-600 hover:text-red-800 hover:bg-red-100 rounded-full transition-colors duration-200"
+                                                            title="Eliminar jurado y sus evaluaciones">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                         {% endfor %}
                                     </div>
@@ -398,6 +416,34 @@
         form.appendChild(hiddenInput);
         form.submit();
     });
+
+    // Función para confirmar eliminación de jurado
+    function confirmarEliminacionJurado(cedulaJurado, nombreJurado) {
+        const mensaje = `¿Está seguro de que desea eliminar al jurado "${nombreJurado}"?\n\n` +
+                       `ADVERTENCIA: Esta acción también eliminará TODAS las evaluaciones realizadas por este jurado.\n` +
+                       `Esta acción NO se puede deshacer.\n\n` +
+                       `¿Desea continuar?`;
+        
+        if (confirm(mensaje)) {
+            // Crear formulario dinámico para enviar la solicitud POST
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `{{ url_for('eliminar_jurado_poster', codigo_evento=evento.codigo, cedula_jurado='CEDULA_PLACEHOLDER') }}`.replace('CEDULA_PLACEHOLDER', cedulaJurado);
+            
+            // Agregar token CSRF si está disponible
+            const csrfToken = document.querySelector('meta[name="csrf-token"]');
+            if (csrfToken) {
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrf_token';
+                csrfInput.value = csrfToken.getAttribute('content');
+                form.appendChild(csrfInput);
+            }
+            
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
 </script>    
 </body>
 </html>
