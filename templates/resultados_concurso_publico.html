@@ -171,8 +171,8 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                <div class="font-semibold">{{ resultado.poster.nombres }} {{ resultado.poster.apellidos
-                                    }}</div><span class="text-sm text-gray-600">{{ resultado.poster.institucion or '-' }}</span>
+                                <div class="font-semibold">{{ resultado.poster.nombres }} {{ resultado.poster.apellidos }}</div>
+                                <span class="text-xs text-gray-600">{{ resultado.poster.institucion or '-' }}</span>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-900">
                                 <div class="max-w-md">
@@ -255,7 +255,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 mt-16">
+    <footer class="bg-white border-t border-gray-200 mt-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <div class="flex items-center space-x-4 mb-4 md:mb-0">
@@ -267,9 +267,8 @@
                     </div>
                 </div>
                 <div class="text-sm text-gray-500">
-                    <p>Resultados del concurso de investigación</p>
-                    <p class="text-center md:text-right">{{ evento.fecha_fin.strftime('%B %Y') if evento.fecha_fin else
-                        '' }}</p>
+                    <p>{{ evento.unidad_ejecutora }}</p>
+                    <p class="text-center md:text-right">{{ evento.fecha_fin.strftime('%B %Y') if evento.fecha_fin else '' }}</p>
                 </div>
             </div>
         </div>
