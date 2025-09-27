@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Resultados del Concurso de Investigación - {{ evento.nombre }}</title>
@@ -7,15 +8,18 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- favicons -->
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}"
+        sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
+    <link rel="apple-touch-icon" sizes="180x180"
+        href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
     <meta name="apple-mobile-web-app-title" content="CertiCSS" />
     <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
-{% if UMAMI_URL %}
+    {% if UMAMI_URL %}
     {{ UMAMI_URL | safe }}
-{% endif %}
+    {% endif %}
 </head>
+
 <body class="bg-gray-50">
 
     <!-- Header -->
@@ -131,8 +135,6 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Título</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Institución</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Puntuación</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Evaluaciones</th>
@@ -170,15 +172,12 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 <div class="font-semibold">{{ resultado.poster.nombres }} {{ resultado.poster.apellidos
-                                    }}</div>
+                                    }}</div><span class="text-sm text-gray-600">{{ resultado.poster.institucion or '-' }}</span>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-900">
                                 <div class="max-w-md">
                                     <p class="font-medium">{{ resultado.poster.titulo_poster }}</p>
                                 </div>
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-600">
-                                {{ resultado.poster.institucion or '-' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 <span

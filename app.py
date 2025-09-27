@@ -1588,6 +1588,123 @@ def eliminar_jurado_poster(codigo_evento, cedula_jurado):
 
 
 ###
+### Editar póster desde panel administrativo
+###
+@app.route('/tablero/editar_poster_admin/<codigo_evento>/<nanoid_poster>', methods=['GET', 'POST'])
+@login_required
+def editar_poster_admin(codigo_evento, nanoid_poster):
+    # Verificar permisos (solo administradores o coordinadores)
+    if current_user.rol not in ['administrador', 'denadoi']:
+        flash('No tienes permisos para realizar esta acción.', 'error')
+        return redirect(url_for('admin_posters', codigo_evento=codigo_evento))
+    
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+    
+    # Verificar que el concurso de póster esté habilitado
+    if not evento.get('concurso_poster', False):
+        flash('El concurso de póster no está habilitado para este evento.', 'error')
+        return redirect(url_for('admin_posters', codigo_evento=codigo_evento))
+    
+    poster = collection_posters.find_one({
+        "nanoid": nanoid_poster,
+        "codigo_evento": codigo_evento
+    })
+    
+    if not poster:
+        flash('Póster no encontrado.', 'error')
+        return redirect(url_for('admin_posters', codigo_evento=codigo_evento))
+    
+    if request.method == 'POST':
+        # Actualizar datos básicos
+        nombres = request.form.get('nombres', '').strip()
+        apellidos = request.form.get('apellidos', '').strip()
+        email = request.form.get('email', '').strip()
+        telefono = request.form.get('telefono', '').strip()
+        institucion = request.form.get('institucion', '').strip()
+        titulo_poster = request.form.get('titulo_poster', '').strip()
+        nueva_passphrase = request.form.get('nueva_passphrase', '').strip()
+        
+        # Validar campos requeridos
+        if not all([nombres, apellidos, titulo_poster]):
+            flash('Los campos nombres, apellidos y título son obligatorios.', 'error')
+            return render_template('editar_poster_admin.html', evento=evento, poster=poster)
+        
+        update_data = {
+            'nombres': nombres,
+            'apellidos': apellidos,
+            'email': email,
+            'telefono': telefono,
+            'institucion': institucion,
+            'titulo_poster': titulo_poster
+        }
+        
+        # Actualizar passphrase si se proporciona una nueva
+        if nueva_passphrase:
+            update_data['passphrase'] = generate_password_hash(nueva_passphrase)
+        
+        # Manejar subida de archivo PDF (opcional)
+        poster_file = request.files.get('poster_file')
+        if poster_file and poster_file.filename:
+            if poster_file.filename.endswith('.pdf'):
+                # Crear carpeta del evento si no existe
+                carpeta_posters = os.path.join(app.config['UPLOAD_FOLDER'], codigo_evento, 'posters')
+                os.makedirs(carpeta_posters, exist_ok=True)
+                
+                # Nombre del archivo
+                nombre_archivo = f"{codigo_evento}_poster_{poster['numero_poster']:02d}.pdf"
+                ruta_archivo = os.path.join(carpeta_posters, nombre_archivo)
+                
+                # Guardar archivo
+                poster_file.save(ruta_archivo)
+                update_data['archivo_poster'] = nombre_archivo
+                
+                flash('Póster actualizado exitosamente incluyendo el archivo PDF.', 'success')
+            else:
+                flash('Solo se permiten archivos PDF para el póster.', 'error')
+                return render_template('editar_poster_admin.html', evento=evento, poster=poster)
+        else:
+            flash('Póster actualizado exitosamente.', 'success')
+        
+        # Actualizar en base de datos
+        collection_posters.update_one(
+            {"nanoid": nanoid_poster},
+            {"$set": update_data}
+        )
+        
+        # También actualizar en participantes si existe
+        collection_participantes.update_one(
+            {"nanoid": nanoid_poster},
+            {"$set": {
+                'nombres': nombres,
+                'apellidos': apellidos,
+                'perfil': institucion
+            }}
+        )
+        
+        # Crear mensaje de log detallado
+        cambios = []
+        if nombres != poster.get('nombres', ''):
+            cambios.append('nombres')
+        if apellidos != poster.get('apellidos', ''):
+            cambios.append('apellidos')
+        if titulo_poster != poster.get('titulo_poster', ''):
+            cambios.append('título')
+        if nueva_passphrase:
+            cambios.append('passphrase')
+        if poster_file and poster_file.filename:
+            cambios.append('archivo PDF')
+        
+        cambios_str = ', '.join(cambios) if cambios else 'información general'
+        log_event(f"Usuario [{current_user.email}] editó el póster #{poster['numero_poster']:02d} de {nombres} {apellidos} en el evento {codigo_evento}. Cambios: {cambios_str}.")
+        
+        return redirect(url_for('admin_posters', codigo_evento=codigo_evento))
+    
+    return render_template('editar_poster_admin.html', evento=evento, poster=poster)
+
+
+###
 ### Formulario de registro de participantes
 ###
 @app.route('/registrar_participante/<codigo_evento>')

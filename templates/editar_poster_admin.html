@@ -1,0 +1,323 @@
+{% include 'tablero-header.html' %}
+
+{% include 'tablero-sidebar.html' %}
+
+<!-- CONTENIDO -->
+<div class="w-full lg:ps-64">
+    <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+
+        <!-- FORMULARIO -->
+        <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+            <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+                <!-- Header -->
+                <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-800">
+                            Editar Póster (Administrador) - Póster #{{ "%02d"|format(poster.numero_poster) }}
+                        </h2>
+                        <p class="text-sm text-gray-600">
+                            {{ evento.nombre }}
+                        </p>
+                    </div>
+    
+                    <div>
+                        <div class="inline-flex gap-x-2">
+                            <a href="{{ url_for('admin_posters', codigo_evento=evento.codigo) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                                Volver
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Header -->
+
+                <div class="p-6">
+
+                    <!-- Advertencia -->
+                    <div class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-yellow-800">Edición Administrativa</h3>
+                                <div class="mt-2 text-sm text-yellow-700">
+                                    <p>Está editando este póster como administrador. Use esta función solo para
+                                        correcciones menores como errores tipográficos o información incorrecta. Los
+                                        cambios quedarán registrados en el sistema.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="POST" enctype="multipart/form-data" class="space-y-6">
+
+                        <!-- Información del Autor -->
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Información del Autor</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="nombres" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Nombres <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" id="nombres" name="nombres" value="{{ poster.nombres }}" required
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+
+                                <div>
+                                    <label for="apellidos" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Apellidos <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" id="apellidos" name="apellidos" value="{{ poster.apellidos }}"
+                                        required
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+
+                                <div>
+                                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Correo Electrónico
+                                    </label>
+                                    <input type="email" id="email" name="email" value="{{ poster.email or '' }}"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+
+                                <div>
+                                    <label for="telefono" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Teléfono
+                                    </label>
+                                    <input type="tel" id="telefono" name="telefono" value="{{ poster.telefono or '' }}"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label for="institucion" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Institución
+                                    </label>
+                                    <input type="text" id="institucion" name="institucion"
+                                        value="{{ poster.institucion or '' }}"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Información del Trabajo -->
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Información del Trabajo</h3>
+                            <div>
+                                <label for="titulo_poster" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Título del Trabajo de Investigación <span class="text-red-500">*</span>
+                                </label>
+                                <textarea id="titulo_poster" name="titulo_poster" rows="3" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">{{ poster.titulo_poster }}</textarea>
+                                <p class="mt-1 text-sm text-gray-500">Escriba el título completo del trabajo de
+                                    investigación.</p>
+                            </div>
+                        </div>
+
+                        <!-- Seguridad de Acceso -->
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Seguridad de Acceso</h3>
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3">
+                                        <h4 class="text-sm font-medium text-blue-800">Cambio de Passphrase</h4>
+                                        <div class="mt-1 text-sm text-blue-700">
+                                            <p>Solo complete este campo si necesita cambiar la passphrase del
+                                                participante. Déjelo vacío para mantener la passphrase actual.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="nueva_passphrase" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Nueva Passphrase (opcional)
+                                </label>
+                                <input type="text" id="nueva_passphrase" name="nueva_passphrase"
+                                    placeholder="Ingrese nueva passphrase solo si desea cambiarla"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <p class="mt-1 text-sm text-gray-500">
+                                    La passphrase permite al participante acceder para editar su póster. Use algo simple
+                                    que pueda recordar o comunicar fácilmente.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Archivo del Póster -->
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Archivo del Póster</h3>
+
+                            {% if poster.archivo_poster %}
+                            <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span class="text-sm text-green-700">
+                                        Archivo actual: {{ poster.archivo_poster }}
+                                    </span>
+                                    <a href="{{ url_for('static', filename='uploads/' + evento.codigo + '/posters/' + poster.archivo_poster) }}"
+                                        target="_blank" class="ml-4 text-blue-600 hover:text-blue-800 text-sm">
+                                        Ver archivo
+                                    </a>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 text-yellow-500 mr-2" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z">
+                                        </path>
+                                    </svg>
+                                    <span class="text-sm text-yellow-700">No hay archivo subido actualmente</span>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <div>
+                                <label for="poster_file" class="block text-sm font-medium text-gray-700 mb-2">
+                                    {% if poster.archivo_poster %}Reemplazar archivo (opcional){% else %}Subir archivo
+                                    PDF{% endif %}
+                                </label>
+                                <input type="file" id="poster_file" name="poster_file" accept=".pdf"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <p class="mt-1 text-sm text-gray-500">Solo archivos PDF. Máximo 10MB.</p>
+                            </div>
+                        </div>
+
+                        <!-- Información del Sistema -->
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h3 class="text-sm font-medium text-gray-700 mb-2">Información del Sistema</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                                <div>
+                                    <span class="font-medium">Número de póster:</span> {{
+                                    "%02d"|format(poster.numero_poster) }}
+                                </div>
+                                <div>
+                                    <span class="font-medium">Cédula:</span> {{ poster.cedula }}
+                                </div>
+                                <div>
+                                    <span class="font-medium">Fecha de registro:</span> {{
+                                    poster.timestamp.strftime('%d/%m/%Y %H:%M') if poster.timestamp else 'N/A' }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                            <a href="{{ url_for('admin_posters', codigo_evento=evento.codigo) }}"
+                                class="py-2 px-4 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Cancelar
+                            </a>
+                            <button type="submit"
+                                class="py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+{% include 'tablero-footer.html' %}
+
+    </div>
+</div>
+<!-- FIN CONTENIDO -->
+
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+<script>
+    // Limpia campos dinámicos al cargar la página
+    document.addEventListener("DOMContentLoaded", function () {
+        const hiddenInputs = document.querySelectorAll("#buscadorForm input[type='hidden']");
+        hiddenInputs.forEach((input) => input.remove());
+    });
+    document.getElementById("buscadorForm").addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevenir envío estándar del formulario
+    
+        const valor = document.getElementById("buscador").value.trim();
+        const patterns = {
+            cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas
+            pasaporte: /^[A-Z]{2}\d{6,9}$/,                        // Pasaportes
+            id_certificado: /^[a-zA-Z0-9]{8}$/                    // IDs de certificados
+        };
+    
+        let action, field;
+    
+        if (patterns.cedula.test(valor)) {
+            action = "/buscar_certificados";
+            field = "cedula";
+        } else if (patterns.pasaporte.test(valor)) {
+            action = "/buscar_certificados";
+            field = "cedula";
+        } else if (patterns.id_certificado.test(valor)) {
+            action = "/validar_certificado";
+            field = "nanoid";
+        } else {
+            alert("Formato no válido. Introduzca un documento de identificación o un ID de certificado válido.");
+            return;
+        }
+    
+        // Crear y enviar el formulario dinámicamente
+        const form = event.target;
+        form.action = action;
+        form.method = "POST";
+    
+        // Limpiar campos ocultos previos
+        const hiddenInputs = form.querySelectorAll("input[type='hidden']");
+        hiddenInputs.forEach((input) => input.remove());
+    
+        const hiddenInput = document.createElement("input");
+        hiddenInput.type = "hidden";
+        hiddenInput.name = field;
+        hiddenInput.value = valor;
+        form.appendChild(hiddenInput);
+        form.submit();
+    });
+
+    // Función para confirmar eliminación de jurado
+    function confirmarEliminacionJurado(cedulaJurado, nombreJurado) {
+        const mensaje = `¿Está seguro de que desea eliminar al jurado "${nombreJurado}"?\n\n` +
+                       `ADVERTENCIA: Esta acción también eliminará TODAS las evaluaciones realizadas por este jurado.\n` +
+                       `Esta acción NO se puede deshacer.\n\n` +
+                       `¿Desea continuar?`;
+        
+        if (confirm(mensaje)) {
+            // Crear formulario dinámico para enviar la solicitud POST
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `{{ url_for('eliminar_jurado_poster', codigo_evento=evento.codigo, cedula_jurado='CEDULA_PLACEHOLDER') }}`.replace('CEDULA_PLACEHOLDER', cedulaJurado);
+            
+            // Agregar token CSRF si está disponible
+            const csrfToken = document.querySelector('meta[name="csrf-token"]');
+            if (csrfToken) {
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrf_token';
+                csrfInput.value = csrfToken.getAttribute('content');
+                form.appendChild(csrfInput);
+            }
+            
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+</script>    
+</body>
+</html>
