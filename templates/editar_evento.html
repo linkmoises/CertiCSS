@@ -66,26 +66,17 @@
                                 class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
                                 id="region" name="region" required>
                                 <option value="">Seleccione una provincia / región / unidad administrativa</option>
-                                <option value="panama" {% if evento.region=='panama' %}selected{% endif %}>Panamá Metro
-                                </option>
-                                <option value="sanmiguelito" {% if evento.region=='sanmiguelito' %}selected{% endif %}>
-                                    San Miguelito</option>
-                                <option value="panamaoeste" {% if evento.region=='panamaoeste' %}selected{% endif %}>
-                                    Panamá Oeste</option>
-                                <option value="panamaeste" {% if evento.region=='panamaeste' %}selected{% endif %}>
-                                    Panamá Este</option>
-                                <option value="bocasdeltoro" {% if evento.region=='bocasdeltoro' %}selected{% endif %}>
-                                    Bocas del Toro</option>
+                                <option value="panama" {% if evento.region=='panama' %}selected{% endif %}>Panamá Metro</option>
+                                <option value="sanmiguelito" {% if evento.region=='sanmiguelito' %}selected{% endif %}>San Miguelito</option>
+                                <option value="panamaoeste" {% if evento.region=='panamaoeste' %}selected{% endif %}>Panamá Oeste</option>
+                                <option value="panamaeste" {% if evento.region=='panamaeste' %}selected{% endif %}>Panamá Este</option>
+                                <option value="bocasdeltoro" {% if evento.region=='bocasdeltoro' %}selected{% endif %}>Bocas del Toro</option>
                                 <option value="cocle" {% if evento.region=='cocle' %}selected{% endif %}>Coclé</option>
                                 <option value="colon" {% if evento.region=='colon' %}selected{% endif %}>Colón</option>
-                                <option value="chiriqui" {% if evento.region=='chiriqui' %}selected{% endif %}>Chiriquí
-                                </option>
-                                <option value="herrera" {% if evento.region=='herrera' %}selected{% endif %}>Herrera
-                                </option>
-                                <option value="lossantos" {% if evento.region=='lossantos' %}selected{% endif %}>Los
-                                    Santos</option>
-                                <option value="veraguas" {% if evento.region=='veraguas' %}selected{% endif %}>Veraguas
-                                </option>
+                                <option value="chiriqui" {% if evento.region=='chiriqui' %}selected{% endif %}>Chiriquí</option>
+                                <option value="herrera" {% if evento.region=='herrera' %}selected{% endif %}>Herrera</option>
+                                <option value="lossantos" {% if evento.region=='lossantos' %}selected{% endif %}>Los Santos</option>
+                                <option value="veraguas" {% if evento.region=='veraguas' %}selected{% endif %}>Veraguas</option>
                             </select>
                         </div>
 
@@ -99,9 +90,9 @@
 
                         <div class="sm:col-span-9">
                             <input id="unidad_ejecutora" name="unidad_ejecutora" type="text"
-                                class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                                class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed dark:bg-neutral-700 dark:border-neutral-600 dark:text-neutral-500"
                                 placeholder="Escriba la unidad ejecutora organizadora..."
-                                value="{{ evento.unidad_ejecutora }}">
+                                value="{{ evento.unidad_ejecutora }}" readonly>
                         </div>
                         <!-- End Col -->
 
@@ -129,14 +120,10 @@
                                 class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
                                 id="modalidad" name="modalidad" required>
                                 <option value="">Seleccione la modalidad del evento académico</option>
-                                <option value="Presencial" {% if evento.modalidad=='Presencial' %}selected{% endif %}>
-                                    Presencial</option>
-                                <option value="Híbrida" {% if evento.modalidad=='Híbrida' %}selected{% endif %}>Híbrida
-                                </option>
-                                <option value="Virtual asincrónica" {% if evento.modalidad=='Virtual asincrónica'
-                                    %}selected{% endif %}>Virtual asincrónica</option>
-                                <option value="Virtual sincrónica" {% if evento.modalidad=='Virtual sincrónica'
-                                    %}selected{% endif %}>Virtual sincrónica</option>
+                                <option value="Presencial" {% if evento.modalidad=='Presencial' %}selected{% endif %}>Presencial</option>
+                                <option value="Híbrida" {% if evento.modalidad=='Híbrida' %}selected{% endif %}>Híbrida</option>
+                                <option value="Virtual asincrónica" {% if evento.modalidad=='Virtual asincrónica' %}selected{% endif %}>Virtual asincrónica</option>
+                                <option value="Virtual sincrónica" {% if evento.modalidad=='Virtual sincrónica' %}selected{% endif %}>Virtual sincrónica</option>
                             </select>
                         </div>
 
@@ -152,24 +139,16 @@
                                 class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
                                 id="tipo" name="tipo">
                                 <option value="">Seleccione la categoría del evento</option>
-                                <option value="Congreso" {% if evento.tipo=='Congreso' %}selected{% endif %}>Congreso
-                                </option>
-                                <option value="Seminario" {% if evento.tipo=='Seminario' %}selected{% endif %}>Seminario
-                                </option>
-                                <option value="Jornada" {% if evento.tipo=='Jornada' %}selected{% endif %}>Jornada
-                                </option>
-                                <option value="Sesión Docente" {% if evento.tipo=='Sesión Docente' %}selected{% endif
-                                    %}>Sesión Docente</option>
-                                <option value="Simposio" {% if evento.tipo=='Simposio' %}selected{% endif %}>Simposio
-                                </option>
-                                <option value="Mesa Redonda" {% if evento.tipo=='Mesa Redonda' %}selected{% endif %}>
-                                    Mesa Redonda</option>
+                                <option value="Congreso" {% if evento.tipo=='Congreso' %}selected{% endif %}>Congreso</option>
+                                <option value="Seminario" {% if evento.tipo=='Seminario' %}selected{% endif %}>Seminario</option>
+                                <option value="Jornada" {% if evento.tipo=='Jornada' %}selected{% endif %}>Jornada</option>
+                                <option value="Sesión Docente" {% if evento.tipo=='Sesión Docente' %}selected{% endif %}>Sesión Docente</option>
+                                <option value="Simposio" {% if evento.tipo=='Simposio' %}selected{% endif %}>Simposio</option>
+                                <option value="Mesa Redonda" {% if evento.tipo=='Mesa Redonda' %}selected{% endif %}>Mesa Redonda</option>
                                 <option value="Taller" {% if evento.tipo=='Taller' %}selected{% endif %}>Taller</option>
                                 <option value="Curso" {% if evento.tipo=='Curso' %}selected{% endif %}>Curso</option>
-                                <option value="Diplomado" {% if evento.tipo=='Diplomado' %}selected{% endif %}>Diplomado
-                                </option>
-                                <option value="Seminario-Taller" {% if evento.tipo=='Seminario-Taller' %}selected{%
-                                    endif %}>Seminario-Taller</option>
+                                <option value="Diplomado" {% if evento.tipo=='Diplomado' %}selected{% endif %}>Diplomado</option>
+                                <option value="Seminario-Taller" {% if evento.tipo=='Seminario-Taller' %}selected{% endif %}>Seminario-Taller</option>
                             </select>
                         </div>
                         <!-- End Col -->
@@ -189,6 +168,7 @@
                         </div>
                         <!-- End Col -->
 
+{% if current_user.rol == 'administrador' or current_user.rol == 'denadoi' %}
                         <div class="sm:col-span-3">
                             <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                 Asistencia controlada
@@ -211,6 +191,7 @@
                             </p>
                         </div>
                         <!-- End Col -->
+{% endif %}
 
                         <div class="sm:col-span-3">
                             <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
@@ -258,7 +239,7 @@
                             </p>
                         </div>
                         <!-- End Col -->
-{% endif    %}
+{% endif %}
 
                         <div class="sm:col-span-3">
                             <label for="carga_horaria"

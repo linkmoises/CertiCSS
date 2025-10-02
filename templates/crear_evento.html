@@ -167,6 +167,7 @@
                         </div>
                         <!-- End Col -->
 
+{% if current_user.rol == 'administrador' or current_user.rol == 'denadoi' %}
                         <div class="sm:col-span-3">
                             <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                 Asistencia controlada
@@ -188,6 +189,7 @@
                             </p>
                         </div>
                         <!-- End Col -->
+{% endif %}
 
                         <div class="sm:col-span-3">
                             <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
@@ -570,6 +572,7 @@
             "CAPPS Torrijos Carter"
         ],
         panamaoeste: [
+            "Coordinación Regional de Docencia - Panamá Oeste",
             "Hospital Hogar de La Esperanza",
             "Policlínica Dr. Santiago Barraza",
             "Policlínica Dr. Blas Gómez Chetro",
@@ -582,18 +585,21 @@
             "CAPPS El Tecal"
         ],
         panamaeste: [
+            "Coordinación Regional de Docencia - Panamá Este",
             "Hospital Regional de Chepo",
             "Hospital Irma de Lourdes Tzanetatos",
             "Policlínica de Cañitas",
         ],
         bocasdeltoro: [
-            "Hospital Regional de Changuinola",
+            "Coordinación Regional de Docencia - Bocas Del Toro",
+            "Hospital Regional Dr. Raúl Dávila Mena",
             "Hospital Regional de Almirante",
             "Hospital de Chiriquí Grande",
             "Policlínica de Guabito",
-            "ULAPS Las Tablas"
+            "ULAPS Juan Aguilar"
         ],
         cocle: [
+            "Coordinación Regional de Docencia - Coclé",
             "Hospital Regional Dr. Rafael Estévez",
             "Policlínica Dr. Manuel De Jesús Rojas",
             "Policlínica San Juan De Dios",
@@ -601,6 +607,7 @@
             "CAPPS La Pintada"
         ],
         colon: [
+            "Coordinación Regional de Docencia - Colón",
             "Complejo Hospitalario Dr. Manuel Amador Guerrero",
             "Policlínica de Nuevo San Juan",
             "Policlínica de Sabanitas",
@@ -608,6 +615,7 @@
             "ULAPS Portobelo"
         ],
         chiriqui: [
+            "Coordinación Regional de Docencia - Chiriquí",
             "Hospital Regional Dr. Rafael Hernández",
             "Hospital Dr. Dionisio Arrocha",
             "Policlínica Dr. Gustavo Adolfo Ross",
@@ -615,17 +623,12 @@
             "Policlínica Dr. Ernesto Perez Balladares",
             "Policlínica de Divalá",
             "ULAPS Nuevo Vedado",
-            "ULAPS Volcán",
-            "ULAPS Dolega",
-            "CAPPS Barú",
-            "CAPPS Jobito",
-            "CAPPS Balsa",
-            "CAPPS Blanco",
-            "CAPPS Caoba",
-            "CAPPS Corredor",
-            "CAPPS Zapatero"
+            "ULAPS Faustino Fonseca",
+            "ULAPS Carlos Alvarado",
+            "CAPPS"
         ],
         herrera: [
+            "Coordinación Regional de Docencia - Herrera",
             "Hospital Dr. Gustavo Nelson Collado",
             "Policlínica Dr. Roberto Ramírez De Diego",
             "CAPPS Los Pozos",
@@ -633,6 +636,7 @@
             "CAPPS Pesé"
         ],
         lossantos: [
+            "Coordinación Regional de Docencia - Los Santos",
             "Policlínica Dr. Miguel Cárdenas Barahona",
             "Policlínica San Juan de Dios",
             "CAPPS Guararé",
@@ -640,6 +644,7 @@
             "CAPPS Macaracas"
         ],
         veraguas: [
+            "Coordinación Regional de Docencia - Veraguas",
             "Hospital Dr. Ezequiel Abadía",
             "Policlínica Dr. Horacio Díaz Gómez",
             "ULAPS Alberto León",
