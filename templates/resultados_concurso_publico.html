@@ -113,7 +113,7 @@
                         2</div>
                     <h3 class="font-bold text-gray-900 text-lg mb-2 name-element" data-name="{{ resultados[1].poster.nombres }} {{ resultados[1].poster.apellidos }}">••••• ••••••</h3>
                     {% if resultados[1].poster.institucion %}
-                    <p class="text-sm text-gray-600 mb-3">{{ resultados[1].poster.institucion }}</p>
+                    <p class="text-sm text-gray-600 mb-3 institution-element" data-institution="{{ resultados[1].poster.institucion }}">••••• •••••• •••••</p>
                     {% endif %}
                     <p class="text-xs text-gray-600 mt-1 title-element" data-title="{{ resultados[1].poster.titulo_poster[:50] }}{% if resultados[1].poster.titulo_poster|length > 50 %}...{% endif %}">••••• •••••• •••••</p>
                     <p class="text-2xl font-bold text-gray-600 mb-2 score-element" data-score="{{ "%.2f"|format(resultados[1].promedio) }}/10">{{ "%.2f"|format(resultados[1].promedio) }}/10</p>
@@ -129,7 +129,7 @@
                         1</div>
                     <h3 class="font-bold text-gray-900 text-xl mb-2 name-element" data-name="{{ resultados[0].poster.nombres }} {{ resultados[0].poster.apellidos }}">••••• ••••••</h3>
                     {% if resultados[0].poster.institucion %}
-                    <p class="text-sm text-gray-700 mb-3 font-medium">{{ resultados[0].poster.institucion }}</p>
+                    <p class="text-sm text-gray-700 mb-3 font-medium institution-element" data-institution="{{ resultados[0].poster.institucion }}">••••• •••••• •••••</p>
                     {% endif %}
                     <p class="text-xs text-gray-600 mt-1 title-element" data-title="{{ resultados[0].poster.titulo_poster[:90] }}{% if resultados[0].poster.titulo_poster|length > 90 %}...{% endif %}">••••• •••••• ••••• •••••• •••••</p>
                     <p class="text-3xl font-bold text-yellow-700 mb-2 score-element" data-score="{{ "%.2f"|format(resultados[0].promedio) }}/10">{{ "%.2f"|format(resultados[0].promedio) }}/10
@@ -146,7 +146,7 @@
                         3</div>
                     <h3 class="font-bold text-gray-900 text-lg mb-2 name-element" data-name="{{ resultados[2].poster.nombres }} {{ resultados[2].poster.apellidos }}">••••• ••••••</h3>
                     {% if resultados[2].poster.institucion %}
-                    <p class="text-sm text-gray-600 mb-3">{{ resultados[2].poster.institucion }}</p>
+                    <p class="text-sm text-gray-600 mb-3 institution-element" data-institution="{{ resultados[2].poster.institucion }}">••••• •••••• •••••</p>
                     {% endif %}
                     <p class="text-xs text-gray-600 mt-1 title-element" data-title="{{ resultados[2].poster.titulo_poster[:40] }}{% if resultados[2].poster.titulo_poster|length > 40 %}...{% endif %}">••••• •••••• •••••</p>
                     <p class="text-2xl font-bold text-orange-600 mb-2 score-element" data-score="{{ "%.2f"|format(resultados[2].promedio) }}/10">{{ "%.2f"|format(resultados[2].promedio) }}/10
@@ -226,7 +226,7 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 <h4 class="font-semibold text-gray-800 text-sm name-element" data-name="{{ resultado.poster.nombres }} {{ resultado.poster.apellidos }}">••••• ••••••</h4>
-                                <span class="text-xs text-gray-600">{{ resultado.poster.institucion or '-' }}</span>
+                                <span class="text-xs text-gray-600 institution-element" data-institution="{{ resultado.poster.institucion or '-' }}">••••• •••••• •••••</span>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-900">
                                 <div class="max-w-xs title-element" data-title="{{ resultado.poster.titulo_poster }}">
@@ -335,6 +335,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const scoreElements = document.querySelectorAll('.score-element');
     const nameElements = document.querySelectorAll('.name-element');
     const workNumberElements = document.querySelectorAll('.work-number-element');
+    const institutionElements = document.querySelectorAll('.institution-element');
     const titleElements = document.querySelectorAll('.title-element');
     
     function toggleScores() {
@@ -370,6 +371,17 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 element.classList.add('score-obfuscated');
                 element.textContent = '••';
+            }
+        });
+        
+        // Toggle institutions
+        institutionElements.forEach(element => {
+            if (showScores) {
+                element.classList.remove('score-obfuscated');
+                element.textContent = element.getAttribute('data-institution');
+            } else {
+                element.classList.add('score-obfuscated');
+                element.textContent = '••••• •••••• •••••';
             }
         });
         
