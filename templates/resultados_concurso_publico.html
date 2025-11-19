@@ -18,6 +18,56 @@
     {% if UMAMI_URL %}
     {{ UMAMI_URL | safe }}
     {% endif %}
+    <style>
+        .score-obfuscated {
+            filter: blur(5px);
+            user-select: none;
+            color: #9ca3af !important;
+            background: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #3b82f6;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+    </style>
 </head>
 
 <body class="bg-gray-50">
@@ -68,7 +118,7 @@
                     {% endif %}
                     <p class="text-sm text-gray-700 mb-4 line-clamp-3">{{ resultados[1].poster.titulo_poster[:80] }}{%
                         if resultados[1].poster.titulo_poster|length > 80 %}...{% endif %}</p>
-                    <p class="text-2xl font-bold text-gray-600 mb-2">{{ "%.2f"|format(resultados[1].promedio) }}/10</p>
+                    <p class="text-2xl font-bold text-gray-600 mb-2 score-element" data-score="{{ "%.2f"|format(resultados[1].promedio) }}/10">{{ "%.2f"|format(resultados[1].promedio) }}/10</p>
                     <p class="text-sm text-gray-500">{{ resultados[1].num_evaluaciones }} evaluaciones</p>
                 </div>
                 {% endif %}
@@ -87,7 +137,7 @@
                     <p class="text-sm text-gray-800 mb-4 line-clamp-3 font-medium">{{
                         resultados[0].poster.titulo_poster[:90] }}{% if resultados[0].poster.titulo_poster|length > 90
                         %}...{% endif %}</p>
-                    <p class="text-3xl font-bold text-yellow-700 mb-2">{{ "%.2f"|format(resultados[0].promedio) }}/10
+                    <p class="text-3xl font-bold text-yellow-700 mb-2 score-element" data-score="{{ "%.2f"|format(resultados[0].promedio) }}/10">{{ "%.2f"|format(resultados[0].promedio) }}/10
                     </p>
                     <p class="text-sm text-gray-600">{{ resultados[0].num_evaluaciones }} evaluaciones</p>
                 </div>
@@ -106,7 +156,7 @@
                     {% endif %}
                     <p class="text-sm text-gray-700 mb-4 line-clamp-3">{{ resultados[2].poster.titulo_poster[:70] }}{%
                         if resultados[2].poster.titulo_poster|length > 70 %}...{% endif %}</p>
-                    <p class="text-2xl font-bold text-orange-600 mb-2">{{ "%.2f"|format(resultados[2].promedio) }}/10
+                    <p class="text-2xl font-bold text-orange-600 mb-2 score-element" data-score="{{ "%.2f"|format(resultados[2].promedio) }}/10">{{ "%.2f"|format(resultados[2].promedio) }}/10
                     </p>
                     <p class="text-sm text-gray-500">{{ resultados[2].num_evaluaciones }} evaluaciones</p>
                 </div>
@@ -118,8 +168,19 @@
         <!-- Tabla Completa de Resultados -->
         <div class="bg-white rounded-xl shadow-lg overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200">
-                <h2 class="text-2xl font-bold text-gray-900">Clasificación Completa</h2>
-                <p class="text-gray-600 mt-1">Todos los participantes ordenados por puntuación</p>
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900 mb-2">Clasificación Completa</h2>
+                        <p class="text-gray-600">Todos los participantes ordenados por puntuación</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <label class="text-sm font-medium text-gray-700">Mostrar puntajes:</label>
+                        <label class="switch">
+                            <input type="checkbox" id="scoreToggle" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
             </div>
 
             <div class="overflow-x-auto">
@@ -181,7 +242,7 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 <span
-                                    class="text-xl font-bold {% if loop.index == 1 %}text-yellow-600{% elif loop.index == 2 %}text-gray-600{% elif loop.index == 3 %}text-orange-600{% else %}text-blue-600{% endif %}">
+                                    class="text-xl font-bold {% if loop.index == 1 %}text-yellow-600{% elif loop.index == 2 %}text-gray-600{% elif loop.index == 3 %}text-orange-600{% else %}text-blue-600{% endif %} score-element" data-score="{{ "%.2f"|format(resultado.promedio) }}/10">
                                     {{ "%.2f"|format(resultado.promedio) }}/10
                                 </span>
                             </td>
@@ -221,12 +282,11 @@
                     <div class="text-sm text-gray-600 font-medium">Trabajos participantes</div>
                 </div>
                 <div class="text-center">
-                    <div class="text-3xl font-bold text-green-600">{{ "%.2f"|format(resultados[0].promedio) }}</div>
+                    <div class="text-3xl font-bold text-green-600 score-element" data-score="{{ "%.2f"|format(resultados[0].promedio) }}">{{ "%.2f"|format(resultados[0].promedio) }}</div>
                     <div class="text-sm text-gray-600 font-medium">Puntuación más alta</div>
                 </div>
                 <div class="text-center">
-                    <div class="text-3xl font-bold text-purple-600">{{ "%.2f"|format(resultados |
-                        sum(attribute='promedio') / resultados|length) }}</div>
+                    <div class="text-3xl font-bold text-purple-600 score-element" data-score="{{ "%.2f"|format(resultados | sum(attribute='promedio') / resultados|length) }}">{{ "%.2f"|format(resultados | sum(attribute='promedio') / resultados|length) }}</div>
                     <div class="text-sm text-gray-600 font-medium">Promedio general</div>
                 </div>
                 <div class="text-center">
@@ -275,5 +335,32 @@
     </footer>
 
 </body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const scoreToggle = document.getElementById('scoreToggle');
+    const scoreElements = document.querySelectorAll('.score-element');
+    
+    function toggleScores() {
+        const showScores = scoreToggle.checked;
+        
+        scoreElements.forEach(element => {
+            if (showScores) {
+                element.classList.remove('score-obfuscated');
+                element.textContent = element.getAttribute('data-score');
+            } else {
+                element.classList.add('score-obfuscated');
+                element.textContent = '•••••';
+            }
+        });
+    }
+    
+    // Initialize state
+    toggleScores();
+    
+    // Add event listener
+    scoreToggle.addEventListener('change', toggleScores);
+});
+</script>
 
 </html>
