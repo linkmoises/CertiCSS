@@ -220,8 +220,8 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
-                                    {{ "%02d"|format(resultado.poster.numero_poster) }}
+                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium work-number-element" data-work-number="{{ "%02d"|format(resultado.poster.numero_poster) }}">
+                                    ••
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -334,6 +334,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const scoreToggle = document.getElementById('scoreToggle');
     const scoreElements = document.querySelectorAll('.score-element');
     const nameElements = document.querySelectorAll('.name-element');
+    const workNumberElements = document.querySelectorAll('.work-number-element');
     const titleElements = document.querySelectorAll('.title-element');
     
     function toggleScores() {
@@ -358,6 +359,17 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 element.classList.add('score-obfuscated');
                 element.textContent = '••••• ••••••';
+            }
+        });
+        
+        // Toggle work numbers
+        workNumberElements.forEach(element => {
+            if (showScores) {
+                element.classList.remove('score-obfuscated');
+                element.textContent = element.getAttribute('data-work-number');
+            } else {
+                element.classList.add('score-obfuscated');
+                element.textContent = '••';
             }
         });
         
