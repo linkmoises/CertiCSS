@@ -3446,12 +3446,48 @@ def eliminar_participante_bd(codigo_evento, id_participante, origen=None):
         participante = None
     
     if participante:
-        collection_participantes.delete_one({'_id': ObjectId(id_participante), 'codigo_evento': codigo_evento})
-        if origen == 'huerfanos':
-            log_event(f"Usuario [{current_user.email}] eliminó participante huérfano {participante.get('nombres', '')} {participante.get('apellidos', '')} del evento inexistente {codigo_evento}.")
+        cedula = participante.get('cedula', '')
+        rol = participante.get('rol', '')
+        
+        # Si es un presentador de póster, eliminar también sus pósters y evaluaciones
+        if rol == 'presentador_poster':
+            # Obtener todos los pósters del participante
+            posters = list(collection_posters.find({
+                "cedula": cedula,
+                "codigo_evento": codigo_evento
+            }))
+            
+            # Eliminar evaluaciones de todos los pósters
+            nanoids_posters = [p['nanoid'] for p in posters]
+            if nanoids_posters:
+                result_evaluaciones = collection_evaluaciones_poster.delete_many({
+                    "codigo_evento": codigo_evento,
+                    "nanoid_poster": {"$in": nanoids_posters}
+                })
+                num_evaluaciones = result_evaluaciones.deleted_count
+            else:
+                num_evaluaciones = 0
+            
+            # Eliminar todos los pósters
+            result_posters = collection_posters.delete_many({
+                "cedula": cedula,
+                "codigo_evento": codigo_evento
+            })
+            num_posters = result_posters.deleted_count
+            
+            if origen == 'huerfanos':
+                log_event(f"Usuario [{current_user.email}] eliminó participante huérfano {participante.get('nombres', '')} {participante.get('apellidos', '')} del evento inexistente {codigo_evento}. Se eliminaron {num_posters} póster(es) y {num_evaluaciones} evaluación(es).")
+            else:
+                log_event(f"Usuario [{current_user.email}] eliminó participante {participante.get('nombres', '')} {participante.get('apellidos', '')} del evento {codigo_evento}. Se eliminaron {num_posters} póster(es) y {num_evaluaciones} evaluación(es).")
+            flash(f'Participante eliminado correctamente. Se eliminaron {num_posters} póster(es) y {num_evaluaciones} evaluación(es).', 'success')
         else:
-            log_event(f"Usuario [{current_user.email}] eliminó participante {participante.get('nombres', '')} {participante.get('apellidos', '')} del evento {codigo_evento}.")
-        flash('Participante eliminado correctamente.', 'success')
+            if origen == 'huerfanos':
+                log_event(f"Usuario [{current_user.email}] eliminó participante huérfano {participante.get('nombres', '')} {participante.get('apellidos', '')} del evento inexistente {codigo_evento}.")
+            else:
+                log_event(f"Usuario [{current_user.email}] eliminó participante {participante.get('nombres', '')} {participante.get('apellidos', '')} del evento {codigo_evento}.")
+            flash('Participante eliminado correctamente.', 'success')
+        
+        collection_participantes.delete_one({'_id': ObjectId(id_participante), 'codigo_evento': codigo_evento})
     else:
         flash('Participante no encontrado.', 'error')
     
@@ -4032,9 +4068,42 @@ def eliminar_participante(nanoid):
     participante = collection_participantes.find_one({"nanoid": nanoid})
 
     if participante:
-        log_event(f"Usuario [{current_user.email}] eliminó al {participante['rol']} {participante['cedula']} del evento {participante['codigo_evento']}.")
+        codigo_evento = participante['codigo_evento']
+        cedula = participante['cedula']
+        rol = participante.get('rol', '')
+        
+        # Si es un presentador de póster, eliminar también sus pósters y evaluaciones
+        if rol == 'presentador_poster':
+            # Obtener todos los pósters del participante
+            posters = list(collection_posters.find({
+                "cedula": cedula,
+                "codigo_evento": codigo_evento
+            }))
+            
+            # Eliminar evaluaciones de todos los pósters
+            nanoids_posters = [p['nanoid'] for p in posters]
+            if nanoids_posters:
+                result_evaluaciones = collection_evaluaciones_poster.delete_many({
+                    "codigo_evento": codigo_evento,
+                    "nanoid_poster": {"$in": nanoids_posters}
+                })
+                num_evaluaciones = result_evaluaciones.deleted_count
+            else:
+                num_evaluaciones = 0
+            
+            # Eliminar todos los pósters
+            result_posters = collection_posters.delete_many({
+                "cedula": cedula,
+                "codigo_evento": codigo_evento
+            })
+            num_posters = result_posters.deleted_count
+            
+            log_event(f"Usuario [{current_user.email}] eliminó al {rol} {cedula} del evento {codigo_evento}. Se eliminaron {num_posters} póster(es) y {num_evaluaciones} evaluación(es).")
+        else:
+            log_event(f"Usuario [{current_user.email}] eliminó al {rol} {cedula} del evento {codigo_evento}.")
+        
         result = collection_participantes.delete_one({"nanoid": nanoid})
-        return redirect(url_for('listar_participantes', codigo_evento=participante['codigo_evento']))
+        return redirect(url_for('listar_participantes', codigo_evento=codigo_evento))
 
     else:
         log_event(f"Usuario [{current_user.email}] intentó eliminar un participante que no existe con nanoid {nanoid}")
