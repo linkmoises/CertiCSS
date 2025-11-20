@@ -91,7 +91,13 @@
                                                 </p>
                                             </td>
                                             <td class="px-6 py-2">
-                                                {% if poster.archivo_poster %}
+                                                {% if poster.archivo_url %}
+                                                <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium"
+                                                    href="{{ url_for('static', filename=poster.archivo_url) }}"
+                                                    target="_blank">
+                                                    Ver Poster
+                                                </a><br />
+                                                {% elif poster.archivo_poster %}
                                                 <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium"
                                                     href="{{ url_for('static', filename='uploads/' + evento.codigo + '/posters/' + poster.archivo_poster) }}"
                                                     target="_blank">

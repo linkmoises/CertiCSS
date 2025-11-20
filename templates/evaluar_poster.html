@@ -34,7 +34,15 @@
                 {% if poster.institucion %}
                 <p><strong>Institución:</strong> {{ poster.institucion }}</p>
                 {% endif %}
-                {% if poster.archivo_poster %}
+                {% if poster.archivo_url %}
+                <p class="mt-2">
+                    <a href="{{ url_for('static', filename=poster.archivo_url) }}" 
+                       target="_blank" 
+                       class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors">
+                        Ver Póster PDF
+                    </a>
+                </p>
+                {% elif poster.archivo_poster %}
                 <p class="mt-2">
                     <a href="{{ url_for('static', filename='uploads/' + evento.codigo + '/posters/' + poster.archivo_poster) }}" 
                        target="_blank" 

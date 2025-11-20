@@ -103,7 +103,13 @@
                         {% endif %}
                         
                         <div class="flex justify-between items-center">
-                            {% if poster.archivo_poster %}
+                            {% if poster.archivo_url %}
+                                <a href="{{ url_for('static', filename=poster.archivo_url) }}" 
+                                   target="_blank" 
+                                   class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                    Ver PDF
+                                </a>
+                            {% elif poster.archivo_poster %}
                                 <a href="{{ url_for('static', filename='uploads/' + evento.codigo + '/posters/' + poster.archivo_poster) }}" 
                                    target="_blank" 
                                    class="text-blue-600 hover:text-blue-800 text-sm font-medium">

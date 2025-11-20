@@ -169,10 +169,17 @@
                                     <span class="text-sm text-green-700">
                                         Archivo actual: {{ poster.archivo_poster }}
                                     </span>
+                                    {% if poster.archivo_url %}
+                                    <a href="{{ url_for('static', filename=poster.archivo_url) }}"
+                                        target="_blank" class="ml-4 text-blue-600 hover:text-blue-800 text-sm">
+                                        Ver archivo
+                                    </a>
+                                    {% elif poster.archivo_poster %}
                                     <a href="{{ url_for('static', filename='uploads/' + evento.codigo + '/posters/' + poster.archivo_poster) }}"
                                         target="_blank" class="ml-4 text-blue-600 hover:text-blue-800 text-sm">
                                         Ver archivo
                                     </a>
+                                    {% endif %}
                                 </div>
                             </div>
                             {% else %}

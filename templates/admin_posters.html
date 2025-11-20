@@ -238,8 +238,8 @@
                                                     </div>
                                                 </td>
                                                 <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
-                                                    {% if poster.archivo_poster %}
-                                                        <a href="{{ url_for('static', filename='uploads/' + poster.archivo_poster) }}" 
+                                                    {% if poster.archivo_url %}
+                                                        <a href="{{ url_for('static', filename=poster.archivo_url) }}" 
                                                            target="_blank" 
                                                            class="text-blue-600 hover:text-blue-800 text-xs">
                                                             Ver archivo

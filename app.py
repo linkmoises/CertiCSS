@@ -925,6 +925,8 @@ def registrar_poster(codigo_evento):
         
         # Si el participante no existe, crearlo
         if not participante_existente:
+            # Generar nanoid para el participante
+            nanoid_participante = generate_nanoid(cedula, codigo_evento, "presentador_poster")
             # Insertar en participantes
             participante_id = collection_participantes.insert_one({
                 'nombres': nombres,
@@ -938,6 +940,7 @@ def registrar_poster(codigo_evento):
                 'region': '',
                 'unidad': '',
                 'codigo_evento': codigo_evento,
+                'nanoid': nanoid_participante,
                 'timestamp': datetime.now()
             }).inserted_id
         else:
@@ -1359,6 +1362,10 @@ def evaluar_posters(codigo_evento):
     evento = collection_eventos.find_one({"codigo": codigo_evento})
     posters = list(collection_posters.find({"codigo_evento": codigo_evento}).sort("numero_poster"))
     
+    # Agregar URL de archivo a cada póster
+    for poster in posters:
+        poster['archivo_url'] = get_poster_file_url(poster.get('archivo_poster'), codigo_evento)
+    
     # Obtener evaluaciones existentes del jurado
     evaluaciones_existentes = {}
     evaluaciones = collection_evaluaciones_poster.find({
@@ -1388,6 +1395,9 @@ def evaluar_poster(codigo_evento, nanoid_poster):
     
     if not poster:
         abort(404)
+    
+    # Agregar URL de archivo al póster
+    poster['archivo_url'] = get_poster_file_url(poster.get('archivo_poster'), codigo_evento)
     
     # Verificar evaluación existente
     evaluacion_existente = collection_evaluaciones_poster.find_one({
@@ -1560,12 +1570,36 @@ def concurso_investigacion_publico(codigo_evento):
     # Obtener los posters del evento
     posters = list(collection_posters.find({"codigo_evento": codigo_evento}).sort("timestamp", -1))
     
+    # Agregar URL de archivo a cada póster
+    for poster in posters:
+        poster['archivo_url'] = get_poster_file_url(poster.get('archivo_poster'), codigo_evento)
+    
     return render_template('concurso_publico.html', evento=evento, posters=posters)
 
 
 ###
 ### Panel administrativo de pósters
 ###
+def get_poster_file_url(archivo_poster, codigo_evento):
+    """Obtiene la URL correcta del archivo del póster, compatible con formatos antiguos y nuevos."""
+    if not archivo_poster:
+        return None
+    
+    # Formato nuevo: posters/{nanoid}_{filename}
+    if archivo_poster.startswith('posters/'):
+        return f"uploads/{archivo_poster}"
+    
+    # Formato antiguo: {codigo_evento}_poster_{numero:02d}.pdf (sin carpeta)
+    # o {codigo_evento}/posters/{codigo_evento}_poster_{numero:02d}.pdf
+    if archivo_poster.startswith(f"{codigo_evento}/"):
+        return f"uploads/{archivo_poster}"
+    elif archivo_poster.startswith(f"{codigo_evento}_poster_"):
+        return f"uploads/{codigo_evento}/posters/{archivo_poster}"
+    else:
+        # Intentar formato antiguo sin prefijo
+        return f"uploads/{codigo_evento}/posters/{archivo_poster}"
+
+
 @app.route('/tablero/posters/<codigo_evento>')
 @login_required
 def admin_posters(codigo_evento):
@@ -1582,6 +1616,10 @@ def admin_posters(codigo_evento):
     posters = list(collection_posters.find(
         {"codigo_evento": codigo_evento}
     ).sort("numero_poster", 1))
+    
+    # Agregar URL de archivo a cada póster para compatibilidad
+    for poster in posters:
+        poster['archivo_url'] = get_poster_file_url(poster.get('archivo_poster'), codigo_evento)
     
     # Obtener todos los jurados
     jurados = list(collection_participantes.find({
@@ -1796,6 +1834,9 @@ def editar_poster_admin(codigo_evento, nanoid_poster):
     if not poster:
         flash('Póster no encontrado.', 'error')
         return redirect(url_for('admin_posters', codigo_evento=codigo_evento))
+    
+    # Agregar URL de archivo al póster
+    poster['archivo_url'] = get_poster_file_url(poster.get('archivo_poster'), codigo_evento)
     
     if request.method == 'POST':
         # Actualizar datos básicos
