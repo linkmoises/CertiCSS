@@ -985,12 +985,14 @@ def registrar_poster(codigo_evento):
                 'estado': 'pendiente'  # pendiente, aprobado, rechazado
             }
             
-            # Guardar el archivo
-            filename = secure_filename(f"{nanoid}_{archivo.filename}")
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], 'posters', filename)
-            os.makedirs(os.path.dirname(filepath), exist_ok=True)
+            # Guardar el archivo con formato original: <codigo_evento>_poster_nn.pdf
+            extension = os.path.splitext(archivo.filename)[1].lower()
+            nombre_archivo = f"{codigo_evento}_poster_{numero_poster:02d}{extension}"
+            carpeta_posters = os.path.join(app.config['UPLOAD_FOLDER'], codigo_evento, 'posters')
+            os.makedirs(carpeta_posters, exist_ok=True)
+            filepath = os.path.join(carpeta_posters, nombre_archivo)
             archivo.save(filepath)
-            poster_data['archivo_poster'] = f"posters/{filename}"
+            poster_data['archivo_poster'] = nombre_archivo
             
             # Insertar el póster
             collection_posters.insert_one(poster_data)
@@ -1111,12 +1113,11 @@ def editar_poster(codigo_evento):
             # Generar nanoid único para el nuevo póster
             nanoid = generate_nanoid(cedula, codigo_evento, f"{titulo_poster}_{len(todos_posters)}")
             
-            # Crear carpeta de posters si no existe
-            carpeta_posters = os.path.join(app.config['UPLOAD_FOLDER'], 'posters')
+            # Guardar el archivo con formato original: <codigo_evento>_poster_nn.pdf
+            extension = os.path.splitext(poster_file.filename)[1].lower()
+            nombre_archivo = f"{codigo_evento}_poster_{numero_poster:02d}{extension}"
+            carpeta_posters = os.path.join(app.config['UPLOAD_FOLDER'], codigo_evento, 'posters')
             os.makedirs(carpeta_posters, exist_ok=True)
-            
-            # Nombre del archivo usando nanoid
-            nombre_archivo = secure_filename(f"{nanoid}_{poster_file.filename}")
             ruta_archivo = os.path.join(carpeta_posters, nombre_archivo)
             
             # Guardar archivo
@@ -1139,7 +1140,7 @@ def editar_poster(codigo_evento):
                 'codigo_evento': codigo_evento,
                 'nanoid': nanoid,
                 'numero_poster': numero_poster,
-                'archivo_poster': f"posters/{nombre_archivo}",
+                'archivo_poster': nombre_archivo,
                 'timestamp': datetime.now(),
                 'estado': 'pendiente'
             }
@@ -1193,17 +1194,16 @@ def editar_poster(codigo_evento):
                     flash('Solo se permiten archivos PDF, JPG, JPEG o PNG.', 'error')
                     return render_template('editar_poster.html', evento=evento, poster=poster_editar, todos_posters=todos_posters)
                 
-                # Crear carpeta de posters si no existe
-                carpeta_posters = os.path.join(app.config['UPLOAD_FOLDER'], 'posters')
+                # Guardar el archivo con formato original: <codigo_evento>_poster_nn.pdf
+                extension = os.path.splitext(poster_file.filename)[1].lower()
+                nombre_archivo = f"{codigo_evento}_poster_{poster_editar['numero_poster']:02d}{extension}"
+                carpeta_posters = os.path.join(app.config['UPLOAD_FOLDER'], codigo_evento, 'posters')
                 os.makedirs(carpeta_posters, exist_ok=True)
-                
-                # Nombre del archivo usando nanoid para evitar conflictos
-                nombre_archivo = secure_filename(f"{poster_editar['nanoid']}_{poster_file.filename}")
                 ruta_archivo = os.path.join(carpeta_posters, nombre_archivo)
                 
                 # Guardar archivo
                 poster_file.save(ruta_archivo)
-                update_data['archivo_poster'] = f"posters/{nombre_archivo}"
+                update_data['archivo_poster'] = nombre_archivo
                 
                 flash('Póster actualizado exitosamente.', 'success')
             
@@ -1585,19 +1585,21 @@ def get_poster_file_url(archivo_poster, codigo_evento):
     if not archivo_poster:
         return None
     
-    # Formato nuevo: posters/{nanoid}_{filename}
+    # Formato nuevo (temporal): posters/{nanoid}_{filename}
     if archivo_poster.startswith('posters/'):
         return f"uploads/{archivo_poster}"
     
-    # Formato antiguo: {codigo_evento}_poster_{numero:02d}.pdf (sin carpeta)
-    # o {codigo_evento}/posters/{codigo_evento}_poster_{numero:02d}.pdf
+    # Formato original: {codigo_evento}_poster_{numero:02d}.pdf
+    # Se guarda en: uploads/{codigo_evento}/posters/{codigo_evento}_poster_{numero:02d}.pdf
+    if archivo_poster.startswith(f"{codigo_evento}_poster_"):
+        return f"uploads/{codigo_evento}/posters/{archivo_poster}"
+    
+    # Formato con carpeta completa: {codigo_evento}/posters/{codigo_evento}_poster_{numero:02d}.pdf
     if archivo_poster.startswith(f"{codigo_evento}/"):
         return f"uploads/{archivo_poster}"
-    elif archivo_poster.startswith(f"{codigo_evento}_poster_"):
-        return f"uploads/{codigo_evento}/posters/{archivo_poster}"
-    else:
-        # Intentar formato antiguo sin prefijo
-        return f"uploads/{codigo_evento}/posters/{archivo_poster}"
+    
+    # Si no coincide con ningún formato conocido, intentar formato original
+    return f"uploads/{codigo_evento}/posters/{archivo_poster}"
 
 
 @app.route('/tablero/posters/<codigo_evento>')
