@@ -239,10 +239,10 @@
                                                 </td>
                                                 <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
                                                     {% if poster.archivo_poster %}
-                                                        <a href="{{ url_for('static', filename='uploads/' + evento.codigo + '/posters/' + poster.archivo_poster) }}" 
+                                                        <a href="{{ url_for('static', filename='uploads/' + poster.archivo_poster) }}" 
                                                            target="_blank" 
                                                            class="text-blue-600 hover:text-blue-800 text-xs">
-                                                            Ver PDF
+                                                            Ver archivo
                                                         </a>
                                                     {% else %}
                                                         <span class="text-gray-400 text-xs">Sin archivo</span>

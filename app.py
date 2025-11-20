@@ -1573,31 +1573,51 @@ def admin_posters(codigo_evento):
     if not evento:
         abort(404)
     
-    # Obtener todos los pósters agrupados por participante
+    # Verificar que el concurso de póster esté habilitado
+    if not evento.get('concurso_poster', False):
+        flash('El concurso de póster no está habilitado para este evento.', 'error')
+        return redirect(url_for('listar_participantes', codigo_evento=codigo_evento))
+    
+    # Obtener todos los pósters ordenados por número
     posters = list(collection_posters.find(
         {"codigo_evento": codigo_evento}
-    ).sort([("apellidos", 1), ("nombres", 1), ("titulo_poster", 1)]))
+    ).sort("numero_poster", 1))
     
-    # Agrupar por participante
-    participantes = {}
+    # Obtener todos los jurados
+    jurados = list(collection_participantes.find({
+        "codigo_evento": codigo_evento,
+        "rol": "jurado_poster"
+    }).sort([("apellidos", 1), ("nombres", 1)]))
+    
+    # Obtener todas las evaluaciones
+    evaluaciones = list(collection_evaluaciones_poster.find({
+        "codigo_evento": codigo_evento
+    }))
+    
+    # Agrupar evaluaciones por póster
+    evaluaciones_por_poster = {}
+    for eval in evaluaciones:
+        nanoid = eval['nanoid_poster']
+        if nanoid not in evaluaciones_por_poster:
+            evaluaciones_por_poster[nanoid] = []
+        evaluaciones_por_poster[nanoid].append(eval)
+    
+    # Calcular promedios por póster
+    promedios_poster = {}
     for poster in posters:
-        cedula = poster['cedula']
-        if cedula not in participantes:
-            participantes[cedula] = {
-                'nombres': poster['nombres'],
-                'apellidos': poster['apellidos'],
-                'email': poster['email'],
-                'institucion': poster.get('institucion', ''),
-                'posters': []
-            }
-        participantes[cedula]['posters'].append(poster)
-    
-    # Ordenar por apellidos
-    participantes_ordenados = sorted(participantes.values(), key=lambda x: (x['apellidos'], x['nombres']))
+        nanoid = poster['nanoid']
+        if nanoid in evaluaciones_por_poster:
+            evaluaciones_poster = evaluaciones_por_poster[nanoid]
+            if evaluaciones_poster:
+                promedio = sum(e['puntuacion_final'] for e in evaluaciones_poster) / len(evaluaciones_poster)
+                promedios_poster[nanoid] = promedio
     
     return render_template('admin_posters.html', 
                          evento=evento,
-                         participantes=participantes_ordenados)
+                         posters=posters,
+                         jurados=jurados,
+                         evaluaciones_por_poster=evaluaciones_por_poster,
+                         promedios_poster=promedios_poster)
 
 
 ###
