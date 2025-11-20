@@ -64,7 +64,11 @@
                                     <div class="text-center mb-6">
                                         <h1 class="text-lg font-bold text-gray-800 mb-2">Concurso de Trabajos de Investigación</h1>
                                         <h3 class="text-sm text-gray-600">{{ evento.nombre }}</h3>
-                                        <p class="text-sm text-gray-500">Editar - Póster #{{ "%02d"|format(poster.numero_poster) }}</p>
+                                        {% if todos_posters|length > 1 %}
+                                            <p class="text-sm text-gray-500">Tienes {{ todos_posters|length }} pósters registrados</p>
+                                        {% else %}
+                                            <p class="text-sm text-gray-500">Editar Póster</p>
+                                        {% endif %}
                                     </div>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
@@ -77,51 +81,74 @@
     {% endif %}
 {% endwith %}
 
-                                    <form method="POST" enctype="multipart/form-data" class="space-y-4">
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <label for="nombres" class="block text-sm font-medium text-gray-700 mb-1">Nombres *</label>
-                                                <input type="text" id="nombres" name="nombres" value="{{ poster.nombres }}" required 
-                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                            </div>
-                                            <div>
-                                                <label for="apellidos" class="block text-sm font-medium text-gray-700 mb-1">Apellidos *</label>
-                                                <input type="text" id="apellidos" name="apellidos" value="{{ poster.apellidos }}" required 
-                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                            </div>
+                                    {% if todos_posters|length > 1 %}
+                                    <!-- Pestañas para múltiples pósters -->
+                                    <div class="mb-4 border-b border-gray-200">
+                                        <nav class="-mb-px flex space-x-4 overflow-x-auto" aria-label="Tabs">
+                                            {% for p in todos_posters %}
+                                            <button type="button" onclick="switchPoster('{{ p.nanoid }}')" 
+                                                    class="poster-tab whitespace-nowrap py-2 px-4 border-b-2 font-medium text-sm {% if p.nanoid == poster.nanoid %}border-blue-500 text-blue-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %}">
+                                                Póster #{{ "%02d"|format(p.numero_poster) }}
+                                            </button>
+                                            {% endfor %}
+                                        </nav>
+                                    </div>
+                                    {% endif %}
+
+                                    <!-- Formularios para cada póster -->
+                                    {% for p in todos_posters %}
+                                    <form method="POST" enctype="multipart/form-data" class="space-y-4 poster-form {% if p.nanoid != poster.nanoid %}hidden{% endif %}" data-nanoid="{{ p.nanoid }}">
+                                        <input type="hidden" name="nanoid_poster" value="{{ p.nanoid }}">
+                                        
+                                        <div class="mb-4 pb-4 border-b border-gray-200">
+                                            <h3 class="text-md font-semibold text-gray-800">Póster #{{ "%02d"|format(p.numero_poster) }}</h3>
                                         </div>
 
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
-                                                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                                                <input type="email" id="email" name="email" value="{{ poster.email }}" required 
+                                                <label for="nombres_{{ p.nanoid }}" class="block text-sm font-medium text-gray-700 mb-1">Nombres *</label>
+                                                <input type="text" id="nombres_{{ p.nanoid }}" name="nombres" value="{{ p.nombres }}" required 
                                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                             </div>
                                             <div>
-                                                <label for="telefono" class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-                                                <input type="tel" id="telefono" name="telefono" value="{{ poster.telefono or '' }}" 
+                                                <label for="apellidos_{{ p.nanoid }}" class="block text-sm font-medium text-gray-700 mb-1">Apellidos *</label>
+                                                <input type="text" id="apellidos_{{ p.nanoid }}" name="apellidos" value="{{ p.apellidos }}" required 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label for="email_{{ p.nanoid }}" class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                                                <input type="email" id="email_{{ p.nanoid }}" name="email" value="{{ p.email }}" required 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            </div>
+                                            <div>
+                                                <label for="telefono_{{ p.nanoid }}" class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                                                <input type="tel" id="telefono_{{ p.nanoid }}" name="telefono" value="{{ p.telefono or '' }}" 
                                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                             </div>
                                         </div>
 
                                         <div>
-                                            <label for="institucion" class="block text-sm font-medium text-gray-700 mb-1">Institución</label>
-                                            <input type="text" id="institucion" name="institucion" value="{{ poster.institucion or '' }}" 
+                                            <label for="institucion_{{ p.nanoid }}" class="block text-sm font-medium text-gray-700 mb-1">Institución</label>
+                                            <input type="text" id="institucion_{{ p.nanoid }}" name="institucion" value="{{ p.institucion or '' }}" 
                                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                         </div>
 
                                         <div>
-                                            <label for="titulo_poster" class="block text-sm font-medium text-gray-700 mb-1">Título del Póster *</label>
-                                            <textarea id="titulo_poster" name="titulo_poster" rows="2" required 
-                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">{{ poster.titulo_poster }}</textarea>
+                                            <label for="titulo_poster_{{ p.nanoid }}" class="block text-sm font-medium text-gray-700 mb-1">Título del Póster *</label>
+                                            <textarea id="titulo_poster_{{ p.nanoid }}" name="titulo_poster" rows="2" required 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">{{ p.titulo_poster }}</textarea>
                                         </div>
 
                                         <div>
-                                            <label for="poster_file" class="block text-sm font-medium text-gray-700 mb-1">Archivo del Póster (PDF)</label>
-                                            <input type="file" id="poster_file" name="poster_file" accept=".pdf" 
-                                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                            {% if poster.archivo_poster %}
-                                                <p class="text-sm text-green-600 mt-1">✓ Archivo actual: {{ poster.archivo_poster }}</p>
+                                            <label for="poster_file_{{ p.nanoid }}" class="block text-sm font-medium text-gray-700 mb-1">Archivo del Póster (PDF, JPG, PNG)</label>
+                                            <input type="file" id="poster_file_{{ p.nanoid }}" name="poster_file" accept=".pdf,.jpg,.jpeg,.png" 
+                                                class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none">
+                                            {% if p.archivo_poster %}
+                                                <p class="text-sm text-green-600 mt-1">✓ Archivo actual: {{ p.archivo_poster.split('/')[-1] }}</p>
+                                                <a href="{{ url_for('static', filename='uploads/' + p.archivo_poster) }}" target="_blank" class="text-xs text-blue-600 hover:underline">Ver archivo actual</a>
                                             {% else %}
                                                 <p class="text-sm text-gray-500 mt-1">No hay archivo subido aún</p>
                                             {% endif %}
@@ -130,17 +157,18 @@
                                         <div class="bg-yellow-50 p-4 rounded-md">
                                             <h3 class="font-semibold text-yellow-800 mb-2">Instrucciones:</h3>
                                             <ul class="text-sm text-yellow-700 space-y-1">
-                                                <li>• Solo se permiten archivos en formato PDF</li>
+                                                <li>• Se permiten archivos en formato PDF, JPG, JPEG o PNG</li>
                                                 <li>• Tamaño máximo recomendado: 10MB</li>
-                                                <li>• El archivo se guardará como: {{ evento.codigo }}_poster_{{ "%02d"|format(poster.numero_poster) }}.pdf</li>
+                                                <li>• Solo suba un nuevo archivo si desea reemplazar el actual</li>
                                             </ul>
                                         </div>
 
                                         <button type="submit" 
                                                 class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
-                                            Actualizar Póster
+                                            Actualizar Póster #{{ "%02d"|format(p.numero_poster) }}
                                         </button>
                                     </form>
+                                    {% endfor %}
 
                                     <div class="mt-6 flex justify-between gap-x-4">
                                         <a href="{{ url_for('ver_calificaciones', codigo_evento=evento.codigo) }}" class="w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
@@ -173,6 +201,62 @@
     </footer>
 
 <script>
+// Función para cambiar entre pósters
+function switchPoster(nanoid) {
+    // Ocultar todos los formularios
+    document.querySelectorAll('.poster-form').forEach(form => {
+        form.classList.add('hidden');
+    });
+    
+    // Mostrar el formulario del póster seleccionado
+    const formToShow = document.querySelector(`.poster-form[data-nanoid="${nanoid}"]`);
+    if (formToShow) {
+        formToShow.classList.remove('hidden');
+    }
+    
+    // Actualizar las pestañas activas
+    document.querySelectorAll('.poster-tab').forEach(tab => {
+        tab.classList.remove('border-blue-500', 'text-blue-600');
+        tab.classList.add('border-transparent', 'text-gray-500');
+    });
+    
+    // Activar la pestaña correspondiente
+    const activeTab = event.target;
+    if (activeTab) {
+        activeTab.classList.remove('border-transparent', 'text-gray-500');
+        activeTab.classList.add('border-blue-500', 'text-blue-600');
+    }
+    
+    // Scroll suave al formulario
+    if (formToShow) {
+        formToShow.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+// Validar archivos antes de enviar
+document.querySelectorAll('.poster-form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        const fileInput = this.querySelector('input[type="file"]');
+        if (fileInput && fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            const fileSize = file.size / 1024 / 1024; // en MB
+            const validTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+            
+            if (!validTypes.includes(file.type)) {
+                e.preventDefault();
+                alert('Solo se permiten archivos PDF, JPG, JPEG o PNG.');
+                return false;
+            }
+            
+            if (fileSize > 10) {
+                e.preventDefault();
+                alert('El archivo es demasiado grande. El tamaño máximo permitido es 10MB.');
+                return false;
+            }
+        }
+    });
+});
+
 function validarCedula(input) {
     const cedula = input.value.trim();
     input.value = cedula;
@@ -188,11 +272,15 @@ function validarCedula(input) {
     if (esValido) {
         input.classList.remove('border-red-500');
         input.classList.add('border-gray-200');
-        errorMessage.classList.add('hidden');
+        if (errorMessage) {
+            errorMessage.classList.add('hidden');
+        }
     } else {
         input.classList.remove('border-gray-200');
         input.classList.add('border-red-500');
-        errorMessage.classList.remove('hidden');
+        if (errorMessage) {
+            errorMessage.classList.remove('hidden');
+        }
     }
 }
 </script>
