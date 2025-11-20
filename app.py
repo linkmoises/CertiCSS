@@ -897,67 +897,111 @@ def registrar_poster(codigo_evento):
         email = request.form.get('email', '').strip()
         telefono = request.form.get('telefono', '').strip()
         institucion = request.form.get('institucion', '').strip()
-        titulo_poster = request.form.get('titulo_poster', '').strip()
+        # Obtener múltiples títulos de pósters
+        titulos_posters = [t.strip() for t in request.form.getlist('titulo_poster[]') if t.strip()]
+        # Obtener múltiples archivos de pósters
+        archivos_posters = request.files.getlist('archivo_poster[]')
         passphrase = request.form.get('passphrase', '').strip()
         
         # Validaciones básicas
-        if not all([nombres, apellidos, cedula, email, titulo_poster, passphrase]):
-            flash('Todos los campos son obligatorios.', 'error')
+        if not all([nombres, apellidos, cedula, email, passphrase]):
+            flash('Todos los campos obligatorios deben ser completados.', 'error')
             return render_template('registrar_poster.html', evento=evento)
         
-        # Verificar si ya existe un póster con la misma cédula y evento
-        poster_existente = collection_posters.find_one({
+        if not titulos_posters:
+            flash('Debe registrar al menos un póster con título.', 'error')
+            return render_template('registrar_poster.html', evento=evento)
+        
+        if len(archivos_posters) != len(titulos_posters):
+            flash('Cada póster debe tener un título y un archivo asociado.', 'error')
+            return render_template('registrar_poster.html', evento=evento)
+        
+        # Verificar si el participante ya existe
+        participante_existente = collection_participantes.find_one({
             "cedula": cedula,
-            "codigo_evento": codigo_evento
+            "codigo_evento": codigo_evento,
+            "rol": "presentador_poster"
         })
         
-        if poster_existente:
-            flash('Ya existe un registro de póster para esta cédula en este evento.', 'error')
-            return render_template('registrar_poster.html', evento=evento)
-        
-        # Generar nanoid y número de póster
-        nanoid = generate_nanoid(cedula, codigo_evento, titulo_poster)
+        # Si el participante no existe, crearlo
+        if not participante_existente:
+            # Insertar en participantes
+            participante_id = collection_participantes.insert_one({
+                'nombres': nombres,
+                'apellidos': apellidos,
+                'cedula': cedula,
+                'email': email,
+                'telefono': telefono,
+                'institucion': institucion,
+                'rol': 'presentador_poster',
+                'perfil': institucion,
+                'region': '',
+                'unidad': '',
+                'codigo_evento': codigo_evento,
+                'timestamp': datetime.now()
+            }).inserted_id
+        else:
+            # Usar el ID del participante existente
+            participante_id = participante_existente['_id']
         
         # Contar pósters existentes para generar número progresivo
         count_posters = collection_posters.count_documents({"codigo_evento": codigo_evento})
-        numero_poster = count_posters + 1
         
-        # Insertar en la colección de pósters
-        collection_posters.insert_one({
-            'nombres': nombres,
-            'apellidos': apellidos,
-            'cedula': cedula,
-            'email': email,
-            'telefono': telefono,
-            'institucion': institucion,
-            'titulo_poster': titulo_poster,
-            'passphrase': generate_password_hash(passphrase),
-            'codigo_evento': codigo_evento,
-            'nanoid': nanoid,
-            'numero_poster': numero_poster,
-            'archivo_poster': None,
-            'timestamp': datetime.now(),
-            'rol': 'presentador_poster'
-        })
+        # Procesar cada póster
+        posters_registrados = 0
+        for idx, (titulo_poster, archivo) in enumerate(zip(titulos_posters, archivos_posters)):
+            # Validar que el archivo existe y es válido
+            if not archivo or not archivo.filename:
+                flash(f'El póster "{titulo_poster}" no tiene un archivo asociado.', 'error')
+                continue
+            
+            if not allowed_file(archivo.filename):
+                flash(f'El archivo del póster "{titulo_poster}" no tiene un formato válido.', 'error')
+                continue
+            
+            # Generar nanoid único para cada póster
+            nanoid = generate_nanoid(cedula, codigo_evento, f"{titulo_poster}_{idx}")
+            numero_poster = count_posters + idx + 1
+            
+            # Preparar datos del póster
+            poster_data = {
+                'participante_id': participante_id,
+                'nombres': nombres,
+                'apellidos': apellidos,
+                'cedula': cedula,
+                'email': email,
+                'telefono': telefono,
+                'institucion': institucion,
+                'titulo_poster': titulo_poster,
+                'passphrase': generate_password_hash(passphrase),
+                'codigo_evento': codigo_evento,
+                'nanoid': nanoid,
+                'numero_poster': numero_poster,
+                'archivo_poster': None,
+                'timestamp': datetime.now(),
+                'estado': 'pendiente'  # pendiente, aprobado, rechazado
+            }
+            
+            # Guardar el archivo
+            filename = secure_filename(f"{nanoid}_{archivo.filename}")
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], 'posters', filename)
+            os.makedirs(os.path.dirname(filepath), exist_ok=True)
+            archivo.save(filepath)
+            poster_data['archivo_poster'] = f"posters/{filename}"
+            
+            # Insertar el póster
+            collection_posters.insert_one(poster_data)
+            posters_registrados += 1
         
-        # También registrar en participantes
-        collection_participantes.insert_one({
-            'nombres': nombres,
-            'apellidos': apellidos,
-            'cedula': cedula,
-            'rol': 'presentador_poster',
-            'perfil': institucion,
-            'region': '',
-            'unidad': '',
-            'codigo_evento': codigo_evento,
-            'nanoid': nanoid,
-            'timestamp': datetime.now(),
-            'indice_registro': datetime.now().strftime('%Y%m%d'),
-            'tipo_evento': evento.get('modalidad', 'Virtual')
-        })
-        
-        flash(f'Registro exitoso. Su número de póster es: {numero_poster:02d}. Guarde su passphrase para futuras ediciones.', 'success')
-        return redirect(url_for('registrar_poster', codigo_evento=codigo_evento))
+        if posters_registrados > 0:
+            if posters_registrados == 1:
+                flash('¡Póster registrado exitosamente!', 'success')
+            else:
+                flash(f'¡{posters_registrados} pósters registrados exitosamente!', 'success')
+            return redirect(url_for('poster_login', codigo_evento=codigo_evento))
+        else:
+            flash('No se pudo registrar ningún póster. Por favor, verifique los archivos.', 'error')
+            return render_template('registrar_poster.html', evento=evento)
     
     return render_template('registrar_poster.html', evento=evento)
 
@@ -1409,43 +1453,31 @@ def admin_posters(codigo_evento):
     if not evento:
         abort(404)
     
-    # Verificar que el concurso de póster esté habilitado
-    if not evento.get('concurso_poster', False):
-        flash('El concurso de póster no está habilitado para este evento.', 'error')
-        return redirect(url_for('listar_participantes', codigo_evento=codigo_evento))
+    # Obtener todos los pósters agrupados por participante
+    posters = list(collection_posters.find(
+        {"codigo_evento": codigo_evento}
+    ).sort([("apellidos", 1), ("nombres", 1), ("titulo_poster", 1)]))
     
-    # Obtener todos los pósters del evento
-    posters = list(collection_posters.find({"codigo_evento": codigo_evento}).sort("numero_poster"))
+    # Agrupar por participante
+    participantes = {}
+    for poster in posters:
+        cedula = poster['cedula']
+        if cedula not in participantes:
+            participantes[cedula] = {
+                'nombres': poster['nombres'],
+                'apellidos': poster['apellidos'],
+                'email': poster['email'],
+                'institucion': poster.get('institucion', ''),
+                'posters': []
+            }
+        participantes[cedula]['posters'].append(poster)
     
-    # Obtener todas las evaluaciones
-    evaluaciones = list(collection_evaluaciones_poster.find({"codigo_evento": codigo_evento}))
-    
-    # Organizar evaluaciones por póster
-    evaluaciones_por_poster = {}
-    for eval in evaluaciones:
-        if eval['nanoid_poster'] not in evaluaciones_por_poster:
-            evaluaciones_por_poster[eval['nanoid_poster']] = []
-        evaluaciones_por_poster[eval['nanoid_poster']].append(eval)
-    
-    # Calcular promedios
-    promedios_poster = {}
-    for nanoid, evals in evaluaciones_por_poster.items():
-        if evals:
-            promedio = sum(e['puntuacion_final'] for e in evals) / len(evals)
-            promedios_poster[nanoid] = promedio
-    
-    # Obtener jurados
-    jurados = list(collection_participantes.find({
-        "codigo_evento": codigo_evento,
-        "rol": "jurado_poster"
-    }))
+    # Ordenar por apellidos
+    participantes_ordenados = sorted(participantes.values(), key=lambda x: (x['apellidos'], x['nombres']))
     
     return render_template('admin_posters.html', 
-                         evento=evento, 
-                         posters=posters, 
-                         evaluaciones_por_poster=evaluaciones_por_poster,
-                         promedios_poster=promedios_poster,
-                         jurados=jurados)
+                         evento=evento,
+                         participantes=participantes_ordenados)
 
 
 ###

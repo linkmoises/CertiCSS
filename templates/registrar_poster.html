@@ -76,7 +76,7 @@
     {% endif %}
 {% endwith %}
 
-                                    <form method="POST" class="space-y-4">
+                                    <form method="POST" enctype="multipart/form-data" class="space-y-4">
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
                                                 <label for="nombres" class="block text-sm font-medium text-gray-700 mb-1">Nombres *</label>
@@ -116,23 +116,62 @@
                                             </div>
                                         </div>
 
-                                        <div>
-                                            <label for="titulo_poster" class="block text-sm font-medium text-gray-700 mb-1">Título del Póster / Caso Clínico / Trabajo de Investigación *</label>
-                                            <textarea id="titulo_poster" name="titulo_poster" rows="2" required 
-                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                                        <div id="poster-container">
+                                            <div class="poster-entry border p-4 rounded-lg mb-4 bg-gray-50">
+                                                <div class="flex justify-between items-center mb-2">
+                                                    <h4 class="font-medium text-gray-700">Póster #<span class="poster-number">1</span></h4>
+                                                    <button type="button" class="remove-poster text-red-600 hover:text-red-800 text-sm font-medium hidden">
+                                                        Eliminar
+                                                    </button>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="titulo_poster_1" class="block text-sm font-medium text-gray-700 mb-1">Título del Póster *</label>
+                                                    <input type="text" id="titulo_poster_1" name="titulo_poster[]" required 
+                                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                </div>
+                                                <div>
+                                                    <label for="archivo_poster_1" class="block text-sm font-medium text-gray-700 mb-1">Archivo del Póster (PDF, JPG, PNG) *</label>
+                                                    <input type="file" id="archivo_poster_1" name="archivo_poster[]" accept=".pdf,.jpg,.jpeg,.png" required
+                                                        class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none">
+                                                    <p class="mt-1 text-xs text-gray-500">Suba su póster en formato PDF o imagen (máx. 10MB)</p>
+                                                </div>
+                                            </div>
                                         </div>
-
-                                        <div>
-                                            <label for="passphrase" class="block text-sm font-medium text-gray-700 mb-1">Contraseña *</label>
-                                            <input type="password" id="passphrase" name="passphrase" required 
-                                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                            <p class="text-sm text-gray-500 mt-1">Cree una contraseñá segura para proteger su póster. La necesitará para futuras ediciones.</p>
-                                        </div>
-
-                                        <button type="submit" 
-                                                class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
-                                            Registrar Póster
+                                        <button type="button" id="add-another" class="mt-2 text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                            </svg>
+                                            Añadir otro póster
                                         </button>
+
+                                        <div class="mt-4">
+                                            <label for="passphrase" class="block text-sm font-medium text-gray-700 mb-1">Contraseña *</label>
+                                            <div class="relative">
+                                                <input type="password" id="passphrase" name="passphrase" required 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10">
+                                                <button type="button" onclick="togglePassword('passphrase')" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                                    <svg class="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            <p class="text-sm text-gray-500 mt-1">Cree una contraseña segura. La necesitará para acceder a sus pósters.</p>
+                                            <div class="mt-2">
+                                                <div class="flex items-center">
+                                                    <div id="strength-meter" class="h-2 rounded-full bg-gray-200 flex-1 mr-2"></div>
+                                                    <span id="strength-text" class="text-xs font-medium"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-6">
+                                            <button type="submit" 
+                                                    class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 flex items-center justify-center">
+                                                <span>Registrar Póster</span>
+                                                <span id="poster-count" class="ml-2 bg-blue-700 text-white text-xs font-semibold px-2 py-1 rounded-full">1</span>
+                                            </button>
+                                        </div>
                                     </form>
 
                                     <div class="mt-6 text-center">
@@ -162,6 +201,194 @@
     </footer>
 
 <script>
+// Contador de pósters
+let posterCount = 1;
+
+// Añadir nuevo formulario de póster
+document.getElementById('add-another').addEventListener('click', function() {
+    posterCount++;
+    const container = document.getElementById('poster-container');
+    const newPoster = document.querySelector('.poster-entry').cloneNode(true);
+    
+    // Actualizar números y limpiar valores
+    newPoster.querySelector('.poster-number').textContent = posterCount;
+    const titleInput = newPoster.querySelector('input[type="text"]');
+    const fileInput = newPoster.querySelector('input[type="file"]');
+    
+    // Actualizar IDs y names
+    titleInput.id = `titulo_poster_${posterCount}`;
+    titleInput.name = 'titulo_poster[]';
+    titleInput.value = '';
+    
+    fileInput.id = `archivo_poster_${posterCount}`;
+    fileInput.name = 'archivo_poster[]';
+    fileInput.value = '';
+    
+    // Mostrar botón de eliminar
+    newPoster.querySelector('.remove-poster').classList.remove('hidden');
+    
+    container.appendChild(newPoster);
+    
+    // Actualizar contador en el botón de enviar
+    document.getElementById('poster-count').textContent = posterCount;
+    
+    // Desplazarse al nuevo formulario
+    newPoster.scrollIntoView({ behavior: 'smooth' });
+});
+
+// Eliminar póster
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('remove-poster')) {
+        if (posterCount > 1) {
+            const posterToRemove = e.target.closest('.poster-entry');
+            posterToRemove.remove();
+            posterCount--;
+            
+            // Renumerar los pósters restantes
+            const posters = document.querySelectorAll('.poster-entry');
+            posters.forEach((poster, index) => {
+                const num = index + 1;
+                poster.querySelector('.poster-number').textContent = num;
+                poster.querySelector('input[type="text"]').id = `titulo_poster_${num}`;
+                poster.querySelector('input[type="file"]').id = `archivo_poster_${num}`;
+                
+                // Ocultar botón de eliminar si solo queda un póster
+                if (posters.length === 1) {
+                    poster.querySelector('.remove-poster').classList.add('hidden');
+                } else {
+                    poster.querySelector('.remove-poster').classList.remove('hidden');
+                }
+            });
+            
+            // Actualizar contador en el botón de enviar
+            document.getElementById('poster-count').textContent = posterCount;
+        }
+    }
+});
+
+// Validar formulario antes de enviar
+document.querySelector('form').addEventListener('submit', function(e) {
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+    let valid = true;
+    
+    fileInputs.forEach((input, index) => {
+        if (!input.files || !input.files[0]) {
+            valid = false;
+            input.classList.add('border-red-500');
+            const errorMsg = input.parentElement.querySelector('.file-error');
+            if (!errorMsg) {
+                const errorElement = document.createElement('p');
+                errorElement.className = 'mt-1 text-xs text-red-600 file-error';
+                errorElement.textContent = 'Por favor, seleccione un archivo para este póster.';
+                input.parentElement.appendChild(errorElement);
+            }
+        } else {
+            const file = input.files[0];
+            const fileSize = file.size / 1024 / 1024; // in MB
+            const fileType = file.type;
+            const validTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+            
+            input.classList.remove('border-red-500');
+            const errorMsg = input.parentElement.querySelector('.file-error');
+            if (errorMsg) errorMsg.remove();
+            
+            if (!validTypes.includes(fileType)) {
+                valid = false;
+                input.classList.add('border-red-500');
+                const errorElement = document.createElement('p');
+                errorElement.className = 'mt-1 text-xs text-red-600';
+                errorElement.textContent = 'Formato de archivo no válido. Solo se permiten PDF, JPG y PNG.';
+                input.parentElement.appendChild(errorElement);
+            } else if (fileSize > 10) {
+                valid = false;
+                input.classList.add('border-red-500');
+                const errorElement = document.createElement('p');
+                errorElement.className = 'mt-1 text-xs text-red-600';
+                errorElement.textContent = 'El archivo es demasiado grande. El tamaño máximo permitido es 10MB.';
+                input.parentElement.appendChild(errorElement);
+            }
+        }
+    });
+    
+    if (!valid) {
+        e.preventDefault();
+        // Desplazarse al primer error
+        const firstError = document.querySelector('.border-red-500');
+        if (firstError) {
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+});
+
+// Mostrar/ocultar contraseña
+function togglePassword(inputId) {
+    const input = document.getElementById(inputId);
+    const icon = document.querySelector(`button[onclick="togglePassword('${inputId}')"] svg`);
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />';
+    } else {
+        input.type = 'password';
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />';
+    }
+}
+
+// Medidor de fortaleza de contraseña
+document.getElementById('passphrase').addEventListener('input', function() {
+    const password = this.value;
+    const strengthMeter = document.getElementById('strength-meter');
+    const strengthText = document.getElementById('strength-text');
+    
+    // Reset
+    strengthMeter.className = 'h-2 rounded-full flex-1 mr-2';
+    
+    // Verificar fortaleza
+    let strength = 0;
+    let messages = [];
+    
+    // Longitud mínima
+    if (password.length >= 8) strength += 1;
+    
+    // Contiene letras mayúsculas y minúsculas
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength += 1;
+    
+    // Contiene números
+    if (/\d/.test(password)) strength += 1;
+    
+    // Contiene caracteres especiales
+    if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+    
+    // Actualizar la barra de fortaleza
+    switch(strength) {
+        case 0:
+            strengthMeter.className += ' bg-red-500 w-1/4';
+            strengthText.textContent = 'Muy débil';
+            strengthText.className = 'text-xs font-medium text-red-600';
+            break;
+        case 1:
+            strengthMeter.className += ' bg-red-400 w-1/2';
+            strengthText.textContent = 'Débil';
+            strengthText.className = 'text-xs font-medium text-red-500';
+            break;
+        case 2:
+            strengthMeter.className += ' bg-yellow-400 w-3/4';
+            strengthText.textContent = 'Moderada';
+            strengthText.className = 'text-xs font-medium text-yellow-600';
+            break;
+        case 3:
+            strengthMeter.className += ' bg-blue-500 w-full';
+            strengthText.textContent = 'Fuerte';
+            strengthText.className = 'text-xs font-medium text-blue-600';
+            break;
+        case 4:
+            strengthMeter.className += ' bg-green-500 w-full';
+            strengthText.textContent = 'Muy fuerte';
+            strengthText.className = 'text-xs font-medium text-green-600';
+            break;
+    }
+});
+
 function validarCedula(input) {
     const cedula = input.value.trim();
     input.value = cedula;
