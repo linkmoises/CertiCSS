@@ -736,13 +736,22 @@ def salir():
 @app.route('/')
 def home():
     inicio_hoy = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    eventos_futuros = collection_eventos.find({
+    
+    # Obtener todos los eventos futuros
+    todos_eventos = list(collection_eventos.find({
         "fecha_inicio": {"$gte": inicio_hoy},
         "estado_evento": {"$ne": "borrador"},
         'registro_abierto': {'$ne': True}
-    }).sort("fecha_inicio").limit(3)
-
-    return render_template('home.html', eventos=eventos_futuros)
+    }))
+    
+    # Seleccionar 3 eventos aleatorios si hay más de 3
+    if len(todos_eventos) > 3:
+        import random
+        eventos_aleatorios = random.sample(todos_eventos, 3)
+    else:
+        eventos_aleatorios = todos_eventos
+    
+    return render_template('home.html', eventos=eventos_aleatorios)
 
 
 ###
