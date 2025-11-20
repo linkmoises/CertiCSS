@@ -1068,86 +1068,175 @@ def editar_poster(codigo_evento):
     poster = todos_posters[0]
     
     if request.method == 'POST':
-        # Obtener el nanoid del póster a editar desde el formulario
-        nanoid_editar = request.form.get('nanoid_poster', poster['nanoid'])
-        poster_editar = next((p for p in todos_posters if p['nanoid'] == nanoid_editar), None)
+        action = request.form.get('action', 'editar')
         
-        if not poster_editar:
-            flash('Póster no encontrado.', 'error')
-            return render_template('editar_poster.html', evento=evento, poster=poster, todos_posters=todos_posters)
-        
-        # Actualizar datos básicos
-        nombres = request.form.get('nombres', '').strip()
-        apellidos = request.form.get('apellidos', '').strip()
-        email = request.form.get('email', '').strip()
-        telefono = request.form.get('telefono', '').strip()
-        institucion = request.form.get('institucion', '').strip()
-        titulo_poster = request.form.get('titulo_poster', '').strip()
-        
-        update_data = {
-            'nombres': nombres,
-            'apellidos': apellidos,
-            'email': email,
-            'telefono': telefono,
-            'institucion': institucion,
-            'titulo_poster': titulo_poster
-        }
-        
-        # Manejar subida de archivo (PDF, JPG, PNG)
-        poster_file = request.files.get('poster_file')
-        if poster_file and poster_file.filename:
+        # Si es para añadir un nuevo póster
+        if action == 'añadir_poster':
+            # Obtener datos del formulario
+            titulo_poster = request.form.get('nuevo_titulo_poster', '').strip()
+            poster_file = request.files.get('nuevo_poster_file')
+            
+            if not titulo_poster:
+                flash('El título del póster es obligatorio.', 'error')
+                return render_template('editar_poster.html', evento=evento, poster=poster, todos_posters=todos_posters)
+            
+            if not poster_file or not poster_file.filename:
+                flash('Debe subir un archivo para el nuevo póster.', 'error')
+                return render_template('editar_poster.html', evento=evento, poster=poster, todos_posters=todos_posters)
+            
             # Verificar tipo de archivo
             if not allowed_file(poster_file.filename):
                 flash('Solo se permiten archivos PDF, JPG, JPEG o PNG.', 'error')
-                return render_template('editar_poster.html', evento=evento, poster=poster_editar, todos_posters=todos_posters)
+                return render_template('editar_poster.html', evento=evento, poster=poster, todos_posters=todos_posters)
+            
+            # Obtener datos del participante del primer póster
+            datos_participante = todos_posters[0]
+            participante = collection_participantes.find_one({
+                "cedula": cedula,
+                "codigo_evento": codigo_evento,
+                "rol": "presentador_poster"
+            })
+            
+            if not participante:
+                flash('Participante no encontrado.', 'error')
+                return render_template('editar_poster.html', evento=evento, poster=poster, todos_posters=todos_posters)
+            
+            # Contar pósters existentes para generar número progresivo
+            count_posters = collection_posters.count_documents({"codigo_evento": codigo_evento})
+            numero_poster = count_posters + 1
+            
+            # Generar nanoid único para el nuevo póster
+            nanoid = generate_nanoid(cedula, codigo_evento, f"{titulo_poster}_{len(todos_posters)}")
             
             # Crear carpeta de posters si no existe
             carpeta_posters = os.path.join(app.config['UPLOAD_FOLDER'], 'posters')
             os.makedirs(carpeta_posters, exist_ok=True)
             
-            # Nombre del archivo usando nanoid para evitar conflictos
-            nombre_archivo = secure_filename(f"{poster_editar['nanoid']}_{poster_file.filename}")
+            # Nombre del archivo usando nanoid
+            nombre_archivo = secure_filename(f"{nanoid}_{poster_file.filename}")
             ruta_archivo = os.path.join(carpeta_posters, nombre_archivo)
             
             # Guardar archivo
             poster_file.save(ruta_archivo)
-            update_data['archivo_poster'] = f"posters/{nombre_archivo}"
             
-            flash('Póster actualizado exitosamente.', 'success')
+            # Obtener la passphrase del póster existente
+            passphrase_hash = todos_posters[0].get('passphrase')
+            
+            # Preparar datos del nuevo póster
+            nuevo_poster_data = {
+                'participante_id': participante['_id'],
+                'nombres': datos_participante['nombres'],
+                'apellidos': datos_participante['apellidos'],
+                'cedula': cedula,
+                'email': datos_participante['email'],
+                'telefono': datos_participante.get('telefono', ''),
+                'institucion': datos_participante.get('institucion', ''),
+                'titulo_poster': titulo_poster,
+                'passphrase': passphrase_hash,
+                'codigo_evento': codigo_evento,
+                'nanoid': nanoid,
+                'numero_poster': numero_poster,
+                'archivo_poster': f"posters/{nombre_archivo}",
+                'timestamp': datetime.now(),
+                'estado': 'pendiente'
+            }
+            
+            # Insertar el nuevo póster
+            collection_posters.insert_one(nuevo_poster_data)
+            
+            flash('¡Nuevo póster añadido exitosamente!', 'success')
+            
+            # Recargar todos los pósters
+            todos_posters = list(collection_posters.find({
+                "cedula": cedula,
+                "codigo_evento": codigo_evento
+            }).sort("numero_poster", 1))
+            
+            # Seleccionar el nuevo póster como el actual
+            poster = next((p for p in todos_posters if p['nanoid'] == nanoid), todos_posters[-1])
         
-        # Actualizar el póster específico en base de datos
-        collection_posters.update_one(
-            {"nanoid": nanoid_editar},
-            {"$set": update_data}
-        )
-        
-        # Actualizar también en participantes
-        participante = collection_participantes.find_one({
-            "cedula": cedula,
-            "codigo_evento": codigo_evento,
-            "rol": "presentador_poster"
-        })
-        if participante:
-            collection_participantes.update_one(
-                {"_id": participante['_id']},
-                {"$set": {
-                    'nombres': nombres,
-                    'apellidos': apellidos,
-                    'email': email,
-                    'telefono': telefono,
-                    'institucion': institucion,
-                    'perfil': institucion
-                }}
+        else:
+            # Editar póster existente
+            # Obtener el nanoid del póster a editar desde el formulario
+            nanoid_editar = request.form.get('nanoid_poster', poster['nanoid'])
+            poster_editar = next((p for p in todos_posters if p['nanoid'] == nanoid_editar), None)
+            
+            if not poster_editar:
+                flash('Póster no encontrado.', 'error')
+                return render_template('editar_poster.html', evento=evento, poster=poster, todos_posters=todos_posters)
+            
+            # Actualizar datos básicos
+            nombres = request.form.get('nombres', '').strip()
+            apellidos = request.form.get('apellidos', '').strip()
+            email = request.form.get('email', '').strip()
+            telefono = request.form.get('telefono', '').strip()
+            institucion = request.form.get('institucion', '').strip()
+            titulo_poster = request.form.get('titulo_poster', '').strip()
+            
+            update_data = {
+                'nombres': nombres,
+                'apellidos': apellidos,
+                'email': email,
+                'telefono': telefono,
+                'institucion': institucion,
+                'titulo_poster': titulo_poster
+            }
+            
+            # Manejar subida de archivo (PDF, JPG, PNG)
+            poster_file = request.files.get('poster_file')
+            if poster_file and poster_file.filename:
+                # Verificar tipo de archivo
+                if not allowed_file(poster_file.filename):
+                    flash('Solo se permiten archivos PDF, JPG, JPEG o PNG.', 'error')
+                    return render_template('editar_poster.html', evento=evento, poster=poster_editar, todos_posters=todos_posters)
+                
+                # Crear carpeta de posters si no existe
+                carpeta_posters = os.path.join(app.config['UPLOAD_FOLDER'], 'posters')
+                os.makedirs(carpeta_posters, exist_ok=True)
+                
+                # Nombre del archivo usando nanoid para evitar conflictos
+                nombre_archivo = secure_filename(f"{poster_editar['nanoid']}_{poster_file.filename}")
+                ruta_archivo = os.path.join(carpeta_posters, nombre_archivo)
+                
+                # Guardar archivo
+                poster_file.save(ruta_archivo)
+                update_data['archivo_poster'] = f"posters/{nombre_archivo}"
+                
+                flash('Póster actualizado exitosamente.', 'success')
+            
+            # Actualizar el póster específico en base de datos
+            collection_posters.update_one(
+                {"nanoid": nanoid_editar},
+                {"$set": update_data}
             )
-        
-        # Recargar todos los pósters
-        todos_posters = list(collection_posters.find({
-            "cedula": cedula,
-            "codigo_evento": codigo_evento
-        }).sort("numero_poster", 1))
-        
-        # Actualizar el póster actual
-        poster = next((p for p in todos_posters if p['nanoid'] == nanoid_editar), todos_posters[0])
+            
+            # Actualizar también en participantes
+            participante = collection_participantes.find_one({
+                "cedula": cedula,
+                "codigo_evento": codigo_evento,
+                "rol": "presentador_poster"
+            })
+            if participante:
+                collection_participantes.update_one(
+                    {"_id": participante['_id']},
+                    {"$set": {
+                        'nombres': nombres,
+                        'apellidos': apellidos,
+                        'email': email,
+                        'telefono': telefono,
+                        'institucion': institucion,
+                        'perfil': institucion
+                    }}
+                )
+            
+            # Recargar todos los pósters
+            todos_posters = list(collection_posters.find({
+                "cedula": cedula,
+                "codigo_evento": codigo_evento
+            }).sort("numero_poster", 1))
+            
+            # Actualizar el póster actual
+            poster = next((p for p in todos_posters if p['nanoid'] == nanoid_editar), todos_posters[0])
     
     return render_template('editar_poster.html', evento=evento, poster=poster, todos_posters=todos_posters)
 

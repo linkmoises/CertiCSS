@@ -170,6 +170,54 @@
                                     </form>
                                     {% endfor %}
 
+                                    <!-- Formulario para añadir nuevo póster -->
+                                    <div class="mt-8 pt-6 border-t-2 border-gray-300">
+                                        <div class="bg-green-50 p-4 rounded-lg mb-4">
+                                            <h3 class="text-lg font-semibold text-green-800 mb-2 flex items-center">
+                                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                                </svg>
+                                                Añadir Nuevo Póster
+                                            </h3>
+                                            <p class="text-sm text-green-700">Puede añadir un nuevo póster a su registro. Todos los pósters serán evaluados por el jurado.</p>
+                                        </div>
+
+                                        <form method="POST" enctype="multipart/form-data" class="space-y-4" id="form-nuevo-poster">
+                                            <input type="hidden" name="action" value="añadir_poster">
+                                            
+                                            <div>
+                                                <label for="nuevo_titulo_poster" class="block text-sm font-medium text-gray-700 mb-1">Título del Nuevo Póster *</label>
+                                                <textarea id="nuevo_titulo_poster" name="nuevo_titulo_poster" rows="2" required 
+                                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                        placeholder="Ingrese el título del nuevo póster"></textarea>
+                                            </div>
+
+                                            <div>
+                                                <label for="nuevo_poster_file" class="block text-sm font-medium text-gray-700 mb-1">Archivo del Nuevo Póster (PDF, JPG, PNG) *</label>
+                                                <input type="file" id="nuevo_poster_file" name="nuevo_poster_file" accept=".pdf,.jpg,.jpeg,.png" required
+                                                        class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none">
+                                                <p class="mt-1 text-xs text-gray-500">Suba su póster en formato PDF o imagen (máx. 10MB)</p>
+                                            </div>
+
+                                            <div class="bg-blue-50 p-4 rounded-md">
+                                                <h3 class="font-semibold text-blue-800 mb-2">Información:</h3>
+                                                <ul class="text-sm text-blue-700 space-y-1">
+                                                    <li>• El nuevo póster usará sus mismos datos personales</li>
+                                                    <li>• Se asignará automáticamente un nuevo número de póster</li>
+                                                    <li>• Todos sus pósters serán evaluados por el jurado</li>
+                                                </ul>
+                                            </div>
+
+                                            <button type="submit" 
+                                                    class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200 flex items-center justify-center">
+                                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                                </svg>
+                                                Añadir Nuevo Póster
+                                            </button>
+                                        </form>
+                                    </div>
+
                                     <div class="mt-6 flex justify-between gap-x-4">
                                         <a href="{{ url_for('ver_calificaciones', codigo_evento=evento.codigo) }}" class="w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
                                             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"></path><path d="M16 12h2"></path><path d="M16 8h2"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path><path d="M6 12h2"></path><path d="M6 8h2"></path></svg>
@@ -256,6 +304,53 @@ document.querySelectorAll('.poster-form').forEach(form => {
         }
     });
 });
+
+// Validar formulario de nuevo póster
+const formNuevoPoster = document.getElementById('form-nuevo-poster');
+if (formNuevoPoster) {
+    formNuevoPoster.addEventListener('submit', function(e) {
+        const tituloInput = this.querySelector('#nuevo_titulo_poster');
+        const fileInput = this.querySelector('#nuevo_poster_file');
+        
+        // Validar título
+        if (!tituloInput.value.trim()) {
+            e.preventDefault();
+            alert('Por favor, ingrese el título del nuevo póster.');
+            tituloInput.focus();
+            return false;
+        }
+        
+        // Validar archivo
+        if (!fileInput.files || fileInput.files.length === 0) {
+            e.preventDefault();
+            alert('Por favor, seleccione un archivo para el nuevo póster.');
+            fileInput.focus();
+            return false;
+        }
+        
+        const file = fileInput.files[0];
+        const fileSize = file.size / 1024 / 1024; // en MB
+        const validTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+        
+        if (!validTypes.includes(file.type)) {
+            e.preventDefault();
+            alert('Solo se permiten archivos PDF, JPG, JPEG o PNG.');
+            return false;
+        }
+        
+        if (fileSize > 10) {
+            e.preventDefault();
+            alert('El archivo es demasiado grande. El tamaño máximo permitido es 10MB.');
+            return false;
+        }
+        
+        // Confirmar antes de enviar
+        if (!confirm('¿Está seguro de que desea añadir este nuevo póster?')) {
+            e.preventDefault();
+            return false;
+        }
+    });
+}
 
 function validarCedula(input) {
     const cedula = input.value.trim();
