@@ -6086,7 +6086,12 @@ def generar_pdf_participante(participante, afiche_path):
     draw_centered_text(4.8 * inch, f"Cédula: {participante['cedula']}", font="Helvetica-Oblique", size=14)
     
     # Mostrar "concursante" en lugar de "presentador_poster"
-    rol_mostrar = "concursante" if participante['rol'] == 'presentador_poster' else participante['rol']
+    if participante['rol'] == 'presentador_poster':
+        rol_mostrar = "concursante"
+    elif participante['rol'] == 'jurado_poster':
+        rol_mostrar = "jurado"
+    else:
+        rol_mostrar = participante['rol']
 
     if participante['rol'] == 'presentador_poster':
         draw_centered_text(4.4 * inch, f"Por su participación en el concurso de trabajos de investigación realizado en:")
