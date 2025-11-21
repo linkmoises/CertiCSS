@@ -1474,13 +1474,18 @@ def ver_calificaciones(codigo_evento):
         return redirect(url_for('poster_login', codigo_evento=codigo_evento))
     
     evento = collection_eventos.find_one({"codigo": codigo_evento})
-    poster = collection_posters.find_one({
+    posters = list(collection_posters.find({
         "cedula": session['poster_user']['cedula'],
         "codigo_evento": codigo_evento
-    })
+    }).sort("numero_poster", 1))
     
-    if not poster:
+    if not posters:
         abort(404)
+    
+    selected_nanoid = request.args.get('nanoid')
+    poster = next((p for p in posters if p['nanoid'] == selected_nanoid), None)
+    if not poster:
+        poster = posters[0]
     
     # Obtener todas las evaluaciones del póster
     evaluaciones = list(collection_evaluaciones_poster.find({
@@ -1506,6 +1511,7 @@ def ver_calificaciones(codigo_evento):
     
     return render_template('ver_calificaciones.html', 
                          evento=evento, 
+                         posters=posters,
                          poster=poster, 
                          evaluaciones=evaluaciones,
                          jurados_data=jurados_data,
