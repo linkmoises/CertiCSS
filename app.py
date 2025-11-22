@@ -1356,10 +1356,20 @@ def jurado_login(codigo_evento):
 ###
 @app.route('/evaluar_posters/<codigo_evento>')
 def evaluar_posters(codigo_evento):
-    if 'jurado_user' not in session or session['jurado_user']['codigo_evento'] != codigo_evento:
+    # Verificar si hay una sesión de jurado activa, una sesión de jurado antigua o si es un administrador suplantando
+    jurado_logged_in = (
+        session.get('jurado_logged_in') or 
+        (session.get('jurado_user') and session['jurado_user'].get('codigo_evento') == codigo_evento) or
+        session.get('admin_impersonating')
+    )
+    
+    if not jurado_logged_in:
         return redirect(url_for('jurado_login', codigo_evento=codigo_evento))
     
     evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+        
     posters = list(collection_posters.find({"codigo_evento": codigo_evento}).sort("numero_poster"))
     
     # Agregar URL de archivo a cada póster
@@ -1368,13 +1378,23 @@ def evaluar_posters(codigo_evento):
     
     # Obtener evaluaciones existentes del jurado
     evaluaciones_existentes = {}
-    evaluaciones = collection_evaluaciones_poster.find({
-        "codigo_evento": codigo_evento,
-        "cedula_jurado": session['jurado_user']['cedula']
-    })
+    cedula_jurado = None
     
-    for eval in evaluaciones:
-        evaluaciones_existentes[eval['nanoid_poster']] = eval
+    # Determinar la cédula del jurado según el tipo de sesión
+    if session.get('jurado_user'):
+        cedula_jurado = session['jurado_user'].get('cedula')
+    elif session.get('jurado_cedula'):
+        cedula_jurado = session['jurado_cedula']
+    
+    # Si hay una cédula de jurado, buscar sus evaluaciones
+    if cedula_jurado:
+        evaluaciones = collection_evaluaciones_poster.find({
+            "codigo_evento": codigo_evento,
+            "cedula_jurado": cedula_jurado
+        })
+        
+        for eval in evaluaciones:
+            evaluaciones_existentes[eval['nanoid_poster']] = eval
     
     return render_template('evaluar_posters.html', 
                          evento=evento, 
@@ -1387,26 +1407,48 @@ def evaluar_posters(codigo_evento):
 ###
 @app.route('/evaluar_poster/<codigo_evento>/<nanoid_poster>', methods=['GET', 'POST'])
 def evaluar_poster(codigo_evento, nanoid_poster):
-    if 'jurado_user' not in session or session['jurado_user']['codigo_evento'] != codigo_evento:
+    # Verificar si hay una sesión de jurado activa, una sesión de jurado antigua o si es un administrador suplantando
+    jurado_logged_in = (
+        session.get('jurado_logged_in') or 
+        (session.get('jurado_user') and session['jurado_user'].get('codigo_evento') == codigo_evento) or
+        session.get('admin_impersonating')
+    )
+    
+    if not jurado_logged_in:
         return redirect(url_for('jurado_login', codigo_evento=codigo_evento))
     
     evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+        
     poster = collection_posters.find_one({"nanoid": nanoid_poster})
-    
     if not poster:
         abort(404)
     
     # Agregar URL de archivo al póster
     poster['archivo_url'] = get_poster_file_url(poster.get('archivo_poster'), codigo_evento)
     
+    # Determinar la cédula del jurado según el tipo de sesión
+    cedula_jurado = None
+    if session.get('jurado_user'):
+        cedula_jurado = session['jurado_user'].get('cedula')
+    elif session.get('jurado_cedula'):
+        cedula_jurado = session['jurado_cedula']
+    
     # Verificar evaluación existente
-    evaluacion_existente = collection_evaluaciones_poster.find_one({
-        "codigo_evento": codigo_evento,
-        "nanoid_poster": nanoid_poster,
-        "cedula_jurado": session['jurado_user']['cedula']
-    })
+    evaluacion_existente = None
+    if cedula_jurado:  # Solo buscar evaluación si tenemos una cédula de jurado
+        evaluacion_existente = collection_evaluaciones_poster.find_one({
+            "codigo_evento": codigo_evento,
+            "nanoid_poster": nanoid_poster,
+            "cedula_jurado": cedula_jurado
+        })
     
     if request.method == 'POST':
+        if not cedula_jurado:
+            flash('No se pudo identificar al jurado. Por favor, inicie sesión nuevamente.', 'error')
+            return redirect(url_for('jurado_login', codigo_evento=codigo_evento))
+            
         # Recoger puntuaciones
         introduccion_objetivos = int(request.form.get('introduccion_objetivos', 0))
         metodologia = int(request.form.get('metodologia', 0))
@@ -1418,17 +1460,25 @@ def evaluar_poster(codigo_evento, nanoid_poster):
         dominio_tema = int(request.form.get('dominio_tema', 0))
         comentarios = request.form.get('comentarios', '').strip()
         
-        # Calcular puntuaciones ponderadas
-        contenido_score = (introduccion_objetivos + metodologia + resultados + conclusiones) * 0.15
-        presentacion_visual_score = (diseno_organizacion + imagenes_graficos) * 0.10
-        presentacion_oral_score = (claridad_comunicacion + dominio_tema) * 0.10
+        # Obtener nombres del jurado según el tipo de sesión
+        nombres_jurado = session.get('jurado_nombres') or (session.get('jurado_user', {}).get('nombres') or '')
+        apellidos_jurado = session.get('jurado_apellidos') or (session.get('jurado_user', {}).get('apellidos') or '')
+        email_jurado = session.get('jurado_email') or (session.get('jurado_user', {}).get('email') or '')
         
-        puntuacion_final = contenido_score + presentacion_visual_score + presentacion_oral_score
+        # Calcular puntuaciones
+        contenido_score = (introduccion_objetivos + metodologia + resultados + conclusiones) / 4.0
+        presentacion_visual_score = (diseno_organizacion + imagenes_graficos) / 2.0
+        presentacion_oral_score = (claridad_comunicacion + dominio_tema) / 2.0
+        puntuacion_final = (contenido_score + presentacion_visual_score + presentacion_oral_score) / 3.0
         
+        # Crear o actualizar evaluación
         evaluacion_data = {
             'codigo_evento': codigo_evento,
             'nanoid_poster': nanoid_poster,
-            'cedula_jurado': session['jurado_user']['cedula'],
+            'cedula_jurado': cedula_jurado,
+            'nombres_jurado': nombres_jurado,
+            'apellidos_jurado': apellidos_jurado,
+            'email_jurado': email_jurado,
             'introduccion_objetivos': introduccion_objetivos,
             'metodologia': metodologia,
             'resultados': resultados,
@@ -1552,8 +1602,21 @@ def info_concurso_poster(codigo_evento):
 ###
 @app.route('/concurso_logout/<codigo_evento>')
 def poster_logout(codigo_evento):
+    # Limpiar todas las variables de sesión relacionadas con jurados
     session.pop('poster_user', None)
     session.pop('jurado_user', None)
+    session.pop('jurado_logged_in', None)
+    session.pop('jurado_cedula', None)
+    session.pop('jurado_nombres', None)
+    session.pop('jurado_apellidos', None)
+    session.pop('jurado_email', None)
+    session.pop('admin_impersonating', None)
+    
+    # Redirigir a la página de administración de pósters si venimos de ahí
+    if 'admin_impersonating' in session or 'jurado_logged_in' in session:
+        return redirect(url_for('admin_posters', codigo_evento=codigo_evento))
+        
+    # Si no, redirigir a la página de información del concurso
     return redirect(url_for('info_concurso_poster', codigo_evento=codigo_evento))
 
 
@@ -1639,7 +1702,7 @@ def login_as_judge(codigo_evento, cedula_jurado):
     Permite al administrador iniciar sesión como un jurado específico para editar evaluaciones.
     """
     # Verificar que el usuario sea administrador
-    if not current_user.is_authenticated or current_user.get_role() not in ['admin', 'superadmin']:
+    if not current_user.is_authenticated or current_user.rol != 'administrador':
         abort(403)
     
     # Obtener datos del evento
