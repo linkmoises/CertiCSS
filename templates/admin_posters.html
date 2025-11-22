@@ -58,11 +58,7 @@
 
                         <div class="mt-1 flex items-center gap-x-2">
                             <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
-                                {% set total_evaluaciones = 0 %}
-                                {% for evals in evaluaciones_por_poster.values() %}
-                                {% set total_evaluaciones = total_evaluaciones + (evals|length) %}
-                                {% endfor %}
-                                {{ total_evaluaciones }}
+                                {{ promedios_poster|length }}
                             </h3>
                         </div>
                     </div>
@@ -74,13 +70,13 @@
                     <div class="p-4 md:p-5">
                         <div class="flex items-center gap-x-2">
                             <p class="text-xs uppercase tracking-wide text-gray-500">
-                                Evaluaciones completas
+                                Evaluaciones totales
                             </p>
                         </div>
 
                         <div class="mt-1 flex items-center gap-x-2">
                             <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
-                                {{ promedios_poster|length }}
+                                {{ posters|length * jurados|length }}
                             </h3>
                         </div>
                     </div>
