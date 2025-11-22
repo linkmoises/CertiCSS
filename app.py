@@ -1608,6 +1608,54 @@ def get_poster_file_url(archivo_poster, codigo_evento):
     return f"uploads/{codigo_evento}/posters/{archivo_poster}"
 
 
+def get_judge_session(codigo_evento, cedula_jurado):
+    """
+    Crea una sesión simulada para un jurado, permitiendo al administrador actuar en su nombre.
+    """
+    # Obtener datos del jurado
+    jurado = collection_participantes.find_one({
+        "codigo_evento": codigo_evento,
+        "rol": "jurado_poster",
+        "cedula": cedula_jurado
+    })
+    
+    if not jurado:
+        return None
+        
+    # Crear sesión simulada
+    session['jurado_logged_in'] = True
+    session['jurado_cedula'] = jurado['cedula']
+    session['jurado_nombres'] = jurado['nombres']
+    session['jurado_apellidos'] = jurado['apellidos']
+    session['jurado_email'] = jurado.get('email', '')
+    session['codigo_evento'] = codigo_evento
+    
+    return jurado
+
+@app.route('/tablero/posters/<codigo_evento>/login_as_judge/<cedula_jurado>')
+@login_required
+def login_as_judge(codigo_evento, cedula_jurado):
+    """
+    Permite al administrador iniciar sesión como un jurado específico para editar evaluaciones.
+    """
+    # Verificar que el usuario sea administrador
+    if not current_user.is_authenticated or current_user.rol not in ['admin', 'superadmin']:
+        abort(403)
+    
+    # Obtener datos del evento
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+    
+    # Configurar la sesión del jurado
+    jurado = get_judge_session(codigo_evento, cedula_jurado)
+    if not jurado:
+        flash('No se encontró al jurado especificado.', 'error')
+        return redirect(url_for('admin_posters', codigo_evento=codigo_evento))
+    
+    flash(f'Has iniciado sesión como {jurado["nombres"]} {jurado["apellidos"]} (Jurado).', 'info')
+    return redirect(url_for('evaluar_posters', codigo_evento=codigo_evento))
+
 @app.route('/tablero/posters/<codigo_evento>')
 @login_required
 def admin_posters(codigo_evento):
@@ -1658,12 +1706,22 @@ def admin_posters(codigo_evento):
                 promedio = sum(e['puntuacion_final'] for e in evaluaciones_poster) / len(evaluaciones_poster)
                 promedios_poster[nanoid] = promedio
     
+    # Verificar si hay una sesión de jurado activa
+    jurado_activo = None
+    if 'jurado_logged_in' in session and session.get('codigo_evento') == codigo_evento:
+        jurado_activo = {
+            'cedula': session.get('jurado_cedula'),
+            'nombres': session.get('jurado_nombres'),
+            'apellidos': session.get('jurado_apellidos')
+        }
+    
     return render_template('admin_posters.html', 
                          evento=evento,
                          posters=posters,
                          jurados=jurados,
                          evaluaciones_por_poster=evaluaciones_por_poster,
-                         promedios_poster=promedios_poster)
+                         promedios_poster=promedios_poster,
+                         jurado_activo=jurado_activo)
 
 
 ###
