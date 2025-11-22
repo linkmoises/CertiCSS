@@ -6,6 +6,86 @@
 <div class="w-full lg:ps-64">
     <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
 
+        <!-- TARJETAS RESUMEN CONCURSO -->
+        <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+            <!-- Grid -->
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <!-- Card -->
+                <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                    <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
+                                Trabajos registrados
+                            </p>
+                        </div>
+
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                {{ resultados|length }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+
+                <!-- Card -->
+                <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                    <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
+                                Puntuación más alta
+                            </p>
+                        </div>
+
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                {{ "%.2f"|format(resultados[0].promedio) }}/10
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+
+                <!-- Card -->
+                <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                    <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
+                                Promedio general
+                            </p>
+                        </div>
+
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                {{ "%.2f"|format(resultados | sum(attribute='promedio') / resultados|length) }}/10
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+
+                <!-- Card -->
+                <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                    <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
+                                Evaluaciones totales
+                            </p>
+                        </div>
+
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                {{ resultados | sum(attribute='num_evaluaciones') }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+            </div>
+            <!-- End Grid -->
+        </div>
+        <!-- FIN TARJETAS RESUMEN CONCURSO -->
+
         <!-- TABLA RESUMEN EVENTOS -->
         <div class="max-w-[85rem] px-2 pt-1 mx-auto">
             <!-- Card -->
@@ -155,32 +235,6 @@
                                                 {% endfor %}
                                             </tbody>
                                         </table>
-                                    </div>
-                                </div>
-
-                                <!-- Estadísticas del Concurso -->
-                                <div class="bg-gray-50 p-4 rounded-lg">
-                                    <h3 class="font-semibold text-gray-800 mb-3">Estadísticas del Concurso</h3>
-                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-                                        <div>
-                                            <span class="font-medium text-gray-700">Total de pósters:</span>
-                                            <span class="text-gray-900">{{ resultados|length }}</span>
-                                        </div>
-                                        <div>
-                                            <span class="font-medium text-gray-700">Puntuación más alta:</span>
-                                            <span class="text-gray-900">{{ "%.2f"|format(resultados[0].promedio)
-                                                }}/10</span>
-                                        </div>
-                                        <div>
-                                            <span class="font-medium text-gray-700">Promedio general:</span>
-                                            <span class="text-gray-900">{{ "%.2f"|format(resultados |
-                                                sum(attribute='promedio') / resultados|length) }}/10</span>
-                                        </div>
-                                        <div>
-                                            <span class="font-medium text-gray-700">Total evaluaciones:</span>
-                                            <span class="text-gray-900">{{ resultados |
-                                                sum(attribute='num_evaluaciones') }}</span>
-                                        </div>
                                     </div>
                                 </div>
 
