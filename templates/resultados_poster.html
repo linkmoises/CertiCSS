@@ -69,13 +69,14 @@
                     <div class="p-4 md:p-5">
                         <div class="flex items-center gap-x-2">
                             <p class="text-xs uppercase tracking-wide text-gray-500">
-                                Evaluaciones totales
+                                Evaluaciones realizadas
                             </p>
                         </div>
 
                         <div class="mt-1 flex items-center gap-x-2">
                             <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
-                                {{ resultados | sum(attribute='num_evaluaciones') }}
+                                {{ resultados | sum(attribute='num_evaluaciones') }}/{{ posters|length *
+                                jurados|length }}
                             </h3>
                         </div>
                     </div>
