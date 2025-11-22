@@ -32,6 +32,10 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)  # Configura ProxyFix
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)     # Crear la carpeta de subida si no existe
 
 client = MongoClient(app.config['MONGO_URI'])               # Configurar MongoDB usando la URI de la configuración
+
+###
+### Configuraciones de MongoDB
+###
 db = client['certi_css']
 collection_eventos = db['eventos']
 collection_participantes = db['participantes']
@@ -49,7 +53,9 @@ collection_posters = db['posters']
 collection_evaluaciones_poster = db['evaluaciones_poster']
 collection_progreso = db['progreso']
 
-# Roles de usuario
+###
+### Roles de usuario
+###
 class UserRole(str, Enum):
     COORDINADOR_DEPARTAMENTAL = 'coordinador-departamental'
     COORDINADOR_LOCAL = 'coordinador-local'
@@ -1602,6 +1608,9 @@ def info_concurso_poster(codigo_evento):
 ###
 @app.route('/concurso_logout/<codigo_evento>')
 def poster_logout(codigo_evento):
+    # Verificar si es un administrador suplantando ANTES de borrar la sesión
+    is_admin_impersonating = session.get('admin_impersonating', False)
+    
     # Limpiar todas las variables de sesión relacionadas con jurados
     session.pop('poster_user', None)
     session.pop('jurado_user', None)
@@ -1613,7 +1622,7 @@ def poster_logout(codigo_evento):
     session.pop('admin_impersonating', None)
     
     # Redirigir a la página de administración de pósters si venimos de ahí
-    if 'admin_impersonating' in session or 'jurado_logged_in' in session:
+    if is_admin_impersonating:
         return redirect(url_for('admin_posters', codigo_evento=codigo_evento))
         
     # Si no, redirigir a la página de información del concurso
@@ -1695,7 +1704,7 @@ def get_judge_session(codigo_evento, cedula_jurado):
     
     return jurado
 
-@app.route('/tablero/posters/<codigo_evento>/login_as_judge/<cedula_jurado>')
+@app.route('/tablero/posters/<codigo_evento>/login_como_jurado/<cedula_jurado>')
 @login_required
 def login_as_judge(codigo_evento, cedula_jurado):
     """
@@ -1715,6 +1724,9 @@ def login_as_judge(codigo_evento, cedula_jurado):
     if not jurado:
         flash('No se encontró al jurado especificado.', 'error')
         return redirect(url_for('admin_posters', codigo_evento=codigo_evento))
+    
+    # Marcar que es un administrador suplantando
+    session['admin_impersonating'] = True
     
     flash(f'Has iniciado sesión como {jurado["nombres"]} {jurado["apellidos"]} (Jurado).', 'info')
     return redirect(url_for('evaluar_posters', codigo_evento=codigo_evento))

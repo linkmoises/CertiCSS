@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>{{ evento.nombre }} - Concurso de Trabajos de Investigación</title>
@@ -7,159 +8,179 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- favicons -->
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}"
+        sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
+    <link rel="apple-touch-icon" sizes="180x180"
+        href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
     <meta name="apple-mobile-web-app-title" content="CertiCSS" />
     <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
-{% if UMAMI_URL %}
+    {% if UMAMI_URL %}
     {{ UMAMI_URL | safe }}
-{% endif %}
+    {% endif %}
 </head>
+
 <body class="bg-gray-50 dark:bg-neutral-900">
 
-{% block content %}
-<div class="container mx-auto">
-    <div class="max-w-6xl mx-auto my-8">
-        <div class="bg-white rounded-lg shadow-lg border border-gray-200">
-            <div class="flex flex-col">
-                <!-- Header -->
-                <div class="flex items-center gap-x-3">
-                    <div class="relative h-32 w-32 shrink-0">
-{% if evento.afiche_750 %}
-                        <img src="{{ url_for('static', filename='uploads/' + evento.afiche_750.split('/')[-1]) }}" alt="{{ evento.nombre }}" class="w-32 h-32 object-cover rounded-lg absolute top-0 start-0">
-{% else %}
-                        <img class="size-full absolute top-0 start-0 object-cover rounded-l-xl" src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}" alt="{{ evento.nombre }}">
-{% endif %}                                        
-                    </div>
-                    
-                    <div class="grow">
-                        <h2 class="block text-3xl font-bold mt-2">Panel de Evaluación</h2>
-                        <h4 class="block italic mb-2">{{ evento.nombre }}</h4>
-                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
-                            Concurso de Trabajos Científicos
-                        </span>
-                    </div>
-                </div>
-                <!-- End Header -->
-            </div>
+    {% block content %}
+    <div class="container mx-auto">
+        <div class="max-w-6xl mx-auto my-8">
+            <div class="bg-white rounded-lg shadow-lg border border-gray-200">
+                <div class="flex flex-col">
+                    <!-- Header -->
+                    <div class="flex items-center gap-x-3">
+                        <div class="relative h-32 w-32 shrink-0">
+                            {% if evento.afiche_750 %}
+                            <img src="{{ url_for('static', filename='uploads/' + evento.afiche_750.split('/')[-1]) }}"
+                                alt="{{ evento.nombre }}"
+                                class="w-32 h-32 object-cover rounded-lg absolute top-0 start-0">
+                            {% else %}
+                            <img class="size-full absolute top-0 start-0 object-cover rounded-l-xl"
+                                src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}"
+                                alt="{{ evento.nombre }}">
+                            {% endif %}
+                        </div>
 
-            <div class="bg-gray-50 p-8">
-                <h3 class="font-semibold text-gray-800 mb-2">Criterios de Evaluación:</h3>
-                <div class="text-sm text-gray-700 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <strong>I. Contenido (60%)</strong>
-                        <ul class="mt-1 space-y-1">
-                            <li>• Introducción y Objetivos (15%)</li>
-                            <li>• Metodología (15%)</li>
-                            <li>• Resultados (15%)</li>
-                            <li>• Conclusiones (15%)</li>
-                        </ul>
+                        <div class="grow">
+                            <h2 class="block text-3xl font-bold mt-2">Panel de Evaluación</h2>
+                            <h4 class="block italic mb-2">{{ evento.nombre }}</h4>
+                            <span
+                                class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                Concurso de Trabajos Científicos
+                            </span>
+                        </div>
                     </div>
-                    <div>
-                        <strong>II. Presentación Visual (20%)</strong>
-                        <ul class="mt-1 space-y-1">
-                            <li>• Diseño y Organización (10%)</li>
-                            <li>• Imágenes y Gráficos (10%)</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <strong>III. Presentación Oral (20%)</strong>
-                        <ul class="mt-1 space-y-1">
-                            <li>• Claridad y Comunicación (10%)</li>
-                            <li>• Dominio del Tema (10%)</li>
-                        </ul>
-                    </div>
+                    <!-- End Header -->
                 </div>
-                <p class="text-xs text-gray-600 mt-2">Cada criterio se evalúa en una escala de 1-10 puntos. Ver detalles de <a class="underline" href="{{ url_for('static', filename='resources/rubricas-evaluacion.pdf') }}">instrumentos de evaluación</a>.</p>
-            </div>
 
-            {% if posters %}
-            <div class="p-8">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Trabajos Científicos para Evaluar ({{ posters|length }})</h3>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {% for poster in posters %}
-                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <div class="flex justify-between items-start mb-2">
-                            <h4 class="font-semibold text-gray-800">Póster #{{ "%02d"|format(poster.numero_poster) }}</h4>
-                            {% if poster.nanoid in evaluaciones_existentes %}
+                <div class="bg-gray-50 p-8">
+                    <h3 class="font-semibold text-gray-800 mb-2">Criterios de Evaluación:</h3>
+                    <div class="text-sm text-gray-700 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <strong>I. Contenido (60%)</strong>
+                            <ul class="mt-1 space-y-1">
+                                <li>• Introducción y Objetivos (15%)</li>
+                                <li>• Metodología (15%)</li>
+                                <li>• Resultados (15%)</li>
+                                <li>• Conclusiones (15%)</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <strong>II. Presentación Visual (20%)</strong>
+                            <ul class="mt-1 space-y-1">
+                                <li>• Diseño y Organización (10%)</li>
+                                <li>• Imágenes y Gráficos (10%)</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <strong>III. Presentación Oral (20%)</strong>
+                            <ul class="mt-1 space-y-1">
+                                <li>• Claridad y Comunicación (10%)</li>
+                                <li>• Dominio del Tema (10%)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-600 mt-2">Cada criterio se evalúa en una escala de 1-10 puntos. Ver
+                        detalles de <a class="underline"
+                            href="{{ url_for('static', filename='resources/rubricas-evaluacion.pdf') }}">instrumentos de
+                            evaluación</a>.</p>
+                </div>
+
+                {% if posters %}
+                <div class="p-8">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Trabajos Científicos para Evaluar ({{
+                        posters|length }})</h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {% for poster in posters %}
+                        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-semibold text-gray-800">Póster #{{ "%02d"|format(poster.numero_poster)
+                                    }}</h4>
+                                {% if poster.nanoid in evaluaciones_existentes %}
                                 <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Evaluado</span>
-                            {% else %}
-                                <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Pendiente</span>
-                            {% endif %}
-                        </div>
-                        
-                        <p class="text-sm text-gray-600 mb-2">
-                            <strong>Autor:</strong> {{ poster.nombres }} {{ poster.apellidos }}
-                        </p>
-                        
-                        <p class="text-sm text-gray-600 mb-3">
-                            <strong>Título:</strong> {{ poster.titulo_poster[:100] }}{% if poster.titulo_poster|length > 100 %}...{% endif %}
-                        </p>
-                        
-                        {% if poster.institucion %}
-                        <p class="text-xs text-gray-500 mb-3">{{ poster.institucion }}</p>
-                        {% endif %}
-                        
-                        <div class="flex justify-between items-center">
-                            {% if poster.archivo_url %}
-                                <a href="{{ url_for('static', filename=poster.archivo_url) }}" 
-                                   target="_blank" 
-                                   class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                                    Ver PDF
-                                </a>
-                            {% elif poster.archivo_poster %}
-                                <a href="{{ url_for('static', filename='uploads/' + evento.codigo + '/posters/' + poster.archivo_poster) }}" 
-                                   target="_blank" 
-                                   class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                                    Ver PDF
-                                </a>
-                            {% else %}
-                                <span class="text-gray-400 text-sm">Sin archivo</span>
-                            {% endif %}
-                            
-                            <a href="{{ url_for('evaluar_poster', codigo_evento=evento.codigo, nanoid_poster=poster.nanoid) }}" 
-                               class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors">
-                                {% if poster.nanoid in evaluaciones_existentes %}Editar{% else %}Evaluar{% endif %}
-                            </a>
-                        </div>
-                        
-                        {% if poster.nanoid in evaluaciones_existentes %}
-                        <div class="mt-2 pt-2 border-t border-gray-100">
-                            <p class="text-xs text-gray-600">
-                                Puntuación: {{ "%.1f"|format(evaluaciones_existentes[poster.nanoid].puntuacion_final) }}/10
+                                {% else %}
+                                <span
+                                    class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Pendiente</span>
+                                {% endif %}
+                            </div>
+
+                            <p class="text-sm text-gray-600 mb-2">
+                                <strong>Autor:</strong> {{ poster.nombres }} {{ poster.apellidos }}
                             </p>
+
+                            <p class="text-sm text-gray-600 mb-3">
+                                <strong>Título:</strong> {{ poster.titulo_poster[:100] }}{% if
+                                poster.titulo_poster|length > 100 %}...{% endif %}
+                            </p>
+
+                            {% if poster.institucion %}
+                            <p class="text-xs text-gray-500 mb-3">{{ poster.institucion }}</p>
+                            {% endif %}
+
+                            <div class="flex justify-between items-center">
+                                {% if poster.archivo_url %}
+                                <a href="{{ url_for('static', filename=poster.archivo_url) }}" target="_blank"
+                                    class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                    Ver PDF
+                                </a>
+                                {% elif poster.archivo_poster %}
+                                <a href="{{ url_for('static', filename='uploads/' + evento.codigo + '/posters/' + poster.archivo_poster) }}"
+                                    target="_blank" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                    Ver PDF
+                                </a>
+                                {% else %}
+                                <span class="text-gray-400 text-sm">Sin archivo</span>
+                                {% endif %}
+
+                                <a href="{{ url_for('evaluar_poster', codigo_evento=evento.codigo, nanoid_poster=poster.nanoid) }}"
+                                    class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors">
+                                    {% if poster.nanoid in evaluaciones_existentes %}Editar{% else %}Evaluar{% endif %}
+                                </a>
+                            </div>
+
+                            {% if poster.nanoid in evaluaciones_existentes %}
+                            <div class="mt-2 pt-2 border-t border-gray-100">
+                                <p class="text-xs text-gray-600">
+                                    Puntuación: {{
+                                    "%.1f"|format(evaluaciones_existentes[poster.nanoid].puntuacion_final) }}/10
+                                </p>
+                            </div>
+                            {% endif %}
                         </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {% else %}
+                <div class="text-center px-8 py-8">
+                    <p class="text-gray-500">No hay pósters registrados para este evento aún.</p>
+                </div>
+                {% endif %}
+
+                <div class="mx-auto text-center">
+                    <div class="px-8 pb-8 inline-flex gap-x-2 w-full">
+                        <a href="{{ url_for('poster_logout', codigo_evento=evento.codigo) }}"
+                            class="w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-red-600 text-white hover:bg-red-700 focus:outline-none focus:bg-red-700 disabled:opacity-50 disabled:pointer-events-none">
+                            Cerrar sesión
+                        </a>
+                        {% if current_user.rol == 'administrador' %}
+                        <a href="{{ url_for('admin_posters', codigo_evento=evento.codigo) }}"
+                            class="w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                            Volver al tablero
+                        </a>
                         {% endif %}
                     </div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            {% else %}
-            <div class="text-center px-8 py-8">
-                <p class="text-gray-500">No hay pósters registrados para este evento aún.</p>
-            </div>
-            {% endif %}
-
-            <div class="mx-auto text-center">
-                <div class="px-8 pb-8">
-                    <a href="{{ url_for('poster_logout', codigo_evento=evento.codigo) }}"
-                        class="w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-red-600 text-white hover:bg-red-700 focus:outline-none focus:bg-red-700 disabled:opacity-50 disabled:pointer-events-none">
-                        Cerrar sesión
-                    </a>
                 </div>
             </div>
         </div>
     </div>
-</div>
-{% endblock %}
+    {% endblock %}
 
-<footer class="mt-auto w-full max-w-[85rem] px-4 sm:px-6 lg:px-8 mx-auto">
-    <div class="text-center text-xs text-gray-500 my-8">
-        <p>Este evento es potenciado por la plataforma CertiCSS.</p>
-    </div>
-</footer>
+    <footer class="mt-auto w-full max-w-[85rem] px-4 sm:px-6 lg:px-8 mx-auto">
+        <div class="text-center text-xs text-gray-500 my-8">
+            <p>Este evento es potenciado por la plataforma CertiCSS.</p>
+        </div>
+    </footer>
 
 </body>
