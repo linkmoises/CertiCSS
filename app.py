@@ -3885,6 +3885,7 @@ def crear_evento():
         checkin_masivo = request.form.get('checkin_masivo') == 'on'
         concurso_poster = request.form.get('concurso_poster') == 'on'
         registro_abierto = request.form.get('registro_abierto') == 'on'
+        avales = request.form.getlist('aval')
 
         fecha_inicio_str = request.form['fecha_inicio']
         fecha_fin_str = request.form['fecha_fin']
@@ -3968,7 +3969,8 @@ def crear_evento():
             'autor': current_user.id,
             'checkin_masivo': checkin_masivo,
             'concurso_poster': concurso_poster,
-            'registro_abierto': registro_abierto
+            'registro_abierto': registro_abierto,
+            'avales': avales
         })
         log_event(f"Usuario [{current_user.email}] ha creado el evento {codigo} exitosamente.")
         return redirect(url_for('mis_eventos'))  # Redirigir a la lista de eventos
@@ -4092,6 +4094,10 @@ def editar_evento(codigo_evento):
                 'fondo': fondo_path,
                 'programa': programa_path,
                 'certificado': certificado_path,
+                'checkin_masivo': checkin_masivo,
+                'concurso_poster': concurso_poster,
+                'registro_abierto': registro_abierto,
+                'avales': avales
             }}
         )
 

@@ -167,7 +167,7 @@
                         </div>
                         <!-- End Col -->
 
-{% if current_user.rol == 'administrador' or current_user.rol == 'denadoi' %}
+                        {% if current_user.rol == 'administrador' or current_user.rol == 'denadoi' %}
                         <div class="sm:col-span-3">
                             <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                 Asistencia controlada
@@ -189,7 +189,7 @@
                             </p>
                         </div>
                         <!-- End Col -->
-{% endif %}
+                        {% endif %}
 
                         <div class="sm:col-span-3">
                             <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
@@ -213,7 +213,7 @@
                         </div>
                         <!-- End Col -->
 
-{% if current_user.rol == 'administrador' or current_user.rol == 'denadoi' %}
+                        {% if current_user.rol == 'administrador' or current_user.rol == 'denadoi' %}
                         <div class="sm:col-span-3">
                             <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                 Evento de Registro Abierto
@@ -235,7 +235,7 @@
                             </p>
                         </div>
                         <!-- End Col -->
-{% endif %}
+                        {% endif %}
 
                         <div class="sm:col-span-3">
                             <label for="carga_horaria"
@@ -297,6 +297,64 @@
                                 rows="6" placeholder="Breve descripción de la actividad docente..."></textarea>
                             <div class="mt-1 text-right">
                                 <span id="contador_descripcion" class="text-xs text-gray-500">0/255</span>
+                            </div>
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-3">
+                            <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                Avales del Evento
+                                <span class="text-sm text-gray-400 dark:text-neutral-600">
+                                    (seleccione el aval pertinente si fue tramitado)
+                                </span>
+                            </label>
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-9 pb-6">
+                            <!-- Colegio Médico de Panamá -->
+                            <div class="flex items-center mt-2.5">
+                                <input type="checkbox" id="aval-cmp" name="aval" value="aval-cmp"
+                                    class="shrink-0 border-gray-200 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800">
+                                <label for="aval-cmp" class="text-sm text-gray-500 ms-3 dark:text-neutral-400">
+                                    Colegio Médico de Panamá
+                                </label>
+                            </div>
+
+                            <!-- Asociación Nacional de Enfermeras de Panamá -->
+                            <div class="flex items-center mt-2.5">
+                                <input type="checkbox" id="aval-anep" name="aval" value="aval-anep"
+                                    class="shrink-0 border-gray-200 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800">
+                                <label for="aval-anep" class="text-sm text-gray-500 ms-3 dark:text-neutral-400">
+                                    Asociación Nacional de Enfermeras de Panamá
+                                </label>
+                            </div>
+
+                            <!-- Universidad de Panamá - Facultad de Medicina -->
+                            <div class="flex items-center mt-2.5">
+                                <input type="checkbox" id="aval-facmed" name="aval" value="aval-facmed"
+                                    class="shrink-0 border-gray-200 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800">
+                                <label for="aval-facmed" class="text-sm text-gray-500 ms-3 dark:text-neutral-400">
+                                    Universidad de Panamá - Facultad de Medicina
+                                </label>
+                            </div>
+
+                            <!-- Universidad de Panamá - Vicerrectoría de Investigación y Postgrado -->
+                            <div class="flex items-center mt-2.5">
+                                <input type="checkbox" id="aval-vip" name="aval" value="aval-vip"
+                                    class="shrink-0 border-gray-200 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800">
+                                <label for="aval-vip" class="text-sm text-gray-500 ms-3 dark:text-neutral-400">
+                                    Universidad de Panamá - Vicerrectoría de Investigación y Postgrado
+                                </label>
+                            </div>
+
+                            <!-- Colegio Nacional de Laboratoristas Clínicos -->
+                            <div class="flex items-center mt-2.5">
+                                <input type="checkbox" id="aval-conalac" name="aval" value="aval-conalac"
+                                    class="shrink-0 border-gray-200 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800">
+                                <label for="aval-conalac" class="text-sm text-gray-500 ms-3 dark:text-neutral-400">
+                                    Colegio Nacional de Laboratoristas Clínicos
+                                </label>
                             </div>
                         </div>
                         <!-- End Col -->
