@@ -1639,7 +1639,7 @@ def login_as_judge(codigo_evento, cedula_jurado):
     Permite al administrador iniciar sesión como un jurado específico para editar evaluaciones.
     """
     # Verificar que el usuario sea administrador
-    if not current_user.is_authenticated or current_user.rol not in ['admin', 'superadmin']:
+    if not current_user.is_authenticated or current_user.get_role() not in ['admin', 'superadmin']:
         abort(403)
     
     # Obtener datos del evento
@@ -1655,6 +1655,7 @@ def login_as_judge(codigo_evento, cedula_jurado):
     
     flash(f'Has iniciado sesión como {jurado["nombres"]} {jurado["apellidos"]} (Jurado).', 'info')
     return redirect(url_for('evaluar_posters', codigo_evento=codigo_evento))
+
 
 @app.route('/tablero/posters/<codigo_evento>')
 @login_required
