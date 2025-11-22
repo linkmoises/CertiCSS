@@ -1803,7 +1803,7 @@ def admin_posters(codigo_evento):
 ###
 ### Resultados finales del concurso
 ###
-@app.route('/tablero/resultados_poster/<codigo_evento>')
+@app.route('/tablero/posters/<codigo_evento>/resultados')
 @login_required
 def resultados_poster(codigo_evento):
     evento = collection_eventos.find_one({"codigo": codigo_evento})
@@ -1836,9 +1836,35 @@ def resultados_poster(codigo_evento):
     # Ordenar por promedio descendente
     resultados.sort(key=lambda x: x['promedio'], reverse=True)
     
+    # Obtener todos los jurados (para la vista detallada)
+    jurados = list(collection_participantes.find({
+        "codigo_evento": codigo_evento,
+        "rol": "jurado_poster"
+    }).sort([("apellidos", 1), ("nombres", 1)]))
+    
+    # Obtener todas las evaluaciones (para la vista detallada)
+    all_evaluaciones = list(collection_evaluaciones_poster.find({
+        "codigo_evento": codigo_evento
+    }))
+    
+    # Agrupar evaluaciones por póster
+    evaluaciones_por_poster = {}
+    for eval in all_evaluaciones:
+        nanoid = eval['nanoid_poster']
+        if nanoid not in evaluaciones_por_poster:
+            evaluaciones_por_poster[nanoid] = []
+        evaluaciones_por_poster[nanoid].append(eval)
+        
+    # Diccionario de promedios para acceso rápido
+    promedios_poster = {r['poster']['nanoid']: r['promedio'] for r in resultados}
+    
     return render_template('resultados_poster.html', 
                          evento=evento, 
-                         resultados=resultados)
+                         resultados=resultados,
+                         posters=posters,
+                         jurados=jurados,
+                         evaluaciones_por_poster=evaluaciones_por_poster,
+                         promedios_poster=promedios_poster)
 
 
 ###

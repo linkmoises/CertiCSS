@@ -1,403 +1,444 @@
 {% include 'tablero-header.html' %}
 
 {% include 'tablero-sidebar.html' %}
-    
-    <!-- CONTENIDO -->
-    <div class="w-full lg:ps-64">
-        
-        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
 
-            <!-- TARJETAS RESUMEN CONCURSO -->
-            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
-                <!-- Grid -->
-                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                    <!-- Card -->
-                    <div class="flex flex-col bg-white border shadow-sm rounded-xl">
-                            <div class="p-4 md:p-5">
-                            <div class="flex items-center gap-x-2">
-                                <p class="text-xs uppercase tracking-wide text-gray-500">
-                                    Trabajos registrados
-                                </p>
-                            </div>
-                    
-                            <div class="mt-1 flex items-center gap-x-2">
-                                <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
-                                    {{ posters|length }}
-                                </h3>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- End Card -->
-                
-                    <!-- Card -->
-                    <div class="flex flex-col bg-white border shadow-sm rounded-xl">
-                        <div class="p-4 md:p-5">
-                            <div class="flex items-center gap-x-2">
-                                <p class="text-xs uppercase tracking-wide text-gray-500">
-                                    Jurados registrados
-                                </p>
-                            </div>
-                
-                            <div class="mt-1 flex items-center gap-x-2">
-                                <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
-                                    {{ jurados|length }}
-                                </h3>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- End Card -->
-                
-                    <!-- Card -->
-                    <div class="flex flex-col bg-white border shadow-sm rounded-xl">
-                        <div class="p-4 md:p-5">
-                            <div class="flex items-center gap-x-2">
-                                <p class="text-xs uppercase tracking-wide text-gray-500">
-                                    Evaluaciones realizadas
-                                </p>
-                            </div>
+<!-- CONTENIDO -->
+<div class="w-full lg:ps-64">
 
-                            <div class="mt-1 flex items-center gap-x-2">
-                                <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
-                                    {% set total_evaluaciones = 0 %}
-                                    {% for evals in evaluaciones_por_poster.values() %}
-                                        {% set total_evaluaciones = total_evaluaciones + (evals|length) %}
-                                    {% endfor %}
-                                    {{ total_evaluaciones }}
-                                </h3>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- End Card -->
-                
-                    <!-- Card -->
-                    <div class="flex flex-col bg-white border shadow-sm rounded-xl">
-                        <div class="p-4 md:p-5">
-                            <div class="flex items-center gap-x-2">
-                                <p class="text-xs uppercase tracking-wide text-gray-500">
-                                    Evaluaciones completas
-                                </p>
-                            </div>
+    <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
 
-                            <div class="mt-1 flex items-center gap-x-2">
-                                <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
-                                    {{ promedios_poster|length }}
-                                </h3>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- End Card -->
-                </div>
-                <!-- End Grid -->
-            </div>
-            <!-- FIN TARJETAS RESUMEN CONCURSO -->
-
-            <!-- TABLA RESUMEN EVENTO -->
-            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+        <!-- TARJETAS RESUMEN CONCURSO -->
+        <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+            <!-- Grid -->
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 <!-- Card -->
-                <div class="flex flex-col">
-                    <div class="-m-1.5 overflow-x-auto">
-                        <div class="p-1.5 min-w-full inline-block align-middle">
-                            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                                <!-- Header -->
-                                <div class="flex items-center gap-x-3">
-                                    <div class="relative h-32 w-32 shrink-0">
-{% if evento.afiche_750 %}
-                                        <img src="{{ url_for('static', filename='uploads/' + evento.afiche_750.split('/')[-1]) }}" alt="{{ evento.nombre }}" class="w-32 h-32 object-cover rounded-lg absolute top-0 start-0">
-{% else %}
-                                        <img class="size-full absolute top-0 start-0 object-cover rounded-l-xl" src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}" alt="{{ evento.nombre }}">
-{% endif %}                                        
-                                    </div>
-                                    
-                                    <div class="grow">
-                                        <h2 class="block text-3xl font-bold mt-2">{{ evento.tipo }}</h2>
-                                        <h4 class="block italic mb-2">{{ evento.unidad_ejecutora }}</h4>
-                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
-                                            {{ evento.tipo }}
-                                        </span>
-                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
-                                            {{ evento.modalidad }}
-                                        </span>
-                                    </div>
-                                </div>
-                                <!-- End Header -->
-                            </div>
+                <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                    <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
+                                Trabajos registrados
+                            </p>
+                        </div>
+
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                {{ posters|length }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+
+                <!-- Card -->
+                <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                    <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
+                                Jurados registrados
+                            </p>
+                        </div>
+
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                {{ jurados|length }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+
+                <!-- Card -->
+                <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                    <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
+                                Evaluaciones realizadas
+                            </p>
+                        </div>
+
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                {% set total_evaluaciones = 0 %}
+                                {% for evals in evaluaciones_por_poster.values() %}
+                                {% set total_evaluaciones = total_evaluaciones + (evals|length) %}
+                                {% endfor %}
+                                {{ total_evaluaciones }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+
+                <!-- Card -->
+                <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                    <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
+                                Evaluaciones completas
+                            </p>
+                        </div>
+
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                {{ promedios_poster|length }}
+                            </h3>
                         </div>
                     </div>
                 </div>
                 <!-- End Card -->
             </div>
-            <!-- End TABLA RESUMEN EVENTO -->
+            <!-- End Grid -->
+        </div>
+        <!-- FIN TARJETAS RESUMEN CONCURSO -->
 
-            <!-- TABLA RESUMEN EVENTOS -->
-            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
-                <!-- Card -->
-                <div class="flex flex-col">
+        <!-- TABLA RESUMEN EVENTO -->
+        <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+            <!-- Card -->
+            <div class="flex flex-col">
                 <div class="-m-1.5 overflow-x-auto">
                     <div class="p-1.5 min-w-full inline-block align-middle">
-                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                        <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                            <!-- Header -->
+                            <div class="flex items-center gap-x-3">
+                                <div class="relative h-32 w-32 shrink-0">
+                                    {% if evento.afiche_750 %}
+                                    <img src="{{ url_for('static', filename='uploads/' + evento.afiche_750.split('/')[-1]) }}"
+                                        alt="{{ evento.nombre }}"
+                                        class="w-32 h-32 object-cover rounded-lg absolute top-0 start-0">
+                                    {% else %}
+                                    <img class="size-full absolute top-0 start-0 object-cover rounded-l-xl"
+                                        src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}"
+                                        alt="{{ evento.nombre }}">
+                                    {% endif %}
+                                </div>
 
-                        <!-- Header -->
-                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
-                            <div>
-                                <h2 class="text-xl font-semibold text-gray-800">
-                                    Concurso de trabajos de investigación
-                                </h2>
-                                <p class="text-sm text-gray-600">
-                                    {{ evento.nombre }}
-                                </p>
-                            </div>
-            
-                            <div>
-                                <div class="inline-flex gap-x-2">
-                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="{{ url_for('resultados_concurso_publico', codigo_evento=evento.codigo) }}" target="_blank">
-                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trophy-icon lucide-trophy"><path d="M10 14.66v1.626a2 2 0 0 1-.976 1.696A5 5 0 0 0 7 21.978"/><path d="M14 14.66v1.626a2 2 0 0 0 .976 1.696A5 5 0 0 1 17 21.978"/><path d="M18 9h1.5a1 1 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/><path d="M6 9H4.5a1 1 0 0 1 0-5H6"/></svg>
-                                        Podio
-                                    </a>
-                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="{{ url_for('resultados_poster', codigo_evento=evento.codigo) }}">
-                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-table-icon lucide-table"><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></svg>
-                                        Resultados
-                                    </a>
+                                <div class="grow">
+                                    <h2 class="block text-3xl font-bold mt-2">{{ evento.tipo }}</h2>
+                                    <h4 class="block italic mb-2">{{ evento.unidad_ejecutora }}</h4>
+                                    <span
+                                        class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                        {{ evento.tipo }}
+                                    </span>
+                                    <span
+                                        class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                        {{ evento.modalidad }}
+                                    </span>
                                 </div>
                             </div>
+                            <!-- End Header -->
                         </div>
-                        <!-- End Header -->
+                    </div>
+                </div>
+            </div>
+            <!-- End Card -->
+        </div>
+        <!-- End TABLA RESUMEN EVENTO -->
 
-                        <!-- Banner de sesión de jurado activa -->
-{% if jurado_activo %}
-                        <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0">
-                                        <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                                        </svg>
-                                    </div>
-                                    <div class="ml-3">
-                                        <p class="text-sm text-blue-700">
-                                            <strong>Modo Jurado Activado:</strong> Estás evaluando como <strong>{{ jurado_activo.nombres }} {{ jurado_activo.apellidos }}</strong>.
-                                            <a href="{{ url_for('poster_logout', codigo_evento=evento.codigo) }}" class="ml-2 text-blue-600 hover:text-blue-800 font-medium">
-                                                Salir del modo jurado
-                                            </a>
-                                        </p>
+        <!-- TABLA RESUMEN EVENTOS -->
+        <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+            <!-- Card -->
+            <div class="flex flex-col">
+                <div class="-m-1.5 overflow-x-auto">
+                    <div class="p-1.5 min-w-full inline-block align-middle">
+                        <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+
+                            <!-- Header -->
+                            <div
+                                class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
+                                <div>
+                                    <h2 class="text-xl font-semibold text-gray-800">
+                                        Concurso de trabajos de investigación
+                                    </h2>
+                                    <p class="text-sm text-gray-600">
+                                        {{ evento.nombre }}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <div class="inline-flex gap-x-2">
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
+                                            href="{{ url_for('resultados_concurso_publico', codigo_evento=evento.codigo) }}"
+                                            target="_blank">
+                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                                height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                class="lucide lucide-trophy-icon lucide-trophy">
+                                                <path d="M10 14.66v1.626a2 2 0 0 1-.976 1.696A5 5 0 0 0 7 21.978" />
+                                                <path d="M14 14.66v1.626a2 2 0 0 0 .976 1.696A5 5 0 0 1 17 21.978" />
+                                                <path d="M18 9h1.5a1 1 0 0 0 0-5H18" />
+                                                <path d="M4 22h16" />
+                                                <path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z" />
+                                                <path d="M6 9H4.5a1 1 0 0 1 0-5H6" />
+                                            </svg>
+                                            Podio
+                                        </a>
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
+                                            href="{{ url_for('resultados_poster', codigo_evento=evento.codigo) }}">
+                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                                height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                class="lucide lucide-table-icon lucide-table">
+                                                <path d="M12 3v18" />
+                                                <rect width="18" height="18" x="3" y="3" rx="2" />
+                                                <path d="M3 9h18" />
+                                                <path d="M3 15h18" />
+                                            </svg>
+                                            Resultados
+                                        </a>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-{% endif %}
-                        <!-- Body -->
-                        <div class="bg-white p-6">
-                            <!-- Lista de Jurados -->
-                            {% if jurados %}
-                            <div class="mb-6">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-3">Jurados Registrados</h3>
-                                <div class="bg-gray-50 p-4 rounded-lg">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                        {% for jurado in jurados %}
-                                        <div class="bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
-                                            <div class="flex justify-between items-start">
-                                                <div class="flex-1">
-                                                    <div class="text-sm">
-                                                        <strong>{{ jurado.nombres }} {{ jurado.apellidos }}</strong>
-                                                        <br>
-                                                        <span class="text-gray-600">{{ jurado.especialidad }}</span>
-                                                        {% if jurado.institucion %}
-                                                        <br>
-                                                        <span class="text-gray-500 text-xs">{{ jurado.institucion }}</span>
-                                                        {% endif %}
-                                                        <br>
-                                                        <span class="text-gray-400 text-xs">Cédula: {{ jurado.cedula }}</span>
-                                                    </div>
-                                                </div>
-                                                <div class="ml-2">
-                                                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 space-x-1">
-                                                        <a href="{{ url_for('login_as_judge', codigo_evento=evento.codigo, cedula_jurado=jurado.cedula) }}" 
-                                                        class="inline-flex items-center p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-full transition-colors duration-200"
-                                                        title="Iniciar sesión como este jurado">
-                                                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-gavel-icon lucide-gavel"><path d="m14 13-8.381 8.38a1 1 0 0 1-3.001-3l8.384-8.381"/><path d="m16 16 6-6"/><path d="m21.5 10.5-8-8"/><path d="m8 8 6-6"/><path d="m8.5 7.5 8 8"/></svg>
-                                                        </a>
-                                                        <button onclick="confirmarEliminacionJurado('{{ jurado.cedula }}', '{{ jurado.nombres }} {{ jurado.apellidos }}')" 
-                                                                class="inline-flex items-center p-1.5 text-red-600 hover:text-red-800 hover:bg-red-100 rounded-full transition-colors duration-200"
-                                                                title="Eliminar jurado">
-                                                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2-icon lucide-trash-2"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                                        </button>
-                                                    </td>
-                                                </div>
-                                            </div>
+                            <!-- End Header -->
+
+                            <!-- Banner de sesión de jurado activa -->
+                            {% if jurado_activo %}
+                            <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0">
+                                            <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd"
+                                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
                                         </div>
-                                        {% endfor %}
+                                        <div class="ml-3">
+                                            <p class="text-sm text-blue-700">
+                                                <strong>Modo Jurado Activado:</strong> Estás evaluando como <strong>{{
+                                                    jurado_activo.nombres }} {{ jurado_activo.apellidos }}</strong>.
+                                                <a href="{{ url_for('poster_logout', codigo_evento=evento.codigo) }}"
+                                                    class="ml-2 text-blue-600 hover:text-blue-800 font-medium">
+                                                    Salir del modo jurado
+                                                </a>
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             {% endif %}
-                
-                            <!-- Lista de Pósters -->
-                            {% if posters %}
-                            <div class="mb-6">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-3">Trabajos de Investigación Registrados</h3>
-                                
-                                <div class="overflow-x-auto">
-                                    <table class="min-w-full bg-white border border-gray-200">
-                                        <thead class="bg-gray-50">
-                                            <tr>
-                                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-                                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Autor</th>
-                                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
-                                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Archivo</th>
-                                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Evaluaciones</th>
-                                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="bg-white divide-y divide-gray-200">
-                                            {% for poster in posters %}
-                                            <tr class="hover:bg-gray-50">
-                                                <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                    {{ "%02d"|format(poster.numero_poster) }}
-                                                </td>
-                                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
-                                                    <div>
-                                                        <strong>{{ poster.nombres }} {{ poster.apellidos }}</strong>
-                                                        {% if poster.institucion %}
-                                                        <br>
-                                                        <span class="text-xs text-gray-500">{{ poster.institucion }}</span>
-                                                        {% endif %}
+                            <!-- Body -->
+                            <div class="bg-white p-6">
+                                <!-- Lista de Jurados -->
+                                {% if jurados %}
+                                <div class="mb-6">
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Jurados Registrados</h3>
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                            {% for jurado in jurados %}
+                                            <div class="bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
+                                                <div class="flex justify-between items-start">
+                                                    <div class="flex-1">
+                                                        <div class="text-sm">
+                                                            <strong>{{ jurado.nombres }} {{ jurado.apellidos }}</strong>
+                                                            <br>
+                                                            <span class="text-gray-600">{{ jurado.especialidad }}</span>
+                                                            {% if jurado.institucion %}
+                                                            <br>
+                                                            <span class="text-gray-500 text-xs">{{ jurado.institucion
+                                                                }}</span>
+                                                            {% endif %}
+                                                            <br>
+                                                            <span class="text-gray-400 text-xs">Cédula: {{ jurado.cedula
+                                                                }}</span>
+                                                        </div>
                                                     </div>
-                                                </td>
-                                                <td class="px-4 py-2 text-sm text-gray-900">
-                                                    <div class="max-w-xs">
-                                                        {{ poster.titulo_poster[:100] }}{% if poster.titulo_poster|length > 100 %}...{% endif %}
+                                                    {% if current_user.rol == 'administrador' %}
+                                                    <div class="ml-2">
+                                                        <td
+                                                            class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 space-x-1">
+                                                            <a href="{{ url_for('login_as_judge', codigo_evento=evento.codigo, cedula_jurado=jurado.cedula) }}"
+                                                                class="inline-flex items-center p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-full transition-colors duration-200"
+                                                                title="Iniciar sesión como este jurado">
+                                                                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg"
+                                                                    width="24" height="24" viewBox="0 0 24 24"
+                                                                    fill="none" stroke="currentColor" stroke-width="2"
+                                                                    stroke-linecap="round" stroke-linejoin="round"
+                                                                    class="lucide lucide-gavel-icon lucide-gavel">
+                                                                    <path
+                                                                        d="m14 13-8.381 8.38a1 1 0 0 1-3.001-3l8.384-8.381" />
+                                                                    <path d="m16 16 6-6" />
+                                                                    <path d="m21.5 10.5-8-8" />
+                                                                    <path d="m8 8 6-6" />
+                                                                    <path d="m8.5 7.5 8 8" />
+                                                                </svg>
+                                                            </a>
+                                                            <button
+                                                                onclick="confirmarEliminacionJurado('{{ jurado.cedula }}', '{{ jurado.nombres }} {{ jurado.apellidos }}')"
+                                                                class="inline-flex items-center p-1.5 text-red-600 hover:text-red-800 hover:bg-red-100 rounded-full transition-colors duration-200"
+                                                                title="Eliminar jurado">
+                                                                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg"
+                                                                    width="24" height="24" viewBox="0 0 24 24"
+                                                                    fill="none" stroke="currentColor" stroke-width="2"
+                                                                    stroke-linecap="round" stroke-linejoin="round"
+                                                                    class="lucide lucide-trash2-icon lucide-trash-2">
+                                                                    <path d="M10 11v6" />
+                                                                    <path d="M14 11v6" />
+                                                                    <path
+                                                                        d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                                                    <path d="M3 6h18" />
+                                                                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                                                </svg>
+                                                            </button>
+                                                        </td>
                                                     </div>
-                                                </td>
-                                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
-                                                    {% if poster.archivo_url %}
-                                                        <a href="{{ url_for('static', filename=poster.archivo_url) }}" 
-                                                           target="_blank" 
-                                                           class="text-blue-600 hover:text-blue-800 text-xs">
-                                                            Ver archivo
-                                                        </a>
-                                                    {% else %}
-                                                        <span class="text-gray-400 text-xs">Sin archivo</span>
                                                     {% endif %}
-                                                </td>
-                                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
-                                                    {% set num_evals = evaluaciones_por_poster.get(poster.nanoid, [])|length %}
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                                        {% if num_evals == 0 %}bg-red-100 text-red-800
-                                                        {% elif num_evals < jurados|length %}bg-yellow-100 text-yellow-800
-                                                        {% else %}bg-green-100 text-green-800{% endif %}">
-                                                        {{ num_evals }}/{{ jurados|length }}
-                                                    </span>
-                                                </td>
-                                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
-                                                    <div class="flex items-center space-x-2">
-                                                        <a href="{{ url_for('editar_poster_admin', codigo_evento=evento.codigo, nanoid_poster=poster.nanoid) }}" 
-                                                           class="inline-flex items-center p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-full transition-colors duration-200"
-                                                           title="Editar póster">
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                                            </svg>
-                                                        </a>
-                                                    </div>
-                                                </td>
-                                            </tr>
+                                                </div>
+                                            </div>
                                             {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                
-                            <!-- Evaluaciones Detalladas -->
-                            <div class="mb-6">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-3">Estado de Evaluaciones</h3>
-                                
-                                {% for poster in posters %}
-                                {% set evaluaciones = evaluaciones_por_poster.get(poster.nanoid, []) %}
-                                {% if evaluaciones %}
-                                <div class="border border-gray-200 rounded-lg p-4 mb-4">
-                                    <div class="flex justify-between items-center mb-2">
-                                        <h4 class="font-medium text-gray-800">
-                                            Póster #{{ "%02d"|format(poster.numero_poster) }} - {{ poster.nombres }} {{ poster.apellidos }}
-                                        </h4>
-                                        {% if poster.nanoid in promedios_poster %}
-                                        <span class="text-lg font-bold text-blue-600">
-                                            {{ "%.2f"|format(promedios_poster[poster.nanoid]) }}/10
-                                        </span>
-                                        {% endif %}
-                                    </div>
-                                    
-                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                        {% for eval in evaluaciones %}
-                                        {% set jurado = jurados | selectattr('cedula', 'equalto', eval.cedula_jurado) | first %}
-                                        <div class="bg-gray-50 p-3 rounded">
-                                            <div class="flex justify-between items-center mb-1">
-                                                <span class="text-sm font-medium">
-                                                    {% if jurado %}{{ jurado.nombres }} {{ jurado.apellidos }}{% else %}Jurado {{ eval.cedula_jurado }}{% endif %}
-                                                </span>
-                                                <span class="text-sm font-bold text-blue-600">{{ "%.2f"|format(eval.puntuacion_final) }}/10</span>
-                                            </div>
-                                            <div class="text-xs text-gray-600">
-                                                <div>Contenido: {{ "%.1f"|format(eval.contenido_score) }}/6.0</div>
-                                                <div>Visual: {{ "%.1f"|format(eval.presentacion_visual_score) }}/2.0</div>
-                                                <div>Oral: {{ "%.1f"|format(eval.presentacion_oral_score) }}/2.0</div>
-                                            </div>
-                                            <div class="text-xs text-gray-500 mt-1">
-                                                {{ eval.timestamp.strftime('%d/%m/%Y %H:%M') }}
-                                            </div>
                                         </div>
-                                        {% endfor %}
                                     </div>
                                 </div>
                                 {% endif %}
-                                {% endfor %}
+
+                                <!-- Lista de Pósters -->
+                                {% if posters %}
+                                <div class="mb-6">
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Trabajos de Investigación
+                                        Registrados</h3>
+
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full bg-white border border-gray-200">
+                                            <thead class="bg-gray-50">
+                                                <tr>
+                                                    <th
+                                                        class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        #</th>
+                                                    <th
+                                                        class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Autor</th>
+                                                    <th
+                                                        class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Título</th>
+                                                    <th
+                                                        class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Archivo</th>
+                                                    <th
+                                                        class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Evaluaciones</th>
+                                                    <th
+                                                        class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="bg-white divide-y divide-gray-200">
+                                                {% for poster in posters %}
+                                                <tr class="hover:bg-gray-50">
+                                                    <td
+                                                        class="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                        {{ "%02d"|format(poster.numero_poster) }}
+                                                    </td>
+                                                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                                                        <div>
+                                                            <strong>{{ poster.nombres }} {{ poster.apellidos }}</strong>
+                                                            {% if poster.institucion %}
+                                                            <br>
+                                                            <span class="text-xs text-gray-500">{{ poster.institucion
+                                                                }}</span>
+                                                            {% endif %}
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-4 py-2 text-sm text-gray-900">
+                                                        <div class="max-w-xs">
+                                                            {{ poster.titulo_poster[:100] }}{% if
+                                                            poster.titulo_poster|length > 100 %}...{% endif %}
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                                                        {% if poster.archivo_url %}
+                                                        <a href="{{ url_for('static', filename=poster.archivo_url) }}"
+                                                            target="_blank"
+                                                            class="text-blue-600 hover:text-blue-800 text-xs">
+                                                            Ver archivo
+                                                        </a>
+                                                        {% else %}
+                                                        <span class="text-gray-400 text-xs">Sin archivo</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                                                        {% set num_evals = evaluaciones_por_poster.get(poster.nanoid,
+                                                        [])|length %}
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                                        {% if num_evals == 0 %}bg-red-100 text-red-800
+                                                        {% elif num_evals < jurados|length %}bg-yellow-100 text-yellow-800
+                                                        {% else %}bg-green-100 text-green-800{% endif %}">
+                                                            {{ num_evals }}/{{ jurados|length }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                                                        <div class="flex items-center space-x-2">
+                                                            <a href="{{ url_for('editar_poster_admin', codigo_evento=evento.codigo, nanoid_poster=poster.nanoid) }}"
+                                                                class="inline-flex items-center p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-full transition-colors duration-200"
+                                                                title="Editar póster">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                                    viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2"
+                                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                                                    </path>
+                                                                </svg>
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                {% else %}
+                                <div class="text-center py-8">
+                                    <p class="text-gray-500">No hay pósters registrados para este evento aún.</p>
+                                    <div class="mt-4 space-y-2">
+                                        <p class="text-sm text-gray-600">Enlaces de registro:</p>
+                                        <div class="space-x-4">
+                                            <a href="{{ url_for('registrar_poster', codigo_evento=evento.codigo) }}"
+                                                class="text-blue-600 hover:text-blue-800 font-medium">Registrar
+                                                Póster</a>
+                                            <a href="{{ url_for('registrar_jurado', codigo_evento=evento.codigo) }}"
+                                                class="text-green-600 hover:text-green-800 font-medium">Registrar
+                                                Jurado</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
                             </div>
-                
-                            {% else %}
-                            <div class="text-center py-8">
-                                <p class="text-gray-500">No hay pósters registrados para este evento aún.</p>
-                                <div class="mt-4 space-y-2">
-                                    <p class="text-sm text-gray-600">Enlaces de registro:</p>
-                                    <div class="space-x-4">
-                                        <a href="{{ url_for('registrar_poster', codigo_evento=evento.codigo) }}" 
-                                           class="text-blue-600 hover:text-blue-800 font-medium">Registrar Póster</a>
-                                        <a href="{{ url_for('registrar_jurado', codigo_evento=evento.codigo) }}" 
-                                           class="text-green-600 hover:text-green-800 font-medium">Registrar Jurado</a>
+                            <!-- End Body -->
+
+                            <!-- Footer -->
+                            <div
+                                class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
+                                <div>
+                                    <p class="text-sm text-gray-600 dark:text-neutral-400">
+                                        <span class="font-semibold text-gray-800 dark:text-neutral-200">X</span> x
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <div class="inline-flex gap-x-2">
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50"
+                                            href="{{ url_for('listar_participantes', codigo_evento=evento.codigo) }}">
+                                            Volver al listado de participantes
+                                        </a>
                                     </div>
                                 </div>
                             </div>
-                            {% endif %}
+                            <!-- End Footer -->
+
                         </div>
-                        <!-- End Body -->
-
-                        <!-- Footer -->
-                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
-                            <div>
-                            <p class="text-sm text-gray-600 dark:text-neutral-400">
-                                <span class="font-semibold text-gray-800 dark:text-neutral-200">X</span> x
-                            </p>
-                            </div>
-
-                            <div>
-                                <div class="inline-flex gap-x-2">
-                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="{{ url_for('listar_participantes', codigo_evento=evento.codigo) }}">
-                                        Volver al listado de participantes
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- End Footer -->
-
-                    </div>
                     </div>
                 </div>
-                </div>
-                <!-- End Card -->
             </div>
-            <!-- FIN TABLA RESUMEN EVENTOS -->
-
-{% include 'tablero-footer.html' %}
-
+            <!-- End Card -->
         </div>
+        <!-- FIN TABLA RESUMEN EVENTOS -->
+
+        {% include 'tablero-footer.html' %}
+
     </div>
-    <!-- FIN CONTENIDO -->
+</div>
+<!-- FIN CONTENIDO -->
 
 <!-- JS PLUGINS -->
 <script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
@@ -409,16 +450,16 @@
     });
     document.getElementById("buscadorForm").addEventListener("submit", function (event) {
         event.preventDefault(); // Prevenir envío estándar del formulario
-    
+
         const valor = document.getElementById("buscador").value.trim();
         const patterns = {
             cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas
             pasaporte: /^[A-Z]{2}\d{6,9}$/,                        // Pasaportes
             id_certificado: /^[a-zA-Z0-9]{8}$/                    // IDs de certificados
         };
-    
+
         let action, field;
-    
+
         if (patterns.cedula.test(valor)) {
             action = "/buscar_certificados";
             field = "cedula";
@@ -432,16 +473,16 @@
             alert("Formato no válido. Introduzca un documento de identificación o un ID de certificado válido.");
             return;
         }
-    
+
         // Crear y enviar el formulario dinámicamente
         const form = event.target;
         form.action = action;
         form.method = "POST";
-    
+
         // Limpiar campos ocultos previos
         const hiddenInputs = form.querySelectorAll("input[type='hidden']");
         hiddenInputs.forEach((input) => input.remove());
-    
+
         const hiddenInput = document.createElement("input");
         hiddenInput.type = "hidden";
         hiddenInput.name = field;
@@ -453,16 +494,16 @@
     // Función para confirmar eliminación de jurado
     function confirmarEliminacionJurado(cedulaJurado, nombreJurado) {
         const mensaje = `¿Está seguro de que desea eliminar al jurado "${nombreJurado}"?\n\n` +
-                       `ADVERTENCIA: Esta acción también eliminará TODAS las evaluaciones realizadas por este jurado.\n` +
-                       `Esta acción NO se puede deshacer.\n\n` +
-                       `¿Desea continuar?`;
-        
+            `ADVERTENCIA: Esta acción también eliminará TODAS las evaluaciones realizadas por este jurado.\n` +
+            `Esta acción NO se puede deshacer.\n\n` +
+            `¿Desea continuar?`;
+
         if (confirm(mensaje)) {
             // Crear formulario dinámico para enviar la solicitud POST
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = `{{ url_for('eliminar_jurado_poster', codigo_evento=evento.codigo, cedula_jurado='CEDULA_PLACEHOLDER') }}`.replace('CEDULA_PLACEHOLDER', cedulaJurado);
-            
+
             // Agregar token CSRF si está disponible
             const csrfToken = document.querySelector('meta[name="csrf-token"]');
             if (csrfToken) {
@@ -472,11 +513,12 @@
                 csrfInput.value = csrfToken.getAttribute('content');
                 form.appendChild(csrfInput);
             }
-            
+
             document.body.appendChild(form);
             form.submit();
         }
     }
-</script>    
+</script>
 </body>
+
 </html>
