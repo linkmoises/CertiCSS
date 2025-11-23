@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>CertiCSS - Nosotros</title>
@@ -7,45 +8,59 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- favicons -->
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}"
+        sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
+    <link rel="apple-touch-icon" sizes="180x180"
+        href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
     <meta name="apple-mobile-web-app-title" content="CertiCSS" />
     <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
     <!-- metadatos -->
-    <meta property="og:title" content="DENADOI - CertiCSS"/>
-    <meta property="og:description" content="Plataforma de eventos académicos del Departamento Nacional de Docencia e Invetsigación de la Caja de Seguro Social"/>
-    <meta property="og:image" content="{{ BASE_URL}}{{ url_for('static', filename='assets/og-certicss.jpg') }}"/>
+    <meta property="og:title" content="DENADOI - CertiCSS" />
+    <meta property="og:description"
+        content="Plataforma de eventos académicos del Departamento Nacional de Docencia e Invetsigación de la Caja de Seguro Social" />
+    <meta property="og:image" content="{{ BASE_URL}}{{ url_for('static', filename='assets/og-certicss.jpg') }}" />
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:url" content="{{ BASE_URL}}"/>
+    <meta property="og:url" content="{{ BASE_URL}}" />
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="DENADOI - CertiCSS">
-    <meta name="twitter:description" content="Plataforma de eventos académicos del Departamento Nacional de Docencia e Invetsigación de la Caja de Seguro Social">
+    <meta name="twitter:description"
+        content="Plataforma de eventos académicos del Departamento Nacional de Docencia e Invetsigación de la Caja de Seguro Social">
     <meta name="twitter:image" content="{{ BASE_URL}}{{ url_for('static', filename='assets/og-certicss.jpg') }}">
     <meta name="twitter:url" content="{{ BASE_URL}}">
-{% if UMAMI_URL %}
+    {% if UMAMI_URL %}
     {{ UMAMI_URL | safe }}
-{% endif %}
+    {% endif %}
 </head>
+
 <body>
 
     <!--====== HERO ======-->
     <section class="relative bg-gradient-to-br from-blue-900 to-indigo-800 text-white overflow-hidden">
-        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ url_for('static', filename='assets/auditorio-cidelas-dark.jpg') }}');"></div>
+        <div class="absolute inset-0 bg-cover bg-center"
+            style="background-image: url('{{ url_for('static', filename='assets/auditorio-cidelas-dark.jpg') }}');">
+        </div>
 
         <div class="container mx-auto px-4 py-24 md:py-24 relative z-10">
             <div class="flex flex-col md:flex-row items-center justify-between">
 
                 <div class="w-full md:w-1/2 mb-12 md:mb-0">
-                    <a href="/"><img src="{{ url_for('static', filename='assets/css-logo.png') }}" alt="Logo Caja de Seguro Social" class="h-28 w-28 mb-5"></a>
+                    <a href="/"><img src="{{ url_for('static', filename='assets/css-logo.png') }}"
+                            alt="Logo Caja de Seguro Social" class="h-28 w-28 mb-5"></a>
                     <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
                         Conocimiento.<br>Interacción.<br>Aprendizaje.
                     </h1>
-                    <p class="text-xl mb-8 text-gray-300">Empoderando la educación continua en los profesionales de la salud en nuestras unidades ejecutoras desde el Departamento Nacional de Docencia e Investigación de la Caja de Seguro Social.</p>
+                    <p class="text-xl mb-8 text-gray-300">Empoderando la educación continua en los profesionales de la
+                        salud en nuestras unidades ejecutoras desde el Departamento Nacional de Docencia e Investigación
+                        de la Caja de Seguro Social.</p>
                     <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mb-8">
-                        <a href="/catalogo/1" class="bg-white text-blue-900 font-semibold px-8 py-3 rounded-full hover:bg-blue-100 transition duration-300 text-center">Explorar Eventos</a>
-                        <a href="{{ url_for('buscar_certificados') }}" class="border-2 border-white text-white font-semibold px-8 py-3 rounded-full hover:bg-white hover:text-blue-900 transition duration-300 text-center">Buscar Certificado</a>
+                        <a href="/catalogo/1"
+                            class="bg-white text-blue-900 font-semibold px-8 py-3 rounded-full hover:bg-blue-100 transition duration-300 text-center">Explorar
+                            Eventos</a>
+                        <a href="{{ url_for('buscar_certificados') }}"
+                            class="border-2 border-white text-white font-semibold px-8 py-3 rounded-full hover:bg-white hover:text-blue-900 transition duration-300 text-center">Buscar
+                            Certificado</a>
                     </div>
                 </div>
 
@@ -53,34 +68,55 @@
                     <div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-xl p-8 shadow-2xl">
                         <h2 class="text-2xl font-semibold mb-6">Validar o buscar un certificado</h2>
 
-                            <div class="relative z-10 flex gap-x-3 p-3 bg-white border rounded-lg shadow-lg shadow-gray-100">
-                                <div class="w-full">
-                                    <form id="buscadorForm">
-                                        <div class="relative">
-                                            <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none z-20 ps-3.5">
-                                                <svg class="shrink-0 size-4 text-gray-400 dark:text-white/60" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <circle cx="11" cy="11" r="8"></circle>
-                                                    <path d="m21 21-4.3-4.3"></path>
-                                                </svg>
-                                            </div>
-                                            <input type="text" id="buscador" name="buscador" class="text-gray-500 py-2 ps-10 pe-16 block w-full bg-white border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder:text-neutral-400 dark:focus:ring-neutral-600" placeholder="Ingrese el ID de certificado o documento de identificación...">
-                                            <div class="hidden absolute inset-y-0 end-0 flex items-center pointer-events-none z-20 pe-1">
-                                                <button type="button" class="inline-flex shrink-0 justify-center items-center size-6 rounded-full text-gray-500 hover:text-blue-600 focus:outline-none focus:text-blue-600 dark:text-neutral-500 dark:hover:text-blue-500 dark:focus:text-blue-500" aria-label="Close">
-                                                    <span class="sr-only">Close</span>
-                                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <div
+                            class="relative z-10 flex gap-x-3 p-3 bg-white border rounded-lg shadow-lg shadow-gray-100">
+                            <div class="w-full">
+                                <form id="buscadorForm">
+                                    <div class="relative">
+                                        <div
+                                            class="absolute inset-y-0 start-0 flex items-center pointer-events-none z-20 ps-3.5">
+                                            <svg class="shrink-0 size-4 text-gray-400 dark:text-white/60"
+                                                xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="11" cy="11" r="8"></circle>
+                                                <path d="m21 21-4.3-4.3"></path>
+                                            </svg>
+                                        </div>
+                                        <input type="text" id="buscador" name="buscador"
+                                            class="text-gray-500 py-2 ps-10 pe-16 block w-full bg-white border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder:text-neutral-400 dark:focus:ring-neutral-600"
+                                            placeholder="Ingrese el ID de certificado o documento de identificación...">
+                                        <div
+                                            class="hidden absolute inset-y-0 end-0 flex items-center pointer-events-none z-20 pe-1">
+                                            <button type="button"
+                                                class="inline-flex shrink-0 justify-center items-center size-6 rounded-full text-gray-500 hover:text-blue-600 focus:outline-none focus:text-blue-600 dark:text-neutral-500 dark:hover:text-blue-500 dark:focus:text-blue-500"
+                                                aria-label="Close">
+                                                <span class="sr-only">Close</span>
+                                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg"
+                                                    width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round">
                                                     <circle cx="12" cy="12" r="10"></circle>
                                                     <path d="m15 9-6 6"></path>
                                                     <path d="m9 9 6 6"></path>
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                            <div class="absolute inset-y-0 end-0 flex items-center pointer-events-none z-20 pe-3 text-gray-400">
-                                                <svg class="shrink-0 size-3 text-gray-400 dark:text-white/60" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-corner-down-left"><polyline points="9 10 4 15 9 20"/><path d="M20 4v7a4 4 0 0 1-4 4H4"/></svg>
-                                            </div>
+                                                </svg>
+                                            </button>
                                         </div>
-                                    </form>
-                                </div>
+                                        <div
+                                            class="absolute inset-y-0 end-0 flex items-center pointer-events-none z-20 pe-3 text-gray-400">
+                                            <svg class="shrink-0 size-3 text-gray-400 dark:text-white/60"
+                                                xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round"
+                                                class="lucide lucide-corner-down-left">
+                                                <polyline points="9 10 4 15 9 20" />
+                                                <path d="M20 4v7a4 4 0 0 1-4 4H4" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </form>
                             </div>
+                        </div>
 
                     </div>
                 </div>
@@ -91,7 +127,9 @@
         <!-- Decorative Element -->
         <div class="absolute custom-bottom-y left-0 right-0">
             <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="white"/>
+                <path
+                    d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
+                    fill="white" />
             </svg>
         </div>
     </section>
@@ -102,19 +140,40 @@
         <div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
             <!-- Title -->
             <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-gray-800 sm:text-4xl dark:text-white">Departamento Nacional de Docencia e Investigación</h1>
-                <p class="mt-1 text-gray-600 dark:text-neutral-400">Educación, Formación e Investigación para el Fortalecimiento del Sistema de Salud</p>
+                <h1 class="text-3xl font-bold text-gray-800 sm:text-4xl dark:text-white">Departamento Nacional de
+                    Docencia e Investigación</h1>
+                <p class="mt-1 text-gray-600 dark:text-neutral-400">Educación, Formación e Investigación para el
+                    Fortalecimiento del Sistema de Salud</p>
             </div>
             <!-- End Title -->
 
             <div class="max-w-3xl px-4 pt-6 lg:pt-10 pb-12 sm:px-6 lg:px-8 mx-auto">
-                <p class="mb-4">El <strong>Departamento Nacional de Docencia e Investigación (DENADOI)</strong> de la <strong>Caja de Seguro Social (CSS)</strong> forma parte de la <strong>Dirección Nacional de Servicios y Prestaciones Médicas</strong> y actúa como el ente rector en la planificación, estructuración e implementación de estrategias de educación y capacitación para el personal de salud que labora en la institución.</p>
+                <p class="mb-4">El <strong>Departamento Nacional de Docencia e Investigación (DENADOI)</strong> de la
+                    <strong>Caja de Seguro Social (CSS)</strong> forma parte de la <strong>Dirección Nacional de
+                        Servicios y Prestaciones Médicas</strong> y actúa como el ente rector en la planificación,
+                    estructuración e implementación de estrategias de educación y capacitación para el personal de salud
+                    que labora en la institución.
+                </p>
 
-                <p class="mb-4">En lo que respecta a la formación médica, el departamento tiene la responsabilidad de establecer y gestionar las plazas de <strong>internado rotatorio</strong> para médicos internos, con una duración de dos años, así como las plazas de <strong>formación de médicos especialistas</strong>. Además, coordina la formación de <strong>médicos subespecialistas</strong>, en función de las necesidades del país.</p>
+                <p class="mb-4">En lo que respecta a la formación médica, el departamento tiene la responsabilidad de
+                    establecer y gestionar las plazas de <strong>internado rotatorio</strong> para médicos internos, con
+                    una duración de dos años, así como las plazas de <strong>formación de médicos
+                        especialistas</strong>. Además, coordina la formación de <strong>médicos
+                        subespecialistas</strong>, en función de las necesidades del país.</p>
 
-                <p class="mb-4">Asimismo, es el órgano responsable de la <strong>Educación Médica Continua</strong> para médicos generales y especialistas que prestan servicio en la distintas unidades ejecutoras de la CSS. Su ámbito de acción también abarca la actualización y supervisión permanente del nivel educativo del personal de <strong>enfermería, tecnología médica, farmacia y personal auxiliar del equipo de salud</strong>.</p>
+                <p class="mb-4">Asimismo, es el órgano responsable de la <strong>Educación Médica Continua</strong> para
+                    médicos generales y especialistas que prestan servicio en la distintas unidades ejecutoras de la
+                    CSS. Su ámbito de acción también abarca la actualización y supervisión permanente del nivel
+                    educativo del personal de <strong>enfermería, tecnología médica, farmacia y personal auxiliar del
+                        equipo de salud</strong>.</p>
 
-                <p class="mb-4">En el ámbito de la investigación, el departamento tiene la responsabilidad de <strong>promover, dirigir y supervisar</strong> las investigaciones en salud dentro de la CSS, así como la divulgación de sus resultados a nivel nacional e internacional. Una de las estrategias clave para el cumplimiento de este objetivo es la <strong>Revista Médica de la CSS</strong>, una publicación periódica elaborada en este departamento y orientada a la difusión del conocimiento científico.</p>
+                <p class="mb-4">En el ámbito de la investigación, el departamento tiene la responsabilidad de
+                    <strong>promover, dirigir y supervisar</strong> las investigaciones en salud dentro de la CSS, así
+                    como la divulgación de sus resultados a nivel nacional e internacional. Una de las estrategias clave
+                    para el cumplimiento de este objetivo es la <strong>Revista Médica de la CSS</strong>, una
+                    publicación periódica elaborada en este departamento y orientada a la difusión del conocimiento
+                    científico.
+                </p>
 
                 <!-- Title -->
                 <div class="text-center mt-10 mb-8">
@@ -125,12 +184,13 @@
 
                 <!-- Grid -->
                 <div id="denadoi-jefes" class="justify-center grid grid-cols-2 max-md:gap-x-4">
-{% if jefe %}
+                    {% if jefe %}
                     <div class="text-center">
                         <div>
                             <img class="rounded-xl sm:size-48 lg:size-60 mx-auto" src="{{ jefe_foto_url }}" alt="Jefe">
                             <div class="mt-2 sm:mt-4">
-                                <h3 class="text-sm font-medium text-gray-800 sm:text-base lg:text-lg dark:text-neutral-200">
+                                <h3
+                                    class="text-sm font-medium text-gray-800 sm:text-base lg:text-lg dark:text-neutral-200">
                                     {{ jefe.nombres }} {{ jefe.apellidos }}
                                 </h3>
                                 <p class="text-xs text-gray-600 sm:text-sm lg:text-base dark:text-neutral-400">
@@ -139,14 +199,16 @@
                             </div>
                         </div>
                     </div>
-{% endif %}
+                    {% endif %}
 
-{% if subjefe %}
+                    {% if subjefe %}
                     <div class="text-center">
                         <div>
-                            <img class="rounded-xl sm:size-48 lg:size-60 mx-auto" src="{{ subjefe_foto_url }}" alt="Subjefe">
+                            <img class="rounded-xl sm:size-48 lg:size-60 mx-auto" src="{{ subjefe_foto_url }}"
+                                alt="Subjefe">
                             <div class="mt-2 sm:mt-4">
-                                <h3 class="text-sm font-medium text-gray-800 sm:text-base lg:text-lg dark:text-neutral-200">
+                                <h3
+                                    class="text-sm font-medium text-gray-800 sm:text-base lg:text-lg dark:text-neutral-200">
                                     {{ subjefe.nombres }} {{ subjefe.apellidos }}
                                 </h3>
                                 <p class="text-xs text-gray-600 sm:text-sm lg:text-base dark:text-neutral-400">
@@ -155,23 +217,27 @@
                             </div>
                         </div>
                     </div>
-{% endif %}
+                    {% endif %}
                 </div>
 
                 <!-- Title -->
                 <div class="text-center mt-10 mb-8">
-                    <h1 class="text-3xl font-bold text-gray-800 sm:text-4xl dark:text-white">Coordinadores Nacionales</h1>
-                    <p class="mt-1 text-gray-600 dark:text-neutral-400">Fortaleciendo la Educación Continua en el Territorio Nacional</p>
+                    <h1 class="text-3xl font-bold text-gray-800 sm:text-4xl dark:text-white">Coordinadores Nacionales
+                    </h1>
+                    <p class="mt-1 text-gray-600 dark:text-neutral-400">Fortaleciendo la Educación Continua en el
+                        Territorio Nacional</p>
                 </div>
                 <!-- End Title -->
 
                 <div id="denadoi" class="justify-center grid grid-cols-2 max-md:gap-x-4">
-{% for usuario in denadoi_users %}
-                    <div class="text-center">
+                    {% for usuario in denadoi_users %}
+                    <div class="text-center mb-6">
                         <div>
-                            <img class="rounded-xl sm:size-48 lg:size-60 mx-auto" src="{{ usuario.foto_url }}" alt="Subjefe">
+                            <img class="rounded-xl sm:size-48 lg:size-60 mx-auto" src="{{ usuario.foto_url }}"
+                                alt="Subjefe">
                             <div class="mt-2 sm:mt-4">
-                                <h3 class="text-sm font-medium text-gray-800 sm:text-base lg:text-lg dark:text-neutral-200">
+                                <h3
+                                    class="text-sm font-medium text-gray-800 sm:text-base lg:text-lg dark:text-neutral-200">
                                     {{ usuario.nombres }} {{ usuario.apellidos }}
                                 </h3>
                                 <p class="text-xs text-gray-600 sm:text-sm lg:text-base dark:text-neutral-400">
@@ -180,7 +246,7 @@
                             </div>
                         </div>
                     </div>
-{% endfor %}
+                    {% endfor %}
                 </div>
 
             </div>
@@ -200,8 +266,8 @@
             <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8 relative">
                 <div class="relative mt-12 lg:mt-20">
                     <div class="absolute inset-x-0 hidden xl:px-44 top-2 md:block md:px-20 lg:px-28">
-                        <svg class="w-full" xmlns="http://www.w3.org/2000/svg" width="875" height="48" viewBox="0 0 875 48"
-                            fill="none">
+                        <svg class="w-full" xmlns="http://www.w3.org/2000/svg" width="875" height="48"
+                            viewBox="0 0 875 48" fill="none">
                             <path
                                 d="M2 29C20.2154 33.6961 38.9915 35.1324 57.6111 37.5555C80.2065 40.496 102.791 43.3231 125.556 44.5555C163.184 46.5927 201.26 45 238.944 45C312.75 45 385.368 30.7371 458.278 20.6666C495.231 15.5627 532.399 11.6429 569.278 6.11109C589.515 3.07551 609.767 2.09927 630.222 1.99998C655.606 1.87676 681.208 1.11809 706.556 2.44442C739.552 4.17096 772.539 6.75565 805.222 11.5C828 14.8064 850.34 20.2233 873 24"
                                 stroke="#D4D4D8" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 12" />
@@ -258,29 +324,41 @@
         <!-- Grid -->
         <div class="grid grid-cols-1 md:grid-cols-3 items-center gap-5">
             <div class="text-center md:text-left">
-                <a class="flex-none text-xl font-semibold text-black focus:outline-none dark:text-white" href="{{ url_for('home') }}" aria-label="Brand">CertiCSS</a>
+                <a class="flex-none text-xl font-semibold text-black focus:outline-none dark:text-white"
+                    href="{{ url_for('home') }}" aria-label="Brand">CertiCSS</a>
             </div>
             <!-- End Col -->
 
             <ul class="text-center">
-                <li class="inline-block relative pe-8 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
-                    <a target="_blank" class="inline-flex gap-x-2 text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200" href="https://css.gob.pa/">
-                    CSS
+                <li
+                    class="inline-block relative pe-8 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
+                    <a target="_blank"
+                        class="inline-flex gap-x-2 text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200"
+                        href="https://css.gob.pa/">
+                        CSS
                     </a>
                 </li>
-                <li class="inline-block relative pe-8 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
-                    <a target="_blank" class="inline-flex gap-x-2 text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200" href="https://denadoi.css.gob.pa/">
-                    DENADOI
+                <li
+                    class="inline-block relative pe-8 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
+                    <a target="_blank"
+                        class="inline-flex gap-x-2 text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200"
+                        href="https://denadoi.css.gob.pa/">
+                        DENADOI
                     </a>
                 </li>
-                <li class="inline-block relative pe-8 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
-                    <a target="_blank" class="inline-flex gap-x-2 text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200" href="{{ url_for('nosotros') }}">
-                    Nosotros
+                <li
+                    class="inline-block relative pe-8 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
+                    <a target="_blank"
+                        class="inline-flex gap-x-2 text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200"
+                        href="{{ url_for('nosotros') }}">
+                        Nosotros
                     </a>
                 </li>
-                <li class="inline-block relative pe-8 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
-                    <a class="inline-flex gap-x-2 text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200" href="{{ url_for('politica_privacidad') }}">
-                    Privacidad
+                <li
+                    class="inline-block relative pe-8 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
+                    <a class="inline-flex gap-x-2 text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200"
+                        href="{{ url_for('politica_privacidad') }}">
+                        Privacidad
                     </a>
                 </li>
             </ul>
@@ -288,20 +366,36 @@
 
             <!-- Social Brands -->
             <div class="md:text-end space-x-2 text-center">
-                <a target="_blank" class="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-500 hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-400 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700" href="https://github.com/linkmoises/CertiCSS/">
-                    <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                <a target="_blank"
+                    class="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-500 hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-400 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+                    href="https://github.com/linkmoises/CertiCSS/">
+                    <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                        fill="currentColor" viewBox="0 0 16 16">
+                        <path
+                            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z" />
                     </svg>
                 </a>
-{% if current_user.is_authenticated %}
-                <a class="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-500 hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-400 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700" href="{{ url_for('tablero_coordinadores') }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-window-sidebar" viewBox="0 0 16 16"><path d="M2.5 4a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1m2-.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0m1 .5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1"/><path d="M2 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2zm12 1a1 1 0 0 1 1 1v2H1V3a1 1 0 0 1 1-1zM1 13V6h4v8H2a1 1 0 0 1-1-1m5 1V6h9v7a1 1 0 0 1-1 1z"/></svg>
+                {% if current_user.is_authenticated %}
+                <a class="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-500 hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-400 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+                    href="{{ url_for('tablero_coordinadores') }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        class="bi bi-window-sidebar" viewBox="0 0 16 16">
+                        <path
+                            d="M2.5 4a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1m2-.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0m1 .5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1" />
+                        <path
+                            d="M2 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2zm12 1a1 1 0 0 1 1 1v2H1V3a1 1 0 0 1 1-1zM1 13V6h4v8H2a1 1 0 0 1-1-1m5 1V6h9v7a1 1 0 0 1-1 1z" />
+                    </svg>
                 </a>
-{% else %}
-                <a class="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-500 hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-400 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700" href="{{ url_for('login') }}" rel="nofollow">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 448 512"><path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z"/></svg>
+                {% else %}
+                <a class="size-8 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-500 hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-400 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+                    href="{{ url_for('login') }}" rel="nofollow">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        viewBox="0 0 448 512">
+                        <path
+                            d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z" />
+                    </svg>
                 </a>
-{% endif %}
+                {% endif %}
 
             </div>
             <!-- End Social Brands -->
@@ -309,57 +403,58 @@
         <!-- End Grid -->
     </footer>
 
-<script>
-// Limpia campos dinámicos al cargar la página
-document.addEventListener("DOMContentLoaded", function () {
-    const hiddenInputs = document.querySelectorAll("#buscadorForm input[type='hidden']");
-    hiddenInputs.forEach((input) => input.remove());
-});
-document.getElementById("buscadorForm").addEventListener("submit", function (event) {
-    event.preventDefault(); // Prevenir envío estándar del formulario
+    <script>
+        // Limpia campos dinámicos al cargar la página
+        document.addEventListener("DOMContentLoaded", function () {
+            const hiddenInputs = document.querySelectorAll("#buscadorForm input[type='hidden']");
+            hiddenInputs.forEach((input) => input.remove());
+        });
+        document.getElementById("buscadorForm").addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevenir envío estándar del formulario
 
-    const buscadorInput = document.getElementById("buscador");
-    const valor = buscadorInput.value.trim();
-    buscadorInput.value = valor;
-    //const valor = document.getElementById("buscador").value.trim();
+            const buscadorInput = document.getElementById("buscador");
+            const valor = buscadorInput.value.trim();
+            buscadorInput.value = valor;
+            //const valor = document.getElementById("buscador").value.trim();
 
-    const patterns = {
-        cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas
-        pasaporte: /^[A-Z]{2}\d{6,9}$/,                        // Pasaportes
-        id_certificado: /^[a-zA-Z0-9]{8}$/                    // IDs de certificados
-    };
+            const patterns = {
+                cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas
+                pasaporte: /^[A-Z]{2}\d{6,9}$/,                        // Pasaportes
+                id_certificado: /^[a-zA-Z0-9]{8}$/                    // IDs de certificados
+            };
 
-    let action, field;
+            let action, field;
 
-    if (patterns.cedula.test(valor)) {
-        action = "/buscar_certificados";
-        field = "cedula";
-    } else if (patterns.pasaporte.test(valor)) {
-        action = "/buscar_certificados";
-        field = "cedula";
-    } else if (patterns.id_certificado.test(valor)) {
-        action = "/validar_certificado";
-        field = "nanoid";
-    } else {
-        alert("Formato no válido. Introduzca un documento de identificación o un ID de certificado válido.");
-        return;
-    }
+            if (patterns.cedula.test(valor)) {
+                action = "/buscar_certificados";
+                field = "cedula";
+            } else if (patterns.pasaporte.test(valor)) {
+                action = "/buscar_certificados";
+                field = "cedula";
+            } else if (patterns.id_certificado.test(valor)) {
+                action = "/validar_certificado";
+                field = "nanoid";
+            } else {
+                alert("Formato no válido. Introduzca un documento de identificación o un ID de certificado válido.");
+                return;
+            }
 
-    // Crear y enviar el formulario dinámicamente
-    const form = event.target;
-    form.action = action;
-    form.method = "POST";
+            // Crear y enviar el formulario dinámicamente
+            const form = event.target;
+            form.action = action;
+            form.method = "POST";
 
-    // Limpiar campos ocultos previos
-    const hiddenInputs = form.querySelectorAll("input[type='hidden']");
-    hiddenInputs.forEach((input) => input.remove());
+            // Limpiar campos ocultos previos
+            const hiddenInputs = form.querySelectorAll("input[type='hidden']");
+            hiddenInputs.forEach((input) => input.remove());
 
-    const hiddenInput = document.createElement("input");
-    hiddenInput.type = "hidden";
-    hiddenInput.name = field;
-    hiddenInput.value = valor;
-    form.appendChild(hiddenInput);
-    form.submit();
-});
-</script>
+            const hiddenInput = document.createElement("input");
+            hiddenInput.type = "hidden";
+            hiddenInput.name = field;
+            hiddenInput.value = valor;
+            form.appendChild(hiddenInput);
+            form.submit();
+        });
+    </script>
+
 </html>
