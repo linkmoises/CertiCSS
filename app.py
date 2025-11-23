@@ -3905,11 +3905,13 @@ def crear_evento():
         fondo_file = request.files.get('fondo_evento')
         programa_file = request.files.get('programa_evento')
         certificado_file = request.files.get('certificado_evento')
+        constancia_file = request.files.get('constancia_evento')
 
         afiche_path = None
         fondo_path = None
         programa_path = None
         certificado_path = None
+        constancia_path = None
 
         if afiche_file:
             afiche_filename = f"{codigo}-afiche.jpg"
@@ -3945,6 +3947,11 @@ def crear_evento():
             certificado_path = os.path.join(app.config['UPLOAD_FOLDER'], certificado_filename)
             certificado_file.save(certificado_path)
 
+        if constancia_file:
+            constancia_filename = f"{codigo}-constancia.pdf"
+            constancia_path = os.path.join(app.config['UPLOAD_FOLDER'], constancia_filename)
+            constancia_file.save(constancia_path)
+
         # Insertar nuevo evento en la colección
         collection_eventos.insert_one({
             'nombre': nombre,
@@ -3965,6 +3972,7 @@ def crear_evento():
             'fondo': fondo_path if fondo_file else None,
             'programa': programa_path if programa_file else None,
             'certificado': certificado_path if certificado_file else None,
+            'constancia': constancia_path if constancia_file else None,
             'timestamp': timestamp,
             'autor': current_user.id,
             'checkin_masivo': checkin_masivo,
@@ -4036,12 +4044,14 @@ def editar_evento(codigo_evento):
         fondo_file = request.files.get('fondo_evento')
         programa_file = request.files.get('programa_evento')
         certificado_file = request.files.get('certificado_evento')
+        constancia_file = request.files.get('constancia_evento')
 
         afiche_path = evento.get('afiche')
         fondo_path = evento.get('fondo')
         resized_afiche_path = evento.get('afiche_750')
         programa_path = evento.get('programa')
         certificado_path = evento.get('certificado')
+        constancia_path = evento.get('constancia')
 
         if afiche_file:
             afiche_filename = f"{codigo_evento}-afiche.jpg"
@@ -4074,6 +4084,11 @@ def editar_evento(codigo_evento):
             certificado_path = os.path.join(app.config['UPLOAD_FOLDER'], certificado_filename)
             certificado_file.save(certificado_path)
 
+        if constancia_file:
+            constancia_filename = f"{codigo_evento}-constancia.pdf"
+            constancia_path = os.path.join(app.config['UPLOAD_FOLDER'], constancia_filename)
+            constancia_file.save(constancia_path)
+
         # Actualizar el evento en la base de datos
         collection_eventos.update_one(
             {"codigo": codigo_evento},
@@ -4098,6 +4113,7 @@ def editar_evento(codigo_evento):
                 'fondo': fondo_path,
                 'programa': programa_path,
                 'certificado': certificado_path,
+                'constancia': constancia_path,
                 'checkin_masivo': checkin_masivo,
                 'concurso_poster': concurso_poster,
                 'registro_abierto': registro_abierto,
@@ -4145,6 +4161,9 @@ def eliminar_archivo_evento(codigo_evento, tipo_archivo):
     elif tipo_archivo == 'certificado':
         archivo_path = evento.get('certificado')
         campo_db = 'certificado'
+    elif tipo_archivo == 'constancia':
+        archivo_path = evento.get('constancia')
+        campo_db = 'constancia'
     else:
         flash("Tipo de archivo no válido", "error")
         return redirect(url_for('editar_evento', codigo_evento=codigo_evento))
