@@ -358,6 +358,16 @@
                                 </label>
                             </div>
 
+                            <!-- Asociación Odontológica Panameña -->
+                            <div class="flex items-center mt-2.5">
+                                <input type="checkbox" id="aval-aop" name="aval" value="aval-aop" {% if 'aval-aop' in
+                                    evento.get('avales', []) %}checked{% endif %}
+                                    class="shrink-0 border-gray-200 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800">
+                                <label for="aval-aop" class="text-sm text-gray-500 ms-3 dark:text-neutral-400">
+                                    Asociación Odontológica Panameña
+                                </label>
+                            </div>
+
                             <!-- Asociación Nacional de Enfermeras de Panamá -->
                             <div class="flex items-center mt-2.5">
                                 <input type="checkbox" id="aval-anep" name="aval" value="aval-anep" {% if 'aval-anep' in
@@ -378,65 +388,119 @@
                                 </label>
                             </div>
 
-                            <!-- Universidad de Panamá - Vicerrectoría de Investigación y Postgrado -->
-                            <div class="flex items-center mt-2.5">
-                                <input type="checkbox" id="aval-vip" name="aval" value="aval-vip" {% if 'aval-vip' in
-                                    evento.get('avales', []) %}checked{% endif %}
-                                    class="shrink-0 border-gray-200 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800">
-                                <label for="aval-vip" class="text-sm text-gray-500 ms-3 dark:text-neutral-400">
-                                    Universidad de Panamá - Vicerrectoría de Investigación y Postgrado
-                                </label>
-                            </div>
+                            {% if 'aval-cmp' in evento.get('avales', []) %}
+                            <div class="flex items-center gap-x-3 bg-gray-100 mt-4 p-4 rounded-lg">
+                                <div class="shrink-0">
+                                    <img class="shrink-0 size-16"
+                                        src="{{ url_for('static', filename='assets/logo-cmp.png') }}"
+                                        alt="Colegio Médico de Panamá Logo">
+                                </div>
+                                <div class="grow">
+                                    <h3 class="text-sm font-semibold mb-2">Aval Colegio Médico de Panamá - Información
+                                        adicional</h3>
+                                    <p class="text-gray-500 text-sm mb-4">
+                                        La selección de este aval implica incorporar en el certificado el logotipo
+                                        oficial del Colegio Médico de Panamá y la firma digital del presidente actual,
+                                        según lineamientos del Colegio.
+                                    </p>
 
-                            <!-- Colegio Nacional de Laboratoristas Clínicos -->
-                            <div class="flex items-center mt-2.5">
-                                <input type="checkbox" id="aval-conalac" name="aval" value="aval-conalac" {%
-                                    if 'aval-conalac' in evento.get('avales', []) %}checked{% endif %}
-                                    class="shrink-0 border-gray-200 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800">
-                                <label for="aval-conalac" class="text-sm text-gray-500 ms-3 dark:text-neutral-400">
-                                    Colegio Nacional de Laboratoristas Clínicos
-                                </label>
+                                    <div class="grid sm:grid-cols-3 gap-4">
+                                        <div>
+                                            <label for="aval_cmp_tipo"
+                                                class="block text-sm font-medium mb-2 dark:text-white">Tipo de
+                                                Créditos</label>
+                                            <select id="aval_cmp_tipo" name="aval_cmp_tipo"
+                                                class="py-2 px-3 pe-9 block w-full border-gray-200 shadow-sm rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
+                                                <option value="">Seleccione...</option>
+                                                <option value="A" {% if evento.get('aval_cmp_tipo', '' )=='A'
+                                                    %}selected{% endif %}>
+                                                    Tipo A</option>
+                                                <option value="B" {% if evento.get('aval_cmp_tipo', '' )=='B'
+                                                    %}selected{% endif %}>
+                                                    Tipo B</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="aval_cmp_horas"
+                                                class="block text-sm font-medium mb-2 dark:text-white">Horas-Crédito</label>
+                                            <input type="number" id="aval_cmp_horas" name="aval_cmp_horas"
+                                                value="{{ evento.get('aval_cmp_horas', '') }}"
+                                                class="py-2 px-3 block w-full border-gray-200 shadow-sm rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                                                placeholder="0">
+                                        </div>
+                                        <div>
+                                            <label for="aval_cmp_codigo"
+                                                class="block text-sm font-medium mb-2 dark:text-white">Código de
+                                                Actividad</label>
+                                            <input type="text" id="aval_cmp_codigo" name="aval_cmp_codigo"
+                                                value="{{ evento.get('aval_cmp_codigo', '') }}"
+                                                class="py-2 px-3 block w-full border-gray-200 shadow-sm rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                                                placeholder="COLMED-nnnn-yyyy">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
+                            {% endif %}
 
-                            <div class="bg-gray-100 mt-4 p-4 rounded-lg">
-                                <h3 class="text-sm font-semibold mb-2">Aval Colegio Médico de Panamá - Información
-                                    adicional</h3>
-                                <p class="text-gray-500 text-sm">
-                                    La selección de este aval implica incorporar en el certificado el logotipo oficial
-                                    del Colegio Médico de Panamá y la firma digital del presidente actual, según
-                                    lineamientos del Colegio.
-                                </p>
+                            {% if 'aval-aop' in evento.get('avales', []) %}
+                            <div class="flex items-center gap-x-3 bg-gray-100 mt-4 p-4 rounded-lg">
+                                <div class="shrink-0">
+                                    <img class="shrink-0 size-16"
+                                        src="{{ url_for('static', filename='assets/logo-aop.png') }}"
+                                        alt="Asociación Odontológica Panameña Logo">
+                                </div>
+                                <div class="grow">
+                                    <h3 class="text-sm font-semibold mb-2">Aval Asociación Odontológica Panameña -
+                                        Información adicional</h3>
+                                    <p class="text-gray-500 text-sm">
+                                        La selección de este aval implica incorporar en el certificado el logotipo
+                                        oficial de la Asociación Odontológica Panameña y la firma digital del presidente
+                                        actual, según lineamientos de la Asociación.
+                                    </p>
+                                </div>
                             </div>
+                            {% endif %}
 
-                            <div class="bg-gray-100 mt-4 p-4 rounded-lg">
-                                <h3 class="text-sm font-semibold mb-2">Aval Asociación Nacional de Enfermeras de Panamá
-                                    - Información adicional</h3>
-                                <p class="text-gray-500 text-sm">
-                                    La selección de este aval implica incorporar en el certificado el logotipo oficial
-                                    de la Asociación Nacional de Enfermeras de Panamá y la firma digital del presidente
-                                    actual, según lineamientos de la Asociación.
-                                </p>
+                            {% if 'aval-anep' in evento.get('avales', []) %}
+                            <div class="flex items-center gap-x-3 bg-gray-100 mt-4 p-4 rounded-lg">
+                                <div class="shrink-0">
+                                    <img class="shrink-0 size-16"
+                                        src="{{ url_for('static', filename='assets/logo-anep.png') }}"
+                                        alt="Asociación Nacional de Enfermeras de Panamá Logo">
+                                </div>
+                                <div class="grow">
+                                    <h3 class="text-sm font-semibold mb-2">Aval Asociación Nacional de Enfermeras de
+                                        Panamá
+                                        - Información adicional</h3>
+                                    <p class="text-gray-500 text-sm">
+                                        La selección de este aval implica incorporar en el certificado el logotipo
+                                        oficial de la Asociación Nacional de Enfermeras de Panamá y la firma digital
+                                        del presidente actual, según lineamientos de la Asociación.
+                                    </p>
+                                </div>
                             </div>
+                            {% endif %}
 
-                            <div class="bg-gray-100 mt-4 p-4 rounded-lg">
-                                <h3 class="text-sm font-semibold mb-2">Aval Universidad de Panamá - Información
-                                    adicional</h3>
-                                <p class="text-gray-500 text-sm">
-                                    La selección de este aval implica incorporar en el certificado el logotipo oficial
-                                    de la Universidad de Panamá.
-                                </p>
+                            {% if 'aval-facmed' in evento.get('avales', []) %}
+                            <div class="flex items-center gap-x-3 bg-gray-100 mt-4 p-4 rounded-lg">
+                                <div class="shrink-0">
+                                    <img class="shrink-0 size-16"
+                                        src="{{ url_for('static', filename='assets/logo-facmedup.png') }}"
+                                        alt="Facultad de Medicina Universidad de Panamá Logo">
+                                </div>
+                                <div class="grow">
+                                    <h3 class="text-sm font-semibold mb-2">Aval Universidad de Panamá Facultad de
+                                        Medicina -
+                                        Información
+                                        adicional</h3>
+                                    <p class="text-gray-500 text-sm">
+                                        La selección de este aval implica incorporar en el certificado el logotipo
+                                        oficial de la Facultad de Medicina Universidad de Panamá y la firma digital del
+                                        decano actual.
+                                    </p>
+                                </div>
                             </div>
-
-                            <div class="bg-gray-100 mt-4 p-4 rounded-lg">
-                                <h3 class="text-sm font-semibold mb-2">Aval Universidad de Panamá Facultad de Medicina -
-                                    Información
-                                    adicional</h3>
-                                <p class="text-gray-500 text-sm">
-                                    La selección de este aval implica incorporar en el certificado el logotipo oficial
-                                    de la Facultad de Medicina Universidad de Panamá y la firma digital del decano
-                                    actual.
-                                </p>
-                            </div>
+                            {% endif %}
                         </div>
                         <!-- End Col -->
 

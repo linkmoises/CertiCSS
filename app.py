@@ -4018,6 +4018,9 @@ def editar_evento(codigo_evento):
         concurso_poster = request.form.get('concurso_poster') == 'on'
         registro_abierto = request.form.get('registro_abierto') == 'on'
         avales = request.form.getlist('aval')
+        aval_cmp_tipo = request.form.get('aval_cmp_tipo')
+        aval_cmp_horas = request.form.get('aval_cmp_horas')
+        aval_cmp_codigo = request.form.get('aval_cmp_codigo')
         fecha_inicio_str = request.form['fecha_inicio']
         fecha_fin_str = request.form['fecha_fin']
 
@@ -4098,7 +4101,10 @@ def editar_evento(codigo_evento):
                 'checkin_masivo': checkin_masivo,
                 'concurso_poster': concurso_poster,
                 'registro_abierto': registro_abierto,
-                'avales': avales
+                'avales': avales,
+                'aval_cmp_tipo': aval_cmp_tipo,
+                'aval_cmp_horas': aval_cmp_horas,
+                'aval_cmp_codigo': aval_cmp_codigo
             }}
         )
 
