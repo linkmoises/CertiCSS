@@ -58,6 +58,10 @@ if [ -f "$STATIC_TAR" ]; then
     # Usamos sudo para evitar problemas de permisos (utime, ownership)
     sudo tar -xzf "$STATIC_TAR" -C ..
     
+    # Restaurar la propiedad de los archivos al usuario actual
+    echo "Restaurando propiedad de los archivos..."
+    sudo chown -R $(id -u):$(id -g) ../static_certificados ../static_uploads ../static_usuarios ../static_audio
+    
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}Archivos estáticos restaurados correctamente.${NC}"
     else
