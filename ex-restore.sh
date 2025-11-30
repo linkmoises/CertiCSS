@@ -31,7 +31,7 @@ if [[ $confirm != "s" && $confirm != "S" ]]; then
 fi
 
 echo "Deteniendo contenedor web para evitar inconsistencias..."
-docker-compose stop web
+docker-compose stop certicss_web_1
 
 # 1. Restaurar Base de Datos
 if [ -f "$MONGO_ARCHIVE" ]; then
@@ -55,7 +55,8 @@ if [ -f "$STATIC_TAR" ]; then
     echo "Restaurando archivos estáticos desde $STATIC_TAR..."
     
     # Extraer en el directorio padre (..)
-    tar -xzf "$STATIC_TAR" -C ..
+    # Usamos sudo para evitar problemas de permisos (utime, ownership)
+    sudo tar -xzf "$STATIC_TAR" -C ..
     
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}Archivos estáticos restaurados correctamente.${NC}"

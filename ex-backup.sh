@@ -3,7 +3,7 @@
 # Configuración
 BACKUP_DIR="./backups"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-DB_CONTAINER_NAME="certicss-db-1" # Ajustar si el nombre del contenedor es diferente, o usar docker-compose
+DB_CONTAINER_NAME="certicss_db_1" # Ajustar si el nombre del contenedor es diferente, o usar docker-compose
 # Nota: Usaremos docker-compose para ser más genéricos respecto al nombre del contenedor
 
 # Colores para output
