@@ -30,6 +30,9 @@ if [[ $confirm != "s" && $confirm != "S" ]]; then
     exit 0
 fi
 
+echo "Deteniendo contenedor web para evitar inconsistencias..."
+docker-compose stop web
+
 # 1. Restaurar Base de Datos
 if [ -f "$MONGO_ARCHIVE" ]; then
     echo "Restaurando base de datos desde $MONGO_ARCHIVE..."
@@ -65,4 +68,5 @@ else
 fi
 
 echo -e "${GREEN}¡Proceso de restauración finalizado!${NC}"
-echo "Es recomendable reiniciar los contenedores: docker-compose restart"
+echo "Ejecutando script de despliegue para reiniciar servicios..."
+./run-docker.sh
