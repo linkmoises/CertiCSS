@@ -13,7 +13,7 @@ class Config:
     UPLOAD_FOLDER = 'static/uploads'                                # Carpeta para subir archivos
     USERS_FOLDER = 'static/usuarios'                                # Carpeta para fotos de perfil de usuarios
     NUBE_FOLDER = 'static/nube'                                     # Carpeta para archivos de la nube personal
-    BASE_URL = os.getenv('BASE_URL', 'http://localhost:5000')       # URL base por defecto
+    BASE_URL = os.getenv('BASE_URL', 'http://localhost:5000/')       # URL base por defecto
     HOST = os.getenv('FLASK_HOST', '0.0.0.0')                       # Host por defecto
     PORT = int(os.getenv('FLASK_PORT', 5000))                       # Puerto por defecto
     UMAMI_URL = os.getenv('UMAMI_URL', '')                          # URL seguimiento UMAMI

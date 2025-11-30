@@ -171,3 +171,4 @@ tailwindcss
 version.txt
 *.m4a
 .vscode
+backups/
