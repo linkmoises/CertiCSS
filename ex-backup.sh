@@ -38,7 +38,7 @@ echo "Respaldando archivos estáticos..."
 TAR_NAME="static_files_$TIMESTAMP.tar.gz"
 
 # Lista de carpetas a respaldar (relativas al directorio padre del proyecto)
-FOLDERS="static_certificados static_uploads static_usuarios static_audio"
+FOLDERS="static_certificados static_uploads static_usuarios static_audio static_nube"
 
 # Verificamos que las carpetas existan antes de intentar comprimirlas
 FOLDERS_TO_BACKUP=""

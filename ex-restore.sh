@@ -60,7 +60,7 @@ if [ -f "$STATIC_TAR" ]; then
     
     # Restaurar la propiedad de los archivos al usuario actual
     echo "Restaurando propiedad de los archivos..."
-    sudo chown -R $(id -u):$(id -g) ../static_certificados ../static_uploads ../static_usuarios ../static_audio
+    sudo chown -R $(id -u):$(id -g) ../static_certificados ../static_uploads ../static_usuarios ../static_audio ../static_nube
     
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}Archivos estáticos restaurados correctamente.${NC}"
