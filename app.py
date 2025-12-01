@@ -6737,7 +6737,7 @@ def get_client_ip():
 
 
 ###
-### Importaciones de appy blueprints
+### Importaciones de app y blueprints
 ###
 
 ### Logs
@@ -6803,6 +6803,28 @@ import numpy as np
 import pandas as pd
 import io
 import base64
+
+
+###
+### Carga de plugins
+### 
+from app.plugin_api import PluginAPI
+import importlib
+import pkgutil
+import plugins
+
+plugin_api = PluginAPI(app)
+
+def load_plugins():
+    for finder, name, ispkg in pkgutil.iter_modules(plugins.__path__):
+        module_path = f"plugins.{name}.plugin"
+        module = importlib.import_module(module_path)
+
+        if hasattr(module, "init_plugin"):
+            module.init_plugin(plugin_api)
+
+load_plugins()
+
 
 ###
 ### robots.txt
