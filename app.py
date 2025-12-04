@@ -2263,7 +2263,6 @@ def cargar_funcionarios_css():
 ###
 @app.route('/inscripcion/<codigo_evento>', methods=['GET', 'POST'])
 def registrar_abierto(codigo_evento):
-    print(f"DEBUG: Accediendo a registro abierto para evento {codigo_evento}, método: {request.method}")
     
     # Verificar si el evento existe y tiene registro abierto
     evento = collection_eventos.find_one({"codigo": codigo_evento})
@@ -2280,9 +2279,6 @@ def registrar_abierto(codigo_evento):
     evento_cerrado = evento.get('estado_evento') == 'cerrado'
     
     if request.method == 'POST':
-        print(f"DEBUG: Procesando POST para evento {codigo_evento}")
-        print(f"DEBUG: Form data: {dict(request.form)}")
-        
         if evento_cerrado:
             flash('Este evento está cerrado y no acepta más registros.', 'error')
             return redirect(url_for('registrar_abierto', codigo_evento=codigo_evento))
@@ -2307,7 +2303,7 @@ def registrar_abierto(codigo_evento):
             flash("Ya está registrado en esta actividad.", "error")
             return redirect(url_for('registrar_abierto', codigo_evento=codigo_evento))
         
-        # Verificar cédula contra el cache de funcionarios CSS (búsqueda O(1))
+        # Verificar cédula contra el cache de funcionarios CSS
         funcionarios_css = cargar_funcionarios_css()
         
         if not funcionarios_css:
@@ -2338,8 +2334,15 @@ def registrar_abierto(codigo_evento):
             'origen': 'registro_abierto'
         })
         
-        flash("Registro exitoso. El certificado se podrá descargar al completar las actividades del evento.", "success")
-        return redirect(url_for('registrar_abierto', codigo_evento=codigo_evento))
+        # Generar token para acceso a la plataforma
+        token = generate_token(cedula)
+        
+        # Redirigir directamente a la plataforma de contenidos
+        return redirect(url_for('plataforma.ver_contenido', 
+                               codigo_evento=codigo_evento, 
+                               orden=1, 
+                               cedula=cedula, 
+                               token=token))
     
     # Preparar datos para el template
     nombre_evento = evento.get('nombre', 'Evento')
@@ -4426,15 +4429,16 @@ def buscar_certificados():
                 examen_completado = False
                 puntaje_examen = 0
                 if evento.get('registro_abierto', False):
-                    # Buscar el progreso del participante en el examen
-                    progreso = collection_progreso.find_one({
+                    # Buscar los resultados del examen en collection_exam_results
+                    resultados_examen = list(collection_exam_results.find({
                         'codigo_evento': codigo_evento,
-                        'cedula': participante['cedula'],
-                        'tipo': 'examen'
-                    })
-                    if progreso:
-                        examen_completado = progreso.get('completado', False)
-                        puntaje_examen = progreso.get('puntaje', 0)
+                        'cedula_participante': participante['cedula']
+                    }).sort('calificacion', -1).limit(1))
+                    
+                    if resultados_examen:
+                        mejor_resultado = resultados_examen[0]
+                        puntaje_examen = mejor_resultado.get('calificacion', 0)
+                        examen_completado = True
 
                 resultado = {
                     'nombres': participante['nombres'],

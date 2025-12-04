@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>{{ evento.nombre }} - Aula Digital - CertiCSS</title>
@@ -7,15 +8,18 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- favicons -->
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}"
+        sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
+    <link rel="apple-touch-icon" sizes="180x180"
+        href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
     <meta name="apple-mobile-web-app-title" content="CertiCSS" />
     <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
-{% if UMAMI_URL %}
+    {% if UMAMI_URL %}
     {{ UMAMI_URL | safe }}
-{% endif %}
+    {% endif %}
 </head>
+
 <body class="bg-gray-50 dark:bg-neutral-900">
 
     <!-- ========== MAIN CONTENT ========== -->
@@ -28,11 +32,14 @@
 
                 <div class="sm:order-1 lg:col-span-3 border-r border-gray-200">
                     <div class="relative pt-[100%] sm:pt-[100%]">
-{% if evento.afiche_750 %}
-                        <img class="size-full absolute top-0 start-0 object-cover rounded-l-xl" src="{{ BASE_URL }}{{ evento.afiche_750 }}" alt="{{ evento.nombre }}">
-{% else %}
-                        <img class="size-full absolute top-0 start-0 object-cover rounded-l-xl" src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}" alt="{{ evento.nombre }}">
-{% endif %}
+                        {% if evento.afiche_750 %}
+                        <img class="size-full absolute top-0 start-0 object-cover rounded-l-xl"
+                            src="{{ BASE_URL }}{{ evento.afiche_750 }}" alt="{{ evento.nombre }}">
+                        {% else %}
+                        <img class="size-full absolute top-0 start-0 object-cover rounded-l-xl"
+                            src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}"
+                            alt="{{ evento.nombre }}">
+                        {% endif %}
                     </div>
                     <div class="m-4">
                         <h2 class="font-bold text-gray-800 mb-2">{{ evento.nombre }}</h2>
@@ -40,47 +47,112 @@
                     </div>
                     <div class="m-6">
                         <ul class="text-sm text-gray-500">
-{% for contenido in contenidos %}
+                            {% for contenido in contenidos %}
                             <li class="gap-x-2 {% if contenido.orden == contenido_actual.orden %}font-bold{% endif %}">
-                                <a href="{{ url_for('plataforma.ver_contenido', codigo_evento=evento.codigo, orden=contenido.orden, cedula=cedula, token=token) }}">
+                                <a
+                                    href="{{ url_for('plataforma.ver_contenido', codigo_evento=evento.codigo, orden=contenido.orden, cedula=cedula, token=token) }}">
                                     {{ contenido.orden|string|zfill(2) }} - {{ contenido.titulo }}
                                 </a>
-{% if current_user.is_authenticated %}
+                                {% if current_user.is_authenticated %}
                                 <div>
-                                    <form action="{{ url_for('plataforma.mover_contenido', codigo_evento=evento.codigo, orden=contenido.orden, direccion='arriba') }}" method="POST" class="inline">
-                                        <button type="submit" class="text-sm text-blue-600 decoration-2 hover:underline disabled:text-gray-200" {% if contenido.orden == 1 %}disabled{% endif %}>
-                                            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-chevron-up"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m8 14 4-4 4 4"/></svg>
+                                    <form
+                                        action="{{ url_for('plataforma.mover_contenido', codigo_evento=evento.codigo, orden=contenido.orden, direccion='arriba') }}"
+                                        method="POST" class="inline">
+                                        <button type="submit"
+                                            class="text-sm text-blue-600 decoration-2 hover:underline disabled:text-gray-200"
+                                            {% if contenido.orden==1 %}disabled{% endif %}>
+                                            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                                height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                class="lucide lucide-square-chevron-up">
+                                                <rect width="18" height="18" x="3" y="3" rx="2" />
+                                                <path d="m8 14 4-4 4 4" />
+                                            </svg>
                                         </button>
                                     </form>
 
-                                    <form action="{{ url_for('plataforma.mover_contenido', codigo_evento=evento.codigo, orden=contenido.orden, direccion='abajo') }}" method="POST" class="inline">
-                                        <button type="submit" class="text-sm text-blue-600 decoration-2 hover:underline disabled:text-gray-200" {% if contenido.orden == contenidos|length %}disabled{% endif %}>
-                                            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-chevron-down"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m16 10-4 4-4-4"/></svg>
+                                    <form
+                                        action="{{ url_for('plataforma.mover_contenido', codigo_evento=evento.codigo, orden=contenido.orden, direccion='abajo') }}"
+                                        method="POST" class="inline">
+                                        <button type="submit"
+                                            class="text-sm text-blue-600 decoration-2 hover:underline disabled:text-gray-200"
+                                            {% if contenido.orden==contenidos|length %}disabled{% endif %}>
+                                            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                                height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                class="lucide lucide-square-chevron-down">
+                                                <rect width="18" height="18" x="3" y="3" rx="2" />
+                                                <path d="m16 10-4 4-4-4" />
+                                            </svg>
                                         </button>
                                     </form>
 
-                                    <a href="{{ url_for('plataforma.editar_contenido', codigo_evento=evento.codigo, orden=contenido.orden) }}" class="text-sm text-blue-600 decoration-2 inline-flex">
-                                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-pen-line"><path d="m18 5-2.414-2.414A2 2 0 0 0 14.172 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2"/><path d="M21.378 12.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><path d="M8 18h1"/></svg>
+                                    <a href="{{ url_for('plataforma.editar_contenido', codigo_evento=evento.codigo, orden=contenido.orden) }}"
+                                        class="text-sm text-blue-600 decoration-2 inline-flex">
+                                        <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round"
+                                            class="lucide lucide-file-pen-line">
+                                            <path
+                                                d="m18 5-2.414-2.414A2 2 0 0 0 14.172 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2" />
+                                            <path
+                                                d="M21.378 12.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z" />
+                                            <path d="M8 18h1" />
+                                        </svg>
                                     </a>
 
-                                    <form action="{{ url_for('plataforma.eliminar_contenido', codigo_evento=evento.codigo, orden=contenido.orden) }}" method="POST" class="inline">
-                                        <button type="submit" class="text-sm text-red-600 decoration-2 hover:underline" onclick="return confirm('¿Estás seguro de eliminar este contenido?')">
-                                            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                                    <form
+                                        action="{{ url_for('plataforma.eliminar_contenido', codigo_evento=evento.codigo, orden=contenido.orden) }}"
+                                        method="POST" class="inline">
+                                        <button type="submit" class="text-sm text-red-600 decoration-2 hover:underline"
+                                            onclick="return confirm('¿Estás seguro de eliminar este contenido?')">
+                                            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                                height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                class="lucide lucide-trash-2">
+                                                <path d="M3 6h18" />
+                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                                <line x1="10" x2="10" y1="11" y2="17" />
+                                                <line x1="14" x2="14" y1="11" y2="17" />
+                                            </svg>
                                         </button>
                                     </form>
                                 </div>
-{% endif %}
+                                {% endif %}
                             </li>
-{% endfor %}
+                            {% endfor %}
                         </ul>
-{% if current_user.is_authenticated %}
+                        {% if current_user.is_authenticated %}
                         <div class="my-4">
-                            <a href="{{ url_for('plataforma.crear_contenido', codigo_evento=evento.codigo) }}" class="w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"">
-                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open-text"><path d="M12 7v14"/><path d="M16 12h2"/><path d="M16 8h2"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/><path d="M6 12h2"/><path d="M6 8h2"/></svg>
+                            <a href="{{ url_for('plataforma.crear_contenido', codigo_evento=evento.codigo) }}"
+                                class="w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"">
+                                <svg class=" shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open-text">
+                                <path d="M12 7v14" />
+                                <path d="M16 12h2" />
+                                <path d="M16 8h2" />
+                                <path
+                                    d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
+                                <path d="M6 12h2" />
+                                <path d="M6 8h2" /></svg>
                                 Añadir contenido
                             </a>
                         </div>
-{% endif %}
+                        {% endif %}
+                        <div class="my-4">
+                            <a href="/catalogo/abiertos"
+                                class="w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left">
+                                    <path d="m12 19-7-7 7-7" />
+                                    <path d="M19 12H5" />
+                                </svg>
+                                Volver al catálogo
+                            </a>
+                        </div>
                     </div>
                 </div>
                 <!-- End Col -->
@@ -89,50 +161,75 @@
 
                     <div class="m-8">
 
-{% if contenido_actual %}
+                        {% if contenido_actual %}
 
-{% if contenido_actual.tipo == 'video' %}
+                        {% if contenido_actual.tipo == 'video' %}
                         <h2 class="text-xl font-bold text-gray-800 pb-4">{{ contenido_actual.titulo }}</h2>
                         <div style="display: flex; justify-content: center;">
-                            <iframe style="aspect-ratio: 16 / 9; width: 100% !important;" src="{{ contenido_actual.url_video }}" title="{{ contenido_actual.titulo }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                            <iframe style="aspect-ratio: 16 / 9; width: 100% !important;"
+                                src="{{ contenido_actual.url_video }}" title="{{ contenido_actual.titulo }}"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                         </div>
                         <br />
                         <p>{{ contenido_actual.descripcion }}</p>
-{% elif contenido_actual.tipo == 'texto' %}
+                        {% elif contenido_actual.tipo == 'texto' %}
                         <div class="prose text-gray-600 w-full text-sm !max-w-none">
-{{ contenido_actual.contenido_texto | safe }}
+                            {{ contenido_actual.contenido_texto | safe }}
                         </div>
-{% elif contenido_actual.tipo == 'documento' %}
-<a href="{{ url_for('static', filename=contenido_actual.documento) }}" target="_blank">📄 Descargar Documento</a>
-{% endif %}
-{% else %}
+                        {% elif contenido_actual.tipo == 'documento' %}
+                        <a href="{{ url_for('static', filename=contenido_actual.documento) }}" target="_blank">📄
+                            Descargar Documento</a>
+                        {% endif %}
+                        {% else %}
                         <p>Selecciona un recurso del listado.</p>
-{% endif %}
+                        {% endif %}
 
                         <div class="mt-6 flex justify-between">
-{% if contenido_anterior %}
-                            <a href="{{ url_for('plataforma.ver_contenido', codigo_evento=evento.codigo, orden=contenido_anterior.orden, cedula=cedula, token=token) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
-                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                            {% if contenido_anterior %}
+                            <a href="{{ url_for('plataforma.ver_contenido', codigo_evento=evento.codigo, orden=contenido_anterior.orden, cedula=cedula, token=token) }}"
+                                class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m15 18-6-6 6-6" />
+                                </svg>
                                 Anterior
                             </a>
-{% else %}
-                            <button disabled class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
-                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                            {% else %}
+                            <button disabled
+                                class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m15 18-6-6 6-6" />
+                                </svg>
                                 Anterior
                             </button>
-{% endif %}
+                            {% endif %}
 
-{% if contenido_siguiente %}
-                            <a href="{{ url_for('plataforma.ver_contenido', codigo_evento=evento.codigo, orden=contenido_siguiente.orden, cedula=cedula, token=token) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
-                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+                            {% if contenido_siguiente %}
+                            <a href="{{ url_for('plataforma.ver_contenido', codigo_evento=evento.codigo, orden=contenido_siguiente.orden, cedula=cedula, token=token) }}"
+                                class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m9 18 6-6-6-6"></path>
+                                </svg>
                                 Siguiente
                             </a>
-{% else %}
-                            <button disabled class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
-                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+                            {% else %}
+                            <button disabled
+                                class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m9 18 6-6-6-6"></path>
+                                </svg>
                                 Siguiente
                             </button>
-{% endif %}
+                            {% endif %}
                         </div>
 
                     </div>
@@ -155,4 +252,5 @@
 
 
 </body>
+
 </html>

@@ -311,7 +311,26 @@ def ver_contenido(codigo_evento, orden):
                         print(f"Error al guardar resultado del examen: {e}")
             # Pasar los IDs de las preguntas al template para el campo oculto
             preguntas_ids = ','.join([str(p['_id']) for p in preguntas])
-            return render_template('examen.html', preguntas=preguntas, puntaje=puntaje, contenido=contenido_actual, evento=evento, cedula=cedula, token=token, preguntas_ids=preguntas_ids)
+            
+            # Buscar el nanoid del participante para el enlace del certificado
+            participante = collection_participantes.find_one({
+                'cedula': cedula,
+                'codigo_evento': codigo_evento,
+                'rol': 'participante'
+            })
+            nanoid = participante.get('nanoid') if participante else None
+            
+            return render_template('examen.html', 
+                                 preguntas=preguntas, 
+                                 puntaje=puntaje, 
+                                 contenido=contenido_actual,
+                                 contenido_actual=contenido_actual,
+                                 evento=evento, 
+                                 cedula=cedula, 
+                                 token=token, 
+                                 preguntas_ids=preguntas_ids,
+                                 nanoid=nanoid,
+                                 contenidos=contenidos)
 
     # Encontrar el contenido anterior y el siguiente
     indice_actual = contenidos.index(contenido_actual)
