@@ -2,14 +2,14 @@
 
 {% include 'tablero-sidebar.html' %}
 
-    <!-- Content -->
-    <div class="w-full lg:ps-64">
-        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+<!-- Content -->
+<div class="w-full lg:ps-64">
+    <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
 
-            <!-- Card Section -->
-            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
-                <!-- Card -->
-                <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-7 dark:bg-neutral-800">
+        <!-- Card Section -->
+        <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+            <!-- Card -->
+            <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-7 dark:bg-neutral-800">
                 <div class="mb-8">
                     <h2 class="text-xl font-bold text-gray-800 dark:text-neutral-200">
                         Registrar usuario
@@ -18,22 +18,27 @@
                         Registrar nuevo coordinador de docencia
                     </p>
                 </div>
-            
+
                 <form method="POST">
                     <!-- Grid -->
                     <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
 
                         <div class="sm:col-span-3">
-                            <label for="nombre-completo" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                            <label for="nombre-completo"
+                                class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                 Nombre completo
                             </label>
                         </div>
                         <!-- End Col -->
-                
+
                         <div class="sm:col-span-9">
                             <div class="sm:flex">
-                            <input id="nombres" name="nombres" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Nombres...">
-                            <input id="apellidos" name="apellidos" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Apellidos...">
+                                <input id="nombres" name="nombres" type="text"
+                                    class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                                    placeholder="Nombres...">
+                                <input id="apellidos" name="apellidos" type="text"
+                                    class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                                    placeholder="Apellidos...">
                             </div>
                         </div>
                         <!-- End Col -->
@@ -46,20 +51,30 @@
 
                         <div class="sm:col-span-9">
                             <div class="sm:flex">
-                              <label for="genero-m" class="flex py-2 px-3 w-full border border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
-                                <input type="radio" name="genero" value="masculino" class="shrink-0 mt-0.5 border-gray-300 rounded-full text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-500 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800" id="genero-m">
-                                <span class="text-sm text-gray-500 ms-3 dark:text-neutral-400">Masculino</span>
-                              </label>
-                  
-                              <label for="genero-f" class="flex py-2 px-3 w-full border border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
-                                <input type="radio" name="genero" value="femenino" class="shrink-0 mt-0.5 border-gray-300 rounded-full text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-500 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800" id="genero-f">
-                                <span class="text-sm text-gray-500 ms-3 dark:text-neutral-400">Femenino</span>
-                              </label>
-                  
-                              <label for="genero-o" class="flex py-2 px-3 w-full border border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
-                                <input type="radio" name="genero" value="otro" class="shrink-0 mt-0.5 border-gray-300 rounded-full text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-500 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800" id="genero-o">
-                                <span class="text-sm text-gray-500 ms-3 dark:text-neutral-400">Prefiero no especificar</span>
-                              </label>
+                                <label for="genero-m"
+                                    class="flex py-2 px-3 w-full border border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
+                                    <input type="radio" name="genero" value="masculino"
+                                        class="shrink-0 mt-0.5 border-gray-300 rounded-full text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-500 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
+                                        id="genero-m">
+                                    <span class="text-sm text-gray-500 ms-3 dark:text-neutral-400">Masculino</span>
+                                </label>
+
+                                <label for="genero-f"
+                                    class="flex py-2 px-3 w-full border border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
+                                    <input type="radio" name="genero" value="femenino"
+                                        class="shrink-0 mt-0.5 border-gray-300 rounded-full text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-500 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
+                                        id="genero-f">
+                                    <span class="text-sm text-gray-500 ms-3 dark:text-neutral-400">Femenino</span>
+                                </label>
+
+                                <label for="genero-o"
+                                    class="flex py-2 px-3 w-full border border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
+                                    <input type="radio" name="genero" value="otro"
+                                        class="shrink-0 mt-0.5 border-gray-300 rounded-full text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-500 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
+                                        id="genero-o">
+                                    <span class="text-sm text-gray-500 ms-3 dark:text-neutral-400">Prefiero no
+                                        especificar</span>
+                                </label>
                             </div>
                         </div>
 
@@ -69,13 +84,13 @@
                             </label>
                         </div>
                         <!-- End Col -->
-                
+
                         <div class="sm:col-span-9">
-                            <input id="cedula" name="cedula" type="text" 
-                                class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" 
-                                placeholder="8-123-456" required 
-                                onblur="validarCedula(this)" />
-                            <small id="cedula-error" class="text-red-500 text-sm hidden">Cédula inválida. Por favor, verifica el formato.</small>
+                            <input id="cedula" name="cedula" type="text"
+                                class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                                placeholder="8-123-456" required onblur="validarCedula(this)" />
+                            <small id="cedula-error" class="text-red-500 text-sm hidden">Cédula inválida. Por favor,
+                                verifica el formato.</small>
                         </div>
                         <!-- End Col -->
 
@@ -87,7 +102,9 @@
                         <!-- End Col -->
 
                         <div class="sm:col-span-9">
-                            <input id="orcid" name="orcid" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" type="text" placeholder="Código ORCID" />
+                            <input id="orcid" name="orcid"
+                                class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                                type="text" placeholder="Código ORCID" />
                         </div>
                         <!-- End Col -->
 
@@ -97,9 +114,11 @@
                             </label>
                         </div>
                         <!-- End Col -->
-                
+
                         <div class="sm:col-span-9">
-                            <select class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" id="region" name="region" onchange="actualizarUnidadesUsuario()" required>
+                            <select
+                                class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                                id="region" name="region" onchange="actualizarUnidadesUsuario()" required>
                                 <option value="">Seleccione la región de salud</option>
                                 <option value="css00">Unidades administrativas</option>
                                 <option value="css01">Región de Salud de Bocas Del Toro</option>
@@ -118,15 +137,17 @@
                         <!-- End Col -->
 
                         <div class="sm:col-span-3">
-                            <label for="unidad_ejecutora" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                            <label for="unidad_ejecutora"
+                                class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                 Unidad ejecutora
                             </label>
                         </div>
                         <!-- End Col -->
-                
+
                         <div class="sm:col-span-9">
                             <select id="unidad_ejecutora" name="unidad_ejecutora"
-                                class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" required>
+                                class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                                required>
                                 <option value="">Seleccione una unidad ejecutora</option>
                             </select>
                         </div>
@@ -138,39 +159,47 @@
                             </label>
                         </div>
                         <!-- End Col -->
-                
+
                         <div class="sm:col-span-9">
-                            <select class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" id="rol" name="rol" onchange="mostrarOcultarDepartamento()" required>
+                            <select
+                                class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                                id="rol" name="rol" onchange="mostrarOcultarDepartamento()" required>
                                 <option value="">Seleccione el rol de usuario</option>
-{% if current_user.rol in ['coordinador-local', 'coordinador-regional', 'coordinador-nacional', 'denadoi', 'administrador'] %}
+                                {% if current_user.rol in ['coordinador-local', 'coordinador-regional',
+                                'coordinador-nacional', 'denadoi', 'administrador'] %}
                                 <option value="coordinador-departamental">Coordinador de Docencia de Servicio</option>
                                 <option value="coordinador-local">Coordinador Local de Docencia e Investigación</option>
-{% endif %}
-{% if current_user.rol in ['coordinador-nacional', 'denadoi', 'administrador'] %}
-                                <option value="coordinador-regional">Coordinador Regional de Docencia e Investigación</option>
-{% endif %}
-{% if current_user.rol in ['denadoi', 'administrador'] %}
+                                {% endif %}
+                                {% if current_user.rol in ['coordinador-nacional', 'denadoi', 'administrador'] %}
+                                <option value="coordinador-regional">Coordinador Regional de Docencia e Investigación
+                                </option>
+                                {% endif %}
+                                {% if current_user.rol in ['denadoi', 'administrador'] %}
                                 <option value="coordinador-nacional">Coordinador Nacional de Docencia</option>
                                 <option value="subdirector-docencia">Subdirector de Docencia e Investigación</option>
-                                <option value="coordinador-administrativo">Coordinador de Docencia de Unidad Administrativa</option>
-{% endif %}
-{% if current_user.rol == 'administrador' %}
+                                <option value="coordinador-administrativo">Coordinador de Docencia de Unidad
+                                    Administrativa</option>
+                                {% endif %}
+                                {% if current_user.rol == 'administrador' %}
                                 <option value="denadoi">DENADOI</option>
                                 <option value="simulacion">Centro de Simulación Avanzada</option>
-{% endif %}
+                                {% endif %}
                             </select>
                         </div>
                         <!-- End Col -->
 
                         <div class="sm:col-span-3" id="departamento-label">
-                            <label for="departamento" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                            <label for="departamento"
+                                class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                 Servicio o departamento adscrito
                             </label>
                         </div>
                         <!-- End Col -->
-                
+
                         <div class="sm:col-span-9" id="departamento-container">
-                            <input id="departamento" name="departamento" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Escriba el servicio o departamento donde es coordinador de docencia...">
+                            <input id="departamento" name="departamento" type="text"
+                                class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                                placeholder="Escriba el servicio o departamento donde es coordinador de docencia...">
                         </div>
                         <!-- End Col -->
 
@@ -180,9 +209,10 @@
                             </label>
                         </div>
                         <!-- End Col -->
-                
+
                         <div class="sm:col-span-9">
-                            <input id="cargo" name="cargo" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
+                            <input id="cargo" name="cargo" type="text"
+                                class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
                         </div>
                         <!-- End Col -->
 
@@ -192,112 +222,121 @@
                             </label>
                         </div>
                         <!-- End Col -->
-                
+
                         <div class="sm:col-span-9">
-                            <input type="tel" id="phone" name="phone" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="+507-6XXX-XXXX" pattern="\+507-[6-9][0-9]{3}-[0-9]{4}" required />
+                            <input type="tel" id="phone" name="phone"
+                                class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                                placeholder="+507-6XXX-XXXX" pattern="\+507-[6-9][0-9]{3}-[0-9]{4}" required />
                         </div>
                         <!-- End Col -->
-            
+
                         <div class="sm:col-span-3">
                             <label for="email" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                 Correo electrónico institucional
                             </label>
                         </div>
                         <!-- End Col -->
-                
+
                         <div class="sm:col-span-9">
-                            <input type="email" id="email" name="email" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="usuario@css.gob.pa">
+                            <input type="email" id="email" name="email"
+                                class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                                placeholder="usuario@css.gob.pa">
                         </div>
                         <!-- End Col -->
-            
+
                         <div class="sm:col-span-3">
-                            <label for="password" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                            <label for="password"
+                                class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                 Contraseña
                             </label>
                             <span class="text-sm text-gray-400 dark:text-neutral-600">
-                                ( Mostrar <input type="checkbox" onclick="this.form.password.type = this.checked ? 'text' : 'password'">  )
+                                ( Mostrar <input type="checkbox"
+                                    onclick="this.form.password.type = this.checked ? 'text' : 'password'"> )
                             </span>
                         </div>
                         <!-- End Col -->
-                
+
                         <div class="sm:col-span-9">
                             <div class="space-y-2">
-                            <input type="password" id="password" name="password" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Escriba su contraseña...">
+                                <input type="password" id="password" name="password"
+                                    class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                                    placeholder="Escriba su contraseña...">
                             </div>
                         </div>
                         <!-- End Col -->
-            
+
                     </div>
                     <!-- End Grid -->
-            
+
                     <div class="mt-5 flex justify-end gap-x-2">
-                        <button type="submit" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                        <button type="submit"
+                            class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
                             Registrar usuario
                         </button>
                     </div>
                 </form>
-                
-                </div>
-                <!-- End Card -->
-            </div>
-            <!-- End Card Section -->
 
-{% include 'tablero-footer.html' %}
-        
+            </div>
+            <!-- End Card -->
         </div>
+        <!-- End Card Section -->
+
+        {% include 'tablero-footer.html' %}
+
     </div>
-    <!-- FIN CONTENIDO -->
+</div>
+<!-- FIN CONTENIDO -->
 
 <!-- JS PLUGINS -->
 <script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
 <script>
-function validarCedula(input) {
-    const cedula = input.value.trim();
-    const errorMessage = document.getElementById('cedula-error');
+    function validarCedula(input) {
+        const cedula = input.value.trim();
+        const errorMessage = document.getElementById('cedula-error');
 
-    const patrones = [
-        /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$|^[A-Z]{2}\d{6,20}$/
-    ];
+        const patrones = [
+            /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$|^[A-Z]{2}\d{6,20}$/
+        ];
 
-    // Verificar si la cédula cumple con alguno de los patrones
-    const esValido = patrones.some(patron => patron.test(cedula));
+        // Verificar si la cédula cumple con alguno de los patrones
+        const esValido = patrones.some(patron => patron.test(cedula));
 
-    if (esValido) {
-        input.classList.remove('border-red-500');
-        input.classList.add('border-gray-200');
-        errorMessage.classList.add('hidden');
-    } else {
-        input.classList.remove('border-gray-200');
-        input.classList.add('border-red-500');
-        errorMessage.classList.remove('hidden');
-    }
-}
-document.getElementById('phone').addEventListener('input', function (e) {
-    let value = e.target.value;
-
-    // Eliminar todos los caracteres que no sean dígitos
-    value = value.replace(/\D/g, '');
-
-    // Verificar si ya contiene el código de país y eliminarlo
-    if (value.startsWith('507')) {
-        value = value.slice(3); // Eliminar el código de país si ya está presente
-    }
-
-    // Formatear el número según el patrón +507-6XXX-XXXX
-    if (value.length > 0) {
-        value = '+507-' + value; // Agregar el código de país
-
-        // Insertar guiones en las posiciones correctas
-        if (value.length > 9) {
-            value = value.slice(0, 9) + '-' + value.slice(9); // Después de los primeros 4 dígitos
-        }
-        if (value.length > 14) {
-            value = value.slice(0, 14); // Limitar el número total de caracteres
+        if (esValido) {
+            input.classList.remove('border-red-500');
+            input.classList.add('border-gray-200');
+            errorMessage.classList.add('hidden');
+        } else {
+            input.classList.remove('border-gray-200');
+            input.classList.add('border-red-500');
+            errorMessage.classList.remove('hidden');
         }
     }
+    document.getElementById('phone').addEventListener('input', function (e) {
+        let value = e.target.value;
 
-    e.target.value = value; // Actualizar el valor del campo
-});
+        // Eliminar todos los caracteres que no sean dígitos
+        value = value.replace(/\D/g, '');
+
+        // Verificar si ya contiene el código de país y eliminarlo
+        if (value.startsWith('507')) {
+            value = value.slice(3); // Eliminar el código de país si ya está presente
+        }
+
+        // Formatear el número según el patrón +507-6XXX-XXXX
+        if (value.length > 0) {
+            value = '+507-' + value; // Agregar el código de país
+
+            // Insertar guiones en las posiciones correctas
+            if (value.length > 9) {
+                value = value.slice(0, 9) + '-' + value.slice(9); // Después de los primeros 4 dígitos
+            }
+            if (value.length > 14) {
+                value = value.slice(0, 14); // Limitar el número total de caracteres
+            }
+        }
+
+        e.target.value = value; // Actualizar el valor del campo
+    });
 </script>
 <script>
     const unidadesPorRegion = {
@@ -379,6 +418,7 @@ document.getElementById('phone').addEventListener('input', function (e) {
             "CAPPS Zapotillo"
         ],
         css13: [ // Panamá Oeste
+            "Coordinación Regional - Panamá Oeste",
             "Hospital Hogar de La Esperanza",
             "Policlínica Dr. Santiago Barraza",
             "Policlínica Dr. Blas Gómez Chetro",
@@ -419,14 +459,14 @@ document.getElementById('phone').addEventListener('input', function (e) {
             "CAPPS Torrijos Carter"
         ]
     };
-    
+
     function actualizarUnidadesUsuario() {
         const regionSeleccionada = document.getElementById("region").value;
         const unidadSelect = document.getElementById("unidad_ejecutora");
-        
+
         // Limpiar opciones previas
         unidadSelect.innerHTML = '<option value="">Seleccione una unidad ejecutora</option>';
-        
+
         if (regionSeleccionada && unidadesPorRegion[regionSeleccionada]) {
             unidadesPorRegion[regionSeleccionada].forEach(unidad => {
                 const option = document.createElement("option");
@@ -455,9 +495,10 @@ document.getElementById('phone').addEventListener('input', function (e) {
     }
 
     // Ocultar campo departamento al cargar la página
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         mostrarOcultarDepartamento();
     });
 </script>
 </body>
+
 </html>
