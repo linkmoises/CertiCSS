@@ -106,16 +106,22 @@
                                         <td class="h-px w-72 min-w-72">
                                             <div class="px-6 py-2">
                                                 <p class="text-sm text-gray-500 mb-2">
-                                                    <strong><a class="text-sm text-blue-600 decoration-2 hover:underline" href="{{ url_for('mostrar_evento', codigo_evento=evento.codigo) }}">
-                                                    {{ evento.nombre }}</a></strong>
+                                                    <strong><a
+                                                            class="text-sm text-blue-600 decoration-2 hover:underline"
+                                                            href="{{ url_for('mostrar_evento', codigo_evento=evento.codigo) }}">
+                                                            {{ evento.nombre }}</a></strong>
                                                 </p>
-                                                <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                                <span
+                                                    class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
                                                     {{ evento.tipo }}
                                                 </span>
-                                                <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                                <span
+                                                    class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
                                                     {{ evento.modalidad }}
                                                 </span>
-                                                <button onclick="this.innerText='Código copiado'; navigator.clipboard.writeText('{{ evento.codigo }}'); setTimeout(() => this.innerText='{{ evento.codigo }}', 2000);" class="inline-flex items-center justify-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800 hover:bg-gray-200 transition-all">
+                                                <button
+                                                    onclick="this.innerText='Código copiado'; navigator.clipboard.writeText('{{ evento.codigo }}'); setTimeout(() => this.innerText='{{ evento.codigo }}', 2000);"
+                                                    class="inline-flex items-center justify-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800 hover:bg-gray-200 transition-all">
                                                     {{ evento.codigo }}
                                                 </button><br />
                                             </div>
@@ -128,7 +134,8 @@
                                                     Contenidos: {{ evento.total_contenidos }}<br />
                                                     Evaluaciones: {{ evento.total_examenes }}<br />
                                                     {% if evento.tiene_lms %}
-                                                    <a href="{{ url_for('tablero_metricas_lms_evento', codigo_evento=evento.codigo) }}" class="underline">
+                                                    <a href="{{ url_for('tablero_metricas_lms_evento', codigo_evento=evento.codigo) }}"
+                                                        class="underline">
                                                         Ver Métricas LMS
                                                     </a><br />
                                                     {% endif %}
@@ -138,8 +145,11 @@
 
                                         <td class="size-px whitespace-nowrap">
                                             <div class="px-6 py-3">
-                                                <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium {% if evento.estado_evento == 'publicado' %}bg-blue-100 text-blue-800{% elif evento.estado_evento == 'cerrado' %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
-                                                    {% if evento.estado_evento == 'publicado' %}Publicado{% elif evento.estado_evento == 'cerrado' %}Cerrado{% else %}Borrador{% endif %}
+                                                <span
+                                                    class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium {% if evento.estado_evento == 'publicado' %}bg-blue-100 text-blue-800{% elif evento.estado_evento == 'cerrado' %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                                    {% if evento.estado_evento == 'publicado' %}Publicado{% elif
+                                                    evento.estado_evento == 'cerrado' %}Cerrado{% else %}Borrador{%
+                                                    endif %}
                                                 </span><br />
                                                 {% if evento.tiene_lms %}
                                                 <span
@@ -170,24 +180,33 @@
 
                                         <td class="size-px whitespace-nowrap text-center">
                                             <a class="block relative z-10" href="#">
-                                                <span class="text-sm text-gray-500">i: {{ evento.fecha_inicio.strftime('%d %b, %Y') }}<br />f: {{ evento.fecha_fin.strftime('%d %b, %Y') }}</span>
+                                                <span class="text-sm text-gray-500">i: {{
+                                                    evento.fecha_inicio.strftime('%d %b, %Y') }}<br />f: {{
+                                                    evento.fecha_fin.strftime('%d %b, %Y') }}</span>
                                             </a>
                                         </td>
 
                                         <td class="size-px whitespace-nowrap">
                                             <div class="px-6 py-2">
-{% if current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor or evento.es_organizador)) %}
-                                                <a href="{{ url_for('plataforma.listar_contenidos', codigo_evento=evento.codigo) }}" class="inline-flex items-center gap-x-1 text-sm text-green-600 decoration-2 hover:underline font-medium" title="Gestionar LMS">
+                                                {% if current_user.rol == 'administrador' or (evento.estado_evento !=
+                                                'cerrado' and (current_user.rol == 'denadoi' or current_user.id ==
+                                                evento.autor or evento.es_organizador)) %}
+                                                <a href="{{ url_for('plataforma.listar_contenidos', codigo_evento=evento.codigo) }}"
+                                                    class="inline-flex items-center gap-x-1 text-sm text-green-600 decoration-2 hover:underline font-medium"
+                                                    title="Gestionar LMS">
                                                     Gestionar LMS
-                                                </a><br />                                                
-                                                <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('registrar_abierto', codigo_evento=evento.codigo) }}">
+                                                </a><br />
+                                                <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium"
+                                                    href="{{ url_for('registrar_abierto', codigo_evento=evento.codigo) }}">
                                                     Inscribir participante
                                                 </a><br />
-                                                <a class="inline-flex items-center gap-x-1 text-sm text-green-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('registrar_ponente', codigo_evento=evento.codigo) }}">
+                                                <a class="inline-flex items-center gap-x-1 text-sm text-green-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium"
+                                                    href="{{ url_for('registrar_ponente', codigo_evento=evento.codigo) }}">
                                                     Añadir ponente
                                                 </a><br />
-{% endif %}
-                                                <a class="inline-flex items-center gap-x-1 text-sm text-pink-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('listar_participantes', codigo_evento=evento.codigo) }}">
+                                                {% endif %}
+                                                <a class="inline-flex items-center gap-x-1 text-sm text-pink-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium"
+                                                    href="{{ url_for('listar_participantes', codigo_evento=evento.codigo) }}">
                                                     Listado de participantes
                                                 </a>
                                             </div>
@@ -203,26 +222,39 @@
                                                     </a><br />
 
                                                     <!-- 2. Editar evento (solo organizadores) -->
-                                                    {% if evento.es_organizador or current_user.rol == 'administrador'
-                                                    %}
+                                                    {% if current_user.rol == 'administrador' or (evento.estado_evento
+                                                    != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id
+                                                    == evento.autor or evento.es_organizador)) %}
                                                     <a class="inline-flex items-center gap-x-1 text-sm text-orange-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium"
                                                         href="{{ url_for('editar_evento', codigo_evento=evento.codigo) }}">
                                                         Editar evento
                                                     </a><br />
                                                     {% endif %}
 
-{% if current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor)) %}
-                                                    <form action="{{ url_for('eliminar_evento', codigo_evento=evento.codigo) }}" method="post" style="display:inline;">
-                                                        <button class="text-sm text-red-600 decoration-2 hover:underline" type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este evento?');">
+                                                    {% if current_user.rol == 'administrador' or (evento.estado_evento
+                                                    != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id
+                                                    == evento.autor)) %}
+                                                    <form
+                                                        action="{{ url_for('eliminar_evento', codigo_evento=evento.codigo) }}"
+                                                        method="post" style="display:inline;">
+                                                        <button
+                                                            class="text-sm text-red-600 decoration-2 hover:underline"
+                                                            type="submit"
+                                                            onclick="return confirm('¿Estás seguro de que deseas eliminar este evento?');">
                                                             Eliminar
                                                         </button>
                                                     </form><br />
-                                                    <form action="{{ url_for('cerrar_evento', codigo_evento=evento.codigo) }}" method="post" style="display:inline;">
-                                                        <button class="text-sm text-red-800 decoration-2 hover:underline" type="submit" onclick="return confirm('¿Estás seguro de que deseas cerrar este evento?');">
+                                                    <form
+                                                        action="{{ url_for('cerrar_evento', codigo_evento=evento.codigo) }}"
+                                                        method="post" style="display:inline;">
+                                                        <button
+                                                            class="text-sm text-red-800 decoration-2 hover:underline"
+                                                            type="submit"
+                                                            onclick="return confirm('¿Estás seguro de que deseas cerrar este evento?');">
                                                             Cerrar
                                                         </button>
                                                     </form>
-{% endif %}
+                                                    {% endif %}
                                                 </div>
                                             </div>
                                         </td>
@@ -283,7 +315,7 @@
         </div>
         <!-- End TABLA DE EVENTOS -->
 
-{% include 'tablero-footer.html' %}
+        {% include 'tablero-footer.html' %}
 
     </div>
 </div>
@@ -300,16 +332,16 @@
     });
     document.getElementById("buscadorForm").addEventListener("submit", function (event) {
         event.preventDefault(); // Prevenir envío estándar del formulario
-    
+
         const valor = document.getElementById("buscador").value.trim();
         const patterns = {
             cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas
             pasaporte: /^[A-Z]{2}\d{6,9}$/,                        // Pasaportes
             id_certificado: /^[a-zA-Z0-9]{8}$/                    // IDs de certificados
         };
-    
+
         let action, field;
-    
+
         if (patterns.cedula.test(valor)) {
             action = "/buscar_certificados";
             field = "cedula";
@@ -323,16 +355,16 @@
             alert("Formato no válido. Introduzca un documento de identificación o un ID de certificado válido.");
             return;
         }
-    
+
         // Crear y enviar el formulario dinámicamente
         const form = event.target;
         form.action = action;
         form.method = "POST";
-    
+
         // Limpiar campos ocultos previos
         const hiddenInputs = form.querySelectorAll("input[type='hidden']");
         hiddenInputs.forEach((input) => input.remove());
-    
+
         const hiddenInput = document.createElement("input");
         hiddenInput.type = "hidden";
         hiddenInput.name = field;
@@ -340,6 +372,7 @@
         form.appendChild(hiddenInput);
         form.submit();
     });
-</script>    
+</script>
 </body>
+
 </html>
