@@ -432,6 +432,7 @@ def editar_usuario(user_id):
         if not usuario:
             return redirect(url_for('listar_usuarios'))
 
+
         # Recoger los datos del formulario
         nombres = request.form.get('nombres')
         apellidos = request.form.get('apellidos')

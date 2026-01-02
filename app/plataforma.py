@@ -127,10 +127,20 @@ def editar_contenido(codigo_evento, orden):
         elif tipo == 'documento':
             documento_file = request.files.get('documento')
             if documento_file:
-                documento_filename = f"{codigo_evento}-{orden:02d}.pdf"
                 documento_path = os.path.join(app.config['UPLOAD_FOLDER'], documento_filename)
                 documento_file.save(documento_path)
                 actualizacion['documento'] = documento_filename
+        elif tipo == 'caso_chatgpt':
+            try:
+                import json
+                contenido_json_raw = request.form['json_caso']
+                # Intentar parsear el JSON para validarlo
+                contenido_json = json.loads(contenido_json_raw)
+                # Guardar el contenido como string para evitar problemas de codificación
+                actualizacion['contenido_json'] = contenido_json_raw
+            except Exception as e:
+                flash('El JSON del caso clínico no es válido: ' + str(e), 'error')
+                return redirect(request.url)
         elif tipo == 'examen':
             actualizacion['qbank_config'] = request.form['qbank_config']
 
@@ -546,7 +556,21 @@ def editar_pregunta_qbank(codigo_qbank, pregunta_id):
         opciones = []
         for i in range(int(request.form['num_opciones'])):
             texto = request.form.get(f'opcion_texto_{i}', '')
-            opciones.append({'texto': texto})
+            imagen = None
+            
+            # Verificar si se subió una nueva imagen
+            if f'opcion_imagen_{i}' in request.files:
+                file = request.files[f'opcion_imagen_{i}']
+                if file and file.filename:
+                    filename = secure_filename(file.filename)
+                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                    imagen = filename
+            
+            # Si no se subió nueva imagen, intentar mantener la existente
+            if not imagen:
+                imagen = request.form.get(f'opcion_imagen_actual_{i}')
+                
+            opciones.append({'texto': texto, 'imagen': imagen})
         
         # Guardar imágenes de la pregunta (solo si se suben nuevas)
         imagenes = pregunta.get('imagenes', [])  # Mantener imágenes existentes
