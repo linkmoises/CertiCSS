@@ -4620,12 +4620,12 @@ def tablero_metricas(page=1):
     # Obtener el número total de usuarios
     total_usuarios = collection_usuarios.count_documents({"rol": {"$ne": "administrador"}})
     # Obtener el número total de eventos (excluyendo registro abierto y sesiones docentes)
-    total_eventos = collection_eventos.count_documents({'registro_abierto': {'$ne': True}, 'tipo': {'$ne': 'Sesión docente'}})
+    total_eventos = collection_eventos.count_documents({'registro_abierto': {'$ne': True}, 'tipo': {'$ne': 'Sesión Docente'}})
     # Obtener el número total de eventos cerrados (excluyendo registro abierto y sesiones docentes)
     total_eventos_cerrados = collection_eventos.count_documents({
         "estado_evento": "cerrado",
         'registro_abierto': {'$ne': True},
-        'tipo': {'$ne': 'Sesión docente'}
+        'tipo': {'$ne': 'Sesión Docente'}
     })
     # Contar el número total de ponentes
     total_ponentes = collection_participantes.count_documents({"rol": "ponente"})
@@ -4640,7 +4640,7 @@ def tablero_metricas(page=1):
     eventos_cursor = collection_eventos.find({
         "estado_evento": "cerrado",
         'registro_abierto': {'$ne': True},
-        'tipo': {'$ne': 'Sesión docente'}
+        'tipo': {'$ne': 'Sesión Docente'}
     }).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     
     eventos = list(eventos_cursor)
