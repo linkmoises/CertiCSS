@@ -4626,7 +4626,8 @@ def tablero_metricas(page=1):
     # Obtener el número total de eventos cerrados (excluyendo registro abierto)
     total_eventos_cerrados = collection_eventos.count_documents({
         "estado_evento": "cerrado",
-        'registro_abierto': {'$ne': True}
+        'registro_abierto': {'$ne': True},
+        'tipo': {'$ne': 'Sesión docente'}
     })
     # Contar el número total de ponentes
     total_ponentes = collection_participantes.count_documents({"rol": "ponente"})
