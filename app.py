@@ -792,7 +792,8 @@ def catalogo(page=1):
     # Filtro para excluir eventos con registro abierto
     filtro_catalogo = {
         "estado_evento": {"$ne": "borrador"},
-        'registro_abierto': {'$ne': True}
+        'registro_abierto': {'$ne': True},
+        'tipo': {'$ne': 'Sesión Docente'}
     }
 
     # Contar total de eventos (excluyendo registro abierto)
