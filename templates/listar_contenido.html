@@ -1,84 +1,152 @@
 {% include 'tablero-header.html' %}
 
 {% include 'tablero-sidebar.html' %}
-    
-    <!-- CONTENIDO -->
-    <div class="w-full lg:ps-64">
-        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
 
-            <!-- TABLA RESUMEN EVENTOS -->
-            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
-                <!-- Card -->
-                <div class="flex flex-col">
+<!-- CONTENIDO -->
+<div class="w-full lg:ps-64">
+    <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+
+        <!-- TABLA RESUMEN EVENTOS -->
+        <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+            <!-- Card -->
+            <div class="flex flex-col">
                 <div class="-m-1.5 overflow-x-auto">
                     <div class="p-1.5 min-w-full inline-block align-middle">
-                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                        <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
 
-                        <!-- Header -->
-                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
-                            <div>
-                                <h2 class="text-xl font-semibold text-gray-800">
-                                    {{ evento.nombre }}
-                                </h2>
-                                <p class="text-sm text-gray-600">
-                                    Actividades / contenidos del evento digital
-                                </p>
-                            </div>
-            
-                            <div>
-                                <div class="inline-flex gap-x-2">
-                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="{{ url_for('plataforma.crear_contenido', codigo_evento=codigo_evento) }}">
-                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                                        Nueva Actividad / Contenido
-                                    </a>
+                            <!-- Header -->
+                            <div
+                                class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
+                                <div>
+                                    <h2 class="text-xl font-semibold text-gray-800">
+                                        {{ evento.nombre }}
+                                    </h2>
+                                    <p class="text-sm text-gray-600">
+                                        Actividades / contenidos del evento digital
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <div class="inline-flex gap-x-2">
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
+                                            href="{{ url_for('plataforma.crear_contenido', codigo_evento=codigo_evento) }}">
+                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                                height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M5 12h14" />
+                                                <path d="M12 5v14" />
+                                            </svg>
+                                            Nueva Actividad / Contenido
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <!-- End Header -->
+                            <!-- End Header -->
 
-                        <!-- Body -->
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Orden</th>
-                                        <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Título</th>
-                                        <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Tipo</th>
-                                        <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200">
-                                    {% if actividades %}
+                            <!-- Body -->
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col"
+                                                class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">
+                                                Orden</th>
+                                            <th scope="col"
+                                                class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">
+                                                Título</th>
+                                            <th scope="col"
+                                                class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">
+                                                Tipo</th>
+                                            <th scope="col"
+                                                class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">
+                                                Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        {% if actividades %}
                                         {% for actividad in actividades %}
                                         <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ actividad.orden }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ actividad.titulo }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ actividad.tipo }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{
+                                                actividad.orden }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{
+                                                actividad.titulo }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{
+                                                actividad.tipo }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
                                                 <div class="flex gap-4">
-                                                    <form action="{{ url_for('plataforma.mover_contenido', codigo_evento=codigo_evento, orden=actividad.orden, direccion='arriba') }}" method="POST" class="inline">
-                                                        <button type="submit" class="inline-flex items-center gap-x-2 text-sm font-medium text-gray-600 hover:text-gray-800 disabled:text-gray-200" {% if loop.first %}disabled{% endif %}>
-                                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 15 7-7 7 7"/></svg>
+                                                    <form
+                                                        action="{{ url_for('plataforma.mover_contenido', codigo_evento=codigo_evento, orden=actividad.orden, direccion='arriba') }}"
+                                                        method="POST" class="inline">
+                                                        <button type="submit"
+                                                            class="inline-flex items-center gap-x-2 text-sm font-medium text-gray-600 hover:text-gray-800 disabled:text-gray-200"
+                                                            {% if loop.first %}disabled{% endif %}>
+                                                            <svg class="shrink-0 size-4"
+                                                                xmlns="http://www.w3.org/2000/svg" width="24"
+                                                                height="24" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2"
+                                                                stroke-linecap="round" stroke-linejoin="round">
+                                                                <path d="m5 15 7-7 7 7" />
+                                                            </svg>
                                                             Arriba
                                                         </button>
                                                     </form>
-                                                    <form action="{{ url_for('plataforma.mover_contenido', codigo_evento=codigo_evento, orden=actividad.orden, direccion='abajo') }}" method="POST" class="inline">
-                                                        <button type="submit" class="inline-flex items-center gap-x-2 text-sm font-medium text-gray-600 hover:text-gray-800 disabled:text-gray-200" {% if loop.last %}disabled{% endif %}>
-                                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 9-7 7-7-7"/></svg>
+                                                    <form
+                                                        action="{{ url_for('plataforma.mover_contenido', codigo_evento=codigo_evento, orden=actividad.orden, direccion='abajo') }}"
+                                                        method="POST" class="inline">
+                                                        <button type="submit"
+                                                            class="inline-flex items-center gap-x-2 text-sm font-medium text-gray-600 hover:text-gray-800 disabled:text-gray-200"
+                                                            {% if loop.last %}disabled{% endif %}>
+                                                            <svg class="shrink-0 size-4"
+                                                                xmlns="http://www.w3.org/2000/svg" width="24"
+                                                                height="24" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2"
+                                                                stroke-linecap="round" stroke-linejoin="round">
+                                                                <path d="m19 9-7 7-7-7" />
+                                                            </svg>
                                                             Abajo
                                                         </button>
                                                     </form>
-                                                    <a href="#" class="inline-flex items-center gap-x-2 text-sm font-medium text-green-600 hover:text-green-800">
-                                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-icon lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+                                                    <a href="{{ url_for('plataforma.previsualizar_contenido', codigo_evento=codigo_evento, orden=actividad.orden) }}"
+                                                        target="_blank"
+                                                        class="inline-flex items-center gap-x-2 text-sm font-medium text-green-600 hover:text-green-800">
+                                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg"
+                                                            width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                            stroke="currentColor" stroke-width="2"
+                                                            stroke-linecap="round" stroke-linejoin="round"
+                                                            class="lucide lucide-eye-icon lucide-eye">
+                                                            <path
+                                                                d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+                                                            <circle cx="12" cy="12" r="3" />
+                                                        </svg>
                                                         Previsualizar
                                                     </a>
-                                                    <a href="{{ url_for('plataforma.editar_contenido', codigo_evento=codigo_evento, orden=actividad.orden) }}" class="inline-flex items-center gap-x-2 text-sm font-medium text-blue-600 hover:text-blue-800">
-                                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                                                    <a href="{{ url_for('plataforma.editar_contenido', codigo_evento=codigo_evento, orden=actividad.orden) }}"
+                                                        class="inline-flex items-center gap-x-2 text-sm font-medium text-blue-600 hover:text-blue-800">
+                                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg"
+                                                            width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                            stroke="currentColor" stroke-width="2"
+                                                            stroke-linecap="round" stroke-linejoin="round">
+                                                            <path
+                                                                d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                                                            <path d="m15 5 4 4" />
+                                                        </svg>
                                                         Editar
                                                     </a>
-                                                    <form action="{{ url_for('plataforma.eliminar_contenido', codigo_evento=codigo_evento, orden=actividad.orden) }}" method="POST" class="inline">
-                                                        <button type="submit" class="inline-flex items-center gap-x-2 text-sm font-medium text-red-600 hover:text-red-800" onclick="return confirm('¿Está seguro de eliminar esta actividad?')">
-                                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                                    <form
+                                                        action="{{ url_for('plataforma.eliminar_contenido', codigo_evento=codigo_evento, orden=actividad.orden) }}"
+                                                        method="POST" class="inline">
+                                                        <button type="submit"
+                                                            class="inline-flex items-center gap-x-2 text-sm font-medium text-red-600 hover:text-red-800"
+                                                            onclick="return confirm('¿Está seguro de eliminar esta actividad?')">
+                                                            <svg class="shrink-0 size-4"
+                                                                xmlns="http://www.w3.org/2000/svg" width="24"
+                                                                height="24" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2"
+                                                                stroke-linecap="round" stroke-linejoin="round">
+                                                                <path d="M3 6h18" />
+                                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                                            </svg>
                                                             Eliminar
                                                         </button>
                                                     </form>
@@ -86,49 +154,52 @@
                                             </td>
                                         </tr>
                                         {% endfor %}
-                                    {% else %}
+                                        {% else %}
                                         <tr>
                                             <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">
                                                 No hay actividades disponibles
                                             </td>
                                         </tr>
-                                    {% endif %}
-                                </tbody>
-                            </table>
-                        </div>
-                        <!-- End Body -->
-
-                        <!-- Footer -->
-                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
-                            <div>
-                            <p class="text-sm text-gray-600 dark:text-neutral-400">
-                                <span class="font-semibold text-gray-800 dark:text-neutral-200">{{ codigo_evento }}</span>
-                            </p>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
                             </div>
+                            <!-- End Body -->
 
-                            <div>
-                                <div class="inline-flex gap-x-2">
-                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="{{ url_for('listar_eventos_digitales') }}">
-                                        Volver al listado de eventos digitales
-                                    </a>
+                            <!-- Footer -->
+                            <div
+                                class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
+                                <div>
+                                    <p class="text-sm text-gray-600 dark:text-neutral-400">
+                                        <span class="font-semibold text-gray-800 dark:text-neutral-200">{{ codigo_evento
+                                            }}</span>
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <div class="inline-flex gap-x-2">
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50"
+                                            href="{{ url_for('listar_eventos_digitales') }}">
+                                            Volver al listado de eventos digitales
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
+                            <!-- End Footer -->
+
                         </div>
-                        <!-- End Footer -->
-
-                    </div>
                     </div>
                 </div>
-                </div>
-                <!-- End Card -->
             </div>
-            <!-- FIN TABLA RESUMEN EVENTOS -->
-
-{% include 'tablero-footer.html' %}
-
+            <!-- End Card -->
         </div>
+        <!-- FIN TABLA RESUMEN EVENTOS -->
+
+        {% include 'tablero-footer.html' %}
+
     </div>
-    <!-- FIN CONTENIDO -->
+</div>
+<!-- FIN CONTENIDO -->
 
 <!-- JS PLUGINS -->
 <script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
@@ -140,16 +211,16 @@
     });
     document.getElementById("buscadorForm").addEventListener("submit", function (event) {
         event.preventDefault(); // Prevenir envío estándar del formulario
-    
+
         const valor = document.getElementById("buscador").value.trim();
         const patterns = {
             cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas
             pasaporte: /^[A-Z]{2}\d{6,9}$/,                        // Pasaportes
             id_certificado: /^[a-zA-Z0-9]{8}$/                    // IDs de certificados
         };
-    
+
         let action, field;
-    
+
         if (patterns.cedula.test(valor)) {
             action = "/buscar_certificados";
             field = "cedula";
@@ -163,16 +234,16 @@
             alert("Formato no válido. Introduzca un documento de identificación o un ID de certificado válido.");
             return;
         }
-    
+
         // Crear y enviar el formulario dinámicamente
         const form = event.target;
         form.action = action;
         form.method = "POST";
-    
+
         // Limpiar campos ocultos previos
         const hiddenInputs = form.querySelectorAll("input[type='hidden']");
         hiddenInputs.forEach((input) => input.remove());
-    
+
         const hiddenInput = document.createElement("input");
         hiddenInput.type = "hidden";
         hiddenInput.name = field;
@@ -180,6 +251,7 @@
         form.appendChild(hiddenInput);
         form.submit();
     });
-</script>    
+</script>
 </body>
+
 </html>

@@ -173,7 +173,6 @@
                                 referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                         </div>
                         <br />
-                        <p>{{ contenido_actual.descripcion }}</p>
                         {% elif contenido_actual.tipo == 'texto' %}
                         <div class="prose text-gray-600 w-full text-sm !max-w-none">
                             {{ contenido_actual.contenido_texto | safe }}
