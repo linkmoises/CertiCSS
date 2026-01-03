@@ -745,20 +745,38 @@ def home():
     inicio_hoy = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     
     # Obtener todos los eventos futuros
-    todos_eventos = list(collection_eventos.find({
+    eventos_futuros = list(collection_eventos.find({
         "fecha_inicio": {"$gte": inicio_hoy},
         "estado_evento": {"$ne": "borrador"},
         'registro_abierto': {'$ne': True}
     }))
     
-    # Seleccionar 3 eventos aleatorios si hay más de 3
-    if len(todos_eventos) > 3:
-        import random
-        eventos_aleatorios = random.sample(todos_eventos, 3)
+    mostrar_recientes = False
+
+    if eventos_futuros:
+        # Seleccionar 3 eventos aleatorios si hay más de 3
+        if len(eventos_futuros) > 3:
+            import random
+            eventos_a_mostrar = random.sample(eventos_futuros, 3)
+        else:
+            eventos_a_mostrar = eventos_futuros
     else:
-        eventos_aleatorios = todos_eventos
+        # Si no hay futuros, buscar recientes (pasados)
+        mostrar_recientes = True
+        # Obtener los últimos 20 eventos pasados para sacar aleatorios de ahí
+        eventos_pasados = list(collection_eventos.find({
+            "fecha_inicio": {"$lt": inicio_hoy},
+            "estado_evento": {"$ne": "borrador"},
+            'registro_abierto': {'$ne': True}
+        }).sort("fecha_inicio", -1).limit(20))
+
+        if len(eventos_pasados) > 3:
+            import random
+            eventos_a_mostrar = random.sample(eventos_pasados, 3)
+        else:
+            eventos_a_mostrar = eventos_pasados
     
-    return render_template('home.html', eventos=eventos_aleatorios)
+    return render_template('home.html', eventos=eventos_a_mostrar, mostrar_recientes=mostrar_recientes)
 
 
 ###

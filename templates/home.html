@@ -137,8 +137,14 @@
     <!--====== CARDS ======-->
     <section class="bg-white">
         <div class="text-center">
+            {% if mostrar_recientes %}
+            <h1 class="text-3xl font-bold text-gray-800 sm:text-4xl dark:text-white">Eventos Recientes</h1>
+            <p class="mt-1 text-gray-600 dark:text-neutral-400">Un vistazo a nuestras actividades académicas recientes
+            </p>
+            {% else %}
             <h1 class="text-3xl font-bold text-gray-800 sm:text-4xl dark:text-white">Próximos Eventos</h1>
             <p class="mt-1 text-gray-600 dark:text-neutral-400">Un vistazo a los eventos que se avecinan</p>
+            {% endif %}
         </div>
 
         <!-- Tarjetas de evento -->
