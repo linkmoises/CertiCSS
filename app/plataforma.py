@@ -165,7 +165,29 @@ def previsualizar_contenido(codigo_evento, orden):
     if not contenido:
         abort(404)
 
-    return render_template('previsualizar_contenido.html', evento=evento, contenido=contenido)
+    # Obtener la lista completa de contenidos para el sidebar
+    contenidos = list(collection_eva.find({'codigo_evento': codigo_evento}).sort('orden', 1))
+
+    # Convertir Markdown a HTML solo si el tipo es 'texto'
+    import markdown
+    if contenido.get('tipo') == 'texto' and 'contenido_texto' in contenido:
+        contenido['contenido_texto'] = markdown.markdown(contenido['contenido_texto'])
+
+    # Si es examen, cargar las preguntas para la previsualización
+    preguntas = []
+    if contenido.get('tipo') == 'examen' and 'qbank_config' in contenido:
+        codigo_qbank, num_preguntas, aleatorio = parse_qbank_config(contenido['qbank_config'])
+        if codigo_qbank:
+            preguntas = list(collection_qbanks_data.find({'codigo_qbank': codigo_qbank}))
+            import random
+            if aleatorio:
+                preguntas = random.sample(preguntas, min(num_preguntas, len(preguntas)))
+            else:
+                preguntas = preguntas[:num_preguntas]
+    
+    return render_template('plataforma_previsualizar.html', evento=evento, contenido_actual=contenido, contenidos=contenidos, preguntas=preguntas)
+
+
 
 
 ###
