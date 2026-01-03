@@ -152,6 +152,23 @@ def editar_contenido(codigo_evento, orden):
 
 
 ###
+### LMS - previsualizar contenido
+###
+@plataforma_bp.route('/tablero/eventos/<codigo_evento>/lms/<int:orden>/previsualizar', methods=['GET'])
+@login_required
+def previsualizar_contenido(codigo_evento, orden):
+    evento = collection_eventos.find_one({'codigo': codigo_evento})
+    if not evento:
+        abort(404)
+
+    contenido = collection_eva.find_one({'codigo_evento': codigo_evento, 'orden': orden})
+    if not contenido:
+        abort(404)
+
+    return render_template('previsualizar_contenido.html', evento=evento, contenido=contenido)
+
+
+###
 ### LMS - mover item de evento
 ###
 @plataforma_bp.route('/tablero/eventos/<codigo_evento>/lms/<int:orden>/mover/<direccion>', methods=['POST'])
