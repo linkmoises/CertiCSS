@@ -6401,13 +6401,16 @@ def generar_pdf_participante(participante, afiche_path):
         next_y = min(final_y - 0.3 * inch, min_next_y)
     else:
         texto_horas = "hora" if str(carga_horaria_evento) == "1" else "horas"
-        actividad_y = draw_centered_text(base_y, f"Actividad académica con una duración de {carga_horaria_evento} {texto_horas}")
+        tipo_actividad = "Actividad académica virtual" if evento.get('registro_abierto') is True else "Actividad académica"
+        actividad_y = draw_centered_text(base_y, f"{tipo_actividad} con una duración de {carga_horaria_evento} {texto_horas}")
         # Show the pre-formatted date range
         if evento.get('registro_abierto') is True:
-            fecha_y = draw_centered_text(actividad_y - 0.3 * inch, "Evento virtual")
+            # No mostrar nada si registro_abierto es True
+            fecha_y = actividad_y
         else:
             fecha_y = draw_centered_text(actividad_y - 0.3 * inch, fecha_fin_formateada)
-            next_y = fecha_y - 0.3 * inch
+        
+        next_y = fecha_y - 0.3 * inch
 
     # Format just the end date for the 'Dado en...' line
     fecha_fin_simple = fecha_fin_evento.strftime('%d de %B de %Y')
