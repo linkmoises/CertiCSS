@@ -128,20 +128,6 @@
                         </a>
                     </li>
 
-                    <li>
-                        <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100 {% if active_section == 'nube' %}bg-gray-100{% endif %}"
-                            href="{{ url_for('nube.nube_dashboard') }}">
-                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round"
-                                class="lucide lucide-cloudy-icon lucide-cloudy">
-                                <path d="M17.5 21H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
-                                <path d="M22 10a3 3 0 0 0-3-3h-2.207a5.502 5.502 0 0 0-10.702.5" />
-                            </svg>
-                            Internado médico
-                        </a>
-                    </li>
-
                     <li class="hs-accordion" id="projects-accordion">
                         <button type="button"
                             class="hs-accordion-toggle w-full text-start flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:text-neutral-200"
@@ -269,6 +255,26 @@
                                 </li>
                             </ul>
                         </div>
+                    </li>
+
+                    <li>
+                        <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100 {% if active_section == 'nube' %}bg-gray-100{% endif %}"
+                            href="{{ url_for('mis_sesiones_docentes') }}">
+                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round"
+                                class="lucide lucide-calendar-sync-icon lucide-calendar-sync">
+                                <path d="M11 10v4h4" />
+                                <path d="m11 14 1.535-1.605a5 5 0 0 1 8 1.5" />
+                                <path d="M16 2v4" />
+                                <path d="m21 18-1.535 1.605a5 5 0 0 1-8-1.5" />
+                                <path d="M21 22v-4h-4" />
+                                <path d="M21 8.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4.3" />
+                                <path d="M3 10h4" />
+                                <path d="M8 2v4" />
+                            </svg>
+                            Docencia continua
+                        </a>
                     </li>
 
                     {% if current_user.rol in roles_permitidos %}
