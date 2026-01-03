@@ -378,6 +378,10 @@ def listar_qbank(page=1):
     qbanks_cursor = collection_qbanks.find().sort("fecha_creacion", -1).skip((page - 1) * qbanks_por_pagina).limit(qbanks_por_pagina)
     qbanks = list(qbanks_cursor)
 
+    # Cargar las preguntas para cada qbank
+    for qbank in qbanks:
+        qbank['preguntas'] = list(collection_qbanks_data.find({"codigo_qbank": qbank['codigo']}))
+
     return render_template('qbanks_listar.html', 
         qbanks=qbanks,
         page=page,
