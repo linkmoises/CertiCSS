@@ -6364,6 +6364,8 @@ def generar_pdf_participante(participante, afiche_path):
 
     if participante['rol'] == 'presentador_poster':
         draw_centered_text(4.4 * inch, f"Por su participación en el concurso de trabajos de investigación realizado en:")
+    elif evento.get('registro_abierto') is True:
+        draw_centered_text(4.4 * inch, f"Por aprobar la actividad académica titulada:")
     else:
         draw_centered_text(4.4 * inch, f"Por su asistencia en calidad de {rol_mostrar} en:")
     
@@ -6398,16 +6400,42 @@ def generar_pdf_participante(participante, afiche_path):
         min_next_y = poster_y - 0.9 * inch  # Espaciado mínimo para títulos cortos
         next_y = min(final_y - 0.3 * inch, min_next_y)
     else:
-        actividad_y = draw_centered_text(base_y, f"Actividad académica con una duración de {carga_horaria_evento} horas")
+        texto_horas = "hora" if str(carga_horaria_evento) == "1" else "horas"
+        actividad_y = draw_centered_text(base_y, f"Actividad académica con una duración de {carga_horaria_evento} {texto_horas}")
         # Show the pre-formatted date range
-        fecha_y = draw_centered_text(actividad_y - 0.3 * inch, fecha_fin_formateada)
-        next_y = fecha_y - 0.3 * inch
+        if evento.get('registro_abierto') is True:
+            fecha_y = draw_centered_text(actividad_y - 0.3 * inch, "Evento virtual")
+        else:
+            fecha_y = draw_centered_text(actividad_y - 0.3 * inch, fecha_fin_formateada)
+            next_y = fecha_y - 0.3 * inch
 
     # Format just the end date for the 'Dado en...' line
     fecha_fin_simple = fecha_fin_evento.strftime('%d de %B de %Y')
     # Usar next_y si está definido (para ponentes) o la posición fija para participantes
     final_position = next_y if 'next_y' in locals() else 2.7 * inch
-    draw_centered_text(final_position, f"Dado en la República de Panamá, Provincia de Panamá, el {fecha_fin_simple}")
+    # Determinar la provincia basada en la región
+    region = evento.get('region', '')
+    if region == 'bocasdeltoro':
+        provincia = 'Provincia de Bocas del Toro'
+    elif region == 'cocle':
+        provincia = 'Provincia de Coclé'
+    elif region == 'colon':
+        provincia = 'Provincia de Colón'
+    elif region == 'chiriqui':
+        provincia = 'Provincia de Chiriquí'
+    elif region == 'herrera':
+        provincia = 'Provincia de Herrera'
+    elif region == 'lossantos':
+        provincia = 'Provincia de Los Santos'
+    elif region == 'veraguas':
+        provincia = 'Provincia de Veraguas'
+    else:
+        provincia = 'Provincia de Panamá'
+
+    if evento.get('registro_abierto') is True:
+        draw_centered_text(final_position, f"Dado en la República de Panamá, el {fecha_fin_simple}")
+    else:
+        draw_centered_text(final_position, f"Dado en la República de Panamá, {provincia}, el {fecha_fin_simple}")
 
     # Código de certificado en la esquina superior derecha
     c.setFillColor("white")
