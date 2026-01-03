@@ -6407,7 +6407,7 @@ def generar_pdf_participante(participante, afiche_path):
         # Show the pre-formatted date range
         if evento.get('registro_abierto') is True:
             # No mostrar nada si registro_abierto es True
-            fecha_y = " "
+            fecha_y = actividad_y
         else:
             fecha_y = draw_centered_text(actividad_y - 0.3 * inch, fecha_fin_formateada)
         
