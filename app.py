@@ -748,6 +748,7 @@ def home():
     eventos_futuros = list(collection_eventos.find({
         "fecha_inicio": {"$gte": inicio_hoy},
         "estado_evento": {"$ne": "borrador"},
+        'tipo': {'$ne': 'Sesión Docente'},
         'registro_abierto': {'$ne': True}
     }))
     
@@ -767,6 +768,7 @@ def home():
         eventos_pasados = list(collection_eventos.find({
             "fecha_inicio": {"$lt": inicio_hoy},
             "estado_evento": {"$ne": "borrador"},
+            'tipo': {'$ne': 'Sesión Docente'},
             'registro_abierto': {'$ne': True}
         }).sort("fecha_inicio", -1).limit(20))
 
