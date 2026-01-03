@@ -4610,10 +4610,7 @@ def herramientas():
 
 
 ###
-###
-###
-###
-### Plantilla varias
+### Tablero de Métricas
 ###
 @app.route('/tablero/metricas')
 @app.route('/tablero/metricas/page/<int:page>')
@@ -4622,9 +4619,9 @@ def tablero_metricas(page=1):
 
     # Obtener el número total de usuarios
     total_usuarios = collection_usuarios.count_documents({"rol": {"$ne": "administrador"}})
-    # Obtener el número total de eventos (excluyendo registro abierto)
-    total_eventos = collection_eventos.count_documents({'registro_abierto': {'$ne': True}})
-    # Obtener el número total de eventos cerrados (excluyendo registro abierto)
+    # Obtener el número total de eventos (excluyendo registro abierto y sesiones docentes)
+    total_eventos = collection_eventos.count_documents({'registro_abierto': {'$ne': True}, 'tipo': {'$ne': 'Sesión docente'}})
+    # Obtener el número total de eventos cerrados (excluyendo registro abierto y sesiones docentes)
     total_eventos_cerrados = collection_eventos.count_documents({
         "estado_evento": "cerrado",
         'registro_abierto': {'$ne': True},
@@ -4639,10 +4636,11 @@ def tablero_metricas(page=1):
     eventos_por_pagina = 20
     total_paginas = (total_eventos_cerrados + eventos_por_pagina - 1) // eventos_por_pagina
 
-    # Obtener los eventos con estado cerrado para la página actual (excluyendo registro abierto)
+    # Obtener los eventos con estado cerrado para la página actual (excluyendo registro abierto y sesiones docentes)
     eventos_cursor = collection_eventos.find({
         "estado_evento": "cerrado",
-        'registro_abierto': {'$ne': True}
+        'registro_abierto': {'$ne': True},
+        'tipo': {'$ne': 'Sesión docente'}
     }).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     
     eventos = list(eventos_cursor)
