@@ -1,92 +1,108 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ evento.nombre }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
-    <!-- favicons -->
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
-    <meta name="apple-mobile-web-app-title" content="CertiCSS" />
-    <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
-    <style>
-        body {
-            background-image: url('{% if evento.fondo and evento.fondo.split('/')[-1] %}{{ url_for('static', filename='uploads/' + evento.fondo.split('/')[-1]) }}{% else %}{{ base_url }}{{ url_for('static', filename='assets/auditorio-cidelas-moredark.jpg') }}{% endif %}');
-            background-size: cover;
-            color: white;
-            text-align: left;
-            padding: 20px;
-        }
-        .otp-container {
-            color: black;
-            font-family: monospace;
-            max-width: 500px;
-        }
-    </style>
+    <head>
+        <meta charset="UTF-8" />
+        <title>{{ evento.nombre }}</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}" />
+        <!-- favicons -->
+        <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
+        <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
+        <meta name="apple-mobile-web-app-title" content="CertiCSS" />
+        <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
+        <style>
+            body {
+                background-image: url("{% if evento.fondo and evento.fondo.split("/")[-1] %}{{ url_for("static", filename="uploads/" + evento.fondo.split("/")[-1]) }}{% else %}{{ base_url }}{{ url_for("static", filename="assets/auditorio-cidelas-moredark.jpg") }}{% endif %}");
+                background-size: cover;
+                color: white;
+                text-align: left;
+                padding: 20px;
+            }
+            .otp-container {
+                color: black;
+                font-family: monospace;
+                max-width: 500px;
+            }
+        </style>
 {% if evento.estado_evento != 'cerrado' %}
-    <!-- Script para actualizar dinámicamente el OTP -->
-    <script>
-        function actualizarOTP() {
-            const codigoEvento = "{{ evento.codigo }}";  // Obtener el código del evento desde la plantilla
-            console.log("Actualizando OTP para el evento:", codigoEvento);  // Depuración
-            fetch(`/get-otp/${codigoEvento}`)
-                .then(response => response.json())
-                .then(data => {
-                    console.log("Nuevo OTP recibido:", data.otp);  // Depuración
-                    document.getElementById('otp').innerText = data.otp;
-                })
-        }
-        // Actualizar el OTP cada 2 segundos
-        setInterval(actualizarOTP, 1000);
-        // Actualizar el OTP inmediatamente al cargar la página
-        actualizarOTP();
-    </script>
+        <!-- Script para actualizar dinámicamente el OTP -->
+        <script>
+            function actualizarOTP() {
+                const codigoEvento = "{{ evento.codigo }}"; // Obtener el código del evento desde la plantilla
+                console.log("Actualizando OTP para el evento:", codigoEvento); // Depuración
+                fetch(`/get-otp/${codigoEvento}`)
+                    .then((response) => response.json())
+                    .then((data) => {
+                        console.log("Nuevo OTP recibido:", data.otp); // Depuración
+                        document.getElementById("otp").innerText = data.otp;
+                    });
+            }
+            // Actualizar el OTP cada 2 segundos
+            setInterval(actualizarOTP, 1000);
+            // Actualizar el OTP inmediatamente al cargar la página
+            actualizarOTP();
+        </script>
 {% endif %}
-</head>
-<body>
-    <!-- Hero -->
-    <div class="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Grid -->
-        <div class="grid md:grid-cols-2 gap-4 md:gap-8 xl:gap-20">
-            <div>
-                <div class="flex items-center gap-x-3">
-                    <div class="shrink-0">
-                        <img class="h-24 w-24" src="{{ url_for('static', filename='assets/' + 'css-logo.png') }}" alt="Caja de Seguro Social" />
+    </head>
+    <body>
+        <!-- Hero -->
+        <div class="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Grid -->
+            <div class="grid md:grid-cols-2 gap-4 md:gap-8 xl:gap-20">
+                <div>
+                    <div class="flex items-center gap-x-3">
+                        <div class="shrink-0">
+                            <img class="h-24 w-24" src="{{ url_for('static', filename='assets/' + 'css-logo.png') }}" alt="Caja de Seguro Social" />
+                        </div>
+
+                        <div class="grow">
+                            <h2 class="block text-3xl font-bold mt-8">
+                                {{ evento.tipo }}
+                            </h2>
+                            <h4 class="block italic mb-8">
+                                {{ evento.unidad_ejecutora }}
+                            </h4>
+                        </div>
                     </div>
-                    
-                    <div class="grow">
-                        <h2 class="block text-3xl font-bold mt-8">{{ evento.tipo }}</h2>
-                        <h4 class="block italic mb-8">{{ evento.unidad_ejecutora }}</h4>
-                    </div>
-                </div>
-                  
-                <h1 class="block text-3xl font-bold dark:text-gray-800 sm:text-4xl lg:text-6xl lg:leading-tight mb-8">{{ evento.nombre }}</h1>
-{% if evento.fecha_inicio.date() == evento.fecha_fin.date() %}
-                <h3 class="my-3 text-lg dark:text-gray-800">{{ evento.fecha_inicio.strftime('%d de %B de %Y') }}</h3>
+
+                    <h1 class="block text-3xl font-bold dark:text-gray-800 sm:text-4xl lg:text-6xl lg:leading-tight mb-8">
+                        {{ evento.nombre }}
+                    </h1>
+{% if evento.fecha_inicio.date() == evento.fecha_fin.date()%}
+                    <h3 class="my-3 text-lg dark:text-gray-800">
+                        {{ evento.fecha_inicio.strftime('%d de %B de %Y') }}
+                    </h3>
 {% elif evento.fecha_fin %}
-                <h3 class="my-3 text-lg dark:text-gray-800">{{ evento.fecha_inicio.strftime('%d') }} - {{ evento.fecha_fin.strftime('%d de %B de %Y') }}</h3>
+                    <h3 class="my-3 text-lg dark:text-gray-800">
+                        {{ evento.fecha_inicio.strftime('%d') }} - {{ evento.fecha_fin.strftime('%d de %B de %Y') }}
+                    </h3>
 {% else %}
-                <h3 class="my-3 text-lg dark:text-gray-800">{{ evento.fecha_inicio.strftime('%d de %B de %Y') }}</h3>
+                    <h3 class="my-3 text-lg dark:text-gray-800">
+                        {{ evento.fecha_inicio.strftime('%d de %B de %Y') }}
+                    </h3>
 {% endif %}
-            </div>
-            <!-- End Col -->
-    
-            <div class="relative my-4">
-                <div class="otp-container">
-                    <p class="bg-white p-3 text-5xl border-4 border-black rounded-xl">{% if evento.estado_evento == 'cerrado' %}Evento cerrado{% else %}Código OTP: <span id="otp" class="font-bold">{{ otp }}{% endif %}</span></p>
                 </div>
-                <div class="qr-code">
-                    <img class="block float-right mt-8 w-64 h-64 border-4 border-black rounded-xl" src="{{ url_for('static', filename='uploads/' + evento.codigo + '-qr.png') }}" alt="Código QR" class="w-64 h-64" /><br />
-                    <p class="mt-8 bg-white block text-black float-right p-4 text-3xl border-4 border-black rounded-xl">{{ BASE_URL }}{{ evento.codigo }}</p>
+                <!-- End Col -->
+
+                <div class="relative my-4">
+                    <div class="otp-container">
+                        <p class="bg-white p-3 text-5xl border-4 border-black rounded-xl">
+{% if evento.estado_evento == 'cerrado' %}Evento cerrado{% elif evento.estado_evento == 'borrador' %}Evento no publicado{% else %}Código OTP:
+                            <span id="otp" class="font-bold">{{ otp }}{% endif %}</span>
+                        </p>
+                    </div>
+                    <div class="qr-code">
+                        <img class="block float-right mt-8 w-64 h-64 border-4 border-black rounded-xl" src="{{ url_for('static', filename='uploads/' + evento.codigo + '-qr.png') }}" alt="Código QR" class="w-64 h-64"/><br />
+                        <p class="mt-8 bg-white block text-black float-right p-4 text-3xl border-4 border-black rounded-xl">
+                            {{ BASE_URL }}{{ evento.codigo }}
+                        </p>
+                    </div>
                 </div>
+                <!-- End Col -->
             </div>
-            <!-- End Col -->
-        
+            <!-- End Grid -->
         </div>
-        <!-- End Grid -->
-    </div>
-    <!-- End Hero -->
-</body>
+        <!-- End Hero -->
+    </body>
 </html>
