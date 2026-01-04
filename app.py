@@ -3777,7 +3777,7 @@ def listar_eventos_digitales(page=1):
         evento["es_organizador"] = es_organizador
 
     return render_template(
-        'aula_digital.html',
+        'docencia_digital.html',
         eventos=eventos,
         total_eventos=total_eventos,
         page=page,
@@ -4685,6 +4685,94 @@ def tablero_metricas(page=1):
 
 
 ###
+### Tablero de métricas propias
+###
+@app.route('/tablero/metricas/mias')
+@app.route('/tablero/metricas/mias/page/<int:page>')
+@login_required
+def mis_metricas(page=1):
+
+    # Filtro para eventos del usuario actual
+    filtro_usuario = {
+        "autor": current_user.id,
+        'registro_abierto': {'$ne': True},
+        'tipo': {'$ne': 'Sesión Docente'}
+    }
+
+    # Obtener el número total de usuarios
+    total_usuarios = collection_usuarios.count_documents({"rol": {"$ne": "administrador"}})
+    # Obtener el número total de eventos del usuario (excluyendo registro abierto y sesiones docentes)
+    total_eventos = collection_eventos.count_documents(filtro_usuario)
+    # Obtener el número total de eventos cerrados del usuario (excluyendo registro abierto y sesiones docentes)
+    filtro_cerrados = {
+        **filtro_usuario,
+        "estado_evento": "cerrado"
+    }
+    total_eventos_cerrados = collection_eventos.count_documents(filtro_cerrados)
+    
+    # Obtener códigos de eventos del usuario para filtrar participantes
+    eventos_usuario = list(collection_eventos.find(filtro_usuario, {"codigo": 1}))
+    codigos_eventos_usuario = [evento["codigo"] for evento in eventos_usuario]
+    
+    # Contar ponentes y participantes solo en eventos del usuario
+    total_ponentes = collection_participantes.count_documents({
+        "codigo_evento": {"$in": codigos_eventos_usuario},
+        "rol": "ponente"
+    })
+    total_participantes = collection_participantes.count_documents({
+        "codigo_evento": {"$in": codigos_eventos_usuario},
+        "rol": "participante"
+    })
+
+    ## Tablero de Métricas de Eventos
+    eventos_por_pagina = 20
+    total_paginas = (total_eventos_cerrados + eventos_por_pagina - 1) // eventos_por_pagina
+
+    # Obtener los eventos cerrados del usuario para la página actual
+    eventos_cursor = collection_eventos.find(filtro_cerrados).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    
+    eventos = list(eventos_cursor)
+
+    # Verificar si el usuario es organizador en cada evento
+    for evento in eventos:
+        es_organizador = collection_participantes.find_one({
+            "codigo_evento": evento["codigo"],
+            "cedula": str(current_user.cedula),
+            "rol": "coorganizador"
+        }) is not None 
+
+        evento["es_organizador"] = es_organizador
+
+        # Añade métricas específicas de cada evento
+        codigo_evento = evento["codigo"]
+        
+        # Total de participantes en este evento
+        evento["total_participantes"] = collection_participantes.count_documents({
+            "codigo_evento": codigo_evento,
+            "rol": "participante"
+        })
+        
+        # Total de ponentes en este evento
+        evento["total_ponentes"] = collection_participantes.count_documents({
+            "codigo_evento": codigo_evento, 
+            "rol": "ponente"
+        })
+
+    return render_template(
+        'metricas_usuario.html',
+        active_section='metricas',
+        page=page,
+        total_paginas=total_paginas,
+        total_usuarios=total_usuarios,
+        total_eventos=total_eventos,
+        total_eventos_cerrados=total_eventos_cerrados,
+        total_ponentes=total_ponentes,
+        total_participantes=total_participantes,
+        eventos=eventos,
+    )
+
+
+###
 ### LMS Metrics Dashboard - General
 ###
 @app.route('/tablero/metricas/lms')
@@ -5000,7 +5088,7 @@ def listar_eventos_abiertos(page=1):
         evento["registro_abierto"] = evento.get("registro_abierto", False)
     
     return render_template(
-        'eventos_abiertos.html',
+        'docencia_abiertas.html',
         active_section='eventos',
         page=page,
         total_paginas=total_paginas,
