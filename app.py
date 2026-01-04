@@ -3594,7 +3594,7 @@ def eliminar_huerfanos_lote():
 ###
 ### Colección de participantes de evento
 ###
-@app.route("/base-de-datos/<codigo_evento>")
+@app.route("/tablero/bases-de-datos/<codigo_evento>")
 def db_individual(codigo_evento):
     documentos = list(collection_participantes.find({"codigo_evento": codigo_evento}))
     total_registros = len(documentos)
@@ -3616,6 +3616,100 @@ def db_individual(codigo_evento):
         total_registros=total_registros,
         evento=evento
     )
+
+
+###
+### Administración de Colección de Encuestas
+###
+@app.route('/tablero/bases-de-datos/encuestas')
+@app.route('/tablero/bases-de-datos/encuestas/page/<int:page>')
+@login_required
+def db_encuestas(page=1):
+    # Verificar si el usuario es administrador
+    if current_user.rol != 'administrador':
+        flash('No tienes permiso para acceder a esta página.', 'error')
+        return redirect(url_for('home'))
+
+    encuestas_por_pagina = 50
+    skip = (page - 1) * encuestas_por_pagina
+
+    # Obtener el filtro de código de evento desde los parámetros de la URL
+    codigo_evento_filtro = request.args.get('codigo_evento', '').strip()
+    
+    # Construir el filtro de búsqueda
+    filtro = {}
+    if codigo_evento_filtro:
+        filtro['codigo_evento'] = codigo_evento_filtro
+
+    # Obtener encuestas con filtro aplicado
+    encuestas = list(collection_encuestas.find(filtro).sort("fecha", -1).skip(skip).limit(encuestas_por_pagina))
+    total_encuestas = collection_encuestas.count_documents(filtro)
+    total_paginas = (total_encuestas + encuestas_por_pagina - 1) // encuestas_por_pagina
+
+    # Obtener todos los campos posibles de la colección de encuestas
+    campos = set()
+    for encuesta in encuestas:
+        campos.update(encuesta.keys())
+        # También incluir campos de las respuestas si existen
+        if 'respuestas' in encuesta and isinstance(encuesta['respuestas'], dict):
+            for key in encuesta['respuestas'].keys():
+                campos.add(f"respuestas.{key}")
+    
+    # Asegurar que campos importantes siempre estén presentes
+    campos_importantes = ['codigo_evento', 'fecha', 'respuestas']
+    campos.update(campos_importantes)
+    
+    campos = sorted(campos)  # ordenamos alfabéticamente para la tabla
+
+    # Expandir las respuestas para mostrarlas en la tabla
+    encuestas_expandidas = []
+    for encuesta in encuestas:
+        encuesta_expandida = encuesta.copy()
+        if 'respuestas' in encuesta and isinstance(encuesta['respuestas'], dict):
+            for key, value in encuesta['respuestas'].items():
+                encuesta_expandida[f"respuestas.{key}"] = value
+        encuestas_expandidas.append(encuesta_expandida)
+
+    # Obtener lista única de códigos de evento para el dropdown
+    codigos_eventos = collection_encuestas.distinct('codigo_evento')
+    codigos_eventos = sorted([codigo for codigo in codigos_eventos if codigo])  # Filtrar valores vacíos y ordenar
+
+    return render_template('bd_encuestas.html',
+        encuestas=encuestas_expandidas,
+        campos=campos,
+        page=page,
+        total_paginas=total_paginas,
+        total_encuestas=total_encuestas,
+        codigo_evento_filtro=codigo_evento_filtro,
+        codigos_eventos=codigos_eventos)
+
+
+###
+### Eliminar encuesta desde vista de BD
+###
+@app.route('/eliminar_encuesta_bd/<id_encuesta>', methods=['POST'])
+@login_required
+def eliminar_encuesta_bd(id_encuesta):
+    if current_user.rol != 'administrador':
+        flash('No tienes permisos para eliminar encuestas.', 'error')
+        return redirect(url_for('db_encuestas'))
+
+    try:
+        encuesta = collection_encuestas.find_one({'_id': ObjectId(id_encuesta)})
+    except Exception:
+        encuesta = None
+    
+    if encuesta:
+        codigo_evento = encuesta.get('codigo_evento', 'N/A')
+        
+        collection_encuestas.delete_one({'_id': ObjectId(id_encuesta)})
+        
+        log_event(f"Usuario [{current_user.email}] eliminó encuesta del evento {codigo_evento}.")
+        flash('Encuesta eliminada correctamente.', 'success')
+    else:
+        flash('Encuesta no encontrada.', 'error')
+    
+    return redirect(url_for('db_encuestas'))
 
 
 ###

@@ -1,0 +1,204 @@
+{% include 'tablero-header.html' %}
+
+{% include 'tablero-sidebar.html' %}
+
+    <!-- CONTENIDO -->
+    <div class="w-full lg:ps-64">
+        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+
+            <!-- TABLA RESUMEN EVENTOS -->
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+
+                <!-- Card -->
+                <div class="flex flex-col">
+                    <div class="-m-1.5 overflow-x-auto">
+                        <div class="p-1.5 min-w-full inline-block align-middle">
+                        <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                            <!-- Header -->
+                            <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
+                                <div>
+                                    <h2 class="text-xl font-semibold text-gray-800">
+                                        MongoDB - Colección - Encuestas
+                                    </h2>
+                                    <p class="text-sm text-gray-600">
+                                        Vista de solo lectura de encuestas de satisfacción (eliminar registros únicamente)
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <div class="inline-flex gap-x-2">
+                                        <!-- Formulario de filtro -->
+                                        <form method="GET" action="{{ url_for('db_encuestas') }}" class="flex gap-2 items-center">
+                                            <select name="codigo_evento" class="py-2 px-3 pe-9 block border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none">
+                                                <option value="">Todos los eventos</option>
+                                                {% for codigo in codigos_eventos %}
+                                                <option value="{{ codigo }}" {% if codigo == codigo_evento_filtro %}selected{% endif %}>
+                                                    {{ codigo }}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                            <button type="submit" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700">
+                                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <circle cx="11" cy="11" r="8"/>
+                                                    <path d="m21 21-4.35-4.35"/>
+                                                </svg>
+                                                Filtrar
+                                            </button>
+                                            {% if codigo_evento_filtro %}
+                                            <a href="{{ url_for('db_encuestas') }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
+                                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M18 6 6 18"/>
+                                                    <path d="m6 6 12 12"/>
+                                                </svg>
+                                                Limpiar
+                                            </a>
+                                            {% endif %}
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- End Header -->
+
+                            <!-- Table -->
+                            <table class="table-auto min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                    {% for campo in campos %}
+                                        <th scope="col" class="px-4 py-2 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">
+                                        {{ campo }}
+                                        </th>
+                                    {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 bg-white">
+                                    {% for encuesta in encuestas %}
+                                    <tr class="hover:bg-gray-50">
+                                        {% for campo in campos %}
+                                        <td class="px-4 py-2 text-sm text-gray-800 whitespace-nowrap">
+                                            <div style="min-height: 20px;">
+                                                {{ encuesta.get(campo, '') }}
+                                            </div>
+                                        </td>
+                                        {% endfor %}
+                                        <td class="px-4 py-2 text-sm text-gray-800 whitespace-nowrap">
+                                            <form method="POST" action="{{ url_for('eliminar_encuesta_bd', id_encuesta=encuesta.get('_id')) }}" style="display:inline;">
+                                                <button type="submit" class="text-red-600 hover:text-red-800 font-bold" onclick="return confirm('¿Estás seguro de que deseas eliminar este registro?');">
+                                                    Eliminar
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+
+                            <!-- Footer -->
+                            <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
+                                <div>
+                                    <p class="text-sm text-gray-600 dark:text-neutral-400">
+                                        <span class="font-semibold text-gray-800 dark:text-neutral-200">{{ total_encuestas }}</span> {{ 'encuesta en esta colección' if total_encuestas == 1 else 'encuestas en esta colección' }}
+                                        {% if codigo_evento_filtro %}
+                                        <span class="text-blue-600">(filtrado por: {{ codigo_evento_filtro }})</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <div class="inline-flex gap-x-2">
+                                        {% if page > 1 %}
+                                        <a href="{{ url_for('db_encuestas', page=page-1, codigo_evento=codigo_evento_filtro) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
+                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                                            Anterior
+                                        </a>
+                                        {% endif %}
+                                        
+                                        {% if total_paginas > 1 %}
+                                        <p class="px-3 py-2 text-sm text-gray-600">
+                                            Página {{ page }} de {{ total_paginas }}
+                                        </p>
+                                        {% endif %}
+                                        
+                                        {% if page < total_paginas %}
+                                        <a href="{{ url_for('db_encuestas', page=page+1, codigo_evento=codigo_evento_filtro) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
+                                            Siguiente
+                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                                        </a>
+                                        {% endif %}
+                                        
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="{{ url_for('db_eventos') }}">
+                                            Ver todos los eventos
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- End Footer -->
+
+                        </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+
+            </div>
+
+{% include 'tablero-footer.html' %}
+
+        </div>
+    </div>
+    <!-- FIN CONTENIDO -->
+
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+<script>
+// Limpia campos dinámicos al cargar la página
+document.addEventListener("DOMContentLoaded", function () {
+const hiddenInputs = document.querySelectorAll("#buscadorForm input[type='hidden']");
+hiddenInputs.forEach((input) => input.remove());
+});
+document.getElementById("buscadorForm").addEventListener("submit", function (event) {
+event.preventDefault(); // Prevenir envío estándar del formulario
+
+const valor = document.getElementById("buscador").value.trim();
+const patterns = {
+cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas
+pasaporte: /^[A-Z]{2}\d{6,9}$/,                        // Pasaportes
+id_certificado: /^[a-zA-Z0-9]{8}$/                    // IDs de certificados
+};
+
+let action, field;
+
+if (patterns.cedula.test(valor)) {
+action = "/buscar_certificados";
+field = "cedula";
+} else if (patterns.pasaporte.test(valor)) {
+action = "/buscar_certificados";
+field = "cedula";
+} else if (patterns.id_certificado.test(valor)) {
+action = "/validar_certificado";
+field = "nanoid";
+} else {
+alert("Formato no válido. Introduzca un documento de identificación o un ID de certificado válido.");
+return;
+}
+
+// Crear y enviar el formulario dinámicamente
+const form = event.target;
+form.action = action;
+form.method = "POST";
+
+// Limpiar campos ocultos previos
+const hiddenInputs = form.querySelectorAll("input[type='hidden']");
+hiddenInputs.forEach((input) => input.remove());
+
+const hiddenInput = document.createElement("input");
+hiddenInput.type = "hidden";
+hiddenInput.name = field;
+hiddenInput.value = valor;
+form.appendChild(hiddenInput);
+form.submit();
+});
+
+// Funciones de edición removidas - esta vista es de solo lectura
+</script>
+</body>
+</html>
