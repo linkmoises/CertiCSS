@@ -1553,6 +1553,11 @@ select {
   margin-bottom: 2rem;
 }
 
+.my-1 {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
 .\!me-1 {
   margin-inline-end: 0.25rem !important;
 }
@@ -2237,6 +2242,10 @@ select {
   list-style-type: disc;
 }
 
+.list-\[upper-alpha\] {
+  list-style-type: upper-alpha;
+}
+
 .grid-cols-1 {
   grid-template-columns: repeat(1, minmax(0, 1fr));
 }
@@ -2749,6 +2758,11 @@ select {
 .border-green-300 {
   --tw-border-opacity: 1;
   border-color: rgb(134 239 172 / var(--tw-border-opacity, 1));
+}
+
+.border-red-300 {
+  --tw-border-opacity: 1;
+  border-color: rgb(252 165 165 / var(--tw-border-opacity, 1));
 }
 
 .border-t-transparent {
@@ -3318,6 +3332,10 @@ select {
 
 .pt-\[50\%\] {
   padding-top: 50%;
+}
+
+.ps-64 {
+  padding-inline-start: 16rem;
 }
 
 .text-left {
