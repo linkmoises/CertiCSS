@@ -651,25 +651,6 @@ def nuevo_qbank():
 
 
 ###
-### Ver un Banco de Preguntas
-###
-@plataforma_bp.route("/tablero/qbanks/<codigo_qbank>")
-@login_required
-def ver_qbank(codigo_qbank):
-    # Buscar el qbank en la base de datos
-    qbank = collection_qbanks.find_one({"codigo": codigo_qbank})
-
-    if not qbank:
-        flash("Banco de preguntas no encontrado.", "error")
-        return redirect(url_for("plataforma.listar_qbank"))
-
-    # Buscar las preguntas asociadas a este banco
-    preguntas = list(collection_qbanks_data.find({"codigo_qbank": codigo_qbank}))
-
-    return render_template("qbanks_ver.html", qbank=qbank, preguntas=preguntas)
-
-
-###
 ### Editar un banco de preguntas
 ###
 @plataforma_bp.route("/tablero/qbanks/<codigo_qbank>/editar", methods=["GET", "POST"])
@@ -735,11 +716,11 @@ def editar_qbank(codigo_qbank):
 
 
 ###
-### Ver un Banco de preguntas completo
+### Ver QBank completo
 ###
-@plataforma_bp.route("/tablero/qbanks/<codigo_qbank>/ver")
+@plataforma_bp.route("/tablero/qbanks/<codigo_qbank>")
 @login_required
-def ver_qbank_completo(codigo_qbank):
+def ver_qbank(codigo_qbank):
     # Buscar el qbank en la base de datos
     qbank = collection_qbanks.find_one({"codigo": codigo_qbank})
 
@@ -750,7 +731,7 @@ def ver_qbank_completo(codigo_qbank):
     # Buscar las preguntas asociadas a este banco
     preguntas = list(collection_qbanks_data.find({"codigo_qbank": codigo_qbank}))
 
-    return render_template("qbanks_ver_todo.html", qbank=qbank, preguntas=preguntas)
+    return render_template("qbanks_ver.html", qbank=qbank, preguntas=preguntas)
 
 
 ###
