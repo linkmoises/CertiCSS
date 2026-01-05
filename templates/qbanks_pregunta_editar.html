@@ -265,7 +265,7 @@
 <script>
     let opcionIndex = 0;
 
-    function crearOpcion(tipo, texto = '', esCorrecta = false, imagen = '') {
+    function crearOpcion(tipo, texto = '', esCorrecta = false) {
         const div = document.createElement('div');
         div.className = "flex items-start gap-2 mb-2 p-2 border border-gray-100 rounded-lg bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700";
         div.id = "opcion_" + opcionIndex;
@@ -283,21 +283,8 @@
             <div class="mt-2">
                 ${inputRespuesta}
             </div>
-            <div class="flex-grow space-y-2">
+            <div class="flex-grow">
                 <input type="text" name="opcion_texto_${opcionIndex}" placeholder="Texto de la opción" value="${texto}" class="py-2 px-3 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" required>
-                <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
-                    <div class="w-full">
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Imagen (opcional)</label>
-                        <input type="file" name="opcion_imagen_${opcionIndex}" accept="image/*" class="block w-full text-sm text-gray-500 file:me-4 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:file:bg-blue-500 dark:hover:file:bg-blue-400">
-                    </div>
-                    ${imagen ? `
-                    <div class="flex items-center gap-2 bg-white px-2 py-1 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700">
-                        <span class="text-xs text-gray-500">Actual:</span>
-                        <a href="/static/uploads/${imagen}" target="_blank" class="text-xs text-blue-600 hover:underline truncate max-w-[150px]">${imagen}</a>
-                        <input type="hidden" name="opcion_imagen_actual_${opcionIndex}" value="${imagen}">
-                    </div>
-                    ` : ''}
-                </div>
             </div>
             <button type="button" onclick="eliminarOpcion(${opcionIndex})" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-red-200 bg-white text-red-600 shadow-sm hover:bg-red-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-red-50">
                 <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
@@ -341,7 +328,7 @@
         {% if pregunta.opciones %}
         {% for opcion in pregunta.opciones %}
         {% set es_correcta = loop.index0 in pregunta.respuestas_correctas %}
-        crearOpcion('{{ pregunta.tipo }}', '{{ opcion.texto|replace("'", "\\'") }}', {{ 'true' if es_correcta else 'false' }}, '{{ opcion.imagen or "" }}');
+        crearOpcion('{{ pregunta.tipo }}', '{{ opcion.texto|replace("'", "\\'") }}', {{ 'true' if es_correcta else 'false' }});
     {% endfor %}
     {% else %}
     crearOpcion(tipo);
