@@ -735,6 +735,25 @@ def editar_qbank(codigo_qbank):
 
 
 ###
+### Ver un Banco de preguntas completo
+###
+@plataforma_bp.route("/tablero/qbanks/<codigo_qbank>/ver")
+@login_required
+def ver_qbank_completo(codigo_qbank):
+    # Buscar el qbank en la base de datos
+    qbank = collection_qbanks.find_one({"codigo": codigo_qbank})
+
+    if not qbank:
+        flash("Banco de preguntas no encontrado.", "error")
+        return redirect(url_for("plataforma.listar_qbank"))
+
+    # Buscar las preguntas asociadas a este banco
+    preguntas = list(collection_qbanks_data.find({"codigo_qbank": codigo_qbank}))
+
+    return render_template("qbanks_ver_todo.html", qbank=qbank, preguntas=preguntas)
+
+
+###
 ### Eliminar un Banco de Preguntas
 ###
 @plataforma_bp.route("/tablero/qbanks/<codigo_qbank>/eliminar", methods=["POST"])

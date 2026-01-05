@@ -1,0 +1,275 @@
+{% include 'tablero-header.html' %}
+
+{% include 'tablero-sidebar.html' %}
+
+<!-- CONTENIDO -->
+<div class="w-full lg:ps-64">
+    <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+
+        <!-- TABLA RESUMEN QBANKS -->
+        <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+            <!-- Card -->
+            <div class="flex flex-col">
+                <div class="-m-1.5 overflow-x-auto">
+                    <div class="p-1.5 min-w-full inline-block align-middle">
+                        <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+
+                            <!-- Header -->
+                            <div
+                                class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
+                                <div>
+                                    <h2 class="text-xl font-semibold text-gray-800">
+                                        {{ qbank.titulo }}
+                                    </h2>
+                                    <p class="text-sm text-gray-600">
+                                        {{ qbank.descripcion }}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <div class="inline-flex gap-x-2">
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
+                                            href="{{ url_for('plataforma.nueva_pregunta_qbank', codigo_qbank=qbank.codigo) }}">
+                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                                height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M5 12h14" />
+                                                <path d="M12 5v14" />
+                                            </svg>
+                                            Añadir pregunta
+                                        </a>
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50"
+                                            href="{{ url_for('plataforma.ver_qbank', codigo_qbank=qbank.codigo) }}">
+                                            Volver al banco
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- End Header -->
+
+                            {% if preguntas|length == 0 %}
+
+                            <!-- Body -->
+                            <div class="max-w-sm w-full min-h-[400px] flex flex-col justify-center mx-auto px-6 py-4">
+                                <div
+                                    class="flex justify-center items-center size-[46px] bg-gray-100 rounded-lg dark:bg-neutral-800">
+                                    <svg class="shrink-0 size-6 text-gray-600 dark:text-neutral-400"
+                                        xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" class="lucide lucide-grid2x2-x-icon lucide-grid-2x2-x">
+                                        <path
+                                            d="M12 3v17a1 1 0 0 1-1 1H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1H3" />
+                                        <path d="m16 16 5 5" />
+                                        <path d="m16 21 5-5" />
+                                    </svg>
+                                </div>
+
+                                <h2 class="mt-5 font-semibold text-gray-800 dark:text-white">
+                                    No hay preguntas
+                                </h2>
+                                <p class="mt-2 text-sm text-gray-600 dark:text-neutral-400">
+                                    Deberías añadir algunas preguntas.
+                                </p>
+
+                                <div class="mt-5 flex flex-col sm:flex-row gap-2">
+                                    <a href="{{ url_for('plataforma.nueva_pregunta_qbank', codigo_qbank=qbank.codigo) }}"
+                                        class="py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M5 12h14" />
+                                            <path d="M12 5v14" />
+                                        </svg>
+                                        Añadir pregunta
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- End Body -->
+
+                            <!-- Footer -->
+                            <div
+                                class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
+                                <div>
+                                    <p class="text-sm text-gray-600 dark:text-neutral-400">
+                                        <span class="font-semibold text-gray-800 dark:text-neutral-200">0</span>
+                                        resultados
+                                    </p>
+                                </div>
+                            </div>
+                            <!-- End Footer -->
+
+                            {% else %}
+
+                            <!-- Preguntas -->
+                            <div class="p-6 space-y-6">
+                                {% for pregunta in preguntas %}
+                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                                    <!-- Pregunta -->
+                                    <div class="mb-4">
+                                        <h3 class="text-lg font-semibold text-gray-800 mb-2">Pregunta {{ loop.index }}</h3>
+                                        <div class="text-gray-700">
+                                            {{ pregunta.pregunta_html|safe }}
+                                        </div>
+                                        
+                                        <!-- Imágenes de la pregunta -->
+                                        {% if pregunta.imagenes %}
+                                        <div class="mt-3 flex flex-wrap gap-2">
+                                            {% for imagen in pregunta.imagenes %}
+                                            <img src="{{ url_for('static', filename='uploads/' + imagen) }}" 
+                                                 alt="Imagen de pregunta" 
+                                                 class="max-w-xs h-auto rounded border">
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Opciones -->
+                                    {% if pregunta.opciones %}
+                                    <div class="mb-4">
+                                        <h4 class="font-medium text-gray-800 mb-2">Opciones:</h4>
+                                        <div class="space-y-2">
+                                            {% for opcion in pregunta.opciones %}
+                                            <div class="flex items-start gap-3 p-2 rounded 
+                                                        {% if loop.index0 in pregunta.respuestas_correctas %}bg-green-100 border border-green-300{% else %}bg-white border border-gray-200{% endif %}">
+                                                <span class="font-medium text-sm 
+                                                           {% if loop.index0 in pregunta.respuestas_correctas %}text-green-700{% else %}text-gray-600{% endif %}">
+                                                    {{ loop.index }}{% if loop.index0 in pregunta.respuestas_correctas %} ✓{% endif %}
+                                                </span>
+                                                <div class="flex-1">
+                                                    {% if opcion.texto %}
+                                                    <div class="text-gray-700">{{ opcion.texto }}</div>
+                                                    {% endif %}
+                                                    {% if opcion.imagen %}
+                                                    <img src="{{ url_for('static', filename='uploads/' + opcion.imagen) }}" 
+                                                         alt="Imagen de opción" 
+                                                         class="mt-2 max-w-xs h-auto rounded border">
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
+                                    <!-- Justificación -->
+                                    {% if pregunta.justificacion_html %}
+                                    <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                                        <h4 class="font-medium text-blue-800 mb-2">Explicación:</h4>
+                                        <div class="text-blue-700">
+                                            {{ pregunta.justificacion_html|safe }}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
+                                    <!-- Acciones -->
+                                    <div class="mt-4 flex gap-2">
+                                        <a href="{{ url_for('plataforma.editar_pregunta_qbank', codigo_qbank=qbank.codigo, pregunta_id=pregunta._id) }}"
+                                           class="py-1 px-3 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 hover:bg-gray-50">
+                                            Editar
+                                        </a>
+                                        <form method="POST" 
+                                              action="{{ url_for('plataforma.eliminar_pregunta_qbank', codigo_qbank=qbank.codigo, pregunta_id=pregunta._id) }}"
+                                              class="inline"
+                                              onsubmit="return confirm('¿Estás seguro de que quieres eliminar esta pregunta?')">
+                                            <button type="submit"
+                                                    class="py-1 px-3 text-sm font-medium rounded-lg border border-red-200 bg-red-50 text-red-700 hover:bg-red-100">
+                                                Eliminar
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <!-- End Preguntas -->
+
+                            <!-- Footer -->
+                            <div
+                                class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200">
+                                <div>
+                                    <p class="text-sm text-gray-600">
+                                        <span class="font-semibold text-gray-800">{{ preguntas|length }}</span> 
+                                        {{ 'pregunta' if preguntas|length == 1 else 'preguntas' }}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <a href="{{ url_for('plataforma.ver_qbank', codigo_qbank=qbank.codigo) }}"
+                                       class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="m15 18-6-6 6-6"/>
+                                        </svg>
+                                        Volver al banco
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- End Footer -->
+                            {% endif %}
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End Card -->
+        </div>
+        <!-- FIN TABLA RESUMEN EVENTOS -->
+
+        {% include 'tablero-footer.html' %}
+
+    </div>
+</div>
+<!-- FIN CONTENIDO -->
+
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+<script>
+    // Limpia campos dinámicos al cargar la página
+    document.addEventListener("DOMContentLoaded", function () {
+        const hiddenInputs = document.querySelectorAll("#buscadorForm input[type='hidden']");
+        hiddenInputs.forEach((input) => input.remove());
+    });
+    document.getElementById("buscadorForm").addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevenir envío estándar del formulario
+
+        const valor = document.getElementById("buscador").value.trim();
+        const patterns = {
+            cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas
+            pasaporte: /^[A-Z]{2}\d{6,9}$/,                        // Pasaportes
+            id_certificado: /^[a-zA-Z0-9]{8}$/                    // IDs de certificados
+        };
+
+        let action, field;
+
+        if (patterns.cedula.test(valor)) {
+            action = "/buscar_certificados";
+            field = "cedula";
+        } else if (patterns.pasaporte.test(valor)) {
+            action = "/buscar_certificados";
+            field = "cedula";
+        } else if (patterns.id_certificado.test(valor)) {
+            action = "/validar_certificado";
+            field = "nanoid";
+        } else {
+            alert("Formato no válido. Introduzca un documento de identificación o un ID de certificado válido.");
+            return;
+        }
+
+        // Crear y enviar el formulario dinámicamente
+        const form = event.target;
+        form.action = action;
+        form.method = "POST";
+
+        // Limpiar campos ocultos previos
+        const hiddenInputs = form.querySelectorAll("input[type='hidden']");
+        hiddenInputs.forEach((input) => input.remove());
+
+        const hiddenInput = document.createElement("input");
+        hiddenInput.type = "hidden";
+        hiddenInput.name = field;
+        hiddenInput.value = valor;
+        form.appendChild(hiddenInput);
+        form.submit();
+    });
+</script>
+</body>
+
+</html>
