@@ -87,10 +87,10 @@
                                         Título
                                     </a>
                                 </th>
-                
+
                                 <th scope="col" class="px-6 py-3 text-start">
                                     <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
-                                        Enlaces
+                                        Resumen LMS
                                     </a>
                                 </th>
                 
@@ -123,7 +123,7 @@
                         <tbody class="divide-y divide-gray-200">
 {% for evento in eventos %}
                             <tr class="bg-white hover:bg-gray-50">
-                                <td class="h-px w-80 min-w-80">
+                                <td class="h-px w-64 min-w-64">
                                     <div class="px-6 py-2">
                                         <p class="text-sm text-gray-500 mb-2">
                                             <strong><a class="text-sm text-blue-600 decoration-2 hover:underline" href="{{ url_for('mostrar_evento', codigo_evento=evento.codigo) }}">
@@ -144,36 +144,51 @@
                                     </div>
                                 </td>
                                 <td class="size-px whitespace-nowrap">
-                                    <a class="block relative z-10" href="#">
-                                    <div class="px-6 py-2">
-                                        <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('resumen_evento', codigo_evento=evento.codigo) }}" target="_blank">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-external-link-icon lucide-external-link"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
-                                            Resumen
-                                        </a><br />
-{% if current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor or evento.es_organizador)) %}
-{% if evento.modalidad != 'presencial' %}
-                                        <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('plataforma.listar_contenidos', codigo_evento=evento.codigo) }}">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-copy-icon lucide-book-copy"><path d="M2 16V4a2 2 0 0 1 2-2h11"/><path d="M22 18H11a2 2 0 1 0 0 4h10.5a.5.5 0 0 0 .5-.5v-15a.5.5 0 0 0-.5-.5H11a2 2 0 0 0-2 2v12"/><path d="M5 14H4a2 2 0 1 0 0 4h1"/></svg>
-                                            LMS
-                                        </a><br />
-{% endif %}
-                                        <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('cierre_evento', codigo_evento=evento.codigo) }}" target="_blank">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-external-link-icon lucide-external-link"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
-                                            QR cierre
-                                        </a>
-{% endif %}
+                                    <div class="px-4 py-3">
+                                        <div class="text-xs bg-gray-50 border border-gray-200 p-2 rounded-md">
+                                            Inscritos: {{ evento.total_participantes }}<br />
+                                            Contenidos: {{ evento.total_contenidos }}<br />
+                                            Evaluaciones: {{ evento.total_examenes }}<br />
+                                            {% if evento.tiene_lms %}
+                                            <a href="{{ url_for('tablero_metricas_lms_evento', codigo_evento=evento.codigo) }}"
+                                                class="underline">
+                                                Ver Métricas LMS
+                                            </a><br />
+                                            {% endif %}
+                                        </div>
                                     </div>
-                                    </a>
                                 </td>
                                 <td class="size-px whitespace-nowrap">
-                                    <a class="block relative z-10" href="#">
-                                    <div class="px-6 py-2">
-                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium {% if evento.estado_evento == 'publicado' %}bg-blue-100 text-blue-800{% elif evento.estado_evento == 'cerrado' %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
-                            {% if evento.estado_evento == 'publicado' %}Publicado{% elif evento.estado_evento == 'cerrado' %}Cerrado{% else %}Borrador{% endif %}
+                                    <div class="px-4 py-3">
+                                        <span
+                                            class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium {% if evento.estado_evento == 'publicado' %}bg-blue-100 text-blue-800{% elif evento.estado_evento == 'cerrado' %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                            {% if evento.estado_evento == 'publicado' %}Publicado{% elif evento.estado_evento == 'cerrado' %}Cerrado{% else %}Borrador{% endif %}
                                         </span><br />
+                                        {% if evento.tiene_lms %}
+                                        <span
+                                            class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-green-100 text-green-800">
+                                            <svg class="size-2.5" xmlns="http://www.w3.org/2000/svg" width="16"
+                                                height="16" fill="currentColor" viewBox="0 0 16 16">
+                                                <path
+                                                    d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z">
+                                                </path>
+                                            </svg>
+                                            Configurado
+                                        </span><br />
+                                        {% else %}
+                                        <span
+                                            class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-red-100 text-red-800">
+                                            <svg class="size-2.5" xmlns="http://www.w3.org/2000/svg" width="16"
+                                                height="16" fill="currentColor" viewBox="0 0 16 16">
+                                                <path
+                                                    d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z">
+                                                </path>
+                                            </svg>
+                                            Sin contenido
+                                        </span><br />
+                                        {% endif %}
                                         {{ evento|estado_evento }}
                                     </div>
-                                    </a>
                                 </td>
                                 <td class="size-px whitespace-nowrap text-center">
                                     <a class="block relative z-10" href="#">
@@ -215,6 +230,13 @@ Esperamos%20contar%20con%20su%20participación.">
                                 </td>
                                 <td class="size-px whitespace-nowrap">
                                     <div class="px-6 py-2">
+{% if current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor or evento.es_organizador)) %}
+{% if evento.modalidad != 'presencial' %}
+                                        <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('plataforma.listar_contenidos', codigo_evento=evento.codigo) }}">
+                                            Gestionar LMS
+                                        </a><br />
+{% endif %}
+{% endif %}
                                         <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('ver_evento', codigo_evento=evento.codigo) }}">
                                             Ver datos
                                         </a><br />

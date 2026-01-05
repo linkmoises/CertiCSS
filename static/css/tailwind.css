@@ -2084,6 +2084,10 @@ select {
   min-width: 100%;
 }
 
+.min-w-64 {
+  min-width: 16rem;
+}
+
 .\!max-w-none {
   max-width: none !important;
 }

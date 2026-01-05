@@ -3860,7 +3860,7 @@ def listar_eventos_digitales(page=1):
     )
     eventos = list(eventos_cursor)
 
-    # Verificar si el usuario es organizador en cada evento
+    # Verificar si el usuario es organizador en cada evento y calcular contadores
     for evento in eventos:
         es_organizador = collection_participantes.find_one({
             "codigo_evento": evento["codigo"],
@@ -3869,6 +3869,24 @@ def listar_eventos_digitales(page=1):
         }) is not None 
 
         evento["es_organizador"] = es_organizador
+        
+        # Calcular contadores para el resumen LMS
+        evento["total_participantes"] = collection_participantes.count_documents({
+            "codigo_evento": evento["codigo"],
+            "rol": "participante"
+        })
+        
+        evento["total_contenidos"] = collection_eva.count_documents({
+            "codigo_evento": evento["codigo"]
+        })
+        
+        evento["total_examenes"] = collection_eva.count_documents({
+            "codigo_evento": evento["codigo"],
+            "tipo": "examen"
+        })
+        
+        # Verificar si tiene LMS configurado (tiene contenidos)
+        evento["tiene_lms"] = evento["total_contenidos"] > 0
 
     return render_template(
         'docencia_digital.html',
