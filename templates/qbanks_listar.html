@@ -148,10 +148,11 @@
                                                             href="{{ url_for('plataforma.ver_qbank', codigo_qbank=qbank.codigo) }}">
                                                             {{ qbank.titulo }}</a></strong>
                                                 </p>
-                                                <span
-                                                    class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                                <button
+                                                    onclick="this.innerText='Código copiado'; navigator.clipboard.writeText('{{ qbank.codigo }}'); setTimeout(() => this.innerText='{{ qbank.codigo }}', 2000);"
+                                                    class="inline-flex items-center justify-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800 hover:bg-gray-200 transition-all">
                                                     {{ qbank.codigo }}
-                                                </span>
+                                                </button>
                                             </div>
                                         </td>
                                         <td class="size-px whitespace-nowrap">

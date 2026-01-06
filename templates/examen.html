@@ -148,7 +148,7 @@
                 <div class="sm:order-2 lg:col-span-9">
 
                     <div class="m-8">
-                        <div class="max-w-2xl mx-auto py-8">
+                        <div class="mx-auto">
                             <h2 class="text-2xl font-bold mb-4">Examen</h2>
                             {% if puntaje is not none %}
                             {% set porcentaje = (puntaje[0] / puntaje[1] * 100) if puntaje[1] > 0 else 0 %}
@@ -191,6 +191,14 @@
                             <div class="mb-6 border-b pb-4">
                                 <div class="mb-2 font-semibold">{{ loop.index }}. {{ pregunta.pregunta_html|safe }}
                                 </div>
+                                <!-- Imágenes de la pregunta -->
+                                {% if pregunta.imagenes %}
+                                <div class="my-2">
+                                    {% for imagen in pregunta.imagenes %}
+                                    <img src="{{ url_for('static', filename='uploads/' + imagen) }}" alt="Imagen de pregunta" class="max-w-md h-auto border p-1 m-1">
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
                                 <div class="space-y-2">
                                     {% set idx = loop.index0 %}
                                     {% set seleccion = request.form.getlist('resp_' ~ idx) %}
@@ -198,18 +206,16 @@
                                     {% set es_correcta = (loop.index0 in pregunta.respuestas_correctas) %}
                                     {% set fue_seleccionada = (loop.index0|string) in seleccion %}
                                     <label class="flex items-center gap-2">
-                                        <input
-                                            type="{{ 'checkbox' if pregunta.tipo == 'seleccion_multiple' else 'radio' }}"
-                                            disabled {% if fue_seleccionada %}checked{% endif %}>
+                                        <input type="{{ 'checkbox' if pregunta.tipo == 'seleccion_multiple' else 'radio' }}" disabled {% if fue_seleccionada %}checked{% endif %}>
                                         <span class="px-2 py-1 rounded
-                                                        {% if fue_seleccionada and es_correcta %}bg-green-200 text-green-800
-                                                        {% elif fue_seleccionada and not es_correcta %}bg-red-200 text-red-800
-                                                        {% elif es_correcta %}bg-green-50 text-green-700
-                                                        {% endif %}">
+                                            {% if fue_seleccionada and es_correcta %}bg-green-200 text-green-800
+                                            {% elif fue_seleccionada and not es_correcta %}bg-red-200 text-red-800
+                                            {% elif es_correcta %}bg-green-50 text-green-700
+                                            {% endif %}">
                                             {{ opcion.texto }}
                                         </span>
                                         {% if opcion.imagen %}
-                                        <img src="{{ url_for('static', filename=opcion.imagen) }}" alt="img"
+                                        <img src="{{ url_for('static', filename='uploads/' + opcion.imagen) }}" alt="img"
                                             class="h-8 inline">
                                         {% endif %}
                                     </label>
@@ -228,7 +234,18 @@
                                 <div class="mb-6 border-b pb-4">
                                     <div class="mb-2 font-semibold">{{ loop.index }}. {{ pregunta.pregunta_html|safe }}
                                     </div>
-                                    <div class="space-y-2">
+                                    <!-- Imágenes de la pregunta -->
+                                    {% if pregunta.imagenes %}
+                                    <div class="my-2 max-w-md">
+                                        {% for imagen in pregunta.imagenes %}
+                                        <a href="{{ url_for('static', filename='uploads/' + imagen) }}" target="_blank">
+                                            <img src="{{ url_for('static', filename='uploads/' + imagen) }}" alt="Imagen" class="max-w-md h-auto border p-1 m-1">
+                                        </a>
+                                        <p class="text-sm text-center italic text-gray-400">(Click para ver tamaño completo)</p>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    <div class="space-y-2"></div>
                                         {% if pregunta.tipo == 'seleccion_simple' or pregunta.tipo == 'verdadero_falso'
                                         %}
                                         {% for opcion in pregunta.opciones %}
@@ -237,7 +254,7 @@
                                                 required>
                                             {{ opcion.texto }}
                                             {% if opcion.imagen %}
-                                            <img src="{{ url_for('static', filename=opcion.imagen) }}" alt="img"
+                                            <img src="{{ url_for('static', filename='uploads/' + opcion.imagen) }}" alt="img"
                                                 class="h-8 inline">
                                             {% endif %}
                                         </label>
@@ -248,7 +265,7 @@
                                             <input type="checkbox" name="resp_{{ idx }}" value="{{ loop.index0 }}">
                                             {{ opcion.texto }}
                                             {% if opcion.imagen %}
-                                            <img src="{{ url_for('static', filename=opcion.imagen) }}" alt="img"
+                                            <img src="{{ url_for('static', filename='uploads/' + opcion.imagen) }}" alt="img"
                                                 class="h-8 inline">
                                             {% endif %}
                                         </label>
@@ -258,8 +275,7 @@
                                 </div>
                                 {% endfor %}
                                 <input type="hidden" name="preguntas_ids" value="{{ preguntas_ids }}">
-                                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Enviar
-                                    examen</button>
+                                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Enviar examen</button>
                             </form>
                             {% endif %}
                         </div>

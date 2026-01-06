@@ -12,6 +12,7 @@ from flask import (
     render_template,
     request,
     url_for,
+    current_app,
 )
 from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
@@ -90,12 +91,18 @@ def crear_contenido(codigo_evento):
         elif tipo == "documento":
             documento_file = request.files.get("documento")
             if documento_file:
-                documento_filename = f"{codigo_evento}-{nuevo_orden:02d}.pdf"
-                documento_path = os.path.join(
-                    app.config["UPLOAD_FOLDER"], documento_filename
-                )
+                # Crear carpeta del evento si no existe
+                evento_folder = os.path.join(current_app.config["UPLOAD_FOLDER"], codigo_evento)
+                os.makedirs(evento_folder, exist_ok=True)
+                
+                # Generar nombre único para el documento
+                extension = os.path.splitext(documento_file.filename)[1] or '.pdf'
+                documento_filename = f"documento-{codigo_evento}-{nuevo_orden:02d}{extension}"
+                documento_path = os.path.join(evento_folder, documento_filename)
                 documento_file.save(documento_path)
-                contenido["documento"] = documento_filename
+                
+                # Guardar la ruta relativa desde uploads
+                contenido["documento"] = f"{codigo_evento}/{documento_filename}"
 
         elif tipo == "caso_chatgpt":
             try:
@@ -158,11 +165,18 @@ def editar_contenido(codigo_evento, orden):
         elif tipo == "documento":
             documento_file = request.files.get("documento")
             if documento_file:
-                documento_path = os.path.join(
-                    app.config["UPLOAD_FOLDER"], documento_filename
-                )
+                # Crear carpeta del evento si no existe
+                evento_folder = os.path.join(current_app.config["UPLOAD_FOLDER"], codigo_evento)
+                os.makedirs(evento_folder, exist_ok=True)
+                
+                # Generar nombre único para el documento
+                extension = os.path.splitext(documento_file.filename)[1] or '.pdf'
+                documento_filename = f"documento-{codigo_evento}-{orden:02d}{extension}"
+                documento_path = os.path.join(evento_folder, documento_filename)
                 documento_file.save(documento_path)
-                actualizacion["documento"] = documento_filename
+                
+                # Guardar la ruta relativa desde uploads
+                actualizacion["documento"] = f"{codigo_evento}/{documento_filename}"
         elif tipo == "caso_chatgpt":
             try:
                 import json
@@ -822,6 +836,19 @@ def editar_pregunta_qbank(codigo_qbank, pregunta_id):
         respuestas_correctas = request.form.getlist("respuestas_correctas")
         imagenes_pregunta = request.files.getlist("imagenes_pregunta")
 
+        # Crear carpeta del evento si no existe
+        evento_folder = os.path.join(current_app.config["UPLOAD_FOLDER"], codigo_qbank)
+        os.makedirs(evento_folder, exist_ok=True)
+        
+        # Obtener el contador actual de archivos en la carpeta
+        existing_files = [f for f in os.listdir(evento_folder) if f.startswith(f"archivo-{codigo_qbank}-")]
+        archivo_counter = len(existing_files) + 1
+        
+        # Función para generar nombre único de archivo
+        def generar_nombre_archivo(original_filename, counter):
+            extension = os.path.splitext(original_filename)[1]
+            return f"archivo-{codigo_qbank}-{counter}{extension}"
+
         # Procesar opciones
         opciones = []
         for i in range(int(request.form["num_opciones"])):
@@ -832,9 +859,12 @@ def editar_pregunta_qbank(codigo_qbank, pregunta_id):
             if f"opcion_imagen_{i}" in request.files:
                 file = request.files[f"opcion_imagen_{i}"]
                 if file and file.filename:
-                    filename = secure_filename(file.filename)
-                    file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
-                    imagen = filename
+                    filename = generar_nombre_archivo(file.filename, archivo_counter)
+                    archivo_counter += 1
+                    file_path = os.path.join(evento_folder, filename)
+                    file.save(file_path)
+                    # Guardar la ruta relativa desde uploads
+                    imagen = f"{codigo_qbank}/{filename}"
 
             # Si no se subió nueva imagen, intentar mantener la existente
             if not imagen:
@@ -846,9 +876,12 @@ def editar_pregunta_qbank(codigo_qbank, pregunta_id):
         imagenes = pregunta.get("imagenes", [])  # Mantener imágenes existentes
         for file in imagenes_pregunta:
             if file and file.filename:
-                filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
-                imagenes.append(filename)
+                filename = generar_nombre_archivo(file.filename, archivo_counter)
+                archivo_counter += 1
+                file_path = os.path.join(evento_folder, filename)
+                file.save(file_path)
+                # Guardar la ruta relativa desde uploads
+                imagenes.append(f"{codigo_qbank}/{filename}")
 
         # Actualizar en MongoDB
         actualizacion = {
@@ -1021,6 +1054,18 @@ def nueva_pregunta_qbank(codigo_qbank):
         imagenes_pregunta = request.files.getlist("imagenes_pregunta")
         imagenes_opciones = request.files.getlist("imagenes_opciones")
 
+        # Crear carpeta del evento si no existe
+        evento_folder = os.path.join(current_app.config["UPLOAD_FOLDER"], codigo_qbank)
+        os.makedirs(evento_folder, exist_ok=True)
+        
+        # Contador para archivos únicos
+        archivo_counter = 1
+        
+        # Función para generar nombre único de archivo
+        def generar_nombre_archivo(original_filename, counter):
+            extension = os.path.splitext(original_filename)[1]
+            return f"archivo-{codigo_qbank}-{counter}{extension}"
+        
         # Procesar opciones y sus imágenes
         for i in range(int(request.form["num_opciones"])):
             texto = request.form.get(f"opcion_texto_{i}", "")
@@ -1028,18 +1073,24 @@ def nueva_pregunta_qbank(codigo_qbank):
             if f"opcion_imagen_{i}" in request.files:
                 file = request.files[f"opcion_imagen_{i}"]
                 if file and file.filename:
-                    filename = secure_filename(file.filename)
-                    file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
-                    imagen = filename
+                    filename = generar_nombre_archivo(file.filename, archivo_counter)
+                    archivo_counter += 1
+                    file_path = os.path.join(evento_folder, filename)
+                    file.save(file_path)
+                    # Guardar la ruta relativa desde uploads
+                    imagen = f"{codigo_qbank}/{filename}"
             opciones.append({"texto": texto, "imagen": imagen})
 
         # Guardar imágenes de la pregunta
         imagenes = []
         for file in imagenes_pregunta:
             if file and file.filename:
-                filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
-                imagenes.append(filename)
+                filename = generar_nombre_archivo(file.filename, archivo_counter)
+                archivo_counter += 1
+                file_path = os.path.join(evento_folder, filename)
+                file.save(file_path)
+                # Guardar la ruta relativa desde uploads
+                imagenes.append(f"{codigo_qbank}/{filename}")
 
         # Guardar en MongoDB
         collection_qbanks_data.insert_one(
