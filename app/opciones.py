@@ -260,6 +260,7 @@ def actualizar_permisos(user_id):
         return redirect(url_for('home'))
     
     from app import collection_usuarios
+    from app.logs import log_event
     from bson import ObjectId
     
     # Obtener el usuario
@@ -284,7 +285,6 @@ def actualizar_permisos(user_id):
     )
     
     # Log de la acción
-    from app import log_event
     log_event(f"Usuario [{current_user.email}] actualizó permisos de {usuario.get('email')}: {permisos_nuevos}")
     
     flash(f'Permisos actualizados para {usuario.get("nombres")} {usuario.get("apellidos")}.', 'success')

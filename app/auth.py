@@ -10,6 +10,41 @@ auth_bp = Blueprint('auth', __name__)
 
 
 ###
+### Decorador de permisos LMS
+###
+def lms_required(f):
+    """
+    Decorador que verifica si el usuario tiene permisos completos en el LMS.
+    Tienen acceso:
+    - Administradores
+    - Rol 'denadoi'
+    - Usuarios con permiso 'lms_admin'
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            abort(401)
+        
+        # Administradores siempre tienen acceso
+        if current_user.rol == 'administrador':
+            return f(*args, **kwargs)
+        
+        # Rol denadoi tiene acceso
+        if current_user.rol == 'denadoi':
+            return f(*args, **kwargs)
+        
+        # Verificar si tiene el permiso lms_admin
+        permisos_usuario = getattr(current_user, 'permisos', [])
+        if 'lms_admin' in permisos_usuario:
+            return f(*args, **kwargs)
+        
+        # Si no cumple ninguna condición, denegar acceso
+        abort(403)
+    
+    return decorated_function
+
+
+###
 ### Decorador de permisos
 ###
 def permission_required(*permisos):

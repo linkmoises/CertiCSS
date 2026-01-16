@@ -26,7 +26,7 @@ from app import (
     collection_qbanks_data,
     db,
 )
-from app.auth import token_required
+from app.auth import token_required, lms_required
 
 plataforma_bp = Blueprint("plataforma", __name__)
 
@@ -36,6 +36,7 @@ plataforma_bp = Blueprint("plataforma", __name__)
 ###
 @plataforma_bp.route("/tablero/eventos/<codigo_evento>/lms")
 @login_required
+@lms_required
 def listar_contenidos(codigo_evento):
     evento = collection_eventos.find_one({"codigo": codigo_evento})
     if not evento:
@@ -58,6 +59,7 @@ def listar_contenidos(codigo_evento):
     "/tablero/eventos/<codigo_evento>/lms/nuevo", methods=["GET", "POST"]
 )
 @login_required
+@lms_required
 def crear_contenido(codigo_evento):
     evento = collection_eventos.find_one({"codigo": codigo_evento})
     if not evento:
@@ -136,6 +138,7 @@ def crear_contenido(codigo_evento):
     "/tablero/eventos/<codigo_evento>/lms/<int:orden>/editar", methods=["GET", "POST"]
 )
 @login_required
+@lms_required
 def editar_contenido(codigo_evento, orden):
     # # Obtener cédula y token de los parámetros
     # cedula = request.args.get('cedula')
@@ -210,6 +213,7 @@ def editar_contenido(codigo_evento, orden):
     "/tablero/eventos/<codigo_evento>/lms/<int:orden>/previsualizar", methods=["GET"]
 )
 @login_required
+@lms_required
 def previsualizar_contenido(codigo_evento, orden):
     evento = collection_eventos.find_one({"codigo": codigo_evento})
     if not evento:
@@ -266,6 +270,7 @@ def previsualizar_contenido(codigo_evento, orden):
     methods=["POST"],
 )
 @login_required
+@lms_required
 def mover_contenido(codigo_evento, orden, direccion):
     evento = collection_eventos.find_one({"codigo": codigo_evento})
     if not evento:
@@ -308,6 +313,7 @@ def mover_contenido(codigo_evento, orden, direccion):
     "/tablero/eventos/<codigo_evento>/<int:orden>/eliminar", methods=["POST"]
 )
 @login_required
+@lms_required
 def eliminar_contenido(codigo_evento, orden):
     evento = collection_eventos.find_one({"codigo": codigo_evento})
     if not evento:
@@ -550,6 +556,7 @@ def ver_contenido(codigo_evento, orden):
 @plataforma_bp.route("/tablero/qbanks/")
 @plataforma_bp.route("/tablero/qbanks/page/<int:page>")
 @login_required
+@lms_required
 def listar_qbank(page=1):
     qbanks_por_pagina = 20  # Número de qbanks por página
 
@@ -588,6 +595,7 @@ def listar_qbank(page=1):
 ###
 @plataforma_bp.route("/tablero/qbanks/nuevo", methods=["GET", "POST"])
 @login_required
+@lms_required
 def nuevo_qbank():
     if request.method == "POST":
         # Obtener datos del formulario
@@ -669,6 +677,7 @@ def nuevo_qbank():
 ###
 @plataforma_bp.route("/tablero/qbanks/<codigo_qbank>/editar", methods=["GET", "POST"])
 @login_required
+@lms_required
 def editar_qbank(codigo_qbank):
     # Buscar el qbank en la base de datos
     qbank = collection_qbanks.find_one({"codigo": codigo_qbank})
@@ -734,6 +743,7 @@ def editar_qbank(codigo_qbank):
 ###
 @plataforma_bp.route("/tablero/qbanks/<codigo_qbank>")
 @login_required
+@lms_required
 def ver_qbank(codigo_qbank):
     # Buscar el qbank en la base de datos
     qbank = collection_qbanks.find_one({"codigo": codigo_qbank})
@@ -753,6 +763,7 @@ def ver_qbank(codigo_qbank):
 ###
 @plataforma_bp.route("/tablero/qbanks/<codigo_qbank>/eliminar", methods=["POST"])
 @login_required
+@lms_required
 def eliminar_qbank(codigo_qbank):
     # Buscar el qbank en la base de datos
     qbank = collection_qbanks.find_one({"codigo": codigo_qbank})
@@ -804,6 +815,7 @@ def eliminar_qbank(codigo_qbank):
     methods=["GET", "POST"],
 )
 @login_required
+@lms_required
 def editar_pregunta_qbank(codigo_qbank, pregunta_id):
     # Buscar el qbank en la base de datos
     qbank = collection_qbanks.find_one({"codigo": codigo_qbank})
@@ -925,6 +937,7 @@ def editar_pregunta_qbank(codigo_qbank, pregunta_id):
     "/tablero/qbanks/<codigo_qbank>/eliminar_pregunta/<pregunta_id>", methods=["POST"]
 )
 @login_required
+@lms_required
 def eliminar_pregunta_qbank(codigo_qbank, pregunta_id):
     # Buscar el qbank en la base de datos
     qbank = collection_qbanks.find_one({"codigo": codigo_qbank})
@@ -1044,6 +1057,7 @@ def eliminar_pregunta_qbank(codigo_qbank, pregunta_id):
     "/tablero/qbanks/<codigo_qbank>/nueva_pregunta", methods=["GET", "POST"]
 )
 @login_required
+@lms_required
 def nueva_pregunta_qbank(codigo_qbank):
     if request.method == "POST":
         tipo = request.form["tipo"]

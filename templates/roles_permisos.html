@@ -40,12 +40,11 @@
                                             {{ permiso.nombre }}
                                         </th>
                                         {% endfor %}
-                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200">
                                     {% for usuario in usuarios %}
-                                    <tr>
+                                    <tr id="row-{{ usuario._id }}">
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center">
                                                 <div class="text-sm font-medium text-gray-900">
@@ -66,14 +65,9 @@
                                                        name="{{ permiso.id }}" 
                                                        class="shrink-0 border-gray-200 rounded text-blue-600 focus:ring-blue-500"
                                                        {% if permiso.id in usuario.permisos %}checked{% endif %}
-                                                       onchange="document.getElementById('form-{{ usuario._id }}').submit()">
+                                                       onchange="autoGuardar('{{ usuario._id }}')">
                                             </td>
                                             {% endfor %}
-                                            <td class="px-6 py-4 whitespace-nowrap text-center">
-                                                <button type="submit" class="text-blue-600 hover:text-blue-900 text-sm font-medium">
-                                                    Guardar
-                                                </button>
-                                            </td>
                                         </form>
                                     </tr>
                                     {% endfor %}
@@ -152,6 +146,18 @@
 
 <!-- JS PLUGINS -->
 <script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+<script>
+function autoGuardar(userId) {
+    const form = document.getElementById('form-' + userId);
+    const row = document.getElementById('row-' + userId);
+    
+    // Feedback visual: cambiar fondo temporalmente
+    row.style.backgroundColor = '#fef3c7'; // amarillo claro
+    
+    // Enviar formulario
+    form.submit();
+}
+</script>
 
 </body>
 </html>
