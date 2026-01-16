@@ -26,7 +26,7 @@ from app import (
     collection_qbanks_data,
     db,
 )
-from app.auth import token_required, lms_required
+from app.auth import token_required, lms_required, lms_edit_required
 
 plataforma_bp = Blueprint("plataforma", __name__)
 
@@ -556,19 +556,32 @@ def ver_contenido(codigo_evento, orden):
 @plataforma_bp.route("/tablero/qbanks/")
 @plataforma_bp.route("/tablero/qbanks/page/<int:page>")
 @login_required
-@lms_required
+@lms_edit_required
 def listar_qbank(page=1):
     qbanks_por_pagina = 20  # Número de qbanks por página
 
+    # Verificar permisos del usuario
+    permisos_usuario = getattr(current_user, 'permisos', [])
+    es_admin_completo = (
+        current_user.rol in ['administrador', 'denadoi'] or 
+        'lms_admin' in permisos_usuario
+    )
+    
+    # Si tiene lms_edit (no admin completo), solo mostrar sus propios QBanks
+    if not es_admin_completo and 'lms_edit' in permisos_usuario:
+        filtro = {"autor": current_user.id}
+    else:
+        filtro = {}
+
     # Contar el total de qbanks
-    total_qbanks = collection_qbanks.count_documents({})
+    total_qbanks = collection_qbanks.count_documents(filtro)
 
     # Calcular el número total de páginas
     total_paginas = (total_qbanks + qbanks_por_pagina - 1) // qbanks_por_pagina
 
     # Obtener los qbanks para la página actual
     qbanks_cursor = (
-        collection_qbanks.find()
+        collection_qbanks.find(filtro)
         .sort("fecha_creacion", -1)
         .skip((page - 1) * qbanks_por_pagina)
         .limit(qbanks_por_pagina)
@@ -595,7 +608,7 @@ def listar_qbank(page=1):
 ###
 @plataforma_bp.route("/tablero/qbanks/nuevo", methods=["GET", "POST"])
 @login_required
-@lms_required
+@lms_edit_required
 def nuevo_qbank():
     if request.method == "POST":
         # Obtener datos del formulario
@@ -677,7 +690,7 @@ def nuevo_qbank():
 ###
 @plataforma_bp.route("/tablero/qbanks/<codigo_qbank>/editar", methods=["GET", "POST"])
 @login_required
-@lms_required
+@lms_edit_required
 def editar_qbank(codigo_qbank):
     # Buscar el qbank en la base de datos
     qbank = collection_qbanks.find_one({"codigo": codigo_qbank})
@@ -743,7 +756,7 @@ def editar_qbank(codigo_qbank):
 ###
 @plataforma_bp.route("/tablero/qbanks/<codigo_qbank>")
 @login_required
-@lms_required
+@lms_edit_required
 def ver_qbank(codigo_qbank):
     # Buscar el qbank en la base de datos
     qbank = collection_qbanks.find_one({"codigo": codigo_qbank})
@@ -763,7 +776,7 @@ def ver_qbank(codigo_qbank):
 ###
 @plataforma_bp.route("/tablero/qbanks/<codigo_qbank>/eliminar", methods=["POST"])
 @login_required
-@lms_required
+@lms_edit_required
 def eliminar_qbank(codigo_qbank):
     # Buscar el qbank en la base de datos
     qbank = collection_qbanks.find_one({"codigo": codigo_qbank})
@@ -815,7 +828,7 @@ def eliminar_qbank(codigo_qbank):
     methods=["GET", "POST"],
 )
 @login_required
-@lms_required
+@lms_edit_required
 def editar_pregunta_qbank(codigo_qbank, pregunta_id):
     # Buscar el qbank en la base de datos
     qbank = collection_qbanks.find_one({"codigo": codigo_qbank})
@@ -937,7 +950,7 @@ def editar_pregunta_qbank(codigo_qbank, pregunta_id):
     "/tablero/qbanks/<codigo_qbank>/eliminar_pregunta/<pregunta_id>", methods=["POST"]
 )
 @login_required
-@lms_required
+@lms_edit_required
 def eliminar_pregunta_qbank(codigo_qbank, pregunta_id):
     # Buscar el qbank en la base de datos
     qbank = collection_qbanks.find_one({"codigo": codigo_qbank})
@@ -1057,7 +1070,7 @@ def eliminar_pregunta_qbank(codigo_qbank, pregunta_id):
     "/tablero/qbanks/<codigo_qbank>/nueva_pregunta", methods=["GET", "POST"]
 )
 @login_required
-@lms_required
+@lms_edit_required
 def nueva_pregunta_qbank(codigo_qbank):
     if request.method == "POST":
         tipo = request.form["tipo"]

@@ -19,6 +19,7 @@ def lms_required(f):
     - Administradores
     - Rol 'denadoi'
     - Usuarios con permiso 'lms_admin'
+    - Usuarios con permiso 'lms_edit' (acceso limitado)
     """
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -33,10 +34,61 @@ def lms_required(f):
         if current_user.rol == 'denadoi':
             return f(*args, **kwargs)
         
-        # Verificar si tiene el permiso lms_admin
+        # Verificar si tiene el permiso lms_admin o lms_edit
         permisos_usuario = getattr(current_user, 'permisos', [])
+        if 'lms_admin' in permisos_usuario or 'lms_edit' in permisos_usuario:
+            return f(*args, **kwargs)
+        
+        # Si no cumple ninguna condición, denegar acceso
+        abort(403)
+    
+    return decorated_function
+
+
+###
+### Decorador de permisos LMS Edit (acceso limitado)
+###
+def lms_edit_required(f):
+    """
+    Decorador que verifica si el usuario tiene permisos de edición limitados en el LMS.
+    Tienen acceso:
+    - Administradores (acceso completo)
+    - Rol 'denadoi' (acceso completo)
+    - Usuarios con permiso 'lms_admin' (acceso completo)
+    - Usuarios con permiso 'lms_edit' (acceso limitado a sus propios QBanks)
+    
+    Para rutas de QBanks, verifica que el usuario sea el autor del QBank.
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            abort(401)
+        
+        # Administradores y denadoi siempre tienen acceso completo
+        if current_user.rol in ['administrador', 'denadoi']:
+            return f(*args, **kwargs)
+        
+        # Verificar permisos
+        permisos_usuario = getattr(current_user, 'permisos', [])
+        
+        # lms_admin tiene acceso completo
         if 'lms_admin' in permisos_usuario:
             return f(*args, **kwargs)
+        
+        # lms_edit tiene acceso limitado
+        if 'lms_edit' in permisos_usuario:
+            # Si la ruta incluye codigo_qbank, verificar que sea el autor
+            codigo_qbank = kwargs.get('codigo_qbank')
+            if codigo_qbank:
+                from app import collection_qbanks
+                qbank = collection_qbanks.find_one({"codigo": codigo_qbank})
+                if qbank and qbank.get('autor') == current_user.id:
+                    return f(*args, **kwargs)
+                else:
+                    abort(403)  # No es el autor del QBank
+            else:
+                # Para rutas sin codigo_qbank (como crear nuevo), permitir acceso
+                return f(*args, **kwargs)
         
         # Si no cumple ninguna condición, denegar acceso
         abort(403)

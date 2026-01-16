@@ -235,7 +235,8 @@ def roles_permisos(page=1):
     
     # Definir permisos disponibles
     permisos_disponibles = [
-        {'id': 'lms_admin', 'nombre': 'LMS Admin', 'descripcion': 'Crear y editar contenidos LMS'},
+        {'id': 'lms_admin', 'nombre': 'LMS Admin', 'descripcion': 'Crear y editar todos los contenidos LMS y QBanks'},
+        {'id': 'lms_edit', 'nombre': 'LMS Edit', 'descripcion': 'Crear y editar contenidos LMS y QBanks propios (sin acceso a eventos abiertos)'},
         {'id': 'lms_view', 'nombre': 'LMS Ver', 'descripcion': 'Ver contenidos LMS'},
         {'id': 'qbanks_admin', 'nombre': 'Qbanks Admin', 'descripcion': 'Gestionar bancos de preguntas'},
         {'id': 'metricas_avanzadas', 'nombre': 'Métricas Avanzadas', 'descripcion': 'Ver métricas detalladas'},
@@ -272,7 +273,7 @@ def actualizar_permisos(user_id):
     
     # Obtener permisos del formulario
     permisos_nuevos = []
-    permisos_posibles = ['lms_admin', 'lms_view', 'qbanks_admin', 'metricas_avanzadas', 'exportar_datos', 'gestionar_usuarios']
+    permisos_posibles = ['lms_admin', 'lms_edit', 'lms_view', 'qbanks_admin', 'metricas_avanzadas', 'exportar_datos', 'gestionar_usuarios']
     
     for permiso in permisos_posibles:
         if request.form.get(permiso) == 'on':
