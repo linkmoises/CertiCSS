@@ -1,0 +1,157 @@
+{% include 'tablero-header.html' %}
+
+{% include 'tablero-sidebar.html' %}
+    
+    <!-- CONTENIDO -->
+    <div class="w-full lg:ps-64">
+        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+
+            <!-- TABLA RESUMEN EVENTOS -->
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <!-- Card -->
+                <div class="flex flex-col">
+                <div class="-m-1.5 overflow-x-auto">
+                    <div class="p-1.5 min-w-full inline-block align-middle">
+                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+
+                        <!-- Header -->
+                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-800">
+                                    Roles y Permisos
+                                </h2>
+                                <p class="text-sm text-gray-600">
+                                    Gestiona los permisos adicionales de los usuarios
+                                </p>
+                            </div>
+                        </div>
+                        <!-- End Header -->
+
+                        <!-- Body -->
+                        {% if usuarios %}
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Usuario</th>
+                                        <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Rol Base</th>
+                                        {% for permiso in permisos_disponibles %}
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase" title="{{ permiso.descripcion }}">
+                                            {{ permiso.nombre }}
+                                        </th>
+                                        {% endfor %}
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    {% for usuario in usuarios %}
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="text-sm font-medium text-gray-900">
+                                                    {{ usuario.nombres }} {{ usuario.apellidos }}
+                                                </div>
+                                            </div>
+                                            <div class="text-sm text-gray-500">{{ usuario.email }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                                {{ usuario.rol }}
+                                            </span>
+                                        </td>
+                                        <form method="POST" action="{{ url_for('opciones.actualizar_permisos', user_id=usuario._id) }}" id="form-{{ usuario._id }}">
+                                            {% for permiso in permisos_disponibles %}
+                                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                                <input type="checkbox" 
+                                                       name="{{ permiso.id }}" 
+                                                       class="shrink-0 border-gray-200 rounded text-blue-600 focus:ring-blue-500"
+                                                       {% if permiso.id in usuario.permisos %}checked{% endif %}
+                                                       onchange="document.getElementById('form-{{ usuario._id }}').submit()">
+                                            </td>
+                                            {% endfor %}
+                                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                                <button type="submit" class="text-blue-600 hover:text-blue-900 text-sm font-medium">
+                                                    Guardar
+                                                </button>
+                                            </td>
+                                        </form>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="max-w-sm w-full min-h-[400px] flex flex-col justify-center mx-auto px-6 py-4">
+                            <div class="flex justify-center items-center size-[46px] bg-gray-100 rounded-lg">
+                                <svg class="shrink-0 size-6 text-gray-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="9" cy="7" r="4"/>
+                                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                </svg>
+                            </div>
+                            <h2 class="mt-5 font-semibold text-gray-800">
+                                No hay usuarios
+                            </h2>
+                            <p class="mt-2 text-sm text-gray-600">
+                                No hay usuarios registrados en el sistema.
+                            </p>
+                        </div>
+                        {% endif %}
+                        <!-- End Body -->
+
+                        <!-- Footer -->
+                        {% if total_paginas > 1 %}
+                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200">
+                            <div>
+                                <p class="text-sm text-gray-600">
+                                    <span class="font-semibold text-gray-800">{{ total_usuarios }}</span> usuarios totales
+                                </p>
+                            </div>
+
+                            <div>
+                                <div class="inline-flex gap-x-2">
+                                    {% if page > 1 %}
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50" 
+                                       href="{{ url_for('opciones.roles_permisos', page=page-1) }}">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                                        Anterior
+                                    </a>
+                                    {% endif %}
+
+                                    <span class="py-2 px-3 text-sm text-gray-600">
+                                        Página {{ page }} de {{ total_paginas }}
+                                    </span>
+
+                                    {% if page < total_paginas %}
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50" 
+                                       href="{{ url_for('opciones.roles_permisos', page=page+1) }}">
+                                        Siguiente
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <!-- End Footer -->
+
+                    </div>
+                    </div>
+                </div>
+                </div>
+                <!-- End Card -->
+            </div>
+            <!-- FIN TABLA RESUMEN EVENTOS -->
+
+{% include 'tablero-footer.html' %}
+
+        </div>
+    </div>
+    <!-- FIN CONTENIDO -->
+
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+
+</body>
+</html>

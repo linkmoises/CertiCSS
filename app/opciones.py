@@ -160,6 +160,7 @@ def cargar_planilla():
                          total_funcionarios=total_funcionarios,
                          ultima_actualizacion=ultima_actualizacion)
 
+
 @opciones_bp.route('/tablero/opciones/exportar-planilla')
 @login_required
 def exportar_planilla():
@@ -174,3 +175,117 @@ def exportar_planilla():
         mimetype='text/csv',
         headers={'Content-Disposition': 'attachment; filename=planilla_funcionarios.csv'}
     )
+
+
+@opciones_bp.route('/tablero/roles-permisos')
+@opciones_bp.route('/tablero/roles-permisos/page/<int:page>')
+@login_required
+def roles_permisos(page=1):
+    # Verificar si el usuario es administrador
+    if current_user.rol != 'administrador':
+        flash('No tienes permiso para acceder a esta página.', 'error')
+        return redirect(url_for('home'))
+    
+    # Importar colección de usuarios
+    from app import collection_usuarios
+    
+    usuarios_por_pagina = 20
+    
+    # Definir jerarquía de roles (de mayor a menor)
+    jerarquia_roles = {
+        'denadoi': 1,
+        'coordinador-nacional': 2,
+        'coordinador-administrativo': 3,
+        'coordinador-regional': 4,
+        'subdirector-docencia': 5,
+        'coordinador-local': 6,
+        'coordinador-departamental': 7,
+        'simulacion': 8,  # Agregar simulacion al final
+    }
+    
+    # Obtener todos los usuarios (excluyendo administradores)
+    usuarios_cursor = collection_usuarios.find(
+        {"rol": {"$ne": "administrador"}}
+    )
+    
+    usuarios = list(usuarios_cursor)
+    
+    # Asegurar que todos los usuarios tengan el campo permisos
+    for usuario in usuarios:
+        if 'permisos' not in usuario:
+            usuario['permisos'] = []
+    
+    # Ordenar usuarios por jerarquía de rol, luego por apellidos y nombres
+    usuarios.sort(key=lambda u: (
+        jerarquia_roles.get(u.get('rol', ''), 999),  # Primero por jerarquía de rol
+        u.get('apellidos', '').lower(),               # Luego por apellidos
+        u.get('nombres', '').lower()                  # Finalmente por nombres
+    ))
+    
+    # Contar total de usuarios
+    total_usuarios = len(usuarios)
+    
+    # Calcular total de páginas
+    total_paginas = (total_usuarios + usuarios_por_pagina - 1) // usuarios_por_pagina
+    
+    # Aplicar paginación manualmente
+    inicio = (page - 1) * usuarios_por_pagina
+    fin = inicio + usuarios_por_pagina
+    usuarios_pagina = usuarios[inicio:fin]
+    
+    # Definir permisos disponibles
+    permisos_disponibles = [
+        {'id': 'lms_admin', 'nombre': 'LMS Admin', 'descripcion': 'Crear y editar contenidos LMS'},
+        {'id': 'lms_view', 'nombre': 'LMS Ver', 'descripcion': 'Ver contenidos LMS'},
+        {'id': 'qbanks_admin', 'nombre': 'Qbanks Admin', 'descripcion': 'Gestionar bancos de preguntas'},
+        {'id': 'metricas_avanzadas', 'nombre': 'Métricas Avanzadas', 'descripcion': 'Ver métricas detalladas'},
+        {'id': 'exportar_datos', 'nombre': 'Exportar Datos', 'descripcion': 'Exportar bases de datos'},
+        {'id': 'gestionar_usuarios', 'nombre': 'Gestionar Usuarios', 'descripcion': 'Crear y editar usuarios'}
+    ]
+    
+    return render_template('roles_permisos.html',
+                         usuarios=usuarios_pagina,
+                         permisos_disponibles=permisos_disponibles,
+                         page=page,
+                         total_paginas=total_paginas,
+                         total_usuarios=total_usuarios)
+
+
+@opciones_bp.route('/tablero/roles-permisos/actualizar/<user_id>', methods=['POST'])
+@login_required
+def actualizar_permisos(user_id):
+    # Verificar si el usuario es administrador
+    if current_user.rol != 'administrador':
+        flash('No tienes permiso para realizar esta acción.', 'error')
+        return redirect(url_for('home'))
+    
+    from app import collection_usuarios
+    from bson import ObjectId
+    
+    # Obtener el usuario
+    usuario = collection_usuarios.find_one({"_id": ObjectId(user_id)})
+    
+    if not usuario:
+        flash('Usuario no encontrado.', 'error')
+        return redirect(url_for('opciones.roles_permisos'))
+    
+    # Obtener permisos del formulario
+    permisos_nuevos = []
+    permisos_posibles = ['lms_admin', 'lms_view', 'qbanks_admin', 'metricas_avanzadas', 'exportar_datos', 'gestionar_usuarios']
+    
+    for permiso in permisos_posibles:
+        if request.form.get(permiso) == 'on':
+            permisos_nuevos.append(permiso)
+    
+    # Actualizar permisos en la base de datos
+    collection_usuarios.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {"permisos": permisos_nuevos}}
+    )
+    
+    # Log de la acción
+    from app import log_event
+    log_event(f"Usuario [{current_user.email}] actualizó permisos de {usuario.get('email')}: {permisos_nuevos}")
+    
+    flash(f'Permisos actualizados para {usuario.get("nombres")} {usuario.get("apellidos")}.', 'success')
+    return redirect(url_for('opciones.roles_permisos'))

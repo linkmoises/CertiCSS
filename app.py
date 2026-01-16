@@ -123,7 +123,8 @@ def load_user(user_id):
             cedula=user_data.get('cedula', ''),
             nombres=user_data.get('nombres', ''),
             apellidos=user_data.get('apellidos', ''),
-            foto=user_data.get('foto')
+            foto=user_data.get('foto'),
+            permisos=user_data.get('permisos', [])
         )
         user.id = str(user_data['_id'])
         return user
@@ -131,7 +132,7 @@ def load_user(user_id):
 
 
 class User(UserMixin):
-    def __init__(self, email, password, rol, nombres, apellidos, cedula, foto=None):
+    def __init__(self, email, password, rol, nombres, apellidos, cedula, foto=None, permisos=None):
         self.email = email
         self.password = password
         self.rol = rol
@@ -139,6 +140,7 @@ class User(UserMixin):
         self.apellidos = apellidos
         self.cedula = cedula
         self.foto = foto
+        self.permisos = permisos if permisos is not None else []
         self.id = None
 
     @property
@@ -157,6 +159,18 @@ class User(UserMixin):
 
     def is_admin(self):
         return self.rol == UserRole.ADMINISTRADOR.value
+    
+    def has_permission(self, permission):
+        """Verifica si el usuario tiene un permiso específico"""
+        if self.is_admin():
+            return True
+        return permission in self.permisos
+    
+    def has_any_permission(self, *permissions):
+        """Verifica si el usuario tiene al menos uno de los permisos especificados"""
+        if self.is_admin():
+            return True
+        return any(permission in self.permisos for permission in permissions)
 
     def is_authenticated(self):
         return True
@@ -311,6 +325,7 @@ def registro():
             'jefe': False,
             'subjefe': False,
             'activo': True,
+            'permisos': [],  # Inicializar sin permisos adicionales
             'timestamp': timestamp
         })
         log_event(f"Usuario [{current_user.email}] registró un nuevo usuario: {email}.")

@@ -10,6 +10,50 @@ auth_bp = Blueprint('auth', __name__)
 
 
 ###
+### Decorador de permisos
+###
+def permission_required(*permisos):
+    """
+    Decorador que verifica si el usuario tiene al menos uno de los permisos especificados.
+    Los administradores siempre tienen acceso.
+    
+    Uso:
+        @permission_required('lms_admin', 'lms_view')
+        def mi_ruta():
+            ...
+    """
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not current_user.is_authenticated:
+                abort(401)
+            
+            # Los administradores siempre tienen acceso
+            if current_user.rol == 'administrador':
+                return f(*args, **kwargs)
+            
+            # Verificar si el usuario tiene alguno de los permisos requeridos
+            permisos_usuario = getattr(current_user, 'permisos', [])
+            if not permisos_usuario:
+                # Si el usuario no tiene el atributo permisos, cargar desde la base de datos
+                from app import collection_usuarios
+                from bson import ObjectId
+                user_data = collection_usuarios.find_one({"_id": ObjectId(current_user.id)})
+                permisos_usuario = user_data.get('permisos', []) if user_data else []
+                current_user.permisos = permisos_usuario
+            
+            # Verificar si tiene al menos uno de los permisos requeridos
+            if any(permiso in permisos_usuario for permiso in permisos):
+                return f(*args, **kwargs)
+            
+            # Si no tiene permisos, denegar acceso
+            abort(403)
+        
+        return decorated_function
+    return decorator
+
+
+###
 ### Tokens EVA
 ###
 def generate_token(cedula):
