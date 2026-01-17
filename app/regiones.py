@@ -32,13 +32,20 @@ def eventos_region_bocas(page=1):
     titulo_region = "Bocas Del Toro"
     eventos_por_pagina = 20
 
+    # Filtro para excluir eventos con registro abierto y sesiones docentes
+    filtro_eventos = {
+        'region': "bocasdeltoro",
+        'registro_abierto': {'$ne': True},
+        'tipo': {'$ne': 'Sesión Docente'}
+    }
+
     # Calcular el número total de eventos
-    total_eventos = collection_eventos.count_documents({"region": "bocasdeltoro"})
+    total_eventos = collection_eventos.count_documents(filtro_eventos)
     # Calcular el número total de páginas
     total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
 
     # Obtener los eventos para la página actual
-    eventos_cursor = collection_eventos.find({"region": "bocasdeltoro"}).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    eventos_cursor = collection_eventos.find(filtro_eventos).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
 
     # Verificar si el usuario es organizador en cada evento
@@ -70,13 +77,20 @@ def eventos_region_cocle(page=1):
     titulo_region = "Coclé"
     eventos_por_pagina = 20
 
+    # Filtro para excluir eventos con registro abierto y sesiones docentes
+    filtro_eventos = {
+        'region': "cocle",
+        'registro_abierto': {'$ne': True},
+        'tipo': {'$ne': 'Sesión Docente'}
+    }
+
     # Calcular el número total de eventos
-    total_eventos = collection_eventos.count_documents({"region": "cocle"})
+    total_eventos = collection_eventos.count_documents(filtro_eventos)
     # Calcular el número total de páginas
     total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
 
     # Obtener los eventos para la página actual
-    eventos_cursor = collection_eventos.find({"region": "cocle"}).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    eventos_cursor = collection_eventos.find(filtro_eventos).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
 
     # Verificar si el usuario es organizador en cada evento
@@ -108,13 +122,20 @@ def eventos_region_colon(page=1):
     titulo_region = "Colón"
     eventos_por_pagina = 20
 
+    # Filtro para excluir eventos con registro abierto y sesiones docentes
+    filtro_eventos = {
+        'region': "colon",
+        'registro_abierto': {'$ne': True},
+        'tipo': {'$ne': 'Sesión Docente'}
+    }
+
     # Calcular el número total de eventos
-    total_eventos = collection_eventos.count_documents({"region": "colon"})
+    total_eventos = collection_eventos.count_documents(filtro_eventos)
     # Calcular el número total de páginas
     total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
 
     # Obtener los eventos para la página actual
-    eventos_cursor = collection_eventos.find({"region": "colon"}).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    eventos_cursor = collection_eventos.find(filtro_eventos).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
 
     # Verificar si el usuario es organizador en cada evento
@@ -146,13 +167,20 @@ def eventos_region_chiriqui(page=1):
     titulo_region = "Chiriquí"
     eventos_por_pagina = 20
 
+    # Filtro para excluir eventos con registro abierto y sesiones docentes
+    filtro_eventos = {
+        'region': "chiriqui",
+        'registro_abierto': {'$ne': True},
+        'tipo': {'$ne': 'Sesión Docente'}
+    }
+
     # Calcular el número total de eventos
-    total_eventos = collection_eventos.count_documents({"region": "chiriqui"})
+    total_eventos = collection_eventos.count_documents(filtro_eventos)
     # Calcular el número total de páginas
     total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
 
     # Obtener los eventos para la página actual
-    eventos_cursor = collection_eventos.find({"region": "chiriqui"}).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    eventos_cursor = collection_eventos.find(filtro_eventos).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
 
     # Verificar si el usuario es organizador en cada evento
@@ -190,13 +218,20 @@ def eventos_region_herrera(page=1):
     titulo_region = "Herrera"
     eventos_por_pagina = 20
 
+    # Filtro para excluir eventos con registro abierto y sesiones docentes
+    filtro_eventos = {
+        'region': "herrera",
+        'registro_abierto': {'$ne': True},
+        'tipo': {'$ne': 'Sesión Docente'}
+    }
+
     # Calcular el número total de eventos
-    total_eventos = collection_eventos.count_documents({"region": "herrera"})
+    total_eventos = collection_eventos.count_documents(filtro_eventos)
     # Calcular el número total de páginas
     total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
 
     # Obtener los eventos para la página actual
-    eventos_cursor = collection_eventos.find({"region": "herrera"}).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    eventos_cursor = collection_eventos.find(filtro_eventos).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
 
     # Verificar si el usuario es organizador en cada evento
@@ -228,13 +263,20 @@ def eventos_region_los_santos(page=1):
     titulo_region = "Los Santos"
     eventos_por_pagina = 20
 
+    # Filtro para excluir eventos con registro abierto y sesiones docentes
+    filtro_eventos = {
+        'region': "lossantos",
+        'registro_abierto': {'$ne': True},
+        'tipo': {'$ne': 'Sesión Docente'}
+    }
+
     # Calcular el número total de eventos
-    total_eventos = collection_eventos.count_documents({"region": "lossantos"})
+    total_eventos = collection_eventos.count_documents(filtro_eventos)
     # Calcular el número total de páginas
     total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
 
     # Obtener los eventos para la página actual
-    eventos_cursor = collection_eventos.find({"region": "lossantos"}).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    eventos_cursor = collection_eventos.find(filtro_eventos).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
 
     # Verificar si el usuario es organizador en cada evento
@@ -266,13 +308,20 @@ def eventos_region_panama(page=1):
     titulo_region = "Panamá"
     eventos_por_pagina = 20
 
+    # Filtro para excluir eventos con registro abierto y sesiones docentes
+    filtro_eventos = {
+        'region': {"$in": ["panama", "sanmiguelito", "panamaeste"]},
+        'registro_abierto': {'$ne': True},
+        'tipo': {'$ne': 'Sesión Docente'}
+    }
+
     # Calcular el número total de eventos
-    total_eventos = collection_eventos.count_documents({"region": {"$in": ["panama", "sanmiguelito", "panamaeste"]}})
+    total_eventos = collection_eventos.count_documents(filtro_eventos)
     # Calcular el número total de páginas
     total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
 
     # Obtener los eventos para la página actual
-    eventos_cursor = collection_eventos.find({"region": {"$in": ["panama", "sanmiguelito", "panamaeste"]}}).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    eventos_cursor = collection_eventos.find(filtro_eventos).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
 
     # Verificar si el usuario es organizador en cada evento
@@ -304,13 +353,20 @@ def eventos_region_veraguas(page=1):
     titulo_region = "Veraguas"
     eventos_por_pagina = 20
 
+    # Filtro para excluir eventos con registro abierto y sesiones docentes
+    filtro_eventos = {
+        'region': "veraguas",
+        'registro_abierto': {'$ne': True},
+        'tipo': {'$ne': 'Sesión Docente'}
+    }
+
     # Calcular el número total de eventos
-    total_eventos = collection_eventos.count_documents({"region": "veraguas"})
+    total_eventos = collection_eventos.count_documents(filtro_eventos)
     # Calcular el número total de páginas
     total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
 
     # Obtener los eventos para la página actual
-    eventos_cursor = collection_eventos.find({"region": "veraguas"}).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    eventos_cursor = collection_eventos.find(filtro_eventos).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
 
     # Verificar si el usuario es organizador en cada evento
@@ -342,13 +398,20 @@ def eventos_region_panamaoeste(page=1):
     titulo_region = "Panamá Oeste"
     eventos_por_pagina = 20
 
+    # Filtro para excluir eventos con registro abierto y sesiones docentes
+    filtro_eventos = {
+        'region': "panamaoeste",
+        'registro_abierto': {'$ne': True},
+        'tipo': {'$ne': 'Sesión Docente'}
+    }
+
     # Calcular el número total de eventos
-    total_eventos = collection_eventos.count_documents({"region": "panamaoeste"})
+    total_eventos = collection_eventos.count_documents(filtro_eventos)
     # Calcular el número total de páginas
     total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
 
     # Obtener los eventos para la página actual
-    eventos_cursor = collection_eventos.find({"region": "panamaoeste"}).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    eventos_cursor = collection_eventos.find(filtro_eventos).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
 
     # Verificar si el usuario es organizador en cada evento
@@ -380,13 +443,20 @@ def eventos_region_panamaeste(page=1):
     titulo_region = "Panamá Este"
     eventos_por_pagina = 20
 
+    # Filtro para excluir eventos con registro abierto y sesiones docentes
+    filtro_eventos = {
+        'region': "panamaeste",
+        'registro_abierto': {'$ne': True},
+        'tipo': {'$ne': 'Sesión Docente'}
+    }
+
     # Calcular el número total de eventos
-    total_eventos = collection_eventos.count_documents({"region": "panamaeste"})
+    total_eventos = collection_eventos.count_documents(filtro_eventos)
     # Calcular el número total de páginas
     total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
 
     # Obtener los eventos para la página actual
-    eventos_cursor = collection_eventos.find({"region": "panamaeste"}).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    eventos_cursor = collection_eventos.find(filtro_eventos).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
 
     # Verificar si el usuario es organizador en cada evento
@@ -418,13 +488,20 @@ def eventos_region_sanmiguelito(page=1):
     titulo_region = "San Miguelito"
     eventos_por_pagina = 20
 
+    # Filtro para excluir eventos con registro abierto y sesiones docentes
+    filtro_eventos = {
+        'region': "sanmiguelito",
+        'registro_abierto': {'$ne': True},
+        'tipo': {'$ne': 'Sesión Docente'}
+    }
+
     # Calcular el número total de eventos
-    total_eventos = collection_eventos.count_documents({"region": "sanmiguelito"})
+    total_eventos = collection_eventos.count_documents(filtro_eventos)
     # Calcular el número total de páginas
     total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
 
     # Obtener los eventos para la página actual
-    eventos_cursor = collection_eventos.find({"region": "sanmiguelito"}).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    eventos_cursor = collection_eventos.find(filtro_eventos).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
 
     # Verificar si el usuario es organizador en cada evento
@@ -456,13 +533,20 @@ def eventos_region_panamametro(page=1):
     titulo_region = "Panamá Metro"
     eventos_por_pagina = 20
 
+    # Filtro para excluir eventos con registro abierto y sesiones docentes
+    filtro_eventos = {
+        'region': "panama",
+        'registro_abierto': {'$ne': True},
+        'tipo': {'$ne': 'Sesión Docente'}
+    }
+
     # Calcular el número total de eventos
-    total_eventos = collection_eventos.count_documents({"region": "panama"})
+    total_eventos = collection_eventos.count_documents(filtro_eventos)
     # Calcular el número total de páginas
     total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
 
     # Obtener los eventos para la página actual
-    eventos_cursor = collection_eventos.find({"region": "panama"}).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    eventos_cursor = collection_eventos.find(filtro_eventos).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
 
     # Verificar si el usuario es organizador en cada evento

@@ -212,18 +212,17 @@
         <!-- End Tarjetas de evento -->
 
         <div class="text-center mb-12">
-            <div
-                class="inline-block bg-white border shadow-sm rounded-full dark:bg-neutral-900 dark:border-neutral-800">
-                <div class="py-3 px-4 flex items-center gap-x-2">
-                    <p class="text-gray-600 dark:text-neutral-400">¿Quieres ver más eventos?</p>
-                    <a class="inline-flex items-center gap-x-1.5 text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium dark:text-blue-500"
-                        href="/catalogo/1">
-                        Visita el catálogo completo
-                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="m9 18 6-6-6-6" />
-                        </svg>
+            <div class="inline-block bg-white border shadow-sm rounded-full dark:bg-neutral-900 dark:border-neutral-800">
+                <div class="py-3 px-4 flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <p class="text-gray-600 dark:text-neutral-400">
+                        ¿Quieres ver más eventos?
+                    </p>
+                    <a href="/catalogo/1" class="text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium dark:text-blue-500">
+                        Explora el catálogo completo
+                    </a>
+                    <span class="text-gray-400 dark:text-neutral-500">o</span>
+                    <a href="{{ url_for('catalogo.catalogo_region') }}" class="text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium dark:text-blue-500">
+                        navega el catálogo regional
                     </a>
                 </div>
             </div>
@@ -249,24 +248,17 @@
 
                 <div class="mt-5 sm:mt-10 lg:mt-0 lg:col-span-5">
                     <div class="space-y-6 sm:space-y-8">
-                        <!-- Title -->
                         <div class="flex justify-center items-center mx-auto">
-                            <img class="w-1/2 max-w-xs h-auto"
-                                src="{{ url_for('static', filename='assets/css-colmed.png') }}" alt="CSS COLMED" />
+                            <img class="w-1/2 max-w-xs h-auto" src="{{ url_for('static', filename='assets/css-colmed.png') }}" alt="CSS COLMED" />
                         </div>
                         <div class="space-y-2 md:space-y-4">
                             <h2 class="font-bold text-3xl lg:text-4xl text-gray-800">
                                 Actividades acreditadas
                             </h2>
                             <p class="text-gray-500">
-                                Si eres funcionario de la CSS, accede a programas de <strong>educación médica
-                                    continua</strong> acreditados por el <strong>Departamento Nacional de Docencia e
-                                    Investigación</strong>,
-                                diseñados para fortalecer tu práctica clínica y potenciar tu desarrollo profesional.
+                                Si eres funcionario de la CSS, accede a programas de <strong>educación médica continua</strong> acreditados por el <strong>Departamento Nacional de Docencia e Investigación</strong>, diseñados para fortalecer tu práctica clínica y potenciar tu desarrollo profesional.
                             </p>
                         </div>
-                        <!-- End Title -->
-
                         <!-- List -->
                         <ul class="space-y-2 sm:space-y-4">
                             <li class="flex gap-x-3">
@@ -278,7 +270,8 @@
                                         <polyline points="20 6 9 17 4 12" />
                                     </svg>
                                 </span>
-                                <div class="grow">
+                                <div class="growjustify-center items-center mx-auto">
+                            <img class="w-1/2 max-w-xs ">
                                     <span class="text-sm sm:text-base text-gray-500">
                                         Formación reconocida <span class="font-bold">oficialmente</span>.
                                     </span>
@@ -336,27 +329,58 @@
                             </svg>
                             Catálogo de actividades abiertas
                         </a> -->
-                        <button
-                            class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
-                            disabled>
-                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="2" y="6" width="20" height="8" rx="1" />
-                                <path d="M17 14v7" />
-                                <path d="M7 14v7" />
-                                <path d="M17 3v3" />
-                                <path d="M7 3v3" />
-                                <path d="M10 14 2.3 6.3" />
-                                <path d="m14 6 7.7 7.7" />
-                                <path d="m8 6 8 8" />
-                            </svg>
+                        <button class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" disabled>
+                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="8" rx="1" /><path d="M17 14v7" /><path d="M7 14v7" /><path d="M17 3v3" /><path d="M7 3v3" /><path d="M10 14 2.3 6.3" /><path d="m14 6 7.7 7.7" /><path d="m8 6 8 8" /></svg>
                             Próximamente
                         </button>
 
                     </div>
                 </div>
 
+            </div>
+            <!-- End Grid -->
+        </div>
+    </section>
+
+    <!--====== DOCENCIA SEMANAL =====-->
+    <section class="bg-white pb-5 lg:mx-20 md:mx-10">
+        <div class="max-w-[85rem] px-4 py-10 mb-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
+            <!-- Grid -->
+            <div class="lg:grid lg:grid-cols-12 lg:gap-10 lg:items-center">
+                <div class="mt-5 sm:mt-10 lg:mt-0 lg:col-span-5">
+                    <div class="space-y-6 sm:space-y-8">
+                        <div class="space-y-2 md:space-y-4">
+                            <h2 class="font-bold text-3xl lg:text-4xl text-gray-800">
+                                Docencias Semanales
+                            </h2>
+                            <p class="text-gray-500">
+                                En cada unidad ejecutora, los equipos de salud se reúnen semana a semana para revisar casos, compartir experiencias y actualizar conocimientos desde la práctica clínica cotidiana.
+                            </p>
+                            <p class="text-gray-500">
+                                Esta docencia, propia de cada servicio, se adapta a su realidad asistencial y a las necesidades formativas de sus equipos.
+                            </p>
+                            <p class="text-gray-500">
+                                Desde aquí podrás consultar las unidades ejecutoras por provincia y conocer cómo organizan sus docencias semanales.
+                            </p>
+                        </div>
+                        <button class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 focus:outline-hidden focus:bg-green-700 disabled:opacity-50 disabled:pointer-events-none" disabled>
+                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="8" rx="1" /><path d="M17 14v7" /><path d="M7 14v7" /><path d="M17 3v3" /><path d="M7 3v3" /><path d="M10 14 2.3 6.3" /><path d="m14 6 7.7 7.7" /><path d="m8 6 8 8" /></svg>
+                            Catálogo por unidad ejecutora - Próximamente
+                        </button>
+
+                    </div>
+                </div>
+                <div class="lg:col-span-7">
+                    <!-- Grid -->
+                    <div class="grid grid-cols-12 gap-2 sm:gap-6 items-center">
+                        <div class="col-span-12">
+                            <img class="rounded-xl"
+                                src="{{ url_for('static', filename='assets/docencia-medica.jpg') }}"
+                                alt="Docencia semanal">
+                        </div>
+                    </div>
+                    <!-- End Grid -->
+                </div>
             </div>
             <!-- End Grid -->
         </div>
