@@ -7090,9 +7090,13 @@ app.register_blueprint(auth_bp)
 from app.normalizador import normalizador_bp
 app.register_blueprint(normalizador_bp)
 
-### Búsqueda avanzada y normalizador
+### Catálogo por regiones
 from app.regiones import regiones_bp
 app.register_blueprint(regiones_bp)
+
+### Catálogo por unidades ejecutoras
+from app.unidades import unidades_bp
+app.register_blueprint(unidades_bp)
 
 ### Catálogo de eventos
 from app.catalogo import catalogo_bp

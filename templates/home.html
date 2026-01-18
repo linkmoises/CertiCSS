@@ -153,8 +153,7 @@
             <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for evento in eventos %}
                 <!-- Card -->
-                <div
-                    class="group flex flex-col h-full bg-white border border-gray-200 shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70">
+                <div class="group flex flex-col h-full bg-white border border-gray-200 shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70">
                     <div class="relative pt-[100%] sm:pt-[100%] overflow-hidden rounded-t-xl">
                         {% if evento.afiche_750 %}
                         <img class="size-full absolute top-0 start-0 object-cover group-hover:scale-105 group-focus:scale-105 transition-transform duration-500 ease-in-out rounded-t-xl"
@@ -213,7 +212,7 @@
 
         <div class="text-center mb-12">
             <div class="inline-block bg-white border shadow-sm rounded-full dark:bg-neutral-900 dark:border-neutral-800">
-                <div class="py-3 px-4 flex flex-wrap items-center gap-x-2 gap-y-1">
+                <div class="py-3 px-4 flex flex-wrap justify-center items-center gap-x-2 gap-y-1">
                     <p class="text-gray-600 dark:text-neutral-400">
                         ¿Quieres ver más eventos?
                     </p>
@@ -362,8 +361,8 @@
                                 Desde aquí podrás consultar las unidades ejecutoras por provincia y conocer cómo organizan sus docencias semanales.
                             </p>
                         </div>
-                        <button class="w-full mb-8 sm:mb-0 py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 focus:outline-hidden focus:bg-green-700 disabled:opacity-50 disabled:pointer-events-none" disabled>
-                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="8" rx="1" /><path d="M17 14v7" /><path d="M7 14v7" /><path d="M17 3v3" /><path d="M7 3v3" /><path d="M10 14 2.3 6.3" /><path d="m14 6 7.7 7.7" /><path d="m8 6 8 8" /></svg>
+                        <button class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 focus:outline-hidden focus:bg-green-700 disabled:opacity-50 disabled:pointer-events-none" disabled="">
+                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="8" rx="1"></rect><path d="M17 14v7"></path><path d="M7 14v7"></path><path d="M17 3v3"></path><path d="M7 3v3"></path><path d="M10 14 2.3 6.3"></path><path d="m14 6 7.7 7.7"></path><path d="m8 6 8 8"></path></svg>
                             Catálogo por unidad ejecutora - Próximamente
                         </button>
                     </div>
