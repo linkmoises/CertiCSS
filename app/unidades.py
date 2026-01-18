@@ -5,7 +5,7 @@
 ### 
 ###
 ###
-from flask import Flask, Blueprint, render_template, render_template_string, send_file, request, redirect, url_for, flash
+from flask import Flask, Blueprint, render_template, render_template_string, send_file, request, redirect, url_for, flash, abort
 from app import db, collection_eventos, collection_participantes, collection_unidades, app
 from flask_login import login_required, current_user
 from datetime import datetime
@@ -342,7 +342,69 @@ def catalogo_unidades():
 ### Docencia semanal por unidad específica
 ###
 @unidades_bp.route('/catalogo/unidades/<codigo_unidad>')
-def docencia_unidad(codigo_unidad):
-    # Aquí puedes agregar lógica para obtener eventos específicos de la unidad
-    # Por ahora retornamos un template básico
-    return render_template('catalogo_unidad.html', codigo_unidad=codigo_unidad)
+@unidades_bp.route('/catalogo/unidades/<codigo_unidad>/page/<int:page>')
+def docencia_unidad(codigo_unidad, page=1):
+    # Buscar la unidad por slug
+    unidad = collection_unidades.find_one({"slug": codigo_unidad, "activo": True})
+    
+    if not unidad:
+        # Si no se encuentra la unidad, mostrar página de error o redirigir
+        flash('Unidad no encontrada.', 'error')
+        return redirect(url_for('unidades.catalogo_unidades'))
+    
+    # Agregar URL de foto
+    if unidad.get('foto'):
+        unidad['foto_url'] = f"/static/uploads/unidades/{unidad['foto']}"
+    else:
+        unidad['foto_url'] = "/static/uploads/unidades/default.jpg"
+    
+    # Configuración de paginación
+    per_page = 15  # Número máximo de eventos por página
+    skip = (page - 1) * per_page
+
+    # Filtro para eventos de tipo "Sesión Docente" de esta unidad
+    # El campo 'nombre' de la unidad debe coincidir con 'unidad_ejecutora' del evento
+    
+    # Enfoque 1: Coincidencia exacta
+    filtro_exacto = {
+        "estado_evento": {"$ne": "borrador"},
+        'tipo': 'Sesión Docente',
+        'unidad_ejecutora': unidad['nombre']
+    }
+    
+    # Enfoque 2: Coincidencia con regex (case-insensitive y trimming)
+    import re
+    nombre_unidad_regex = re.compile(f"^{re.escape(unidad['nombre'].strip())}$", re.IGNORECASE)
+    filtro_regex = {
+        "estado_evento": {"$ne": "borrador"},
+        'tipo': 'Sesión Docente',
+        'unidad_ejecutora': nombre_unidad_regex
+    }
+    
+    # Usar el filtro exacto primero, luego regex si no hay resultados
+    filtro_docencia = filtro_exacto
+
+    # Contar total de eventos de docencia
+    total_eventos = collection_eventos.count_documents(filtro_docencia)
+    
+    # Si no hay resultados con filtro exacto, probar con regex
+    if total_eventos == 0:
+        filtro_docencia = filtro_regex
+        total_eventos = collection_eventos.count_documents(filtro_docencia)
+    
+    total_pages = (total_eventos + per_page - 1) // per_page if total_eventos > 0 else 1
+
+    # Verificar si la página solicitada es válida
+    if page < 1 or (total_eventos > 0 and page > total_pages):
+        abort(404)
+
+    # Obtener eventos paginados
+    eventos = list(collection_eventos.find(filtro_docencia).sort("fecha_inicio", -1).skip(skip).limit(per_page))
+    
+    return render_template('catalogo_unidad.html', 
+                         codigo_unidad=codigo_unidad, 
+                         unidad=unidad, 
+                         eventos=eventos,
+                         page=page,
+                         total_pages=total_pages,
+                         total_eventos=total_eventos)

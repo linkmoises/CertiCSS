@@ -1896,6 +1896,11 @@ select {
   height: 1px;
 }
 
+.size-10 {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
 .\!h-2\.5 {
   height: 0.625rem !important;
 }
@@ -2827,6 +2832,11 @@ select {
 .border-yellow-400 {
   --tw-border-opacity: 1;
   border-color: rgb(250 204 21 / var(--tw-border-opacity, 1));
+}
+
+.border-blue-100 {
+  --tw-border-opacity: 1;
+  border-color: rgb(219 234 254 / var(--tw-border-opacity, 1));
 }
 
 .border-t-transparent {
