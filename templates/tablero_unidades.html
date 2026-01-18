@@ -45,7 +45,7 @@
                                         <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Unidad</th>
                                         <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Tipo</th>
                                         <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Provincia</th>
-                                        <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Nivel</th>
+                                        <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Nivel asistencial</th>
                                         <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Formación</th>
                                         <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Estado</th>
                                         <th scope="col" class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase">Acciones</th>
@@ -68,7 +68,13 @@
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                                 {% if unidad.tipo == 'Hospital' %}bg-red-100 text-red-800
+                                                {% elif unidad.tipo == 'Hospital General' %}bg-red-100 text-red-800
+                                                {% elif unidad.tipo == 'Hospital Regional' %}bg-red-200 text-red-900
+                                                {% elif unidad.tipo == 'Hospital de Alta Complejidad' %}bg-red-300 text-red-900
+                                                {% elif unidad.tipo == 'Hospital de Referencia Nacional' %}bg-red-400 text-red-900
                                                 {% elif unidad.tipo == 'Policlínica' %}bg-blue-100 text-blue-800
+                                                {% elif unidad.tipo == 'Policlínica Básica' %}bg-blue-100 text-blue-800
+                                                {% elif unidad.tipo == 'Policlínica Especializada' %}bg-blue-200 text-blue-900
                                                 {% elif unidad.tipo == 'CAPPS' %}bg-green-100 text-green-800
                                                 {% elif unidad.tipo == 'ULAPS' %}bg-yellow-100 text-yellow-800
                                                 {% elif unidad.tipo == 'ULSySO' %}bg-purple-100 text-purple-800
@@ -81,7 +87,8 @@
                                             {{ unidad.provincia if unidad.provincia else 'No especificada' }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            Nivel {{ unidad.nivel_asistencial }}
+                                            Nivel: {{ unidad.nivel_asistencial }}<br />
+                                            Complejidad: {{ unidad.nivel_complejidad if unidad.nivel_complejidad else 'NE' }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex flex-col space-y-1">
@@ -218,7 +225,13 @@
                                                 <option value="ULAPS">ULAPS</option>
                                                 <option value="ULSySO">ULSySO</option>
                                                 <option value="Policlínica">Policlínica</option>
+                                                <option value="Policlínica Básica">Policlínica Básica</option>
+                                                <option value="Policlínica Especializada">Policlínica Especializada</option>
                                                 <option value="Hospital">Hospital</option>
+                                                <option value="Hospital General">Hospital General</option>
+                                                <option value="Hospital Regional">Hospital Regional</option>
+                                                <option value="Hospital de Alta Complejidad">Hospital de Alta Complejidad</option>
+                                                <option value="Hospital de Referencia Nacional">Hospital de Referencia Nacional</option>
                                                 <option value="Coordinación Regional">Coordinación Regional</option>
                                             </select>
                                         </div>
@@ -248,6 +261,23 @@
                                                 <option value="3">Nivel 3</option>
                                                 <option value="4">Nivel 4</option>
                                                 <option value="5">Nivel 5</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- Nivel de Complejidad -->
+                                        <div>
+                                            <label for="nivel_complejidad" class="block text-sm font-medium mb-2">Nivel de Complejidad *</label>
+                                            <select id="nivel_complejidad" name="nivel_complejidad" class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" required>
+                                                <option value="">Seleccionar complejidad</option>
+                                                <option value="1">Complejidad 1</option>
+                                                <option value="2">Complejidad 2</option>
+                                                <option value="3">Complejidad 3</option>
+                                                <option value="4">Complejidad 4</option>
+                                                <option value="5">Complejidad 5</option>
+                                                <option value="6">Complejidad 6</option>
+                                                <option value="7">Complejidad 7</option>
+                                                <option value="8">Complejidad 8</option>
+                                                <option value="9">Complejidad 9</option>
                                             </select>
                                         </div>
                                     </div>

@@ -59,7 +59,13 @@
                                             <option value="ULAPS" {% if unidad.tipo == 'ULAPS' %}selected{% endif %}>ULAPS</option>
                                             <option value="ULSySO" {% if unidad.tipo == 'ULSySO' %}selected{% endif %}>ULSySO</option>
                                             <option value="Policlínica" {% if unidad.tipo == 'Policlínica' %}selected{% endif %}>Policlínica</option>
+                                            <option value="Policlínica Básica" {% if unidad.tipo == 'Policlínica Básica' %}selected{% endif %}>Policlínica Básica</option>
+                                            <option value="Policlínica Especializada" {% if unidad.tipo == 'Policlínica Especializada' %}selected{% endif %}>Policlínica Especializada</option>
                                             <option value="Hospital" {% if unidad.tipo == 'Hospital' %}selected{% endif %}>Hospital</option>
+                                            <option value="Hospital General" {% if unidad.tipo == 'Hospital General' %}selected{% endif %}>Hospital General</option>
+                                            <option value="Hospital Regional" {% if unidad.tipo == 'Hospital Regional' %}selected{% endif %}>Hospital Regional</option>
+                                            <option value="Hospital de Alta Complejidad" {% if unidad.tipo == 'Hospital de Alta Complejidad' %}selected{% endif %}>Hospital de Alta Complejidad</option>
+                                            <option value="Hospital de Referencia Nacional" {% if unidad.tipo == 'Hospital de Referencia Nacional' %}selected{% endif %}>Hospital de Referencia Nacional</option>
                                             <option value="Coordinación Regional" {% if unidad.tipo == 'Coordinación Regional' %}selected{% endif %}>Coordinación Regional</option>
                                         </select>
                                     </div>
@@ -89,6 +95,23 @@
                                             <option value="3" {% if unidad.nivel_asistencial == 3 %}selected{% endif %}>Nivel 3</option>
                                             <option value="4" {% if unidad.nivel_asistencial == 4 %}selected{% endif %}>Nivel 4</option>
                                             <option value="5" {% if unidad.nivel_asistencial == 5 %}selected{% endif %}>Nivel 5</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Nivel de Complejidad -->
+                                    <div>
+                                        <label for="nivel_complejidad" class="block text-sm font-medium mb-2">Nivel de Complejidad *</label>
+                                        <select id="nivel_complejidad" name="nivel_complejidad" class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" required>
+                                            <option value="">Seleccionar complejidad</option>
+                                            <option value="1" {% if unidad.nivel_complejidad == 1 %}selected{% endif %}>Complejidad 1</option>
+                                            <option value="2" {% if unidad.nivel_complejidad == 2 %}selected{% endif %}>Complejidad 2</option>
+                                            <option value="3" {% if unidad.nivel_complejidad == 3 %}selected{% endif %}>Complejidad 3</option>
+                                            <option value="4" {% if unidad.nivel_complejidad == 4 %}selected{% endif %}>Complejidad 4</option>
+                                            <option value="5" {% if unidad.nivel_complejidad == 5 %}selected{% endif %}>Complejidad 5</option>
+                                            <option value="6" {% if unidad.nivel_complejidad == 6 %}selected{% endif %}>Complejidad 6</option>
+                                            <option value="7" {% if unidad.nivel_complejidad == 7 %}selected{% endif %}>Complejidad 7</option>
+                                            <option value="8" {% if unidad.nivel_complejidad == 8 %}selected{% endif %}>Complejidad 8</option>
+                                            <option value="9" {% if unidad.nivel_complejidad == 9 %}selected{% endif %}>Complejidad 9</option>
                                         </select>
                                     </div>
                                 </div>
