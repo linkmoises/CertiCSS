@@ -6,7 +6,7 @@
 ###
 ###
 from flask import Flask, Blueprint, render_template, render_template_string, send_file, request, redirect, url_for, flash, abort
-from app import db, collection_eventos, collection_participantes, collection_unidades, app
+from app import db, collection_eventos, collection_participantes, collection_unidades, collection_usuarios, app
 from flask_login import login_required, current_user
 from datetime import datetime
 from werkzeug.utils import secure_filename
@@ -328,12 +328,70 @@ def catalogo_unidades():
     # Obtener todas las unidades activas
     unidades = list(collection_unidades.find({"activo": True}).sort("nombre", 1))
     
-    # Agregar URL de foto para cada unidad
+    # Agregar URL de foto y coordinador para cada unidad
     for unidad in unidades:
+        # Agregar URL de foto
         if unidad.get('foto'):
             unidad['foto_url'] = f"/static/uploads/unidades/{unidad['foto']}"
         else:
             unidad['foto_url'] = "/static/uploads/unidades/default.jpg"
+        
+        # Buscar coordinador de docencia para esta unidad
+        # Solo buscar usuarios con roles específicos que son únicos por unidad:
+        # coordinador-regional, coordinador-local, subdirector-docencia
+        coordinador = None
+        
+        # Enfoque 1: Buscar coordinador local específico para esta unidad
+        coordinador = collection_usuarios.find_one({
+            "unidad_ejecutora": unidad['nombre'],
+            "rol": "coordinador-local",
+            "activo": True
+        })
+        
+        # Enfoque 2: Si no hay coordinador local, buscar subdirector de docencia
+        if not coordinador:
+            coordinador = collection_usuarios.find_one({
+                "unidad_ejecutora": unidad['nombre'],
+                "rol": "subdirector-docencia",
+                "activo": True
+            })
+        
+        # Enfoque 3: Si no hay subdirector, buscar coordinador regional
+        if not coordinador:
+            coordinador = collection_usuarios.find_one({
+                "unidad_ejecutora": unidad['nombre'],
+                "rol": "coordinador-regional",
+                "activo": True
+            })
+        
+        # Enfoque 4: Si no hay coincidencia exacta, probar con regex case-insensitive
+        # pero solo para los roles permitidos
+        if not coordinador:
+            import re
+            nombre_unidad_regex = re.compile(f"^{re.escape(unidad['nombre'].strip())}$", re.IGNORECASE)
+            coordinador = collection_usuarios.find_one({
+                "unidad_ejecutora": nombre_unidad_regex,
+                "rol": {"$in": ["coordinador-local", "subdirector-docencia", "coordinador-regional"]},
+                "activo": True
+            })
+        
+        if coordinador:
+            # Construir nombre completo del coordinador
+            nombre_completo = f"{coordinador.get('nombres', '')} {coordinador.get('apellidos', '')}".strip()
+            unidad['coordinador_nombre'] = nombre_completo if nombre_completo else 'No asignado'
+            
+            # Agregar rol del coordinador (solo los roles permitidos)
+            rol_coordinador = coordinador.get('rol', '')
+            rol_legible = {
+                'coordinador-local': 'Coordinador Local de Docencia e Investigación',
+                'coordinador-regional': 'Coordinador Regional de Docencia',
+                'subdirector-docencia': 'Subdirector de Docencia e Investigación'
+            }.get(rol_coordinador, 'Rol no válido')
+            
+            unidad['coordinador_rol'] = rol_legible
+        else:
+            unidad['coordinador_nombre'] = 'No asignado'
+            unidad['coordinador_rol'] = 'Coordinador Local'
     
     return render_template('catalogo_unidades.html', unidades=unidades)
 

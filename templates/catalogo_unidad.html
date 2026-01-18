@@ -86,206 +86,214 @@
     
     <!--====== DOCENCIA SEMANAL ======-->
     <section class="bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            
-            <!-- Header -->
-            <div class="text-center">
-                <h2 class="text-3xl font-bold text-gray-800 sm:text-4xl">
-                    {{ unidad.nombre }}
-                </h2>
-                <p class="mt-2 text-gray-600">
-                    Sesiones Docentes Semanales
-                </p>
-            </div>
+        
+        <!-- Header -->
+        <div class="text-center">
+            <h2 class="text-3xl font-bold text-gray-800 sm:text-4xl">
+                {{ unidad.nombre }}
+            </h2>
+            <p class="mt-2 text-gray-600">
+                Sesiones Docentes Semanales
+            </p>
+        </div>
 
-            {% if eventos and total_eventos > 0 %}
-            <!-- Tarjetas de evento -->
-            <div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
-                <!-- Grid -->
-                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {% for evento in eventos %}
-                    <!-- Card -->
-                    <div class="group flex flex-col h-full bg-white border border-gray-200 shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70">
-                        <div class="relative pt-[100%] sm:pt-[100%] overflow-hidden rounded-t-xl">
-    {% if evento.afiche_750 %}
-                            <img class="size-full absolute top-0 start-0 object-cover group-hover:scale-105 group-focus:scale-105 transition-transform duration-500 ease-in-out rounded-t-xl" src="{{ url_for('static', filename='uploads/' + evento.afiche_750.split('/')[-1]) }}" alt="{{ evento.nombre }}">
-    {% else %}
-                            <img class="size-full absolute top-0 start-0 object-cover group-hover:scale-105 group-focus:scale-105 transition-transform duration-500 ease-in-out rounded-t-xl" src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}" alt="{{ evento.nombre }}">
-    {% endif %}
-                            <span class="absolute top-0 end-0 rounded-se-xl rounded-es-xl text-xs font-medium bg-gray-800 text-white py-1.5 px-3 dark:bg-neutral-900">
-                                {{ evento.modalidad }}
-                            </span>
-                          </div>
-                        <div class="p-4 md:p-6">
-                            <span class="block mb-1 text-xs font-semibold uppercase text-blue-600 dark:text-blue-500">
-                                {{ evento.tipo }} <!-- Tipo de evento -->
-                            </span>
-                            <h3 class="text-xl font-semibold text-gray-800 dark:text-neutral-300 dark:hover:text-white">
-                                {{ evento.nombre }} <!-- Nombre del evento -->
+        {% if eventos and total_eventos > 0 %}
+        <!-- Tarjetas de evento -->
+        <div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
+            <!-- Grid -->
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for evento in eventos %}
+                <!-- Card -->
+                <div class="group flex flex-col h-full bg-white border border-gray-200 shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70">
+                    <div class="relative pt-[100%] sm:pt-[100%] overflow-hidden rounded-t-xl">
+{% if evento.afiche_750 %}
+                        <img class="size-full absolute top-0 start-0 object-cover group-hover:scale-105 group-focus:scale-105 transition-transform duration-500 ease-in-out rounded-t-xl" src="{{ url_for('static', filename='uploads/' + evento.afiche_750.split('/')[-1]) }}" alt="{{ evento.nombre }}">
+{% else %}
+                        <img class="size-full absolute top-0 start-0 object-cover group-hover:scale-105 group-focus:scale-105 transition-transform duration-500 ease-in-out rounded-t-xl" src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}" alt="{{ evento.nombre }}">
+{% endif %}
+                        <span class="absolute top-0 end-0 rounded-se-xl rounded-es-xl text-xs font-medium bg-gray-800 text-white py-1.5 px-3 dark:bg-neutral-900">
+                            {{ evento.modalidad }}
+                        </span>
+                        </div>
+                    <div class="p-4 md:p-6">
+                        <span class="block mb-1 text-xs font-semibold uppercase text-blue-600 dark:text-blue-500">
+                            {{ evento.tipo }} <!-- Tipo de evento -->
+                        </span>
+                        <h3 class="text-xl font-semibold text-gray-800 dark:text-neutral-300 dark:hover:text-white">
+                            {{ evento.nombre }} <!-- Nombre del evento -->
+                        </h3>
+                        <p class="mt-3 text-gray-500 dark:text-neutral-500">
+                            Fecha: {% if evento.fecha_inicio.date() == evento.fecha_fin.date() %}{{ evento.fecha_inicio.strftime('%d de %B de %Y') }}{% elif evento.fecha_fin %}{{ evento.fecha_inicio.strftime('%d') }} - {{ evento.fecha_fin.strftime('%d de %B de %Y') }}{% else %}{{ evento.fecha_inicio.strftime('%d de %B de %Y') }}{% endif %} <!-- Fecha de inicio -->
+                        </p>
+                    </div>
+                    <div class="mt-auto flex border-t border-gray-200 divide-x divide-gray-200 dark:border-neutral-700 dark:divide-neutral-700">
+{% if evento.programa %}
+                        <a class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-es-xl bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800" href="{{ url_for('resumen_evento', codigo_evento=evento.codigo) }}">
+                            Detalles del evento
+                        </a>
+                        <a class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-ee-xl bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800" href="{{ BASE_URL }}{{ evento.programa }}">
+                            Descargar programa
+                        </a>
+{% else %}
+                        <a class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-b-xl bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800" href="{{ url_for('resumen_evento', codigo_evento=evento.codigo) }}">
+                            Detalles del evento
+                        </a>
+{% endif %}                        
+                    </div>
+                </div>
+                <!-- End Card -->
+                {% endfor %}
+            </div>
+            <!-- End Grid -->
+        </div>
+        <!-- End Tarjetas de evento -->
+
+        <!-- Paginación -->
+        {% if total_pages > 1 %}
+        <div class="text-center mb-12">
+            <div class="inline-flex gap-x-2">
+                {% if page > 1 %}
+                    <a href="{{ url_for('unidades.docencia_unidad', codigo_unidad=codigo_unidad, page=page-1) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                        Anterior
+                    </a>
+                {% endif %}
+                <p class="px-3 py-2 text-sm text-gray-600">Página {{ page }} de {{ total_pages }}</p>
+                {% if page < total_pages %}
+                    <a href="{{ url_for('unidades.docencia_unidad', codigo_unidad=codigo_unidad, page=page+1) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                        Siguiente
+                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Botón para volver al catálogo de unidades -->
+        <div class="text-center mb-12">
+            <a href="{{ url_for('unidades.catalogo_unidades') }}" class="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                <svg class="size-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Volver al Catálogo de Unidades
+            </a>
+        </div>
+
+        {% else %}
+        <!-- Card Principal cuando no hay eventos -->
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                
+                <!-- Header de la Card -->
+                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">
+                                Programación Docente
                             </h3>
-                            <p class="mt-3 text-gray-500 dark:text-neutral-500">
-                                Fecha: {% if evento.fecha_inicio.date() == evento.fecha_fin.date() %}{{ evento.fecha_inicio.strftime('%d de %B de %Y') }}{% elif evento.fecha_fin %}{{ evento.fecha_inicio.strftime('%d') }} - {{ evento.fecha_fin.strftime('%d de %B de %Y') }}{% else %}{{ evento.fecha_inicio.strftime('%d de %B de %Y') }}{% endif %} <!-- Fecha de inicio -->
+                            <p class="text-sm text-gray-600">
+                                Actividades académicas semanales programadas
                             </p>
                         </div>
-                        <div class="mt-auto flex border-t border-gray-200 divide-x divide-gray-200 dark:border-neutral-700 dark:divide-neutral-700">
-    {% if evento.programa %}
-                            <a class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-es-xl bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800" href="{{ url_for('resumen_evento', codigo_evento=evento.codigo) }}">
-                                Detalles del evento
-                            </a>
-                            <a class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-ee-xl bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800" href="{{ BASE_URL }}{{ evento.programa }}">
-                                Descargar programa
-                            </a>
-    {% else %}
-                            <a class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-b-xl bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800" href="{{ url_for('resumen_evento', codigo_evento=evento.codigo) }}">
-                                Detalles del evento
-                            </a>
-    {% endif %}                        
+                        <div class="flex items-center space-x-2">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                En desarrollo
+                            </span>
                         </div>
                     </div>
-                    <!-- End Card -->
-                    {% endfor %}
                 </div>
-                <!-- End Grid -->
-            </div>
-            <!-- End Tarjetas de evento -->
 
-            <!-- Paginación -->
-            {% if total_pages > 1 %}
-            <div class="text-center mb-12">
-                <div class="inline-flex gap-x-2">
-                    {% if page > 1 %}
-                        <a href="{{ url_for('unidades.docencia_unidad', codigo_unidad=codigo_unidad, page=page-1) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
-                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-                            Anterior
-                        </a>
-                    {% endif %}
-                    <p class="px-3 py-2 text-sm text-gray-600">Página {{ page }} de {{ total_pages }}</p>
-                    {% if page < total_pages %}
-                        <a href="{{ url_for('unidades.docencia_unidad', codigo_unidad=codigo_unidad, page=page+1) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
-                            Siguiente
-                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-                        </a>
-                    {% endif %}
-                </div>
-            </div>
-            {% endif %}
-
-            {% else %}
-            <!-- Card Principal cuando no hay eventos -->
-            <div class="max-w-4xl mx-auto">
-                <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                    
-                    <!-- Header de la Card -->
-                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <h3 class="text-lg font-semibold text-gray-800">
-                                    Programación Docente
-                                </h3>
-                                <p class="text-sm text-gray-600">
-                                    Actividades académicas semanales programadas
-                                </p>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                    En desarrollo
-                                </span>
-                            </div>
+                <!-- Contenido de la Card -->
+                <div class="p-8">
+                    <div class="text-center py-12">
+                        <!-- Icono -->
+                        <div class="flex justify-center items-center size-16 bg-blue-100 rounded-full mx-auto mb-6">
+                            <svg class="size-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
                         </div>
-                    </div>
+                        
+                        <!-- Título -->
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">
+                            Próximamente Disponible
+                        </h3>
+                        
+                        <!-- Descripción -->
+                        <p class="text-gray-600 mb-6 max-w-md mx-auto">
+                            La programación docente semanal para esta unidad ejecutora estará disponible pronto. Estamos trabajando para ofrecerte la mejor experiencia educativa.
+                        </p>
 
-                    <!-- Contenido de la Card -->
-                    <div class="p-8">
-                        <div class="text-center py-12">
-                            <!-- Icono -->
-                            <div class="flex justify-center items-center size-16 bg-blue-100 rounded-full mx-auto mb-6">
-                                <svg class="size-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                </svg>
-                            </div>
-                            
-                            <!-- Título -->
-                            <h3 class="text-xl font-semibold text-gray-900 mb-3">
-                                Próximamente Disponible
-                            </h3>
-                            
-                            <!-- Descripción -->
-                            <p class="text-gray-600 mb-6 max-w-md mx-auto">
-                                La programación docente semanal para esta unidad ejecutora estará disponible pronto. Estamos trabajando para ofrecerte la mejor experiencia educativa.
-                            </p>
-
-                            <!-- Características que estarán disponibles -->
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 max-w-2xl mx-auto">
-                                <div class="text-center p-4 bg-gray-50 rounded-lg">
-                                    <div class="flex justify-center items-center size-10 bg-green-100 rounded-full mx-auto mb-2">
-                                        <svg class="size-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a4 4 0 118 0v4m-4 8a4 4 0 11-8 0v-4m4-4h8m-4-4v8m-4 4h8" />
-                                        </svg>
-                                    </div>
-                                    <h4 class="text-sm font-medium text-gray-900">Horarios</h4>
-                                    <p class="text-xs text-gray-600">Programación semanal</p>
-                                </div>
-                                
-                                <div class="text-center p-4 bg-gray-50 rounded-lg">
-                                    <div class="flex justify-center items-center size-10 bg-blue-100 rounded-full mx-auto mb-2">
-                                        <svg class="size-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                        </svg>
-                                    </div>
-                                    <h4 class="text-sm font-medium text-gray-900">Facilitadores</h4>
-                                    <p class="text-xs text-gray-600">Equipo docente</p>
-                                </div>
-                                
-                                <div class="text-center p-4 bg-gray-50 rounded-lg">
-                                    <div class="flex justify-center items-center size-10 bg-purple-100 rounded-full mx-auto mb-2">
-                                        <svg class="size-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                        </svg>
-                                    </div>
-                                    <h4 class="text-sm font-medium text-gray-900">Temas</h4>
-                                    <p class="text-xs text-gray-600">Contenido académico</p>
-                                </div>
-                            </div>
-
-                            <!-- Botones de acción -->
-                            <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                                <a href="/catalogo/unidades" class="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                    <svg class="size-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                                    </svg>
-                                    Volver al catálogo
-                                </a>
-                                <a href="/catalogo/1" class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                    <svg class="size-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <!-- Características que estarán disponibles -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 max-w-2xl mx-auto">
+                            <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                <div class="flex justify-center items-center size-10 bg-green-100 rounded-full mx-auto mb-2">
+                                    <svg class="size-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a4 4 0 118 0v4m-4 8a4 4 0 11-8 0v-4m4-4h8m-4-4v8m-4 4h8" />
                                     </svg>
-                                    Ver eventos disponibles
-                                </a>
+                                </div>
+                                <h4 class="text-sm font-medium text-gray-900">Horarios</h4>
+                                <p class="text-xs text-gray-600">Programación semanal</p>
+                            </div>
+                            
+                            <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                <div class="flex justify-center items-center size-10 bg-blue-100 rounded-full mx-auto mb-2">
+                                    <svg class="size-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                </div>
+                                <h4 class="text-sm font-medium text-gray-900">Facilitadores</h4>
+                                <p class="text-xs text-gray-600">Equipo docente</p>
+                            </div>
+                            
+                            <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                <div class="flex justify-center items-center size-10 bg-purple-100 rounded-full mx-auto mb-2">
+                                    <svg class="size-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </div>
+                                <h4 class="text-sm font-medium text-gray-900">Temas</h4>
+                                <p class="text-xs text-gray-600">Contenido académico</p>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Footer informativo -->
-                    <div class="px-6 py-4 bg-blue-50 border-t border-blue-100">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <svg class="size-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <!-- Botones de acción -->
+                        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                            <a href="{{ url_for('unidades.catalogo_unidades') }}" class="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"></a>
+                                <svg class="size-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                                 </svg>
-                            </div>
-                            <div class="ml-3">
-                                <p class="text-sm text-blue-700">
-                                    <strong>¿Tienes sugerencias?</strong> Contáctanos para mejorar la programación docente de tu unidad.
-                                </p>
-                            </div>
+                                Volver al catálogo de unidades
+                            </a>
+                            <a href="/catalogo/1" class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                <svg class="size-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a4 4 0 118 0v4m-4 8a4 4 0 11-8 0v-4m4-4h8m-4-4v8m-4 4h8" />
+                                </svg>
+                                Ver eventos disponibles
+                            </a>
                         </div>
                     </div>
-
                 </div>
-            </div>
-            {% endif %}
 
+                <!-- Footer informativo -->
+                <div class="px-6 py-4 bg-blue-50 border-t border-blue-100">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="size-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-blue-700">
+                                <strong>¿Tienes sugerencias?</strong> Contáctanos para mejorar la programación docente de tu unidad.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
+        {% endif %}
+
     </section>
 
     <!--====== PROCESO ======-->
