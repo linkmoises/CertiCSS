@@ -52,6 +52,7 @@ collection_participantes_temporales = db['participantes_temporales']
 collection_posters = db['posters']
 collection_evaluaciones_poster = db['evaluaciones_poster']
 collection_progreso = db['progreso']
+collection_unidades = db['unidades']
 
 ###
 ### Roles de usuario

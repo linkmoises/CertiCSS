@@ -70,6 +70,7 @@ def opciones_globales():
                          total_funcionarios=total_funcionarios,
                          ultima_actualizacion=ultima_actualizacion)
 
+
 @opciones_bp.route('/tablero/opciones/cargar-planilla', methods=['GET', 'POST'])
 @login_required
 def cargar_planilla():

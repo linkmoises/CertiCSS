@@ -1,0 +1,251 @@
+{% include 'tablero-header.html' %}
+
+{% include 'tablero-sidebar.html' %}
+    
+    <!-- CONTENIDO -->
+    <div class="w-full lg:ps-64">
+        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+
+            <!-- FORMULARIO EDITAR UNIDAD -->
+            <div class="max-w-4xl mx-auto">
+                <!-- Card -->
+                <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <!-- Header -->
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-800">
+                                    Editar Unidad Ejecutora
+                                </h2>
+                                <p class="text-sm text-gray-600">
+                                    Modificar información de la unidad ejecutora
+                                </p>
+                            </div>
+                            <a href="{{ url_for('unidades.tablero_unidades') }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                                </svg>
+                                Volver
+                            </a>
+                        </div>
+                    </div>
+                    <!-- End Header -->
+
+                    <!-- Body -->
+                    <div class="p-6">
+                        <form method="POST" action="{{ url_for('unidades.editar_unidad', unidad_id=unidad._id) }}" enctype="multipart/form-data">
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <!-- Columna izquierda -->
+                                <div class="space-y-4">
+                                    <!-- Nombre -->
+                                    <div>
+                                        <label for="nombre" class="block text-sm font-medium mb-2">Nombre *</label>
+                                        <input type="text" id="nombre" name="nombre" value="{{ unidad.nombre }}" class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" required>
+                                    </div>
+
+                                    <!-- Slug -->
+                                    <div>
+                                        <label for="slug" class="block text-sm font-medium mb-2">Slug *</label>
+                                        <input type="text" id="slug" name="slug" value="{{ unidad.slug }}" class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="ej: hospital-santo-tomas" required>
+                                        <p class="text-xs text-gray-500 mt-1">Identificador único (solo letras minúsculas, números y guiones)</p>
+                                    </div>
+
+                                    <!-- Tipo -->
+                                    <div>
+                                        <label for="tipo" class="block text-sm font-medium mb-2">Tipo *</label>
+                                        <select id="tipo" name="tipo" class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" required onchange="handleTipoChangeEdit()">
+                                            <option value="">Seleccionar tipo</option>
+                                            <option value="CAPPS" {% if unidad.tipo == 'CAPPS' %}selected{% endif %}>CAPPS</option>
+                                            <option value="ULAPS" {% if unidad.tipo == 'ULAPS' %}selected{% endif %}>ULAPS</option>
+                                            <option value="ULSySO" {% if unidad.tipo == 'ULSySO' %}selected{% endif %}>ULSySO</option>
+                                            <option value="Policlínica" {% if unidad.tipo == 'Policlínica' %}selected{% endif %}>Policlínica</option>
+                                            <option value="Hospital" {% if unidad.tipo == 'Hospital' %}selected{% endif %}>Hospital</option>
+                                            <option value="Coordinación Regional" {% if unidad.tipo == 'Coordinación Regional' %}selected{% endif %}>Coordinación Regional</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Provincia -->
+                                    <div>
+                                        <label for="provincia" class="block text-sm font-medium mb-2">Provincia *</label>
+                                        <select id="provincia" name="provincia" class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" required>
+                                            <option value="">Seleccionar provincia</option>
+                                            <option value="Bocas Del Toro" {% if unidad.provincia == 'Bocas Del Toro' %}selected{% endif %}>Bocas Del Toro</option>
+                                            <option value="Coclé" {% if unidad.provincia == 'Coclé' %}selected{% endif %}>Coclé</option>
+                                            <option value="Colón" {% if unidad.provincia == 'Colón' %}selected{% endif %}>Colón</option>
+                                            <option value="Chiriquí" {% if unidad.provincia == 'Chiriquí' %}selected{% endif %}>Chiriquí</option>
+                                            <option value="Herrera" {% if unidad.provincia == 'Herrera' %}selected{% endif %}>Herrera</option>
+                                            <option value="Los Santos" {% if unidad.provincia == 'Los Santos' %}selected{% endif %}>Los Santos</option>
+                                            <option value="Panamá" {% if unidad.provincia == 'Panamá' %}selected{% endif %}>Panamá</option>
+                                            <option value="Panamá Oeste" {% if unidad.provincia == 'Panamá Oeste' %}selected{% endif %}>Panamá Oeste</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Nivel Asistencial -->
+                                    <div>
+                                        <label for="nivel_asistencial" class="block text-sm font-medium mb-2">Nivel Asistencial *</label>
+                                        <select id="nivel_asistencial" name="nivel_asistencial" class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 {% if unidad.tipo == 'Coordinación Regional' %}bg-gray-100 cursor-not-allowed{% endif %}" required {% if unidad.tipo == 'Coordinación Regional' %}disabled{% endif %}>
+                                            <option value="1" {% if unidad.nivel_asistencial == 1 %}selected{% endif %}>Nivel 1</option>
+                                            <option value="2" {% if unidad.nivel_asistencial == 2 %}selected{% endif %}>Nivel 2</option>
+                                            <option value="3" {% if unidad.nivel_asistencial == 3 %}selected{% endif %}>Nivel 3</option>
+                                            <option value="4" {% if unidad.nivel_asistencial == 4 %}selected{% endif %}>Nivel 4</option>
+                                            <option value="5" {% if unidad.nivel_asistencial == 5 %}selected{% endif %}>Nivel 5</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Columna derecha -->
+                                <div class="space-y-4">
+                                    <!-- Foto actual -->
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Foto Actual</label>
+                                        <div class="flex items-center space-x-4">
+                                            <img src="{% if unidad.get('foto') %}/static/uploads/unidades/{{ unidad.foto }}{% else %}/static/uploads/unidades/default.jpg{% endif %}" alt="{{ unidad.nombre }}" class="h-20 w-20 rounded-lg object-cover border border-gray-200">
+                                            <div class="text-sm text-gray-600">
+                                                {% if unidad.get('foto') %}
+                                                    <p>Archivo: {{ unidad.foto }}</p>
+                                                {% else %}
+                                                    <p>Sin imagen personalizada</p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Nueva foto -->
+                                    <div>
+                                        <label for="foto" class="block text-sm font-medium mb-2">Nueva Foto (opcional)</label>
+                                        <input type="file" id="foto" name="foto" accept="image/jpeg,image/jpg,image/png" class="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 file:bg-gray-50 file:border-0 file:me-4 file:py-3 file:px-4">
+                                        <p class="text-xs text-gray-500 mt-1">Formatos permitidos: JPG, JPEG, PNG. Se guardará como slug-nivel.jpg</p>
+                                    </div>
+
+                                    <!-- Checkboxes -->
+                                    <div class="space-y-3">
+                                        <div class="flex">
+                                            <input type="checkbox" id="formador_internos" name="formador_internos" class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500" {% if unidad.formador_internos %}checked{% endif %}>
+                                            <label for="formador_internos" class="text-sm text-gray-800 ms-3">Formador de Internos</label>
+                                        </div>
+
+                                        <div class="flex">
+                                            <input type="checkbox" id="formador_residente" name="formador_residente" class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500" {% if unidad.formador_residente %}checked{% endif %}>
+                                            <label for="formador_residente" class="text-sm text-gray-800 ms-3">Formador de Residentes</label>
+                                        </div>
+
+                                        <div class="flex">
+                                            <input type="checkbox" id="activo" name="activo" class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500" {% if unidad.activo %}checked{% endif %}>
+                                            <label for="activo" class="text-sm text-gray-800 ms-3">Activo</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botones -->
+                            <div class="flex justify-end items-center gap-x-2 pt-6 border-t border-gray-200 mt-6">
+                                <a href="{{ url_for('unidades.tablero_unidades') }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50">
+                                    Cancelar
+                                </a>
+                                <button type="submit" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Actualizar Unidad
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- End Body -->
+                </div>
+                <!-- End Card -->
+            </div>
+            <!-- FIN FORMULARIO EDITAR UNIDAD -->
+
+{% include 'tablero-footer.html' %}
+
+        </div>
+    </div>
+    <!-- FIN CONTENIDO -->
+
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+<script>
+    // Auto-generar slug basado en el nombre (solo si el slug está vacío)
+    document.getElementById('nombre').addEventListener('input', function() {
+        const slugField = document.getElementById('slug');
+        if (!slugField.value.trim()) {  // Solo auto-generar si el slug está vacío
+            const nombre = this.value;
+            const slug = nombre
+                .toLowerCase()
+                .replace(/[áàäâ]/g, 'a')
+                .replace(/[éèëê]/g, 'e')
+                .replace(/[íìïî]/g, 'i')
+                .replace(/[óòöô]/g, 'o')
+                .replace(/[úùüû]/g, 'u')
+                .replace(/[ñ]/g, 'n')
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-')
+                .trim('-');
+            
+            slugField.value = slug;
+        }
+    });
+
+    // Manejar cambio de tipo de unidad en edición
+    function handleTipoChangeEdit() {
+        const tipoSelect = document.getElementById('tipo');
+        const nivelSelect = document.getElementById('nivel_asistencial');
+        
+        if (tipoSelect.value === 'Coordinación Regional') {
+            // Establecer nivel 5 y deshabilitar
+            nivelSelect.value = '5';
+            nivelSelect.disabled = true;
+            nivelSelect.classList.add('bg-gray-100', 'cursor-not-allowed');
+        } else {
+            // Habilitar selección de nivel
+            nivelSelect.disabled = false;
+            nivelSelect.classList.remove('bg-gray-100', 'cursor-not-allowed');
+            // Si estaba en nivel 5, cambiar a nivel 1
+            if (nivelSelect.value === '5') {
+                nivelSelect.value = '1';
+            }
+        }
+    }
+
+    // Mostrar mensajes flash
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                // Crear notificación toast
+                const toast = document.createElement('div');
+                toast.className = `fixed top-4 right-4 z-50 max-w-sm w-full bg-white border border-gray-200 rounded-xl shadow-lg ${category === 'error' ? 'border-red-200' : 'border-green-200'}`;
+                toast.innerHTML = `
+                    <div class="flex p-4">
+                        <div class="flex-shrink-0">
+                            ${category === 'error' ? 
+                                '<svg class="flex-shrink-0 size-4 text-red-500 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/></svg>' :
+                                '<svg class="flex-shrink-0 size-4 text-green-500 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.061L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/></svg>'
+                            }
+                        </div>
+                        <div class="ms-3">
+                            <p class="text-sm text-gray-700">{{ message }}</p>
+                        </div>
+                        <div class="ms-auto">
+                            <button type="button" class="inline-flex flex-shrink-0 justify-center items-center size-5 rounded-lg text-gray-800 opacity-50 hover:opacity-100 focus:outline-none focus:opacity-100" onclick="this.parentElement.parentElement.parentElement.remove()">
+                                <span class="sr-only">Cerrar</span>
+                                <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 6-12 12"/><path d="m6 6 12 12"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(toast);
+                
+                // Auto-remover después de 5 segundos
+                setTimeout(() => {
+                    if (toast.parentElement) {
+                        toast.remove();
+                    }
+                }, 5000);
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</script>    
+</body>
+</html>
