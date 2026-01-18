@@ -85,143 +85,138 @@
     </section>
     
     <!--====== CATÁLOGO DE UNIDADES ======-->
-    <section class="bg-white py-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section class="bg-white">
 
-            <!-- Header -->
-            <div class="text-center mb-14">
-                <h2 class="text-3xl font-bold text-gray-800 sm:text-4xl">
-                    Catálogo de Unidades Ejecutoras
-                </h2>
-                <p class="mt-2 text-gray-600">
-                    Explora las unidades por provincia y conoce cómo organizan su docencia semanal.
-                </p>
-            </div>
-
-            <!--====== FILTROS UNIDADES =====-->
-            <div class="bg-gray-50 border rounded-xl p-4 mb-10">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-
-                <!-- Provincia -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                    Provincia
-                    </label>
-                    <select id="filtro-provincia" class="w-full rounded-lg border-gray-300 text-sm">
-                    <option value="">Todas</option>
-                    <option value="bocas-del-toro">Bocas Del Toro</option>
-                    <option value="coclé">Coclé</option>
-                    <option value="colón">Colón</option>
-                    <option value="chiriquí">Chiriquí</option>
-                    <option value="herrera">Herrera</option>
-                    <option value="los-santos">Los Santos</option>
-                    <option value="panamá">Panamá</option>
-                    <option value="panamá-oeste">Panamá Oeste</option>
-                    </select>
-                </div>
-
-                <!-- Tipo de unidad -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                    Tipo de unidad
-                    </label>
-                    <select id="filtro-tipo" class="w-full rounded-lg border-gray-300 text-sm">
-                    <option value="">Todos</option>
-                    <option value="hospital">Hospital</option>
-                    <option value="policlínica">Policlínica</option>
-                    <option value="capps">CAPPS</option>
-                    <option value="ulaps">ULAPS</option>
-                    <option value="ulsyso">ULSySO</option>
-                    <option value="coordinación-regional">Coordinación Regional</option>
-                    </select>
-                </div>
-
-                <!-- Acciones -->
-                <div class="flex items-end">
-                    <button id="limpiar-filtros" class="w-full py-2.5 text-sm font-medium rounded-lg bg-gray-200 hover:bg-gray-300">
-                    Limpiar filtros
-                    </button>
-                </div>
-
-                </div>
-            </div>
-
-            <!-- ================= CARDS UNIDADES ================= -->
-            <div class="mb-16">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
-                    {% if unidades %}
-                        {% for unidad in unidades %}
-                        <!-- Card Unidad Ejecutora -->
-                        <div data-provincia="{{ unidad.provincia|lower|replace(' ', '-') if unidad.provincia else 'sin-provincia' }}" 
-                             data-tipo="{{ unidad.tipo|lower|replace(' ', '-') if unidad.tipo else 'sin-tipo' }}" 
-                             class="group flex flex-col h-full bg-white border border-gray-200 shadow-sm rounded-xl overflow-hidden hover:shadow-md transition unidad-card">
-                            <!-- Imagen -->
-                            <div class="relative pt-[66%] overflow-hidden">
-                                <img src="{{ unidad.foto_url }}" alt="{{ unidad.nombre }}" class="absolute top-0 left-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out" loading="lazy" />
-                                <!-- Badge Tipo -->
-                                <span class="absolute top-0 end-0 rounded-se-xl rounded-es-xl text-xs font-medium 
-                                    {% if unidad.tipo == 'Hospital' %}bg-red-600 text-white
-                                    {% elif unidad.tipo == 'Policlínica' %}bg-blue-600 text-white
-                                    {% elif unidad.tipo == 'CAPPS' %}bg-green-600 text-white
-                                    {% elif unidad.tipo == 'ULAPS' %}bg-yellow-600 text-white
-                                    {% elif unidad.tipo == 'ULSySO' %}bg-purple-600 text-white
-                                    {% elif unidad.tipo == 'Coordinación Regional' %}bg-orange-600 text-white
-                                    {% else %}bg-gray-600 text-white{% endif %} py-1.5 px-3">
-                                    {{ unidad.tipo }}
-                                </span>
-                                <!-- Badge Provincia -->
-                                <span class="absolute bottom-0 start-0 m-3 rounded-full text-xs font-medium bg-gray-800 text-white py-1.5 px-3">
-                                    {{ unidad.provincia if unidad.provincia else 'Sin provincia' }}
-                                </span>
-                            </div>
-                            <!-- Contenido -->
-                            <div class="p-5 flex flex-col flex-1">
-                                <!-- Nombre -->
-                                <h3 class="text-lg font-bold text-gray-800">
-                                    {{ unidad.nombre }}
-                                </h3>
-                                <!-- Nivel y Formación -->
-                                <div class="mt-3 space-y-2">
-                                    <p class="text-sm text-gray-600">
-                                        <span class="font-medium">{{ unidad.coordinador_rol }}:</span><br /><strong>{{ unidad.coordinador_nombre }}</strong>
-                                    </p>
-                                    <p class="text-sm text-gray-600">
-                                        <span class="font-medium">Nivel:</span> {{ unidad.nivel_asistencial }}
-                                    </p>
-                                    {% if unidad.formador_internos or unidad.formador_residente %}
-                                    <p class="text-sm text-gray-600 mt-2">
-                                        Esta instalación es formadora de {% if unidad.formador_internos and unidad.formador_residente %}médicos internos y médicos residentes{% elif unidad.formador_internos %}médicos internos{% elif unidad.formador_residente %}médicos residentes{% endif %}.
-                                    </p>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <!-- Footer / CTA -->
-                            <div class="mt-auto flex border-t border-gray-200">
-                                <a href="/catalogo/unidades/{{ unidad.slug }}" class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
-                                    Ver docencias semanales
-                                </a>
-                            </div>
-                        </div>
-                        <!-- End Card -->
-                        {% endfor %}
-                    {% else %}
-                        <!-- Mensaje cuando no hay unidades -->
-                        <div class="col-span-full text-center py-12">
-                            <div class="flex justify-center items-center size-[46px] bg-gray-100 rounded-lg mx-auto mb-4">
-                                <svg class="shrink-0 size-6 text-gray-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 7v4"/><path d="M14 21v-3a2 2 0 0 0-4 0v3"/><path d="M14 9h-4"/><path d="M18 11h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h2"/><path d="M18 21V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16"/>
-                                </svg>
-                            </div>
-                            <h3 class="text-lg font-semibold text-gray-800">No hay unidades disponibles</h3>
-                            <p class="text-gray-600">No se encontraron unidades ejecutoras activas en el sistema.</p>
-                        </div>
-                    {% endif %}
-
-                </div>
-            </div>
-
+        <!-- Header -->
+        <div class="text-center mb-14">
+            <h2 class="text-3xl font-bold text-gray-800 sm:text-4xl">
+                Catálogo de Unidades Ejecutoras
+            </h2>
+            <p class="mt-2 text-gray-600">
+                Explora las unidades por provincia y conoce cómo organizan su docencia semanal.
+            </p>
         </div>
+
+        <!--====== FILTROS UNIDADES =====-->
+        <div class="bg-gray-50 border rounded-xl p-4 mb-10">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+            <!-- Provincia -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                Provincia
+                </label>
+                <select id="filtro-provincia" class="w-full rounded-lg border-gray-300 text-sm">
+                <option value="">Todas</option>
+                <option value="bocas-del-toro">Bocas Del Toro</option>
+                <option value="coclé">Coclé</option>
+                <option value="colón">Colón</option>
+                <option value="chiriquí">Chiriquí</option>
+                <option value="herrera">Herrera</option>
+                <option value="los-santos">Los Santos</option>
+                <option value="panamá">Panamá</option>
+                <option value="panamá-oeste">Panamá Oeste</option>
+                </select>
+            </div>
+
+            <!-- Tipo de unidad -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                Tipo de unidad
+                </label>
+                <select id="filtro-tipo" class="w-full rounded-lg border-gray-300 text-sm">
+                <option value="">Todos</option>
+                <option value="hospital">Hospital</option>
+                <option value="policlínica">Policlínica</option>
+                <option value="capps">CAPPS</option>
+                <option value="ulaps">ULAPS</option>
+                <option value="ulsyso">ULSySO</option>
+                <option value="coordinación-regional">Coordinación Regional</option>
+                </select>
+            </div>
+
+            <!-- Acciones -->
+            <div class="flex items-end">
+                <button id="limpiar-filtros" class="w-full py-2.5 text-sm font-medium rounded-lg bg-gray-200 hover:bg-gray-300">
+                Limpiar filtros
+                </button>
+            </div>
+
+            </div>
+        </div>
+
+        <!-- ================= CARDS UNIDADES ================= -->
+        <div class="mb-16">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                {% if unidades %}
+                    {% for unidad in unidades %}
+                    <!-- Card Unidad Ejecutora -->
+                    <div data-provincia="{{ unidad.provincia|lower|replace(' ', '-') if unidad.provincia else 'sin-provincia' }}" 
+                            data-tipo="{{ unidad.tipo|lower|replace(' ', '-') if unidad.tipo else 'sin-tipo' }}" 
+                            class="group flex flex-col h-full bg-white border border-gray-200 shadow-sm rounded-xl overflow-hidden hover:shadow-md transition unidad-card">
+                        <!-- Imagen -->
+                        <div class="relative pt-[66%] overflow-hidden">
+                            <img src="{{ unidad.foto_url }}" alt="{{ unidad.nombre }}" class="absolute top-0 left-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out" loading="lazy" />
+                            <!-- Badge Tipo -->
+                            <span class="absolute top-0 end-0 rounded-se-xl rounded-es-xl text-xs font-medium 
+                                {% if unidad.tipo == 'Hospital' %}bg-red-600 text-white
+                                {% elif unidad.tipo == 'Policlínica' %}bg-blue-600 text-white
+                                {% elif unidad.tipo == 'CAPPS' %}bg-green-600 text-white
+                                {% elif unidad.tipo == 'ULAPS' %}bg-yellow-600 text-white
+                                {% elif unidad.tipo == 'ULSySO' %}bg-purple-600 text-white
+                                {% elif unidad.tipo == 'Coordinación Regional' %}bg-orange-600 text-white
+                                {% else %}bg-gray-600 text-white{% endif %} py-1.5 px-3">
+                                {{ unidad.tipo }}
+                            </span>
+                            <!-- Badge Provincia -->
+                            <span class="absolute bottom-0 start-0 m-3 rounded-full text-xs font-medium bg-gray-800 text-white py-1.5 px-3">
+                                {{ unidad.provincia if unidad.provincia else 'Sin provincia' }}
+                            </span>
+                        </div>
+                        <!-- Contenido -->
+                        <div class="p-5 flex flex-col flex-1">
+                            <!-- Nombre -->
+                            <h3 class="text-lg font-bold text-gray-800">
+                                {{ unidad.nombre }}
+                            </h3>
+                            <!-- Nivel y Formación -->
+                            <div class="mt-3 space-y-2">
+                                <p class="text-sm text-gray-600">
+                                    <span class="font-medium">{{ unidad.coordinador_rol }}:</span><br /><strong>{{ unidad.coordinador_nombre }}</strong>
+                                </p>
+                                {% if unidad.formador_internos or unidad.formador_residente %}
+                                <p class="text-sm text-gray-600 mt-2">
+                                    Esta instalación es formadora de {% if unidad.formador_internos and unidad.formador_residente %}médicos internos y médicos residentes{% elif unidad.formador_internos %}médicos internos{% elif unidad.formador_residente %}médicos residentes{% endif %}.
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <!-- Footer / CTA -->
+                        <div class="mt-auto flex border-t border-gray-200">
+                            <a href="/catalogo/unidades/{{ unidad.slug }}" class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
+                                Ver docencias semanales
+                            </a>
+                        </div>
+                    </div>
+                    <!-- End Card -->
+                    {% endfor %}
+                {% else %}
+                    <!-- Mensaje cuando no hay unidades -->
+                    <div class="col-span-full text-center py-12">
+                        <div class="flex justify-center items-center size-[46px] bg-gray-100 rounded-lg mx-auto mb-4">
+                            <svg class="shrink-0 size-6 text-gray-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 7v4"/><path d="M14 21v-3a2 2 0 0 0-4 0v3"/><path d="M14 9h-4"/><path d="M18 11h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h2"/><path d="M18 21V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800">No hay unidades disponibles</h3>
+                        <p class="text-gray-600">No se encontraron unidades ejecutoras activas en el sistema.</p>
+                    </div>
+                {% endif %}
+
+            </div>
+        </div>
+
     </section>
 
     <!--====== PROCESO ======-->
