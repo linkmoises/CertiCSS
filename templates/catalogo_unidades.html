@@ -98,7 +98,7 @@
         </div>
 
         <!--====== FILTROS UNIDADES =====-->
-        <div class="bg-gray-50 border rounded-xl p-4 mb-10">
+        <div class="bg-gray-50 border rounded-xl mx-8 p-4">
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
             <!-- Provincia -->
@@ -146,7 +146,7 @@
         </div>
 
         <!-- ================= CARDS UNIDADES ================= -->
-        <div class="mb-16">
+        <div class="max-w-[85rem] p-4 sm:px-6 lg:px-8 lg:py-14 mx-auto">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 {% if unidades %}
@@ -161,7 +161,13 @@
                             <!-- Badge Tipo -->
                             <span class="absolute top-0 end-0 rounded-se-xl rounded-es-xl text-xs font-medium 
                                 {% if unidad.tipo == 'Hospital' %}bg-red-600 text-white
+                                {% elif unidad.tipo == 'Hospital General' %}bg-red-600 text-white
+                                {% elif unidad.tipo == 'Hospital Regional' %}bg-red-600 text-white
+                                {% elif unidad.tipo == 'Hospital de Alta Complejidad' %}bg-red-600 text-white
+                                {% elif unidad.tipo == 'Hospital de Referencia Nacional' %}bg-red-600 text-white
                                 {% elif unidad.tipo == 'Policlínica' %}bg-blue-600 text-white
+                                {% elif unidad.tipo == 'Policlínica Básica' %}bg-blue-600 text-white
+                                {% elif unidad.tipo == 'Policlínica Especializada' %}bg-blue-600 text-white
                                 {% elif unidad.tipo == 'CAPPS' %}bg-green-600 text-white
                                 {% elif unidad.tipo == 'ULAPS' %}bg-yellow-600 text-white
                                 {% elif unidad.tipo == 'ULSySO' %}bg-purple-600 text-white
@@ -194,9 +200,15 @@
                         </div>
                         <!-- Footer / CTA -->
                         <div class="mt-auto flex border-t border-gray-200">
+                            {% if unidad.tipo == 'Coordinación Regional' %}
+                            <a href="/catalogo/{{ unidad.slug }}" class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
+                                Ver catálogo docente regional
+                            </a>
+                            {% else %}
                             <a href="/catalogo/unidades/{{ unidad.slug }}" class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
                                 Ver docencias semanales
                             </a>
+                            {% endif %}
                         </div>
                     </div>
                     <!-- End Card -->

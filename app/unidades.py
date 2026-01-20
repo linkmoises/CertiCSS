@@ -29,7 +29,11 @@ def tablero_unidades():
         return redirect(url_for('home'))
     
     # Obtener todas las unidades ejecutoras
-    unidades = list(collection_unidades.find().sort("nombre", 1))
+    unidades = list(collection_unidades.find().sort([
+        ("nivel_asistencial", -1),    # Nivel asistencial descendente (5,4,3,2,1)
+        ("nivel_complejidad", -1),    # Nivel complejidad descendente (9,8,7,6...)
+        ("nombre", 1)                 # Nombre alfabético ascendente (A-Z)
+    ]))
     
     # Agregar URL de foto para cada unidad
     for unidad in unidades:
@@ -63,9 +67,12 @@ def crear_unidad():
         formador_residente = request.form.get('formador_residente') == 'on'
         activo = request.form.get('activo') == 'on'
         
-        # Si es Coordinación Regional, forzar nivel 5
+        # Si es Coordinación Regional, forzar nivel 5 y complejidad NA
         if tipo == 'Coordinación Regional':
             nivel_asistencial = 5
+            nivel_complejidad = 'NA'
+        else:
+            nivel_complejidad = int(request.form.get('nivel_complejidad', 1))
         
         # Validar campos requeridos
         if not all([nombre, slug, tipo, provincia]):
@@ -126,6 +133,7 @@ def crear_unidad():
             'tipo': tipo,
             'provincia': provincia,
             'nivel_asistencial': nivel_asistencial,
+            'nivel_complejidad': nivel_complejidad,
             'formador_internos': formador_internos,
             'formador_residente': formador_residente,
             'activo': activo,
@@ -178,9 +186,12 @@ def editar_unidad(unidad_id):
             formador_residente = request.form.get('formador_residente') == 'on'
             activo = request.form.get('activo') == 'on'
             
-            # Si es Coordinación Regional, forzar nivel 5
+            # Si es Coordinación Regional, forzar nivel 5 y complejidad NA
             if tipo == 'Coordinación Regional':
                 nivel_asistencial = 5
+                nivel_complejidad = 'NA'
+            else:
+                nivel_complejidad = int(request.form.get('nivel_complejidad', 1))
             
             # Validar campos requeridos
             if not all([nombre, slug, tipo, provincia]):
@@ -248,6 +259,7 @@ def editar_unidad(unidad_id):
                 'tipo': tipo,
                 'provincia': provincia,
                 'nivel_asistencial': nivel_asistencial,
+                'nivel_complejidad': nivel_complejidad,
                 'formador_internos': formador_internos,
                 'formador_residente': formador_residente,
                 'activo': activo,
@@ -326,7 +338,11 @@ def allowed_file(filename):
 @unidades_bp.route('/catalogo/unidades')
 def catalogo_unidades():
     # Obtener todas las unidades activas
-    unidades = list(collection_unidades.find({"activo": True}).sort("nombre", 1))
+    unidades = list(collection_unidades.find({"activo": True}).sort([
+        ("nivel_asistencial", -1),    # Nivel asistencial descendente (5,4,3,2,1)
+        ("nivel_complejidad", -1),    # Nivel complejidad descendente (9,8,7,6...)
+        ("nombre", 1)                 # Nombre alfabético ascendente (A-Z)
+    ]))
     
     # Agregar URL de foto y coordinador para cada unidad
     for unidad in unidades:

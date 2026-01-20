@@ -101,7 +101,7 @@
                                     <!-- Nivel de Complejidad -->
                                     <div>
                                         <label for="nivel_complejidad" class="block text-sm font-medium mb-2">Nivel de Complejidad *</label>
-                                        <select id="nivel_complejidad" name="nivel_complejidad" class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" required>
+                                        <select id="nivel_complejidad" name="nivel_complejidad" class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 {% if unidad.tipo == 'Coordinación Regional' %}bg-gray-100 cursor-not-allowed{% endif %}" required {% if unidad.tipo == 'Coordinación Regional' %}disabled{% endif %}>
                                             <option value="">Seleccionar complejidad</option>
                                             <option value="1" {% if unidad.nivel_complejidad == 1 %}selected{% endif %}>Complejidad 1</option>
                                             <option value="2" {% if unidad.nivel_complejidad == 2 %}selected{% endif %}>Complejidad 2</option>
@@ -112,6 +112,7 @@
                                             <option value="7" {% if unidad.nivel_complejidad == 7 %}selected{% endif %}>Complejidad 7</option>
                                             <option value="8" {% if unidad.nivel_complejidad == 8 %}selected{% endif %}>Complejidad 8</option>
                                             <option value="9" {% if unidad.nivel_complejidad == 9 %}selected{% endif %}>Complejidad 9</option>
+                                            <option value="NA" {% if unidad.nivel_complejidad == 'NA' %}selected{% endif %}>No Aplica</option>
                                         </select>
                                     </div>
                                 </div>
@@ -215,12 +216,18 @@
     function handleTipoChangeEdit() {
         const tipoSelect = document.getElementById('tipo');
         const nivelSelect = document.getElementById('nivel_asistencial');
+        const complejidadSelect = document.getElementById('nivel_complejidad');
         
         if (tipoSelect.value === 'Coordinación Regional') {
             // Establecer nivel 5 y deshabilitar
             nivelSelect.value = '5';
             nivelSelect.disabled = true;
             nivelSelect.classList.add('bg-gray-100', 'cursor-not-allowed');
+            
+            // Establecer complejidad NA y deshabilitar
+            complejidadSelect.value = 'NA';
+            complejidadSelect.disabled = true;
+            complejidadSelect.classList.add('bg-gray-100', 'cursor-not-allowed');
         } else {
             // Habilitar selección de nivel
             nivelSelect.disabled = false;
@@ -228,6 +235,14 @@
             // Si estaba en nivel 5, cambiar a nivel 1
             if (nivelSelect.value === '5') {
                 nivelSelect.value = '1';
+            }
+            
+            // Habilitar selección de complejidad
+            complejidadSelect.disabled = false;
+            complejidadSelect.classList.remove('bg-gray-100', 'cursor-not-allowed');
+            // Si estaba en NA, cambiar a vacío para que seleccione
+            if (complejidadSelect.value === 'NA') {
+                complejidadSelect.value = '';
             }
         }
     }
