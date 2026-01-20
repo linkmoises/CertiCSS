@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>CertiCSS - Nosotros</title>
+    <title>CertiCSS - Coordinadores Docentes</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -140,130 +140,44 @@
         <div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
             <!-- Title -->
             <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-gray-800 sm:text-4xl dark:text-white">Departamento Nacional de
-                    Docencia e Investigación</h1>
-                <p class="mt-1 text-gray-600 dark:text-neutral-400">Educación, Formación e Investigación para el
-                    Fortalecimiento del Sistema de Salud</p>
+                <h1 class="text-3xl font-bold text-gray-800 sm:text-4xl dark:text-white">Directorio de Coordinadores de Docencia</h1>
+                <p class="mt-1 text-gray-600 dark:text-neutral-400">Red nacional de coordinación académica en las unidades ejecutoras de la CSS</p>
             </div>
             <!-- End Title -->
 
             <div class="max-w-3xl px-4 pt-6 lg:pt-10 pb-12 sm:px-6 lg:px-8 mx-auto">
-                <p class="mb-4">El <strong>Departamento Nacional de Docencia e Investigación (DENADOI)</strong> de la
-                    <strong>Caja de Seguro Social (CSS)</strong> forma parte de la <strong>Dirección Nacional de
-                        Servicios y Prestaciones Médicas</strong> y actúa como el ente rector en la planificación,
-                    estructuración e implementación de estrategias de educación y capacitación para el personal de salud
-                    que labora en la institución.
-                </p>
+                <p class="mb-4">Los Coordinadores de Docencia son el eje articulador de la formación médica en las unidades ejecutoras de la Caja de Seguro Social. Desde hospitales, policlínicas y otras instalaciones de salud, tienen la responsabilidad de organizar, supervisar y fortalecer las actividades docentes que se desarrollan en cada nivel de atención.</p>
 
-                <p class="mb-4">En lo que respecta a la formación médica, el departamento tiene la responsabilidad de
-                    establecer y gestionar las plazas de <strong>internado rotatorio</strong> para médicos internos, con
-                    una duración de dos años, así como las plazas de <strong>formación de médicos
-                        especialistas</strong>. Además, coordina la formación de <strong>médicos
-                        subespecialistas</strong>, en función de las necesidades del país.</p>
+                <p class="mb-4">Este directorio reúne a los coordinadores locales y regionales responsables de la formación de médicos internos, médicos residentes o ambos, según el perfil docente de cada unidad. Su labor garantiza que los procesos formativos se desarrollen con calidad, pertinencia y alineados a las necesidades del sistema de salud y de la población.</p>
 
-                <p class="mb-4">Asimismo, es el órgano responsable de la <strong>Educación Médica Continua</strong> para
-                    médicos generales y especialistas que prestan servicio en la distintas unidades ejecutoras de la
-                    CSS. Su ámbito de acción también abarca la actualización y supervisión permanente del nivel
-                    educativo del personal de <strong>enfermería, tecnología médica, farmacia y personal auxiliar del
-                        equipo de salud</strong>.</p>
-
-                <p class="mb-4">En el ámbito de la investigación, el departamento tiene la responsabilidad de
-                    <strong>promover, dirigir y supervisar</strong> las investigaciones en salud dentro de la CSS, así
-                    como la divulgación de sus resultados a nivel nacional e internacional. Una de las estrategias clave
-                    para el cumplimiento de este objetivo es la <strong>Revista Médica de la CSS</strong>, una
-                    publicación periódica elaborada en este departamento y orientada a la difusión del conocimiento
-                    científico.
-                </p>
-
-                <!-- Title -->
-                <div class="text-center mt-10 mb-8">
-                    <h1 class="text-3xl font-bold text-gray-800 sm:text-4xl dark:text-white">Jefatura</h1>
-                    <p class="mt-1 text-gray-600 dark:text-neutral-400">Liderazgo y Gestión Académica</p>
-                </div>
-                <!-- End Title -->
-
-                <!-- Grid -->
-                <div id="denadoi-jefes" class="justify-center grid grid-cols-2 max-md:gap-x-4">
-                    {% if jefe %}
-                    <div class="text-center">
-                        <div>
-                            <img class="rounded-xl sm:size-48 lg:size-60 mx-auto" src="{{ jefe_foto_url }}" alt="Jefe">
-                            <div class="mt-2 sm:mt-4">
-                                <h3
-                                    class="text-sm font-medium text-gray-800 sm:text-base lg:text-lg dark:text-neutral-200">
-                                    {{ jefe.nombres }} {{ jefe.apellidos }}
-                                </h3>
-                                <p class="text-xs text-gray-600 sm:text-sm lg:text-base dark:text-neutral-400">
-                                    {{ jefe.cargo }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    {% if subjefe %}
-                    <div class="text-center">
-                        <div>
-                            <img class="rounded-xl sm:size-48 lg:size-60 mx-auto" src="{{ subjefe_foto_url }}"
-                                alt="Subjefe">
-                            <div class="mt-2 sm:mt-4">
-                                <h3
-                                    class="text-sm font-medium text-gray-800 sm:text-base lg:text-lg dark:text-neutral-200">
-                                    {{ subjefe.nombres }} {{ subjefe.apellidos }}
-                                </h3>
-                                <p class="text-xs text-gray-600 sm:text-sm lg:text-base dark:text-neutral-400">
-                                    {{ subjefe.cargo }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
-                </div>
-
+                <p class="mb-4">Aquí podrás identificar a los referentes docentes de cada unidad ejecutora y conocer la estructura de coordinación académica a nivel nacional.</p>
             </div>
             <div class="px-4 pt-6 lg:pt-10 pb-12 sm:px-6 lg:px-8 mx-auto">
 
                 <!-- Title -->
                 <div class="text-center mt-10 mb-8">
-                    <h1 class="text-3xl font-bold text-gray-800 sm:text-4xl dark:text-white">Equipo DENADOI</h1>
+                    <h1 class="text-3xl font-bold text-gray-800 sm:text-4xl dark:text-white">Coordinadores Docentes</h1>
                     <p class="mt-1 text-gray-600 dark:text-neutral-400">Fortaleciendo la Educación Continua en el Territorio Nacional</p>
                 </div>
                 <!-- End Title -->
 
-                <div id="denadoi" class="justify-center grid grid-cols-3 max-md:gap-x-4">
-                    {% for usuario in denadoi_users %}
+                <div id="coordinadores" class="justify-center grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {% for coordinador in coordinadores %}
                     <div class="text-center mb-6">
                         <div>
-                            <img class="rounded-xl sm:size-48 lg:size-60 mx-auto" src="{{ usuario.foto_url }}"
-                                alt="Subjefe">
+                            <img class="rounded-xl sm:size-48 lg:size-60 mx-auto" src="{{ coordinador.foto_url }}"
+                                alt="{{ coordinador.nombres }} {{ coordinador.apellidos }}">
                             <div class="px-4 mt-2 sm:mt-4">
                                 <h3 class="text-sm font-medium text-gray-800 sm:text-base lg:text-lg dark:text-neutral-200">
-                                    {{ usuario.nombres }} {{ usuario.apellidos }}
+                                    {{ coordinador.nombres }} {{ coordinador.apellidos }}
                                 </h3>
                                 <p class="text-xs text-gray-600 sm:text-sm lg:text-base dark:text-neutral-400">
-                                    {{ usuario.cargo }}
+                                    {{ coordinador.unidad_ejecutora if coordinador.unidad_ejecutora else 'Unidad no asignada' }}
                                 </p>
                             </div>
                         </div>
                     </div>
                     {% endfor %}
-                </div>
-
-                <div class="px-4 pt-6 lg:pt-10 pb-12 sm:px-6 lg:px-8 mx-auto">
-                    <div class="text-center">
-                        <div>
-                            <img class="rounded-xl mx-auto" src="{{ url_for('static', filename='assets/equipo-administrativo.jpg') }}" alt="Equipo administrativo">
-                            <div class="mt-2 sm:mt-4">
-                                <h3
-                                    class="text-sm font-medium text-gray-800 sm:text-base lg:text-lg dark:text-neutral-200">
-                                    Annybel Alvarado, Aixa Samaniego, Gisela Ariza, Xenia Calderón, Juana Martinez, Jackeline Alonso, Lineth Vásquez
-                                </h3>
-                                <p class="text-xs text-gray-600 sm:text-sm lg:text-base dark:text-neutral-400">
-                                    Equipo administrativo
-                                </p>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
             </div>

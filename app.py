@@ -5265,6 +5265,75 @@ def nosotros():
 
 
 ###
+### Coordinadores
+###
+@app.route('/docentes')
+def docentes():
+    # Obtener coordinadores con los roles específicos
+    coordinadores_roles = ['coordinador-regional', 'subdirector-docencia', 'coordinador-local']
+    
+    coordinadores = list(collection_usuarios.find(
+        {
+            "rol": {"$in": coordinadores_roles},
+            "activo": True
+        },
+        {
+            "nombres": 1, 
+            "apellidos": 1, 
+            "foto": 1, 
+            "unidad_ejecutora": 1,
+            "rol": 1
+        }
+    ))
+    
+    # Obtener todas las unidades para hacer el mapeo de ordenamiento
+    unidades_dict = {}
+    unidades = list(collection_unidades.find({}, {"nombre": 1, "nivel_asistencial": 1, "nivel_complejidad": 1, "tipo": 1}))
+    for unidad in unidades:
+        unidades_dict[unidad['nombre']] = {
+            'nivel_asistencial': unidad.get('nivel_asistencial', 0),
+            'nivel_complejidad': unidad.get('nivel_complejidad', 0),
+            'tipo': unidad.get('tipo', '')
+        }
+    
+    # Agregar datos de ordenamiento y foto URL a cada coordinador
+    for coordinador in coordinadores:
+        # Generar URL de foto o usar imagen predeterminada
+        coordinador["foto_url"] = f"/static/usuarios/{coordinador['foto']}" if coordinador.get("foto") else "/static/assets/user-avatar.png"
+        
+        # Agregar datos de la unidad para ordenamiento
+        unidad_nombre = coordinador.get('unidad_ejecutora', '')
+        if unidad_nombre in unidades_dict:
+            coordinador['nivel_asistencial'] = unidades_dict[unidad_nombre]['nivel_asistencial']
+            coordinador['nivel_complejidad'] = unidades_dict[unidad_nombre]['nivel_complejidad']
+            coordinador['tipo_unidad'] = unidades_dict[unidad_nombre]['tipo']
+        else:
+            coordinador['nivel_asistencial'] = 0
+            coordinador['nivel_complejidad'] = 0
+            coordinador['tipo_unidad'] = ''
+    
+    # Función auxiliar para manejar el ordenamiento de complejidad
+    def get_complejidad_sort_key(complejidad):
+        """Convierte nivel_complejidad a un valor numérico para ordenamiento descendente"""
+        if complejidad == 'NA':
+            return -1  # NA va al final
+        try:
+            return int(complejidad)
+        except (ValueError, TypeError):
+            return 0
+    
+    # Ordenar coordinadores como las unidades: por nivel, complejidad y nombre
+    coordinadores.sort(key=lambda x: (
+        -x.get('nivel_asistencial', 0),                    # Nivel descendente (5,4,3,2,1)
+        -get_complejidad_sort_key(x.get('nivel_complejidad', 0)),  # Complejidad descendente (9,8,7...1, NA)
+        x.get('apellidos', ''),                            # Apellido alfabético
+        x.get('nombres', '')                               # Nombre alfabético
+    ))
+    
+    return render_template('coordinadores.html', coordinadores=coordinadores)
+
+
+###
 ### LMS
 ###
 def zfill_filter(value, width=2):
