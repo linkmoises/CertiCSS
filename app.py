@@ -5267,7 +5267,7 @@ def nosotros():
 ###
 ### Coordinadores
 ###
-@app.route('/docentes')
+@app.route('/coordinadores-docentes')
 def docentes():
     # Obtener coordinadores con los roles específicos
     coordinadores_roles = ['coordinador-regional', 'subdirector-docencia', 'coordinador-local']

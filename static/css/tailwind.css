@@ -3560,6 +3560,14 @@ select {
   padding-right: 0.5rem;
 }
 
+.pe-4 {
+  padding-inline-end: 1rem;
+}
+
+.pe-6 {
+  padding-inline-end: 1.5rem;
+}
+
 .text-left {
   text-align: left;
 }
@@ -4247,6 +4255,11 @@ select {
 .before\:top-1\/2::before {
   content: var(--tw-content);
   top: 50%;
+}
+
+.before\:end-2::before {
+  content: var(--tw-content);
+  inset-inline-end: 0.5rem;
 }
 
 .before\:h-4::before {
