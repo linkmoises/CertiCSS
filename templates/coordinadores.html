@@ -145,14 +145,14 @@
             </div>
             <!-- End Title -->
 
-            <div class="max-w-3xl px-4 pt-6 lg:pt-10 pb-12 sm:px-6 lg:px-8 mx-auto">
+            <div class="max-w-3xl px-4 sm:px-6 lg:px-8 mx-auto">
                 <p class="mb-4">Los Coordinadores de Docencia son el eje articulador de la formación médica en las unidades ejecutoras de la Caja de Seguro Social. Desde hospitales, policlínicas y otras instalaciones de salud, tienen la responsabilidad de organizar, supervisar y fortalecer las actividades docentes que se desarrollan en cada nivel de atención.</p>
 
                 <p class="mb-4">Este directorio reúne a los coordinadores locales y regionales responsables de la formación de médicos internos, médicos residentes o ambos, según el perfil docente de cada unidad. Su labor garantiza que los procesos formativos se desarrollen con calidad, pertinencia y alineados a las necesidades del sistema de salud y de la población.</p>
 
                 <p class="mb-4">Aquí podrás identificar a los referentes docentes de cada unidad ejecutora y conocer la estructura de coordinación académica a nivel nacional.</p>
             </div>
-            <div class="px-4 pt-6 lg:pt-10 pb-12 sm:px-6 lg:px-8 mx-auto">
+            <div class="px-4 pb-12 sm:px-6 lg:px-8 mx-auto">
 
                 <!-- Title -->
                 <div class="text-center mt-10 mb-8">
@@ -168,10 +168,13 @@
                             <img class="rounded-xl sm:size-48 lg:size-60 mx-auto" src="{{ coordinador.foto_url }}"
                                 alt="{{ coordinador.nombres }} {{ coordinador.apellidos }}">
                             <div class="px-4 mt-2 sm:mt-4">
-                                <h3 class="text-sm font-medium text-gray-800 sm:text-base lg:text-lg dark:text-neutral-200">
+                                <h3 class="text-sm font-semibold text-gray-800 sm:text-base lg:text-lg dark:text-neutral-200">
                                     {{ coordinador.nombres }} {{ coordinador.apellidos }}
                                 </h3>
-                                <p class="text-xs text-gray-600 sm:text-sm lg:text-base dark:text-neutral-400">
+                                <p class="text-sm text-gray-600 font-medium sm:text-sm dark:text-blue-400">
+                                    {{ coordinador.rol_legible }}
+                                </p>
+                                <p class="text-xs text-gray-400 sm:text-sm dark:text-neutral-400">
                                     {{ coordinador.unidad_ejecutora if coordinador.unidad_ejecutora else 'Unidad no asignada' }}
                                 </p>
                             </div>

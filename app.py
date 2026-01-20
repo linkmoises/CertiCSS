@@ -5301,6 +5301,20 @@ def docentes():
         # Generar URL de foto o usar imagen predeterminada
         coordinador["foto_url"] = f"/static/usuarios/{coordinador['foto']}" if coordinador.get("foto") else "/static/assets/user-avatar.png"
         
+        # Agregar nombre legible del rol
+        rol_legible = {
+            'coordinador-departamental': 'Coordinador de Docencia de Servicio',
+            'coordinador-local': 'Coordinador Local de Docencia e Investigación',
+            'coordinador-regional': 'Coordinador Regional de Docencia e Investigación',
+            'coordinador-nacional': 'Coordinador Nacional de Docencia',
+            'subdirector-docencia': 'Subdirector de Docencia e Investigación',
+            'coordinador-administrativo': 'Coordinador de Docencia de Unidad Administrativa',
+            'denadoi': 'DENADOI',
+            'simulacion': 'Centro de Simulación Avanzada'
+        }.get(coordinador.get('rol', ''), coordinador.get('rol', 'Rol no especificado'))
+        
+        coordinador['rol_legible'] = rol_legible
+        
         # Agregar datos de la unidad para ordenamiento
         unidad_nombre = coordinador.get('unidad_ejecutora', '')
         if unidad_nombre in unidades_dict:
@@ -5322,12 +5336,11 @@ def docentes():
         except (ValueError, TypeError):
             return 0
     
-    # Ordenar coordinadores como las unidades: por nivel, complejidad y nombre
+    # Ordenar coordinadores como las unidades: por nivel, complejidad y nombre de unidad
     coordinadores.sort(key=lambda x: (
         -x.get('nivel_asistencial', 0),                    # Nivel descendente (5,4,3,2,1)
         -get_complejidad_sort_key(x.get('nivel_complejidad', 0)),  # Complejidad descendente (9,8,7...1, NA)
-        x.get('apellidos', ''),                            # Apellido alfabético
-        x.get('nombres', '')                               # Nombre alfabético
+        x.get('unidad_ejecutora', '')                      # Nombre de unidad alfabético
     ))
     
     return render_template('coordinadores.html', coordinadores=coordinadores)
