@@ -58,10 +58,8 @@
                                             <option value="CAPPS" {% if unidad.tipo == 'CAPPS' %}selected{% endif %}>CAPPS</option>
                                             <option value="ULAPS" {% if unidad.tipo == 'ULAPS' %}selected{% endif %}>ULAPS</option>
                                             <option value="ULSySO" {% if unidad.tipo == 'ULSySO' %}selected{% endif %}>ULSySO</option>
-                                            <option value="Policlínica" {% if unidad.tipo == 'Policlínica' %}selected{% endif %}>Policlínica</option>
                                             <option value="Policlínica Básica" {% if unidad.tipo == 'Policlínica Básica' %}selected{% endif %}>Policlínica Básica</option>
                                             <option value="Policlínica Especializada" {% if unidad.tipo == 'Policlínica Especializada' %}selected{% endif %}>Policlínica Especializada</option>
-                                            <option value="Hospital" {% if unidad.tipo == 'Hospital' %}selected{% endif %}>Hospital</option>
                                             <option value="Hospital General" {% if unidad.tipo == 'Hospital General' %}selected{% endif %}>Hospital General</option>
                                             <option value="Hospital Regional" {% if unidad.tipo == 'Hospital Regional' %}selected{% endif %}>Hospital Regional</option>
                                             <option value="Hospital de Alta Complejidad" {% if unidad.tipo == 'Hospital de Alta Complejidad' %}selected{% endif %}>Hospital de Alta Complejidad</option>
@@ -123,7 +121,7 @@
                                     <div>
                                         <label class="block text-sm font-medium mb-2">Foto Actual</label>
                                         <div class="flex items-center space-x-4">
-                                            <img src="{% if unidad.get('foto') %}/static/uploads/unidades/{{ unidad.foto }}{% else %}/static/uploads/unidades/default.jpg{% endif %}" alt="{{ unidad.nombre }}" class="h-20 w-20 rounded-lg object-cover border border-gray-200">
+                                            <img src="{% if unidad.get('foto') %}/static/uploads/unidades/{{ unidad.foto }}{% else %}/static/assets/unidades/default.jpg{% endif %}" alt="{{ unidad.nombre }}" class="h-20 w-20 rounded-lg object-cover border border-gray-200">
                                             <div class="text-sm text-gray-600">
                                                 {% if unidad.get('foto') %}
                                                     <p>Archivo: {{ unidad.foto }}</p>

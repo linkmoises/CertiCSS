@@ -66,14 +66,12 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                        <td class="px-2 py-4 whitespace-nowrap">
                                             <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium
-                                                {% if unidad.tipo == 'Hospital' %}bg-red-100 text-red-800
-                                                {% elif unidad.tipo == 'Hospital General' %}bg-red-100 text-red-800
+                                                {% if unidad.tipo == 'Hospital General' %}bg-red-100 text-red-800
                                                 {% elif unidad.tipo == 'Hospital Regional' %}bg-red-200 text-red-900
                                                 {% elif unidad.tipo == 'Hospital de Alta Complejidad' %}bg-red-300 text-red-900
                                                 {% elif unidad.tipo == 'Hospital de Referencia Nacional' %}bg-red-400 text-red-900
-                                                {% elif unidad.tipo == 'Policlínica' %}bg-blue-100 text-blue-800
                                                 {% elif unidad.tipo == 'Policlínica Básica' %}bg-blue-100 text-blue-800
                                                 {% elif unidad.tipo == 'Policlínica Especializada' %}bg-blue-200 text-blue-900
                                                 {% elif unidad.tipo == 'CAPPS' %}bg-green-100 text-green-800
@@ -96,13 +94,13 @@
                                                 {{ unidad.provincia if unidad.provincia else 'No especificada' }}
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-900">
                                             <div class="text-xs bg-gray-50 border border-gray-200 p-2 rounded-md">
                                                 Nivel: {{ unidad.nivel_asistencial }}<br />
                                                 Complejidad: {{ unidad.nivel_complejidad if unidad.nivel_complejidad else 'NE' }}<br />
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                        <td class="px-2 py-4 whitespace-nowrap">
                                             <div class="flex flex-col space-y-1">
                                                 {% if unidad.formador_internos %}
                                                 <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-green-100 text-green-800">
@@ -119,7 +117,7 @@
                                                 {% endif %}
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                        <td class="px-2 py-4 whitespace-nowrap">
                                             {% if unidad.activo %}
                                             <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-green-100 text-green-800">
                                                 Activo

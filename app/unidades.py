@@ -40,7 +40,7 @@ def tablero_unidades():
         if unidad.get('foto'):
             unidad['foto_url'] = f"/static/uploads/unidades/{unidad['foto']}"
         else:
-            unidad['foto_url'] = "/static/uploads/unidades/default.jpg"
+            unidad['foto_url'] = "/static/assets/unidades/default.jpg"
     
     return render_template('tablero_unidades.html', unidades=unidades)
 
@@ -350,7 +350,7 @@ def catalogo_unidades():
         if unidad.get('foto'):
             unidad['foto_url'] = f"/static/uploads/unidades/{unidad['foto']}"
         else:
-            unidad['foto_url'] = "/static/uploads/unidades/default.jpg"
+            unidad['foto_url'] = "/static/assets/unidades/default.jpg"
         
         # Buscar coordinador de docencia para esta unidad
         # Solo buscar usuarios con roles específicos que son únicos por unidad:
@@ -430,7 +430,7 @@ def docencia_unidad(codigo_unidad, page=1):
     if unidad.get('foto'):
         unidad['foto_url'] = f"/static/uploads/unidades/{unidad['foto']}"
     else:
-        unidad['foto_url'] = "/static/uploads/unidades/default.jpg"
+        unidad['foto_url'] = "/static/assets/unidades/default.jpg"
     
     # Configuración de paginación
     per_page = 15  # Número máximo de eventos por página

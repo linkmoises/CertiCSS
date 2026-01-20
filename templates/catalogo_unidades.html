@@ -160,12 +160,10 @@
                             <img src="{{ unidad.foto_url }}" alt="{{ unidad.nombre }}" class="absolute top-0 left-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out" loading="lazy" />
                             <!-- Badge Tipo -->
                             <span class="absolute top-0 end-0 rounded-se-xl rounded-es-xl text-xs font-medium 
-                                {% if unidad.tipo == 'Hospital' %}bg-red-600 text-white
-                                {% elif unidad.tipo == 'Hospital General' %}bg-red-600 text-white
+                                {% if unidad.tipo == 'Hospital General' %}bg-red-600 text-white
                                 {% elif unidad.tipo == 'Hospital Regional' %}bg-red-600 text-white
                                 {% elif unidad.tipo == 'Hospital de Alta Complejidad' %}bg-red-600 text-white
                                 {% elif unidad.tipo == 'Hospital de Referencia Nacional' %}bg-red-600 text-white
-                                {% elif unidad.tipo == 'Policlínica' %}bg-blue-600 text-white
                                 {% elif unidad.tipo == 'Policlínica Básica' %}bg-blue-600 text-white
                                 {% elif unidad.tipo == 'Policlínica Especializada' %}bg-blue-600 text-white
                                 {% elif unidad.tipo == 'CAPPS' %}bg-green-600 text-white
