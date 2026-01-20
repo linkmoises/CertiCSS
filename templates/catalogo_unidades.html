@@ -173,10 +173,19 @@
                                 {% else %}bg-gray-600 text-white{% endif %} py-1.5 px-3">
                                 {{ unidad.tipo }}
                             </span>
-                            <!-- Badge Provincia -->
-                            <span class="absolute bottom-0 start-0 m-3 rounded-full text-xs font-medium bg-gray-800 text-white py-1.5 px-3">
+                            <!-- Badge Geo Link -->
+                            {% if unidad.latitud and unidad.longitud %}
+                            <a href="https://www.google.com/maps?q={{ unidad.latitud }},{{ unidad.longitud }}{% if unidad.altitud %}&z={{ unidad.altitud }}{% endif %}" target="_blank" rel="noopener noreferrer">
+                                <span class="absolute bottom-0 start-0 m-3 flex gap-x-1 rounded-full text-xs font-medium bg-gray-800 text-white py-1.5 px-3 hover:bg-gray-700 transition-colors">
+                                    <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin-icon lucide-map-pin"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
+                                    {{ unidad.provincia if unidad.provincia else 'Sin provincia' }}
+                                </span>
+                            </a>
+                            {% else %}
+                            <span class="absolute bottom-0 start-0 m-3 flex gap-x-1 rounded-full text-xs font-medium bg-gray-800 text-white py-1.5 px-3">
                                 {{ unidad.provincia if unidad.provincia else 'Sin provincia' }}
                             </span>
+                            {% endif %}
                         </div>
                         <!-- Contenido -->
                         <div class="p-5 flex flex-col flex-1">
@@ -191,7 +200,7 @@
                                 </p>
                                 {% if unidad.formador_internos or unidad.formador_residente %}
                                 <p class="text-sm text-gray-600 mt-2">
-                                    Esta instalación es formadora de {% if unidad.formador_internos and unidad.formador_residente %}médicos internos y médicos residentes{% elif unidad.formador_internos %}médicos internos{% elif unidad.formador_residente %}médicos residentes{% endif %}.
+                                    Esta unidad ejecutora es formadora de {% if unidad.formador_internos and unidad.formador_residente %}médicos internos y médicos residentes{% elif unidad.formador_internos %}médicos internos{% elif unidad.formador_residente %}médicos residentes{% endif %}.
                                 </p>
                                 {% endif %}
                             </div>

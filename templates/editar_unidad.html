@@ -62,8 +62,8 @@
                                             <option value="Policlínica Especializada" {% if unidad.tipo == 'Policlínica Especializada' %}selected{% endif %}>Policlínica Especializada</option>
                                             <option value="Hospital General" {% if unidad.tipo == 'Hospital General' %}selected{% endif %}>Hospital General</option>
                                             <option value="Hospital Regional" {% if unidad.tipo == 'Hospital Regional' %}selected{% endif %}>Hospital Regional</option>
-                                            <option value="Hospital de Alta Complejidad" {% if unidad.tipo == 'Hospital de Alta Complejidad' %}selected{% endif %}>Hospital de Alta Complejidad</option>
                                             <option value="Hospital de Referencia Nacional" {% if unidad.tipo == 'Hospital de Referencia Nacional' %}selected{% endif %}>Hospital de Referencia Nacional</option>
+                                            <option value="Hospital de Alta Complejidad" {% if unidad.tipo == 'Hospital de Alta Complejidad' %}selected{% endif %}>Hospital de Alta Complejidad</option>
                                             <option value="Coordinación Regional" {% if unidad.tipo == 'Coordinación Regional' %}selected{% endif %}>Coordinación Regional</option>
                                         </select>
                                     </div>
@@ -84,6 +84,53 @@
                                             <option value="Panamá Oeste" {% if unidad.provincia == 'Panamá Oeste' %}selected{% endif %}>Panamá Oeste</option>
                                             <option value="Veraguas" {% if unidad.provincia == 'Veraguas' %}selected{% endif %}>Veraguas</option>
                                         </select>
+                                    </div>
+
+                                    <!-- Coordenadas Geográficas -->
+                                    <div class="space-y-3">
+                                        <label class="block text-sm font-medium mb-2">Coordenadas Geográficas</label>
+                                        
+                                        <div class="grid grid-cols-5 gap-2">
+                                            <div class="col-span-2">
+                                                <label for="latitud" class="block text-xs font-medium mb-1">Latitud</label>
+                                                <input type="number" id="latitud" name="latitud" step="any" value="{{ unidad.latitud if unidad.latitud else '' }}" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="8.9824">
+                                            </div>
+                                            <div class="col-span-2">
+                                                <label for="longitud" class="block text-xs font-medium mb-1">Longitud</label>
+                                                <input type="number" id="longitud" name="longitud" step="any" value="{{ unidad.longitud if unidad.longitud else '' }}" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="-79.5199">
+                                            </div>
+                                            <div class="col-span-1">
+                                                <label for="altitud" class="block text-xs font-medium mb-1">Z</label>
+                                                <input type="number" id="altitud" name="altitud" step="1" value="{{ unidad.altitud if unidad.altitud else '' }}" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="0">
+                                            </div>
+                                        </div>
+                                        
+                                        <p class="text-xs text-gray-500">Coordenadas para ubicación geográfica de la unidad</p>
+                                    </div>
+                                </div>
+
+                                <!-- Columna derecha -->
+                                <div class="space-y-4">
+                                    <!-- Foto actual -->
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Foto Actual</label>
+                                        <div class="flex items-center space-x-4">
+                                            <img src="{% if unidad.get('foto') %}/static/uploads/unidades/{{ unidad.foto }}{% else %}/static/assets/unidades/default.jpg{% endif %}" alt="{{ unidad.nombre }}" class="h-20 w-20 rounded-lg object-cover border border-gray-200">
+                                            <div class="text-sm text-gray-600">
+                                                {% if unidad.get('foto') %}
+                                                    <p>Archivo: {{ unidad.foto }}</p>
+                                                {% else %}
+                                                    <p>Sin imagen personalizada</p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Nueva foto -->
+                                    <div>
+                                        <label for="foto" class="block text-sm font-medium mb-2">Nueva Foto (opcional)</label>
+                                        <input type="file" id="foto" name="foto" accept="image/jpeg,image/jpg,image/png" class="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 file:bg-gray-50 file:border-0 file:me-4 file:py-3 file:px-4">
+                                        <p class="text-xs text-gray-500 mt-1">Formatos permitidos: JPG, JPEG, PNG. Se guardará como slug-nivel.jpg</p>
                                     </div>
 
                                     <!-- Nivel Asistencial -->
@@ -115,47 +162,35 @@
                                             <option value="NA" {% if unidad.nivel_complejidad == 'NA' %}selected{% endif %}>No Aplica</option>
                                         </select>
                                     </div>
-                                </div>
 
-                                <!-- Columna derecha -->
-                                <div class="space-y-4">
-                                    <!-- Foto actual -->
+                                    <!-- Actividad docente -->
                                     <div>
-                                        <label class="block text-sm font-medium mb-2">Foto Actual</label>
-                                        <div class="flex items-center space-x-4">
-                                            <img src="{% if unidad.get('foto') %}/static/uploads/unidades/{{ unidad.foto }}{% else %}/static/assets/unidades/default.jpg{% endif %}" alt="{{ unidad.nombre }}" class="h-20 w-20 rounded-lg object-cover border border-gray-200">
-                                            <div class="text-sm text-gray-600">
-                                                {% if unidad.get('foto') %}
-                                                    <p>Archivo: {{ unidad.foto }}</p>
-                                                {% else %}
-                                                    <p>Sin imagen personalizada</p>
-                                                {% endif %}
+                                        <p class="block text-sm font-medium mb-2">
+                                            Actividad docente
+                                        </p>
+
+                                        <div class="space-y-3">
+                                            <div class="flex">
+                                                <input type="checkbox" id="formador_internos" name="formador_internos" class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500" {% if unidad.formador_internos %}checked{% endif %}>
+                                                <label for="formador_internos" class="text-sm text-gray-800 ms-3">Formador de Internos</label>
+                                            </div>
+
+                                            <div class="flex">
+                                                <input type="checkbox" id="formador_residente" name="formador_residente" class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500" {% if unidad.formador_residente %}checked{% endif %}>
+                                                <label for="formador_residente" class="text-sm text-gray-800 ms-3">Formador de Residentes</label>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <!-- Nueva foto -->
+                                    <!-- Estado operativo -->
                                     <div>
-                                        <label for="foto" class="block text-sm font-medium mb-2">Nueva Foto (opcional)</label>
-                                        <input type="file" id="foto" name="foto" accept="image/jpeg,image/jpg,image/png" class="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 file:bg-gray-50 file:border-0 file:me-4 file:py-3 file:px-4">
-                                        <p class="text-xs text-gray-500 mt-1">Formatos permitidos: JPG, JPEG, PNG. Se guardará como slug-nivel.jpg</p>
-                                    </div>
-
-                                    <!-- Checkboxes -->
-                                    <div class="space-y-3">
-                                        <div class="flex">
-                                            <input type="checkbox" id="formador_internos" name="formador_internos" class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500" {% if unidad.formador_internos %}checked{% endif %}>
-                                            <label for="formador_internos" class="text-sm text-gray-800 ms-3">Formador de Internos</label>
-                                        </div>
-
-                                        <div class="flex">
-                                            <input type="checkbox" id="formador_residente" name="formador_residente" class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500" {% if unidad.formador_residente %}checked{% endif %}>
-                                            <label for="formador_residente" class="text-sm text-gray-800 ms-3">Formador de Residentes</label>
-                                        </div>
+                                        <p class="block text-sm font-medium mb-2">
+                                            Estado operativo
+                                        </p>
 
                                         <div class="flex">
                                             <input type="checkbox" id="activo" name="activo" class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500" {% if unidad.activo %}checked{% endif %}>
-                                            <label for="activo" class="text-sm text-gray-800 ms-3">Activo</label>
+                                            <label for="activo" class="text-sm text-gray-800 ms-3">En funcionamiento</label>
                                         </div>
                                     </div>
                                 </div>

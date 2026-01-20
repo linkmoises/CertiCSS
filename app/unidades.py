@@ -63,9 +63,20 @@ def crear_unidad():
         tipo = request.form.get('tipo', '').strip()
         provincia = request.form.get('provincia', '').strip()
         nivel_asistencial = int(request.form.get('nivel_asistencial', 1))
+        nivel_complejidad = request.form.get('nivel_complejidad', '').strip()
         formador_internos = request.form.get('formador_internos') == 'on'
         formador_residente = request.form.get('formador_residente') == 'on'
         activo = request.form.get('activo') == 'on'
+        
+        # Obtener coordenadas geográficas
+        latitud = request.form.get('latitud', '').strip()
+        longitud = request.form.get('longitud', '').strip()
+        altitud = request.form.get('altitud', '').strip()
+        
+        # Convertir coordenadas a float si están presentes
+        latitud = float(latitud) if latitud else None
+        longitud = float(longitud) if longitud else None
+        altitud = int(altitud) if altitud else None
         
         # Si es Coordinación Regional, forzar nivel 5 y complejidad NA
         if tipo == 'Coordinación Regional':
@@ -138,6 +149,9 @@ def crear_unidad():
             'formador_residente': formador_residente,
             'activo': activo,
             'foto': foto_filename,
+            'latitud': latitud,
+            'longitud': longitud,
+            'altitud': altitud,
             'timestamp': datetime.now()
         }
         
@@ -182,9 +196,20 @@ def editar_unidad(unidad_id):
             tipo = request.form.get('tipo', '').strip()
             provincia = request.form.get('provincia', '').strip()
             nivel_asistencial = int(request.form.get('nivel_asistencial', 1))
+            nivel_complejidad = request.form.get('nivel_complejidad', '').strip()
             formador_internos = request.form.get('formador_internos') == 'on'
             formador_residente = request.form.get('formador_residente') == 'on'
             activo = request.form.get('activo') == 'on'
+            
+            # Obtener coordenadas geográficas
+            latitud = request.form.get('latitud', '').strip()
+            longitud = request.form.get('longitud', '').strip()
+            altitud = request.form.get('altitud', '').strip()
+            
+            # Convertir coordenadas a float si están presentes
+            latitud = float(latitud) if latitud else None
+            longitud = float(longitud) if longitud else None
+            altitud = int(altitud) if altitud else None
             
             # Si es Coordinación Regional, forzar nivel 5 y complejidad NA
             if tipo == 'Coordinación Regional':
@@ -264,6 +289,9 @@ def editar_unidad(unidad_id):
                 'formador_residente': formador_residente,
                 'activo': activo,
                 'foto': foto_filename,
+                'latitud': latitud,
+                'longitud': longitud,
+                'altitud': altitud,
                 'timestamp_updated': datetime.now()
             }
             
