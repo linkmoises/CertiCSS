@@ -220,6 +220,9 @@
                     {% endif %}
                 </div>
 
+            </div>
+            <div class="px-4 pt-6 lg:pt-10 pb-12 sm:px-6 lg:px-8 mx-auto">
+
                 <!-- Title -->
                 <div class="text-center mt-10 mb-8">
                     <h1 class="text-3xl font-bold text-gray-800 sm:text-4xl dark:text-white">Equipo DENADOI</h1>
@@ -227,7 +230,7 @@
                 </div>
                 <!-- End Title -->
 
-                <div id="denadoi" class="justify-center grid grid-cols-2 max-md:gap-x-4">
+                <div id="denadoi" class="justify-center grid grid-cols-3 max-md:gap-x-4">
                     {% for usuario in denadoi_users %}
                     <div class="text-center mb-6">
                         <div>
@@ -247,7 +250,7 @@
                     {% endfor %}
                 </div>
 
-                <div class="max-w-3xl px-4 pt-6 lg:pt-10 pb-12 sm:px-6 lg:px-8 mx-auto">
+                <div class="px-4 pt-6 lg:pt-10 pb-12 sm:px-6 lg:px-8 mx-auto">
                     <div class="text-center">
                         <div>
                             <img class="rounded-xl mx-auto" src="{{ url_for('static', filename='assets/equipo-administrativo.jpg') }}" alt="Equipo administrativo">
