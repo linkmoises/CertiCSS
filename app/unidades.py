@@ -434,7 +434,7 @@ def catalogo_unidades():
             
             unidad['coordinador_rol'] = rol_legible
         else:
-            unidad['coordinador_nombre'] = 'No asignado'
+            unidad['coordinador_nombre'] = 'Designación/asociación pendiente'
             unidad['coordinador_rol'] = 'Coordinador Local'
     
     return render_template('catalogo_unidades.html', unidades=unidades)
