@@ -1,73 +1,111 @@
 {% include 'tablero-header.html' %}
 
 {% include 'tablero-sidebar.html' %}
-    
-    <!-- CONTENIDO -->
-    <div class="w-full lg:ps-64">
-        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
 
-            <!-- TABLA UNIDADES EJECUTORAS -->
-            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
-                <!-- Card -->
-                <div class="flex flex-col">
+<!-- CONTENIDO -->
+<div class="w-full lg:ps-64">
+    <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+
+        <!-- TABLA UNIDADES EJECUTORAS -->
+        <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+            <!-- Card -->
+            <div class="flex flex-col">
                 <div class="-m-1.5 overflow-x-auto">
                     <div class="p-1.5 min-w-full inline-block align-middle">
-                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                        <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
 
-                        <!-- Header -->
-                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
-                            <div>
-                                <h2 class="text-xl font-semibold text-gray-800">
-                                    Unidades Ejecutoras
-                                </h2>
-                                <p class="text-sm text-gray-600">
-                                    Gestión de unidades ejecutoras del sistema
-                                </p>
-                            </div>
-            
-                            <div>
-                                <div class="inline-flex gap-x-2">
-                                    <button type="button" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" data-hs-overlay="#modal-crear-unidad">
-                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                                        Nueva Unidad
-                                    </button>
+                            <!-- Header -->
+                            <div
+                                class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
+                                <div>
+                                    <h2 class="text-xl font-semibold text-gray-800">
+                                        Unidades Ejecutoras
+                                    </h2>
+                                    <p class="text-sm text-gray-600">
+                                        Gestión de unidades ejecutoras del sistema
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <div class="inline-flex gap-x-2">
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50"
+                                            href="{{ url_for('unidades.catalogo_unidades') }}">
+                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                                height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M12 7v4"></path>
+                                                <path d="M14 21v-3a2 2 0 0 0-4 0v3"></path>
+                                                <path d="M14 9h-4"></path>
+                                                <path
+                                                    d="M18 11h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h2">
+                                                </path>
+                                                <path d="M18 21V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16"></path>
+                                            </svg>
+                                            Catálogo de Unidades Ejecutoras
+                                        </a>
+                                        <button type="button"
+                                            class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
+                                            data-hs-overlay="#modal-crear-unidad">
+                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                                height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M5 12h14" />
+                                                <path d="M12 5v14" />
+                                            </svg>
+                                            Nueva Unidad
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <!-- End Header -->
+                            <!-- End Header -->
 
-                        <!-- Body -->
-                        {% if unidades %}
-                        <div class="overflow-hidden">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Unidad</th>
-                                        <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Tipo/Provincia</th>
-                                        <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Nivel/Complejidad</th>
-                                        <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Formación</th>
-                                        <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Estado</th>
-                                        <th scope="col" class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200">
-                                    {% for unidad in unidades %}
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="h-px w-90 min-w-90 px-6 py-4">
-                                            <div class="flex items-center">
-                                                <div class="flex-shrink-0 h-12 w-12">
-                                                    <img class="h-12 w-12 rounded-lg object-cover" src="{{ unidad.foto_url }}" alt="{{ unidad.nombre }}">
+                            <!-- Body -->
+                            {% if unidades %}
+                            <div class="overflow-hidden">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col"
+                                                class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">
+                                                Unidad</th>
+                                            <th scope="col"
+                                                class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">
+                                                Tipo/Provincia</th>
+                                            <th scope="col"
+                                                class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">
+                                                Nivel/Complejidad</th>
+                                            <th scope="col"
+                                                class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">
+                                                Formación</th>
+                                            <th scope="col"
+                                                class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">
+                                                Estado</th>
+                                            <th scope="col"
+                                                class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase">
+                                                Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        {% for unidad in unidades %}
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="h-px w-90 min-w-90 px-6 py-4">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0 h-12 w-12">
+                                                        <img class="h-12 w-12 rounded-lg object-cover"
+                                                            src="{{ unidad.foto_url }}" alt="{{ unidad.nombre }}">
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-semibold text-gray-900">{{
+                                                            unidad.nombre }}</div>
+                                                        <span
+                                                            class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                                            {{ unidad.slug }}
+                                                        </span>
+                                                    </div>
                                                 </div>
-                                                <div class="ml-4">
-                                                    <div class="text-sm font-semibold text-gray-900">{{ unidad.nombre }}</div>
-                                                    <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
-                                                        {{ unidad.slug }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="px-2 py-4 whitespace-nowrap">
-                                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium
+                                            </td>
+                                            <td class="px-2 py-4 whitespace-nowrap">
+                                                <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium
                                                 {% if unidad.tipo == 'Hospital General' %}bg-red-100 text-red-800
                                                 {% elif unidad.tipo == 'Hospital Regional' %}bg-red-200 text-red-900
                                                 {% elif unidad.tipo == 'Hospital de Alta Complejidad' %}bg-red-300 text-red-900
@@ -79,9 +117,9 @@
                                                 {% elif unidad.tipo == 'ULSySO' %}bg-purple-100 text-purple-800
                                                 {% elif unidad.tipo == 'Coordinación Regional' %}bg-orange-100 text-orange-800
                                                 {% else %}bg-gray-100 text-gray-800{% endif %}">
-                                                {{ unidad.tipo }}
-                                            </span><br />
-                                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium
+                                                    {{ unidad.tipo }}
+                                                </span><br />
+                                                <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium
                                                 {% if unidad.provincia == 'Panamá' %}bg-indigo-100 text-indigo-800
                                                 {% elif unidad.provincia == 'Panamá Oeste' %}bg-indigo-200 text-indigo-900
                                                 {% elif unidad.provincia == 'Chiriquí' %}bg-emerald-100 text-emerald-800
@@ -91,304 +129,389 @@
                                                 {% elif unidad.provincia == 'Los Santos' %}bg-pink-100 text-pink-800
                                                 {% elif unidad.provincia == 'Bocas Del Toro' %}bg-teal-100 text-teal-800
                                                 {% else %}bg-gray-100 text-gray-800{% endif %}">
-                                                {{ unidad.provincia if unidad.provincia else 'No especificada' }}
-                                            </span>
-                                        </td>
-                                        <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            <div class="text-xs bg-gray-50 border border-gray-200 p-2 rounded-md">
-                                                Nivel: {{ unidad.nivel_asistencial }}<br />
-                                                Complejidad: {{ unidad.nivel_complejidad if unidad.nivel_complejidad else 'NE' }}<br />
-                                            </div>
-                                        </td>
-                                        <td class="px-2 py-4 whitespace-nowrap">
-                                            <div class="flex flex-col space-y-1">
-                                                {% if unidad.formador_internos %}
-                                                <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-green-100 text-green-800">
-                                                    Internos
+                                                    {{ unidad.provincia if unidad.provincia else 'No especificada' }}
+                                                </span>
+                                            </td>
+                                            <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                <div class="text-xs bg-gray-50 border border-gray-200 p-2 rounded-md">
+                                                    Nivel: {{ unidad.nivel_asistencial }}<br />
+                                                    Complejidad: {{ unidad.nivel_complejidad if unidad.nivel_complejidad
+                                                    else 'NE' }}<br />
+                                                </div>
+                                            </td>
+                                            <td class="px-2 py-4 whitespace-nowrap">
+                                                <div class="flex flex-col space-y-1">
+                                                    {% if unidad.formador_internos %}
+                                                    <span
+                                                        class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-green-100 text-green-800">
+                                                        Internos
+                                                    </span>
+                                                    {% endif %}
+                                                    {% if unidad.formador_residente %}
+                                                    <span
+                                                        class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-blue-100 text-blue-800">
+                                                        Residentes
+                                                    </span>
+                                                    {% endif %}
+                                                    {% if not unidad.formador_internos and not unidad.formador_residente
+                                                    %}
+                                                    <span
+                                                        class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">N/A</span>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td class="px-2 py-4 whitespace-nowrap">
+                                                {% if unidad.activo %}
+                                                <span
+                                                    class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-green-100 text-green-800">
+                                                    Activo
+                                                </span>
+                                                {% else %}
+                                                <span
+                                                    class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-red-100 text-red-800">
+                                                    Inactivo
                                                 </span>
                                                 {% endif %}
-                                                {% if unidad.formador_residente %}
-                                                <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-blue-100 text-blue-800">
-                                                    Residentes
-                                                </span>
-                                                {% endif %}
-                                                {% if not unidad.formador_internos and not unidad.formador_residente %}
-                                                <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">N/A</span>
-                                                {% endif %}
-                                            </div>
-                                        </td>
-                                        <td class="px-2 py-4 whitespace-nowrap">
-                                            {% if unidad.activo %}
-                                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-green-100 text-green-800">
-                                                Activo
-                                            </span>
-                                            {% else %}
-                                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-red-100 text-red-800">
-                                                Inactivo
-                                            </span>
-                                            {% endif %}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-end text-sm font-medium">
-                                            <div class="flex justify-end space-x-2">
-                                                <a href="{{ url_for('unidades.editar_unidad', unidad_id=unidad._id) }}" class="text-blue-600 hover:text-blue-900" title="Editar">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                                    </svg>
-                                                </a>
-                                                <form method="POST" action="{{ url_for('unidades.eliminar_unidad', unidad_id=unidad._id) }}" class="inline" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta unidad?')">
-                                                    <button type="submit" class="text-red-600 hover:text-red-900" title="Eliminar">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-end text-sm font-medium">
+                                                <div class="flex justify-end space-x-2">
+                                                    <a href="{{ url_for('unidades.editar_unidad', unidad_id=unidad._id) }}"
+                                                        class="text-blue-600 hover:text-blue-900" title="Editar">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                                            </path>
                                                         </svg>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                        {% else %}
-                        <div class="max-w-sm w-full min-h-[400px] flex flex-col justify-center mx-auto px-6 py-4">
-                            <div class="flex justify-center items-center size-[46px] bg-gray-100 rounded-lg">
-                                <svg class="shrink-0 size-6 text-gray-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-hospital-icon lucide-hospital"><path d="M12 7v4"/><path d="M14 21v-3a2 2 0 0 0-4 0v3"/><path d="M14 9h-4"/><path d="M18 11h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h2"/><path d="M18 21V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16"/></svg>
+                                                    </a>
+                                                    <form method="POST"
+                                                        action="{{ url_for('unidades.eliminar_unidad', unidad_id=unidad._id) }}"
+                                                        class="inline"
+                                                        onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta unidad?')">
+                                                        <button type="submit" class="text-red-600 hover:text-red-900"
+                                                            title="Eliminar">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                                viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                                </path>
+                                                            </svg>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
                             </div>
+                            {% else %}
+                            <div class="max-w-sm w-full min-h-[400px] flex flex-col justify-center mx-auto px-6 py-4">
+                                <div class="flex justify-center items-center size-[46px] bg-gray-100 rounded-lg">
+                                    <svg class="shrink-0 size-6 text-gray-600" xmlns="http://www.w3.org/2000/svg"
+                                        width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                        class="lucide lucide-hospital-icon lucide-hospital">
+                                        <path d="M12 7v4" />
+                                        <path d="M14 21v-3a2 2 0 0 0-4 0v3" />
+                                        <path d="M14 9h-4" />
+                                        <path
+                                            d="M18 11h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h2" />
+                                        <path d="M18 21V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16" />
+                                    </svg>
+                                </div>
 
-                            <h2 class="mt-5 font-semibold text-gray-800">
-                                No hay unidades ejecutoras
-                            </h2>
-                            <p class="mt-2 text-sm text-gray-600">
-                                No hay unidades ejecutoras registradas en el sistema.
-                            </p>
-                            
-                            <div class="mt-5 flex flex-col sm:flex-row gap-2">
-                                <button type="button" class="py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" data-hs-overlay="#modal-crear-unidad">
-                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                                    Nueva Unidad
-                                </button>
+                                <h2 class="mt-5 font-semibold text-gray-800">
+                                    No hay unidades ejecutoras
+                                </h2>
+                                <p class="mt-2 text-sm text-gray-600">
+                                    No hay unidades ejecutoras registradas en el sistema.
+                                </p>
+
+                                <div class="mt-5 flex flex-col sm:flex-row gap-2">
+                                    <button type="button"
+                                        class="py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
+                                        data-hs-overlay="#modal-crear-unidad">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M5 12h14" />
+                                            <path d="M12 5v14" />
+                                        </svg>
+                                        Nueva Unidad
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                        {% endif %}
-                        <!-- End Body -->
+                            {% endif %}
+                            <!-- End Body -->
 
-                        <!-- Footer -->
-                        {% if unidades %}
-                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200">
-                            <div>
-                            <p class="text-sm text-gray-600">
-                                <span class="font-semibold text-gray-800">{{ unidades|length }}</span> unidad{% if unidades|length != 1 %}es{% endif %} ejecutora{% if unidades|length != 1 %}s{% endif %}
-                            </p>
+                            <!-- Footer -->
+                            {% if unidades %}
+                            <div
+                                class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200">
+                                <div>
+                                    <p class="text-sm text-gray-600">
+                                        <span class="font-semibold text-gray-800">{{ unidades|length }}</span> unidad{%
+                                        if unidades|length != 1 %}es{% endif %} ejecutora{% if unidades|length != 1
+                                        %}s{% endif %}
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                        {% endif %}
-                        <!-- End Footer -->
+                            {% endif %}
+                            <!-- End Footer -->
 
-                    </div>
+                        </div>
                     </div>
                 </div>
-                </div>
-                <!-- End Card -->
             </div>
-            <!-- FIN TABLA UNIDADES EJECUTORAS -->
+            <!-- End Card -->
+        </div>
+        <!-- FIN TABLA UNIDADES EJECUTORAS -->
 
-            <!-- MODAL CREAR UNIDAD -->
-            <div id="modal-crear-unidad" class="hs-overlay hidden size-full fixed top-0 start-0 z-[80] overflow-x-hidden overflow-y-auto pointer-events-none">
-                <div class="hs-overlay-open:mt-7 hs-overlay-open:opacity-100 hs-overlay-open:duration-500 mt-0 opacity-0 ease-out transition-all sm:max-w-2xl sm:w-full m-3 sm:mx-auto">
-                    <div class="flex flex-col bg-white border shadow-sm rounded-xl pointer-events-auto">
-                        <div class="flex justify-between items-center py-3 px-4 border-b">
-                            <h3 class="font-bold text-gray-800">
-                                Nueva Unidad Ejecutora
-                            </h3>
-                            <button type="button" class="flex justify-center items-center size-7 text-sm font-semibold rounded-full border border-transparent text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none" data-hs-overlay="#modal-crear-unidad">
-                                <span class="sr-only">Cerrar</span>
-                                <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="m18 6-12 12"></path>
-                                    <path d="m6 6 12 12"></path>
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="p-4 overflow-y-auto">
-                            <form method="POST" action="{{ url_for('unidades.crear_unidad') }}" enctype="multipart/form-data">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <!-- Columna izquierda -->
-                                    <div class="space-y-4">
-                                        <!-- Nombre -->
-                                        <div>
-                                            <label for="nombre" class="block text-sm font-medium mb-2">Nombre *</label>
-                                            <input type="text" id="nombre" name="nombre" class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" required>
-                                        </div>
-
-                                        <!-- Slug -->
-                                        <div>
-                                            <label for="slug" class="block text-sm font-medium mb-2">Slug *</label>
-                                            <input type="text" id="slug" name="slug" class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="ej: CHMDRAAM" required>
-                                            <p class="text-xs text-gray-500 mt-1">Identificador único (suele ser la abreviatura del nombre)</p>
-                                        </div>
-
-                                        <!-- Tipo -->
-                                        <div>
-                                            <label for="tipo" class="block text-sm font-medium mb-2">Tipo *</label>
-                                            <select id="tipo" name="tipo" class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" required onchange="handleTipoChange()">
-                                                <option value="">Seleccionar tipo</option>
-                                                <option value="CAPPS">CAPPS</option>
-                                                <option value="ULAPS">ULAPS</option>
-                                                <option value="ULSySO">ULSySO</option>
-                                                <option value="Policlínica Básica">Policlínica Básica</option>
-                                                <option value="Policlínica Especializada">Policlínica Especializada</option>
-                                                <option value="Hospital General">Hospital General</option>
-                                                <option value="Hospital Regional">Hospital Regional</option>
-                                                <option value="Hospital de Referencia Nacional">Hospital de Referencia Nacional</option>
-                                                <option value="Hospital de Alta Complejidad">Hospital de Alta Complejidad</option>
-                                                <option value="Coordinación Regional">Coordinación Regional</option>
-                                            </select>
-                                        </div>
-
-                                        <!-- Provincia -->
-                                        <div>
-                                            <label for="provincia" class="block text-sm font-medium mb-2">Provincia *</label>
-                                            <select id="provincia" name="provincia" class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" required>
-                                                <option value="">Seleccionar provincia</option>
-                                                <option value="Bocas Del Toro">Bocas Del Toro</option>
-                                                <option value="Coclé">Coclé</option>
-                                                <option value="Colón">Colón</option>
-                                                <option value="Chiriquí">Chiriquí</option>
-                                                <option value="Herrera">Herrera</option>
-                                                <option value="Los Santos">Los Santos</option>
-                                                <option value="Panamá">Panamá</option>
-                                                <option value="Panamá Este">Panamá Este</option>
-                                                <option value="Panamá Oeste">Panamá Oeste</option>
-                                                <option value="Veraguas">Veraguas</option>
-                                            </select>
-                                        </div>
-
-                                        <!-- Coordenadas Geográficas -->
-                                        <div class="space-y-3">
-                                            <label class="block text-sm font-medium mb-2">Coordenadas Geográficas</label>
-                                            
-                                            <div class="grid grid-cols-5 gap-2">
-                                                <div class="col-span-2">
-                                                    <label for="latitud" class="block text-xs font-medium mb-1">Latitud</label>
-                                                    <input type="number" id="latitud" name="latitud" step="any" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="9.037872">
-                                                </div>
-                                                <div class="col-span-2">
-                                                    <label for="longitud" class="block text-xs font-medium mb-1">Longitud</label>
-                                                    <input type="number" id="longitud" name="longitud" step="any" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="-79.495271">
-                                                </div>
-                                                <div class="col-span-1">
-                                                    <label for="altitud" class="block text-xs font-medium mb-1">Z</label>
-                                                    <input type="number" id="altitud" name="altitud" step="1" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="18">
-                                                </div>
-                                            </div>
-
-                                        </div>
+        <!-- MODAL CREAR UNIDAD -->
+        <div id="modal-crear-unidad"
+            class="hs-overlay hidden size-full fixed top-0 start-0 z-[80] overflow-x-hidden overflow-y-auto pointer-events-none">
+            <div
+                class="hs-overlay-open:mt-7 hs-overlay-open:opacity-100 hs-overlay-open:duration-500 mt-0 opacity-0 ease-out transition-all sm:max-w-2xl sm:w-full m-3 sm:mx-auto">
+                <div class="flex flex-col bg-white border shadow-sm rounded-xl pointer-events-auto">
+                    <div class="flex justify-between items-center py-3 px-4 border-b">
+                        <h3 class="font-bold text-gray-800">
+                            Nueva Unidad Ejecutora
+                        </h3>
+                        <button type="button"
+                            class="flex justify-center items-center size-7 text-sm font-semibold rounded-full border border-transparent text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none"
+                            data-hs-overlay="#modal-crear-unidad">
+                            <span class="sr-only">Cerrar</span>
+                            <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m18 6-12 12"></path>
+                                <path d="m6 6 12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="p-4 overflow-y-auto">
+                        <form method="POST" action="{{ url_for('unidades.crear_unidad') }}"
+                            enctype="multipart/form-data">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Columna izquierda -->
+                                <div class="space-y-4">
+                                    <!-- Nombre -->
+                                    <div>
+                                        <label for="nombre" class="block text-sm font-medium mb-2">Nombre *</label>
+                                        <input type="text" id="nombre" name="nombre"
+                                            class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
+                                            required>
                                     </div>
 
-                                    <!-- Columna derecha -->
-                                    <div class="space-y-4">
+                                    <!-- Slug -->
+                                    <div>
+                                        <label for="slug" class="block text-sm font-medium mb-2">Slug *</label>
+                                        <input type="text" id="slug" name="slug"
+                                            class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
+                                            placeholder="ej: CHMDRAAM" required>
+                                        <p class="text-xs text-gray-500 mt-1">Identificador único (suele ser la
+                                            abreviatura del nombre)</p>
+                                    </div>
 
-                                        <!-- Foto -->
-                                        <div>
-                                            <label for="foto" class="block text-sm font-medium mb-2">Foto</label>
-                                            <input type="file" id="foto" name="foto" accept="image/jpeg,image/jpg,image/png" class="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 file:bg-gray-50 file:border-0 file:me-4 file:py-3 file:px-4">
-                                            <p class="text-xs text-gray-500 mt-1">Formatos permitidos: JPG, JPEG, PNG. Se guardará como slug-nivel.jpg</p>
-                                        </div>
+                                    <!-- Tipo -->
+                                    <div>
+                                        <label for="tipo" class="block text-sm font-medium mb-2">Tipo *</label>
+                                        <select id="tipo" name="tipo"
+                                            class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
+                                            required onchange="handleTipoChange()">
+                                            <option value="">Seleccionar tipo</option>
+                                            <option value="CAPPS">CAPPS</option>
+                                            <option value="ULAPS">ULAPS</option>
+                                            <option value="ULSySO">ULSySO</option>
+                                            <option value="Policlínica Básica">Policlínica Básica</option>
+                                            <option value="Policlínica Especializada">Policlínica Especializada</option>
+                                            <option value="Hospital General">Hospital General</option>
+                                            <option value="Hospital Regional">Hospital Regional</option>
+                                            <option value="Hospital de Referencia Nacional">Hospital de Referencia
+                                                Nacional</option>
+                                            <option value="Hospital de Alta Complejidad">Hospital de Alta Complejidad
+                                            </option>
+                                            <option value="Coordinación Regional">Coordinación Regional</option>
+                                        </select>
+                                    </div>
 
-                                        <!-- Nivel Asistencial -->
-                                        <div>
-                                            <label for="nivel_asistencial" class="block text-sm font-medium mb-2">Nivel Asistencial *</label>
-                                            <select id="nivel_asistencial" name="nivel_asistencial" class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" required>
-                                                <option value="1">Nivel 1</option>
-                                                <option value="2">Nivel 2</option>
-                                                <option value="3">Nivel 3</option>
-                                                <option value="4">Nivel 4</option>
-                                                <option value="5">Nivel 5</option>
-                                            </select>
-                                        </div>
+                                    <!-- Provincia -->
+                                    <div>
+                                        <label for="provincia" class="block text-sm font-medium mb-2">Provincia
+                                            *</label>
+                                        <select id="provincia" name="provincia"
+                                            class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
+                                            required>
+                                            <option value="">Seleccionar provincia</option>
+                                            <option value="Bocas Del Toro">Bocas Del Toro</option>
+                                            <option value="Coclé">Coclé</option>
+                                            <option value="Colón">Colón</option>
+                                            <option value="Chiriquí">Chiriquí</option>
+                                            <option value="Herrera">Herrera</option>
+                                            <option value="Los Santos">Los Santos</option>
+                                            <option value="Panamá">Panamá</option>
+                                            <option value="Panamá Este">Panamá Este</option>
+                                            <option value="Panamá Oeste">Panamá Oeste</option>
+                                            <option value="Veraguas">Veraguas</option>
+                                        </select>
+                                    </div>
 
-                                        <!-- Nivel de Complejidad -->
-                                        <div>
-                                            <label for="nivel_complejidad" class="block text-sm font-medium mb-2">Nivel de Complejidad *</label>
-                                            <select id="nivel_complejidad" name="nivel_complejidad" class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" required>
-                                                <option value="">Seleccionar complejidad</option>
-                                                <option value="1">Complejidad 1</option>
-                                                <option value="2">Complejidad 2</option>
-                                                <option value="3">Complejidad 3</option>
-                                                <option value="4">Complejidad 4</option>
-                                                <option value="5">Complejidad 5</option>
-                                                <option value="6">Complejidad 6</option>
-                                                <option value="7">Complejidad 7</option>
-                                                <option value="8">Complejidad 8</option>
-                                                <option value="9">Complejidad 9</option>
-                                                <option value="NA">No Aplica</option>
-                                            </select>
-                                        </div>
+                                    <!-- Coordenadas Geográficas -->
+                                    <div class="space-y-3">
+                                        <label class="block text-sm font-medium mb-2">Coordenadas Geográficas</label>
 
-                                        <!-- Actividad docente -->
-                                        <div>
-                                            <p class="block text-sm font-medium mb-2">
-                                                Actividad docente
-                                            </p>
-
-                                            <div class="space-y-3">
-                                                <div class="flex">
-                                                    <input type="checkbox" id="formador_internos" name="formador_internos" class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500">
-                                                    <label for="formador_internos" class="text-sm text-gray-800 ms-3">Formador de Internos</label>
-                                                </div>
-
-                                                <div class="flex">
-                                                    <input type="checkbox" id="formador_residente" name="formador_residente" class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500">
-                                                    <label for="formador_residente" class="text-sm text-gray-800 ms-3">Formador de Residentes</label>
-                                                </div>
+                                        <div class="grid grid-cols-5 gap-2">
+                                            <div class="col-span-2">
+                                                <label for="latitud"
+                                                    class="block text-xs font-medium mb-1">Latitud</label>
+                                                <input type="number" id="latitud" name="latitud" step="any"
+                                                    class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
+                                                    placeholder="9.037872">
+                                            </div>
+                                            <div class="col-span-2">
+                                                <label for="longitud"
+                                                    class="block text-xs font-medium mb-1">Longitud</label>
+                                                <input type="number" id="longitud" name="longitud" step="any"
+                                                    class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
+                                                    placeholder="-79.495271">
+                                            </div>
+                                            <div class="col-span-1">
+                                                <label for="altitud" class="block text-xs font-medium mb-1">Z</label>
+                                                <input type="number" id="altitud" name="altitud" step="1"
+                                                    class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
+                                                    placeholder="18">
                                             </div>
                                         </div>
 
-                                        <!-- Estado operativo -->
-                                        <div>
-                                            <p class="block text-sm font-medium mb-2">
-                                                Estado operativo
-                                            </p>
+                                    </div>
+                                </div>
+
+                                <!-- Columna derecha -->
+                                <div class="space-y-4">
+
+                                    <!-- Foto -->
+                                    <div>
+                                        <label for="foto" class="block text-sm font-medium mb-2">Foto</label>
+                                        <input type="file" id="foto" name="foto" accept="image/jpeg,image/jpg,image/png"
+                                            class="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 file:bg-gray-50 file:border-0 file:me-4 file:py-3 file:px-4">
+                                        <p class="text-xs text-gray-500 mt-1">Formatos permitidos: JPG, JPEG, PNG. Se
+                                            guardará como slug-nivel.jpg</p>
+                                    </div>
+
+                                    <!-- Nivel Asistencial -->
+                                    <div>
+                                        <label for="nivel_asistencial" class="block text-sm font-medium mb-2">Nivel
+                                            Asistencial *</label>
+                                        <select id="nivel_asistencial" name="nivel_asistencial"
+                                            class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
+                                            required>
+                                            <option value="1">Nivel 1</option>
+                                            <option value="2">Nivel 2</option>
+                                            <option value="3">Nivel 3</option>
+                                            <option value="4">Nivel 4</option>
+                                            <option value="5">Nivel 5</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Nivel de Complejidad -->
+                                    <div>
+                                        <label for="nivel_complejidad" class="block text-sm font-medium mb-2">Nivel de
+                                            Complejidad *</label>
+                                        <select id="nivel_complejidad" name="nivel_complejidad"
+                                            class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
+                                            required>
+                                            <option value="">Seleccionar complejidad</option>
+                                            <option value="1">Complejidad 1</option>
+                                            <option value="2">Complejidad 2</option>
+                                            <option value="3">Complejidad 3</option>
+                                            <option value="4">Complejidad 4</option>
+                                            <option value="5">Complejidad 5</option>
+                                            <option value="6">Complejidad 6</option>
+                                            <option value="7">Complejidad 7</option>
+                                            <option value="8">Complejidad 8</option>
+                                            <option value="9">Complejidad 9</option>
+                                            <option value="NA">No Aplica</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Actividad docente -->
+                                    <div>
+                                        <p class="block text-sm font-medium mb-2">
+                                            Actividad docente
+                                        </p>
+
+                                        <div class="space-y-3">
+                                            <div class="flex">
+                                                <input type="checkbox" id="formador_internos" name="formador_internos"
+                                                    class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500">
+                                                <label for="formador_internos"
+                                                    class="text-sm text-gray-800 ms-3">Formador de Internos</label>
+                                            </div>
 
                                             <div class="flex">
-                                                <input type="checkbox" id="activo" name="activo" class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500" checked>
-                                                <label for="activo" class="text-sm text-gray-800 ms-3">En funcionamiento</label>
+                                                <input type="checkbox" id="formador_residente" name="formador_residente"
+                                                    class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500">
+                                                <label for="formador_residente"
+                                                    class="text-sm text-gray-800 ms-3">Formador de Residentes</label>
                                             </div>
                                         </div>
+                                    </div>
 
+                                    <!-- Estado operativo -->
+                                    <div>
+                                        <p class="block text-sm font-medium mb-2">
+                                            Estado operativo
+                                        </p>
 
-                                        <!-- Checkboxes -->
-                                        <div class="space-y-3">
-                                            
+                                        <div class="flex">
+                                            <input type="checkbox" id="activo" name="activo"
+                                                class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500"
+                                                checked>
+                                            <label for="activo" class="text-sm text-gray-800 ms-3">En
+                                                funcionamiento</label>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div class="flex justify-end items-center gap-x-2 py-3 px-4 border-t mt-4">
-                                    <button type="button" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50" data-hs-overlay="#modal-crear-unidad">
-                                        Cancelar
-                                    </button>
-                                    <button type="submit" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700">
-                                        Crear Unidad
-                                    </button>
+
+                                    <!-- Checkboxes -->
+                                    <div class="space-y-3">
+
+                                    </div>
                                 </div>
-                            </form>
-                        </div>
+                            </div>
+
+                            <div class="flex justify-end items-center gap-x-2 py-3 px-4 border-t mt-4">
+                                <button type="button"
+                                    class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50"
+                                    data-hs-overlay="#modal-crear-unidad">
+                                    Cancelar
+                                </button>
+                                <button type="submit"
+                                    class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700">
+                                    Crear Unidad
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
-            <!-- FIN MODAL CREAR UNIDAD -->
-
-{% include 'tablero-footer.html' %}
-
         </div>
+        <!-- FIN MODAL CREAR UNIDAD -->
+
+        {% include 'tablero-footer.html' %}
+
     </div>
-    <!-- FIN CONTENIDO -->
+</div>
+<!-- FIN CONTENIDO -->
 
 <!-- JS PLUGINS -->
 <script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
 <script>
     // Auto-generar slug basado en el nombre (primera letra de cada palabra)
-    document.getElementById('nombre').addEventListener('input', function() {
+    document.getElementById('nombre').addEventListener('input', function () {
         const nombre = this.value;
         const slug = nombre
             .trim()
@@ -407,7 +530,7 @@
                 return normalized.charAt(0).toUpperCase();
             })
             .join('');
-        
+
         document.getElementById('slug').value = slug;
     });
 
@@ -416,13 +539,13 @@
         const tipoSelect = document.getElementById('tipo');
         const nivelSelect = document.getElementById('nivel_asistencial');
         const complejidadSelect = document.getElementById('nivel_complejidad');
-        
+
         if (tipoSelect.value === 'Coordinación Regional') {
             // Establecer nivel 5 y deshabilitar
             nivelSelect.value = '5';
             nivelSelect.disabled = true;
             nivelSelect.classList.add('bg-gray-100', 'cursor-not-allowed');
-            
+
             // Establecer complejidad NA y deshabilitar
             complejidadSelect.value = 'NA';
             complejidadSelect.disabled = true;
@@ -435,7 +558,7 @@
             if (nivelSelect.value === '5') {
                 nivelSelect.value = '1';
             }
-            
+
             // Habilitar selección de complejidad
             complejidadSelect.disabled = false;
             complejidadSelect.classList.remove('bg-gray-100', 'cursor-not-allowed');
@@ -447,19 +570,19 @@
     }
 
     // Mostrar mensajes flash
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                // Crear notificación toast
-                const toast = document.createElement('div');
-                toast.className = `fixed top-4 right-4 z-50 max-w-sm w-full bg-white border border-gray-200 rounded-xl shadow-lg ${category === 'error' ? 'border-red-200' : 'border-green-200'}`;
-                toast.innerHTML = `
+    {% with messages = get_flashed_messages(with_categories = true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    // Crear notificación toast
+    const toast = document.createElement('div');
+    toast.className = `fixed top-4 right-4 z-50 max-w-sm w-full bg-white border border-gray-200 rounded-xl shadow-lg ${category === 'error' ? 'border-red-200' : 'border-green-200'}`;
+    toast.innerHTML = `
                     <div class="flex p-4">
                         <div class="flex-shrink-0">
-                            ${category === 'error' ? 
-                                '<svg class="flex-shrink-0 size-4 text-red-500 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/></svg>' :
-                                '<svg class="flex-shrink-0 size-4 text-green-500 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.061L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/></svg>'
-                            }
+                            ${category === 'error' ?
+            '<svg class="flex-shrink-0 size-4 text-red-500 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/></svg>' :
+            '<svg class="flex-shrink-0 size-4 text-green-500 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.061L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/></svg>'
+        }
                         </div>
                         <div class="ms-3">
                             <p class="text-sm text-gray-700">{{ message }}</p>
@@ -472,17 +595,18 @@
                         </div>
                     </div>
                 `;
-                document.body.appendChild(toast);
-                
-                // Auto-remover después de 5 segundos
-                setTimeout(() => {
-                    if (toast.parentElement) {
-                        toast.remove();
-                    }
-                }, 5000);
-            {% endfor %}
-        {% endif %}
+    document.body.appendChild(toast);
+
+    // Auto-remover después de 5 segundos
+    setTimeout(() => {
+        if (toast.parentElement) {
+            toast.remove();
+        }
+    }, 5000);
+    {% endfor %}
+    {% endif %}
     {% endwith %}
-</script>    
+</script>
 </body>
+
 </html>
