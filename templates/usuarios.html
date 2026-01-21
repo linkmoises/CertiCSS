@@ -82,8 +82,60 @@
                 
                             <tbody class="divide-y divide-gray-200">
 
+{% set regiones_nombres = {
+    'css01': 'Bocas del Toro',
+    'css02': 'Coclé', 
+    'css03': 'Colón',
+    'css04': 'Chiriquí',
+    'css06': 'Herrera',
+    'css07': 'Los Santos',
+    'css09': 'Veraguas',
+    'css13': 'Panamá Oeste',
+    'css082': 'Panamá Este',
+    'css081': 'Panamá Metro',
+    'css088': 'San Miguelito'
+} %}
+
+{% set current_section = '' %}
+{% set current_region = '' %}
+{% set denadoi_shown = false %}
+{% set admin_section_shown = false %}
+
 {% for usuario in usuarios %}
     {% if usuario.rol != 'administrador' %}
+        
+        {# Mostrar sección DENADOI #}
+        {% if usuario.rol == 'denadoi' and not denadoi_shown %}
+            {% set denadoi_shown = true %}
+            <tr class="bg-blue-50">
+                <td colspan="5" class="px-6 py-4 text-center">
+                    <h3 class="text-lg font-semibold text-blue-800">Departamento Nacional de Docencia e Investigación</h3>
+                </td>
+            </tr>
+        {% endif %}
+        
+        {# Mostrar separador de provincia para usuarios regionales #}
+        {% if usuario.rol not in ['denadoi', 'coordinador-administrativo', 'simulacion'] and usuario.region != current_region %}
+            {% set current_region = usuario.region %}
+            {% if usuario.region in regiones_nombres %}
+                <tr class="bg-gray-100">
+                    <td colspan="5" class="px-6 py-4 text-center">
+                        <h3 class="text-lg font-semibold text-gray-700">Provincia de {{ regiones_nombres[usuario.region] }}</h3>
+                    </td>
+                </tr>
+            {% endif %}
+        {% endif %}
+        
+        {# Mostrar sección de Unidades Administrativas #}
+        {% if usuario.rol in ['coordinador-administrativo', 'simulacion'] and not admin_section_shown %}
+            {% set admin_section_shown = true %}
+            <tr class="bg-green-50">
+                <td colspan="5" class="px-6 py-4 text-center">
+                    <h3 class="text-lg font-semibold text-green-800">Unidades Administrativas</h3>
+                </td>
+            </tr>
+        {% endif %}
+
                                 <tr class="bg-white hover:bg-gray-50">
                                     <td class="size-px w-60 min-w-60">
                                         <div class="ps-6 py-3">
@@ -92,7 +144,7 @@
                                             <div class="grow">
                                                 <span class="block text-sm font-semibold text-gray-800 usuario-nombre">{{ usuario.nombres }} {{ usuario.apellidos }}
 {% if usuario.orcid %}
-                                                    <a href="https://orcid.org/{{ usuario.orcid }}" target="_blank" title="Ver perfil ORCID" class="inline-block align-top">
+                                                    <a href="https://orcid.org/{{ usuario.orcid }}" target="_blank" title="Ver perfil ORCID" class="inline-block align-top"></a>
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="inline-block" width="18" height="18" viewBox="0 0 256 256"><circle cx="128" cy="128" r="128" fill="#A6CE39"/><path fill="#fff" d="M86.3,186.2H70.9V79.1h15.4V186.2z M78.4,66.9c-5.6,0-10.1-4.6-10.1-10.1c0-5.6,4.5-10.1,10.1-10.1c5.6,0,10.1,4.6,10.1,10.1C88.5,62.3,84,66.9,78.4,66.9z M108.9,79.1h41.6c39.6,0,57,28.3,57,53.6c0,27.5-21.5,53.6-56.8,53.6h-41.8V79.1z M124.3,172.4h24.5c34.9,0,42.9-26.5,42.9-39.7c0-21.5-13.7-39.7-43.7-39.7h-23.7V172.4z"/></svg>
                                                     </a>
 {% endif %}

@@ -415,22 +415,68 @@ def login():
 @app.route('/tablero/usuarios/page/<int:page>')
 @login_required
 def listar_usuarios(page=1):
-    usuarios_por_pagina = 20  # Número de usuarios por página
-
-    # Contar el total de usuarios
-    total_usuarios = collection_usuarios.count_documents({"rol": {"$ne": "administrador"}})  # Excluir administradores si es necesario
-    # Calcular el número total de páginas
-    total_paginas = (total_usuarios + usuarios_por_pagina - 1) // usuarios_por_pagina  # Redondear hacia arriba
-
-    # Obtener los usuarios para la página actual
-    usuarios_cursor = collection_usuarios.find({"rol": {"$ne": "administrador"}}).sort([("apellidos", 1), ("nombres", 1)]).skip((page - 1) * usuarios_por_pagina).limit(usuarios_por_pagina)
+    # Obtener todos los usuarios (sin paginación para poder ordenar correctamente)
+    usuarios_cursor = collection_usuarios.find({"rol": {"$ne": "administrador"}})
     usuarios = list(usuarios_cursor)
 
+    # Agregar foto_url a cada usuario
     for usuario in usuarios:
         usuario['foto_url'] = f"/static/usuarios/{usuario['foto']}" if usuario.get('foto') else "/static/assets/user-avatar.png"
 
+    # Función para ordenar usuarios según los criterios especificados
+    def ordenar_usuarios(usuarios):
+        usuarios_ordenados = []
+        
+        # 1. Primero usuarios DENADOI (jefe, subjefe, luego otros)
+        denadoi_jefe = [u for u in usuarios if u.get('rol') == 'denadoi' and u.get('jefe', False)]
+        denadoi_subjefe = [u for u in usuarios if u.get('rol') == 'denadoi' and u.get('subjefe', False)]
+        denadoi_otros = [u for u in usuarios if u.get('rol') == 'denadoi' and not u.get('jefe', False) and not u.get('subjefe', False)]
+        
+        # Ordenar cada grupo por apellidos y nombres
+        for grupo in [denadoi_jefe, denadoi_subjefe, denadoi_otros]:
+            grupo.sort(key=lambda x: (x.get('apellidos', ''), x.get('nombres', '')))
+        
+        usuarios_ordenados.extend(denadoi_jefe)
+        usuarios_ordenados.extend(denadoi_subjefe)
+        usuarios_ordenados.extend(denadoi_otros)
+        
+        # 2. Luego usuarios por provincia/región (excluyendo DENADOI, coordinador-administrativo y simulacion)
+        regiones_orden = ['css01', 'css02', 'css03', 'css04', 'css06', 'css07', 'css09', 'css13', 'css082', 'css081', 'css088']
+        roles_orden = ['coordinador-regional', 'subdirector-docencia', 'coordinador-local', 'coordinador-departamental']
+        
+        for region in regiones_orden:
+            usuarios_region = [u for u in usuarios if u.get('region') == region and u.get('rol') not in ['denadoi', 'coordinador-administrativo', 'simulacion']]
+            if usuarios_region:
+                # Ordenar por rol según el orden especificado, luego por apellidos y nombres
+                usuarios_region.sort(key=lambda x: (
+                    roles_orden.index(x.get('rol')) if x.get('rol') in roles_orden else 999,
+                    x.get('apellidos', ''),
+                    x.get('nombres', '')
+                ))
+                usuarios_ordenados.extend(usuarios_region)
+        
+        # 3. Finalmente usuarios administrativos (coordinador-administrativo y simulacion)
+        usuarios_admin = [u for u in usuarios if u.get('rol') in ['coordinador-administrativo', 'simulacion']]
+        usuarios_admin.sort(key=lambda x: (x.get('apellidos', ''), x.get('nombres', '')))
+        usuarios_ordenados.extend(usuarios_admin)
+        
+        return usuarios_ordenados
+
+    # Aplicar el ordenamiento
+    usuarios_ordenados = ordenar_usuarios(usuarios)
+    
+    # Aplicar paginación después del ordenamiento
+    usuarios_por_pagina = 20
+    total_usuarios = len(usuarios_ordenados)
+    total_paginas = (total_usuarios + usuarios_por_pagina - 1) // usuarios_por_pagina
+    
+    inicio = (page - 1) * usuarios_por_pagina
+    fin = inicio + usuarios_por_pagina
+    usuarios_pagina = usuarios_ordenados[inicio:fin]
+
     return render_template('usuarios.html',
-        usuarios=usuarios,
+        usuarios=usuarios_pagina,
+        usuarios_todos=usuarios_ordenados,  # Para el template
         page=page,
         total_paginas=total_paginas,
         total_usuarios=total_usuarios
