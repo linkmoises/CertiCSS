@@ -477,7 +477,7 @@ def listar_usuarios(page=1):
     # Determinar qué separadores mostrar en esta página
     separadores_mostrar = {
         'denadoi': False,
-        'regiones': set(),
+        'regiones': [],
         'administrativos': False
     }
     
@@ -501,7 +501,8 @@ def listar_usuarios(page=1):
             
             if (usuario.get('rol') not in ['denadoi', 'coordinador-administrativo', 'simulacion'] and 
                 usuario.get('region') not in grupos_anteriores['regiones']):
-                separadores_mostrar['regiones'].add(usuario.get('region'))
+                if usuario.get('region') not in separadores_mostrar['regiones']:
+                    separadores_mostrar['regiones'].append(usuario.get('region'))
                 grupos_anteriores['regiones'].add(usuario.get('region'))
             
             if (usuario.get('rol') in ['coordinador-administrativo', 'simulacion'] and 
