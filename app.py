@@ -474,9 +474,45 @@ def listar_usuarios(page=1):
     fin = inicio + usuarios_por_pagina
     usuarios_pagina = usuarios_ordenados[inicio:fin]
 
+    # Determinar qué separadores mostrar en esta página
+    separadores_mostrar = {
+        'denadoi': False,
+        'regiones': set(),
+        'administrativos': False
+    }
+    
+    # Verificar si es la primera aparición de cada grupo en esta página
+    if usuarios_pagina:
+        # Verificar usuarios anteriores a esta página para saber qué separadores ya se mostraron
+        usuarios_anteriores = usuarios_ordenados[:inicio] if inicio > 0 else []
+        
+        # Verificar qué grupos ya aparecieron antes de esta página
+        grupos_anteriores = {
+            'denadoi': any(u.get('rol') == 'denadoi' for u in usuarios_anteriores),
+            'regiones': set(u.get('region') for u in usuarios_anteriores if u.get('rol') not in ['denadoi', 'coordinador-administrativo', 'simulacion']),
+            'administrativos': any(u.get('rol') in ['coordinador-administrativo', 'simulacion'] for u in usuarios_anteriores)
+        }
+        
+        # Determinar qué separadores mostrar en esta página
+        for usuario in usuarios_pagina:
+            if usuario.get('rol') == 'denadoi' and not grupos_anteriores['denadoi']:
+                separadores_mostrar['denadoi'] = True
+                grupos_anteriores['denadoi'] = True
+            
+            if (usuario.get('rol') not in ['denadoi', 'coordinador-administrativo', 'simulacion'] and 
+                usuario.get('region') not in grupos_anteriores['regiones']):
+                separadores_mostrar['regiones'].add(usuario.get('region'))
+                grupos_anteriores['regiones'].add(usuario.get('region'))
+            
+            if (usuario.get('rol') in ['coordinador-administrativo', 'simulacion'] and 
+                not grupos_anteriores['administrativos']):
+                separadores_mostrar['administrativos'] = True
+                grupos_anteriores['administrativos'] = True
+
     return render_template('usuarios.html',
         usuarios=usuarios_pagina,
         usuarios_todos=usuarios_ordenados,  # Para el template
+        separadores_mostrar=separadores_mostrar,
         page=page,
         total_paginas=total_paginas,
         total_usuarios=total_usuarios

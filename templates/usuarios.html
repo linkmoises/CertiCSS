@@ -96,16 +96,16 @@
     'css088': 'San Miguelito'
 } %}
 
-{% set current_section = '' %}
 {% set current_region = '' %}
 {% set denadoi_shown = false %}
 {% set admin_section_shown = false %}
+{% set regiones_mostradas = [] %}
 
 {% for usuario in usuarios %}
     {% if usuario.rol != 'administrador' %}
         
-        {# Mostrar sección DENADOI #}
-        {% if usuario.rol == 'denadoi' and not denadoi_shown %}
+        {# Mostrar sección DENADOI solo si debe aparecer en esta página #}
+        {% if usuario.rol == 'denadoi' and separadores_mostrar.denadoi and not denadoi_shown %}
             {% set denadoi_shown = true %}
             <tr class="bg-blue-50">
                 <td colspan="5" class="px-6 py-4 text-center">
@@ -114,9 +114,11 @@
             </tr>
         {% endif %}
         
-        {# Mostrar separador de provincia para usuarios regionales #}
-        {% if usuario.rol not in ['denadoi', 'coordinador-administrativo', 'simulacion'] and usuario.region != current_region %}
-            {% set current_region = usuario.region %}
+        {# Mostrar separador de provincia solo si debe aparecer en esta página #}
+        {% if (usuario.rol not in ['denadoi', 'coordinador-administrativo', 'simulacion'] and 
+               usuario.region in separadores_mostrar.regiones and 
+               usuario.region not in regiones_mostradas) %}
+            {% set _ = regiones_mostradas.append(usuario.region) %}
             {% if usuario.region in regiones_nombres %}
                 <tr class="bg-gray-100">
                     <td colspan="5" class="px-6 py-4 text-center">
@@ -126,8 +128,8 @@
             {% endif %}
         {% endif %}
         
-        {# Mostrar sección de Unidades Administrativas #}
-        {% if usuario.rol in ['coordinador-administrativo', 'simulacion'] and not admin_section_shown %}
+        {# Mostrar sección de Unidades Administrativas solo si debe aparecer en esta página #}
+        {% if usuario.rol in ['coordinador-administrativo', 'simulacion'] and separadores_mostrar.administrativos and not admin_section_shown %}
             {% set admin_section_shown = true %}
             <tr class="bg-green-50">
                 <td colspan="5" class="px-6 py-4 text-center">
