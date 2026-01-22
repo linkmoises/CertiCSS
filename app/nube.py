@@ -18,17 +18,19 @@ nube_bp = Blueprint('nube', __name__)
 
 # Importar función de logging centralizada
 from app.logs import log_event
+from app.helpers import allowed_file
+
+# Configuración específica para archivos de la nube
+NUBE_ALLOWED_EXTENSIONS = {'pdf', 'ppt', 'pptx', 'doc', 'docx', 'txt', 'md', 'jpg', 'png', 'xls', 'xlsx'}
 
 # Configuración específica para la nube
 NUBE_FOLDER = 'static/nube'
 MAX_USER_STORAGE = 256 * 1024 * 1024  # 256 MB en bytes
-ALLOWED_EXTENSIONS = {'pdf', 'ppt', 'pptx', 'doc', 'docx', 'txt', 'md', 'jpg', 'png', 'xls', 'xlsx'}
-
 # La colección collection_nube se importa desde app/__init__.py
 
-def allowed_file(filename):
-    """Verifica si la extensión del archivo está permitida."""
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+def allowed_file_nube(filename):
+    """Verifica si la extensión del archivo está permitida para la nube."""
+    return allowed_file(filename, NUBE_ALLOWED_EXTENSIONS)
 
 def get_user_folder_path(user_id):
     """Obtiene la ruta de la carpeta del usuario."""
@@ -109,7 +111,7 @@ def subir_archivo():
         flash('No se seleccionó ningún archivo.', 'error')
         return redirect(url_for('nube.nube_dashboard'))
     
-    if not allowed_file(file.filename):
+    if not allowed_file_nube(file.filename):
         flash('Tipo de archivo no permitido.', 'error')
         return redirect(url_for('nube.nube_dashboard'))
     

@@ -12,6 +12,7 @@ from datetime import datetime
 from werkzeug.utils import secure_filename
 from PIL import Image
 from app.logs import log_event
+from app.helpers import allowed_file_images as allowed_file
 import os
 
 unidades_bp = Blueprint('unidades', __name__)
@@ -349,15 +350,6 @@ def eliminar_unidad(unidad_id):
         flash(f'Error al eliminar la unidad: {str(e)}', 'error')
     
     return redirect(url_for('unidades.tablero_unidades'))
-
-
-###
-### Función auxiliar para validar archivos
-###
-def allowed_file(filename):
-    """Verifica si la extensión del archivo está permitida."""
-    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 ###

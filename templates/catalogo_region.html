@@ -95,12 +95,13 @@
         <div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
             <!-- Grid -->
             <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% if eventos|length == 0 %}
+                {% set eventos_filtrados = eventos|selectattr('tipo', 'ne', 'Sesión docente')|selectattr('tipo', 'ne', 'Abiertos')|list %}
+                {% if eventos_filtrados|length == 0 %}
                     <div class="alert alert-info text-center my-4">
                         No hay eventos disponibles en esta región.
                     </div>
                 {% else %}
-                    {% for evento in eventos %}
+                    {% for evento in eventos_filtrados %}
                     <!-- Card -->
                     <div class="group flex flex-col h-full bg-white border border-gray-200 shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70">
                         <div class="relative pt-[100%] sm:pt-[100%] overflow-hidden rounded-t-xl">

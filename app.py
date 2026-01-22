@@ -18,6 +18,7 @@ from io import BytesIO, StringIO
 import csv
 from enum import Enum
 from functools import wraps
+from app.helpers import generate_otp, generate_nanoid, generar_codigo_evento, obtener_codigo_unico, allowed_file, otp_storage
 
 app = Flask(__name__)
 
@@ -217,17 +218,6 @@ except Exception as e:
 
 
 ###
-### Función código OTP
-###
-otp_storage = {}
-
-def generate_otp():
-    """Genera un código OTP de 4 dígitos (mayúsculas y números)."""
-    characters = string.ascii_uppercase + string.digits
-    return ''.join(random.choice(characters) for _ in range(4))
-
-
-###
 ### OTP dinámico
 ###
 @app.route('/get-otp/<codigo_evento>')
@@ -245,34 +235,6 @@ def get_otp(codigo_evento):
 
     # Devolver el OTP en formato JSON
     return jsonify(otp=otp_code)
-
-
-###
-### Función código nanoid
-###
-def generate_nanoid(cedula, codigo_evento, titulo_ponencia=None):
-    """Genera un hash nanoid truncado a 8 caracteres utilizando cédula, código de evento y opcionalmente título de ponencia."""
-    # Si no se proporciona un título de ponencia, usar una cadena vacía
-    if titulo_ponencia is None:
-        titulo_ponencia = ""
-    base_string = f"{cedula}{codigo_evento}{titulo_ponencia}"
-    hash_object = hashlib.sha256(base_string.encode())
-    return hash_object.hexdigest()[:8]
-
-
-###
-### Función que genera código evento
-###
-def generar_codigo_evento(longitud=6):
-    caracteres = string.ascii_uppercase + string.digits
-    codigo = ''.join(random.choice(caracteres) for _ in range(longitud))
-    return codigo
-
-def obtener_codigo_unico():
-    while True:
-        codigo = generar_codigo_evento()
-        if collection_eventos.find_one({"codigo": codigo}) is None:
-            return codigo
 
 
 ###
@@ -631,11 +593,6 @@ def editar_usuario(user_id):
         foto_url = None
 
     return render_template('editar_usuario.html', usuario=usuario, foto_url=foto_url)
-
-
-def allowed_file(filename):
-    """Verifica si la extensión del archivo está permitida."""
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 
 ###
@@ -4180,7 +4137,7 @@ def crear_evento():
         timestamp = request.form['timestamp']
 
         # Obtener un código único
-        codigo = obtener_codigo_unico()
+        codigo = obtener_codigo_unico(collection_eventos)
 
         # Carga de archivos
         afiche_file = request.files.get('afiche_evento')
@@ -5442,11 +5399,6 @@ app.jinja_env.filters['zfill'] = zfill_filter
 ###
 from werkzeug.utils import secure_filename
 import os
-
-### Extensiones permitidas para archivos del repositorio
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'pdf', 'ppt', 'pptx', 'doc', 'docx'}
-
 
 import os
 import uuid
