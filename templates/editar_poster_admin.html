@@ -22,7 +22,7 @@
     
                     <div>
                         <div class="inline-flex gap-x-2">
-                            <a href="{{ url_for('admin_posters', codigo_evento=evento.codigo) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50">
+                            <a href="{{ url_for('posters.admin_posters', codigo_evento=evento.codigo) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                                 Volver
                             </a>
@@ -227,7 +227,7 @@
 
                         <!-- Botones -->
                         <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-                            <a href="{{ url_for('admin_posters', codigo_evento=evento.codigo) }}"
+                            <a href="{{ url_for('posters.admin_posters', codigo_evento=evento.codigo) }}"
                                 class="py-2 px-4 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                 Cancelar
                             </a>
@@ -309,7 +309,7 @@
             // Crear formulario dinámico para enviar la solicitud POST
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = `{{ url_for('eliminar_jurado_poster', codigo_evento=evento.codigo, cedula_jurado='CEDULA_PLACEHOLDER') }}`.replace('CEDULA_PLACEHOLDER', cedulaJurado);
+            form.action = `{{ url_for('posters.eliminar_jurado_poster', codigo_evento=evento.codigo, cedula_jurado='CEDULA_PLACEHOLDER') }}`.replace('CEDULA_PLACEHOLDER', cedulaJurado);
             
             // Agregar token CSRF si está disponible
             const csrfToken = document.querySelector('meta[name="csrf-token"]');

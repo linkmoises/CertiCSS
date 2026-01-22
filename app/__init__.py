@@ -42,6 +42,8 @@ collection_qbanks_data = db['qbanks_data']
 collection_exam_results = db['exam_results']
 collection_nube = db['nube_archivos']
 collection_unidades = db['unidades']
+collection_posters = db['posters']
+collection_evaluaciones_poster = db['evaluaciones_poster']
 
 # Exportar variables necesarias
 BASE_URL = config.BASE_URL                      # importado de config.py

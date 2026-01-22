@@ -187,11 +187,11 @@
                         {% endif %}
 
                         <div class="mt-6 text-center">
-                            <a href="{{ url_for('editar_poster', codigo_evento=evento.codigo) }}" 
+                            <a href="{{ url_for('posters.editar_poster', codigo_evento=evento.codigo) }}" 
                             class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors mr-4">
                                 Volver a Mi Póster
                             </a>
-                            <a href="{{ url_for('poster_login', codigo_evento=evento.codigo) }}" 
+                            <a href="{{ url_for('posters.poster_login', codigo_evento=evento.codigo) }}" 
                             class="text-gray-600 hover:text-gray-800 font-medium">Cerrar Sesión</a>
                         </div>
 

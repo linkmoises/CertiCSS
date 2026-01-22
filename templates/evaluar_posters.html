@@ -133,7 +133,7 @@
                                 <span class="text-gray-400 text-sm">Sin archivo</span>
                                 {% endif %}
 
-                                <a href="{{ url_for('evaluar_poster', codigo_evento=evento.codigo, nanoid_poster=poster.nanoid) }}"
+                                <a href="{{ url_for('posters.evaluar_poster', codigo_evento=evento.codigo, nanoid_poster=poster.nanoid) }}"
                                     class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors">
                                     {% if poster.nanoid in evaluaciones_existentes %}Editar{% else %}Evaluar{% endif %}
                                 </a>
@@ -160,12 +160,12 @@
 
                 <div class="mx-auto text-center">
                     <div class="px-8 pb-8 inline-flex gap-x-2 w-full">
-                        <a href="{{ url_for('poster_logout', codigo_evento=evento.codigo) }}"
+                        <a href="{{ url_for('posters.poster_logout', codigo_evento=evento.codigo) }}"
                             class="w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-red-600 text-white hover:bg-red-700 focus:outline-none focus:bg-red-700 disabled:opacity-50 disabled:pointer-events-none">
                             Cerrar sesión
                         </a>
                         {% if current_user.rol == 'administrador' %}
-                        <a href="{{ url_for('admin_posters', codigo_evento=evento.codigo) }}"
+                        <a href="{{ url_for('posters.admin_posters', codigo_evento=evento.codigo) }}"
                             class="w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
                             Volver al tablero
                         </a>

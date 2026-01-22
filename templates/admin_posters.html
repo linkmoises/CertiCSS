@@ -153,7 +153,7 @@
                                 <div>
                                     <div class="inline-flex gap-x-2">
                                         <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
-                                            href="{{ url_for('resultados_concurso_publico', codigo_evento=evento.codigo) }}"
+                                            href="{{ url_for('posters.resultados_concurso_publico', codigo_evento=evento.codigo) }}"
                                             target="_blank">
                                             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
                                                 height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -169,7 +169,7 @@
                                             Podio
                                         </a>
                                         <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
-                                            href="{{ url_for('resultados_poster', codigo_evento=evento.codigo) }}">
+                                            href="{{ url_for('posters.resultados_poster', codigo_evento=evento.codigo) }}">
                                             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
                                                 height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -291,7 +291,7 @@
                                 {% if posters %}
                                 <div class="flex mb-6 gap-x-4">
                                     <div class="w-1/4">
-                                        <a href="mailto:?subject=Registrate%20como%20participante%20-%20{{ evento.nombre | urlencode }}&body=Registrate%20como%20participante%0A%0A{{ BASE_URL }}{{ url_for('registrar_poster', codigo_evento=evento.codigo) }}"
+                                        <a href="mailto:?subject=Registrate%20como%20participante%20-%20{{ evento.nombre | urlencode }}&body=Registrate%20como%20participante%0A%0A{{ BASE_URL }}{{ url_for('posters.registrar_poster', codigo_evento=evento.codigo) }}"
                                             class="w-full inline-flex items-center gap-x-2 bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">
                                             <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" width="24"
                                                 height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -304,7 +304,7 @@
                                         </a>
                                     </div>
                                     <div class="w-1/4">
-                                        <a href="https://wa.me/?text=Registrate%20como%20participante%0A%0A{{ BASE_URL }}{{ url_for('registrar_poster', codigo_evento=evento.codigo) }}"
+                                        <a href="https://wa.me/?text=Registrate%20como%20participante%0A%0A{{ BASE_URL }}{{ url_for('posters.registrar_poster', codigo_evento=evento.codigo) }}"
                                             class="w-full inline-flex items-center gap-x-2 bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">
                                             <svg class="h-4 w-4" fill="#ffffff" stroke="currentColor" stroke-width="2"
                                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
@@ -315,7 +315,7 @@
                                         </a>
                                     </div>
                                     <div class="w-1/4">
-                                        <a href="mailto:?subject=Registrar%20jurado%20-%20{{ evento.nombre | urlencode }}&body=Registrate%20como%20jurado%0A%0A{{ BASE_URL }}{{ url_for('registrar_jurado', codigo_evento=evento.codigo) }}"
+                                        <a href="mailto:?subject=Registrar%20jurado%20-%20{{ evento.nombre | urlencode }}&body=Registrate%20como%20jurado%0A%0A{{ BASE_URL }}{{ url_for('posters.registrar_jurado', codigo_evento=evento.codigo) }}"
                                             class="w-full inline-flex items-center gap-x-2 bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 border-b-4 border-green-700 hover:border-green-500 rounded">
                                             <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" width="24"
                                                 height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -328,7 +328,7 @@
                                         </a>
                                     </div>
                                     <div class="w-1/4">
-                                        <a href="https://wa.me/?text=Registrate%20como%20jurado%0A%0A{{ BASE_URL }}{{ url_for('registrar_jurado', codigo_evento=evento.codigo) }}"
+                                        <a href="https://wa.me/?text=Registrate%20como%20jurado%0A%0A{{ BASE_URL }}{{ url_for('posters.registrar_jurado', codigo_evento=evento.codigo) }}"
                                             class="w-full inline-flex items-center gap-x-2 bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 border-b-4 border-green-700 hover:border-green-500 rounded">
                                             <svg class="h-4 w-4" fill="#ffffff" stroke="currentColor" stroke-width="2"
                                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
@@ -413,7 +413,7 @@
                                                     </td>
                                                     <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
                                                         <div class="flex items-center space-x-2">
-                                                            <a href="{{ url_for('editar_poster_admin', codigo_evento=evento.codigo, nanoid_poster=poster.nanoid) }}"
+                                                            <a href="{{ url_for('posters.editar_poster_admin', codigo_evento=evento.codigo, nanoid_poster=poster.nanoid) }}"
                                                                 class="inline-flex items-center p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-full transition-colors duration-200"
                                                                 title="Editar póster">
                                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -439,10 +439,10 @@
                                     <div class="mt-4 space-y-2">
                                         <p class="text-sm text-gray-600">Enlaces de registro:</p>
                                         <div class="space-x-4">
-                                            <a href="{{ url_for('registrar_poster', codigo_evento=evento.codigo) }}"
+                                            <a href="{{ url_for('posters.registrar_poster', codigo_evento=evento.codigo) }}"
                                                 class="text-blue-600 hover:text-blue-800 font-medium">Registrar
                                                 Póster</a>
-                                            <a href="{{ url_for('registrar_jurado', codigo_evento=evento.codigo) }}"
+                                            <a href="{{ url_for('posters.registrar_jurado', codigo_evento=evento.codigo) }}"
                                                 class="text-green-600 hover:text-green-800 font-medium">Registrar
                                                 Jurado</a>
                                         </div>
@@ -464,7 +464,7 @@
                                 <div>
                                     <div class="inline-flex gap-x-2">
                                         <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50"
-                                            href="{{ url_for('listar_participantes', codigo_evento=evento.codigo) }}">
+                                            href="{{ url_for('posters.listar_participantes', codigo_evento=evento.codigo) }}">
                                             Volver al listado de participantes
                                         </a>
                                     </div>
@@ -548,7 +548,7 @@
             // Crear formulario dinámico para enviar la solicitud POST
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = `{{ url_for('eliminar_jurado_poster', codigo_evento=evento.codigo, cedula_jurado='CEDULA_PLACEHOLDER') }}`.replace('CEDULA_PLACEHOLDER', cedulaJurado);
+            form.action = `{{ url_for('posters.eliminar_jurado_poster', codigo_evento=evento.codigo, cedula_jurado='CEDULA_PLACEHOLDER') }}`.replace('CEDULA_PLACEHOLDER', cedulaJurado);
 
             // Agregar token CSRF si está disponible
             const csrfToken = document.querySelector('meta[name="csrf-token"]');

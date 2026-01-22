@@ -201,11 +201,11 @@
 
                 <div class="flex justify-between items-center">
                     <div class="flex space-x-3">
-                        <a href="{{ url_for('evaluar_posters', codigo_evento=evento.codigo) }}" 
+                        <a href="{{ url_for('posters.evaluar_posters', codigo_evento=evento.codigo) }}" 
                            class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors">
                             Volver al Panel
                         </a>
-                        <a href="{{ url_for('poster_logout', codigo_evento=evento.codigo) }}" 
+                        <a href="{{ url_for('posters.poster_logout', codigo_evento=evento.codigo) }}" 
                            class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors">
                             Cerrar Sesión
                         </a>
