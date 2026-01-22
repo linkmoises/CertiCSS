@@ -27,7 +27,7 @@
                                 <div>
                                     <div class="inline-flex gap-x-2">
                                         <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
-                                            href="{{ url_for('registro') }}">
+                                            href="{{ url_for('usuarios.registro') }}">
                                             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
                                                 height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -165,8 +165,7 @@
                                                         alt="Avatar de {{ usuario.nombres }} {{ usuario.apellidos }}">
                                                     <div class="grow">
                                                         <span
-                                                            class="block text-sm font-semibold text-gray-800 usuario-nombre">{{
-                                                            usuario.nombres }} {{ usuario.apellidos }}
+                                                            class="block text-sm font-semibold text-gray-800 usuario-nombre">{{ usuario.nombres }} {{ usuario.apellidos }}
                                                             {% if usuario.orcid %}
                                                             <a href="https://orcid.org/{{ usuario.orcid }}"
                                                                 target="_blank" title="Ver perfil ORCID"
@@ -180,10 +179,8 @@
                                                             </a>
                                                             {% endif %}
                                                         </span>
-                                                        <span class="block text-sm text-gray-500">{{ usuario.email
-                                                            }}</span>
-                                                        <span class="block text-xs text-gray-500">{{ usuario.phone
-                                                            }}</span>
+                                                        <span class="block text-sm text-gray-500">{{ usuario.email }}</span>
+                                                        <span class="block text-xs text-gray-500">{{ usuario.phone }}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -265,7 +262,7 @@
                                         <td class="size-px whitespace-nowrap">
                                             <div class="px-6 py-1.5">
                                                 <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium"
-                                                    href="{{ url_for('mostrar_usuario', user_id=usuario._id) }}">
+                                                    href="{{ url_for('usuarios.mostrar_usuario', user_id=usuario._id) }}">
                                                     Ver perfil
                                                     <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" width="24"
                                                         height="24" viewBox="0 0 24 24" fill="none"
@@ -280,7 +277,7 @@
                                                 {% if current_user.id|string == usuario._id|string or current_user.rol
                                                 == 'administrador' %}
                                                 <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium"
-                                                    href="{{ url_for('editar_usuario', user_id=usuario._id) }}">
+                                                    href="{{ url_for('usuarios.editar_usuario', user_id=usuario._id) }}">
                                                     Editar
                                                     <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" width="24"
                                                         height="24" viewBox="0 0 24 24" fill="none"
@@ -296,7 +293,7 @@
                                                 {% if usuario.foto %}
                                                 {% if current_user.id|string == usuario._id|string or current_user.rol
                                                 == 'administrador' %}
-                                                <form action="{{ url_for('eliminar_foto', user_id=usuario._id) }}"
+                                                <form action="{{ url_for('usuarios.eliminar_foto', user_id=usuario._id) }}"
                                                     method="post" style="display:inline;">
                                                     <button type="submit"
                                                         onclick="return confirm('¿Estás seguro de que deseas eliminar la foto de perfil?');"
@@ -318,7 +315,7 @@
                                                 {% endif %}
                                                 {% endif %}
                                                 {% if current_user.rol == 'administrador' %}
-                                                <form action="{{ url_for('toggle_activo', user_id=usuario._id) }}"
+                                                <form action="{{ url_for('usuarios.toggle_activo', user_id=usuario._id) }}"
                                                     method="post" style="display:inline;">
                                                     <button type="submit"
                                                         onclick="return confirm('¿Estás seguro de que deseas {% if usuario.activo %}desactivar{% else %}activar{% endif %} este usuario?');"
@@ -351,7 +348,7 @@
                                                 </form><br />
                                                 {% endif %}
                                                 {% if current_user.rol == 'administrador' %}
-                                                <form action="{{ url_for('eliminar_usuario', user_id=usuario._id) }}"
+                                                <form action="{{ url_for('usuarios.eliminar_usuario', user_id=usuario._id) }}"
                                                     method="post" style="display:inline;">
                                                     <button type="submit"
                                                         onclick="return confirm('¿Estás seguro de que deseas eliminar este usuario?');"
@@ -394,7 +391,7 @@
                                 <div>
                                     <div class="inline-flex gap-x-2">
                                         {% if page > 1 %}
-                                        <a href="{{ url_for('listar_usuarios', page=page-1) }}"
+                                        <a href="{{ url_for('usuarios.listar_usuarios', page=page-1) }}"
                                             class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
                                             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
                                                 height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -408,7 +405,7 @@
                                             Página {{ page }} de {{ total_paginas }}
                                         </p>
                                         {% if page < total_paginas %} <a
-                                            href="{{ url_for('listar_usuarios', page=page+1) }}"
+                                            href="{{ url_for('usuarios.listar_usuarios', page=page+1) }}"
                                             class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
                                             Siguiente
                                             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
