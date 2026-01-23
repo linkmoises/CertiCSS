@@ -231,10 +231,19 @@ def editar_ponente(nanoid):
 @app.route('/')
 def home():
     inicio_hoy = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    fin_hoy = inicio_hoy.replace(hour=23, minute=59, second=59, microsecond=999999)
     
-    # Obtener todos los eventos futuros
+    # Obtener eventos futuros y eventos en curso (que incluyen hoy entre fecha_inicio y fecha_fin)
     eventos_futuros = list(collection_eventos.find({
-        "fecha_inicio": {"$gte": inicio_hoy},
+        "$or": [
+            # Eventos que empiezan hoy o en el futuro
+            {"fecha_inicio": {"$gte": inicio_hoy}},
+            # Eventos en curso (hoy está entre fecha_inicio y fecha_fin)
+            {
+                "fecha_inicio": {"$lte": fin_hoy},
+                "fecha_fin": {"$gte": inicio_hoy}
+            }
+        ],
         "estado_evento": {"$ne": "borrador"},
         'tipo': {'$ne': 'Sesión Docente'},
         'registro_abierto': {'$ne': True}
@@ -254,7 +263,7 @@ def home():
         mostrar_recientes = True
         # Obtener los últimos 20 eventos pasados para sacar aleatorios de ahí
         eventos_pasados = list(collection_eventos.find({
-            "fecha_inicio": {"$lt": inicio_hoy},
+            "fecha_fin": {"$lt": inicio_hoy},
             "estado_evento": {"$ne": "borrador"},
             'tipo': {'$ne': 'Sesión Docente'},
             'registro_abierto': {'$ne': True}
