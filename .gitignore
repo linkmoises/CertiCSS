@@ -173,3 +173,4 @@ version.txt
 .vscode
 backups/
 .kiro
+tests/*

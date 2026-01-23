@@ -2929,6 +2929,7 @@ def buscar_certificados():
                     'fecha_evento': fecha_evento,
                     'fecha_inicio': evento.get('fecha_inicio', None),
                     'modalidad_evento': evento.get('modalidad', 'No disponible'),
+                    'tipo_evento': evento.get('tipo', 'General'),  # Agregar tipo de evento
                     'tiene_archivos': tiene_archivos,
                     'hora_inicio': evento.get('hora_inicio', 8),
                     'hora_fin': evento.get('hora_fin', 15),
@@ -2951,6 +2952,7 @@ def buscar_certificados():
                     'fecha_evento': None,
                     'fecha_inicio': None,
                     'modalidad_evento': 'No disponible',
+                    'tipo_evento': 'General',  # Agregar tipo de evento por defecto
                     'tiene_archivos': False,
                     'hora_inicio': 8,
                     'hora_fin': 15,

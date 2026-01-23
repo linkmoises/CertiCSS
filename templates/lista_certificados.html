@@ -8,16 +8,37 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- favicons -->
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}"
-        sizes="96x96" />
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
-    <link rel="apple-touch-icon" sizes="180x180"
-        href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
     <meta name="apple-mobile-web-app-title" content="CertiCSS" />
     <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
     {% if UMAMI_URL %}
     {{ UMAMI_URL | safe }}
     {% endif %}
+    <style>
+        .category-content {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .chevron {
+            transition: transform 0.2s ease-in-out;
+        }
+        
+        .category-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .category-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 
 <body class="bg-gray-50 dark:bg-neutral-900">
@@ -48,223 +69,285 @@
                             </div>
                             <!-- End Header -->
                             {% if resultados %}
-                            <!-- Table -->
-                            <table class="table-auto min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-3 text-start">
-                                            <a
-                                                class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500">
-                                                Evento académico
-                                            </a>
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-start">
-                                            <a
-                                                class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500">
-                                                Rol
-                                            </a>
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-start">
-                                            <a
-                                                class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500">
-                                                Fecha
-                                            </a>
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-start">
-                                            <a
-                                                class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500">
-                                                Documentos
-                                            </a>
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-start">
-                                            <a
-                                                class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500">
-                                                Credenciales
-                                            </a>
-                                        </th>
-                                    </tr>
-                                </thead>
+                            <!-- Categorizar eventos -->
+                            {% set eventos_generales = [] %}
+                            {% set eventos_sesiones = [] %}
+                            {% set eventos_abiertos = [] %}
+                            
+                            {% for resultado in resultados %}
+                                {% if resultado.registro_abierto %}
+                                    {% set _ = eventos_abiertos.append(resultado) %}
+                                {% elif resultado.get('tipo_evento') == 'Sesión Docente' %}
+                                    {% set _ = eventos_sesiones.append(resultado) %}
+                                {% else %}
+                                    {% set _ = eventos_generales.append(resultado) %}
+                                {% endif %}
+                            {% endfor %}
 
-                                <tbody class="divide-y divide-gray-200">
-                                    {% for resultado in resultados %}
-                                    <tr class="bg-white hover:bg-gray-50">
-                                        <td class="h-px w-3/6">
-                                            <div class="px-6 py-2">
-                                                <p class="text-sm text-gray-500 mb-2">
-                                                    <span class="font-semibold">{{ resultado['titulo_evento']
-                                                        }}</span><br />
-                                                    {% if resultado['rol'] == 'ponente' %}
-                                                    — Ponencia: {{ resultado['ponencia']}}<br />
-                                                    {% endif %}
-                                                    — {{ resultado['nombres'] }} {{ resultado['apellidos']}} <br />
-                                                    — {{ resultado['cedula']}}
-                                                </p>
-                                            </div>
-                                        </td>
-                                        <td class="h-px w-1/6">
-                                            <div class="px-6 py-2">
-                                                <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium 
-                                                {% if resultado['rol'] == 'participante' %}bg-blue-100 text-blue-800
-                                                {% elif resultado['rol'] == 'ponente' %}bg-green-100 text-green-800
-                                                {% else %}bg-gray-100 text-gray-800
-                                                {% endif %}">
-                                                    {{ resultado['rol'] }}
-                                                </span><br />
-                                            </div>
-                                        </td>
-                                        <td class="h-px w-1/6">
-                                            <div class="px-6 py-2">
-                                                <p class="text-sm text-gray-500 mb-2">
-                                                    {% if resultado['fecha_evento'] and resultado['fecha_inicio'] %}
-                                                    {% if resultado['fecha_inicio'].date() ==
-                                                    resultado['fecha_evento'].date() %}
-                                                    {{ resultado['fecha_inicio'].strftime('%d de %B de %Y') }}
-                                                    {% elif resultado['fecha_inicio'].month !=
-                                                    resultado['fecha_evento'].month or resultado['fecha_inicio'].year !=
-                                                    resultado['fecha_evento'].year %}
-                                                    {{ resultado['fecha_inicio'].strftime('%d de %B') }} - <br />{{
-                                                    resultado['fecha_evento'].strftime('%d de %B de %Y') }}
-                                                    {% else %}
-                                                    {{ resultado['fecha_inicio'].strftime('%d') }} - {{
-                                                    resultado['fecha_evento'].strftime('%d de %B de %Y') }}
-                                                    {% endif %}
-                                                    {% elif resultado['fecha_evento'] %}
-                                                    {{ resultado['fecha_evento'].strftime('%d de %B de %Y') }}
-                                                    {% else %}
-                                                    Fecha no disponible
-                                                    {% endif %}
-                                                </p>
-                                            </div>
-                                        </td>
-                                        <td class="h-px w-1/6">
-                                            <div class="px-6 py-2">
-                                                {% set certificado_disponible = true %}
-                                                {% set mensaje_certificado = "" %}
-                                                {% if resultado.fecha_evento %}
-                                                {# Para eventos de registro abierto, solo importa el examen #}
-                                                {% if resultado.registro_abierto %}
-                                                {% if not resultado.examen_completado or resultado.puntaje_examen < 80
-                                                    %} {% set certificado_disponible=false %} {% set
-                                                    mensaje_certificado="Complete con puntaje ≥80% para obtener certificado de acreditación"
-                                                    %} {% endif %} {% else %} {# Para eventos regulares, aplicar lógica
-                                                    de tiempo #} {% set hora_inicio=resultado.hora_inicio if
-                                                    resultado.hora_inicio else 8 %} {% set hora_fin=resultado.hora_fin
-                                                    if resultado.hora_fin else 15 %} {% set duracion_evento=hora_fin -
-                                                    hora_inicio %} {% set tiempo_70_porciento=hora_inicio +
-                                                    (duracion_evento * 0.7) %} {# Verificar si el evento es futuro #} {%
-                                                    if resultado.fecha_evento.date()> fecha_actual %}
+                            <!-- Botones de categorías -->
+                            <div class="px-6 py-4 border-b border-gray-200 dark:border-neutral-700">
+                                <div class="flex flex-wrap gap-2">
+                                    {% if eventos_generales %}
+                                    <button type="button" onclick="toggleCategory('generales')" 
+                                        class="category-btn py-2 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
+                                            <line x1="16" x2="16" y1="2" y2="6"></line>
+                                            <line x1="8" x2="8" y1="2" y2="6"></line>
+                                            <line x1="3" x2="21" y1="10" y2="10"></line>
+                                            <path d="M8 14h.01"></path>
+                                            <path d="M12 14h.01"></path>
+                                            <path d="M16 14h.01"></path>
+                                            <path d="M8 18h.01"></path>
+                                            <path d="M12 18h.01"></path>
+                                            <path d="M16 18h.01"></path>
+                                        </svg>
+                                        Eventos Académicos ({{ eventos_generales|length }})
+                                        <svg class="chevron w-4 h-4 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    </button>
+                                    {% endif %}
+                                    
+                                    {% if eventos_sesiones %}
+                                    <button type="button" onclick="toggleCategory('sesiones')" 
+                                        class="category-btn py-2 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M11 10v4h4"></path>
+                                            <path d="m11 14 1.535-1.605a5 5 0 0 1 8 1.5"></path>
+                                            <path d="M16 2v4"></path>
+                                            <path d="m21 18-1.535 1.605a5 5 0 0 1-8-1.5"></path>
+                                            <path d="M21 22v-4h-4"></path>
+                                            <path d="M21 8.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4.3"></path>
+                                            <path d="M3 10h4"></path>
+                                            <path d="M8 2v4"></path>
+                                        </svg>
+                                        Sesiones Docentes ({{ eventos_sesiones|length }})
+                                        <svg class="chevron w-4 h-4 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    </button>
+                                    {% endif %}
+                                    
+                                    {% if eventos_abiertos %}
+                                    <button type="button" onclick="toggleCategory('abiertos')" 
+                                        class="category-btn py-2 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M2 3h20"></path>
+                                            <path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"></path>
+                                            <path d="m7 21 5-5 5 5"></path>
+                                        </svg>
+                                        Actividades Educación Médica Continua ({{ eventos_abiertos|length }})
+                                        <svg class="chevron w-4 h-4 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Macro para renderizar tabla -->
+                            {% macro render_event_table(eventos, category_id) %}
+                            <div id="{{ category_id }}" class="category-content hidden">
+                                <table class="table-auto min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3 text-start">
+                                                <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500">
+                                                    Evento académico
+                                                </a>
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-start">
+                                                <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500">
+                                                    Rol
+                                                </a>
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-start">
+                                                <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500">
+                                                    Fecha
+                                                </a>
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-start">
+                                                <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500">
+                                                    Documentos
+                                                </a>
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-start">
+                                                <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500">
+                                                    Credenciales
+                                                </a>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        {% for resultado in eventos %}
+                                        <tr class="bg-white hover:bg-gray-50">
+                                            <td class="h-px w-3/6">
+                                                <div class="px-6 py-2">
+                                                    <p class="text-sm text-gray-500 mb-2">
+                                                        <span class="font-semibold">{{ resultado['titulo_evento'] }}</span><br />
+                                                        {% if resultado['rol'] == 'ponente' %}
+                                                        — Ponencia: {{ resultado['ponencia']}}<br />
+                                                        {% endif %}
+                                                        — {{ resultado['nombres'] }} {{ resultado['apellidos']}} <br />
+                                                        — {{ resultado['cedula']}}
+                                                    </p>
+                                                </div>
+                                            </td>
+                                            <td class="h-px w-1/6">
+                                                <div class="px-6 py-2">
+                                                    <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium 
+                                                    {% if resultado['rol'] == 'participante' %}bg-blue-100 text-blue-800
+                                                    {% elif resultado['rol'] == 'ponente' %}bg-green-100 text-green-800
+                                                    {% else %}bg-gray-100 text-gray-800
+                                                    {% endif %}">
+                                                        {{ resultado['rol'] }}
+                                                    </span><br />
+                                                </div>
+                                            </td>
+                                            <td class="h-px w-1/6">
+                                                <div class="px-6 py-2">
+                                                    <p class="text-sm text-gray-500 mb-2">
+                                                        {% if resultado['fecha_evento'] and resultado['fecha_inicio'] %}
+                                                        {% if resultado['fecha_inicio'].date() == resultado['fecha_evento'].date() %}
+                                                        {{ resultado['fecha_inicio'].strftime('%d de %B de %Y') }}
+                                                        {% elif resultado['fecha_inicio'].month != resultado['fecha_evento'].month or resultado['fecha_inicio'].year != resultado['fecha_evento'].year %}
+                                                        {{ resultado['fecha_inicio'].strftime('%d de %B') }} - <br />{{ resultado['fecha_evento'].strftime('%d de %B de %Y') }}
+                                                        {% else %}
+                                                        {{ resultado['fecha_inicio'].strftime('%d') }} - {{ resultado['fecha_evento'].strftime('%d de %B de %Y') }}
+                                                        {% endif %}
+                                                        {% elif resultado['fecha_evento'] %}
+                                                        {{ resultado['fecha_evento'].strftime('%d de %B de %Y') }}
+                                                        {% else %}
+                                                        Fecha no disponible
+                                                        {% endif %}
+                                                    </p>
+                                                </div>
+                                            </td>
+                                            <td class="h-px w-1/6">
+                                                <div class="px-6 py-2">
+                                                    {% set certificado_disponible = true %}
+                                                    {% set mensaje_certificado = "" %}
+                                                    {% if resultado.fecha_evento %}
+                                                    {# Para eventos de registro abierto, solo importa el examen #}
+                                                    {% if resultado.registro_abierto %}
+                                                    {% if not resultado.examen_completado or resultado.puntaje_examen < 80 %}
                                                     {% set certificado_disponible = false %}
-                                                    {% set mensaje_certificado = "Certificado disponible al finalizar
-                                                    evento" %}
+                                                    {% set mensaje_certificado = "Complete con puntaje ≥80% para obtener certificado de acreditación" %}
+                                                    {% endif %}
+                                                    {% else %}
+                                                    {# Para eventos regulares, aplicar lógica de tiempo #}
+                                                    {% set hora_inicio = resultado.hora_inicio if resultado.hora_inicio else 8 %}
+                                                    {% set hora_fin = resultado.hora_fin if resultado.hora_fin else 15 %}
+                                                    {% set duracion_evento = hora_fin - hora_inicio %}
+                                                    {% set tiempo_70_porciento = hora_inicio + (duracion_evento * 0.7) %}
+                                                    {# Verificar si el evento es futuro #}
+                                                    {% if resultado.fecha_evento.date() > fecha_actual %}
+                                                    {% set certificado_disponible = false %}
+                                                    {% set mensaje_certificado = "Certificado disponible al finalizar evento" %}
                                                     {# Verificar si es el día del evento #}
                                                     {% elif resultado.fecha_evento.date() == fecha_actual %}
-                                                    {% if hora_actual.hour + (hora_actual.minute / 60.0) <
-                                                        tiempo_70_porciento %} {% set certificado_disponible=false %} {%
-                                                        set mensaje_certificado="Certificado disponible al " ~
-                                                        (tiempo_70_porciento|round(0)|int) ~ ":00" %} {% endif %} {%
-                                                        endif %} {% endif %} {% set repositorio_disponible=true %} {%
-                                                        set dias_transcurridos=(fecha_actual -
-                                                        resultado.fecha_evento.date()).days %} {% if dias_transcurridos>
-                                                        90 %}
-                                                        {% set repositorio_disponible = false %}
-                                                        {% endif %}
-                                                        {% endif %}
+                                                    {% if hora_actual.hour + (hora_actual.minute / 60.0) < tiempo_70_porciento %}
+                                                    {% set certificado_disponible = false %}
+                                                    {% set mensaje_certificado = "Certificado disponible al " ~ (tiempo_70_porciento|round(0)|int) ~ ":00" %}
+                                                    {% endif %}
+                                                    {% endif %}
+                                                    {% endif %}
+                                                    {% set repositorio_disponible = true %}
+                                                    {% set dias_transcurridos = (fecha_actual - resultado.fecha_evento.date()).days %}
+                                                    {% if dias_transcurridos > 90 %}
+                                                    {% set repositorio_disponible = false %}
+                                                    {% endif %}
+                                                    {% endif %}
 
-                                                        {% if resultado.modalidad_evento != 'Presencial' %}
-                                                        <a href="{{ url_for('plataforma.ver_contenido', codigo_evento=resultado['codigo_evento'], orden=1, cedula=cedula, token=token) }}"
-                                                            class="mb-2 px-3 py-2 text-xs font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                                                            <svg class="w-3 h-3 text-white me-2" aria-hidden="true"
-                                                                xmlns="http://www.w3.org/2000/svg" fill="currentColor"
-                                                                viewBox="0 0 576 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
-                                                                <path
-                                                                    d="M0 128C0 92.7 28.7 64 64 64l256 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 448c-35.3 0-64-28.7-64-64L0 128zM559.1 99.8c10.4 5.6 16.9 16.4 16.9 28.2l0 256c0 11.8-6.5 22.6-16.9 28.2s-23 5-32.9-1.6l-96-64L416 337.1l0-17.1 0-128 0-17.1 14.2-9.5 96-64c9.8-6.5 22.4-7.2 32.9-1.6z" />
-                                                            </svg>
-                                                            </svg>
-                                                            Videoclases
-                                                        </a>
-                                                        {% else %}
-
-                                                        {% if repositorio_disponible %}
-                                                        {% if resultado.tiene_archivos %}
-                                                        <a href="{{ url_for('repositorio', codigo_evento=resultado.codigo_evento, cedula=cedula, token=token) }}"
-                                                            class="mb-2 px-3 py-2 text-xs font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                                                            <svg class="w-3 h-3 text-white me-2" aria-hidden="true"
-                                                                xmlns="http://www.w3.org/2000/svg" fill="currentColor"
-                                                                viewBox="0 0 576 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
-                                                                <path
-                                                                    d="M88.7 223.8L0 375.8 0 96C0 60.7 28.7 32 64 32l117.5 0c17 0 33.3 6.7 45.3 18.7l26.5 26.5c12 12 28.3 18.7 45.3 18.7L416 96c35.3 0 64 28.7 64 64l0 32-336 0c-22.8 0-43.8 12.1-55.3 31.8zm27.6 16.1C122.1 230 132.6 224 144 224l400 0c11.5 0 22 6.1 27.7 16.1s5.7 22.2-.1 32.1l-112 192C453.9 474 443.4 480 432 480L32 480c-11.5 0-22-6.1-27.7-16.1s-5.7-22.2 .1-32.1l112-192z" />
-                                                            </svg>
-                                                            </svg>
-                                                            Repositorio
-                                                        </a>
-                                                        {% else %}
-                                                        <div class="inline-flex items-center gap-x-1 text-sm">
-                                                            <div
-                                                                class="inline-flex text-center gap-x-1 text-sm py-1 px-2 bg-yellow-50 text-yellow-700 rounded-md">
-                                                                <span>No hay documentos disponibles</span>
-                                                            </div>
+                                                    {% if resultado.modalidad_evento != 'Presencial' %}
+                                                    <a href="{{ url_for('plataforma.ver_contenido', codigo_evento=resultado['codigo_evento'], orden=1, cedula=cedula, token=token) }}"
+                                                        class="mb-2 px-3 py-2 text-xs font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                                        <svg class="w-3 h-3 text-white me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 576 512">
+                                                            <path d="M0 128C0 92.7 28.7 64 64 64l256 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 448c-35.3 0-64-28.7-64-64L0 128zM559.1 99.8c10.4 5.6 16.9 16.4 16.9 28.2l0 256c0 11.8-6.5 22.6-16.9 28.2s-23 5-32.9-1.6l-96-64L416 337.1l0-17.1 0-128 0-17.1 14.2-9.5 96-64c9.8-6.5 22.4-7.2 32.9-1.6z" />
+                                                        </svg>
+                                                        Videoclases
+                                                    </a>
+                                                    {% else %}
+                                                    {% if repositorio_disponible %}
+                                                    {% if resultado.tiene_archivos %}
+                                                    <a href="{{ url_for('repositorio', codigo_evento=resultado.codigo_evento, cedula=cedula, token=token) }}"
+                                                        class="mb-2 px-3 py-2 text-xs font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                                        <svg class="w-3 h-3 text-white me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 576 512">
+                                                            <path d="M88.7 223.8L0 375.8 0 96C0 60.7 28.7 32 64 32l117.5 0c17 0 33.3 6.7 45.3 18.7l26.5 26.5c12 12 28.3 18.7 45.3 18.7L416 96c35.3 0 64 28.7 64 64l0 32-336 0c-22.8 0-43.8 12.1-55.3 31.8zm27.6 16.1C122.1 230 132.6 224 144 224l400 0c11.5 0 22 6.1 27.7 16.1s5.7 22.2-.1 32.1l-112 192C453.9 474 443.4 480 432 480L32 480c-11.5 0-22-6.1-27.7-16.1s-5.7-22.2 .1-32.1l112-192z" />
+                                                        </svg>
+                                                        Repositorio
+                                                    </a>
+                                                    {% else %}
+                                                    <div class="inline-flex items-center gap-x-1 text-sm">
+                                                        <div class="inline-flex text-center gap-x-1 text-sm py-1 px-2 bg-yellow-50 text-yellow-700 rounded-md">
+                                                            <span>No hay documentos disponibles</span>
                                                         </div>
-                                                        {% endif %}
-                                                        {% else %}
-                                                        <div class="inline-flex items-center gap-x-1 text-sm">
-                                                            <div
-                                                                class="inline-flex text-center gap-x-1 text-sm py-1 px-2 bg-yellow-50 text-yellow-700 rounded-md">
-                                                                <span>El plazo para acceder a los documentos ha
-                                                                    vencido</span>
-                                                            </div>
+                                                    </div>
+                                                    {% endif %}
+                                                    {% else %}
+                                                    <div class="inline-flex items-center gap-x-1 text-sm">
+                                                        <div class="inline-flex text-center gap-x-1 text-sm py-1 px-2 bg-yellow-50 text-yellow-700 rounded-md">
+                                                            <span>El plazo para acceder a los documentos ha vencido</span>
                                                         </div>
-                                                        {% endif %}
-                                                        {% endif %}
-                                            </div>
-                                        </td>
-                                        {% if certificado_disponible %}
-                                        <td class="h-px w-1/6">
-                                            <div class="px-6 py-2">
-                                                {% if not resultado.registro_abierto %}
-                                                <a href="{{ url_for('descargar_constancia', nanoid=resultado['nanoid']) }}"
-                                                    class="mb-2 px-3 py-2 text-xs font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                                                    <svg class="w-3 h-3 text-white me-2" aria-hidden="true"
-                                                        xmlns="http://www.w3.org/2000/svg" fill="currentColor"
-                                                        viewBox="0 0 384 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
-                                                        <path
-                                                            d="M64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-288-128 0c-17.7 0-32-14.3-32-32L224 0 64 0zM256 0l0 128 128 0L256 0zM112 256l160 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-160 0c-8.8 0-16-7.2-16-16s7.2-16 16-16zm0 64l160 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-160 0c-8.8 0-16-7.2-16-16s7.2-16 16-16zm0 64l160 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-160 0c-8.8 0-16-7.2-16-16s7.2-16 16-16z" />
-                                                    </svg>
-                                                    </svg>
-                                                    Constancia
-                                                </a>
-                                                {% endif %}
-                                                {% if resultado.certificado_evento %}
-                                                <a href="{{ url_for('generar_pdf', nanoid=resultado['nanoid']) }}"
-                                                    class="mb-2 px-3 py-2 text-xs font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                                                    <svg class="w-3 h-3 text-white me-2" aria-hidden="true"
-                                                        xmlns="http://www.w3.org/2000/svg" fill="currentColor"
-                                                        viewBox="0 0 640 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
-                                                        <path
-                                                            d="M320 32c-8.1 0-16.1 1.4-23.7 4.1L15.8 137.4C6.3 140.9 0 149.9 0 160s6.3 19.1 15.8 22.6l57.9 20.9C57.3 229.3 48 259.8 48 291.9l0 28.1c0 28.4-10.8 57.7-22.3 80.8c-6.5 13-13.9 25.8-22.5 37.6C0 442.7-.9 448.3 .9 453.4s6 8.9 11.2 10.2l64 16c4.2 1.1 8.7 .3 12.4-2s6.3-6.1 7.1-10.4c8.6-42.8 4.3-81.2-2.1-108.7C90.3 344.3 86 329.8 80 316.5l0-24.6c0-30.2 10.2-58.7 27.9-81.5c12.9-15.5 29.6-28 49.2-35.7l157-61.7c8.2-3.2 17.5 .8 20.7 9s-.8 17.5-9 20.7l-157 61.7c-12.4 4.9-23.3 12.4-32.2 21.6l159.6 57.6c7.6 2.7 15.6 4.1 23.7 4.1s16.1-1.4 23.7-4.1L624.2 182.6c9.5-3.4 15.8-12.5 15.8-22.6s-6.3-19.1-15.8-22.6L343.7 36.1C336.1 33.4 328.1 32 320 32zM128 408c0 35.3 86 72 192 72s192-36.7 192-72L496.7 262.6 354.5 314c-11.1 4-22.8 6-34.5 6s-23.5-2-34.5-6L143.3 262.6 128 408z" />
-                                                    </svg>
-                                                    </svg>
-                                                    Certificado
-                                                </a>
-                                                {% endif %}
-                                            </div>
-                                        </td>
-                                        {% else %}
-                                        <td class="h-px w-1/6">
-                                            <div class="px-6 py-2">
-                                                <div class="inline-flex items-center gap-x-1 text-sm">
-                                                    <div
-                                                        class="inline-flex text-center gap-x-1 text-sm py-1 px-2 bg-yellow-50 text-yellow-700 rounded-md">
-                                                        <span>{{ mensaje_certificado }}</span>
+                                                    </div>
+                                                    {% endif %}
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            {% if certificado_disponible %}
+                                            <td class="h-px w-1/6">
+                                                <div class="px-6 py-2">
+                                                    {% if not resultado.registro_abierto %}
+                                                    <a href="{{ url_for('descargar_constancia', nanoid=resultado['nanoid']) }}"
+                                                        class="mb-2 px-3 py-2 text-xs font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                                        <svg class="w-3 h-3 text-white me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 384 512">
+                                                            <path d="M64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-288-128 0c-17.7 0-32-14.3-32-32L224 0 64 0zM256 0l0 128 128 0L256 0zM112 256l160 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-160 0c-8.8 0-16-7.2-16-16s7.2-16 16-16zm0 64l160 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-160 0c-8.8 0-16-7.2-16-16s7.2-16 16-16zm0 64l160 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-160 0c-8.8 0-16-7.2-16-16s7.2-16 16-16z" />
+                                                        </svg>
+                                                        Constancia
+                                                    </a>
+                                                    {% endif %}
+                                                    {% if resultado.certificado_evento %}
+                                                    <a href="{{ url_for('generar_pdf', nanoid=resultado['nanoid']) }}"
+                                                        class="mb-2 px-3 py-2 text-xs font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                                        <svg class="w-3 h-3 text-white me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 640 512">
+                                                            <path d="M320 32c-8.1 0-16.1 1.4-23.7 4.1L15.8 137.4C6.3 140.9 0 149.9 0 160s6.3 19.1 15.8 22.6l57.9 20.9C57.3 229.3 48 259.8 48 291.9l0 28.1c0 28.4-10.8 57.7-22.3 80.8c-6.5 13-13.9 25.8-22.5 37.6C0 442.7-.9 448.3 .9 453.4s6 8.9 11.2 10.2l64 16c4.2 1.1 8.7 .3 12.4-2s6.3-6.1 7.1-10.4c8.6-42.8 4.3-81.2-2.1-108.7C90.3 344.3 86 329.8 80 316.5l0-24.6c0-30.2 10.2-58.7 27.9-81.5c12.9-15.5 29.6-28 49.2-35.7l157-61.7c8.2-3.2 17.5 .8 20.7 9s-.8 17.5-9 20.7l-157 61.7c-12.4 4.9-23.3 12.4-32.2 21.6l159.6 57.6c7.6 2.7 15.6 4.1 23.7 4.1s16.1-1.4 23.7-4.1L624.2 182.6c9.5-3.4 15.8-12.5 15.8-22.6s-6.3-19.1-15.8-22.6L343.7 36.1C336.1 33.4 328.1 32 320 32zM128 408c0 35.3 86 72 192 72s192-36.7 192-72L496.7 262.6 354.5 314c-11.1 4-22.8 6-34.5 6s-23.5-2-34.5-6L143.3 262.6 128 408z" />
+                                                        </svg>
+                                                        Certificado
+                                                    </a>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            {% else %}
+                                            <td class="h-px w-1/6">
+                                                <div class="px-6 py-2">
+                                                    <div class="inline-flex items-center gap-x-1 text-sm">
+                                                        <div class="inline-flex text-center gap-x-1 text-sm py-1 px-2 bg-yellow-50 text-yellow-700 rounded-md">
+                                                            <span>{{ mensaje_certificado }}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        {% endif %}
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                            <!-- End Table -->
+                                            </td>
+                                            {% endif %}
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% endmacro %}
+
+                            <!-- Renderizar tablas por categoría -->
+                            {% if eventos_generales %}
+                                {{ render_event_table(eventos_generales, 'generales') }}
+                            {% endif %}
+                            
+                            {% if eventos_sesiones %}
+                                {{ render_event_table(eventos_sesiones, 'sesiones') }}
+                            {% endif %}
+                            
+                            {% if eventos_abiertos %}
+                                {{ render_event_table(eventos_abiertos, 'abiertos') }}
+                            {% endif %}
 
                             <!-- Footer -->
                             <div
@@ -451,6 +534,56 @@
     </main>
     <!-- ========== END MAIN CONTENT ========== -->
 
+    <script>
+        function toggleCategory(categoryId) {
+            const content = document.getElementById(categoryId);
+            const button = event.currentTarget;
+            const chevron = button.querySelector('.chevron');
+            
+            // Toggle visibility
+            if (content.classList.contains('hidden')) {
+                // Hide all other categories
+                document.querySelectorAll('.category-content').forEach(el => {
+                    el.classList.add('hidden');
+                });
+                
+                // Reset all chevrons
+                document.querySelectorAll('.chevron').forEach(el => {
+                    el.classList.remove('rotate-180');
+                });
+                
+                // Reset all button styles
+                document.querySelectorAll('.category-btn').forEach(btn => {
+                    btn.classList.remove('bg-blue-50', 'border-blue-200', 'text-blue-800');
+                    btn.classList.add('bg-white', 'border-gray-200', 'text-gray-800');
+                });
+                
+                // Show selected category
+                content.classList.remove('hidden');
+                chevron.classList.add('rotate-180');
+                
+                // Highlight active button
+                button.classList.remove('bg-white', 'border-gray-200', 'text-gray-800');
+                button.classList.add('bg-blue-50', 'border-blue-200', 'text-blue-800');
+            } else {
+                // Hide current category
+                content.classList.add('hidden');
+                chevron.classList.remove('rotate-180');
+                
+                // Reset button style
+                button.classList.remove('bg-blue-50', 'border-blue-200', 'text-blue-800');
+                button.classList.add('bg-white', 'border-gray-200', 'text-gray-800');
+            }
+        }
+        
+        // Show first category by default if there are results
+        document.addEventListener('DOMContentLoaded', function() {
+            const firstButton = document.querySelector('.category-btn');
+            if (firstButton) {
+                firstButton.click();
+            }
+        });
+    </script>
 </body>
 
 </html>
