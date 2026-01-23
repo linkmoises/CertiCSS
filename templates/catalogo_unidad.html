@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CertiCSS - Catálogo de Eventos Académicos</title>
+    <title>{{ unidad.nombre }} - Catálogo de Eventos Académicos - DENADOI CertiCSS</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -93,7 +93,7 @@
                 {{ unidad.nombre }}
             </h2>
             <p class="mt-2 text-gray-600">
-                Sesiones Docentes Semanales
+                Catálogo docente de la unidad
             </p>
         </div>
 
@@ -182,115 +182,39 @@
         {% else %}
         <!-- Card Principal cuando no hay eventos -->
         <div class="max-w-4xl mx-auto">
-            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                
-                <!-- Header de la Card -->
-                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-800">
-                                Programación Docente
-                            </h3>
-                            <p class="text-sm text-gray-600">
-                                Actividades académicas semanales programadas
-                            </p>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                En desarrollo
-                            </span>
-                        </div>
+
+            <!-- Contenido de la Card -->
+            <div class="p-8">
+                <div class="text-center py-12">
+                    <!-- Icono -->
+                    <div class="flex justify-center items-center size-16 bg-blue-100 rounded-full mx-auto mb-6">
+                        <svg class="size-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
                     </div>
+                    
+                    <!-- Título -->
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">
+                        Próximamente Disponible
+                    </h3>
+                    
+                    <!-- Descripción -->
+                    <p class="text-gray-600 mb-6 max-w-md mx-auto">
+                        El catálogo docente para esta unidad ejecutora estará disponible pronto. Estamos trabajando para ofrecerte la mejor experiencia educativa.
+                    </p>
                 </div>
-
-                <!-- Contenido de la Card -->
-                <div class="p-8">
-                    <div class="text-center py-12">
-                        <!-- Icono -->
-                        <div class="flex justify-center items-center size-16 bg-blue-100 rounded-full mx-auto mb-6">
-                            <svg class="size-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                            </svg>
-                        </div>
-                        
-                        <!-- Título -->
-                        <h3 class="text-xl font-semibold text-gray-900 mb-3">
-                            Próximamente Disponible
-                        </h3>
-                        
-                        <!-- Descripción -->
-                        <p class="text-gray-600 mb-6 max-w-md mx-auto">
-                            La programación docente semanal para esta unidad ejecutora estará disponible pronto. Estamos trabajando para ofrecerte la mejor experiencia educativa.
-                        </p>
-
-                        <!-- Características que estarán disponibles -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 max-w-2xl mx-auto">
-                            <div class="text-center p-4 bg-gray-50 rounded-lg">
-                                <div class="flex justify-center items-center size-10 bg-green-100 rounded-full mx-auto mb-2">
-                                    <svg class="size-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a4 4 0 118 0v4m-4 8a4 4 0 11-8 0v-4m4-4h8m-4-4v8m-4 4h8" />
-                                    </svg>
-                                </div>
-                                <h4 class="text-sm font-medium text-gray-900">Horarios</h4>
-                                <p class="text-xs text-gray-600">Programación semanal</p>
-                            </div>
-                            
-                            <div class="text-center p-4 bg-gray-50 rounded-lg">
-                                <div class="flex justify-center items-center size-10 bg-blue-100 rounded-full mx-auto mb-2">
-                                    <svg class="size-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                    </svg>
-                                </div>
-                                <h4 class="text-sm font-medium text-gray-900">Facilitadores</h4>
-                                <p class="text-xs text-gray-600">Equipo docente</p>
-                            </div>
-                            
-                            <div class="text-center p-4 bg-gray-50 rounded-lg">
-                                <div class="flex justify-center items-center size-10 bg-purple-100 rounded-full mx-auto mb-2">
-                                    <svg class="size-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                </div>
-                                <h4 class="text-sm font-medium text-gray-900">Temas</h4>
-                                <p class="text-xs text-gray-600">Contenido académico</p>
-                            </div>
-                        </div>
-
-                        <!-- Botones de acción -->
-                        <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                            <a href="{{ url_for('unidades.catalogo_unidades') }}" class="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"></a>
-                                <svg class="size-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                                </svg>
-                                Volver al catálogo de unidades
-                            </a>
-                            <a href="/catalogo/1" class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                <svg class="size-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a4 4 0 118 0v4m-4 8a4 4 0 11-8 0v-4m4-4h8m-4-4v8m-4 4h8" />
-                                </svg>
-                                Ver eventos disponibles
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Footer informativo -->
-                <div class="px-6 py-4 bg-blue-50 border-t border-blue-100">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <svg class="size-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm text-blue-700">
-                                <strong>¿Tienes sugerencias?</strong> Contáctanos para mejorar la programación docente de tu unidad.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
             </div>
+
+            <!-- Botón para volver al catálogo de unidades -->
+            <div class="text-center mb-12">
+                <a href="{{ url_for('unidades.catalogo_unidades') }}" class="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                    <svg class="size-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Volver al Catálogo de Unidades
+                </a>
+            </div>
+
         </div>
         {% endif %}
 
@@ -369,24 +293,38 @@
             <!-- End Col -->
         
             <ul class="text-center">
-                <li class="inline-block relative pe-8 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
-                    <a target="_blank" class="inline-flex gap-x-2 text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200" href="https://css.gob.pa/">
-                    CSS
+                <li class="inline-block relative pe-6 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
+                    <a target="_blank"
+                        class="inline-flex gap-x-2 text-xs sm:text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200"
+                        href="https://css.gob.pa/">
+                        CSS
                     </a>
                 </li>
-                <li class="inline-block relative pe-8 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
-                    <a target="_blank" class="inline-flex gap-x-2 text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200" href="https://denadoi.css.gob.pa/">
-                    DENADOI
+                <li class="inline-block relative pe-6 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
+                    <a target="_blank"
+                        class="inline-flex gap-x-2 text-xs sm:text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200"
+                        href="https://denadoi.css.gob.pa/">
+                        DENADOI
                     </a>
                 </li>
-                <li class="inline-block relative pe-8 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
-                    <a target="_blank" class="inline-flex gap-x-2 text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200" href="{{ url_for('nosotros') }}">
-                    Nosotros
+                <li class="inline-block relative pe-6 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
+                    <a target="_blank"
+                        class="inline-flex gap-x-2 text-xs sm:text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200"
+                        href="{{ url_for('nosotros') }}">
+                        Nosotros
                     </a>
                 </li>
-                <li class="inline-block relative pe-8 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
-                    <a class="inline-flex gap-x-2 text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200" href="{{ url_for('politica_privacidad') }}">
-                    Privacidad
+                <li class="inline-block relative pe-6 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
+                    <a target="_blank"
+                        class="inline-flex gap-x-2 text-xs sm:text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200"
+                        href="{{ url_for('docentes') }}">
+                        Docentes
+                    </a>
+                </li>
+                <li class="inline-block relative pe-6 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
+                    <a class="inline-flex gap-x-2 text-xs sm:text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200"
+                        href="{{ url_for('politica_privacidad') }}">
+                        Privacidad
                     </a>
                 </li>
             </ul>

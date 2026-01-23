@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>CertiCSS - Catálogo de Unidades Ejecutoras</title>
+    <title>Catálogo de Unidades Ejecutoras - DENADOI CertiCSS</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -129,7 +129,7 @@
                 Catálogo de Unidades Ejecutoras
             </h2>
             <p class="mt-2 text-gray-600">
-                Explora las unidades por provincia y conoce cómo organizan su docencia semanal.
+                Explora las unidades por provincia y conoce cómo organizan sus eventos y sesiones docentes.
             </p>
             {% if current_user.is_authenticated and current_user.rol == 'administrador' %}
             <div class="mt-4">
@@ -285,7 +285,7 @@
                         {% else %}
                         <a href="/catalogo/unidades/{{ unidad.slug }}"
                             class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
-                            Ver docencias semanales
+                            Ver catálogo docente
                         </a>
                         {% endif %}
                     </div>
@@ -390,33 +390,36 @@
             <!-- End Col -->
 
             <ul class="text-center">
-                <li
-                    class="inline-block relative pe-8 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
+                <li class="inline-block relative pe-6 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
                     <a target="_blank"
-                        class="inline-flex gap-x-2 text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200"
+                        class="inline-flex gap-x-2 text-xs sm:text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200"
                         href="https://css.gob.pa/">
                         CSS
                     </a>
                 </li>
-                <li
-                    class="inline-block relative pe-8 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
+                <li class="inline-block relative pe-6 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
                     <a target="_blank"
-                        class="inline-flex gap-x-2 text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200"
+                        class="inline-flex gap-x-2 text-xs sm:text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200"
                         href="https://denadoi.css.gob.pa/">
                         DENADOI
                     </a>
                 </li>
-                <li
-                    class="inline-block relative pe-8 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
+                <li class="inline-block relative pe-6 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
                     <a target="_blank"
-                        class="inline-flex gap-x-2 text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200"
+                        class="inline-flex gap-x-2 text-xs sm:text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200"
                         href="{{ url_for('nosotros') }}">
                         Nosotros
                     </a>
                 </li>
-                <li
-                    class="inline-block relative pe-8 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
-                    <a class="inline-flex gap-x-2 text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200"
+                <li class="inline-block relative pe-6 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
+                    <a target="_blank"
+                        class="inline-flex gap-x-2 text-xs sm:text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200"
+                        href="{{ url_for('docentes') }}">
+                        Docentes
+                    </a>
+                </li>
+                <li class="inline-block relative pe-6 last:pe-0 last-of-type:before:hidden before:absolute before:top-1/2 before:end-3 before:-translate-y-1/2 before:content-['/'] before:text-gray-300 dark:before:text-neutral-600">
+                    <a class="inline-flex gap-x-2 text-xs sm:text-sm text-gray-500 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200 dark:focus:text-neutral-200"
                         href="{{ url_for('politica_privacidad') }}">
                         Privacidad
                     </a>
