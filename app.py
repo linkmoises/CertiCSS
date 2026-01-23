@@ -1907,6 +1907,167 @@ def db_individual(codigo_evento):
 
 
 ###
+### Administración de Colección de Evaluaciones (EVA)
+###
+@app.route('/tablero/bases-de-datos/evaluaciones')
+@app.route('/tablero/bases-de-datos/evaluaciones/page/<int:page>')
+@login_required
+def db_evaluaciones(page=1):
+    # Verificar si el usuario es administrador
+    if current_user.rol != 'administrador':
+        flash('No tienes permiso para acceder a esta página.', 'error')
+        return redirect(url_for('home'))
+
+    evaluaciones_por_pagina = 50
+    skip = (page - 1) * evaluaciones_por_pagina
+
+    # Obtener todas las evaluaciones
+    evaluaciones = list(collection_eva.find().sort("codigo_evento", -1).skip(skip).limit(evaluaciones_por_pagina))
+    total_evaluaciones = collection_eva.count_documents({})
+    total_paginas = (total_evaluaciones + evaluaciones_por_pagina - 1) // evaluaciones_por_pagina
+
+    # Obtener todos los campos posibles de la colección
+    campos = set()
+    for evaluacion in evaluaciones:
+        campos.update(evaluacion.keys())
+    
+    # Asegurar que campos importantes siempre estén presentes
+    campos_importantes = ['codigo_evento', 'tipo', 'orden', 'titulo', 'descripcion', 'preguntas']
+    campos.update(campos_importantes)
+    
+    campos = sorted(campos)  # ordenamos alfabéticamente para la tabla
+
+    return render_template('bd_evaluaciones.html',
+        evaluaciones=evaluaciones,
+        campos=campos,
+        page=page,
+        total_paginas=total_paginas,
+        total_evaluaciones=total_evaluaciones)
+
+
+###
+### Administración de Colección de Resultados de Exámenes
+###
+@app.route('/tablero/bases-de-datos/resultados-examenes')
+@app.route('/tablero/bases-de-datos/resultados-examenes/page/<int:page>')
+@login_required
+def db_resultados_examenes(page=1):
+    # Verificar si el usuario es administrador
+    if current_user.rol != 'administrador':
+        flash('No tienes permiso para acceder a esta página.', 'error')
+        return redirect(url_for('home'))
+
+    resultados_por_pagina = 50
+    skip = (page - 1) * resultados_por_pagina
+
+    # Obtener todos los resultados de exámenes
+    resultados = list(collection_exam_results.find().sort("fecha_envio", -1).skip(skip).limit(resultados_por_pagina))
+    total_resultados = collection_exam_results.count_documents({})
+    total_paginas = (total_resultados + resultados_por_pagina - 1) // resultados_por_pagina
+
+    # Obtener todos los campos posibles de la colección
+    campos = set()
+    for resultado in resultados:
+        campos.update(resultado.keys())
+    
+    # Asegurar que campos importantes siempre estén presentes
+    campos_importantes = ['codigo_evento', 'cedula_participante', 'orden_examen', 'calificacion', 'intento', 'fecha_envio']
+    campos.update(campos_importantes)
+    
+    campos = sorted(campos)  # ordenamos alfabéticamente para la tabla
+
+    return render_template('bd_resultados_examenes.html',
+        resultados=resultados,
+        campos=campos,
+        page=page,
+        total_paginas=total_paginas,
+        total_resultados=total_resultados)
+
+
+###
+### Actualizar campo de evaluación
+###
+@app.route('/actualizar_campo_evaluacion', methods=['POST'])
+@login_required
+def actualizar_campo_evaluacion():
+    if current_user.rol != 'administrador':
+        return jsonify({'success': False, 'error': 'No tienes permiso para realizar esta acción'})
+
+    data = request.get_json()
+    evaluacion_id = data.get('evaluacion_id')
+    campo = data.get('campo')
+    valor = data.get('valor', '')
+
+    if not all([evaluacion_id, campo]):
+        return jsonify({'success': False, 'error': 'Faltan datos requeridos'})
+
+    try:
+        # Convertir el ID a ObjectId
+        from bson import ObjectId
+        object_id = ObjectId(evaluacion_id)
+        
+        # Actualizar el campo
+        result = collection_eva.update_one(
+            {'_id': object_id},
+            {'$set': {campo: valor}}
+        )
+        
+        if result.modified_count > 0:
+            log_event(f"Usuario [{current_user.email}] actualizó el campo '{campo}' de la evaluación {evaluacion_id}")
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False, 'error': 'No se pudo actualizar el campo'})
+            
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
+###
+### Actualizar campo de resultado de examen
+###
+@app.route('/actualizar_campo_resultado_examen', methods=['POST'])
+@login_required
+def actualizar_campo_resultado_examen():
+    if current_user.rol != 'administrador':
+        return jsonify({'success': False, 'error': 'No tienes permiso para realizar esta acción'})
+
+    data = request.get_json()
+    resultado_id = data.get('resultado_id')
+    campo = data.get('campo')
+    valor = data.get('valor', '')
+
+    if not all([resultado_id, campo]):
+        return jsonify({'success': False, 'error': 'Faltan datos requeridos'})
+
+    try:
+        # Convertir el ID a ObjectId
+        from bson import ObjectId
+        object_id = ObjectId(resultado_id)
+        
+        # Convertir valor numérico si es necesario
+        if campo in ['calificacion', 'intento', 'orden_examen']:
+            try:
+                valor = float(valor) if campo == 'calificacion' else int(valor)
+            except ValueError:
+                return jsonify({'success': False, 'error': 'Valor numérico inválido'})
+        
+        # Actualizar el campo
+        result = collection_exam_results.update_one(
+            {'_id': object_id},
+            {'$set': {campo: valor}}
+        )
+        
+        if result.modified_count > 0:
+            log_event(f"Usuario [{current_user.email}] actualizó el campo '{campo}' del resultado de examen {resultado_id}")
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False, 'error': 'No se pudo actualizar el campo'})
+            
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
+###
 ### Administración de Colección de Encuestas
 ###
 @app.route('/tablero/bases-de-datos/encuestas')
