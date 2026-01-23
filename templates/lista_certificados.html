@@ -146,6 +146,38 @@
                                 </div>
                             </div>
 
+                            <!-- Filtros -->
+                            <div class="px-6 py-4 border-b border-gray-200 dark:border-neutral-700">
+                                <div class="flex flex-wrap gap-4">
+                                    <!-- Filtro por año -->
+                                    <div class="flex items-center gap-2">
+                                        <label for="yearFilter" class="text-sm font-medium text-gray-700 dark:text-neutral-300">Año:</label>
+                                        <select id="yearFilter" class="w-36 py-1 px-3 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white">
+                                            <option value="">Todos los años</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <!-- Filtro por rol -->
+                                    <div class="flex items-center gap-2">
+                                        <label for="roleFilter" class="text-sm font-medium text-gray-700 dark:text-neutral-300">Rol:</label>
+                                        <select id="roleFilter" class="w-36 py-1 px-3 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white">
+                                            <option value="">Todos los roles</option>
+                                            <option value="participante">Participante</option>
+                                            <option value="ponente">Ponente</option>
+                                            <option value="organizador">Organizador</option>
+                                            <option value="coorganizador">Coorganizador</option>
+                                            <option value="jurado_poster">Jurado Poster</option>
+                                            <option value="presentador_poster">Presentador Poster</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <!-- Botón limpiar filtros -->
+                                    <button type="button" onclick="clearFilters()" class="py-1 px-3 text-sm font-medium text-gray-600 hover:text-gray-800 dark:text-neutral-400 dark:hover:text-neutral-200">
+                                        Limpiar filtros
+                                    </button>
+                                </div>
+                            </div>
+
                             <!-- Macro para renderizar tabla -->
                             {% macro render_event_table(eventos, category_id) %}
                             <div id="{{ category_id }}" class="category-content hidden">
@@ -181,7 +213,9 @@
                                     </thead>
                                     <tbody class="divide-y divide-gray-200">
                                         {% for resultado in eventos %}
-                                        <tr class="bg-white hover:bg-gray-50">
+                                        <tr class="bg-white hover:bg-gray-50 event-row" 
+                                            data-year="{{ resultado['fecha_evento'].year if resultado['fecha_evento'] else '' }}" 
+                                            data-role="{{ resultado['rol'] }}">
                                             <td class="h-px w-3/6">
                                                 <div class="px-6 py-2">
                                                     <p class="text-sm text-gray-500 mb-2">
@@ -535,6 +569,9 @@
     <!-- ========== END MAIN CONTENT ========== -->
 
     <script>
+        // Variables globales para filtros
+        let availableYears = new Set();
+        
         function toggleCategory(categoryId) {
             const content = document.getElementById(categoryId);
             const button = event.currentTarget;
@@ -565,6 +602,9 @@
                 // Highlight active button
                 button.classList.remove('bg-white', 'border-gray-200', 'text-gray-800');
                 button.classList.add('bg-blue-50', 'border-blue-200', 'text-blue-800');
+                
+                // Apply current filters to newly shown category
+                applyFilters();
             } else {
                 // Hide current category
                 content.classList.add('hidden');
@@ -576,8 +616,106 @@
             }
         }
         
-        // Show first category by default if there are results
+        function populateYearFilter() {
+            // Collect all years from event rows
+            document.querySelectorAll('.event-row').forEach(row => {
+                const year = row.dataset.year;
+                if (year) {
+                    availableYears.add(year);
+                }
+            });
+            
+            // Populate year filter dropdown
+            const yearFilter = document.getElementById('yearFilter');
+            const sortedYears = Array.from(availableYears).sort((a, b) => b - a); // Descending order
+            
+            sortedYears.forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearFilter.appendChild(option);
+            });
+        }
+        
+        function applyFilters() {
+            const yearFilter = document.getElementById('yearFilter').value;
+            const roleFilter = document.getElementById('roleFilter').value;
+            
+            // Get currently visible category
+            const visibleCategory = document.querySelector('.category-content:not(.hidden)');
+            if (!visibleCategory) return;
+            
+            const rows = visibleCategory.querySelectorAll('.event-row');
+            let visibleCount = 0;
+            
+            rows.forEach(row => {
+                const rowYear = row.dataset.year;
+                const rowRole = row.dataset.role;
+                
+                let showRow = true;
+                
+                // Apply year filter
+                if (yearFilter && rowYear !== yearFilter) {
+                    showRow = false;
+                }
+                
+                // Apply role filter
+                if (roleFilter && rowRole !== roleFilter) {
+                    showRow = false;
+                }
+                
+                if (showRow) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            // Show/hide "no results" message
+            updateNoResultsMessage(visibleCategory, visibleCount);
+        }
+        
+        function updateNoResultsMessage(category, visibleCount) {
+            // Remove existing no results message
+            const existingMessage = category.querySelector('.no-results-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+            
+            // Add no results message if needed
+            if (visibleCount === 0) {
+                const tbody = category.querySelector('tbody');
+                const noResultsRow = document.createElement('tr');
+                noResultsRow.className = 'no-results-message';
+                noResultsRow.innerHTML = `
+                    <td colspan="5" class="px-6 py-8 text-center">
+                        <div class="flex flex-col items-center">
+                            <svg class="w-12 h-12 width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert-icon lucide-triangle-alert"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                            <p class="text-gray-500 text-sm my-4">No se encontraron eventos con los filtros seleccionados</p>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(noResultsRow);
+            }
+        }
+        
+        function clearFilters() {
+            document.getElementById('yearFilter').value = '';
+            document.getElementById('roleFilter').value = '';
+            applyFilters();
+        }
+        
+        // Event listeners for filters
         document.addEventListener('DOMContentLoaded', function() {
+            // Populate year filter
+            populateYearFilter();
+            
+            // Add event listeners
+            document.getElementById('yearFilter').addEventListener('change', applyFilters);
+            document.getElementById('roleFilter').addEventListener('change', applyFilters);
+            
+            // Show first category by default if there are results
             const firstButton = document.querySelector('.category-btn');
             if (firstButton) {
                 firstButton.click();
