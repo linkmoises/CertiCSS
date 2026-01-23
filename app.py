@@ -2446,7 +2446,7 @@ def ver_evento(codigo_evento):
     # Obtener el evento actual de la base de datos
     evento = collection_eventos.find_one({"codigo": codigo_evento})
 
-    return render_template('ver_evento.html', evento=evento)
+    return render_template('ver_evento.html', evento=evento, validate_certificate_template=validate_certificate_template, validate_attendance_template=validate_attendance_template)
 
 
 ###
@@ -4807,6 +4807,85 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 from pdfrw import PdfReader, PdfWriter, PageMerge
 import os
 
+def create_sample_participant(codigo_evento):
+    """
+    Generate sample participant data for certificate preview.
+    
+    Args:
+        codigo_evento (str): The event code for which to generate sample data
+        
+    Returns:
+        dict: Dictionary containing standardized sample participant data
+    """
+    return {
+        'nombres': 'Fulano José',
+        'apellidos': 'De Tal Rodríguez',
+        'cedula': '4-123-456',
+        'rol': 'participante',
+        'codigo_evento': codigo_evento,
+        'nanoid': 'PREVIEW1',
+        'titulo_ponencia': None  # Not applicable for participants
+    }
+
+
+def validate_certificate_template(evento):
+    """
+    Validate that a certificate template exists and is accessible for an event.
+    
+    Args:
+        evento (dict): Event document from MongoDB
+        
+    Returns:
+        bool: True if template exists and is accessible, False otherwise
+    """
+    # Handle null/empty template paths gracefully
+    certificado_path = evento.get('certificado')
+    
+    # Check if template path is null or empty
+    if not certificado_path:
+        return False
+    
+    # Check if template path is an empty string or only whitespace
+    if not certificado_path.strip():
+        return False
+    
+    # Check if certificate template file exists on filesystem
+    try:
+        return os.path.exists(certificado_path) and os.path.isfile(certificado_path)
+    except (OSError, TypeError):
+        # Handle any filesystem errors or invalid path types gracefully
+        return False
+
+
+def validate_attendance_template(evento):
+    """
+    Validate that an attendance certificate template exists and is accessible for an event.
+    
+    Args:
+        evento (dict): Event document from MongoDB
+        
+    Returns:
+        bool: True if template exists and is accessible, False otherwise
+    """
+    # Handle null/empty template paths gracefully
+    constancia_path = evento.get('constancia')
+    
+    # Check if template path is null or empty
+    if not constancia_path:
+        return False
+    
+    # Check if template path is an empty string or only whitespace
+    if not constancia_path.strip():
+        return False
+    
+    # Check if attendance certificate template file exists on filesystem
+    try:
+        return os.path.exists(constancia_path) and os.path.isfile(constancia_path)
+    except (OSError, TypeError):
+        # Handle any filesystem errors or invalid path types gracefully
+        return False
+
+
 def generar_pdf_participante(participante, afiche_path):
     codigo_evento = participante['codigo_evento']
     evento = collection_eventos.find_one({"codigo": codigo_evento})
@@ -5067,6 +5146,143 @@ def generar_pdf(nanoid):
     pdf_file = generar_pdf_participante(participante, afiche_path)
 
     return send_file(pdf_file)  # Enviar el archivo PDF al cliente para descarga
+
+
+###
+### Certificate Preview Route
+###
+@app.route('/preview-certificado/<codigo_evento>', methods=['GET'])
+@login_required
+def preview_certificado(codigo_evento):
+    """
+    Generate a certificate preview using sample participant data.
+    
+    Args:
+        codigo_evento (str): The event code for which to generate preview
+        
+    Returns:
+        PDF response: Certificate preview with sample data
+    """
+    # Validate that the event exists
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)  # Event not found
+    
+    # Validate that the user has permission to view this event
+    # Check if user is the event author or a co-organizer
+    es_autor = str(current_user.id) == str(evento.get("autor"))
+    es_coorganizador = collection_participantes.find_one({
+        "codigo_evento": codigo_evento,
+        "cedula": str(current_user.cedula),
+        "rol": "coorganizador"
+    }) is not None
+    
+    if not (es_autor or es_coorganizador):
+        abort(403)  # Forbidden - user doesn't have permission to view this event
+    
+    # Validate that the event has a certificate template
+    certificado_path = evento.get('certificado')
+    if not certificado_path:
+        abort(404)  # No certificate template found
+    
+    # Validate that the certificate template file exists on filesystem
+    if not os.path.exists(certificado_path):
+        abort(404)  # Certificate template file not found
+    
+    # Generate sample participant data
+    sample_participant = create_sample_participant(codigo_evento)
+    
+    # Generate the preview certificate using existing logic
+    try:
+        pdf_file_path = generar_pdf_participante(sample_participant, certificado_path)
+        
+        # Read the PDF file content into memory
+        with open(pdf_file_path, 'rb') as pdf_file:
+            pdf_content = pdf_file.read()
+        
+        # Clean up the generated file immediately (no permanent files on server)
+        if os.path.exists(pdf_file_path):
+            os.remove(pdf_file_path)
+        
+        # Create a BytesIO object from the PDF content
+        pdf_buffer = BytesIO(pdf_content)
+        pdf_buffer.seek(0)
+        
+        # Return the PDF content as response with appropriate headers
+        return send_file(
+            pdf_buffer,
+            mimetype='application/pdf',
+            as_attachment=False,  # Display in browser, not download
+            download_name=f'preview-certificado-{codigo_evento}.pdf'
+        )
+        
+    except Exception as e:
+        # Log the error and return 500
+        print(f"Error generating certificate preview: {e}")
+        abort(500)  # Internal server error
+
+
+###
+### Attendance Certificate Preview Route
+###
+@app.route('/preview-constancia/<codigo_evento>', methods=['GET'])
+@login_required
+def preview_constancia(codigo_evento):
+    """
+    Generate an attendance certificate preview using sample participant data.
+    
+    Args:
+        codigo_evento (str): The event code for which to generate preview
+        
+    Returns:
+        PDF response: Attendance certificate preview with sample data
+    """
+    # Validate that the event exists
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)  # Event not found
+    
+    # Validate that the user has permission to view this event
+    # Check if user is the event author or a co-organizer
+    es_autor = str(current_user.id) == str(evento.get("autor"))
+    es_coorganizador = collection_participantes.find_one({
+        "codigo_evento": codigo_evento,
+        "cedula": str(current_user.cedula),
+        "rol": "coorganizador"
+    }) is not None
+    
+    if not (es_autor or es_coorganizador):
+        abort(403)  # Forbidden - user doesn't have permission to view this event
+    
+    # Validate that the event has an attendance certificate template
+    constancia_path = evento.get('constancia')
+    if not constancia_path:
+        abort(404)  # No attendance certificate template found
+    
+    # Validate that the attendance certificate template file exists on filesystem
+    if not os.path.exists(constancia_path):
+        abort(404)  # Attendance certificate template file not found
+    
+    # Generate sample participant data
+    sample_participant = create_sample_participant(codigo_evento)
+    
+    # Generate the preview attendance certificate using existing logic
+    try:
+        pdf_buffer = generar_constancia_asistencia(sample_participant, constancia_path)
+        
+        # Return the PDF content as response with appropriate headers
+        return send_file(
+            pdf_buffer,
+            mimetype='application/pdf',
+            as_attachment=False,  # Display in browser, not download
+            download_name=f'preview-constancia-{codigo_evento}.pdf'
+        )
+        
+    except Exception as e:
+        # Log the error and return 500
+        log_event(f"Error generating attendance certificate preview for event {codigo_evento}: {e}")
+        print(f"Error generating attendance certificate preview: {e}")
+        abort(500)  # Internal server error
 
 
 ###
