@@ -2901,10 +2901,19 @@ def buscar_certificados():
             if evento:
                 fecha_evento = evento.get('fecha_fin', None)
 
-                # Verificar si el participante completó el examen (para eventos de registro abierto)
+                # Verificar si el participante completó el examen
                 examen_completado = False
                 puntaje_examen = 0
-                if evento.get('registro_abierto', False):
+                tiene_examen = False
+                
+                # Verificar si el evento tiene exámenes
+                examen_evento = collection_eva.find_one({
+                    'codigo_evento': codigo_evento,
+                    'tipo': 'examen'
+                })
+                
+                if examen_evento:
+                    tiene_examen = True
                     # Buscar los resultados del examen en collection_exam_results
                     resultados_examen = list(collection_exam_results.find({
                         'codigo_evento': codigo_evento,
@@ -2936,6 +2945,7 @@ def buscar_certificados():
                     'registro_abierto': evento.get('registro_abierto', False),
                     'examen_completado': examen_completado,
                     'puntaje_examen': puntaje_examen,
+                    'tiene_examen': tiene_examen,
                 }
                 resultados.append(resultado)
             else:
@@ -2959,6 +2969,7 @@ def buscar_certificados():
                     'registro_abierto': False,
                     'examen_completado': False,
                     'puntaje_examen': 0,
+                    'tiene_examen': False,
                 }
                 resultados.append(resultado)
 
