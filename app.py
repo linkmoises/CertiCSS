@@ -19,6 +19,7 @@ import csv
 from enum import Enum
 from functools import wraps
 from app.helpers import generate_otp, generate_nanoid, generar_codigo_evento, obtener_codigo_unico, allowed_file, otp_storage
+from app.template_selection import determine_template_path
 
 app = Flask(__name__)
 
@@ -5598,8 +5599,15 @@ def descargar_constancia(nanoid):
     if not participante:
         abort(404)  # Si no se encuentra el participante
 
-    # Ruta de la plantilla de la constancia
-    afiche_path = "static/assets/membrete-css-generico.pdf"
+    # Obtener el evento asociado al participante
+    codigo_evento = participante['codigo_evento']
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    
+    if not evento:
+        abort(404)  # Si no se encuentra el evento
+
+    # Determinar la ruta de la plantilla usando el algoritmo de selección
+    afiche_path = determine_template_path(evento)
 
     # Llamar a la función para generar el PDF en memoria
     pdf_buffer = generar_constancia_asistencia(participante, afiche_path)
