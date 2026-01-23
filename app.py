@@ -362,10 +362,20 @@ def tablero_coordinadores():
     total_ponentes = collection_participantes.count_documents({"rol": "ponente"})
     total_participantes = collection_participantes.count_documents({"rol": "participante"})
 
-    # Próximos eventos (no borrador, sin registro abierto) desde el inicio del día
+    # Próximos eventos y eventos vigentes (no borrador, sin registro abierto)
     inicio_hoy = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    fin_hoy = inicio_hoy.replace(hour=23, minute=59, second=59, microsecond=999999)
+    
     eventos_cursor = collection_eventos.find({
-        "fecha_inicio": {"$gte": inicio_hoy},
+        "$or": [
+            # Eventos que empiezan hoy o en el futuro
+            {"fecha_inicio": {"$gte": inicio_hoy}},
+            # Eventos en curso (hoy está entre fecha_inicio y fecha_fin)
+            {
+                "fecha_inicio": {"$lte": fin_hoy},
+                "fecha_fin": {"$gte": inicio_hoy}
+            }
+        ],
         "estado_evento": {"$ne": "borrador"},
         'registro_abierto': {'$ne': True}
     }).sort("fecha_inicio", 1).limit(5)
