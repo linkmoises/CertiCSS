@@ -243,12 +243,14 @@
                                         </a>
                                     </div>
                                     {% if validate_certificate_template(evento) %}
+{% if current_user.rol == 'administrador' or current_user.rol == 'denadoi' or current_user.id == evento.autor or evento.es_organizador %}
                                     <div class="sm:col-span-12 gap-2">
                                         <a href="{{ url_for('preview_certificado', codigo_evento=evento.codigo) }}" target="_blank" class="mt-4 w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-purple-600 text-white hover:bg-purple-700 focus:outline-none focus:bg-purple-700 disabled:opacity-50 disabled:pointer-events-none">
                                             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
                                             Vista previa del certificado
                                         </a>
                                     </div>
+{% endif %}
                                     {% endif %}
 {% else %}
                                     <div class="sm:col-span-12 gap-2">
@@ -266,12 +268,14 @@
                                         </a>
                                     </div>
                                     {% if validate_attendance_template(evento) %}
+{% if current_user.rol == 'administrador' or current_user.rol == 'denadoi' or current_user.id == evento.autor or evento.es_organizador %}
                                     <div class="sm:col-span-12 gap-2">
                                         <a href="{{ url_for('preview_constancia', codigo_evento=evento.codigo) }}" target="_blank" class="mt-4 w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-purple-600 text-white hover:bg-purple-700 focus:outline-none focus:bg-purple-700 disabled:opacity-50 disabled:pointer-events-none">
                                             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
                                             Vista previa de la constancia
                                         </a>
                                     </div>
+{% endif %}
                                     {% endif %}
 {% endif %}
                                 </div>

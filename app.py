@@ -2445,6 +2445,14 @@ def crear_evento():
 def ver_evento(codigo_evento):
     # Obtener el evento actual de la base de datos
     evento = collection_eventos.find_one({"codigo": codigo_evento})
+    
+    # Verificar si el usuario es organizador
+    es_organizador = collection_participantes.find_one({
+        "codigo_evento": codigo_evento,
+        "cedula": str(current_user.cedula),
+        "rol": "coorganizador"
+    }) is not None
+    evento["es_organizador"] = es_organizador
 
     return render_template('ver_evento.html', evento=evento, validate_certificate_template=validate_certificate_template, validate_attendance_template=validate_attendance_template)
 
@@ -5169,7 +5177,9 @@ def preview_certificado(codigo_evento):
         abort(404)  # Event not found
     
     # Validate that the user has permission to view this event
-    # Check if user is the event author or a co-organizer
+    # Check if user is admin, denadoi, event author, or a co-organizer
+    es_admin = current_user.rol == 'administrador'
+    es_denadoi = current_user.rol == 'denadoi'
     es_autor = str(current_user.id) == str(evento.get("autor"))
     es_coorganizador = collection_participantes.find_one({
         "codigo_evento": codigo_evento,
@@ -5177,7 +5187,7 @@ def preview_certificado(codigo_evento):
         "rol": "coorganizador"
     }) is not None
     
-    if not (es_autor or es_coorganizador):
+    if not (es_admin or es_denadoi or es_autor or es_coorganizador):
         abort(403)  # Forbidden - user doesn't have permission to view this event
     
     # Validate that the event has a certificate template
@@ -5243,7 +5253,9 @@ def preview_constancia(codigo_evento):
         abort(404)  # Event not found
     
     # Validate that the user has permission to view this event
-    # Check if user is the event author or a co-organizer
+    # Check if user is admin, denadoi, event author, or a co-organizer
+    es_admin = current_user.rol == 'administrador'
+    es_denadoi = current_user.rol == 'denadoi'
     es_autor = str(current_user.id) == str(evento.get("autor"))
     es_coorganizador = collection_participantes.find_one({
         "codigo_evento": codigo_evento,
@@ -5251,7 +5263,7 @@ def preview_constancia(codigo_evento):
         "rol": "coorganizador"
     }) is not None
     
-    if not (es_autor or es_coorganizador):
+    if not (es_admin or es_denadoi or es_autor or es_coorganizador):
         abort(403)  # Forbidden - user doesn't have permission to view this event
     
     # Validate that the event has an attendance certificate template
