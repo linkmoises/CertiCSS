@@ -1183,14 +1183,14 @@ def enviar_resultado_examen():
         if not all([codigo_evento, orden_examen is not None, cedula_participante]):
             return jsonify({"error": "Faltan datos requeridos"}), 400
 
-        # Verificar que el evento existe y es Virtual asincrónica
+        # Verificar que el evento existe y tiene modalidad virtual o híbrida
         evento = collection_eventos.find_one(
-            {"codigo": codigo_evento, "modalidad": "Virtual asincrónica"}
+            {"codigo": codigo_evento, "modalidad": {"$in": ["Virtual asincrónica", "Virtual sincrónica", "Híbrida"]}}
         )
 
         if not evento:
             return jsonify(
-                {"error": "Evento no encontrado o no es Virtual asincrónica"}
+                {"error": "Evento no encontrado o modalidad no compatible"}
             ), 404
 
         # Verificar que el examen existe
