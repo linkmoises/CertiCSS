@@ -3312,10 +3312,10 @@ def tablero_metricas_lms(page=1):
 @login_required
 def tablero_metricas_lms_evento(codigo_evento):
     
-    # Verificar que el evento existe y es Virtual asincrónica
+    # Verificar que el evento existe y tiene modalidad virtual o híbrida
     evento = collection_eventos.find_one({
         "codigo": codigo_evento,
-        "modalidad": "Virtual asincrónica"
+        "modalidad": {"$in": ["Virtual asincrónica", "Virtual sincrónica", "Híbrida"]}
     })
     
     if not evento:
