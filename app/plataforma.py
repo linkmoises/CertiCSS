@@ -468,9 +468,9 @@ def ver_contenido(codigo_evento, orden):
                 # Obtener cédula del participante desde los parámetros
                 cedula_participante = request.args.get("cedula")
 
-                # Verificar que el evento es Virtual asincrónica antes de guardar
+                # Verificar que el evento es virtual antes de guardar
                 if (
-                    evento.get("modalidad") == "Virtual asincrónica"
+                    evento.get("modalidad") in ["Virtual asincrónica", "Virtual sincrónica", "Híbrida"]
                     and cedula_participante
                 ):
                     # Obtener el número de intento (contar intentos previos + 1)

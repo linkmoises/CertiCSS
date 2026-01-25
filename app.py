@@ -3362,9 +3362,9 @@ def mis_metricas(page=1):
 @login_required
 def tablero_metricas_lms(page=1):
     
-    # Filtrar eventos con modalidad Virtual asincrónica y excluir registro abierto
+    # Filtrar eventos con modalidad virtual (todas las modalidades) y excluir registro abierto
     eventos_lms_query = {
-        "modalidad": "Virtual asincrónica",
+        "modalidad": {"$in": ["Virtual asincrónica", "Virtual sincrónica", "Híbrida"]},
         'registro_abierto': {'$ne': True}
     }
     
