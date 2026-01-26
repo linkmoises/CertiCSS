@@ -8,25 +8,21 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- favicons -->
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}"
-        sizes="96x96" />
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
-    <link rel="apple-touch-icon" sizes="180x180"
-        href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
     <meta name="apple-mobile-web-app-title" content="CertiCSS" />
     <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
     <!-- metadatos -->
     <meta property="og:title" content="DENADOI - CertiCSS" />
-    <meta property="og:description"
-        content="Plataforma de eventos académicos del Departamento Nacional de Docencia e Invetsigación de la Caja de Seguro Social" />
+    <meta property="og:description" content="Plataforma de eventos académicos del Departamento Nacional de Docencia e Invetsigación de la Caja de Seguro Social" />
     <meta property="og:image" content="{{ BASE_URL}}{{ url_for('static', filename='assets/og-certicss.jpg') }}" />
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:url" content="{{ BASE_URL}}" />
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="DENADOI - CertiCSS">
-    <meta name="twitter:description"
-        content="Plataforma de eventos académicos del Departamento Nacional de Docencia e Invetsigación de la Caja de Seguro Social">
+    <meta name="twitter:description" content="Plataforma de eventos académicos del Departamento Nacional de Docencia e Invetsigación de la Caja de Seguro Social">
     <meta name="twitter:image" content="{{ BASE_URL}}{{ url_for('static', filename='assets/og-certicss.jpg') }}">
     <meta name="twitter:url" content="{{ BASE_URL}}">
     {% if UMAMI_URL %}
