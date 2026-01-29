@@ -19,9 +19,27 @@ import csv
 from enum import Enum
 from functools import wraps
 from app.helpers import generate_otp, generate_nanoid, generar_codigo_evento, obtener_codigo_unico, allowed_file, otp_storage
-from app.template_selection import determine_template_path
+from app.template_selection import determine_template_path, parse_event_date
 
 app = Flask(__name__)
+
+# Custom date filter for templates
+def format_date(value, format='%d/%m/%y'):
+    if not value:
+        return ''
+    if isinstance(value, str):
+        try:
+            # Try to convert from string to datetime
+            value = datetime.strptime(value, '%Y-%m-%d')
+        except (ValueError, TypeError):
+            return value
+    try:
+        return value.strftime(format)
+    except (AttributeError, ValueError):
+        return value
+
+# Register the filter in the application
+app.jinja_env.filters['date'] = format_date
 
 
 ###
@@ -1461,6 +1479,289 @@ def registrar_organizador(codigo_evento):
         evento=evento,
         afiche_url=afiche_url
     )
+
+
+###
+### Form data extraction and validation functions for extemporaneous registration
+###
+
+def extract_extemporaneous_form_data():
+    """
+    Extract form data from extemporaneous registration form submission.
+    
+    Returns:
+        dict: Extracted and cleaned form data
+    """
+    return {
+        'nombres': request.form.get('nombres', '').strip(),
+        'apellidos': request.form.get('apellidos', '').strip(),
+        'cedula': request.form.get('cedula', '').strip(),
+        'perfil_profesional': request.form.get('perfil_profesional', '').strip(),
+        'region': request.form.get('region', '').strip(),
+        'unidad': request.form.get('unidad', '').strip(),
+        'fecha_evento': request.form.get('fecha_evento', '').strip(),
+        'registro_extemporaneo': request.form.get('registro_extemporaneo') == 'true'
+    }
+
+def validate_extemporaneous_form_data(form_data, evento):
+    """
+    Validate extemporaneous registration form data.
+    
+    Args:
+        form_data (dict): Form data to validate
+        evento (dict): Event document from MongoDB
+        
+    Returns:
+        tuple: (is_valid, error_messages)
+    """
+    errors = []
+    
+    # Validate required fields
+    required_fields = ['nombres', 'apellidos', 'cedula', 'perfil_profesional', 'region', 'unidad']
+    for field in required_fields:
+        if not form_data.get(field):
+            field_names = {
+                'nombres': 'Nombres',
+                'apellidos': 'Apellidos', 
+                'cedula': 'Cédula',
+                'perfil_profesional': 'Perfil profesional',
+                'region': 'Región',
+                'unidad': 'Unidad'
+            }
+            errors.append(f'{field_names[field]} es requerido.')
+    
+    # Validate cedula format using existing patterns
+    if form_data.get('cedula'):
+        cedula = form_data['cedula']
+        # Pattern from the template's JavaScript validation
+        import re
+        cedula_pattern = r'^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$|^[A-Z]{2}\d{6,20}$'
+        if not re.match(cedula_pattern, cedula):
+            errors.append('Formato de cédula inválido.')
+    
+    # Validate date for multi-day events
+    if evento:
+        fecha_inicio = parse_event_date(evento.get('fecha_inicio'))
+        fecha_fin = parse_event_date(evento.get('fecha_fin'))
+        
+        if fecha_inicio and fecha_fin and fecha_inicio.date() != fecha_fin.date():
+            # Multi-day event - date selection is required
+            if not form_data.get('fecha_evento'):
+                errors.append('Debe seleccionar una fecha para este evento de múltiples días.')
+            else:
+                # Validate selected date is within event range
+                try:
+                    selected_date = datetime.strptime(form_data['fecha_evento'], '%Y-%m-%d').date()
+                    if selected_date < fecha_inicio.date() or selected_date > fecha_fin.date():
+                        errors.append('La fecha seleccionada no está dentro del rango del evento.')
+                except ValueError:
+                    errors.append('Formato de fecha inválido.')
+    
+    return len(errors) == 0, errors
+
+def check_duplicate_extemporaneous_registration(cedula, codigo_evento, fecha_evento=None):
+    """
+    Check for duplicate extemporaneous registration with date consideration.
+    
+    Allows same participant on different dates with same nanoid logic as presencial registration.
+    Prevents true duplicates (same participant, same event, same date).
+    
+    Args:
+        cedula (str): Participant's cedula
+        codigo_evento (str): Event code
+        fecha_evento (str): Event date in YYYY-MM-DD format (optional)
+        
+    Returns:
+        tuple: (is_duplicate, error_message)
+    """
+    # For single-day events or when no specific date is provided, use today's date
+    if not fecha_evento:
+        fecha_evento = datetime.now().strftime('%Y-%m-%d')
+    
+    # Convert fecha_evento to indice_registro format for compatibility
+    indice_registro = datetime.strptime(fecha_evento, '%Y-%m-%d').strftime('%Y%m%d')
+    
+    # Check for existing registration with same cedula, event, and date
+    # This query checks both the new fecha_evento field and legacy indice_registro field
+    existing_registration = collection_participantes.find_one({
+        "cedula": cedula,
+        "codigo_evento": codigo_evento,
+        "rol": "participante",
+        "$or": [
+            {"fecha_evento": fecha_evento},  # New date-specific field
+            {"indice_registro": indice_registro}  # Legacy date field for compatibility
+        ]
+    })
+    
+    if existing_registration:
+        # Check if it's the same date - this is a true duplicate
+        existing_fecha = existing_registration.get('fecha_evento')
+        existing_indice = existing_registration.get('indice_registro')
+        
+        # Compare dates - either through fecha_evento or indice_registro
+        is_same_date = (
+            existing_fecha == fecha_evento or 
+            existing_indice == indice_registro
+        )
+        
+        if is_same_date:
+            return True, "El participante ya está registrado en este evento para la fecha seleccionada."
+    
+    # Not a duplicate - same participant can register for different dates
+    return False, None
+
+def get_event_dates(evento):
+    """
+    Generate list of available dates for multi-day events.
+    
+    Args:
+        evento: Event document from MongoDB
+        
+    Returns:
+        List of date strings for selection dropdown
+    """
+    fecha_inicio = parse_event_date(evento.get('fecha_inicio'))
+    fecha_fin = parse_event_date(evento.get('fecha_fin'))
+    
+    if not fecha_inicio:
+        return []
+    
+    if not fecha_fin or fecha_inicio.date() == fecha_fin.date():
+        # Single day event
+        return [fecha_inicio.strftime('%Y-%m-%d')]
+    
+    # Generate date range for multi-day event
+    dates = []
+    current_date = fecha_inicio
+    while current_date.date() <= fecha_fin.date():
+        dates.append(current_date.strftime('%Y-%m-%d'))
+        current_date += timedelta(days=1)
+    
+    return dates
+
+###
+### Formulario de registro extemporáneo
+###
+@app.route('/registrar_extemporaneo/<codigo_evento>', methods=['GET', 'POST'])
+@login_required
+def registrar_extemporaneo(codigo_evento):
+    """
+    Handle extemporaneous registration for administrators.
+    
+    GET: Display registration form
+    POST: Process registration submission
+    """
+    # Verify administrator role
+    if current_user.rol != 'administrador':
+        # Log unauthorized access attempt
+        log_event(f"Usuario [{current_user.email}] intentó acceso no autorizado a registro extemporáneo para evento {codigo_evento} - Rol: {current_user.rol}")
+        
+        flash('No tienes permiso para acceder a esta función.', 'error')
+        return redirect(url_for('listar_participantes', codigo_evento=codigo_evento))
+    
+    # Get event information
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        # Log attempt to access non-existent event
+        log_event(f"Usuario [{current_user.email}] intentó registro extemporáneo para evento inexistente: {codigo_evento}")
+        
+        flash('Evento no encontrado.', 'error')
+        return redirect(url_for('home'))
+    
+    if request.method == 'GET':
+        # Log form access
+        log_event(f"Usuario [{current_user.email}] accedió al formulario de registro extemporáneo para evento {codigo_evento}")
+        
+        # Display the registration form
+        afiche_750 = evento.get('afiche_750')
+        afiche_url = url_for('static', filename='uploads/' + afiche_750.split('/')[-1]) if afiche_750 else None
+        
+        # Get available dates for multi-day events
+        fechas_disponibles = get_event_dates(evento)
+        
+        return render_template('registrar_extemporaneo.html',
+            codigo_evento=codigo_evento,
+            evento=evento,
+            nombre_evento=evento['nombre'],
+            afiche_url=afiche_url,
+            evento_cerrado=False,  # Administrators can register even when event is closed
+            fechas_disponibles=fechas_disponibles
+        )
+    
+    else:  # POST request - process registration
+        try:
+            # Extract form data using new extraction function
+            form_data = extract_extemporaneous_form_data()
+            
+            # Validate form data using new validation function
+            is_valid, error_messages = validate_extemporaneous_form_data(form_data, evento)
+            if not is_valid:
+                # Log validation failure
+                log_event(f"Usuario [{current_user.email}] falló registro extemporáneo para evento {codigo_evento} - Errores de validación: {'; '.join(error_messages)}")
+                
+                for error in error_messages:
+                    flash(error, 'error')
+                return redirect(url_for('registrar_extemporaneo', codigo_evento=codigo_evento))
+            
+            # Check for duplicate registration with date consideration
+            is_duplicate, duplicate_error = check_duplicate_extemporaneous_registration(
+                form_data['cedula'], 
+                codigo_evento, 
+                form_data.get('fecha_evento')
+            )
+            if is_duplicate:
+                # Log duplicate registration attempt
+                log_event(f"Usuario [{current_user.email}] falló registro extemporáneo para evento {codigo_evento} - Registro duplicado: {form_data['nombres']} {form_data['apellidos']} ({form_data['cedula']}) en fecha {form_data.get('fecha_evento', 'N/A')}")
+                
+                flash(duplicate_error, 'error')
+                return redirect(url_for('registrar_extemporaneo', codigo_evento=codigo_evento))
+            
+            # Generate nanoid
+            nanoid = generate_nanoid(form_data['cedula'], codigo_evento)
+            
+            # Determine the date to use for registration
+            fecha_evento = form_data.get('fecha_evento')
+            if not fecha_evento:
+                # For single-day events, use the event start date
+                fecha_inicio = parse_event_date(evento.get('fecha_inicio'))
+                fecha_evento = fecha_inicio.strftime('%Y-%m-%d') if fecha_inicio else datetime.now().strftime('%Y-%m-%d')
+            
+            # Create participant record
+            timestamp = datetime.now()
+            participant_record = {
+                'nombres': form_data['nombres'],
+                'apellidos': form_data['apellidos'],
+                'cedula': form_data['cedula'],
+                'rol': 'participante',
+                'perfil': form_data['perfil_profesional'],
+                'region': form_data['region'],
+                'unidad': form_data['unidad'],
+                'codigo_evento': codigo_evento,
+                'nanoid': nanoid,
+                'timestamp': timestamp,
+                'indice_registro': datetime.strptime(fecha_evento, '%Y-%m-%d').strftime('%Y%m%d'),
+                'fecha_evento': fecha_evento,  # New field for date-specific registration
+                'tipo_evento': 'Extemporáneo',
+                'registro_extemporaneo': True,
+                'administrador_registro': current_user.email
+            }
+            
+            # Store in database
+            collection_participantes.insert_one(participant_record)
+            
+            # Log successful registration with comprehensive details
+            log_event(f"Usuario [{current_user.email}] registró extemporáneamente a {form_data['nombres']} {form_data['apellidos']} ({form_data['cedula']}) para el evento {codigo_evento} en fecha {fecha_evento}. Nanoid: {nanoid}, Región: {form_data['region']}, Unidad: {form_data['unidad']}")
+            
+            # Success response
+            flash(f'Participante {form_data["nombres"]} {form_data["apellidos"]} registrado exitosamente.', 'success')
+            return redirect(url_for('listar_participantes', codigo_evento=codigo_evento))
+            
+        except Exception as e:
+            # Log system errors during registration
+            log_event(f"Usuario [{current_user.email}] falló registro extemporáneo para evento {codigo_evento} - Error del sistema: {str(e)}")
+            
+            flash('Error interno del sistema. Por favor, inténtelo de nuevo.', 'error')
+            return redirect(url_for('registrar_extemporaneo', codigo_evento=codigo_evento))
 
 
 ###
