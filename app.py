@@ -223,22 +223,46 @@ def editar_ponente(nanoid):
         cedula = request.form.get('cedula', '').strip()
         perfil = request.form.get('perfil_profesional').strip()
         titulo_ponencia = request.form.get('titulo_ponencia', '').strip()
+        fecha_evento = request.form.get('fecha_evento')
+
+        # Prepare update data
+        update_data = {
+            "nombres": nombres,
+            "apellidos": apellidos,
+            "cedula": cedula,
+            "perfil": perfil,
+            "titulo_ponencia": titulo_ponencia,
+        }
+
+        # Handle fecha_evento
+        if fecha_evento:
+            update_data["fecha_evento"] = fecha_evento
+            # Update indice_registro based on the new event date
+            update_data["indice_registro"] = datetime.strptime(fecha_evento, '%Y-%m-%d').strftime('%Y%m%d')
+        else:
+            # For single-day events, use the event start date
+            fecha_inicio = parse_event_date(evento.get('fecha_inicio'))
+            if fecha_inicio:
+                fecha_evento = fecha_inicio.strftime('%Y-%m-%d')
+                update_data["fecha_evento"] = fecha_evento
+                update_data["indice_registro"] = fecha_inicio.strftime('%Y%m%d')
 
         # Actualizar el participante en la base de datos
         collection_participantes.update_one(
             {"nanoid": nanoid},
-            {"$set": {
-                "nombres": nombres,
-                "apellidos": apellidos,
-                "cedula": cedula,
-                "perfil": perfil,
-                "titulo_ponencia": titulo_ponencia,
-            }}
+            {"$set": update_data}
         )
 
+        flash("Datos del ponente actualizados exitosamente.", "success")
         return redirect(url_for('listar_participantes', codigo_evento=ponente['codigo_evento']))
 
-    return render_template('editar_ponente.html', ponente=ponente, evento=evento)
+    # Get available dates for multi-day events
+    fechas_disponibles = get_event_dates(evento)
+
+    return render_template('editar_ponente.html', 
+                         ponente=ponente, 
+                         evento=evento, 
+                         fechas_disponibles=fechas_disponibles)
 
 
 
@@ -1398,12 +1422,20 @@ def registrar_ponente(codigo_evento):
         perfil = request.form['perfil_profesional']
         rol = request.form['rol']
         titulo_ponencia = request.form['titulo_ponencia']
+        fecha_evento = request.form.get('fecha_evento')
 
         # Generar nanoid
         nanoid = generate_nanoid(cedula, codigo_evento, titulo_ponencia)
 
-        # Insertar datos en la colección de MongoDB
-        collection_participantes.insert_one({
+        # Determine the date to use for registration
+        if not fecha_evento:
+            # For single-day events, use the event start date
+            fecha_inicio = parse_event_date(evento.get('fecha_inicio'))
+            fecha_evento = fecha_inicio.strftime('%Y-%m-%d') if fecha_inicio else datetime.now().strftime('%Y-%m-%d')
+
+        # Create speaker record
+        timestamp = datetime.now()
+        speaker_record = {
             'nombres': nombres,
             'apellidos': apellidos,
             'cedula': cedula,
@@ -1412,18 +1444,27 @@ def registrar_ponente(codigo_evento):
             'titulo_ponencia': titulo_ponencia,
             'codigo_evento': codigo_evento,
             'nanoid': nanoid,
-            'indice_registro': datetime.now().strftime('%Y%m%d'),
-            'timestamp': datetime.now()  # Almacenar timestamp actual
-        })
+            'timestamp': timestamp,
+            'indice_registro': datetime.strptime(fecha_evento, '%Y-%m-%d').strftime('%Y%m%d'),
+            'fecha_evento': fecha_evento  # Store the selected event date
+        }
+
+        # Insertar datos en la colección de MongoDB
+        collection_participantes.insert_one(speaker_record)
 
         flash("Ponente registrado con éxito.", "success")
-        log_event(f"Usuario [{current_user.email}] registró al {rol} {cedula} en el evento {codigo_evento}.")
+        log_event(f"Usuario [{current_user.email}] registró al {rol} {cedula} en el evento {codigo_evento} para la fecha {fecha_evento}.")
         return redirect(url_for('listar_participantes', codigo_evento=codigo_evento))
+
+    # Get available dates for multi-day events
+    fechas_disponibles = get_event_dates(evento)
 
     return render_template('registrar_ponente.html',
         codigo_evento=codigo_evento,
         evento=evento,
-        afiche_url=afiche_url
+        nombre_evento=evento['nombre'],
+        afiche_url=afiche_url,
+        fechas_disponibles=fechas_disponibles
     )
 
 
@@ -2656,6 +2697,7 @@ def listar_participantes(codigo_evento):
     # Recuperar participantes registrados para el evento específico
     evento = collection_eventos.find_one({"codigo": codigo_evento})
 
+    # Query participants (we'll sort them in Python for better control)
     participantes_cursor = collection_participantes.find({"codigo_evento": codigo_evento})
 
     total_participantes = collection_participantes.count_documents({"codigo_evento": codigo_evento, "rol": "participante"})
@@ -2671,6 +2713,20 @@ def listar_participantes(codigo_evento):
             except (ValueError, AttributeError):
                 # Si hay un error en la conversión, establecer la fecha actual
                 participante['timestamp'] = datetime.now()
+
+    # Sort participants by date - prioritize fecha_evento for extemporaneous participants
+    def get_sort_date(participante):
+        # For extemporaneous participants, use fecha_evento
+        if participante.get('fecha_evento'):
+            try:
+                return datetime.strptime(participante['fecha_evento'], '%Y-%m-%d')
+            except (ValueError, TypeError):
+                pass
+        # For regular participants or if fecha_evento parsing fails, use timestamp
+        return participante.get('timestamp', datetime.min)
+
+    # Sort participants by the determined date
+    participantes.sort(key=get_sort_date)
 
     estado_evento = evento.get('estado_evento', 'borrador')
 

@@ -265,8 +265,8 @@
                                 <td class="size-px whitespace-nowrap">
                                     <div class="px-6 py-2">
 {% if participante.get('fecha_evento') %}
-{% if participante.get('registro_extemporaneo') %}
-                                        <span class="text-sm text-gray-500">{{ participante.fecha_evento | date('%d %b, %Y') }} - (extemp)</span>
+                                        <span class="text-sm text-gray-500">{{ participante.fecha_evento | date('%d %b, %Y') }}{% if participante.get('registro_extemporaneo') %} - (extemp){% elif participante.rol == 'ponente' %} - (ponente){% else %} - (evento){% endif %}</span>
+{% if participante.get('registro_extemporaneo') or participante.rol == 'ponente' %}
                                         <br><span class="text-xs text-gray-400">Reg: {{ participante.timestamp.strftime('%d %b, %Y - %H:%M') }}</span>
 {% endif %}
 {% else %}
@@ -277,28 +277,28 @@
                                 <td class="size-px whitespace-nowrap">
                                     <div class="px-6 py-2">
 {% if puede_editar and (evento.estado_evento != 'cerrado' or current_user.rol == 'administrador') %}
-{% if current_user.rol == 'organizador' %}
+{% if participante.rol == 'ponente' %}
                                         <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('editar_ponente', nanoid=participante.nanoid) }}">
                                             Corregir ponente
                                         </a><br />
                                         <form action="{{ url_for('eliminar_participante', nanoid=participante.nanoid) }}" method="post" style="display:inline;">
-                                            <button class="text-sm text-red-600 decoration-2 hover:underline" type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este participante? Esta acción no se puede deshacer.');">
+                                            <button class="text-sm text-red-600 decoration-2 hover:underline" type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este ponente? Esta acción no se puede deshacer.');">
                                                 Eliminar ponente
                                             </button>
                                         </form>
-{% elif current_user.rol == "organizador" %}
+{% elif participante.rol == 'organizador' %}
                                         <a class="inline-flex items-center gap-x-1 text-sm">Organizador del evento</a><br />
                                         <form action="{{ url_for('eliminar_participante', nanoid=participante.nanoid) }}" method="post" style="display:inline;">
-                                            <button class="text-sm text-red-600 decoration-2 hover:underline" type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este participante? Esta acción no se puede deshacer.');">
+                                            <button class="text-sm text-red-600 decoration-2 hover:underline" type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este organizador? Esta acción no se puede deshacer.');">
                                                 Eliminar organizador
                                             </button>
                                         </form>
-{% elif current_user.rol == "coorganizador" %}
+{% elif participante.rol == 'coorganizador' %}
                                         <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('editar_ponente', nanoid=participante.nanoid) }}">
                                             Corregir coorganizador
                                         </a><br />
                                         <form action="{{ url_for('eliminar_participante', nanoid=participante.nanoid) }}" method="post" style="display:inline;">
-                                            <button class="text-sm text-red-600 decoration-2 hover:underline" type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este participante? Esta acción no se puede deshacer.');">
+                                            <button class="text-sm text-red-600 decoration-2 hover:underline" type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este coorganizador? Esta acción no se puede deshacer.');">
                                                 Eliminar coorganizador
                                             </button>
                                         </form>
