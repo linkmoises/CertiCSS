@@ -3714,8 +3714,8 @@ def mis_metricas(page=1):
 ###
 ### LMS Metrics Dashboard - General
 ###
-@app.route('/tablero/metricas/lms')
-@app.route('/tablero/metricas/lms/page/<int:page>')
+@app.route('/tablero/metricas/emc')
+@app.route('/tablero/metricas/emc/page/<int:page>')
 @login_required
 def tablero_metricas_lms(page=1):
     

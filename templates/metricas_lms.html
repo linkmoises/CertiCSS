@@ -6,31 +6,16 @@
     <div class="w-full lg:ps-64">
         <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
         
-            <!-- Page Header -->
-            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
-                <div class="mb-6">
-                    <h1 class="text-2xl font-bold text-gray-800 sm:text-3xl">Métricas LMS - Minicursos Digitales</h1>
-                    <p class="text-gray-600">Dashboard de métricas para eventos virtuales asincrónicos</p>
-                </div>
-                
-                <!-- Navigation Links -->
-                <div class="mb-6">
-                    <nav class="flex space-x-4">
-                        <a href="{{ url_for('tablero_metricas') }}" class="text-blue-600 hover:text-blue-800 font-medium">← Métricas Generales</a>
-                    </nav>
-                </div>
-            </div>
-        
             <!-- TARJETAS RESUMEN -->
             <div class="max-w-[85rem] px-2 pt-1 mx-auto">
                 <!-- Grid -->
-                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <div class="grid sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
                     <!-- Card -->
                     <div class="flex flex-col bg-white border shadow-sm rounded-xl">
                         <div class="p-4 md:p-5">
                         <div class="flex items-center gap-x-2">
                             <p class="text-xs uppercase tracking-wide text-gray-500">
-                                Eventos LMS Totales
+                                # Actividades EMC
                             </p>
                         </div>
                 
@@ -44,11 +29,11 @@
                 <!-- End Card -->
             
                 <!-- Card -->
-                <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                <!-- <div class="flex flex-col bg-white border shadow-sm rounded-xl">
                     <div class="p-4 md:p-5">
                         <div class="flex items-center gap-x-2">
                             <p class="text-xs uppercase tracking-wide text-gray-500">
-                                Eventos LMS Cerrados
+                                Actividades EMC Cerradas
                             </p>
                         </div>
             
@@ -58,7 +43,7 @@
                             </h3>
                         </div>
                     </div>
-                </div>
+                </div> -->
                 <!-- End Card -->
             
                 <!-- Card -->
@@ -66,7 +51,7 @@
                     <div class="p-4 md:p-5">
                         <div class="flex items-center gap-x-2">
                             <p class="text-xs uppercase tracking-wide text-gray-500">
-                                Participantes LMS
+                                # Participantes EMC
                             </p>
                         </div>
             
@@ -84,7 +69,7 @@
                     <div class="p-4 md:p-5">
                         <div class="flex items-center gap-x-2">
                             <p class="text-xs uppercase tracking-wide text-gray-500">
-                                Exámenes Realizados
+                                # Exámenes Realizados
                             </p>
                         </div>
             
@@ -96,13 +81,6 @@
                     </div>
                 </div>
                 <!-- End Card -->
-            </div>
-            <!-- End Grid -->
-        </div>
-
-        <!-- Additional Metrics Cards -->
-        <div class="max-w-[85rem] px-2 pt-1 mx-auto">
-            <div class="grid sm:grid-cols-2 gap-4 sm:gap-6">
                 <!-- Card -->
                 <div class="flex flex-col bg-white border shadow-sm rounded-xl">
                     <div class="p-4 md:p-5">
@@ -120,25 +98,42 @@
                     </div>
                 </div>
                 <!-- End Card -->
-                
                 <!-- Card -->
                 <div class="flex flex-col bg-white border shadow-sm rounded-xl">
                     <div class="p-4 md:p-5">
                         <div class="flex items-center gap-x-2">
                             <p class="text-xs uppercase tracking-wide text-gray-500">
-                                Promedio de Calificaciones
+                                % Global aprobados
                             </p>
                         </div>
             
                         <div class="mt-1 flex items-center gap-x-2">
                             <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
-                                {{ promedio_calificacion }}%
+                                XX %
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+                 <!-- Card -->
+                <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                    <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
+                                % Global no aprobados
+                            </p>
+                        </div>
+            
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                XX %
                             </h3>
                         </div>
                     </div>
                 </div>
                 <!-- End Card -->
             </div>
+            <!-- End Grid -->
         </div>
 
         <!-- TABLA DE EVENTOS -->
@@ -152,10 +147,10 @@
                             <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
                                 <div>
                                     <h2 class="text-xl font-semibold text-gray-800">
-                                        Eventos LMS Cerrados
+                                        Actividades EMC
                                     </h2>
                                     <p class="text-sm text-gray-600">
-                                        Lista de eventos virtuales asincrónicos finalizados con métricas de exámenes
+                                        Métricas de actividades de educación médica continua
                                     </p>
                                 </div>
                             </div>
@@ -168,7 +163,7 @@
                                         <th scope="col" class="ps-6 py-3 text-start">
                                             <div class="flex items-center gap-x-2">
                                                 <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
-                                                    Evento
+                                                    Título de actividad
                                                 </span>
                                             </div>
                                         </th>
@@ -176,7 +171,7 @@
                                         <th scope="col" class="px-6 py-3 text-start">
                                             <div class="flex items-center gap-x-2">
                                                 <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
-                                                    Participantes
+                                                    # Participantes
                                                 </span>
                                             </div>
                                         </th>
@@ -184,7 +179,7 @@
                                         <th scope="col" class="px-6 py-3 text-start">
                                             <div class="flex items-center gap-x-2">
                                                 <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
-                                                    Exámenes
+                                                    <span class="normal-case">x&#772;</span> intentos por examen
                                                 </span>
                                             </div>
                                         </th>
@@ -192,7 +187,7 @@
                                         <th scope="col" class="px-6 py-3 text-start">
                                             <div class="flex items-center gap-x-2">
                                                 <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
-                                                    Resultados
+                                                    % Aprobados / no aprobados
                                                 </span>
                                             </div>
                                         </th>
@@ -200,7 +195,7 @@
                                         <th scope="col" class="px-6 py-3 text-start">
                                             <div class="flex items-center gap-x-2">
                                                 <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
-                                                    Promedio
+                                                    <span class="normal-case">x&#772;</span> notas (min – max)
                                                 </span>
                                             </div>
                                         </th>

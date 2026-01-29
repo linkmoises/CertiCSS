@@ -200,31 +200,31 @@
                                     </a>
                                 </th>
                 
-                                <th scope="col" class="px-6 py-3 text-start">
+                                <th scope="col" class="px-6 py-3 text-center">
                                     <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
                                         Cédula
                                     </a>
                                 </th>
                 
-                                <th scope="col" class="px-6 py-3 text-start">
+                                <th scope="col" class="px-6 py-3 text-center">
                                     <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
                                         Rol
                                     </a>
                                 </th>
                 
-                                <th scope="col" class="px-6 py-3 text-center">
+                                <th scope="col" class="px-2 py-3 text-center">
                                     <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
                                         ID validación
                                     </a>
                                 </th>
                 
-                                <th scope="col" class="px-6 py-3 text-start">
+                                <th scope="col" class="px-2 py-3 text-start">
                                     <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
                                         Fecha
                                     </a>
                                 </th>
-                
-                                <th scope="col" class="px-6 py-3 text-start">
+
+                                <th scope="col" class="px-2 py-3 text-start">
                                     <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
                                         Acciones de participante
                                     </a>
@@ -236,26 +236,26 @@
 {% for participante in participantes %}
                             <tr class="bg-white hover:bg-gray-50">
                                 <td class="size-px whitespace-nowrap">
-                                    <div class="px-6 py-2">
+                                    <div class="w-48 px-6 py-2">
                                         <p class="text-sm text-gray-500 mb-2">
                                             <span class="participante-nombre">{{ participante.apellidos }}, {{ participante.nombres }}</span>
                                         </p>
                                     </div>
                                 </td>
                                 <td class="size-px whitespace-nowrap">
-                                    <div class="px-6 py-2">
+                                    <div class="px-2 py-2 text-center">
                                         <p class="text-sm text-gray-500 mb-2">
                                             <span class="participante-cedula">{{ participante.cedula }}</span>
                                         </p>
                                     </div>
                                 </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="px-6 py-2">
+                                <td class="size-px whitespace-nowrap text-center">
+                                    <div class="px-2 py-2">
                                         <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium {% if participante.rol == 'participante' %}bg-blue-100 text-blue-800{% elif participante.rol == 'organizador' %}bg-teal-100 text-teal-800{% elif participante.rol == 'coorganizador' %}bg-teal-100 text-teal-800{% elif participante.rol == 'ponente' %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">{{ participante.rol }}</span><br />
                                     </div>
                                 </td>
                                 <td class="size-px whitespace-nowrap text-center">
-                                    <div class="px-6 py-2">
+                                    <div class="px-2 py-2">
                                         <a class="inline-flex items-center gap-x-1 text-sm font-medium decoration-2 hover:underline" href="{{ url_for('generar_pdf', nanoid=participante.nanoid) }}" target="_blank">
                                             <svg class="size-3.5 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-card-text" viewBox="0 0 16 16"><path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2z"/><path d="M3 5.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5M3 8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 8m0 2.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5"/></svg>
                                             <span class="text-sm text-gray-500 font-mono">{{ participante.nanoid }}</span>
@@ -263,7 +263,7 @@
                                     </div>
                                 </td>
                                 <td class="size-px whitespace-nowrap">
-                                    <div class="px-6 py-2">
+                                    <div class="px-2 py-2">
 {% if participante.get('fecha_evento') %}
                                         <span class="text-sm text-gray-500">{{ participante.fecha_evento | date('%d %b, %Y') }}{% if participante.get('registro_extemporaneo') %} - (extemp){% elif participante.rol == 'ponente' %} - (ponente){% else %} - (evento){% endif %}</span>
 {% if participante.get('registro_extemporaneo') or participante.rol == 'ponente' %}
@@ -275,7 +275,7 @@
                                     </div>
                                 </td>
                                 <td class="size-px whitespace-nowrap">
-                                    <div class="px-6 py-2">
+                                    <div class="px-2 py-2">
 {% if puede_editar and (evento.estado_evento != 'cerrado' or current_user.rol == 'administrador') %}
 {% if participante.rol == 'ponente' %}
                                         <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('editar_ponente', nanoid=participante.nanoid) }}">
