@@ -59,6 +59,28 @@ python app.py
 
 9. **¡Listo!** Abre tu navegador y ve a `http://localhost:5000` para empezar a usar CertiCSS.
 
+
+#### Estructura de Archivos de Instalación
+
+- `install-minimal.py` - Configuración básica de base de datos
+- `install-deps.sh` - Instalación gradual de dependencias
+- `setup-local.sh` - Script completo de instalación
+- `run-local.sh` - Script para ejecutar la aplicación
+
+#### Próximos Pasos
+
+1. Accede a http://localhost:5000
+2. Inicia sesión con las credenciales de administrador que creaste
+3. Ve a "Opciones" para cargar la planilla de funcionarios (opcional)
+4. Comienza a crear eventos y gestionar certificados
+
+#### Notas Importantes
+
+- La aplicación se ejecuta en modo desarrollo (DEBUG=True)
+- MongoDB debe estar ejecutándose antes de iniciar la aplicación
+- El primer usuario creado tendrá rol de administrador
+- La base de datos de funcionarios estará vacía inicialmente (normal)
+
 ### Opción 2: Usar Docker (para producción o pruebas rápidas)
 
 Si prefieres no instalar nada en tu máquina o quieres probar la aplicación en un entorno aislado, ¡Docker es tu mejor amigo! 🐳

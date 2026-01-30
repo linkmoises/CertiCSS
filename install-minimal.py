@@ -1,28 +1,38 @@
+#!/usr/bin/env python3
+"""
+Script de instalación mínima para CertiCSS
+Solo instala las dependencias básicas necesarias para la configuración inicial
+"""
+
 import sys
 import os
-from flask import Flask
-from werkzeug.security import generate_password_hash
-from pymongo import MongoClient
-from pymongo.errors import ServerSelectionTimeoutError, ConnectionFailure
-from flask_pymongo import PyMongo
-from datetime import datetime
 
 def verificar_dependencias():
-    """Verificar que las dependencias necesarias estén instaladas"""
-    try:
-        import pymongo
-        import flask
-        import werkzeug
-        print("✓ Dependencias de Python verificadas")
-        return True
-    except ImportError as e:
-        print(f"✗ Error: Falta instalar dependencias de Python: {e}")
-        print("Ejecuta: pip install -r requirements.txt")
+    """Verificar que las dependencias mínimas estén instaladas"""
+    dependencias = ['pymongo', 'flask', 'werkzeug']
+    faltantes = []
+    
+    for dep in dependencias:
+        try:
+            __import__(dep)
+            print(f"✓ {dep} instalado")
+        except ImportError:
+            faltantes.append(dep)
+            print(f"✗ {dep} faltante")
+    
+    if faltantes:
+        print(f"\nInstala las dependencias faltantes:")
+        print(f"pip install {' '.join(faltantes)}")
         return False
+    
+    return True
 
 def verificar_mongodb():
     """Verificar que MongoDB esté ejecutándose"""
     try:
+        from pymongo import MongoClient
+        from pymongo.errors import ServerSelectionTimeoutError, ConnectionFailure
+        
         client = MongoClient('mongodb://localhost:27017/', serverSelectionTimeoutMS=5000)
         client.server_info()  # Forzar conexión
         print("✓ MongoDB está ejecutándose correctamente")
@@ -33,32 +43,19 @@ def verificar_mongodb():
         print("  sudo systemctl start mongod")
         print("  sudo systemctl status mongod")
         return None
+    except ImportError:
+        print("✗ Error: pymongo no está instalado")
+        print("Instala pymongo: pip install pymongo")
+        return None
 
-# Verificar dependencias antes de continuar
-if not verificar_dependencias():
-    sys.exit(1)
-
-# Verificar MongoDB
-client = verificar_mongodb()
-if not client:
-    sys.exit(1)
-
-# Configuración de Flask y MongoDB
-app = Flask(__name__)
-db = client['certi_css']
-collection_usuarios = db['usuarios']
-
-# Verificar si la base de datos y la colección existen
-if 'certi_css' not in client.list_database_names():
-    print("La base de datos 'certi_css' no existe. Creándola...")
-    db = client['certi_css']
-
-if 'usuarios' not in db.list_collection_names():
-    print("La colección 'usuarios' no existe. Creándola...")
-    collection_usuarios = db['usuarios']
-
-def crear_usuario_admin():
+def crear_usuario_admin(client):
     """Crear usuario administrador en la base de datos"""
+    from werkzeug.security import generate_password_hash
+    from datetime import datetime
+    
+    db = client['certi_css']
+    collection_usuarios = db['usuarios']
+    
     print("\n=== Configuración del Usuario Administrador ===")
     
     # Verificar si ya existe un administrador
@@ -100,7 +97,7 @@ def crear_usuario_admin():
             "password": hashed_password,
             "rol": "administrador",
             "activo": True,
-            "permisos": [],  # Los administradores no necesitan permisos adicionales
+            "permisos": [],
             "timestamp": datetime.now()
         })
 
@@ -116,25 +113,30 @@ def crear_usuario_admin():
         print(f"✗ Error al crear el usuario: {e}")
         return False
 
-def mostrar_resumen():
-    """Mostrar resumen de la instalación"""
-    print("\n=== Resumen de la Instalación ===")
-    print("✓ MongoDB conectado correctamente")
-    print("✓ Base de datos 'certi_css' configurada")
-    print("✓ Usuario administrador creado")
-    print("\nPróximos pasos:")
-    print("1. Ejecuta: ./run-local.sh")
-    print("2. Abre tu navegador en: http://localhost:5000")
-    print("3. Inicia sesión con las credenciales que acabas de crear")
-    print("\nNota: Asegúrate de tener MongoDB ejecutándose antes de iniciar la aplicación.")
-
-if __name__ == "__main__":
-    print("=== Instalador Local de CertiCSS ===")
+def main():
+    print("=== Instalador Mínimo de CertiCSS ===")
     print("Este script configurará la base de datos y creará un usuario administrador.")
+    print()
+    
+    # Verificar dependencias
+    if not verificar_dependencias():
+        sys.exit(1)
+    
+    # Verificar MongoDB
+    client = verificar_mongodb()
+    if not client:
+        sys.exit(1)
     
     try:
-        if crear_usuario_admin():
-            mostrar_resumen()
+        if crear_usuario_admin(client):
+            print("\n=== Instalación Completada ===")
+            print("✓ MongoDB conectado correctamente")
+            print("✓ Base de datos 'certi_css' configurada")
+            print("✓ Usuario administrador creado")
+            print("\nPróximos pasos:")
+            print("1. Instala las dependencias completas: pip install -r requirements.txt")
+            print("2. Ejecuta: ./run-local.sh")
+            print("3. Abre tu navegador en: http://localhost:5000")
         else:
             print("\n✗ La instalación no se completó correctamente.")
             sys.exit(1)
@@ -145,5 +147,8 @@ if __name__ == "__main__":
         print(f"\n✗ Error inesperado durante la instalación: {e}")
         sys.exit(1)
     finally:
-        if 'client' in locals():
+        if client:
             client.close()
+
+if __name__ == "__main__":
+    main()
