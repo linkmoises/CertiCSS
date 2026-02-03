@@ -329,7 +329,8 @@
                         <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200">
                             <div>
                                 <p class="text-sm text-gray-600">
-                                    <span class="font-semibold text-gray-800">{{ total_participantes }}</span> {{ 'participante' if total_participantes == 1 else 'participantes' }} / 
+                                    <span class="font-semibold text-gray-800">{{ total_participantes }}</span> {{ 'registro' if total_participantes == 1 else 'registros' }} / 
+                                    <span class="font-medium text-gray-700">{{ participantes|map(attribute='cedula')|unique|list|length }}</span> {{ 'participante único' if (participantes|map(attribute='cedula')|unique|list|length) == 1 else 'participantes únicos' }} / 
                                     <span class="font-semibold text-gray-800">{{ total_ponentes }}</span> {{ 'ponente' if total_ponentes == 1 else 'ponentes' }}
                                 </p>
                             </div>
