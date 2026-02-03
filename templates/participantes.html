@@ -69,7 +69,6 @@
                             </div>
                         </div>
                     </a>
-{% endif %}
 
 {% if evento.get('checkin_masivo', False) and (current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor or es_organizador))) %}
                     <a href="{{ url_for('checkin_evento', codigo_evento=evento.codigo) }}" class="group flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl hover:shadow-md focus:outline-hidden focus:shadow-md transition dark:bg-neutral-900 dark:border-neutral-800">
@@ -104,6 +103,7 @@
                 <!-- End Grid -->
             </div>
             <!-- FIN TARJETAS RESUMEN -->
+{% endif %}
             
             <!-- TABLA RESUMEN EVENTOS -->
             <div class="max-w-[85rem] px-2 pt-1 mx-auto">
