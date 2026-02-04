@@ -1,0 +1,334 @@
+{% include 'tablero-header.html' %}
+
+{% include 'tablero-sidebar.html' %}
+
+    <!-- Content -->
+    <div class="w-full lg:ps-64">
+        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+
+            <!-- TABLA RESUMEN EVENTOS -->
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <!-- Card -->
+                <div class="flex flex-col">
+                    <div class="-m-1.5 overflow-x-auto">
+                        <div class="p-1.5 min-w-full inline-block align-middle">
+                            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                                <!-- Header -->
+                                <div class="flex items-center gap-x-3">
+                                    <div class="relative h-32 w-32 shrink-0">
+                                        <img class="w-32 h-32 object-cover rounded-lg absolute top-0 start-0" src="https://picsum.photos/750/750.jpg" alt="Evento Nacional" />
+                                    </div>
+
+                                    <div class="grow">
+                                        <h2 class="block text-3xl font-bold mt-2">Métricas e Informe Nacional</h2>
+                                        <h4 class="block italic mb-2">República de Panamá</h4>
+                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                            Eventos Generales
+                                        </span>
+                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-blue-100 text-blue-800">
+                                            Año 2025
+                                        </span>
+                                    </div>
+                                </div>
+                                <!-- End Header -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+            </div>
+            <!-- End TABLA RESUMEN EVENTOS -->
+
+            <!-- TARJETAS RESUMEN -->
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <!-- Grid -->
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+                    <!-- Card -->
+                    <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
+                                Registros totales
+                            </p>
+                        </div>
+                
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                {{ estadisticas.total_registrations if estadisticas else 0 }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+            
+                <!-- Card -->
+                <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                    <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
+                                Participantes únicos
+                            </p>
+                        </div>
+            
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                {{ estadisticas.unique_participants if estadisticas else 0 }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+            
+                <!-- Card -->
+                <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                    <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
+                                Ponencias totales
+                            </p>
+                        </div>
+
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                {{ estadisticas.total_presentations if estadisticas else 0 }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+            
+                <!-- Card -->
+                <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                    <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
+                                Año
+                            </p>
+                        </div>
+
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                2025
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+                </div>
+                <!-- fin grid -->
+
+                <div id="informe-descripcion" class="grid">
+                    <div class="flex flex-col bg-white border shadow-sm rounded-xl mb-6">
+                        <div class="overflow-x-auto p-4">
+                            <h3 class="text-base font-semibold text-gray-800 mb-4">Informe Nacional - Eventos Generales</h3>
+                            <p class="text-sm py-1">
+                                <span class="font-semibold">Descripción:</span> 
+                                Este informe presenta las métricas y estadísticas nacionales de participación en eventos de educación médica continua, incluyendo análisis demográficos, distribución geográfica entre otras evaluaciones. Se excluyen de este registro los datos relacionados con sesiones docentes.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grid -->
+                <div id="grafico-perfil" class="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+                    <!-- Card que ocupa 3 columnas -->
+                    <div class="col-span-1 lg:col-span-3 flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="p-4 md:p-5">
+                            <h4 class="text-base font-semibold text-gray-800 mb-4">Gráfica No 1. Participantes según perfil profesional</h4>
+{% if grafica_perfil %}
+                            <img src="{{ grafica_perfil }}" alt="Gráfica de perfil profesional" class="w-full h-auto" />
+{% else %}
+                            <div class="flex justify-center items-center h-64 bg-gray-50 rounded-lg">
+                                <p class="text-gray-500">No hay datos disponibles para generar la gráfica.</p>
+                            </div>
+{% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Card que ocupa 1 columna -->
+                    <div class="col-span-1 flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="overflow-x-auto p-4">
+                            <h4 class="text-base font-semibold text-gray-800 mb-2">Sobre la Gráfica No. 1</h4>
+                            <p class="text-sm mb-2">
+                                Los datos con los que se genera esta gráfica proceden del llenado del formulario de 
+                                registro de cada participante al momento de registrarse. No incluye los ponentes,
+                                organizadores, coorganizadores ni personal de apoyo.
+                            </p>
+                            <p class="text-sm mb-2">
+                                Esta característica se implementó en abril 2025, por lo que eventos anteriores a 
+                                esta fecha mostrarán sus datos agrupados en la categoría otros.
+                            </p>
+                        </div>                          
+                    </div>
+                </div>
+                <!-- fin grid -->
+
+                <!-- Grid -->
+                <div id="grafico-region" class="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+                    <!-- Card que ocupa 3 columnas -->
+                    <div class="col-span-1 lg:col-span-3 flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="p-4 md:p-5">
+                            <h4 class="text-base font-semibold text-gray-800 mb-4">Gráfica No. 2. Participantes según región/provincia de procedencia</h4>
+{% if grafica_region %}
+                            <img src="{{ grafica_region }}" alt="Gráfica de participantes por región" class="w-full h-auto" />
+{% else %}
+                            <div class="flex justify-center items-center h-64 bg-gray-50 rounded-lg">
+                                <p class="text-gray-500">No hay datos disponibles para generar la gráfica.</p>
+                            </div>
+{% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Card que ocupa 1 columna -->
+                    <div class="col-span-1 flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="overflow-x-auto p-4">
+                            <h4 class="text-base font-semibold text-gray-800 mb-2">Sobre la Gráfica No. 2</h4>
+                            <p class="text-sm mb-2">
+                                Los datos con los que se genera esta gráfica proceden del llenado del formulario de 
+                                registro de cada participante al momento de registrarse. No incluye los ponentes,
+                                organizadores, coorganizadores ni personal de apoyo. 
+                            </p>
+                            <p class="text-sm mb-2">
+                                Esta característica se implementó en abril 2025, por lo que eventos anteriores a 
+                                esta fecha mostrarán sus datos agrupados en la categoría otros.
+                            </p>
+                        </div>                          
+                    </div>
+                </div>
+                <!-- fin grid -->
+
+                <div id="grafico-modalidad" class="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+                    <!-- Card -->
+                    <div class="col-span-1 lg:col-span-2 flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="p-4 md:p-5">
+                            <h4 class="text-base font-semibold text-gray-800 mb-4">Gráfica No. 3. Eventos según modalidad</h4>
+{% if grafica_modalidad %}
+                            <img src="{{ grafica_modalidad }}" alt="Gráfica de eventos por modalidad" class="w-full h-auto" />
+{% else %}
+                            <div class="flex justify-center items-center h-64 bg-gray-50 rounded-lg">
+                                <p class="text-gray-500">No hay datos disponibles para generar la gráfica.</p>
+                            </div>
+{% endif %}
+                        </div>                          
+                    </div>
+                    <!-- fin card -->
+
+                    <!-- Card -->
+                    <div class="col-span-1 lg:col-span-2 flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="p-4 md:p-5">
+                            <h4 class="text-base font-semibold text-gray-800 mb-4">Gráfica No. 4. Eventos según categoría</h4>
+{% if grafica_categoria %}
+                            <img src="{{ grafica_categoria }}" alt="Gráfica de eventos por categoría" class="w-full h-auto" />
+{% else %}
+                            <div class="flex justify-center items-center h-64 bg-gray-50 rounded-lg">
+                                <p class="text-gray-500">No hay datos disponibles para generar la gráfica.</p>
+                            </div>
+{% endif %}
+                        </div>                          
+                    </div>
+                    <!-- card -->
+                </div>
+
+                <!-- Grid -->
+                <div id="grafico-mensual" class="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+                    <!-- Card que ocupa 2 columnas -->
+                    <div class="col-span-1 lg:col-span-2 flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="p-4 md:p-5">
+                            <h4 class="text-base font-semibold text-gray-800 mb-4">Gráfico No. 5. Distribución de eventos por mes del año</h4>
+{% if grafica_mensual %}
+                            <img src="{{ grafica_mensual }}" alt="Gráfica de distribución mensual de eventos" class="w-full h-auto" />
+{% else %}
+                            <div class="flex justify-center items-center h-64 bg-gray-50 rounded-lg">
+                                <p class="text-gray-500">No hay datos disponibles para generar la gráfica.</p>
+                            </div>
+{% endif %}
+                        </div>
+                    </div>
+                    <!-- fin card -->
+
+                    <div class="col-span-1 lg:col-span-2 flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="p-4 md:p-5">
+                            <h4 class="text-base font-semibold text-gray-800 mb-4">Sobre las fuentes de datos</h4>
+                            <p class="py-2 text-sm text-gray-500">
+                                La información presentada en este informe se deriva de los registros de eventos y 
+                                participantes almacenados en la plataforma CertiCSS durante el año 2025.
+                            </p>
+                            <p class="py-2 text-sm text-gray-500">
+                                Se excluyen de este análisis los eventos de tipo "Sesión Docente" y aquellos 
+                                eventos que se encuentran en estado de borrador, para proporcionar una visión 
+                                precisa de las actividades de educación médica continua completadas.
+                            </p>
+                            <p class="py-2 text-sm text-gray-500">
+                                Las gráficas de participantes muestran datos agregados de todos los eventos 
+                                válidos del período, mientras que las gráficas de eventos muestran la 
+                                distribución por modalidad, categoría y frecuencia temporal.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- fin grid -->
+
+            </div>
+            <!-- FIN TARJETAS RESUMEN -->
+
+
+{% include 'tablero-footer.html' %}
+
+        </div>
+    </div>
+    <!-- End Content -->
+
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+<script>
+// Limpia campos dinámicos al cargar la página
+document.addEventListener("DOMContentLoaded", function () {
+    const hiddenInputs = document.querySelectorAll("#buscadorForm input[type='hidden']");
+    hiddenInputs.forEach((input) => input.remove());
+});
+document.getElementById("buscadorForm").addEventListener("submit", function (event) {
+    event.preventDefault(); // Prevenir envío estándar del formulario
+
+    const valor = document.getElementById("buscador").value.trim();
+    const patterns = {
+        cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas
+        pasaporte: /^[A-Z]{2}\d{6,9}$/,                        // Pasaportes
+        id_certificado: /^[a-zA-Z0-9]{8}$/                    // IDs de certificados
+    };
+
+    let action, field;
+
+    if (patterns.cedula.test(valor)) {
+        action = "/buscar_certificados";
+        field = "cedula";
+    } else if (patterns.pasaporte.test(valor)) {
+        action = "/buscar_certificados";
+        field = "cedula";
+    } else if (patterns.id_certificado.test(valor)) {
+        action = "/validar_certificado";
+        field = "nanoid";
+    } else {
+        alert("Formato no válido. Introduzca un documento de identificación o un ID de certificado válido.");
+        return;
+    }
+
+    // Crear y enviar el formulario dinámicamente
+    const form = event.target;
+    form.action = action;
+    form.method = "POST";
+
+    // Limpiar campos ocultos previos
+    const hiddenInputs = form.querySelectorAll("input[type='hidden']");
+    hiddenInputs.forEach((input) => input.remove());
+
+    const hiddenInput = document.createElement("input");
+    hiddenInput.type = "hidden";
+    hiddenInput.name = field;
+    hiddenInput.value = valor;
+    form.appendChild(hiddenInput);
+    form.submit();
+});
+</script>
+</body>
+</html>

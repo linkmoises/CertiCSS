@@ -3712,6 +3712,207 @@ def mis_metricas(page=1):
 
 
 ###
+### Funciones de agregación de datos nacionales
+###
+def get_national_statistics_2025():
+    """
+    Obtiene estadísticas nacionales agregadas para el año 2025.
+    Excluye eventos de tipo "Sesión Docente" y estado "borrador".
+    
+    Returns:
+        dict: Diccionario con estadísticas nacionales
+    """
+    from datetime import datetime
+    
+    # Definir rango de fechas para 2025
+    inicio_2025 = datetime(2025, 1, 1)
+    fin_2025 = datetime(2025, 12, 31, 23, 59, 59)
+    
+    # Filtros para eventos válidos
+    filtro_eventos = {
+        "fecha_inicio": {"$gte": inicio_2025, "$lte": fin_2025},
+        "tipo": {"$ne": "Sesión Docente"},
+        "estado_evento": {"$ne": "borrador"}
+    }
+    
+    try:
+        # Obtener códigos de eventos válidos
+        eventos_validos = list(collection_eventos.find(filtro_eventos, {"codigo": 1}))
+        codigos_eventos = [evento["codigo"] for evento in eventos_validos]
+        
+        if not codigos_eventos:
+            return {
+                "total_registrations": 0,
+                "unique_participants": 0,
+                "total_presentations": 0,
+                "year": "2025"
+            }
+        
+        # Contar total de registros (participantes)
+        total_registrations = collection_participantes.count_documents({
+            "codigo_evento": {"$in": codigos_eventos},
+            "rol": "participante"
+        })
+        
+        # Contar participantes únicos por cédula
+        pipeline_unique = [
+            {"$match": {
+                "codigo_evento": {"$in": codigos_eventos},
+                "rol": "participante"
+            }},
+            {"$group": {"_id": "$cedula"}},
+            {"$count": "unique_count"}
+        ]
+        
+        unique_result = list(collection_participantes.aggregate(pipeline_unique))
+        unique_participants = unique_result[0]["unique_count"] if unique_result else 0
+        
+        # Contar total de ponencias (presentaciones)
+        total_presentations = collection_participantes.count_documents({
+            "codigo_evento": {"$in": codigos_eventos},
+            "rol": "ponente",
+            "titulo_ponencia": {"$exists": True, "$ne": ""}
+        })
+        
+        return {
+            "total_registrations": total_registrations,
+            "unique_participants": unique_participants,
+            "total_presentations": total_presentations,
+            "year": "2025"
+        }
+        
+    except Exception as e:
+        print(f"Error al obtener estadísticas nacionales: {e}")
+        return {
+            "total_registrations": 0,
+            "unique_participants": 0,
+            "total_presentations": 0,
+            "year": "2025"
+        }
+
+
+def get_national_participants_2025():
+    """
+    Obtiene todos los participantes de eventos válidos de 2025.
+    
+    Returns:
+        list: Lista de documentos de participantes
+    """
+    from datetime import datetime
+    
+    # Definir rango de fechas para 2025
+    inicio_2025 = datetime(2025, 1, 1)
+    fin_2025 = datetime(2025, 12, 31, 23, 59, 59)
+    
+    # Filtros para eventos válidos
+    filtro_eventos = {
+        "fecha_inicio": {"$gte": inicio_2025, "$lte": fin_2025},
+        "tipo": {"$ne": "Sesión Docente"},
+        "estado_evento": {"$ne": "borrador"}
+    }
+    
+    try:
+        # Obtener códigos de eventos válidos
+        eventos_validos = list(collection_eventos.find(filtro_eventos, {"codigo": 1}))
+        codigos_eventos = [evento["codigo"] for evento in eventos_validos]
+        
+        if not codigos_eventos:
+            return []
+        
+        # Obtener participantes de eventos válidos
+        participantes = list(collection_participantes.find({
+            "codigo_evento": {"$in": codigos_eventos},
+            "rol": "participante"
+        }))
+        
+        return participantes
+        
+    except Exception as e:
+        print(f"Error al obtener participantes nacionales: {e}")
+        return []
+
+
+def get_national_events_2025():
+    """
+    Obtiene todos los eventos válidos de 2025.
+    
+    Returns:
+        list: Lista de documentos de eventos
+    """
+    from datetime import datetime
+    
+    # Definir rango de fechas para 2025
+    inicio_2025 = datetime(2025, 1, 1)
+    fin_2025 = datetime(2025, 12, 31, 23, 59, 59)
+    
+    # Filtros para eventos válidos
+    filtro_eventos = {
+        "fecha_inicio": {"$gte": inicio_2025, "$lte": fin_2025},
+        "tipo": {"$ne": "Sesión Docente"},
+        "estado_evento": {"$ne": "borrador"}
+    }
+    
+    try:
+        eventos = list(collection_eventos.find(filtro_eventos))
+        return eventos
+        
+    except Exception as e:
+        print(f"Error al obtener eventos nacionales: {e}")
+        return []
+
+
+###
+### Métricas Nacionales
+###
+@app.route('/tablero/metricas/nacional')
+@login_required
+def tablero_metricas_nacional():
+    try:
+        # Obtener estadísticas nacionales agregadas
+        estadisticas = get_national_statistics_2025()
+        
+        # Obtener datos de participantes y eventos para gráficas
+        participantes = get_national_participants_2025()
+        eventos = get_national_events_2025()
+        
+        # Generar gráficas usando funciones existentes y nuevas
+        grafica_perfil = generar_grafica_perfil(participantes, "República de Panamá - 2025")
+        grafica_region = generar_grafica_region(participantes, "República de Panamá - 2025")
+        
+        # Generar nuevas gráficas de eventos
+        grafica_modalidad = generar_grafica_modalidad(eventos, "Eventos por Modalidad - 2025")
+        grafica_categoria = generar_grafica_categoria(eventos, "Eventos por Categoría - 2025")
+        grafica_mensual = generar_grafica_mensual(eventos, "Distribución Mensual de Eventos - 2025")
+        
+        return render_template('metrica_nacional.html', 
+                             active_section='metricas',
+                             estadisticas=estadisticas,
+                             grafica_perfil=grafica_perfil,
+                             grafica_region=grafica_region,
+                             grafica_modalidad=grafica_modalidad,
+                             grafica_categoria=grafica_categoria,
+                             grafica_mensual=grafica_mensual)
+    
+    except Exception as e:
+        print(f"Error en métricas nacionales: {e}")
+        # En caso de error, mostrar template con datos vacíos
+        estadisticas_vacias = {
+            "total_registrations": 0,
+            "unique_participants": 0,
+            "total_presentations": 0,
+            "year": "2025"
+        }
+        return render_template('metrica_nacional.html', 
+                             active_section='metricas',
+                             estadisticas=estadisticas_vacias,
+                             grafica_perfil=None,
+                             grafica_region=None,
+                             grafica_modalidad=None,
+                             grafica_categoria=None,
+                             grafica_mensual=None)
+
+
+###
 ### LMS Metrics Dashboard - General
 ###
 @app.route('/tablero/metricas/emc')
@@ -5284,6 +5485,229 @@ def generar_grafica_demografia_grupoetario(edad_data, evento_nombre):
     plt.close(fig) # Cierra la figura para liberar memoria
 
     return f"data:image/png;base64,{img_base64}"
+
+
+def generar_grafica_modalidad(eventos, titulo="Distribución de Eventos por Modalidad"):
+    """
+    Genera una gráfica de barras con la distribución de eventos por modalidad.
+    
+    Args:
+        eventos (list): Lista de documentos de eventos
+        titulo (str): Título de la gráfica
+    
+    Returns:
+        str: Imagen base64 o None si no hay datos
+    """
+    try:
+        # Contar eventos por modalidad
+        modalidad_count = {}
+        for evento in eventos:
+            modalidad = evento.get('modalidad', 'No especificado')
+            modalidad_count[modalidad] = modalidad_count.get(modalidad, 0) + 1
+        
+        # Si no hay datos, retornar None
+        if not modalidad_count:
+            return None
+        
+        # Crear la figura
+        fig, ax = plt.subplots(figsize=(10, 6))
+        
+        # Ordenar por frecuencia descendente
+        modalidades_ordenadas = sorted(modalidad_count.items(), key=lambda x: x[1], reverse=True)
+        
+        # Extraer datos ordenados
+        labels = [modalidad for modalidad, _ in modalidades_ordenadas]
+        values = [count for _, count in modalidades_ordenadas]
+        
+        # Colores para las modalidades
+        colors = ['#0058A6', '#00A651', '#FF6B35', '#8E44AD', '#F39C12']
+        
+        # Crear gráfica de barras
+        bars = ax.bar(labels, values, color=colors[:len(labels)], alpha=0.8)
+        
+        # Personalizar la gráfica
+        ax.set_title(titulo, fontsize=12, fontweight='bold', pad=20)
+        ax.set_xlabel('Modalidad del Evento', fontsize=10, fontweight='bold')
+        ax.set_ylabel('Número de Eventos', fontsize=10, fontweight='bold')
+        
+        # Agregar valores en las barras
+        for bar, value in zip(bars, values):
+            height = bar.get_height()
+            ax.text(bar.get_x() + bar.get_width()/2., height + 0.1,
+                    f'{value}', ha='center', va='bottom', fontweight='bold')
+        
+        # Ajustar layout
+        plt.tight_layout()
+        
+        # Convertir la gráfica a imagen base64
+        img_buffer = io.BytesIO()
+        plt.savefig(img_buffer, format='png', dpi=300, bbox_inches='tight')
+        img_buffer.seek(0)
+        img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
+        plt.close(fig)
+        
+        return f"data:image/png;base64,{img_base64}"
+        
+    except Exception as e:
+        print(f"Error generando gráfica de modalidad: {e}")
+        plt.close('all')  # Cerrar todas las figuras en caso de error
+        return None
+
+
+def generar_grafica_categoria(eventos, titulo="Distribución de Eventos por Categoría"):
+    """
+    Genera una gráfica de barras con la distribución de eventos por categoría/tipo.
+    
+    Args:
+        eventos (list): Lista de documentos de eventos
+        titulo (str): Título de la gráfica
+    
+    Returns:
+        str: Imagen base64 o None si no hay datos
+    """
+    try:
+        # Contar eventos por tipo/categoría
+        categoria_count = {}
+        for evento in eventos:
+            categoria = evento.get('tipo', 'No especificado')
+            categoria_count[categoria] = categoria_count.get(categoria, 0) + 1
+        
+        # Si no hay datos, retornar None
+        if not categoria_count:
+            return None
+        
+        # Crear la figura
+        fig, ax = plt.subplots(figsize=(12, 6))
+        
+        # Ordenar por frecuencia descendente
+        categorias_ordenadas = sorted(categoria_count.items(), key=lambda x: x[1], reverse=True)
+        
+        # Extraer datos ordenados
+        labels = [categoria for categoria, _ in categorias_ordenadas]
+        values = [count for _, count in categorias_ordenadas]
+        
+        # Crear gráfica de barras
+        bars = ax.bar(labels, values, color='#0058A6', alpha=0.8)
+        
+        # Personalizar la gráfica
+        ax.set_title(titulo, fontsize=12, fontweight='bold', pad=20)
+        ax.set_xlabel('Categoría del Evento', fontsize=10, fontweight='bold')
+        ax.set_ylabel('Número de Eventos', fontsize=10, fontweight='bold')
+        
+        # Rotar etiquetas del eje X para mejor legibilidad
+        ax.tick_params(axis='x', rotation=45, labelsize=9)
+        
+        # Agregar valores en las barras
+        for bar, value in zip(bars, values):
+            height = bar.get_height()
+            ax.text(bar.get_x() + bar.get_width()/2., height + 0.1,
+                    f'{value}', ha='center', va='bottom', fontweight='bold')
+        
+        # Ajustar layout
+        plt.tight_layout()
+        
+        # Convertir la gráfica a imagen base64
+        img_buffer = io.BytesIO()
+        plt.savefig(img_buffer, format='png', dpi=300, bbox_inches='tight')
+        img_buffer.seek(0)
+        img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
+        plt.close(fig)
+        
+        return f"data:image/png;base64,{img_base64}"
+        
+    except Exception as e:
+        print(f"Error generando gráfica de categoría: {e}")
+        plt.close('all')  # Cerrar todas las figuras en caso de error
+        return None
+
+
+def generar_grafica_mensual(eventos, titulo="Distribución de Eventos por Mes del Año"):
+    """
+    Genera una gráfica de barras con la distribución de eventos por mes del año.
+    
+    Args:
+        eventos (list): Lista de documentos de eventos
+        titulo (str): Título de la gráfica
+    
+    Returns:
+        str: Imagen base64 o None si no hay datos
+    """
+    try:
+        # Nombres de los meses en español
+        meses_nombres = [
+            'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+            'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+        ]
+        
+        # Inicializar contadores para todos los meses
+        meses_count = {i: 0 for i in range(1, 13)}
+        
+        # Contar eventos por mes
+        for evento in eventos:
+            fecha_inicio = evento.get('fecha_inicio')
+            if fecha_inicio:
+                # Extraer el mes de la fecha
+                if hasattr(fecha_inicio, 'month'):
+                    mes = fecha_inicio.month
+                else:
+                    # Si es string, intentar parsearlo
+                    try:
+                        from datetime import datetime
+                        if isinstance(fecha_inicio, str):
+                            fecha_obj = datetime.strptime(fecha_inicio, '%Y-%m-%d')
+                            mes = fecha_obj.month
+                        else:
+                            continue
+                    except:
+                        continue
+                
+                meses_count[mes] = meses_count.get(mes, 0) + 1
+        
+        # Si no hay datos, retornar None
+        if sum(meses_count.values()) == 0:
+            return None
+        
+        # Crear la figura
+        fig, ax = plt.subplots(figsize=(12, 6))
+        
+        # Preparar datos para la gráfica
+        labels = meses_nombres
+        values = [meses_count[i] for i in range(1, 13)]
+        
+        # Crear gráfica de barras
+        bars = ax.bar(labels, values, color='#0058A6', alpha=0.8)
+        
+        # Personalizar la gráfica
+        ax.set_title(titulo, fontsize=12, fontweight='bold', pad=20)
+        ax.set_xlabel('Mes del Año', fontsize=10, fontweight='bold')
+        ax.set_ylabel('Número de Eventos', fontsize=10, fontweight='bold')
+        
+        # Rotar etiquetas del eje X para mejor legibilidad
+        ax.tick_params(axis='x', rotation=45, labelsize=9)
+        
+        # Agregar valores en las barras (solo si > 0)
+        for bar, value in zip(bars, values):
+            if value > 0:
+                height = bar.get_height()
+                ax.text(bar.get_x() + bar.get_width()/2., height + 0.1,
+                        f'{value}', ha='center', va='bottom', fontweight='bold')
+        
+        # Ajustar layout
+        plt.tight_layout()
+        
+        # Convertir la gráfica a imagen base64
+        img_buffer = io.BytesIO()
+        plt.savefig(img_buffer, format='png', dpi=300, bbox_inches='tight')
+        img_buffer.seek(0)
+        img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
+        plt.close(fig)
+        
+        return f"data:image/png;base64,{img_base64}"
+        
+    except Exception as e:
+        print(f"Error generando gráfica mensual: {e}")
+        plt.close('all')  # Cerrar todas las figuras en caso de error
+        return None
 
 
 ###
