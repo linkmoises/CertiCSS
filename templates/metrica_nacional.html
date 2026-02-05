@@ -21,8 +21,8 @@
                                         </div>
 
                                         <div class="grow">
-                                            <h2 class="block text-3xl font-bold mt-2">Métricas e Informe Nacional - DENADOI</h2>
-                                            <h4 class="block italic mb-2">República de Panamá</h4>
+                                            <h2 class="block text-3xl font-bold mt-2">Departamento Nacional de Docencia e Investigación</h2>
+                                            <h4 class="block italic mb-2">Metricas e Informe Nacional</h4>
                                             <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
                                                 Eventos Generales
                                             </span>
@@ -162,11 +162,10 @@
                                 Durante el año {{ selected_year or current_year or estadisticas.year }} se realizaron {{ estadisticas.total_events if estadisticas else 0 }} eventos 
                                 totales. En estos eventos se registraron {{ estadisticas.total_registrations if estadisticas else 0 }}
                                 participaciones, de los cuales en los datos registrados {{ estadisticas.unique_participants if estadisticas else 0 }}
-                                corresponden a participantes únicos.
-                            </p>
-                            <p class="text-base py-1">
-                                Se registraron en la plataforma además {{ estadisticas.total_presentations if estadisticas else 0 }}
-                                ponencias. Esto da un promedio de {% if estadisticas and estadisticas.total_events > 0 %}{{ "%.1f"|format(estadisticas.total_presentations / estadisticas.total_events) }}{% else %}0.0{% endif %} ponencias por evento. {% if estadisticas and estadisticas.total_events > 0 %}Existen {{ estadisticas.total_events - (estadisticas.total_presentations if estadisticas.total_presentations <= estadisticas.total_events else estadisticas.total_events) }} eventos donde no se registraron ponencias{% else %}No se registraron ponencias{% endif %} por parte de los creadores de la actividad.
+                                corresponden a participantes únicos. Se registraron en la plataforma además {{ estadisticas.total_presentations if estadisticas else 0 }}
+                                ponencias. Esto da un promedio de {% if estadisticas and estadisticas.total_events > 0 %}{{ "%.1f"|format(estadisticas.total_presentations / estadisticas.total_events) }}{% else %}0.0{% endif %} 
+                                ponencias por evento. {% if estadisticas and estadisticas.total_events > 0 %}Existen {{ estadisticas.total_events - (estadisticas.total_presentations if estadisticas.total_presentations <= estadisticas.total_events else estadisticas.total_events) }} 
+                                eventos donde no se registraron ponencias{% else %}No se registraron ponencias{% endif %} por parte de los creadores de la actividad.
                             </p>
                         </div>
                     </div>
