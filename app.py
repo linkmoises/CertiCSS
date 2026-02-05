@@ -3898,6 +3898,8 @@ def get_national_statistics(year=None):
                 "unique_participants": 0,
                 "total_presentations": 0,
                 "total_events": 0,
+                "participantes_recurrentes": 0,
+                "tasa_recurrencia": 0.0,
                 "year": str(year)
             }
         
@@ -3930,11 +3932,39 @@ def get_national_statistics(year=None):
         # Contar total de eventos válidos
         total_events = len(eventos_validos)
         
+        # Calcular tasa de recurrencia
+        # Contar participantes que han asistido a más de un evento
+        pipeline_recurrencia = [
+            {"$match": {
+                "codigo_evento": {"$in": codigos_eventos},
+                "rol": "participante"
+            }},
+            {"$group": {
+                "_id": "$cedula",
+                "eventos_asistidos": {"$addToSet": "$codigo_evento"}
+            }},
+            {"$addFields": {
+                "num_eventos": {"$size": "$eventos_asistidos"}
+            }},
+            {"$match": {
+                "num_eventos": {"$gt": 1}
+            }},
+            {"$count": "participantes_recurrentes"}
+        ]
+        
+        recurrencia_result = list(collection_participantes.aggregate(pipeline_recurrencia))
+        participantes_recurrentes = recurrencia_result[0]["participantes_recurrentes"] if recurrencia_result else 0
+        
+        # Calcular tasa de recurrencia como porcentaje
+        tasa_recurrencia = (participantes_recurrentes / unique_participants * 100) if unique_participants > 0 else 0
+        
         return {
             "total_registrations": total_registrations,
             "unique_participants": unique_participants,
             "total_presentations": total_presentations,
             "total_events": total_events,
+            "participantes_recurrentes": participantes_recurrentes,
+            "tasa_recurrencia": round(tasa_recurrencia, 1),
             "year": str(year)
         }
         
@@ -3945,6 +3975,8 @@ def get_national_statistics(year=None):
             "unique_participants": 0,
             "total_presentations": 0,
             "total_events": 0,
+            "participantes_recurrentes": 0,
+            "tasa_recurrencia": 0.0,
             "year": str(year)
         }
 
@@ -4060,14 +4092,16 @@ def tablero_metricas_nacional(year=None):
         eventos = get_national_events(year)
                 
         # Generar gráficas usando funciones existentes y nuevas
-        grafica_perfil = generar_grafica_perfil(participantes, f"República de Panamá - {year}")
-        grafica_region = generar_grafica_region(participantes, f"República de Panamá - {year}")
+        grafica_perfil = generar_grafica_perfil(participantes, f"Departamento Nacional de Docencia e Investigación - {year}")
+        grafica_region = generar_grafica_region(participantes, f"Departamento Nacional de Docencia e Investigación - {year}")
         
         # Generar nuevas gráficas de eventos
-        grafica_modalidad = generar_grafica_modalidad(eventos, f"Eventos por Modalidad - {year}")
-        grafica_categoria = generar_grafica_categoria(eventos, f"Eventos por Categoría - {year}")
-        grafica_mensual = generar_grafica_mensual(eventos, f"Distribución Mensual de Eventos - {year}")
-        grafica_eventos_provincia = generar_grafica_eventos_provincia(eventos, f"Eventos por Provincia - {year}")
+        grafica_modalidad = generar_grafica_modalidad(eventos, f"Departamento Nacional de Docencia e Investigación - {year}", "Distribución de Eventos por Modalidad")
+        grafica_categoria = generar_grafica_categoria(eventos, f"Departamento Nacional de Docencia e Investigación - {year}", "Distribución de Eventos por Categoría")
+        grafica_mensual = generar_grafica_mensual(eventos, f"Departamento Nacional de Docencia e Investigación - {year}", "Distribución Mensual de Eventos")
+        grafica_eventos_provincia = generar_grafica_eventos_provincia(eventos, f"Departamento Nacional de Docencia e Investigación - {year}", "Distribución de Eventos por Provincia")
+        
+        print(f"DEBUG: Gráficas generadas - modalidad: {'Sí' if grafica_modalidad else 'No'}, categoria: {'Sí' if grafica_categoria else 'No'}, mensual: {'Sí' if grafica_mensual else 'No'}, provincia: {'Sí' if grafica_eventos_provincia else 'No'}")
         
         print(f"DEBUG: Gráficas generadas - perfil: {'Sí' if grafica_perfil else 'No'}, región: {'Sí' if grafica_region else 'No'}")
                 
@@ -4097,6 +4131,8 @@ def tablero_metricas_nacional(year=None):
             "unique_participants": 0,
             "total_presentations": 0,
             "total_events": 0,
+            "participantes_recurrentes": 0,
+            "tasa_recurrencia": 0.0,
             "year": str(year)
         }
         years_available = list(range(2025, current_year + 1))
@@ -5564,7 +5600,7 @@ def generar_grafica_spider(respuestas, evento_nombre):
     plt.savefig(img_buffer, format='png', dpi=300, bbox_inches='tight')
     img_buffer.seek(0)
     img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
-    plt.close(fig) # Cierra la figura para liberar memoria
+    plt.close() # Cierra la figura para liberar memoria
     
     return f"data:image/png;base64,{img_base64}"
 
@@ -5609,7 +5645,7 @@ def generar_grafica_demografia_sexo(sexo_data, evento_nombre):
     # Agregar valores en las barras
     for bar, value in zip(bars, valid_values):
         height = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2., height + 0.1,
+        plt.text(bar.get_x() + bar.get_width()/2., height + 0.1,
                 f'{value}', ha='center', va='bottom', fontweight='bold', fontsize=8)
     
     plt.tight_layout(rect=[0, 0, 1, 0.95]) # Ajustar rect para dejar espacio al subtítulo
@@ -5619,7 +5655,7 @@ def generar_grafica_demografia_sexo(sexo_data, evento_nombre):
     plt.savefig(img_buffer, format='png', dpi=300, bbox_inches='tight')
     img_buffer.seek(0)
     img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
-    plt.close(fig) # Cierra la figura para liberar memoria
+    plt.close() # Cierra la figura para liberar memoria
     
     return f"data:image/png;base64,{img_base64}"
 
@@ -5678,7 +5714,7 @@ def generar_grafica_demografia_grupoetario(edad_data, evento_nombre):
     # Agregar valores en las barras
     for bar, value in zip(bars, valid_values):
         height = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2., height + 0.1,
+        plt.text(bar.get_x() + bar.get_width()/2., height + 0.1,
                 f'{value}', ha='center', va='bottom', fontweight='bold', fontsize=8)
 
     plt.tight_layout(rect=[0, 0, 1, 0.95]) # Ajustar rect para dejar espacio al subtítulo
@@ -5688,18 +5724,19 @@ def generar_grafica_demografia_grupoetario(edad_data, evento_nombre):
     plt.savefig(img_buffer, format='png', dpi=300, bbox_inches='tight')
     img_buffer.seek(0)
     img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
-    plt.close(fig) # Cierra la figura para liberar memoria
+    plt.close() # Cierra la figura para liberar memoria
 
     return f"data:image/png;base64,{img_base64}"
 
 
-def generar_grafica_modalidad(eventos, titulo="Distribución de Eventos por Modalidad"):
+def generar_grafica_modalidad(eventos, titulo_institucional, subtitulo_especifico="Distribución de Eventos por Modalidad"):
     """
     Genera una gráfica de barras con la distribución de eventos por modalidad.
     
     Args:
         eventos (list): Lista de documentos de eventos
-        titulo (str): Título de la gráfica
+        titulo_institucional (str): Título institucional (arriba)
+        subtitulo_especifico (str): Subtítulo específico (abajo)
     
     Returns:
         str: Imagen base64 o None si no hay datos
@@ -5716,7 +5753,7 @@ def generar_grafica_modalidad(eventos, titulo="Distribución de Eventos por Moda
             return None
         
         # Crear la figura
-        fig, ax = plt.subplots(figsize=(10, 6))
+        plt.figure(figsize=(10, 6))
         
         # Ordenar por frecuencia descendente
         modalidades_ordenadas = sorted(modalidad_count.items(), key=lambda x: x[1], reverse=True)
@@ -5729,17 +5766,23 @@ def generar_grafica_modalidad(eventos, titulo="Distribución de Eventos por Moda
         colors = ['#0058A6', '#00A651', '#FF6B35', '#8E44AD', '#F39C12']
         
         # Crear gráfica de barras
-        bars = ax.bar(labels, values, color=colors[:len(labels)], alpha=0.8)
+        bars = plt.bar(labels, values, color=colors[:len(labels)], alpha=0.8)
         
-        # Personalizar la gráfica
-        ax.set_title(titulo, fontsize=12, fontweight='bold', pad=20)
-        ax.set_xlabel('Modalidad del Evento', fontsize=10, fontweight='bold')
-        ax.set_ylabel('Número de Eventos', fontsize=10, fontweight='bold')
+        # Personalizar la gráfica (subtítulo específico abajo)
+        plt.title(subtitulo_especifico, fontsize=10, fontweight='bold', pad=20)
+        
+        # Título institucional arriba
+        plt.text(0.5, 1.15, titulo_institucional, 
+                ha='center', va='bottom', transform=plt.gca().transAxes,
+                fontsize=12, style='italic')
+        
+        plt.xlabel('Modalidad del Evento', fontsize=10, fontweight='bold')
+        plt.ylabel('Número de Eventos', fontsize=10, fontweight='bold')
         
         # Agregar valores en las barras
         for bar, value in zip(bars, values):
             height = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2., height + 0.1,
+            plt.text(bar.get_x() + bar.get_width()/2., height + 0.1,
                     f'{value}', ha='center', va='bottom', fontweight='bold')
         
         # Ajustar layout
@@ -5750,7 +5793,7 @@ def generar_grafica_modalidad(eventos, titulo="Distribución de Eventos por Moda
         plt.savefig(img_buffer, format='png', dpi=300, bbox_inches='tight')
         img_buffer.seek(0)
         img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
-        plt.close(fig)
+        plt.close()
         
         return f"data:image/png;base64,{img_base64}"
         
@@ -5760,13 +5803,14 @@ def generar_grafica_modalidad(eventos, titulo="Distribución de Eventos por Moda
         return None
 
 
-def generar_grafica_categoria(eventos, titulo="Distribución de Eventos por Categoría"):
+def generar_grafica_categoria(eventos, titulo_institucional, subtitulo_especifico="Distribución de Eventos por Categoría"):
     """
     Genera una gráfica de barras con la distribución de eventos por categoría/tipo.
     
     Args:
         eventos (list): Lista de documentos de eventos
-        titulo (str): Título de la gráfica
+        titulo_institucional (str): Título institucional (arriba)
+        subtitulo_especifico (str): Subtítulo específico (abajo)
     
     Returns:
         str: Imagen base64 o None si no hay datos
@@ -5783,7 +5827,7 @@ def generar_grafica_categoria(eventos, titulo="Distribución de Eventos por Cate
             return None
         
         # Crear la figura
-        fig, ax = plt.subplots(figsize=(12, 6))
+        plt.figure(figsize=(12, 6))
         
         # Ordenar por frecuencia descendente
         categorias_ordenadas = sorted(categoria_count.items(), key=lambda x: x[1], reverse=True)
@@ -5793,20 +5837,26 @@ def generar_grafica_categoria(eventos, titulo="Distribución de Eventos por Cate
         values = [count for _, count in categorias_ordenadas]
         
         # Crear gráfica de barras
-        bars = ax.bar(labels, values, color='#0058A6', alpha=0.8)
+        bars = plt.bar(labels, values, color='#0058A6', alpha=0.8)
         
-        # Personalizar la gráfica
-        ax.set_title(titulo, fontsize=12, fontweight='bold', pad=20)
-        ax.set_xlabel('Categoría del Evento', fontsize=10, fontweight='bold')
-        ax.set_ylabel('Número de Eventos', fontsize=10, fontweight='bold')
+        # Personalizar la gráfica (subtítulo específico abajo)
+        plt.title(subtitulo_especifico, fontsize=10, fontweight='bold', pad=20)
+        
+        # Título institucional arriba
+        plt.text(0.5, 1.15, titulo_institucional, 
+                ha='center', va='bottom', transform=plt.gca().transAxes,
+                fontsize=12, style='italic')
+        
+        plt.xlabel('Categoría del Evento', fontsize=10, fontweight='bold')
+        plt.ylabel('Número de Eventos', fontsize=10, fontweight='bold')
         
         # Rotar etiquetas del eje X para mejor legibilidad
-        ax.tick_params(axis='x', rotation=45, labelsize=9)
+        plt.xticks(rotation=45, ha='right')
         
         # Agregar valores en las barras
         for bar, value in zip(bars, values):
             height = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2., height + 0.1,
+            plt.text(bar.get_x() + bar.get_width()/2., height + 0.1,
                     f'{value}', ha='center', va='bottom', fontweight='bold')
         
         # Ajustar layout
@@ -5817,7 +5867,7 @@ def generar_grafica_categoria(eventos, titulo="Distribución de Eventos por Cate
         plt.savefig(img_buffer, format='png', dpi=300, bbox_inches='tight')
         img_buffer.seek(0)
         img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
-        plt.close(fig)
+        plt.close()
         
         return f"data:image/png;base64,{img_base64}"
         
@@ -5827,13 +5877,14 @@ def generar_grafica_categoria(eventos, titulo="Distribución de Eventos por Cate
         return None
 
 
-def generar_grafica_eventos_provincia(eventos, titulo="Distribución de Eventos por Provincia"):
+def generar_grafica_eventos_provincia(eventos, titulo_institucional, subtitulo_especifico="Distribución de Eventos por Provincia"):
     """
     Genera una gráfica de barras con la distribución de eventos por provincia.
     
     Args:
         eventos (list): Lista de documentos de eventos
-        titulo (str): Título de la gráfica
+        titulo (str): Título principal de la gráfica
+        subtitulo (str): Subtítulo institucional (opcional)
     
     Returns:
         str: Imagen base64 o None si no hay datos
@@ -5866,7 +5917,7 @@ def generar_grafica_eventos_provincia(eventos, titulo="Distribución de Eventos 
             return None
         
         # Crear la figura
-        fig, ax = plt.subplots(figsize=(12, 6))
+        plt.figure(figsize=(12, 6))
         
         # Ordenar por frecuencia descendente
         provincias_ordenadas = sorted(provincia_count.items(), key=lambda x: x[1], reverse=True)
@@ -5876,20 +5927,26 @@ def generar_grafica_eventos_provincia(eventos, titulo="Distribución de Eventos 
         values = [count for _, count in provincias_ordenadas]
         
         # Crear gráfica de barras
-        bars = ax.bar(labels, values, color='#0058A6', alpha=0.8)
+        bars = plt.bar(labels, values, color='#0058A6', alpha=0.8)
         
-        # Personalizar la gráfica
-        ax.set_title(titulo, fontsize=12, fontweight='bold', pad=20)
-        ax.set_xlabel('Provincia', fontsize=10, fontweight='bold')
-        ax.set_ylabel('Número de Eventos', fontsize=10, fontweight='bold')
+        # Personalizar la gráfica (subtítulo específico abajo)
+        plt.title(subtitulo_especifico, fontsize=10, fontweight='bold', pad=20)
+        
+        # Título institucional arriba
+        plt.text(0.5, 1.15, titulo_institucional, 
+                ha='center', va='bottom', transform=plt.gca().transAxes,
+                fontsize=12, style='italic')
+        
+        plt.xlabel('Provincia', fontsize=10, fontweight='bold')
+        plt.ylabel('Número de Eventos', fontsize=10, fontweight='bold')
         
         # Rotar etiquetas del eje X para mejor legibilidad
-        ax.tick_params(axis='x', rotation=45, labelsize=9)
+        plt.xticks(rotation=45, ha='right')
         
         # Agregar valores en las barras
         for bar, value in zip(bars, values):
             height = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2., height + 0.1,
+            plt.text(bar.get_x() + bar.get_width()/2., height + 0.1,
                     f'{value}', ha='center', va='bottom', fontweight='bold')
         
         # Ajustar layout
@@ -5900,7 +5957,7 @@ def generar_grafica_eventos_provincia(eventos, titulo="Distribución de Eventos 
         plt.savefig(img_buffer, format='png', dpi=300, bbox_inches='tight')
         img_buffer.seek(0)
         img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
-        plt.close(fig)
+        plt.close()
         
         return f"data:image/png;base64,{img_base64}"
         
@@ -5910,18 +5967,21 @@ def generar_grafica_eventos_provincia(eventos, titulo="Distribución de Eventos 
         return None
 
 
-def generar_grafica_mensual(eventos, titulo="Distribución de Eventos por Mes del Año"):
+def generar_grafica_mensual(eventos, titulo_institucional, subtitulo_especifico="Distribución Mensual de Eventos"):
     """
     Genera una gráfica de barras con la distribución de eventos por mes del año.
     
     Args:
         eventos (list): Lista de documentos de eventos
-        titulo (str): Título de la gráfica
+        titulo (str): Título principal de la gráfica
+        subtitulo (str): Subtítulo institucional (opcional)
     
     Returns:
         str: Imagen base64 o None si no hay datos
     """
     try:
+        print(f"DEBUG generar_grafica_mensual: Recibidos {len(eventos)} eventos")
+        
         # Nombres de los meses en español
         meses_nombres = [
             'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -5952,33 +6012,42 @@ def generar_grafica_mensual(eventos, titulo="Distribución de Eventos por Mes de
                 
                 meses_count[mes] = meses_count.get(mes, 0) + 1
         
+        print(f"DEBUG generar_grafica_mensual: Conteo por meses: {meses_count}")
+        
         # Si no hay datos, retornar None
         if sum(meses_count.values()) == 0:
+            print("DEBUG generar_grafica_mensual: No hay datos, retornando None")
             return None
         
         # Crear la figura
-        fig, ax = plt.subplots(figsize=(12, 6))
+        plt.figure(figsize=(12, 6))
         
         # Preparar datos para la gráfica
         labels = meses_nombres
         values = [meses_count[i] for i in range(1, 13)]
         
         # Crear gráfica de barras
-        bars = ax.bar(labels, values, color='#0058A6', alpha=0.8)
+        bars = plt.bar(labels, values, color='#0058A6', alpha=0.8)
         
-        # Personalizar la gráfica
-        ax.set_title(titulo, fontsize=12, fontweight='bold', pad=20)
-        ax.set_xlabel('Mes del Año', fontsize=10, fontweight='bold')
-        ax.set_ylabel('Número de Eventos', fontsize=10, fontweight='bold')
+        # Personalizar la gráfica (subtítulo específico abajo)
+        plt.title(subtitulo_especifico, fontsize=10, fontweight='bold', pad=20)
+        
+        # Título institucional arriba
+        plt.text(0.5, 1.15, titulo_institucional, 
+                ha='center', va='bottom', transform=plt.gca().transAxes,
+                fontsize=12, style='italic')
+        
+        plt.xlabel('Mes del Año', fontsize=10, fontweight='bold')
+        plt.ylabel('Número de Eventos', fontsize=10, fontweight='bold')
         
         # Rotar etiquetas del eje X para mejor legibilidad
-        ax.tick_params(axis='x', rotation=45, labelsize=9)
+        plt.xticks(rotation=45, ha='right')
         
         # Agregar valores en las barras (solo si > 0)
         for bar, value in zip(bars, values):
             if value > 0:
                 height = bar.get_height()
-                ax.text(bar.get_x() + bar.get_width()/2., height + 0.1,
+                plt.text(bar.get_x() + bar.get_width()/2., height + 0.1,
                         f'{value}', ha='center', va='bottom', fontweight='bold')
         
         # Ajustar layout
@@ -5989,12 +6058,15 @@ def generar_grafica_mensual(eventos, titulo="Distribución de Eventos por Mes de
         plt.savefig(img_buffer, format='png', dpi=300, bbox_inches='tight')
         img_buffer.seek(0)
         img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
-        plt.close(fig)
+        plt.close()
         
+        print("DEBUG generar_grafica_mensual: Gráfica generada exitosamente")
         return f"data:image/png;base64,{img_base64}"
         
     except Exception as e:
         print(f"Error generando gráfica mensual: {e}")
+        import traceback
+        traceback.print_exc()
         plt.close('all')  # Cerrar todas las figuras en caso de error
         return None
 

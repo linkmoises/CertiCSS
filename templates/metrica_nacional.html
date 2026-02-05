@@ -54,7 +54,7 @@
             <!-- TARJETAS RESUMEN -->
             <div class="max-w-[85rem] px-2 pt-1 mx-auto">
                 <!-- Grid -->
-                <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6 mb-6">
+                <div class="grid sm:grid-cols-2 lg:grid-cols-6 gap-4 sm:gap-6 mb-6">
                     <!-- Card -->
                     <div class="flex flex-col bg-white border shadow-sm rounded-xl">
                         <div class="p-4 md:p-5">
@@ -132,6 +132,24 @@
                     <div class="p-4 md:p-5">
                         <div class="flex items-center gap-x-2">
                             <p class="text-xs uppercase tracking-wide text-gray-500">
+                                Tasa recurrencia
+                            </p>
+                        </div>
+
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                {{ estadisticas.tasa_recurrencia if estadisticas else 0.0 }}%
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+            
+                <!-- Card -->
+                <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                    <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
                                 Año
                             </p>
                         </div>
@@ -166,6 +184,7 @@
                                 ponencias. Esto da un promedio de {% if estadisticas and estadisticas.total_events > 0 %}{{ "%.1f"|format(estadisticas.total_presentations / estadisticas.total_events) }}{% else %}0.0{% endif %} 
                                 ponencias por evento. {% if estadisticas and estadisticas.total_events > 0 %}Existen {{ estadisticas.total_events - (estadisticas.total_presentations if estadisticas.total_presentations <= estadisticas.total_events else estadisticas.total_events) }} 
                                 eventos donde no se registraron ponencias{% else %}No se registraron ponencias{% endif %} por parte de los creadores de la actividad.
+                                Hay una tasa de recurrencia de {{ estadisticas.tasa_recurrencia if estadisticas else 0.0 }}%, este valor indica la cantidad de participantes que son recurrentes en los eventos.
                             </p>
                         </div>
                     </div>
