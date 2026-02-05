@@ -331,7 +331,7 @@
                                 <p class="text-sm text-gray-600">
 {% if evento.fecha_fin and evento.fecha_fin != evento.fecha_inicio %}
                                     <span class="font-semibold text-gray-800">{{ total_participantes }}</span> {{ 'registro' if total_participantes == 1 else 'registros' }} / 
-                                    <span class="font-semibold text-gray-800">{{ participantes|map(attribute='cedula')|unique|list|length }}</span> {{ 'participante único' if (participantes|map(attribute='cedula')|unique|list|length) == 1 else 'participantes únicos' }} / 
+                                    <span class="font-semibold text-gray-800">{{ participantes|selectattr('rol', 'equalto', 'participante')|map(attribute='cedula')|unique|list|length }}</span> {{ 'participante único' if (participantes|selectattr('rol', 'equalto', 'participante')|map(attribute='cedula')|unique|list|length) == 1 else 'participantes únicos' }} / 
                                     <span class="font-semibold text-gray-800">{{ total_ponentes }}</span> {{ 'ponente' if total_ponentes == 1 else 'ponentes' }}
 {% else %}
                                     <span class="font-semibold text-gray-800">{{ total_participantes }}</span> {{ 'participante' if total_participantes == 1 else 'participantes' }} / 
