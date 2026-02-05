@@ -3897,6 +3897,7 @@ def get_national_statistics(year=None):
                 "total_registrations": 0,
                 "unique_participants": 0,
                 "total_presentations": 0,
+                "total_events": 0,
                 "year": str(year)
             }
         
@@ -3926,10 +3927,14 @@ def get_national_statistics(year=None):
             "titulo_ponencia": {"$exists": True, "$ne": ""}
         })
         
+        # Contar total de eventos válidos
+        total_events = len(eventos_validos)
+        
         return {
             "total_registrations": total_registrations,
             "unique_participants": unique_participants,
             "total_presentations": total_presentations,
+            "total_events": total_events,
             "year": str(year)
         }
         
@@ -3939,6 +3944,7 @@ def get_national_statistics(year=None):
             "total_registrations": 0,
             "unique_participants": 0,
             "total_presentations": 0,
+            "total_events": 0,
             "year": str(year)
         }
 
@@ -4031,33 +4037,42 @@ def get_national_events(year=None):
 ### Métricas Nacionales
 ###
 @app.route('/tablero/metricas/nacional')
+@app.route('/tablero/metricas/nacional/<int:year>')
 @login_required
-def tablero_metricas_nacional():
+def tablero_metricas_nacional(year=None):
     from datetime import datetime
     
-    # Obtener el año actual
+    # Obtener el año actual si no se especifica
     current_year = datetime.now().year
+    if year is None:
+        year = current_year
+    
+    # Validar que el año esté en el rango permitido (desde 2025 hasta año actual)
+    if year < 2025 or year > current_year:
+        year = current_year
     
     try:
-        # Obtener estadísticas nacionales agregadas para el año actual
-        estadisticas = get_national_statistics(current_year)
+        # Obtener estadísticas nacionales agregadas para el año especificado
+        estadisticas = get_national_statistics(year)
         
         # Obtener datos de participantes y eventos para gráficas
-        participantes = get_national_participants(current_year)
-        eventos = get_national_events(current_year)
-        
-        print(f"DEBUG: Obtenidos {len(participantes)} participantes y {len(eventos)} eventos para {current_year}")
-        
+        participantes = get_national_participants(year)
+        eventos = get_national_events(year)
+                
         # Generar gráficas usando funciones existentes y nuevas
-        grafica_perfil = generar_grafica_perfil(participantes, f"República de Panamá - {current_year}")
-        grafica_region = generar_grafica_region(participantes, f"República de Panamá - {current_year}")
+        grafica_perfil = generar_grafica_perfil(participantes, f"República de Panamá - {year}")
+        grafica_region = generar_grafica_region(participantes, f"República de Panamá - {year}")
         
         # Generar nuevas gráficas de eventos
-        grafica_modalidad = generar_grafica_modalidad(eventos, f"Eventos por Modalidad - {current_year}")
-        grafica_categoria = generar_grafica_categoria(eventos, f"Eventos por Categoría - {current_year}")
-        grafica_mensual = generar_grafica_mensual(eventos, f"Distribución Mensual de Eventos - {current_year}")
+        grafica_modalidad = generar_grafica_modalidad(eventos, f"Eventos por Modalidad - {year}")
+        grafica_categoria = generar_grafica_categoria(eventos, f"Eventos por Categoría - {year}")
+        grafica_mensual = generar_grafica_mensual(eventos, f"Distribución Mensual de Eventos - {year}")
+        grafica_eventos_provincia = generar_grafica_eventos_provincia(eventos, f"Eventos por Provincia - {year}")
         
-        print(f"DEBUG: Gráficas generadas - perfil: {'Sí' if grafica_perfil else 'No'}, región: {'Sí' if grafica_region else 'No'}")
+        print(f"DEBUG: Gráficas generadas - perfil: {'Sí' if grafica_perfil else 'No'}, región: {'Sí' if grafica_region else 'No'}, eventos provincia: {'Sí' if grafica_eventos_provincia else 'No'}")
+                
+        # Generar lista de años disponibles (desde 2025 hasta año actual)
+        years_available = list(range(2025, current_year + 1))
         
         return render_template('metrica_nacional.html', 
                              active_section='metricas',
@@ -4067,7 +4082,10 @@ def tablero_metricas_nacional():
                              grafica_modalidad=grafica_modalidad,
                              grafica_categoria=grafica_categoria,
                              grafica_mensual=grafica_mensual,
-                             current_year=current_year)
+                             grafica_eventos_provincia=grafica_eventos_provincia,
+                             current_year=current_year,
+                             selected_year=year,
+                             years_available=years_available)
     
     except Exception as e:
         print(f"Error en métricas nacionales: {e}")
@@ -4078,8 +4096,10 @@ def tablero_metricas_nacional():
             "total_registrations": 0,
             "unique_participants": 0,
             "total_presentations": 0,
-            "year": str(current_year)
+            "total_events": 0,
+            "year": str(year)
         }
+        years_available = list(range(2025, current_year + 1))
         return render_template('metrica_nacional.html', 
                              active_section='metricas',
                              estadisticas=estadisticas_vacias,
@@ -4088,7 +4108,10 @@ def tablero_metricas_nacional():
                              grafica_modalidad=None,
                              grafica_categoria=None,
                              grafica_mensual=None,
-                             current_year=current_year)
+                             grafica_eventos_provincia=None,
+                             current_year=current_year,
+                             selected_year=year,
+                             years_available=years_available)
 
 
 ###
@@ -5807,6 +5830,89 @@ def generar_grafica_categoria(eventos, titulo="Distribución de Eventos por Cate
         
     except Exception as e:
         print(f"Error generando gráfica de categoría: {e}")
+        plt.close('all')  # Cerrar todas las figuras en caso de error
+        return None
+
+
+def generar_grafica_eventos_provincia(eventos, titulo="Distribución de Eventos por Provincia"):
+    """
+    Genera una gráfica de barras con la distribución de eventos por provincia.
+    
+    Args:
+        eventos (list): Lista de documentos de eventos
+        titulo (str): Título de la gráfica
+    
+    Returns:
+        str: Imagen base64 o None si no hay datos
+    """
+    try:
+        # Mapeo de códigos de región a nombres de provincias
+        PROVINCIA_MAP = {
+            "panama": "Panamá Metro",
+            "sanmiguelito": "San Miguelito", 
+            "panamaoeste": "Panamá Oeste",
+            "panamaeste": "Panamá Este",
+            "bocasdeltoro": "Bocas del Toro",
+            "cocle": "Coclé",
+            "colon": "Colón",
+            "chiriqui": "Chiriquí",
+            "herrera": "Herrera",
+            "lossantos": "Los Santos",
+            "veraguas": "Veraguas"
+        }
+        
+        # Contar eventos por provincia
+        provincia_count = {}
+        for evento in eventos:
+            region = evento.get('region', 'otro')
+            provincia = PROVINCIA_MAP.get(region, 'Otras')
+            provincia_count[provincia] = provincia_count.get(provincia, 0) + 1
+        
+        # Si no hay datos, retornar None
+        if not provincia_count:
+            return None
+        
+        # Crear la figura
+        fig, ax = plt.subplots(figsize=(12, 6))
+        
+        # Ordenar por frecuencia descendente
+        provincias_ordenadas = sorted(provincia_count.items(), key=lambda x: x[1], reverse=True)
+        
+        # Extraer datos ordenados
+        labels = [provincia for provincia, _ in provincias_ordenadas]
+        values = [count for _, count in provincias_ordenadas]
+        
+        # Crear gráfica de barras
+        bars = ax.bar(labels, values, color='#0058A6', alpha=0.8)
+        
+        # Personalizar la gráfica
+        ax.set_title(titulo, fontsize=12, fontweight='bold', pad=20)
+        ax.set_xlabel('Provincia', fontsize=10, fontweight='bold')
+        ax.set_ylabel('Número de Eventos', fontsize=10, fontweight='bold')
+        
+        # Rotar etiquetas del eje X para mejor legibilidad
+        ax.tick_params(axis='x', rotation=45, labelsize=9)
+        
+        # Agregar valores en las barras
+        for bar, value in zip(bars, values):
+            height = bar.get_height()
+            ax.text(bar.get_x() + bar.get_width()/2., height + 0.1,
+                    f'{value}', ha='center', va='bottom', fontweight='bold')
+        
+        # Ajustar layout
+        plt.tight_layout()
+        
+        # Convertir la gráfica a imagen base64
+        img_buffer = io.BytesIO()
+        plt.savefig(img_buffer, format='png', dpi=300, bbox_inches='tight')
+        img_buffer.seek(0)
+        img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
+        plt.close(fig)
+        
+        return f"data:image/png;base64,{img_base64}"
+        
+    except Exception as e:
+        print(f"Error generando gráfica de eventos por provincia: {e}")
         plt.close('all')  # Cerrar todas las figuras en caso de error
         return None
 

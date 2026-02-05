@@ -4488,6 +4488,11 @@ select {
   color: rgb(20 83 45 / var(--tw-text-opacity, 1));
 }
 
+.hover\:text-purple-600:hover {
+  --tw-text-opacity: 1;
+  color: rgb(147 51 234 / var(--tw-text-opacity, 1));
+}
+
 .hover\:text-red-500:hover {
   --tw-text-opacity: 1;
   color: rgb(239 68 68 / var(--tw-text-opacity, 1));

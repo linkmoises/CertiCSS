@@ -14,20 +14,32 @@
                         <div class="p-1.5 min-w-full inline-block align-middle">
                             <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                                 <!-- Header -->
-                                <div class="flex items-center gap-x-3">
-                                    <div class="relative h-32 w-32 shrink-0">
-                                        <img class="w-32 h-32 object-cover rounded-lg absolute top-0 start-0" src="https://picsum.photos/750/750.jpg" alt="Evento Nacional" />
+                                <div class="flex items-center justify-between gap-x-3">
+                                    <div class="flex items-center gap-x-3">
+                                        <div class="relative h-32 w-32 shrink-0">
+                                            <img class="w-32 h-32 object-cover rounded-lg absolute top-0 start-0" src="https://picsum.photos/750/750.jpg" alt="Evento Nacional" />
+                                        </div>
+
+                                        <div class="grow">
+                                            <h2 class="block text-3xl font-bold mt-2">Métricas e Informe Nacional - DENADOI</h2>
+                                            <h4 class="block italic mb-2">República de Panamá</h4>
+                                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                                Eventos Generales
+                                            </span>
+                                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-blue-100 text-blue-800">
+                                                Año {{ selected_year or current_year or estadisticas.year }}
+                                            </span>
+                                        </div>
                                     </div>
 
-                                    <div class="grow">
-                                        <h2 class="block text-3xl font-bold mt-2">Métricas e Informe Nacional</h2>
-                                        <h4 class="block italic mb-2">República de Panamá</h4>
-                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
-                                            Eventos Generales
-                                        </span>
-                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-blue-100 text-blue-800">
-                                            Año {{ current_year or estadisticas.year }}
-                                        </span>
+                                    <!-- Selector de año -->
+                                    <div class="flex flex-col items-end gap-2">
+                                        <label for="year-selector" class="text-sm font-medium text-gray-700">Seleccionar año:</label>
+                                        <select id="year-selector" class="py-2 px-3 pe-9 block border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" onchange="changeYear(this.value)">
+{% for year in years_available|reverse %}
+                                            <option value="{{ year }}" {% if year == (selected_year or current_year) %}selected{% endif %}>{{ year }}</option>
+{% endfor %}
+                                        </select>
                                     </div>
                                 </div>
                                 <!-- End Header -->
@@ -42,7 +54,25 @@
             <!-- TARJETAS RESUMEN -->
             <div class="max-w-[85rem] px-2 pt-1 mx-auto">
                 <!-- Grid -->
-                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+                <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6 mb-6">
+                    <!-- Card -->
+                    <div class="flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="p-4 md:p-5">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">
+                                Eventos totales
+                            </p>
+                        </div>
+                
+                        <div class="mt-1 flex items-center gap-x-2">
+                            <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
+                                {{ estadisticas.total_events if estadisticas else 0 }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Card -->
+            
                     <!-- Card -->
                     <div class="flex flex-col bg-white border shadow-sm rounded-xl">
                         <div class="p-4 md:p-5">
@@ -108,7 +138,7 @@
 
                         <div class="mt-1 flex items-center gap-x-2">
                             <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
-                                {{ current_year or estadisticas.year }}
+                                {{ selected_year or current_year or estadisticas.year }}
                             </h3>
                         </div>
                     </div>
@@ -120,10 +150,23 @@
                 <div id="informe-descripcion" class="grid">
                     <div class="flex flex-col bg-white border shadow-sm rounded-xl mb-6">
                         <div class="overflow-x-auto p-4">
-                            <h3 class="text-base font-semibold text-gray-800 mb-4">Informe Nacional - Eventos Generales</h3>
-                            <p class="text-sm py-1">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Informe Nacional - Eventos Generales</h3>
+                            <p class="text-base py-1">
                                 <span class="font-semibold">Descripción:</span> 
-                                Este informe presenta las métricas y estadísticas nacionales de participación en eventos de educación médica continua, incluyendo análisis demográficos, distribución geográfica entre otras evaluaciones. Se excluyen de este registro los datos relacionados con sesiones docentes.
+                                Este informe presenta las métricas y estadísticas nacionales de participación en eventos de educación 
+                                médica continua para el año {{ selected_year or current_year or estadisticas.year }}, incluyendo 
+                                análisis demográficos, distribución geográfica entre otras evaluaciones. Se excluyen de este registro
+                                los datos relacionados con sesiones docentes y eventos que no fueron publicados.
+                            </p>
+                            <p class="text-base py-1">
+                                Durante el año {{ selected_year or current_year or estadisticas.year }} se realizaron {{ estadisticas.total_events if estadisticas else 0 }} eventos 
+                                totales. En estos eventos se registraron {{ estadisticas.total_registrations if estadisticas else 0 }}
+                                participaciones, de los cuales en los datos registrados {{ estadisticas.unique_participants if estadisticas else 0 }}
+                                corresponden a participantes únicos.
+                            </p>
+                            <p class="text-base py-1">
+                                Se registraron en la plataforma además {{ estadisticas.total_presentations if estadisticas else 0 }}
+                                ponencias. Esto da un promedio de {% if estadisticas and estadisticas.total_events > 0 %}{{ "%.1f"|format(estadisticas.total_presentations / estadisticas.total_events) }}{% else %}0.0{% endif %} ponencias por evento. {% if estadisticas and estadisticas.total_events > 0 %}Existen {{ estadisticas.total_events - (estadisticas.total_presentations if estadisticas.total_presentations <= estadisticas.total_events else estadisticas.total_events) }} eventos donde no se registraron ponencias{% else %}No se registraron ponencias{% endif %} por parte de los creadores de la actividad.
                             </p>
                         </div>
                     </div>
@@ -144,7 +187,7 @@
                                 </svg>
                                 <p class="text-gray-500 text-center">
                                     No hay datos de perfil profesional disponibles.<br>
-                                    <span class="text-sm">Esta información se recopila desde abril 2025.</span>
+                                    <span class="text-sm">Esta información se recopila desde enero 2025.</span>
                                 </p>
                             </div>
 {% endif %}
@@ -184,7 +227,7 @@
                                 </svg>
                                 <p class="text-gray-500 text-center">
                                     No hay datos de región disponibles.<br>
-                                    <span class="text-sm">Esta información se recopila desde abril 2025.</span>
+                                    <span class="text-sm">Esta información se recopila desde enero 2025.</span>
                                 </p>
                             </div>
 {% endif %}
@@ -201,7 +244,7 @@
                                 organizadores, coorganizadores ni personal de apoyo. 
                             </p>
                             <p class="text-sm mb-2">
-                                Esta característica se implementó en abril 2025, por lo que eventos anteriores a 
+                                Esta característica se implementó en enero 2025, por lo que eventos anteriores a 
                                 esta fecha mostrarán sus datos agrupados en la categoría otros.
                             </p>
                         </div>                          
@@ -244,7 +287,7 @@
                 <!-- Grid -->
                 <div id="grafico-mensual" class="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
                     <!-- Card que ocupa 2 columnas -->
-                    <div class="col-span-1 lg:col-span-2 flex flex-col bg-white border shadow-sm rounded-xl">
+                    <div class="col-span-1 lg:col-span-3 flex flex-col bg-white border shadow-sm rounded-xl">
                         <div class="p-4 md:p-5">
                             <h4 class="text-base font-semibold text-gray-800 mb-4">Gráfico No. 5. Distribución de eventos por mes del año</h4>
 {% if grafica_mensual %}
@@ -258,12 +301,12 @@
                     </div>
                     <!-- fin card -->
 
-                    <div class="col-span-1 lg:col-span-2 flex flex-col bg-white border shadow-sm rounded-xl">
+                    <div class="col-span-1 flex flex-col bg-white border shadow-sm rounded-xl">
                         <div class="p-4 md:p-5">
                             <h4 class="text-base font-semibold text-gray-800 mb-4">Sobre las fuentes de datos</h4>
                             <p class="py-2 text-sm text-gray-500">
                                 La información presentada en este informe se deriva de los registros de eventos y 
-                                participantes almacenados en la plataforma CertiCSS durante el año {{ current_year or estadisticas.year }}.
+                                participantes almacenados en la plataforma CertiCSS durante el año {{ selected_year or current_year or estadisticas.year }}.
                             </p>
                             <p class="py-2 text-sm text-gray-500">
                                 Se excluyen de este análisis los eventos de tipo "Sesión Docente" y aquellos 
@@ -281,9 +324,46 @@
                 </div>
                 <!-- fin grid -->
 
+                <!-- Grid para gráfica de eventos por provincia -->
+                <div id="grafico-eventos-provincia" class="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+                    <!-- Card que ocupa 3 columnas -->
+                    <div class="col-span-1 lg:col-span-3 flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="p-4 md:p-5">
+                            <h4 class="text-base font-semibold text-gray-800 mb-4">Gráfico No. 6. Distribución de eventos por provincia</h4>
+{% if grafica_eventos_provincia %}
+                            <img src="{{ grafica_eventos_provincia }}" alt="Gráfica de eventos por provincia" class="w-full h-auto" />
+{% else %}
+                            <div class="flex justify-center items-center h-64 bg-gray-50 rounded-lg">
+                                <p class="text-gray-500">No hay datos disponibles para generar la gráfica.</p>
+                            </div>
+{% endif %}
+                        </div>
+                    </div>
+                    <!-- fin card -->
+
+                    <!-- Card que ocupa 1 columna -->
+                    <div class="col-span-1 flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="overflow-x-auto p-4">
+                            <h4 class="text-base font-semibold text-gray-800 mb-2">Sobre la Gráfica No. 6</h4>
+                            <p class="text-sm mb-2">
+                                Esta gráfica muestra la distribución geográfica de los eventos de educación médica 
+                                continua realizados durante el año {{ selected_year or current_year or estadisticas.year }}.
+                            </p>
+                            <p class="text-sm mb-2">
+                                Los datos se basan en la región/provincia donde se realizó cada evento, según fue 
+                                registrado por los organizadores al momento de crear la actividad en la plataforma.
+                            </p>
+                            <p class="text-sm mb-2">
+                                Se excluyen eventos en estado de borrador y sesiones docentes para mostrar únicamente 
+                                las actividades de educación médica continua completadas.
+                            </p>
+                        </div>                          
+                    </div>
+                </div>
+                <!-- fin grid -->
+
             </div>
             <!-- FIN TARJETAS RESUMEN -->
-
 
 {% include 'tablero-footer.html' %}
 
@@ -294,6 +374,12 @@
 <!-- JS PLUGINS -->
 <script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
 <script>
+// Función para cambiar el año
+function changeYear(selectedYear) {
+    // Redirigir a la misma página con el año seleccionado
+    window.location.href = `/tablero/metricas/nacional/${selectedYear}`;
+}
+
 // Limpia campos dinámicos al cargar la página
 document.addEventListener("DOMContentLoaded", function () {
     const hiddenInputs = document.querySelectorAll("#buscadorForm input[type='hidden']");
