@@ -3897,6 +3897,7 @@ def get_national_statistics(year=None):
                 "total_registrations": 0,
                 "unique_participants": 0,
                 "total_presentations": 0,
+                "eventos_con_ponencias": 0,
                 "total_events": 0,
                 "participantes_recurrentes": 0,
                 "tasa_recurrencia": 0.0,
@@ -3928,6 +3929,20 @@ def get_national_statistics(year=None):
             "rol": "ponente",
             "titulo_ponencia": {"$exists": True, "$ne": ""}
         })
+        
+        # Contar eventos que tienen al menos una ponencia
+        pipeline_eventos_con_ponencias = [
+            {"$match": {
+                "codigo_evento": {"$in": codigos_eventos},
+                "rol": "ponente",
+                "titulo_ponencia": {"$exists": True, "$ne": ""}
+            }},
+            {"$group": {"_id": "$codigo_evento"}},
+            {"$count": "eventos_con_ponencias"}
+        ]
+        
+        eventos_con_ponencias_result = list(collection_participantes.aggregate(pipeline_eventos_con_ponencias))
+        eventos_con_ponencias = eventos_con_ponencias_result[0]["eventos_con_ponencias"] if eventos_con_ponencias_result else 0
         
         # Contar total de eventos válidos
         total_events = len(eventos_validos)
@@ -3962,6 +3977,7 @@ def get_national_statistics(year=None):
             "total_registrations": total_registrations,
             "unique_participants": unique_participants,
             "total_presentations": total_presentations,
+            "eventos_con_ponencias": eventos_con_ponencias,
             "total_events": total_events,
             "participantes_recurrentes": participantes_recurrentes,
             "tasa_recurrencia": round(tasa_recurrencia, 1),
@@ -3974,6 +3990,7 @@ def get_national_statistics(year=None):
             "total_registrations": 0,
             "unique_participants": 0,
             "total_presentations": 0,
+            "eventos_con_ponencias": 0,
             "total_events": 0,
             "participantes_recurrentes": 0,
             "tasa_recurrencia": 0.0,
@@ -5332,11 +5349,13 @@ def generar_grafica_perfil(participantes, evento_nombre):
     PERFILES_MAP = {
         "medico_general": "Médico General - Consulta Externa",
         "medico_urgencias": "Médico General - Urgencias", 
+        "medico_administrativo": "Médico Administrativo",
         "medico_especialista": "Médico Especialista",
         "medico_residente": "Médico Residente",
         "medico_interno": "Médico Interno",
         "odontologo": "Odontólogo",
         "odontologo_especialista": "Odontólogo Especialista",
+        "tao": "Técnico en Asistencia Odontológica",
         "enfermero": "Enfermero(a)",
         "tecnico_enfermeria": "Técnico Enfermería",
         "laboratorista": "Laboratorista",
@@ -5836,8 +5855,8 @@ def generar_grafica_categoria(eventos, titulo_institucional, subtitulo_especific
         labels = [categoria for categoria, _ in categorias_ordenadas]
         values = [count for _, count in categorias_ordenadas]
         
-        # Crear gráfica de barras
-        bars = plt.bar(labels, values, color='#0058A6', alpha=0.8)
+        # Crear gráfica de barras (color rosa)
+        bars = plt.bar(labels, values, color='#E91E63', alpha=0.8)
         
         # Personalizar la gráfica (subtítulo específico abajo)
         plt.title(subtitulo_especifico, fontsize=10, fontweight='bold', pad=20)
@@ -5926,8 +5945,8 @@ def generar_grafica_eventos_provincia(eventos, titulo_institucional, subtitulo_e
         labels = [provincia for provincia, _ in provincias_ordenadas]
         values = [count for _, count in provincias_ordenadas]
         
-        # Crear gráfica de barras
-        bars = plt.bar(labels, values, color='#0058A6', alpha=0.8)
+        # Crear gráfica de barras (color turquesa)
+        bars = plt.bar(labels, values, color='#00BCD4', alpha=0.8)
         
         # Personalizar la gráfica (subtítulo específico abajo)
         plt.title(subtitulo_especifico, fontsize=10, fontweight='bold', pad=20)
@@ -6026,8 +6045,8 @@ def generar_grafica_mensual(eventos, titulo_institucional, subtitulo_especifico=
         labels = meses_nombres
         values = [meses_count[i] for i in range(1, 13)]
         
-        # Crear gráfica de barras
-        bars = plt.bar(labels, values, color='#0058A6', alpha=0.8)
+        # Crear gráfica de barras (color púrpura)
+        bars = plt.bar(labels, values, color='#9C27B0', alpha=0.8)
         
         # Personalizar la gráfica (subtítulo específico abajo)
         plt.title(subtitulo_especifico, fontsize=10, fontweight='bold', pad=20)
