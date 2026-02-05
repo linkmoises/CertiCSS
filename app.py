@@ -3876,9 +3876,13 @@ def get_national_statistics(year=None):
     if year is None:
         year = datetime.now().year
     
+    print(f"DEBUG get_national_statistics: Buscando datos para el año {year}")
+    
     # Definir rango de fechas para el año especificado
     inicio_year = datetime(year, 1, 1)
     fin_year = datetime(year, 12, 31, 23, 59, 59)
+    
+    print(f"DEBUG: Rango de fechas: {inicio_year} a {fin_year}")
     
     # Filtros para eventos válidos
     filtro_eventos = {
@@ -3887,12 +3891,24 @@ def get_national_statistics(year=None):
         "estado_evento": {"$ne": "borrador"}
     }
     
+    print(f"DEBUG: Filtros aplicados: {filtro_eventos}")
+    
     try:
+        # Primero contar todos los eventos del año sin filtros
+        total_eventos_year = collection_eventos.count_documents({
+            "fecha_inicio": {"$gte": inicio_year, "$lte": fin_year}
+        })
+        print(f"DEBUG: Total eventos en {year}: {total_eventos_year}")
+        
         # Obtener códigos de eventos válidos
         eventos_validos = list(collection_eventos.find(filtro_eventos, {"codigo": 1}))
         codigos_eventos = [evento["codigo"] for evento in eventos_validos]
         
+        print(f"DEBUG: Eventos válidos encontrados: {len(eventos_validos)}")
+        print(f"DEBUG: Códigos de eventos: {codigos_eventos[:5]}...")  # Mostrar solo los primeros 5
+        
         if not codigos_eventos:
+            print("DEBUG: No se encontraron eventos válidos, retornando estadísticas vacías")
             return {
                 "total_registrations": 0,
                 "unique_participants": 0,
@@ -3906,6 +3922,7 @@ def get_national_statistics(year=None):
             "codigo_evento": {"$in": codigos_eventos},
             "rol": "participante"
         })
+        print(f"DEBUG: Total registrations: {total_registrations}")
         
         # Contar participantes únicos por cédula
         pipeline_unique = [
@@ -3919,6 +3936,7 @@ def get_national_statistics(year=None):
         
         unique_result = list(collection_participantes.aggregate(pipeline_unique))
         unique_participants = unique_result[0]["unique_count"] if unique_result else 0
+        print(f"DEBUG: Unique participants: {unique_participants}")
         
         # Contar total de ponencias (presentaciones)
         total_presentations = collection_participantes.count_documents({
@@ -3926,11 +3944,13 @@ def get_national_statistics(year=None):
             "rol": "ponente",
             "titulo_ponencia": {"$exists": True, "$ne": ""}
         })
+        print(f"DEBUG: Total presentations: {total_presentations}")
         
         # Contar total de eventos válidos
         total_events = len(eventos_validos)
+        print(f"DEBUG: Total events: {total_events}")
         
-        return {
+        resultado = {
             "total_registrations": total_registrations,
             "unique_participants": unique_participants,
             "total_presentations": total_presentations,
@@ -3938,8 +3958,13 @@ def get_national_statistics(year=None):
             "year": str(year)
         }
         
+        print(f"DEBUG: Resultado final: {resultado}")
+        return resultado
+        
     except Exception as e:
         print(f"Error al obtener estadísticas nacionales: {e}")
+        import traceback
+        traceback.print_exc()
         return {
             "total_registrations": 0,
             "unique_participants": 0,
