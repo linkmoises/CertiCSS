@@ -6146,11 +6146,11 @@ def generar_histograma_horas_registro(eventos, titulo_institucional, subtitulo_e
             {"$match": {
                 "codigo_evento": {"$in": codigos_eventos},
                 "rol": "participante",
-                "fecha_registro": {"$exists": True}
+                "timestamp": {"$exists": True}
             }},
             {"$project": {
                 "codigo_evento": 1,
-                "fecha_registro": 1
+                "timestamp": 1
             }}
         ]
         
@@ -6166,20 +6166,20 @@ def generar_histograma_horas_registro(eventos, titulo_institucional, subtitulo_e
         registros_filtrados = 0
         
         for registro in registros:
-            fecha_registro = registro.get('fecha_registro')
+            timestamp = registro.get('timestamp')
             codigo_evento = registro.get('codigo_evento')
             
-            if not fecha_registro:
+            if not timestamp:
                 continue
                 
             try:
-                # Convertir fecha_registro a datetime si es necesario
-                if hasattr(fecha_registro, 'hour'):
-                    fecha_registro_dt = fecha_registro
+                # Convertir timestamp a datetime si es necesario
+                if hasattr(timestamp, 'hour'):
+                    timestamp_dt = timestamp
                 else:
                     # Si es string, intentar parsearlo
-                    if isinstance(fecha_registro, str):
-                        fecha_registro_dt = datetime.fromisoformat(fecha_registro.replace('Z', '+00:00'))
+                    if isinstance(timestamp, str):
+                        timestamp_dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
                     else:
                         continue
                 
@@ -6188,15 +6188,15 @@ def generar_histograma_horas_registro(eventos, titulo_institucional, subtitulo_e
                 
                 if fecha_hora_fin is None:
                     # Si no hay hora de fin definida, incluir el registro
-                    horas_validas.append(fecha_registro_dt.hour)
-                elif fecha_registro_dt <= fecha_hora_fin:
+                    horas_validas.append(timestamp_dt.hour)
+                elif timestamp_dt <= fecha_hora_fin:
                     # Solo incluir si el registro es antes o igual a la hora de fin
-                    horas_validas.append(fecha_registro_dt.hour)
+                    horas_validas.append(timestamp_dt.hour)
                 else:
                     registros_filtrados += 1
                     
             except Exception as e:
-                print(f"DEBUG: Error procesando fecha_registro: {e}")
+                print(f"DEBUG: Error procesando timestamp: {e}")
                 continue
         
         print(f"DEBUG generar_histograma_horas_registro: {len(horas_validas)} horas válidas, {registros_filtrados} registros filtrados")
