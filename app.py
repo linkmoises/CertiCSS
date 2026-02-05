@@ -3225,6 +3225,151 @@ def resumen_evento(codigo_evento):
 
 
 ###
+### Descargar archivo ICS para calendario
+###
+@app.route('/resumen/<codigo_evento>.ics')
+def descargar_ics(codigo_evento):
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    
+    if not evento:
+        abort(404)
+    
+    # Generar contenido ICS
+    ics_content = generar_ics(evento)
+    
+    # Crear respuesta con el contenido ICS
+    response = Response(ics_content, mimetype='text/calendar')
+    response.headers['Content-Disposition'] = f'attachment; filename="{evento["codigo"]}.ics"'
+    
+    return response
+
+
+def generar_ics(evento):
+    """Genera el contenido del archivo ICS para un evento"""
+    from datetime import datetime, timezone, timedelta, time
+    import uuid
+    
+    # Obtener fechas del evento
+    fecha_inicio = evento.get('fecha_inicio')
+    fecha_fin = evento.get('fecha_fin', fecha_inicio)
+    
+    # Si las fechas son strings, convertirlas a datetime
+    if isinstance(fecha_inicio, str):
+        fecha_inicio = datetime.fromisoformat(fecha_inicio.replace('Z', '+00:00'))
+    if isinstance(fecha_fin, str):
+        fecha_fin = datetime.fromisoformat(fecha_fin.replace('Z', '+00:00'))
+    
+    # Definir zona horaria de Panamá (UTC-5)
+    panama_tz = timezone(timedelta(hours=-5))
+    
+    # Si las fechas no tienen zona horaria (naive), asumimos que están en hora de Panamá
+    if fecha_inicio.tzinfo is None:
+        fecha_inicio = fecha_inicio.replace(tzinfo=panama_tz)
+    if fecha_fin.tzinfo is None:
+        fecha_fin = fecha_fin.replace(tzinfo=panama_tz)
+    
+    # Generar UID único
+    uid = str(uuid.uuid4()) + '@certicss.css.gob.pa'
+    
+    # Timestamp actual
+    dtstamp = datetime.now().strftime('%Y%m%dT%H%M%SZ')
+    
+    # Construir descripción completa
+    descripcion_base = evento.get("descripcion", "")
+    html_ics = 'X-ALT-DESC;FMTTYPE=text/html:<a href="https://docenciamedica.org/buscar_certificados">Descargar</a>'
+    
+    # Verificar si es un evento de múltiples días
+    fecha_inicio_date = fecha_inicio.date()
+    fecha_fin_date = fecha_fin.date()
+    
+    if fecha_inicio_date == fecha_fin_date:
+        # Evento de un solo día
+        dtstart = fecha_inicio.strftime('%Y%m%dT%H%M%S')
+        dtend = fecha_fin.strftime('%Y%m%dT%H%M%S')
+        
+        ics_lines = [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//CertiCSS//CertiCSS Event//ES',
+            'CALSCALE:GREGORIAN',
+            'METHOD:PUBLISH',
+            'BEGIN:VTIMEZONE',
+            'TZID:America/Panama',
+            'BEGIN:STANDARD',
+            'DTSTART:19700101T000000',
+            'TZOFFSETFROM:-0500',
+            'TZOFFSETTO:-0500',
+            'TZNAME:EST',
+            'END:STANDARD',
+            'END:VTIMEZONE',
+            'BEGIN:VEVENT',
+            f'UID:{uid}',
+            f'DTSTAMP:{dtstamp}',
+            f'DTSTART;TZID=America/Panama:{dtstart}',
+            f'DTEND;TZID=America/Panama:{dtend}',
+            f'SUMMARY:{evento.get("nombre", "Evento CSS")}',
+            f'DESCRIPTION:{descripcion_base}',
+            f'X-ALT-DESC;FMTTYPE=text/html:{html_ics}',
+            f'LOCATION:{evento.get("lugar", "Por determinar")}',
+            f'URL:{app.config.get("BASE_URL", "")}resumen/{evento.get("codigo")}',
+            'STATUS:CONFIRMED',
+            'TRANSP:OPAQUE',
+            'END:VEVENT',
+            'END:VCALENDAR'
+        ]
+    else:
+        # Evento de múltiples días - usar RRULE para repetir diariamente
+        # El evento se repite cada día con el mismo horario
+        
+        # Crear el evento base con la hora de inicio y fin del primer día
+        evento_inicio = datetime.combine(fecha_inicio_date, fecha_inicio.time()).replace(tzinfo=panama_tz)
+        evento_fin = datetime.combine(fecha_inicio_date, fecha_fin.time()).replace(tzinfo=panama_tz)
+        
+        dtstart = evento_inicio.strftime('%Y%m%dT%H%M%S')
+        dtend = evento_fin.strftime('%Y%m%dT%H%M%S')
+        
+        # Calcular el número de días del evento
+        dias_evento = (fecha_fin_date - fecha_inicio_date).days + 1
+        
+        # Fecha final para RRULE (último día del evento)
+        until_date = fecha_fin_date.strftime('%Y%m%d')
+        
+        ics_lines = [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//CertiCSS//CertiCSS Event//ES',
+            'CALSCALE:GREGORIAN',
+            'METHOD:PUBLISH',
+            'BEGIN:VTIMEZONE',
+            'TZID:America/Panama',
+            'BEGIN:STANDARD',
+            'DTSTART:19700101T000000',
+            'TZOFFSETFROM:-0500',
+            'TZOFFSETTO:-0500',
+            'TZNAME:EST',
+            'END:STANDARD',
+            'END:VTIMEZONE',
+            'BEGIN:VEVENT',
+            f'UID:{uid}',
+            f'DTSTAMP:{dtstamp}',
+            f'DTSTART;TZID=America/Panama:{dtstart}',
+            f'DTEND;TZID=America/Panama:{dtend}',
+            f'RRULE:FREQ=DAILY;UNTIL={until_date}T235959',
+            f'SUMMARY:{evento.get("nombre", "Evento CSS")}',
+            f'DESCRIPTION:{descripcion_base}',
+            f'X-ALT-DESC;FMTTYPE=text/html:{html_ics}',
+            f'LOCATION:{evento.get("lugar", "Por determinar")}',
+            f'URL:{app.config.get("BASE_URL", "")}resumen/{evento.get("codigo")}',
+            'STATUS:CONFIRMED',
+            'TRANSP:OPAQUE',
+            'END:VEVENT',
+            'END:VCALENDAR'
+        ]
+    
+    return '\r\n'.join(ics_lines)
+
+
+###
 ###
 ###
 @app.route('/tablero/eventos/<codigo_evento>/cerrar', methods=['POST'])
