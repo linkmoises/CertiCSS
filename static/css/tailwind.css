@@ -1799,6 +1799,10 @@ select {
   margin-top: auto;
 }
 
+.mr-8 {
+  margin-right: 2rem;
+}
+
 .block {
   display: block;
 }

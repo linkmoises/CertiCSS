@@ -17,12 +17,12 @@
                                 <div class="flex items-center justify-between gap-x-3">
                                     <div class="flex items-center gap-x-3">
                                         <div class="relative h-32 w-32 shrink-0">
-                                            <img class="w-32 h-32 object-cover rounded-lg absolute top-0 start-0" src="https://picsum.photos/750/750.jpg" alt="Evento Nacional" />
+                                            <img class="w-32 h-32 object-cover rounded-lg absolute top-0 start-0" src="{{ url_for('static', filename='assets/unidades/default-square.jpg') }}" alt="Evento Nacional" />
                                         </div>
 
                                         <div class="grow">
                                             <h2 class="block text-3xl font-bold mt-2">Departamento Nacional de Docencia e Investigación</h2>
-                                            <h4 class="block italic mb-2">Metricas e Informe Nacional</h4>
+                                            <h4 class="block italic mb-2">Métricas e Informe Nacional</h4>
                                             <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
                                                 Eventos Generales
                                             </span>
@@ -33,7 +33,7 @@
                                     </div>
 
                                     <!-- Selector de año -->
-                                    <div class="flex flex-col items-end gap-2">
+                                    <div class="mr-8 flex flex-col items-end gap-2">
                                         <label for="year-selector" class="text-sm font-medium text-gray-700">Seleccionar año:</label>
                                         <select id="year-selector" class="py-2 px-3 pe-9 block border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" onchange="changeYear(this.value)">
 {% for year in years_available|reverse %}
