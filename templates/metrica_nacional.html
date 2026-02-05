@@ -378,6 +378,44 @@
                 </div>
                 <!-- fin grid -->
 
+                <!-- Grid para histograma de horas de registro -->
+                <div id="grafico-horas-registro" class="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+                    <!-- Card que ocupa 3 columnas -->
+                    <div class="col-span-1 lg:col-span-3 flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="p-4 md:p-5">
+                            <h4 class="text-base font-semibold text-gray-800 mb-4">Gráfico No. 7. Distribución de registros por hora del día</h4>
+{% if grafica_horas_registro %}
+                            <img src="{{ grafica_horas_registro }}" alt="Histograma de registros por hora" class="w-full h-auto" />
+{% else %}
+                            <div class="flex justify-center items-center h-64 bg-gray-50 rounded-lg">
+                                <p class="text-gray-500">No hay datos disponibles para generar el histograma.</p>
+                            </div>
+{% endif %}
+                        </div>
+                    </div>
+                    <!-- fin card -->
+
+                    <!-- Card que ocupa 1 columna -->
+                    <div class="col-span-1 flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="overflow-x-auto p-4">
+                            <h4 class="text-base font-semibold text-gray-800 mb-2">Sobre el Gráfico No. 7</h4>
+                            <p class="text-sm mb-2">
+                                Este histograma muestra la distribución de los registros de participantes según 
+                                la hora del día en que se registraron durante el año {{ selected_year or current_year or estadisticas.year }}.
+                            </p>
+                            <p class="text-sm mb-2">
+                                Solo se incluyen registros realizados antes de la hora de finalización de cada evento, 
+                                excluyendo registros tardíos o posteriores al cierre de la actividad.
+                            </p>
+                            <p class="text-sm mb-2">
+                                Los datos ayudan a identificar patrones de comportamiento de registro y horarios 
+                                de mayor actividad en la plataforma.
+                            </p>
+                        </div>                          
+                    </div>
+                </div>
+                <!-- fin grid -->
+
             </div>
             <!-- FIN TARJETAS RESUMEN -->
 

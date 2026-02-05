@@ -4117,8 +4117,9 @@ def tablero_metricas_nacional(year=None):
         grafica_categoria = generar_grafica_categoria(eventos, f"Departamento Nacional de Docencia e Investigación - {year}", "Distribución de Eventos por Categoría")
         grafica_mensual = generar_grafica_mensual(eventos, f"Departamento Nacional de Docencia e Investigación - {year}", "Distribución Mensual de Eventos")
         grafica_eventos_provincia = generar_grafica_eventos_provincia(eventos, f"Departamento Nacional de Docencia e Investigación - {year}", "Distribución de Eventos por Provincia")
+        grafica_horas_registro = generar_histograma_horas_registro(eventos, f"Departamento Nacional de Docencia e Investigación - {year}", "Distribución de Registros por Hora del Día")
         
-        print(f"DEBUG: Gráficas generadas - modalidad: {'Sí' if grafica_modalidad else 'No'}, categoria: {'Sí' if grafica_categoria else 'No'}, mensual: {'Sí' if grafica_mensual else 'No'}, provincia: {'Sí' if grafica_eventos_provincia else 'No'}")
+        print(f"DEBUG: Gráficas generadas - modalidad: {'Sí' if grafica_modalidad else 'No'}, categoria: {'Sí' if grafica_categoria else 'No'}, mensual: {'Sí' if grafica_mensual else 'No'}, provincia: {'Sí' if grafica_eventos_provincia else 'No'}, horas: {'Sí' if grafica_horas_registro else 'No'}")
         
         print(f"DEBUG: Gráficas generadas - perfil: {'Sí' if grafica_perfil else 'No'}, región: {'Sí' if grafica_region else 'No'}")
                 
@@ -4134,6 +4135,7 @@ def tablero_metricas_nacional(year=None):
                              grafica_categoria=grafica_categoria,
                              grafica_mensual=grafica_mensual,
                              grafica_eventos_provincia=grafica_eventos_provincia,
+                             grafica_horas_registro=grafica_horas_registro,
                              current_year=current_year,
                              selected_year=year,
                              years_available=years_available)
@@ -4162,6 +4164,7 @@ def tablero_metricas_nacional(year=None):
                              grafica_categoria=None,
                              grafica_mensual=None,
                              grafica_eventos_provincia=None,
+                             grafica_horas_registro=None,
                              current_year=current_year,
                              selected_year=year,
                              years_available=years_available)
@@ -6084,6 +6087,170 @@ def generar_grafica_mensual(eventos, titulo_institucional, subtitulo_especifico=
         
     except Exception as e:
         print(f"Error generando gráfica mensual: {e}")
+        import traceback
+        traceback.print_exc()
+        plt.close('all')  # Cerrar todas las figuras en caso de error
+        return None
+
+
+def generar_histograma_horas_registro(eventos, titulo_institucional, subtitulo_especifico="Distribución de Registros por Hora del Día"):
+    """
+    Genera un histograma con la distribución de registros de participantes por hora del día.
+    Excluye registros posteriores a la hora de finalización del evento.
+    
+    Args:
+        eventos (list): Lista de documentos de eventos
+        titulo_institucional (str): Título institucional (arriba)
+        subtitulo_especifico (str): Subtítulo específico (abajo)
+    
+    Returns:
+        str: Imagen base64 o None si no hay datos
+    """
+    try:
+        from datetime import datetime
+        
+        print(f"DEBUG generar_histograma_horas_registro: Recibidos {len(eventos)} eventos")
+        
+        # Obtener códigos de eventos válidos
+        codigos_eventos = [evento["codigo"] for evento in eventos]
+        
+        if not codigos_eventos:
+            print("DEBUG generar_histograma_horas_registro: No hay eventos válidos")
+            return None
+        
+        # Crear un diccionario para mapear códigos de eventos a sus horas de finalización
+        eventos_fin_map = {}
+        for evento in eventos:
+            codigo = evento.get('codigo')
+            fecha_fin = evento.get('fecha_fin')
+            hora_fin = evento.get('hora_fin', '23:59')  # Default a 23:59 si no hay hora_fin
+            
+            if codigo and fecha_fin:
+                try:
+                    # Combinar fecha_fin con hora_fin para obtener datetime completo
+                    if hasattr(fecha_fin, 'date'):
+                        fecha_fin_str = fecha_fin.strftime('%Y-%m-%d')
+                    else:
+                        fecha_fin_str = str(fecha_fin)[:10]  # Tomar solo la parte de fecha
+                    
+                    fecha_hora_fin_str = f"{fecha_fin_str} {hora_fin}"
+                    fecha_hora_fin = datetime.strptime(fecha_hora_fin_str, '%Y-%m-%d %H:%M')
+                    eventos_fin_map[codigo] = fecha_hora_fin
+                except Exception as e:
+                    print(f"DEBUG: Error procesando fecha/hora fin para evento {codigo}: {e}")
+                    # Si hay error, no filtrar por hora (permitir todos los registros)
+                    eventos_fin_map[codigo] = None
+        
+        # Obtener registros de participantes válidos
+        pipeline_registros = [
+            {"$match": {
+                "codigo_evento": {"$in": codigos_eventos},
+                "rol": "participante",
+                "fecha_registro": {"$exists": True}
+            }},
+            {"$project": {
+                "codigo_evento": 1,
+                "fecha_registro": 1
+            }}
+        ]
+        
+        registros = list(collection_participantes.aggregate(pipeline_registros))
+        print(f"DEBUG generar_histograma_horas_registro: Encontrados {len(registros)} registros")
+        
+        if not registros:
+            print("DEBUG generar_histograma_horas_registro: No hay registros válidos")
+            return None
+        
+        # Extraer horas válidas (solo registros antes de la hora de fin del evento)
+        horas_validas = []
+        registros_filtrados = 0
+        
+        for registro in registros:
+            fecha_registro = registro.get('fecha_registro')
+            codigo_evento = registro.get('codigo_evento')
+            
+            if not fecha_registro:
+                continue
+                
+            try:
+                # Convertir fecha_registro a datetime si es necesario
+                if hasattr(fecha_registro, 'hour'):
+                    fecha_registro_dt = fecha_registro
+                else:
+                    # Si es string, intentar parsearlo
+                    if isinstance(fecha_registro, str):
+                        fecha_registro_dt = datetime.fromisoformat(fecha_registro.replace('Z', '+00:00'))
+                    else:
+                        continue
+                
+                # Verificar si el registro es antes de la hora de fin del evento
+                fecha_hora_fin = eventos_fin_map.get(codigo_evento)
+                
+                if fecha_hora_fin is None:
+                    # Si no hay hora de fin definida, incluir el registro
+                    horas_validas.append(fecha_registro_dt.hour)
+                elif fecha_registro_dt <= fecha_hora_fin:
+                    # Solo incluir si el registro es antes o igual a la hora de fin
+                    horas_validas.append(fecha_registro_dt.hour)
+                else:
+                    registros_filtrados += 1
+                    
+            except Exception as e:
+                print(f"DEBUG: Error procesando fecha_registro: {e}")
+                continue
+        
+        print(f"DEBUG generar_histograma_horas_registro: {len(horas_validas)} horas válidas, {registros_filtrados} registros filtrados")
+        
+        if not horas_validas:
+            print("DEBUG generar_histograma_horas_registro: No hay horas válidas")
+            return None
+        
+        # Crear la figura
+        plt.figure(figsize=(12, 6))
+        
+        # Crear histograma con bins para cada hora (0-23)
+        bins = list(range(25))  # 0 a 24 para incluir todas las horas
+        counts, bin_edges, patches = plt.hist(horas_validas, bins=bins, color='#FF5722', alpha=0.8, edgecolor='black', linewidth=0.5)
+        
+        # Personalizar la gráfica
+        plt.title(subtitulo_especifico, fontsize=10, fontweight='bold', pad=20)
+        
+        # Título institucional arriba
+        plt.text(0.5, 1.15, titulo_institucional, 
+                ha='center', va='bottom', transform=plt.gca().transAxes,
+                fontsize=12, style='italic')
+        
+        plt.xlabel('Hora del Día (24h)', fontsize=10, fontweight='bold')
+        plt.ylabel('Número de Registros', fontsize=10, fontweight='bold')
+        
+        # Configurar eje X para mostrar todas las horas
+        plt.xticks(range(0, 24, 2))  # Mostrar cada 2 horas para mejor legibilidad
+        plt.xlim(0, 23)
+        
+        # Agregar valores en las barras (solo si > 0)
+        for i, count in enumerate(counts[:-1]):  # Excluir el último bin (24)
+            if count > 0:
+                plt.text(i + 0.5, count + max(counts) * 0.01,
+                        f'{int(count)}', ha='center', va='bottom', fontsize=8, fontweight='bold')
+        
+        # Agregar líneas de cuadrícula
+        plt.grid(True, alpha=0.3, axis='y')
+        
+        # Ajustar layout
+        plt.tight_layout()
+        
+        # Convertir la gráfica a imagen base64
+        img_buffer = io.BytesIO()
+        plt.savefig(img_buffer, format='png', dpi=300, bbox_inches='tight')
+        img_buffer.seek(0)
+        img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
+        plt.close()
+        
+        print("DEBUG generar_histograma_horas_registro: Histograma generado exitosamente")
+        return f"data:image/png;base64,{img_base64}"
+        
+    except Exception as e:
+        print(f"Error generando histograma de horas de registro: {e}")
         import traceback
         traceback.print_exc()
         plt.close('all')  # Cerrar todas las figuras en caso de error
