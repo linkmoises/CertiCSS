@@ -3859,23 +3859,30 @@ def mis_metricas(page=1):
 ###
 ### Funciones de agregación de datos nacionales
 ###
-def get_national_statistics_2025():
+def get_national_statistics(year=None):
     """
-    Obtiene estadísticas nacionales agregadas para el año 2025.
+    Obtiene estadísticas nacionales agregadas para el año especificado.
     Excluye eventos de tipo "Sesión Docente" y estado "borrador".
+    
+    Args:
+        year (int): Año para el cual obtener estadísticas. Si es None, usa el año actual.
     
     Returns:
         dict: Diccionario con estadísticas nacionales
     """
     from datetime import datetime
     
-    # Definir rango de fechas para 2025
-    inicio_2025 = datetime(2025, 1, 1)
-    fin_2025 = datetime(2025, 12, 31, 23, 59, 59)
+    # Usar año actual si no se especifica
+    if year is None:
+        year = datetime.now().year
+    
+    # Definir rango de fechas para el año especificado
+    inicio_year = datetime(year, 1, 1)
+    fin_year = datetime(year, 12, 31, 23, 59, 59)
     
     # Filtros para eventos válidos
     filtro_eventos = {
-        "fecha_inicio": {"$gte": inicio_2025, "$lte": fin_2025},
+        "fecha_inicio": {"$gte": inicio_year, "$lte": fin_year},
         "tipo": {"$ne": "Sesión Docente"},
         "estado_evento": {"$ne": "borrador"}
     }
@@ -3890,7 +3897,7 @@ def get_national_statistics_2025():
                 "total_registrations": 0,
                 "unique_participants": 0,
                 "total_presentations": 0,
-                "year": "2025"
+                "year": str(year)
             }
         
         # Contar total de registros (participantes)
@@ -3923,7 +3930,7 @@ def get_national_statistics_2025():
             "total_registrations": total_registrations,
             "unique_participants": unique_participants,
             "total_presentations": total_presentations,
-            "year": "2025"
+            "year": str(year)
         }
         
     except Exception as e:
@@ -3932,26 +3939,33 @@ def get_national_statistics_2025():
             "total_registrations": 0,
             "unique_participants": 0,
             "total_presentations": 0,
-            "year": "2025"
+            "year": str(year)
         }
 
 
-def get_national_participants_2025():
+def get_national_participants(year=None):
     """
-    Obtiene todos los participantes de eventos válidos de 2025.
+    Obtiene todos los participantes de eventos válidos del año especificado.
+    
+    Args:
+        year (int): Año para el cual obtener participantes. Si es None, usa el año actual.
     
     Returns:
         list: Lista de documentos de participantes
     """
     from datetime import datetime
     
-    # Definir rango de fechas para 2025
-    inicio_2025 = datetime(2025, 1, 1)
-    fin_2025 = datetime(2025, 12, 31, 23, 59, 59)
+    # Usar año actual si no se especifica
+    if year is None:
+        year = datetime.now().year
+    
+    # Definir rango de fechas para el año especificado
+    inicio_year = datetime(year, 1, 1)
+    fin_year = datetime(year, 12, 31, 23, 59, 59)
     
     # Filtros para eventos válidos
     filtro_eventos = {
-        "fecha_inicio": {"$gte": inicio_2025, "$lte": fin_2025},
+        "fecha_inicio": {"$gte": inicio_year, "$lte": fin_year},
         "tipo": {"$ne": "Sesión Docente"},
         "estado_evento": {"$ne": "borrador"}
     }
@@ -3977,22 +3991,29 @@ def get_national_participants_2025():
         return []
 
 
-def get_national_events_2025():
+def get_national_events(year=None):
     """
-    Obtiene todos los eventos válidos de 2025.
+    Obtiene todos los eventos válidos del año especificado.
+    
+    Args:
+        year (int): Año para el cual obtener eventos. Si es None, usa el año actual.
     
     Returns:
         list: Lista de documentos de eventos
     """
     from datetime import datetime
     
-    # Definir rango de fechas para 2025
-    inicio_2025 = datetime(2025, 1, 1)
-    fin_2025 = datetime(2025, 12, 31, 23, 59, 59)
+    # Usar año actual si no se especifica
+    if year is None:
+        year = datetime.now().year
+    
+    # Definir rango de fechas para el año especificado
+    inicio_year = datetime(year, 1, 1)
+    fin_year = datetime(year, 12, 31, 23, 59, 59)
     
     # Filtros para eventos válidos
     filtro_eventos = {
-        "fecha_inicio": {"$gte": inicio_2025, "$lte": fin_2025},
+        "fecha_inicio": {"$gte": inicio_year, "$lte": fin_year},
         "tipo": {"$ne": "Sesión Docente"},
         "estado_evento": {"$ne": "borrador"}
     }
@@ -4012,22 +4033,31 @@ def get_national_events_2025():
 @app.route('/tablero/metricas/nacional')
 @login_required
 def tablero_metricas_nacional():
+    from datetime import datetime
+    
+    # Obtener el año actual
+    current_year = datetime.now().year
+    
     try:
-        # Obtener estadísticas nacionales agregadas
-        estadisticas = get_national_statistics_2025()
+        # Obtener estadísticas nacionales agregadas para el año actual
+        estadisticas = get_national_statistics(current_year)
         
         # Obtener datos de participantes y eventos para gráficas
-        participantes = get_national_participants_2025()
-        eventos = get_national_events_2025()
+        participantes = get_national_participants(current_year)
+        eventos = get_national_events(current_year)
+        
+        print(f"DEBUG: Obtenidos {len(participantes)} participantes y {len(eventos)} eventos para {current_year}")
         
         # Generar gráficas usando funciones existentes y nuevas
-        grafica_perfil = generar_grafica_perfil(participantes, "República de Panamá - 2025")
-        grafica_region = generar_grafica_region(participantes, "República de Panamá - 2025")
+        grafica_perfil = generar_grafica_perfil(participantes, f"República de Panamá - {current_year}")
+        grafica_region = generar_grafica_region(participantes, f"República de Panamá - {current_year}")
         
         # Generar nuevas gráficas de eventos
-        grafica_modalidad = generar_grafica_modalidad(eventos, "Eventos por Modalidad - 2025")
-        grafica_categoria = generar_grafica_categoria(eventos, "Eventos por Categoría - 2025")
-        grafica_mensual = generar_grafica_mensual(eventos, "Distribución Mensual de Eventos - 2025")
+        grafica_modalidad = generar_grafica_modalidad(eventos, f"Eventos por Modalidad - {current_year}")
+        grafica_categoria = generar_grafica_categoria(eventos, f"Eventos por Categoría - {current_year}")
+        grafica_mensual = generar_grafica_mensual(eventos, f"Distribución Mensual de Eventos - {current_year}")
+        
+        print(f"DEBUG: Gráficas generadas - perfil: {'Sí' if grafica_perfil else 'No'}, región: {'Sí' if grafica_region else 'No'}")
         
         return render_template('metrica_nacional.html', 
                              active_section='metricas',
@@ -4036,16 +4066,19 @@ def tablero_metricas_nacional():
                              grafica_region=grafica_region,
                              grafica_modalidad=grafica_modalidad,
                              grafica_categoria=grafica_categoria,
-                             grafica_mensual=grafica_mensual)
+                             grafica_mensual=grafica_mensual,
+                             current_year=current_year)
     
     except Exception as e:
         print(f"Error en métricas nacionales: {e}")
+        import traceback
+        traceback.print_exc()
         # En caso de error, mostrar template con datos vacíos
         estadisticas_vacias = {
             "total_registrations": 0,
             "unique_participants": 0,
             "total_presentations": 0,
-            "year": "2025"
+            "year": str(current_year)
         }
         return render_template('metrica_nacional.html', 
                              active_section='metricas',
@@ -4054,7 +4087,8 @@ def tablero_metricas_nacional():
                              grafica_region=None,
                              grafica_modalidad=None,
                              grafica_categoria=None,
-                             grafica_mensual=None)
+                             grafica_mensual=None,
+                             current_year=current_year)
 
 
 ###
@@ -5260,14 +5294,25 @@ def generar_grafica_perfil(participantes, evento_nombre):
         "otro": "Otro"
     }
     
+    # Debug: imprimir información sobre los participantes
+    print(f"DEBUG: Total participantes recibidos: {len(participantes)}")
+    
     # Contar participantes por perfil
     perfiles_count = {}
+    participantes_con_perfil = 0
+    
     for participante in participantes:
         perfil = participante.get('perfil', 'otro')
+        if participante.get('perfil'):  # Solo contar si tiene perfil definido
+            participantes_con_perfil += 1
         perfiles_count[perfil] = perfiles_count.get(perfil, 0) + 1
+    
+    print(f"DEBUG: Participantes con perfil definido: {participantes_con_perfil}")
+    print(f"DEBUG: Distribución de perfiles: {perfiles_count}")
     
     # Si no hay datos, retornar None
     if not perfiles_count:
+        print("DEBUG: No hay datos de perfiles, retornando None")
         return None
     
     # Crear la figura
