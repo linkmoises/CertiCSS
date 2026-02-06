@@ -221,7 +221,7 @@ def editar_ponente(nanoid):
         nombres = request.form.get('nombres', '').strip()
         apellidos = request.form.get('apellidos', '').strip()
         cedula = request.form.get('cedula', '').strip()
-        perfil = request.form.get('perfil_profesional').strip()
+        perfil = request.form.get('perfil_profesional', '').strip()
         titulo_ponencia = request.form.get('titulo_ponencia', '').strip()
         fecha_evento = request.form.get('fecha_evento')
 
@@ -1687,19 +1687,11 @@ def get_event_dates(evento):
 @login_required
 def registrar_extemporaneo(codigo_evento):
     """
-    Handle extemporaneous registration for administrators.
+    Handle extemporaneous registration for authorized users.
     
     GET: Display registration form
     POST: Process registration submission
     """
-    # Verify administrator role
-    if current_user.rol != 'administrador':
-        # Log unauthorized access attempt
-        log_event(f"Usuario [{current_user.email}] intentó acceso no autorizado a registro extemporáneo para evento {codigo_evento} - Rol: {current_user.rol}")
-        
-        flash('No tienes permiso para acceder a esta función.', 'error')
-        return redirect(url_for('listar_participantes', codigo_evento=codigo_evento))
-    
     # Get event information
     evento = collection_eventos.find_one({"codigo": codigo_evento})
     if not evento:
@@ -1708,6 +1700,30 @@ def registrar_extemporaneo(codigo_evento):
         
         flash('Evento no encontrado.', 'error')
         return redirect(url_for('home'))
+    
+    # Check if user is organizer
+    es_organizador = collection_participantes.find_one({
+        "codigo_evento": codigo_evento,
+        "cedula": current_user.cedula,
+        "rol": {"$in": ["organizador", "coorganizador"]}
+    }) is not None
+    
+    # Verify permissions: administrator, denadoi, event author, or organizer (if event not closed)
+    puede_registrar = (
+        current_user.rol == 'administrador' or
+        (evento.get('estado_evento') != 'cerrado' and (
+            current_user.rol == 'denadoi' or
+            current_user.id == evento.get('autor') or
+            es_organizador
+        ))
+    )
+    
+    if not puede_registrar:
+        # Log unauthorized access attempt
+        log_event(f"Usuario [{current_user.email}] intentó acceso no autorizado a registro extemporáneo para evento {codigo_evento} - Rol: {current_user.rol}")
+        
+        flash('No tienes permiso para acceder a esta función.', 'error')
+        return redirect(url_for('listar_participantes', codigo_evento=codigo_evento))
     
     if request.method == 'GET':
         # Log form access
