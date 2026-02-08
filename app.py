@@ -3875,7 +3875,7 @@ def mis_metricas(page=1):
 ###
 ### Funciones de agregación de datos nacionales
 ###
-def get_national_statistics(year=None, region=None):
+def get_national_statistics(year=None, region=None, unidad=None):
     """
     Obtiene estadísticas nacionales agregadas para el año especificado.
     Excluye eventos de tipo "Sesión Docente" y estado "borrador".
@@ -3883,6 +3883,7 @@ def get_national_statistics(year=None, region=None):
     Args:
         year (int): Año para el cual obtener estadísticas. Si es None, usa el año actual.
         region (str): Región específica para filtrar. Si es None, incluye todas las regiones.
+        unidad (str): Unidad ejecutora específica para filtrar. Si es None, incluye todas las unidades.
     
     Returns:
         dict: Diccionario con estadísticas nacionales
@@ -3907,6 +3908,10 @@ def get_national_statistics(year=None, region=None):
     # Agregar filtro de región si se especifica
     if region:
         filtro_eventos["region"] = region
+    
+    # Agregar filtro de unidad si se especifica
+    if unidad:
+        filtro_eventos["unidad_ejecutora"] = unidad
     
     try:
         # Obtener códigos de eventos válidos
@@ -4019,13 +4024,14 @@ def get_national_statistics(year=None, region=None):
         }
 
 
-def get_national_participants(year=None, region=None):
+def get_national_participants(year=None, region=None, unidad=None):
     """
     Obtiene todos los participantes de eventos válidos del año especificado.
     
     Args:
         year (int): Año para el cual obtener participantes. Si es None, usa el año actual.
         region (str): Región específica para filtrar. Si es None, incluye todas las regiones.
+        unidad (str): Unidad ejecutora específica para filtrar. Si es None, incluye todas las unidades.
     
     Returns:
         list: Lista de documentos de participantes
@@ -4051,6 +4057,12 @@ def get_national_participants(year=None, region=None):
     if region:
         filtro_eventos["region"] = region
     
+    # Agregar filtro de unidad si se especifica
+    if unidad:
+        filtro_eventos["unidad_ejecutora"] = unidad
+    if region:
+        filtro_eventos["region"] = region
+    
     try:
         # Obtener códigos de eventos válidos
         eventos_validos = list(collection_eventos.find(filtro_eventos, {"codigo": 1}))
@@ -4072,13 +4084,14 @@ def get_national_participants(year=None, region=None):
         return []
 
 
-def get_national_events(year=None, region=None):
+def get_national_events(year=None, region=None, unidad=None):
     """
     Obtiene todos los eventos válidos del año especificado.
     
     Args:
         year (int): Año para el cual obtener eventos. Si es None, usa el año actual.
         region (str): Región específica para filtrar. Si es None, incluye todas las regiones.
+        unidad (str): Unidad ejecutora específica para filtrar. Si es None, incluye todas las unidades.
     
     Returns:
         list: Lista de documentos de eventos
@@ -4103,6 +4116,10 @@ def get_national_events(year=None, region=None):
     # Agregar filtro de región si se especifica
     if region:
         filtro_eventos["region"] = region
+    
+    # Agregar filtro de unidad si se especifica
+    if unidad:
+        filtro_eventos["unidad_ejecutora"] = unidad
     
     try:
         eventos = list(collection_eventos.find(filtro_eventos))
@@ -4240,8 +4257,9 @@ def tablero_metricas_nacional(year=None, region=None):
 ###
 @app.route('/tablero/metricas/mi-region')
 @app.route('/tablero/metricas/mi-region/<int:year>')
+@app.route('/tablero/metricas/mi-region/<int:year>/<unidad>')
 @login_required
-def tablero_metricas_regional(year=None):
+def tablero_metricas_regional(year=None, unidad=None):
     from datetime import datetime
     
     # Verificar que el usuario tenga rol de coordinador regional
@@ -4306,16 +4324,24 @@ def tablero_metricas_regional(year=None):
     # Obtener nombre legible de la región
     titulo_region = REGION_SLUG_TO_NAME.get(region_usuario, region_usuario.title())
     
+    # Decodificar el parámetro de unidad si existe (viene URL-encoded)
+    if unidad:
+        from urllib.parse import unquote
+        unidad = unquote(unidad)
+    
     try:
         # Obtener estadísticas regionales agregadas para el año especificado
-        estadisticas = get_national_statistics(year, region_usuario)
+        estadisticas = get_national_statistics(year, region_usuario, unidad)
         
         # Obtener datos de participantes y eventos para gráficas
-        participantes = get_national_participants(year, region_usuario)
-        eventos = get_national_events(year, region_usuario)
+        participantes = get_national_participants(year, region_usuario, unidad)
+        eventos = get_national_events(year, region_usuario, unidad)
         
-        # Determinar título según región
-        titulo_base = f"Coordinación Regional de {titulo_region} - {year}"
+        # Determinar título según región y unidad
+        if unidad:
+            titulo_base = f"{unidad} - {year}"
+        else:
+            titulo_base = f"Coordinación Regional de {titulo_region} - {year}"
         
         # Generar gráficas usando funciones existentes
         grafica_perfil = generar_grafica_perfil(participantes, titulo_base)
@@ -4325,7 +4351,8 @@ def tablero_metricas_regional(year=None):
         grafica_modalidad = generar_grafica_modalidad(eventos, titulo_base, "Distribución de Eventos por Modalidad")
         grafica_categoria = generar_grafica_categoria(eventos, titulo_base, "Distribución de Eventos por Categoría")
         grafica_mensual = generar_grafica_mensual(eventos, titulo_base, "Distribución Mensual de Eventos")
-        grafica_eventos_provincia = generar_grafica_eventos_provincia(eventos, titulo_base, "Distribución de Eventos por Provincia")
+        # Para métricas regionales, usar gráfica por unidad ejecutora en lugar de provincia
+        grafica_eventos_provincia = generar_grafica_eventos_unidad(eventos, titulo_base, "Distribución de Eventos por Unidad Ejecutora")
         grafica_horas_registro = generar_histograma_horas_registro(eventos, titulo_base, "Distribución de Registros por Hora del Día")
         
         # Generar lista de años disponibles (desde 2025 hasta año actual)
@@ -4343,7 +4370,9 @@ def tablero_metricas_regional(year=None):
                              grafica_horas_registro=grafica_horas_registro,
                              current_year=current_year,
                              selected_year=year,
+                             selected_unidad=unidad,
                              titulo_region=titulo_region,
+                             region_css_code=region_css_code,
                              years_available=years_available)
     
     except Exception as e:
@@ -4373,7 +4402,9 @@ def tablero_metricas_regional(year=None):
                              grafica_horas_registro=None,
                              current_year=current_year,
                              selected_year=year,
+                             selected_unidad=unidad,
                              titulo_region=titulo_region,
+                             region_css_code=region_css_code,
                              years_available=years_available)
 
 
@@ -6192,6 +6223,86 @@ def generar_grafica_eventos_provincia(eventos, titulo_institucional, subtitulo_e
         
     except Exception as e:
         print(f"Error generando gráfica de eventos por provincia: {e}")
+        plt.close('all')  # Cerrar todas las figuras en caso de error
+        return None
+
+
+def generar_grafica_eventos_unidad(eventos, titulo_institucional, subtitulo_especifico="Distribución de Eventos por Unidad Ejecutora"):
+    """
+    Genera una gráfica de barras con la distribución de eventos por unidad ejecutora.
+    Solo muestra unidades que tienen al menos un evento.
+    
+    Args:
+        eventos (list): Lista de documentos de eventos
+        titulo_institucional (str): Título institucional de la gráfica
+        subtitulo_especifico (str): Subtítulo específico (opcional)
+    
+    Returns:
+        str: Imagen base64 o None si no hay datos
+    """
+    try:
+        # Contar eventos por unidad ejecutora
+        unidad_count = {}
+        for evento in eventos:
+            unidad = evento.get('unidad_ejecutora', 'Sin especificar')
+            if unidad and unidad.strip():  # Solo contar si tiene valor
+                unidad_count[unidad] = unidad_count.get(unidad, 0) + 1
+        
+        # Si no hay datos, retornar None
+        if not unidad_count:
+            return None
+        
+        # Ordenar por frecuencia descendente
+        unidades_ordenadas = sorted(unidad_count.items(), key=lambda x: x[1], reverse=True)
+        
+        # Extraer datos ordenados
+        labels = [unidad for unidad, _ in unidades_ordenadas]
+        values = [count for _, count in unidades_ordenadas]
+        
+        # Ajustar tamaño de figura según cantidad de unidades
+        num_unidades = len(labels)
+        fig_height = max(6, num_unidades * 0.4)  # Altura mínima 6, crece con más unidades
+        
+        # Crear la figura con orientación horizontal para mejor legibilidad
+        plt.figure(figsize=(12, fig_height))
+        
+        # Crear gráfica de barras horizontales (color turquesa)
+        bars = plt.barh(labels, values, color='#00BCD4', alpha=0.8)
+        
+        # Personalizar la gráfica
+        plt.title(subtitulo_especifico, fontsize=10, fontweight='bold', pad=20)
+        
+        # Título institucional arriba
+        plt.text(0.5, 1.02, titulo_institucional, 
+                ha='center', va='bottom', transform=plt.gca().transAxes,
+                fontsize=12, style='italic')
+        
+        plt.xlabel('Número de Eventos', fontsize=10, fontweight='bold')
+        plt.ylabel('Unidad Ejecutora', fontsize=10, fontweight='bold')
+        
+        # Invertir el eje Y para que el mayor esté arriba
+        plt.gca().invert_yaxis()
+        
+        # Agregar valores en las barras
+        for bar, value in zip(bars, values):
+            width = bar.get_width()
+            plt.text(width + 0.1, bar.get_y() + bar.get_height()/2.,
+                    f'{value}', ha='left', va='center', fontweight='bold')
+        
+        # Ajustar layout
+        plt.tight_layout()
+        
+        # Convertir la gráfica a imagen base64
+        img_buffer = io.BytesIO()
+        plt.savefig(img_buffer, format='png', dpi=300, bbox_inches='tight')
+        img_buffer.seek(0)
+        img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
+        plt.close()
+        
+        return f"data:image/png;base64,{img_base64}"
+        
+    except Exception as e:
+        print(f"Error generando gráfica de eventos por unidad: {e}")
         plt.close('all')  # Cerrar todas las figuras en caso de error
         return None
 

@@ -22,7 +22,11 @@
 
                                         <div class="grow">
                                             <h2 class="block text-3xl font-bold mt-2">
+{% if selected_unidad %}
+                                                {{ selected_unidad }}
+{% else %}
                                                 Coordinación Regional de {{ titulo_region }}
+{% endif %}
                                             </h2>
                                             <h4 class="block italic mb-2">Métricas e Informe Regional</h4>
                                             <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
@@ -31,10 +35,15 @@
                                             <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-blue-100 text-blue-800">
                                                 Año {{ selected_year or current_year or estadisticas.year }}
                                             </span>
+{% if selected_unidad %}
+                                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-green-100 text-green-800">
+                                                Filtrado por unidad
+                                            </span>
+{% endif %}
                                         </div>
                                     </div>
 
-                                    <!-- Selectores de año  -->
+                                    <!-- Selectores de año y unidad -->
                                     <div class="mr-8 flex flex-col gap-3">
                                         <div class="flex items-center gap-2">
                                             <label for="year-selector" class="text-sm font-medium text-gray-700 whitespace-nowrap">Año:</label>
@@ -42,6 +51,12 @@
 {% for year in years_available|reverse %}
                                                 <option value="{{ year }}" {% if year == (selected_year or current_year) %}selected{% endif %}>{{ year }}</option>
 {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <label for="unidad-selector" class="text-sm font-medium text-gray-700 whitespace-nowrap">Unidad:</label>
+                                            <select id="unidad-selector" class="py-2 px-3 pe-9 border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" onchange="changeFilters()">
+                                                <option value="">Todas las unidades</option>
                                             </select>
                                         </div>
                                     </div>
@@ -175,14 +190,14 @@
                             <h3 class="text-lg font-semibold text-gray-800 mb-4">Informe Regional - Eventos Generales</h3>
                             <p class="text-base py-1">
                                 <span class="font-semibold">Descripción:</span> 
-                                Este informe presenta las métricas y estadísticas regionales de participación en eventos de educación 
+                                Este informe presenta las métricas y estadísticas {% if selected_unidad %}de la unidad {{ selected_unidad }}{% else %}regionales{% endif %} de participación en eventos de educación 
                                 médica continua para el año {{ selected_year or current_year or estadisticas.year }}, incluyendo 
                                 análisis demográficos, distribución geográfica entre otras evaluaciones. Se excluyen de este registro
                                 los datos relacionados con sesiones docentes y eventos que no fueron publicados.
                             </p>
                             <p class="text-base py-1">
                                 Durante el año {{ selected_year or current_year or estadisticas.year }} se realizaron {{ estadisticas.total_events if estadisticas else 0 }} eventos 
-                                totales en la región de {{ titulo_region }}. En estos eventos se registraron {{ estadisticas.total_registrations if estadisticas else 0 }}
+                                totales {% if selected_unidad %}en {{ selected_unidad }}{% else %}en la región de {{ titulo_region }}{% endif %}. En estos eventos se registraron {{ estadisticas.total_registrations if estadisticas else 0 }}
                                 participaciones, de los cuales en los datos registrados {{ estadisticas.unique_participants if estadisticas else 0 }}
                                 corresponden a participantes únicos. Se registraron en la plataforma además {{ estadisticas.total_presentations if estadisticas else 0 }}
                                 ponencias. Esto da un promedio de {% if estadisticas and estadisticas.total_events > 0 %}{{ "%.1f"|format(estadisticas.total_presentations / estadisticas.total_events) }}{% else %}0.0{% endif %} 
@@ -344,14 +359,14 @@
                 </div>
                 <!-- fin grid -->
 
-                <!-- Grid para gráfica de eventos por provincia -->
+                <!-- Grid para gráfica de eventos por unidad ejecutora -->
                 <div id="grafico-eventos-provincia" class="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
                     <!-- Card que ocupa 3 columnas -->
                     <div class="col-span-1 lg:col-span-3 flex flex-col bg-white border shadow-sm rounded-xl">
                         <div class="p-4 md:p-5">
-                            <h4 class="text-base font-semibold text-gray-800 mb-4">Gráfico No. 6. Distribución de eventos por provincia</h4>
+                            <h4 class="text-base font-semibold text-gray-800 mb-4">Gráfico No. 6. Distribución de eventos por unidad ejecutora</h4>
 {% if grafica_eventos_provincia %}
-                            <img src="{{ grafica_eventos_provincia }}" alt="Gráfica de eventos por provincia" class="w-full h-auto" />
+                            <img src="{{ grafica_eventos_provincia }}" alt="Gráfica de eventos por unidad ejecutora" class="w-full h-auto" />
 {% else %}
                             <div class="flex justify-center items-center h-64 bg-gray-50 rounded-lg">
                                 <p class="text-gray-500">No hay datos disponibles para generar la gráfica.</p>
@@ -366,16 +381,17 @@
                         <div class="overflow-x-auto p-4">
                             <h4 class="text-base font-semibold text-gray-800 mb-2">Sobre la Gráfica No. 6</h4>
                             <p class="text-sm mb-2">
-                                Esta gráfica muestra la distribución geográfica de los eventos de educación médica 
-                                continua realizados durante el año {{ selected_year or current_year or estadisticas.year }}.
+                                Esta gráfica muestra la distribución de eventos de educación médica continua por 
+                                unidad ejecutora realizados durante el año {{ selected_year or current_year or estadisticas.year }}
+                                {% if selected_unidad %}en {{ selected_unidad }}{% else %}en la región de {{ titulo_region }}{% endif %}.
                             </p>
                             <p class="text-sm mb-2">
-                                Los datos se basan en la región/provincia donde se realizó cada evento, según fue 
+                                Los datos se basan en la unidad ejecutora donde se realizó cada evento, según fue 
                                 registrado por los organizadores al momento de crear la actividad en la plataforma.
                             </p>
                             <p class="text-sm mb-2">
-                                Se excluyen eventos en estado de borrador y sesiones docentes para mostrar únicamente 
-                                las actividades de educación médica continua completadas.
+                                Solo se muestran las unidades que tienen al menos un evento registrado. Se excluyen 
+                                eventos en estado de borrador y sesiones docentes.
                             </p>
                         </div>                          
                     </div>
@@ -432,12 +448,163 @@
 <!-- JS PLUGINS -->
 <script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
 <script>
-// Función para cambiar el año
+// Mapeo de códigos CSS a slugs de región
+const CSS_TO_REGION_SLUG = {
+    "css01": "bocasdeltoro",
+    "css02": "cocle",
+    "css03": "colon",
+    "css04": "chiriqui",
+    "css06": "herrera",
+    "css07": "lossantos",
+    "css09": "veraguas",
+    "css13": "panamaoeste",
+    "css082": "panamaeste",
+    "css081": "panama",
+    "css088": "sanmiguelito"
+};
+
+// Mapeo de unidades por región
+const unidadesPorRegion = {
+    panama: [
+        "Ciudad De La Salud",
+        "Complejo Hospitalario Metropolitano Dr. Arnulfo Arias Madrid",
+        "Hospital de Especialidades Pediátricas Omar Torrijos Herrera",
+        "Policlínica Presidente Remón",
+        "Policlínica Dr. Manuel Ferrer Valdés",
+        "Policlínica Dr. Carlos N. Brin",
+        "Policlínica Don Alejandro De La Guardia Hijo",
+        "Policlínica Don Joaquín José Vallarino",
+        "ULAPS Máximo Herrera",
+        "ULAPS Prof. Carlos Velarde",
+        "CAPPS Plaza Tocumen",
+        "CAPPS Pedregal",
+        "CAPPS Los Nogales"
+    ],
+    sanmiguelito: [
+        "Hospital Dra. Susana Jones Cano",
+        "Policlínica Lic. Manuel María Valdés",
+        "Policlínica Don Generoso Guardia",
+        "Policlínica Dr. Edilberto Culiolis",
+        "Policlínica Dra. Cecilia Guerra",
+        "CAPPS Torrijos Carter"
+    ],
+    panamaoeste: [
+        "Coordinación Regional de Docencia - Panamá Oeste",
+        "Hospital Hogar de La Esperanza",
+        "Policlínica Dr. Santiago Barraza",
+        "Policlínica Dr. Blas Gómez Chetro",
+        "Policlínica Dr. Juan Vega Méndez",
+        "ULAPS Vista Alegre",
+        "ULAPS Guadalupe",
+        "ULAPS San José",
+        "CAPPS Capira",
+        "CAPPS Vacamonte",
+        "CAPPS El Tecal"
+    ],
+    panamaeste: [
+        "Coordinación Regional de Docencia - Panamá Este",
+        "Hospital Regional de Chepo",
+        "Hospital Irma de Lourdes Tzanetatos",
+        "Policlínica de Cañitas",
+    ],
+    bocasdeltoro: [
+        "Coordinación Regional de Docencia - Bocas Del Toro",
+        "Hospital Regional Dr. Raúl Dávila Mena",
+        "Hospital Regional de Almirante",
+        "Hospital de Chiriquí Grande",
+        "Policlínica de Guabito",
+        "ULAPS Juan Aguilar"
+    ],
+    cocle: [
+        "Coordinación Regional de Docencia - Coclé",
+        "Hospital Regional Dr. Rafael Estévez",
+        "Policlínica Dr. Manuel De Jesús Rojas",
+        "Policlínica San Juan De Dios",
+        "Policlínica Dr. Manuel Paulino Ocaña",
+        "CAPPS La Pintada"
+    ],
+    colon: [
+        "Coordinación Regional de Docencia - Colón",
+        "Complejo Hospitalario Dr. Manuel Amador Guerrero",
+        "Policlínica de Nuevo San Juan",
+        "Policlínica de Sabanitas",
+        "Policlínica Dr. Hugo Spadafora",
+        "ULAPS Portobelo"
+    ],
+    chiriqui: [
+        "Coordinación Regional de Docencia - Chiriquí",
+        "Hospital Regional Dr. Rafael Hernández",
+        "Hospital Dr. Dionisio Arrocha",
+        "Policlínica Dr. Gustavo Adolfo Ross",
+        "Policlínica Dr. Pablo Espinosa",
+        "Policlínica Dr. Ernesto Perez Balladares",
+        "Policlínica de Divalá",
+        "ULAPS Nuevo Vedado",
+        "ULAPS Faustino Fonseca",
+        "ULAPS Carlos Alvarado",
+        "CAPPS"
+    ],
+    herrera: [
+        "Coordinación Regional de Docencia - Herrera",
+        "Hospital Dr. Gustavo Nelson Collado",
+        "Policlínica Dr. Roberto Ramírez De Diego",
+        "CAPPS Los Pozos",
+        "CAPPS Ocú",
+        "CAPPS Pesé"
+    ],
+    lossantos: [
+        "Coordinación Regional de Docencia - Los Santos",
+        "Policlínica Dr. Miguel Cárdenas Barahona",
+        "Policlínica San Juan de Dios",
+        "CAPPS Guararé",
+        "CAPPS Tonosí",
+        "CAPPS Macaracas"
+    ],
+    veraguas: [
+        "Coordinación Regional de Docencia - Veraguas",
+        "Hospital Dr. Ezequiel Abadía",
+        "Policlínica Dr. Horacio Díaz Gómez",
+        "ULAPS Alberto León",
+        "CAPPS Zapotillo"
+    ]
+};
+
+// Inicializar el selector de unidades al cargar la página
+document.addEventListener("DOMContentLoaded", function () {
+    const regionCssCode = "{{ region_css_code }}";
+    const regionSlug = CSS_TO_REGION_SLUG[regionCssCode];
+    const unidadSelector = document.getElementById('unidad-selector');
+    const selectedUnidad = "{{ selected_unidad or '' }}";
+    
+    // Poblar el selector de unidades con las unidades de la región del usuario
+    if (regionSlug && unidadesPorRegion[regionSlug]) {
+        unidadesPorRegion[regionSlug].forEach(unidad => {
+            const option = document.createElement("option");
+            option.value = unidad;
+            option.textContent = unidad;
+            if (unidad === selectedUnidad) {
+                option.selected = true;
+            }
+            unidadSelector.appendChild(option);
+        });
+    }
+});
+
+// Función para cambiar los filtros (año y unidad)
 function changeFilters() {
     const selectedYear = document.getElementById('year-selector').value;
+    const selectedUnidad = document.getElementById('unidad-selector').value;
     
-    // Redirigir a la URL con el año seleccionado
-    window.location.href = `/tablero/metricas/mi-region/${selectedYear}`;
+    // Construir la URL con los parámetros seleccionados
+    let url = `/tablero/metricas/mi-region/${selectedYear}`;
+    
+    // Si hay una unidad seleccionada, añadirla a la URL (URL-encoded)
+    if (selectedUnidad) {
+        url += `/${encodeURIComponent(selectedUnidad)}`;
+    }
+    
+    // Redirigir a la URL construida
+    window.location.href = url;
 }
 
 // Limpia campos dinámicos al cargar la página
