@@ -4263,8 +4263,23 @@ def tablero_metricas_regional(year=None):
     if year < 2025 or year > current_year:
         year = current_year
     
-    # Mapeo de códigos de región a nombres legibles
-    REGION_MAP = {
+    # Mapeo de códigos CSS a slugs de región (usados en eventos)
+    CSS_TO_REGION_SLUG = {
+        "css01": "bocasdeltoro",
+        "css02": "cocle",
+        "css03": "colon",
+        "css04": "chiriqui",
+        "css06": "herrera",
+        "css07": "lossantos",
+        "css09": "veraguas",
+        "css13": "panamaoeste",
+        "css082": "panamaeste",
+        "css081": "panama",
+        "css088": "sanmiguelito"
+    }
+    
+    # Mapeo de slugs de región a nombres legibles
+    REGION_SLUG_TO_NAME = {
         "panama": "Panamá Metro",
         "sanmiguelito": "San Miguelito",
         "panamaoeste": "Panamá Oeste",
@@ -4278,9 +4293,18 @@ def tablero_metricas_regional(year=None):
         "veraguas": "Veraguas"
     }
     
-    # Obtener la región del usuario
-    region_usuario = current_user.region
-    titulo_region = REGION_MAP.get(region_usuario, region_usuario.title() if region_usuario else 'Región')
+    # Obtener la región del usuario (código CSS como css04)
+    region_css_code = current_user.region
+    
+    # Convertir código CSS a slug de región
+    region_usuario = CSS_TO_REGION_SLUG.get(region_css_code)
+    
+    if not region_usuario:
+        flash(f'Código de región no válido: {region_css_code}. Contacta al administrador.', 'error')
+        return redirect(url_for('tablero_coordinadores'))
+    
+    # Obtener nombre legible de la región
+    titulo_region = REGION_SLUG_TO_NAME.get(region_usuario, region_usuario.title())
     
     try:
         # Obtener estadísticas regionales agregadas para el año especificado
