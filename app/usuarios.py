@@ -593,13 +593,46 @@ def eliminar_usuario(user_id):
 @usuarios_bp.route('/tablero/usuarios/<user_id>/toggle_activo', methods=['POST'])
 @login_required
 def toggle_activo(user_id):
-    if current_user.rol != 'administrador':
-        flash('No tienes permisos para realizar esta acción.', 'error')
-        return redirect(url_for('usuarios.listar_usuarios'))
-
+    # Get target user
     usuario = collection_usuarios.find_one({"_id": ObjectId(user_id)})
     if not usuario:
         flash('Usuario no encontrado.', 'error')
+        return redirect(url_for('usuarios.listar_usuarios'))
+
+    # Permission checks
+    puede_modificar = False
+    
+    # 1. Administrators can modify anyone
+    if current_user.rol == 'administrador':
+        puede_modificar = True
+    
+    # 2. DENADOI users can modify anyone except jefe and subjefe DENADOI
+    elif current_user.rol == 'denadoi':
+        es_jefe_denadoi = usuario.get('rol') == 'denadoi' and usuario.get('jefe', False)
+        es_subjefe_denadoi = usuario.get('rol') == 'denadoi' and usuario.get('subjefe', False)
+        
+        if es_jefe_denadoi or es_subjefe_denadoi:
+            flash('No puedes modificar el estado del jefe o subjefe de DENADOI.', 'error')
+            return redirect(url_for('usuarios.listar_usuarios'))
+        
+        puede_modificar = True
+    
+    # 3. Regional coordinators can modify users in their region (except themselves)
+    elif current_user.rol == 'coordinador-regional':
+        # Cannot modify themselves
+        if str(current_user.id) == str(usuario.get('_id')):
+            flash('No puedes modificar tu propio estado.', 'error')
+            return redirect(url_for('usuarios.listar_usuarios'))
+        
+        # Can only modify users in the same region
+        if current_user.region == usuario.get('region'):
+            puede_modificar = True
+        else:
+            flash('Solo puedes modificar usuarios de tu región.', 'error')
+            return redirect(url_for('usuarios.listar_usuarios'))
+    
+    if not puede_modificar:
+        flash('No tienes permisos para realizar esta acción.', 'error')
         return redirect(url_for('usuarios.listar_usuarios'))
 
     email = usuario.get('email')

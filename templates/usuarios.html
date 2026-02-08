@@ -314,7 +314,21 @@
                                                 </form><br />
                                                 {% endif %}
                                                 {% endif %}
+                                                {% if current_user.rol == 'administrador' or current_user.rol == 'denadoi' or current_user.rol == 'coordinador-regional' %}
+                                                {% set puede_toggle = false %}
                                                 {% if current_user.rol == 'administrador' %}
+                                                    {% set puede_toggle = true %}
+                                                {% elif current_user.rol == 'denadoi' %}
+                                                    {% if not (usuario.rol == 'denadoi' and (usuario.get('jefe', False) or usuario.get('subjefe', False))) %}
+                                                        {% set puede_toggle = true %}
+                                                    {% endif %}
+                                                {% elif current_user.rol == 'coordinador-regional' %}
+                                                    {% if current_user.region == usuario.region and current_user.id|string != usuario._id|string %}
+                                                        {% set puede_toggle = true %}
+                                                    {% endif %}
+                                                {% endif %}
+                                                
+                                                {% if puede_toggle %}
                                                 <form action="{{ url_for('usuarios.toggle_activo', user_id=usuario._id) }}"
                                                     method="post" style="display:inline;">
                                                     <button type="submit"
@@ -346,6 +360,7 @@
                                                         {% endif %}
                                                     </button>
                                                 </form><br />
+                                                {% endif %}
                                                 {% endif %}
                                                 {% if current_user.rol == 'administrador' %}
                                                 <form action="{{ url_for('usuarios.eliminar_usuario', user_id=usuario._id) }}"
