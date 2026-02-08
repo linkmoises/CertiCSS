@@ -57,7 +57,7 @@ ALLOWED_USER_ROLES = {
 }
 
 class User(UserMixin):
-    def __init__(self, email, password, rol, nombres, apellidos, cedula, foto=None, permisos=None):
+    def __init__(self, email, password, rol, nombres, apellidos, cedula, foto=None, permisos=None, region=None):
         self.email = email
         self.password = password
         self.rol = rol
@@ -66,6 +66,7 @@ class User(UserMixin):
         self.cedula = cedula
         self.foto = foto
         self.permisos = permisos if permisos is not None else []
+        self.region = region
         self.id = None
 
     @property
@@ -120,7 +121,8 @@ def load_user(user_id):
             nombres=user_data.get('nombres', ''),
             apellidos=user_data.get('apellidos', ''),
             foto=user_data.get('foto'),
-            permisos=user_data.get('permisos', [])
+            permisos=user_data.get('permisos', []),
+            region=user_data.get('region', '')
         )
         user.id = str(user_data['_id'])
         return user
