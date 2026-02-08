@@ -282,6 +282,7 @@ def login():
 
     return render_template('iniciar_sesion.html')
 
+
 ###
 ### Listado de usuarios
 ###
@@ -392,6 +393,52 @@ def listar_usuarios(page=1):
         total_paginas=total_paginas,
         total_usuarios=total_usuarios
     )
+
+
+###
+### Listado de usuarios regional
+###
+@usuarios_bp.route('/tablero/usuarios/mi-region')
+@login_required
+def listar_usuarios_region():
+    # Solo coordinadores regionales pueden acceder
+    if current_user.rol != 'coordinador-regional':
+        abort(403)
+    
+    # Obtener usuarios de la misma región
+    usuarios_cursor = collection_usuarios.find({
+        "region": current_user.region,
+        "rol": {"$ne": "administrador"}
+    })
+    usuarios = list(usuarios_cursor)
+
+    # Agregar foto_url a cada usuario
+    for usuario in usuarios:
+        usuario['foto_url'] = f"/static/usuarios/{usuario['foto']}" if usuario.get('foto') else "/static/assets/user-avatar.png"
+
+    # Función para ordenar usuarios según los criterios especificados
+    def ordenar_usuarios(usuarios):
+        usuarios_ordenados = []
+        
+        roles_orden = ['coordinador-regional', 'subdirector-docencia', 'coordinador-local', 'coordinador-departamental']
+        
+        # Ordenar por rol según el orden especificado, luego por apellidos y nombres
+        usuarios.sort(key=lambda x: (
+            roles_orden.index(x.get('rol')) if x.get('rol') in roles_orden else 999,
+            x.get('apellidos', ''),
+            x.get('nombres', '')
+        ))
+        
+        return usuarios
+
+    # Aplicar el ordenamiento
+    usuarios_ordenados = ordenar_usuarios(usuarios)
+
+    return render_template('usuarios_region.html',
+        usuarios=usuarios_ordenados,
+        total_usuarios=len(usuarios_ordenados)
+    )
+
 
 ###
 ### Edición de perfil de usuario
