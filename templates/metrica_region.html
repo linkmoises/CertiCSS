@@ -359,6 +359,7 @@
                 </div>
                 <!-- fin grid -->
 
+{% if not selected_unidad %}
                 <!-- Grid para gráfica de eventos por unidad ejecutora -->
                 <div id="grafico-eventos-provincia" class="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
                     <!-- Card que ocupa 3 columnas -->
@@ -383,7 +384,7 @@
                             <p class="text-sm mb-2">
                                 Esta gráfica muestra la distribución de eventos de educación médica continua por 
                                 unidad ejecutora realizados durante el año {{ selected_year or current_year or estadisticas.year }}
-                                {% if selected_unidad %}en {{ selected_unidad }}{% else %}en la región de {{ titulo_region }}{% endif %}.
+                                en la región de {{ titulo_region }}.
                             </p>
                             <p class="text-sm mb-2">
                                 Los datos se basan en la unidad ejecutora donde se realizó cada evento, según fue 
@@ -397,13 +398,14 @@
                     </div>
                 </div>
                 <!-- fin grid -->
+{% endif %}
 
                 <!-- Grid para histograma de horas de registro -->
                 <div id="grafico-horas-registro" class="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
                     <!-- Card que ocupa 3 columnas -->
                     <div class="col-span-1 lg:col-span-3 flex flex-col bg-white border shadow-sm rounded-xl">
                         <div class="p-4 md:p-5">
-                            <h4 class="text-base font-semibold text-gray-800 mb-4">Gráfico No. 7. Distribución de registros por hora del día</h4>
+                            <h4 class="text-base font-semibold text-gray-800 mb-4">Gráfico No. {% if selected_unidad %}6{% else %}7{% endif %}. Distribución de registros por hora del día</h4>
 {% if grafica_horas_registro %}
                             <img src="{{ grafica_horas_registro }}" alt="Histograma de registros por hora" class="w-full h-auto" />
 {% else %}
@@ -418,7 +420,7 @@
                     <!-- Card que ocupa 1 columna -->
                     <div class="col-span-1 flex flex-col bg-white border shadow-sm rounded-xl">
                         <div class="overflow-x-auto p-4">
-                            <h4 class="text-base font-semibold text-gray-800 mb-2">Sobre el Gráfico No. 7</h4>
+                            <h4 class="text-base font-semibold text-gray-800 mb-2">Sobre el Gráfico No. {% if selected_unidad %}6{% else %}7{% endif %}</h4>
                             <p class="text-sm mb-2">
                                 Este histograma muestra la distribución de los registros de participantes según 
                                 la hora del día en que se registraron durante el año {{ selected_year or current_year or estadisticas.year }}.
@@ -489,7 +491,7 @@ const unidadesPorRegion = {
         "CAPPS Torrijos Carter"
     ],
     panamaoeste: [
-        "Coordinación Regional de Docencia - Panamá Oeste",
+        "Coordinación Regional - Panamá Oeste",
         "Hospital Hogar de La Esperanza",
         "Policlínica Dr. Santiago Barraza",
         "Policlínica Dr. Blas Gómez Chetro",
@@ -502,21 +504,21 @@ const unidadesPorRegion = {
         "CAPPS El Tecal"
     ],
     panamaeste: [
-        "Coordinación Regional de Docencia - Panamá Este",
+        "Coordinación Regional - Panamá Este",
         "Hospital Regional de Chepo",
         "Hospital Irma de Lourdes Tzanetatos",
-        "Policlínica de Cañitas",
+        "Policlínica de Cañitas"
     ],
     bocasdeltoro: [
-        "Coordinación Regional de Docencia - Bocas Del Toro",
-        "Hospital Regional Dr. Raúl Dávila Mena",
+        "Coordinación Regional - Bocas del Toro",
+        "Hospital Regional de Changuinola",
         "Hospital Regional de Almirante",
         "Hospital de Chiriquí Grande",
         "Policlínica de Guabito",
-        "ULAPS Juan Aguilar"
+        "ULAPS Las Tablas"
     ],
     cocle: [
-        "Coordinación Regional de Docencia - Coclé",
+        "Coordinación Regional - Coclé",
         "Hospital Regional Dr. Rafael Estévez",
         "Policlínica Dr. Manuel De Jesús Rojas",
         "Policlínica San Juan De Dios",
@@ -524,7 +526,7 @@ const unidadesPorRegion = {
         "CAPPS La Pintada"
     ],
     colon: [
-        "Coordinación Regional de Docencia - Colón",
+        "Coordinación Regional - Colón",
         "Complejo Hospitalario Dr. Manuel Amador Guerrero",
         "Policlínica de Nuevo San Juan",
         "Policlínica de Sabanitas",
@@ -532,7 +534,7 @@ const unidadesPorRegion = {
         "ULAPS Portobelo"
     ],
     chiriqui: [
-        "Coordinación Regional de Docencia - Chiriquí",
+        "Coordinación Regional - Chiriquí",
         "Hospital Regional Dr. Rafael Hernández",
         "Hospital Dr. Dionisio Arrocha",
         "Policlínica Dr. Gustavo Adolfo Ross",
@@ -540,12 +542,18 @@ const unidadesPorRegion = {
         "Policlínica Dr. Ernesto Perez Balladares",
         "Policlínica de Divalá",
         "ULAPS Nuevo Vedado",
-        "ULAPS Faustino Fonseca",
-        "ULAPS Carlos Alvarado",
-        "CAPPS"
+        "ULAPS Volcán",
+        "ULAPS Dolega",
+        "CAPPS Barú",
+        "CAPPS Jobito",
+        "CAPPS Balsa",
+        "CAPPS Blanco",
+        "CAPPS Caoba",
+        "CAPPS Corredor",
+        "CAPPS Zapatero"
     ],
     herrera: [
-        "Coordinación Regional de Docencia - Herrera",
+        "Coordinación Regional - Herrera",
         "Hospital Dr. Gustavo Nelson Collado",
         "Policlínica Dr. Roberto Ramírez De Diego",
         "CAPPS Los Pozos",
@@ -553,7 +561,7 @@ const unidadesPorRegion = {
         "CAPPS Pesé"
     ],
     lossantos: [
-        "Coordinación Regional de Docencia - Los Santos",
+        "Coordinación Regional - Los Santos",
         "Policlínica Dr. Miguel Cárdenas Barahona",
         "Policlínica San Juan de Dios",
         "CAPPS Guararé",
@@ -561,7 +569,7 @@ const unidadesPorRegion = {
         "CAPPS Macaracas"
     ],
     veraguas: [
-        "Coordinación Regional de Docencia - Veraguas",
+        "Coordinación Regional - Veraguas",
         "Hospital Dr. Ezequiel Abadía",
         "Policlínica Dr. Horacio Díaz Gómez",
         "ULAPS Alberto León",
