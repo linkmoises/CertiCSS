@@ -3875,13 +3875,14 @@ def mis_metricas(page=1):
 ###
 ### Funciones de agregación de datos nacionales
 ###
-def get_national_statistics(year=None):
+def get_national_statistics(year=None, region=None):
     """
     Obtiene estadísticas nacionales agregadas para el año especificado.
     Excluye eventos de tipo "Sesión Docente" y estado "borrador".
     
     Args:
         year (int): Año para el cual obtener estadísticas. Si es None, usa el año actual.
+        region (str): Región específica para filtrar. Si es None, incluye todas las regiones.
     
     Returns:
         dict: Diccionario con estadísticas nacionales
@@ -3902,6 +3903,10 @@ def get_national_statistics(year=None):
         "tipo": {"$ne": "Sesión Docente"},
         "estado_evento": {"$ne": "borrador"}
     }
+    
+    # Agregar filtro de región si se especifica
+    if region:
+        filtro_eventos["region"] = region
     
     try:
         # Obtener códigos de eventos válidos
@@ -4014,12 +4019,13 @@ def get_national_statistics(year=None):
         }
 
 
-def get_national_participants(year=None):
+def get_national_participants(year=None, region=None):
     """
     Obtiene todos los participantes de eventos válidos del año especificado.
     
     Args:
         year (int): Año para el cual obtener participantes. Si es None, usa el año actual.
+        region (str): Región específica para filtrar. Si es None, incluye todas las regiones.
     
     Returns:
         list: Lista de documentos de participantes
@@ -4040,6 +4046,10 @@ def get_national_participants(year=None):
         "tipo": {"$ne": "Sesión Docente"},
         "estado_evento": {"$ne": "borrador"}
     }
+    
+    # Agregar filtro de región si se especifica
+    if region:
+        filtro_eventos["region"] = region
     
     try:
         # Obtener códigos de eventos válidos
@@ -4062,12 +4072,13 @@ def get_national_participants(year=None):
         return []
 
 
-def get_national_events(year=None):
+def get_national_events(year=None, region=None):
     """
     Obtiene todos los eventos válidos del año especificado.
     
     Args:
         year (int): Año para el cual obtener eventos. Si es None, usa el año actual.
+        region (str): Región específica para filtrar. Si es None, incluye todas las regiones.
     
     Returns:
         list: Lista de documentos de eventos
@@ -4089,6 +4100,10 @@ def get_national_events(year=None):
         "estado_evento": {"$ne": "borrador"}
     }
     
+    # Agregar filtro de región si se especifica
+    if region:
+        filtro_eventos["region"] = region
+    
     try:
         eventos = list(collection_eventos.find(filtro_eventos))
         return eventos
@@ -4103,8 +4118,9 @@ def get_national_events(year=None):
 ###
 @app.route('/tablero/metricas/nacional')
 @app.route('/tablero/metricas/nacional/<int:year>')
+@app.route('/tablero/metricas/nacional/<int:year>/<string:region>')
 @login_required
-def tablero_metricas_nacional(year=None):
+def tablero_metricas_nacional(year=None, region=None):
     from datetime import datetime
     
     # Obtener el año actual si no se especifica
@@ -4116,24 +4132,51 @@ def tablero_metricas_nacional(year=None):
     if year < 2025 or year > current_year:
         year = current_year
     
+    # Definir regiones disponibles
+    regiones_disponibles = {
+        'todas': 'Todas las regiones',
+        'bocasdeltoro': 'Bocas del Toro',
+        'cocle': 'Coclé',
+        'colon': 'Colón',
+        'chiriqui': 'Chiriquí',
+        'herrera': 'Herrera',
+        'lossantos': 'Los Santos',
+        'veraguas': 'Veraguas',
+        'panamaoeste': 'Panamá Oeste',
+        'panamaeste': 'Panamá Este',
+        'panama': 'Panamá Metro',
+        'sanmiguelito': 'San Miguelito'
+    }
+    
+    # Validar región
+    if region is None or region not in regiones_disponibles:
+        region = 'todas'
+    
     try:
-        # Obtener estadísticas nacionales agregadas para el año especificado
-        estadisticas = get_national_statistics(year)
+        # Obtener estadísticas nacionales agregadas para el año y región especificados
+        estadisticas = get_national_statistics(year, region if region != 'todas' else None)
         
         # Obtener datos de participantes y eventos para gráficas
-        participantes = get_national_participants(year)
-        eventos = get_national_events(year)
+        participantes = get_national_participants(year, region if region != 'todas' else None)
+        eventos = get_national_events(year, region if region != 'todas' else None)
+        
+        # Determinar título según región
+        titulo_region = regiones_disponibles.get(region, 'Nacional')
+        if region == 'todas':
+            titulo_base = f"Departamento Nacional de Docencia e Investigación - {year}"
+        else:
+            titulo_base = f"Región de {titulo_region} - {year}"
                 
         # Generar gráficas usando funciones existentes y nuevas
-        grafica_perfil = generar_grafica_perfil(participantes, f"Departamento Nacional de Docencia e Investigación - {year}")
-        grafica_region = generar_grafica_region(participantes, f"Departamento Nacional de Docencia e Investigación - {year}")
+        grafica_perfil = generar_grafica_perfil(participantes, titulo_base)
+        grafica_region = generar_grafica_region(participantes, titulo_base)
         
         # Generar nuevas gráficas de eventos
-        grafica_modalidad = generar_grafica_modalidad(eventos, f"Departamento Nacional de Docencia e Investigación - {year}", "Distribución de Eventos por Modalidad")
-        grafica_categoria = generar_grafica_categoria(eventos, f"Departamento Nacional de Docencia e Investigación - {year}", "Distribución de Eventos por Categoría")
-        grafica_mensual = generar_grafica_mensual(eventos, f"Departamento Nacional de Docencia e Investigación - {year}", "Distribución Mensual de Eventos")
-        grafica_eventos_provincia = generar_grafica_eventos_provincia(eventos, f"Departamento Nacional de Docencia e Investigación - {year}", "Distribución de Eventos por Provincia")
-        grafica_horas_registro = generar_histograma_horas_registro(eventos, f"Departamento Nacional de Docencia e Investigación - {year}", "Distribución de Registros por Hora del Día")
+        grafica_modalidad = generar_grafica_modalidad(eventos, titulo_base, "Distribución de Eventos por Modalidad")
+        grafica_categoria = generar_grafica_categoria(eventos, titulo_base, "Distribución de Eventos por Categoría")
+        grafica_mensual = generar_grafica_mensual(eventos, titulo_base, "Distribución Mensual de Eventos")
+        grafica_eventos_provincia = generar_grafica_eventos_provincia(eventos, titulo_base, "Distribución de Eventos por Provincia")
+        grafica_horas_registro = generar_histograma_horas_registro(eventos, titulo_base, "Distribución de Registros por Hora del Día")
         
         print(f"DEBUG: Gráficas generadas - modalidad: {'Sí' if grafica_modalidad else 'No'}, categoria: {'Sí' if grafica_categoria else 'No'}, mensual: {'Sí' if grafica_mensual else 'No'}, provincia: {'Sí' if grafica_eventos_provincia else 'No'}, horas: {'Sí' if grafica_horas_registro else 'No'}")
         
@@ -4154,6 +4197,9 @@ def tablero_metricas_nacional(year=None):
                              grafica_horas_registro=grafica_horas_registro,
                              current_year=current_year,
                              selected_year=year,
+                             selected_region=region,
+                             regiones_disponibles=regiones_disponibles,
+                             titulo_region=titulo_region,
                              years_available=years_available)
     
     except Exception as e:
@@ -4183,6 +4229,127 @@ def tablero_metricas_nacional(year=None):
                              grafica_horas_registro=None,
                              current_year=current_year,
                              selected_year=year,
+                             selected_region=region,
+                             regiones_disponibles=regiones_disponibles,
+                             titulo_region=titulo_region if region else 'Nacional',
+                             years_available=years_available)
+
+
+###
+### Métricas - Mi región
+###
+@app.route('/tablero/metricas/mi-region')
+@app.route('/tablero/metricas/mi-region/<int:year>')
+@login_required
+def tablero_metricas_regional(year=None):
+    from datetime import datetime
+    
+    # Verificar que el usuario tenga rol de coordinador regional
+    if current_user.rol != 'coordinador-regional':
+        flash('No tienes permiso para acceder a esta página.', 'error')
+        return redirect(url_for('tablero_coordinadores'))
+    
+    # Verificar que el usuario tenga una región asignada
+    if not current_user.region:
+        flash('No tienes una región asignada. Contacta al administrador.', 'error')
+        return redirect(url_for('tablero_coordinadores'))
+    
+    # Obtener el año actual si no se especifica
+    current_year = datetime.now().year
+    if year is None:
+        year = current_year
+    
+    # Validar que el año esté en el rango permitido (desde 2025 hasta año actual)
+    if year < 2025 or year > current_year:
+        year = current_year
+    
+    # Mapeo de códigos de región a nombres legibles
+    REGION_MAP = {
+        "panama": "Panamá Metro",
+        "sanmiguelito": "San Miguelito",
+        "panamaoeste": "Panamá Oeste",
+        "panamaeste": "Panamá Este",
+        "bocasdeltoro": "Bocas del Toro",
+        "cocle": "Coclé",
+        "colon": "Colón",
+        "chiriqui": "Chiriquí",
+        "herrera": "Herrera",
+        "lossantos": "Los Santos",
+        "veraguas": "Veraguas"
+    }
+    
+    # Obtener la región del usuario
+    region_usuario = current_user.region
+    titulo_region = REGION_MAP.get(region_usuario, region_usuario.title() if region_usuario else 'Región')
+    
+    try:
+        # Obtener estadísticas regionales agregadas para el año especificado
+        estadisticas = get_national_statistics(year, region_usuario)
+        
+        # Obtener datos de participantes y eventos para gráficas
+        participantes = get_national_participants(year, region_usuario)
+        eventos = get_national_events(year, region_usuario)
+        
+        # Determinar título según región
+        titulo_base = f"Coordinación Regional de {titulo_region} - {year}"
+        
+        # Generar gráficas usando funciones existentes
+        grafica_perfil = generar_grafica_perfil(participantes, titulo_base)
+        grafica_region = generar_grafica_region(participantes, titulo_base)
+        
+        # Generar gráficas de eventos
+        grafica_modalidad = generar_grafica_modalidad(eventos, titulo_base, "Distribución de Eventos por Modalidad")
+        grafica_categoria = generar_grafica_categoria(eventos, titulo_base, "Distribución de Eventos por Categoría")
+        grafica_mensual = generar_grafica_mensual(eventos, titulo_base, "Distribución Mensual de Eventos")
+        grafica_eventos_provincia = generar_grafica_eventos_provincia(eventos, titulo_base, "Distribución de Eventos por Provincia")
+        grafica_horas_registro = generar_histograma_horas_registro(eventos, titulo_base, "Distribución de Registros por Hora del Día")
+        
+        # Generar lista de años disponibles (desde 2025 hasta año actual)
+        years_available = list(range(2025, current_year + 1))
+        
+        return render_template('metrica_region.html', 
+                             active_section='metricas',
+                             estadisticas=estadisticas,
+                             grafica_perfil=grafica_perfil,
+                             grafica_region=grafica_region,
+                             grafica_modalidad=grafica_modalidad,
+                             grafica_categoria=grafica_categoria,
+                             grafica_mensual=grafica_mensual,
+                             grafica_eventos_provincia=grafica_eventos_provincia,
+                             grafica_horas_registro=grafica_horas_registro,
+                             current_year=current_year,
+                             selected_year=year,
+                             titulo_region=titulo_region,
+                             years_available=years_available)
+    
+    except Exception as e:
+        print(f"Error en métricas regionales: {e}")
+        import traceback
+        traceback.print_exc()
+        # En caso de error, mostrar template con datos vacíos
+        estadisticas_vacias = {
+            "total_registrations": 0,
+            "unique_participants": 0,
+            "total_presentations": 0,
+            "total_events": 0,
+            "participantes_recurrentes": 0,
+            "tasa_recurrencia": 0.0,
+            "year": str(year)
+        }
+        years_available = list(range(2025, current_year + 1))
+        return render_template('metrica_region.html', 
+                             active_section='metricas',
+                             estadisticas=estadisticas_vacias,
+                             grafica_perfil=None,
+                             grafica_region=None,
+                             grafica_modalidad=None,
+                             grafica_categoria=None,
+                             grafica_mensual=None,
+                             grafica_eventos_provincia=None,
+                             grafica_horas_registro=None,
+                             current_year=current_year,
+                             selected_year=year,
+                             titulo_region=titulo_region,
                              years_available=years_available)
 
 

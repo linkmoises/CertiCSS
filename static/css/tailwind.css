@@ -1727,6 +1727,10 @@ select {
   margin-right: 1rem;
 }
 
+.mr-8 {
+  margin-right: 2rem;
+}
+
 .ms-0\.5 {
   margin-inline-start: 0.125rem;
 }
@@ -1797,10 +1801,6 @@ select {
 
 .mt-auto {
   margin-top: auto;
-}
-
-.mr-8 {
-  margin-right: 2rem;
 }
 
 .block {

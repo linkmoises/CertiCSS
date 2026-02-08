@@ -22,43 +22,25 @@
 
                                         <div class="grow">
                                             <h2 class="block text-3xl font-bold mt-2">
-{% if selected_region == 'todas' %}
-                                                Departamento Nacional de Docencia e Investigación
-{% else %}
-                                                Región de {{ titulo_region }}
-{% endif %}
+                                                Coordinación Regional de {{ titulo_region }}
                                             </h2>
-                                            <h4 class="block italic mb-2">Métricas e Informe {{ 'Nacional' if selected_region == 'todas' else 'Regional' }}</h4>
+                                            <h4 class="block italic mb-2">Métricas e Informe Regional</h4>
                                             <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
                                                 Eventos Generales
                                             </span>
                                             <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-blue-100 text-blue-800">
                                                 Año {{ selected_year or current_year or estadisticas.year }}
                                             </span>
-{% if selected_region != 'todas' %}
-                                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-green-100 text-green-800">
-                                                {{ titulo_region }}
-                                            </span>
-{% endif %}
                                         </div>
                                     </div>
 
-                                    <!-- Selectores de año y región -->
+                                    <!-- Selectores de año  -->
                                     <div class="mr-8 flex flex-col gap-3">
                                         <div class="flex items-center gap-2">
                                             <label for="year-selector" class="text-sm font-medium text-gray-700 whitespace-nowrap">Año:</label>
                                             <select id="year-selector" class="py-2 px-3 pe-9 border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" onchange="changeFilters()">
 {% for year in years_available|reverse %}
                                                 <option value="{{ year }}" {% if year == (selected_year or current_year) %}selected{% endif %}>{{ year }}</option>
-{% endfor %}
-                                            </select>
-                                        </div>
-                                        
-                                        <div class="flex items-center gap-2">
-                                            <label for="region-selector" class="text-sm font-medium text-gray-700 whitespace-nowrap">Región:</label>
-                                            <select id="region-selector" class="py-2 px-3 pe-9 border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" onchange="changeFilters()">
-{% for key, value in regiones_disponibles.items() %}
-                                                <option value="{{ key }}" {% if key == selected_region %}selected{% endif %}>{{ value }}</option>
 {% endfor %}
                                             </select>
                                         </div>
@@ -190,17 +172,17 @@
                 <div id="informe-descripcion" class="grid">
                     <div class="flex flex-col bg-white border shadow-sm rounded-xl mb-6">
                         <div class="overflow-x-auto p-4">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Informe Nacional - Eventos Generales</h3>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Informe Regional - Eventos Generales</h3>
                             <p class="text-base py-1">
                                 <span class="font-semibold">Descripción:</span> 
-                                Este informe presenta las métricas y estadísticas nacionales de participación en eventos de educación 
+                                Este informe presenta las métricas y estadísticas regionales de participación en eventos de educación 
                                 médica continua para el año {{ selected_year or current_year or estadisticas.year }}, incluyendo 
                                 análisis demográficos, distribución geográfica entre otras evaluaciones. Se excluyen de este registro
                                 los datos relacionados con sesiones docentes y eventos que no fueron publicados.
                             </p>
                             <p class="text-base py-1">
                                 Durante el año {{ selected_year or current_year or estadisticas.year }} se realizaron {{ estadisticas.total_events if estadisticas else 0 }} eventos 
-                                totales. En estos eventos se registraron {{ estadisticas.total_registrations if estadisticas else 0 }}
+                                totales en la región de {{ titulo_region }}. En estos eventos se registraron {{ estadisticas.total_registrations if estadisticas else 0 }}
                                 participaciones, de los cuales en los datos registrados {{ estadisticas.unique_participants if estadisticas else 0 }}
                                 corresponden a participantes únicos. Se registraron en la plataforma además {{ estadisticas.total_presentations if estadisticas else 0 }}
                                 ponencias. Esto da un promedio de {% if estadisticas and estadisticas.total_events > 0 %}{{ "%.1f"|format(estadisticas.total_presentations / estadisticas.total_events) }}{% else %}0.0{% endif %} 
@@ -450,13 +432,12 @@
 <!-- JS PLUGINS -->
 <script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
 <script>
-// Función para cambiar los filtros (año y región)
+// Función para cambiar el año
 function changeFilters() {
     const selectedYear = document.getElementById('year-selector').value;
-    const selectedRegion = document.getElementById('region-selector').value;
     
-    // Redirigir a la URL con año y región seleccionados
-    window.location.href = `/tablero/metricas/nacional/${selectedYear}/${selectedRegion}`;
+    // Redirigir a la URL con el año seleccionado
+    window.location.href = `/tablero/metricas/mi-region/${selectedYear}`;
 }
 
 // Limpia campos dinámicos al cargar la página
