@@ -64,7 +64,8 @@ collection_preregistro = db['preregistro']
 collection_eva = db['eva']
 collection_tokens = db['tokens']
 collection_repositorio = db['repositorio']
-collection_encuestas = db['encuestas'] 
+collection_encuestas = db['encuestas']
+collection_encuestas_v2 = db['encuestas_v2']
 collection_qbanks = db['qbanks']
 collection_qbanks_data = db['qbanks_data']
 collection_exam_results = db['exam_results']
@@ -2901,6 +2902,9 @@ def crear_evento():
         estado_evento = request.form['estado_evento']
 
         timestamp = request.form['timestamp']
+        
+        # Obtener el instrumento de encuesta (por defecto encuesta_v2 para eventos nuevos)
+        instrumento = request.form.get('instrumento', 'encuesta_v2')
 
         # Obtener un código único
         codigo = obtener_codigo_unico(collection_eventos)
@@ -2983,7 +2987,8 @@ def crear_evento():
             'checkin_masivo': checkin_masivo,
             'concurso_poster': concurso_poster,
             'registro_abierto': registro_abierto,
-            'avales': avales
+            'avales': avales,
+            'instrumento': instrumento
         })
         log_event(f"Usuario [{current_user.email}] ha creado el evento {codigo} exitosamente.")
         return redirect(url_for('mis_eventos'))  # Redirigir a la lista de eventos
@@ -5043,15 +5048,35 @@ def repositorio(codigo_evento):
 ###
 @app.route('/encuesta/<codigo_evento>', methods=['GET', 'POST'])
 def encuesta_satisfaccion(codigo_evento):
-    # Verificar si el evento existe
     evento = collection_eventos.find_one({"codigo": codigo_evento})
     if not evento:
         abort(404)
 
-    # Verificar si la encuesta está disponible
+    # Verificar qué instrumento de encuesta usar (puede estar en 'instrumento' o 'instrumento_encuesta')
+    instrumento = evento.get('instrumento', evento.get('instrumento_encuesta', 'legacy'))
+
+    if instrumento == 'encuesta_v2':
+        return encuesta_satisfaccion_v2(codigo_evento)
+    else:
+        return encuesta_satisfaccion_v1(codigo_evento)
+
+
+###
+###
+### Encuesta de satisfacción (evento solamente 2026)
+###
+def encuesta_satisfaccion_v2(codigo_evento):
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+
+    # Verificar disponibilidad de la encuesta
     ahora = datetime.now()
     fecha_inicio = evento.get('fecha_inicio')
-    fecha_fin = evento.get('fecha_fin') + timedelta(days=2)  # Añadir 2 días a la fecha de fin
+    fecha_fin = evento.get('fecha_fin')
+    
+    if fecha_fin:
+        fecha_fin = fecha_fin + timedelta(days=2)  # Añadir 2 días a la fecha de fin
 
     # Convertir fechas a datetime si son strings
     if isinstance(fecha_inicio, str):
@@ -5060,7 +5085,117 @@ def encuesta_satisfaccion(codigo_evento):
         fecha_fin = datetime.strptime(fecha_fin, '%Y-%m-%d %H:%M:%S')
 
     # Verificar si estamos dentro del período permitido
-    encuesta_disponible = fecha_inicio <= ahora <= fecha_fin
+    encuesta_disponible = fecha_inicio <= ahora <= fecha_fin if fecha_inicio and fecha_fin else True
+
+    if request.method == 'POST' and not encuesta_disponible:
+        flash('La encuesta no está disponible en este momento.', 'error')
+        return redirect(url_for('resumen_evento', codigo_evento=codigo_evento))
+
+    if request.method == 'POST':
+        # Verificar si es spam
+        if request.form.get('email'):
+            flash('¡Gracias por completar la encuesta!', 'success')
+            return redirect(url_for('encuesta_satisfaccion', codigo_evento=codigo_evento))
+
+        # Verificar tiempo de llenado
+        timestamp_inicio = request.form.get('timestamp_inicio')
+        if timestamp_inicio:
+            tiempo_transcurrido = (datetime.now().timestamp() * 1000 - float(timestamp_inicio)) / 1000
+            if tiempo_transcurrido < 10:
+                flash('¡Gracias por completar la encuesta!', 'success')
+                return redirect(url_for('encuesta_satisfaccion', codigo_evento=codigo_evento))
+
+        campos_requeridos = {
+            'D1': ['Masculino', 'Femenino'],
+            'D2': ['20–30', '31–40', '41–50', '51–60', '61+'],
+            'D3': [
+                'medico_administrativo',
+                'medico_general_ce',
+                'medico_general_urg',
+                'medico_especialista',
+                'odontologo',
+                'odontologo_especialista',
+                'enfermero',
+                'tecnico_enfermeria',
+                'laboratorista',
+                'tecnico_laboratorio',
+                'fisioterapeuta',
+                'farmaceutico',
+                'fonoaudiologo',
+                'psicologo',
+                'nutricionista',
+                'trabajador_social',
+                'estudiante_salud',
+                'administrativo',
+                'otro'
+            ],
+            'D4': ['0', '1', '2', '3', '4'],
+            'D5': ['<5', '5–10', '11–20', '21–30', '31–40', '+40'],
+            'E1': ['1', '2', '3', '4', '5'],  # pertinencia
+            'E2': ['1', '2', '3', '4', '5'],  # claridad
+            'E3': ['1', '2', '3', '4', '5'],  # actualización científica
+            'E4': ['1', '2', '3', '4', '5'],  # dominio del tema
+            'E5': ['1', '2', '3', '4', '5']   # organización
+        }
+
+        respuestas = {}
+        errores = []
+
+        for codigo, valores in campos_requeridos.items():
+            valor = request.form.get(codigo)
+            if not valor:
+                errores.append(f'Falta la respuesta para {codigo}')
+            elif valor not in valores:
+                errores.append(f'Respuesta inválida para {codigo}')
+            else:
+                respuestas[codigo] = valor
+
+        # Comentario opcional
+        respuestas['C1'] = request.form.get('C1', '')
+
+        if errores:
+            for error in errores:
+                flash(error, 'error')
+            return redirect(url_for('encuesta_satisfaccion', codigo_evento=codigo_evento))
+
+        # Guardar en collection_encuestas_v2
+        collection_encuestas_v2.insert_one({
+            'codigo_evento': codigo_evento,
+            'respuestas': respuestas,
+            'fecha': datetime.now()
+        })
+
+        flash('¡Gracias por completar la encuesta!', 'success')
+        return redirect(url_for('encuesta_satisfaccion', codigo_evento=codigo_evento))
+
+    return render_template('encuesta.html', evento=evento, encuesta_disponible=encuesta_disponible)
+
+
+###
+### Encuesta de satisfacción (CertiCSS + Evento 2025)
+###
+def encuesta_satisfaccion_v1(codigo_evento):
+    # Verificar si el evento existe
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+
+    # Verificar si la encuesta está disponible
+    ahora = datetime.now()
+    fecha_inicio = evento.get('fecha_inicio')
+    fecha_fin = evento.get('fecha_fin')
+    
+    if fecha_fin:
+        fecha_fin = fecha_fin + timedelta(days=2)  # Añadir 2 días a la fecha de fin
+
+    # Convertir fechas a datetime si son strings
+    if isinstance(fecha_inicio, str):
+        fecha_inicio = datetime.strptime(fecha_inicio, '%Y-%m-%d %H:%M:%S')
+    if isinstance(fecha_fin, str):
+        fecha_fin = datetime.strptime(fecha_fin, '%Y-%m-%d %H:%M:%S')
+
+    # Verificar si estamos dentro del período permitido
+    encuesta_disponible = fecha_inicio <= ahora <= fecha_fin if fecha_inicio and fecha_fin else True
 
     if request.method == 'POST' and not encuesta_disponible:
         flash('La encuesta no está disponible en este momento.', 'error')
@@ -5080,7 +5215,7 @@ def encuesta_satisfaccion(codigo_evento):
                 flash('¡Gracias por completar la encuesta!', 'success')
                 return redirect(url_for('encuesta_satisfaccion', codigo_evento=codigo_evento))
 
-        # Validar que todos los campos requeridos estén presentes
+        # Validación para encuesta v1 (original completa)
         campos_requeridos = {
             'D1': ['Masculino', 'Femenino'],
             'D2': ['20–30', '31–40', '41–50', '51–60', '61+'],
@@ -5147,7 +5282,7 @@ def encuesta_satisfaccion(codigo_evento):
                 flash(error, 'error')
             return redirect(url_for('encuesta_satisfaccion', codigo_evento=codigo_evento))
 
-        # Guardar la respuesta en la base de datos
+        # Guardar en collection_encuestas (v1)
         collection_encuestas.insert_one({
             'codigo_evento': codigo_evento,
             'respuestas': respuestas,
@@ -5157,7 +5292,7 @@ def encuesta_satisfaccion(codigo_evento):
         flash('¡Gracias por completar la encuesta!', 'success')
         return redirect(url_for('encuesta_satisfaccion', codigo_evento=codigo_evento))
 
-    return render_template('encuesta.html', evento=evento, encuesta_disponible=encuesta_disponible)
+    return render_template('encuesta_legacy.html', evento=evento, encuesta_disponible=encuesta_disponible)
 
 
 ###
