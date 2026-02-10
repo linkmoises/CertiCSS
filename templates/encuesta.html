@@ -32,6 +32,7 @@
                         Encuesta de satisfacción
                     </h1>
                     <h2 class="text-2xl font-bold text-gray-800 mb-4">{{ evento.nombre }}</h2>
+
                     <p class="mt-1 text-justify text-gray-600 dark:text-neutral-400">
                         Desde el <span class="font-bold">Departamento Nacional de Docencia e Investigación (DENADOI)</span>, le invitamos a responder esta breve encuesta que nos permite conocer su percepción sobre la calidad del evento académico en el que participó.
                     </p>
@@ -41,32 +42,60 @@
                     <p class="mt-1 text-justify text-gray-600 dark:text-neutral-400">
                         La encuesta no tomará más de 2 minutos. Agradecemos de antemano su tiempo y colaboración.
                     </p>
-                    {% if encuesta_disponible %}
-                    <p class="mt-2 text-sm text-blue-600 dark:text-blue-400">
-                        <strong>Período de disponibilidad:</strong> Desde el inicio del evento hasta 48 horas después de su finalización.
-                    </p>
+                    
+                    {% if already_completed %}
+                    <div class="mt-4 p-4 bg-green-100 text-green-800 rounded-lg">
+                        <p class="font-semibold">✓ Encuesta completada</p>
+                        <p class="mt-2">{% if just_completed %}¡Gracias por completar la encuesta!{% else %}Ya ha completado esta encuesta. Gracias por su participación.{% endif %}</p>
+                        {% if nanoid %}
+                        <div class="mt-4 space-y-2">
+                            <a href="{{ url_for('generar_pdf', nanoid=nanoid) }}" class="inline-flex items-center justify-center w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">
+                                <svg class="h-4 w-4 text-white me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 640 512">
+                                    <path d="M320 32c-8.1 0-16.1 1.4-23.7 4.1L15.8 137.4C6.3 140.9 0 149.9 0 160s6.3 19.1 15.8 22.6l57.9 20.9C57.3 229.3 48 259.8 48 291.9l0 28.1c0 28.4-10.8 57.7-22.3 80.8c-6.5 13-13.9 25.8-22.5 37.6C0 442.7-.9 448.3 .9 453.4s6 8.9 11.2 10.2l64 16c4.2 1.1 8.7 .3 12.4-2s6.3-6.1 7.1-10.4c8.6-42.8 4.3-81.2-2.1-108.7C90.3 344.3 86 329.8 80 316.5l0-24.6c0-30.2 10.2-58.7 27.9-81.5c12.9-15.5 29.6-28 49.2-35.7l157-61.7c8.2-3.2 17.5 .8 20.7 9s-.8 17.5-9 20.7l-157 61.7c-12.4 4.9-23.3 12.4-32.2 21.6l159.6 57.6c7.6 2.7 15.6 4.1 23.7 4.1s16.1-1.4 23.7-4.1L624.2 182.6c9.5-3.4 15.8-12.5 15.8-22.6s-6.3-19.1-15.8-22.6L343.7 36.1C336.1 33.4 328.1 32 320 32zM128 408c0 35.3 86 72 192 72s192-36.7 192-72L496.7 262.6 354.5 314c-11.1 4-22.8 6-34.5 6s-23.5-2-34.5-6L143.3 262.6 128 408z" />
+                                </svg>
+                                Descargar Certificado
+                            </a>
+                            <p class="text-sm text-gray-600">También puede acceder a su certificado desde la página de búsqueda de certificados.</p>
+                        </div>
+                        {% else %}
+                        <p class="mt-2">Puede proceder a descargar su certificado desde la página de búsqueda de certificados.</p>
+                        <div class="mt-4">
+                            <a href="{{ url_for('buscar_certificados') }}" class="inline-block py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                Ir a Mis Certificados
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% elif unregistered %}
+                    <div class="mt-4 p-4 bg-red-100 text-red-800 rounded-lg">
+                        <p class="font-semibold">✗ Cédula no registrada</p>
+                        <p class="mt-2">Su cédula no está registrada para este evento. Por favor verifique que esté correctamente escrita o contacte al organizador del evento.</p>
+                    </div>
+                    {% elif cedula_required %}
+                    <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p class="font-semibold text-blue-800 mb-2">📋 Ingrese su cédula</p>
+                        <p class="text-blue-700 mb-4">Para acceder a la encuesta, por favor ingrese su número de cédula.</p>
+                        <form method="POST" class="space-y-4">
+                            <div>
+                                <label class="block text-gray-700 mb-2">Número de cédula</label>
+                                <input type="text" name="cedula_input" placeholder="Ej: 8-123-4567" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                                       required>
+                            </div>
+                            <button type="submit" class="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                Continuar
+                            </button>
+                        </form>
+                    </div>
+                    {% else %}
+                    
                     {% endif %}
                 </div>
-            </div>
-            <!-- Mostrar mensajes -->
-{% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-            <div class="m-4">
-                <ul>
-                {% for category, message in messages %}
-                    <li class="{{ 'p-2 text-sm bg-red-100 text-red-800 rounded-r-xl' if category == 'error' else 'p-2 text-sm bg-green-100 text-green-800 rounded-r-xl' }}">
-                    {{ message }}
-                    </li>
-                {% endfor %}
-                </ul>
-            </div>
-{% endif %}
-{% endwith %}
             </div>
       
             <div class="mb-8 max-w-lg mx-auto">
 
-{% if encuesta_disponible %}
+{% if not already_completed and not unregistered and not cedula_required and cedula %}
 {% block content %}
                 <form method="POST" class="space-y-8" id="encuestaForm">
                     <!-- Campo oculto para spam -->
@@ -74,6 +103,9 @@
                     
                     <!-- Timestamp oculto para control de tiempo -->
                     <input type="hidden" name="timestamp_inicio" id="timestamp_inicio">
+                    
+                    <!-- Cedula oculta para validación -->
+                    <input type="hidden" name="cedula" value="{{ cedula }}">
                     
                     <div class="bg-white p-6 rounded-lg border">
                         <h3 class="text-xl font-semibold text-gray-800 mb-4">Sección D: Datos demográficos</h3>
@@ -210,13 +242,6 @@
                     </div>
                 </form>
 {% endblock %}
-{% else %}
-                <div class="text-center p-8 bg-white rounded-lg shadow-sm">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Encuesta no disponible</h3>
-                    <p class="text-gray-600 mt-2">
-                        El período para completar la encuesta es desde el inicio del evento hasta 48 horas después de su finalización.
-                    </p>
-                </div>
 {% endif %}
 
             </div>
@@ -227,20 +252,26 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('timestamp_inicio').value = Date.now();
-    });
-
-    document.getElementById('encuestaForm').addEventListener('submit', function(e) {
-        const tiempoInicio = parseInt(document.getElementById('timestamp_inicio').value);
-        const tiempoActual = Date.now();
-        const tiempoTranscurrido = (tiempoActual - tiempoInicio) / 1000; // en segundos
-
-        if (tiempoTranscurrido < 10) {
-            e.preventDefault();
-            alert('¡Gracias por completar la encuesta!');
-            return false;
+        const timestampField = document.getElementById('timestamp_inicio');
+        if (timestampField) {
+            timestampField.value = Date.now();
         }
     });
+
+    const encuestaForm = document.getElementById('encuestaForm');
+    if (encuestaForm) {
+        encuestaForm.addEventListener('submit', function(e) {
+            const tiempoInicio = parseInt(document.getElementById('timestamp_inicio').value);
+            const tiempoActual = Date.now();
+            const tiempoTranscurrido = (tiempoActual - tiempoInicio) / 1000; // en segundos
+
+            if (tiempoTranscurrido < 10) {
+                e.preventDefault();
+                alert('¡Gracias por completar la encuesta!');
+                return false;
+            }
+        });
+    }
 </script>
 </body>
 </html>
