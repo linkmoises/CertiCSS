@@ -7170,7 +7170,14 @@ def generar_pdf(nanoid):
         abort(404)  # Si no se encuentra el evento
 
     # Check survey requirement for Survey_V2 events (ONLY for certificados)
-    if requires_survey_completion(evento):
+    # Skip survey requirement for:
+    # 1. Sesiones Docentes
+    # 2. Ponentes, organizadores y coorganizadores
+    tipo_evento = evento.get('tipo', 'General')
+    rol_participante = participante.get('rol', 'participante')
+    skip_survey = (tipo_evento == 'Sesión Docente') or (rol_participante in ['ponente', 'organizador', 'coorganizador'])
+    
+    if requires_survey_completion(evento) and not skip_survey:
         if not has_completed_survey_v2(participante['cedula'], codigo_evento):
             flash('Debe completar la encuesta antes de descargar el certificado.', 'error')
             return redirect(url_for('buscar_certificados'))
