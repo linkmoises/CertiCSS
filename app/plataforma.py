@@ -239,7 +239,7 @@ def previsualizar_contenido(codigo_evento, orden):
     # Si es examen, cargar las preguntas para la previsualización
     preguntas = []
     if contenido.get("tipo") == "examen" and "qbank_config" in contenido:
-        codigo_qbank, num_preguntas, aleatorio = parse_qbank_config(
+        codigo_qbank, num_preguntas, aleatorio, formativo = parse_qbank_config(
             contenido["qbank_config"]
         )
         if codigo_qbank:
@@ -416,7 +416,7 @@ def ver_contenido(codigo_evento, orden):
 
     # Mostrar examen si el tipo es 'examen' y tiene qbank_config
     if contenido_actual.get("tipo") == "examen" and "qbank_config" in contenido_actual:
-        codigo_qbank, num_preguntas, aleatorio = parse_qbank_config(
+        codigo_qbank, num_preguntas, aleatorio, formativo = parse_qbank_config(
             contenido_actual["qbank_config"]
         )
         if codigo_qbank:
@@ -469,6 +469,7 @@ def ver_contenido(codigo_evento, orden):
                 cedula_participante = request.args.get("cedula")
 
                 # Verificar que el evento es virtual antes de guardar
+                # Solo guardar si NO es formativo o si es formativo pero queremos registro
                 if (
                     evento.get("modalidad") in ["Virtual asincrónica", "Virtual sincrónica", "Híbrida"]
                     and cedula_participante
@@ -497,6 +498,7 @@ def ver_contenido(codigo_evento, orden):
                         "titulo_evento": evento.get("titulo", "Sin título"),
                         "total_preguntas": len(preguntas),
                         "respuestas_correctas": correctas,
+                        "formativo": formativo,  # Marcar si es formativo o no
                     }
 
                     # Insertar el resultado en la base de datos
@@ -529,6 +531,7 @@ def ver_contenido(codigo_evento, orden):
                 preguntas_ids=preguntas_ids,
                 nanoid=nanoid,
                 contenidos=contenidos,
+                formativo=formativo,  # Pasar al template
             )
 
     # Encontrar el contenido anterior y el siguiente
@@ -1142,14 +1145,15 @@ def nueva_pregunta_qbank(codigo_qbank):
 
 
 def parse_qbank_config(config_str):
-    # Ejemplo: [O5W4YTK2 preguntas=3 aleatorio=no]
-    match = re.match(r"\[(\w+) preguntas=(\d+) aleatorio=(si|no)\]", config_str)
+    # Ejemplo: [O5W4YTK2 preguntas=3 aleatorio=no formativo=si]
+    match = re.match(r"\[(\w+) preguntas=(\d+) aleatorio=(si|no)(?: formativo=(si|no))?\]", config_str)
     if match:
         codigo = match.group(1)
         num_preguntas = int(match.group(2))
         aleatorio = match.group(3) == "si"
-        return codigo, num_preguntas, aleatorio
-    return None, None, None
+        formativo = match.group(4) == "si" if match.group(4) else False
+        return codigo, num_preguntas, aleatorio, formativo
+    return None, None, None, False
 
 
 ###
