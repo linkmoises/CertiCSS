@@ -174,3 +174,4 @@ version.txt
 backups/
 .kiro
 tests/*
+.aider*
