@@ -27,6 +27,8 @@ services:
       timeout: 10s
       retries: 5
       start_period: 40s
+    networks:
+      - docenciamedica_net
 
   db:
     image: mongo:6.0
@@ -41,10 +43,20 @@ services:
       timeout: 10s
       retries: 5
       start_period: 40s
+    networks:
+      - docenciamedica_net
 
   tunnel:
     image: cloudflare/cloudflared:latest
     restart: always
     command: tunnel --no-autoupdate run --token ${TUNNEL_TOKEN}
+    env_file:
+      - .env
     depends_on:
       - web
+    networks:
+      - docenciamedica_net
+
+networks:
+  docenciamedica_net:
+    driver: bridge
