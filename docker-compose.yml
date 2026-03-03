@@ -41,3 +41,10 @@ services:
       timeout: 10s
       retries: 5
       start_period: 40s
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: always
+    command: tunnel --no-autoupdate run --token ${TUNNEL_TOKEN}
+    depends_on:
+      - web

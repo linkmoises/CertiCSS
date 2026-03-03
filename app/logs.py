@@ -19,9 +19,16 @@ from logging.handlers import RotatingFileHandler
 
 logs_blueprint = Blueprint('logs', __name__)
 
-# Configuración del logger centralizado
-def setup_logger():
-    """Configura el logger centralizado para toda la aplicación"""
+# Logger centralizado de la aplicación
+logger = None
+
+def get_logger():
+    """Obtiene o crea el logger centralizado para toda la aplicación"""
+    global logger
+    
+    if logger is not None:
+        return logger
+    
     # Crear la carpeta /logs si no existe
     if not os.path.exists('logs'):
         os.makedirs('logs')
@@ -31,24 +38,34 @@ def setup_logger():
 
     # Configuración del logging
     logger = logging.getLogger('certicss_logger')
-    
-    # Evitar duplicar handlers si ya existe
-    if not logger.handlers:
-        logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
 
-        # Formato del log
-        formatter = logging.Formatter('%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    # Formato del log
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
 
-        # Manejador para rotar archivos cada 250 registros
-        handler = RotatingFileHandler(
-            log_filename,
-            maxBytes=0,
-            backupCount=250,
-        )
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
+    # Manejador para archivo (production)
+    file_handler = RotatingFileHandler(
+        log_filename,
+        maxBytes=10 * 1024 * 1024,  # 10MB
+        backupCount=250,
+    )
+    file_handler.setLevel(logging.INFO)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+
+    # Manejador para consola (development)
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.DEBUG)
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
     
     return logger
+
+# Inicializar logger al importar el módulo
+get_logger()
 
 def get_client_ip():
     """Obtiene la dirección IP del cliente."""
@@ -58,8 +75,8 @@ def get_client_ip():
         return request.environ.get('REMOTE_ADDR', 'unknown')
 
 def log_event(message):
-    """Función centralizada para logging de eventos"""
-    logger = setup_logger()
+    """Función centralizada para logging de eventos de usuario"""
+    logger = get_logger()
     client_ip = get_client_ip()
     log_message = f"{message} {client_ip}."
     logger.info(log_message)

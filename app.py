@@ -20,6 +20,10 @@ from enum import Enum
 from functools import wraps
 from app.helpers import generate_otp, generate_nanoid, generar_codigo_evento, obtener_codigo_unico, allowed_file, otp_storage
 from app.template_selection import determine_template_path, parse_event_date
+from app.logs import get_logger
+
+# Inicializar logger
+logger = get_logger()
 
 app = Flask(__name__)
 
@@ -120,12 +124,6 @@ from app.usuarios import User, load_user, roles_required, role_required
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.user_loader(load_user)
-###
-### Configurar Flask-Login
-###
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.user_loader(load_user)
 
 ###
 ### Crear índice único para evitar duplicados
@@ -135,8 +133,9 @@ try:
     collection_participantes.drop_indexes()
     # Crear el nuevo índice
     collection_participantes.create_index([("cedula", 1), ("codigo_evento", 1), ("titulo_ponencia", 1), ("indice_registro", 1)], unique=True)
+    logger.info("Índice único creado en collection_participantes")
 except Exception as e:
-    print(f"Error al crear índice: {e}")
+    logger.error(f"Error al crear índice en collection_participantes: {e}")
 
 
 ###
@@ -149,18 +148,18 @@ try:
         unique=True,
         name="cedula_evento_unique"
     )
-    print("Índice creado: cedula_evento_unique en collection_encuestas_v2")
+    logger.info("Índice cedula_evento_unique creado en collection_encuestas_v2")
     
     # Crear índice en codigo_evento para consultas basadas en eventos
     collection_encuestas_v2.create_index("codigo_evento", name="codigo_evento_idx")
-    print("Índice creado: codigo_evento_idx en collection_encuestas_v2")
+    logger.info("Índice codigo_evento_idx creado en collection_encuestas_v2")
     
     # Crear índice en cedula para consultas basadas en participantes
     collection_encuestas_v2.create_index("cedula", name="cedula_idx")
-    print("Índice creado: cedula_idx en collection_encuestas_v2")
+    logger.info("Índice cedula_idx creado en collection_encuestas_v2")
     
 except Exception as e:
-    print(f"Error al crear índices para encuestas_v2: {e}")
+    logger.error(f"Error al crear índices para encuestas_v2: {e}")
 
 
 ###
@@ -625,14 +624,14 @@ def cargar_funcionarios_css():
             _funcionarios_cache_timestamp = current_timestamp
             
             if len(funcionarios_set) == 0:
-                print("ADVERTENCIA: Base de datos de funcionarios está vacía. Cargue la planilla desde /tablero/opciones")
+                logger.warning("Base de datos de funcionarios está vacía. Cargue la planilla desde /tablero/opciones")
             else:
-                print(f"Cache de funcionarios actualizado desde MongoDB: {len(_funcionarios_cache)} cédulas cargadas")
+                logger.info(f"Cache de funcionarios actualizado: {len(_funcionarios_cache)} cédulas cargadas")
         
         return _funcionarios_cache
         
     except Exception as e:
-        print(f"Error al cargar funcionarios desde MongoDB: {e}")
+        logger.error(f"Error al cargar funcionarios desde MongoDB: {e}")
         return set()
 
 ###
@@ -644,7 +643,7 @@ def registrar_abierto(codigo_evento):
     # Verificar si el evento existe y tiene registro abierto
     evento = collection_eventos.find_one({"codigo": codigo_evento})
     if not evento:
-        print(f"DEBUG: Evento {codigo_evento} no encontrado")
+        logger.warning(f"Evento no encontrado: {codigo_evento}")
         abort(404)
     
     # Verificar que el evento tenga registro abierto habilitado
@@ -669,7 +668,7 @@ def registrar_abierto(codigo_evento):
         unidad = request.form['unidad']
         timestamp = datetime.now()
         
-        print(f"DEBUG: Datos procesados - Cédula: {cedula}, Nombres: {nombres} {apellidos}")
+        logger.debug(f"Datos procesados - Cédula: {cedula}, Nombres: {nombres} {apellidos}")
         
         # Verificar si ya está registrado
         if collection_participantes.find_one({
@@ -2586,7 +2585,7 @@ def actualizar_campo_participante():
             return jsonify({'success': False, 'error': 'No se pudo actualizar el campo'})
 
     except Exception as e:
-        print(f"Error en actualizar_campo_participante: {str(e)}")
+        logger.error(f"Error en actualizar_campo_participante: {str(e)}")
         return jsonify({'success': False, 'error': str(e)})
 
 
@@ -2958,8 +2957,8 @@ def crear_evento():
             image.thumbnail((750, 750))  # Mantiene la relación de aspecto
             resized_afiche_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{codigo}-afiche-750.jpg")
             image.save(resized_afiche_path, 'JPEG')  # Guardar la versión redimensionada
-            print(f"Archivo afiche guardado en: {afiche_path}")  # Confirmación
-            print(f"Archivo afiche redimensionado guardado en: {resized_afiche_path}")  # Confirmación
+            logger.info(f"Archivo afiche guardado: {afiche_path}")
+            logger.info(f"Archivo afiche redimensionado guardado: {resized_afiche_path}")
 
         if fondo_file:
             fondo_filename = f"{codigo}-fondo.jpg"
@@ -2968,7 +2967,7 @@ def crear_evento():
             # Convertir y guardar la imagen como JPG
             image = Image.open(fondo_file)
             image.convert('RGB').save(fondo_path, 'JPEG')  # Convertir a JPG y guardar
-            print(f"Archivo fondo guardado en: {fondo_path}")  # Confirmación
+            logger.info(f"Archivo fondo guardado: {fondo_path}")
 
         if programa_file:
             programa_filename = f"{codigo}-programa.pdf"
@@ -4058,7 +4057,7 @@ def get_national_statistics(year=None, region=None, unidad=None):
         }
         
     except Exception as e:
-        print(f"Error al obtener estadísticas nacionales: {e}")
+        logger.error(f"Error al obtener estadísticas nacionales: {e}")
         return {
             "total_registrations": 0,
             "unique_participants": 0,
@@ -4127,7 +4126,7 @@ def get_national_participants(year=None, region=None, unidad=None):
         return participantes
         
     except Exception as e:
-        print(f"Error al obtener participantes nacionales: {e}")
+        logger.error(f"Error al obtener participantes nacionales: {e}")
         return []
 
 
@@ -4173,7 +4172,7 @@ def get_national_events(year=None, region=None, unidad=None):
         return eventos
         
     except Exception as e:
-        print(f"Error al obtener eventos nacionales: {e}")
+        logger.error(f"Error al obtener eventos nacionales: {e}")
         return []
 
 
@@ -4267,7 +4266,7 @@ def tablero_metricas_nacional(year=None, region=None):
                              years_available=years_available)
     
     except Exception as e:
-        print(f"Error en métricas nacionales: {e}")
+        logger.error(f"Error en métricas nacionales: {e}")
         import traceback
         traceback.print_exc()
         # En caso de error, mostrar template con datos vacíos
@@ -4423,7 +4422,7 @@ def tablero_metricas_regional(year=None, unidad=None):
                              years_available=years_available)
     
     except Exception as e:
-        print(f"Error en métricas regionales: {e}")
+        logger.error(f"Error en métricas regionales: {e}")
         import traceback
         traceback.print_exc()
         # En caso de error, mostrar template con datos vacíos
