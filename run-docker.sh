@@ -26,7 +26,7 @@ echo "Versión generada: $VERSION"
 # Construir y levantar los contenedores
 echo "Construyendo y levantando contenedores..."
 #docker-compose up --build -d
-docker-compose up --build --force-recreate -d
+docker compose up --build --force-recreate -d
 
 # Limpiar imágenes no utilizadas
 echo "Limpiando imágenes no utilizadas..."
