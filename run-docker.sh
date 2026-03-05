@@ -6,12 +6,6 @@ if ! command -v git &> /dev/null; then
   exit 1
 fi
 
-# Validar que docker-compose esté instalado
-#if ! command -v docker-compose &> /dev/null; then
-#  echo "Error: docker-compose no está instalado."
-#  exit 1
-#fi
-
 # Actualizar cambios en el repositorio
 git pull
 
