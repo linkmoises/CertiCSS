@@ -3615,18 +3615,32 @@ def buscar_certificados():
                 puntaje_examen = 0
                 tiene_examen = False
                 
-                # Verificar si el evento tiene exámenes
-                examen_evento = collection_eva.find_one({
+                # Verificar si el evento tiene exámenes sumativos (no formativos)
+                examenes_sumativos = list(collection_eva.find({
                     'codigo_evento': codigo_evento,
                     'tipo': 'examen'
-                })
-                
-                if examen_evento:
+                }))
+                # Filtrar solo los que tienen qbank_config sin formativo=si
+                from app.plataforma import parse_qbank_config
+                ordenes_sumativos = []
+                for ex in examenes_sumativos:
+                    qbank_config = ex.get('qbank_config', '')
+                    if qbank_config:
+                        _, _, _, formativo = parse_qbank_config(qbank_config)
+                        if not formativo:
+                            ordenes_sumativos.append(ex.get('orden'))
+                    else:
+                        # Sin qbank_config configurado, no cuenta como sumativo
+                        pass
+
+                if ordenes_sumativos:
                     tiene_examen = True
-                    # Buscar los resultados del examen en collection_exam_results
+                    # Buscar el mejor resultado solo entre exámenes sumativos
                     resultados_examen = list(collection_exam_results.find({
                         'codigo_evento': codigo_evento,
-                        'cedula_participante': participante['cedula']
+                        'cedula_participante': participante['cedula'],
+                        'orden_examen': {'$in': ordenes_sumativos},
+                        'formativo': {'$ne': True}
                     }).sort('calificacion', -1).limit(1))
                     
                     if resultados_examen:
