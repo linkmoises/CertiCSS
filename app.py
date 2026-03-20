@@ -3903,6 +3903,20 @@ def mis_metricas(page=1):
             {"codigo_evento": codigo_evento, "rol": "participante"}
         ))
 
+        instrumento = evento.get('instrumento', evento.get('instrumento_encuesta', 'legacy'))
+        if instrumento == 'encuesta_v2':
+            evento["total_encuestas"] = collection_encuestas_v2.count_documents({
+                "codigo_evento": codigo_evento,
+                "respuestas": {"$exists": True, "$ne": {}}
+            })
+        else:
+            evento["total_encuestas"] = collection_encuestas.count_documents({
+                "codigo_evento": codigo_evento,
+                "respuestas": {"$exists": True, "$ne": {}}
+            })
+
+        evento["instrumento"] = instrumento
+
         evento["total_ponentes"] = collection_participantes.count_documents({
             "codigo_evento": codigo_evento,
             "rol": "ponente"
