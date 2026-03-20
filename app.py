@@ -3851,30 +3851,28 @@ def tablero_metricas(page=1):
 @app.route('/tablero/metricas/mias/page/<int:page>')
 @login_required
 def mis_metricas(page=1):
-
-    # Filtro para eventos del usuario actual
     filtro_usuario = {
         "autor": current_user.id,
         'registro_abierto': {'$ne': True},
         'tipo': {'$ne': 'Sesión Docente'}
     }
 
-    # Obtener el número total de usuarios
     total_usuarios = collection_usuarios.count_documents({"rol": {"$ne": "administrador"}})
-    # Obtener el número total de eventos del usuario (excluyendo registro abierto y sesiones docentes)
     total_eventos = collection_eventos.count_documents(filtro_usuario)
-    # Obtener el número total de eventos cerrados del usuario (excluyendo registro abierto y sesiones docentes)
+
     filtro_cerrados = {
         **filtro_usuario,
-        "estado_evento": "cerrado"
+        "$or": [
+            {"estado_evento": "cerrado"},
+            {"estado_evento": "publicado"}
+        ]
     }
+
     total_eventos_cerrados = collection_eventos.count_documents(filtro_cerrados)
-    
-    # Obtener códigos de eventos del usuario para filtrar participantes
+
     eventos_usuario = list(collection_eventos.find(filtro_usuario, {"codigo": 1}))
     codigos_eventos_usuario = [evento["codigo"] for evento in eventos_usuario]
-    
-    # Contar ponentes y participantes solo en eventos del usuario
+
     total_ponentes = collection_participantes.count_documents({
         "codigo_evento": {"$in": codigos_eventos_usuario},
         "rol": "ponente"
@@ -3884,37 +3882,29 @@ def mis_metricas(page=1):
         "rol": "participante"
     })
 
-    ## Tablero de Métricas de Eventos
     eventos_por_pagina = 20
     total_paginas = (total_eventos_cerrados + eventos_por_pagina - 1) // eventos_por_pagina
 
-    # Obtener los eventos cerrados del usuario para la página actual
     eventos_cursor = collection_eventos.find(filtro_cerrados).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
-    
     eventos = list(eventos_cursor)
 
-    # Verificar si el usuario es organizador en cada evento
     for evento in eventos:
         es_organizador = collection_participantes.find_one({
             "codigo_evento": evento["codigo"],
             "cedula": str(current_user.cedula),
             "rol": "coorganizador"
-        }) is not None 
+        }) is not None
 
         evento["es_organizador"] = es_organizador
-
-        # Añade métricas específicas de cada evento
         codigo_evento = evento["codigo"]
-        
-        # Total de participantes en este evento
+
         evento["total_participantes"] = collection_participantes.count_documents({
             "codigo_evento": codigo_evento,
             "rol": "participante"
         })
-        
-        # Total de ponentes en este evento
+
         evento["total_ponentes"] = collection_participantes.count_documents({
-            "codigo_evento": codigo_evento, 
+            "codigo_evento": codigo_evento,
             "rol": "ponente"
         })
 
@@ -5489,6 +5479,67 @@ def exportar_encuesta_csv(codigo_evento):
     )
 
 
+@app.route('/tablero/metricas/<codigo_evento>/exportar_encuesta_v2_csv')
+@login_required
+def exportar_encuesta_v2_csv(codigo_evento):
+    respuestas = list(collection_encuestas_v2.find({'codigo_evento': codigo_evento}))
+
+    respuestas_validas = []
+    for respuesta in respuestas:
+        if respuesta.get('respuestas') and isinstance(respuesta['respuestas'], dict) and len(respuesta['respuestas']) > 0:
+            respuestas_validas.append(respuesta)
+
+    print(f"Exportar V2 CSV - Evento {codigo_evento}: Total: {len(respuestas)}, Validas: {len(respuestas_validas)}")
+
+    if not respuestas_validas:
+        flash('No hay respuestas de encuesta v2 válidas disponibles para este evento.', 'error')
+        return redirect(url_for('resumen_evento', codigo_evento=codigo_evento))
+
+    output = StringIO()
+    writer = csv.writer(output)
+
+    headers = [
+        'Fecha', 'Hora', 'D1', 'D2', 'D3', 'D4', 'D5',
+        'E1', 'E2', 'E3', 'E4', 'E5', 'C1'
+    ]
+    writer.writerow(headers)
+
+    for respuesta in respuestas_validas:
+        fecha_hora = respuesta.get('fecha', datetime.now())
+        if isinstance(fecha_hora, str):
+            fecha_hora = datetime.strptime(fecha_hora, '%Y-%m-%d %H:%M:%S')
+        fecha = fecha_hora.strftime('%Y-%m-%d')
+        hora = fecha_hora.strftime('%H:%M:%S')
+        respuestas_data = respuesta.get('respuestas', {})
+
+        row = [
+            fecha,
+            hora,
+            respuestas_data.get('D1', ''),
+            respuestas_data.get('D2', ''),
+            respuestas_data.get('D3', ''),
+            respuestas_data.get('D4', ''),
+            respuestas_data.get('D5', ''),
+            respuestas_data.get('E1', ''),
+            respuestas_data.get('E2', ''),
+            respuestas_data.get('E3', ''),
+            respuestas_data.get('E4', ''),
+            respuestas_data.get('E5', ''),
+            respuestas_data.get('C1', '')
+        ]
+        writer.writerow(row)
+
+    output.seek(0)
+    return Response(
+        output.getvalue().encode('utf-8'),
+        mimetype="text/csv",
+        headers={
+            "Content-Disposition": f"attachment;filename=encuesta_v2_{codigo_evento}.csv",
+            "Content-Type": "text/csv; charset=utf-8"
+        }
+    )
+
+
 @app.route('/tablero/metricas/<codigo_evento>/informe')
 @login_required
 def informe_avanzado(codigo_evento):
@@ -5615,6 +5666,94 @@ def informe_avanzado(codigo_evento):
         alfa_cronbach=alfa_cronbach,
         nps=nps,
         nps_certicss=nps_certicss)
+
+
+@app.route('/tablero/metricas/<codigo_evento>/informe_v2')
+@login_required
+def informe_avanzado_v2(codigo_evento):
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        flash('Evento no encontrado', 'error')
+        return redirect(url_for('home'))
+
+    instrumento = evento.get('instrumento', evento.get('instrumento_encuesta', 'legacy'))
+    if instrumento != 'encuesta_v2':
+        return redirect(url_for('informe_avanzado', codigo_evento=codigo_evento))
+
+    total_participantes = collection_participantes.count_documents({
+        "codigo_evento": codigo_evento,
+        "rol": "participante"
+    })
+
+    participantes = list(collection_participantes.find({
+        "codigo_evento": codigo_evento,
+        "rol": "participante"
+    }))
+
+    grafica_perfil = generar_grafica_perfil(participantes, evento.get('nombre', 'Evento'))
+    grafica_region = generar_grafica_region(participantes, evento.get('nombre', 'Evento'))
+
+    respuestas = list(collection_encuestas_v2.find({'codigo_evento': codigo_evento}))
+
+    respuestas_validas = []
+    for respuesta in respuestas:
+        if respuesta.get('respuestas') and isinstance(respuesta['respuestas'], dict) and len(respuesta['respuestas']) > 0:
+            respuestas_validas.append(respuesta)
+
+    print(f"Evento {codigo_evento}: Total docs: {len(respuestas)}, Respuestas válidas: {len(respuestas_validas)}")
+
+    total_respuestas = len(respuestas_validas)
+
+    promedios_e = {'total': 0, 'count': 0}
+    for i in range(1, 6):
+        for respuesta in respuestas_validas:
+            respuestas_data = respuesta.get('respuestas', {})
+            key = f'E{i}'
+            if key in respuestas_data:
+                try:
+                    promedios_e['total'] += int(respuestas_data[key])
+                    promedios_e['count'] += 1
+                except (ValueError, TypeError):
+                    pass
+
+    demograficos = {
+        'D1': {'Masculino': 0, 'Femenino': 0},
+        'D2': {'20–30': 0, '31–40': 0, '41–50': 0, '51–60': 0, '61+': 0},
+        'D3': {},
+        'D4': {'0': 0, '1': 0, '2': 0, '3': 0, '4': 0},
+        'D5': {'<5': 0, '5–10': 0, '11–20': 0, '21–30': 0, '31–40': 0, '+40': 0}
+    }
+
+    for respuesta in respuestas_validas:
+        respuestas_data = respuesta.get('respuestas', {})
+        for key in demograficos:
+            if key in respuestas_data:
+                valor = respuestas_data[key]
+                if key == 'D3':
+                    demograficos[key][valor] = demograficos[key].get(valor, 0) + 1
+                else:
+                    demograficos[key][valor] = demograficos[key].get(valor, 0) + 1
+
+    metricas = {
+        'total_respuestas': total_respuestas,
+        'total_participantes': total_participantes,
+        'promedio_evento': round(promedios_e['total'] / promedios_e['count'], 2) if promedios_e['count'] > 0 else 0,
+        'demograficos': demograficos,
+        'respuestas_validas': respuestas_validas
+    }
+
+    grafica_spider = generar_grafica_spider_v2(respuestas_validas, evento.get('nombre', 'Evento'))
+    grafica_demografia_sexo = generar_grafica_demografia_sexo(metricas['demograficos']['D1'], evento.get('nombre', 'Evento'))
+    grafica_demografia_grupoetario = generar_grafica_demografia_grupoetario(metricas['demograficos']['D2'], evento.get('nombre', 'Evento'))
+
+    return render_template('metrica_avanzada_v2.html',
+        evento=evento,
+        metricas=metricas,
+        grafica_perfil=grafica_perfil,
+        grafica_region=grafica_region,
+        grafica_spider=grafica_spider,
+        grafica_demografia_sexo=grafica_demografia_sexo,
+        grafica_demografia_grupoetario=grafica_demografia_grupoetario)
 
 
 def calcular_alfa_cronbach(respuestas):
@@ -6182,6 +6321,77 @@ def generar_grafica_demografia_grupoetario(edad_data, evento_nombre):
     img_buffer.seek(0)
     img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
     plt.close() # Cierra la figura para liberar memoria
+
+    return f"data:image/png;base64,{img_base64}"
+
+
+def generar_grafica_spider_v2(respuestas, evento_nombre):
+    """
+    Genera una gráfica radial (de araña) con la evaluación del evento académico (encuesta_v2).
+    Usa E1-E5: Pertinencia, Claridad, Actualización, Dominio, Organización.
+    """
+    if not respuestas:
+        return None
+
+    respuestas_data_list = [r.get('respuestas', {}) for r in respuestas]
+    df = pd.DataFrame(respuestas_data_list)
+
+    for col in ['E1', 'E2', 'E3', 'E4', 'E5']:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+        else:
+            df[col] = np.nan
+
+    df.dropna(subset=['E1', 'E2', 'E3', 'E4', 'E5'], inplace=True)
+
+    if df.empty:
+        return None
+
+    categories = [
+        f'Pertinencia\n({df["E1"].mean():.1f})',
+        f'Claridad\n({df["E2"].mean():.1f})',
+        f'Actualización\n({df["E3"].mean():.1f})',
+        f'Dominio\n({df["E4"].mean():.1f})',
+        f'Organización\n({df["E5"].mean():.1f})'
+    ]
+
+    values = [df['E1'].mean(), df['E2'].mean(), df['E3'].mean(), df['E4'].mean(), df['E5'].mean()]
+    values = [0 if pd.isna(v) else v for v in values]
+
+    num_vars = len(categories)
+    angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
+    values = values + values[:1]
+    angles = angles + angles[:1]
+
+    fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(polar=True))
+
+    ax.plot(angles, values, color='#0058A6', linewidth=2, linestyle='solid', label='Promedio General')
+    ax.fill(angles, values, color='#0058A6', alpha=0.25)
+
+    ax.set_theta_offset(np.pi / 2)
+    ax.set_theta_direction(-1)
+    ax.set_xticks(angles[:-1])
+    ax.set_xticklabels(categories, fontsize=10, fontweight='bold', wrap=True)
+    ax.set_ylim(1, 5)
+    ax.set_yticks(np.arange(1, 6))
+    ax.set_yticklabels([f'{i}' for i in np.arange(1, 6)], color="gray", size=8)
+    ax.tick_params(axis='y', pad=10)
+
+    ax.set_title('Evaluación del Evento Académico',
+                 fontsize=14, fontweight='bold', pad=20)
+
+    plt.text(0.5, 1.2, evento_nombre,
+             horizontalalignment='center', verticalalignment='center',
+             transform=ax.transAxes, fontsize=12, style='italic')
+
+    ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1))
+    plt.tight_layout()
+
+    img_buffer = io.BytesIO()
+    plt.savefig(img_buffer, format='png', dpi=300, bbox_inches='tight')
+    img_buffer.seek(0)
+    img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
+    plt.close()
 
     return f"data:image/png;base64,{img_base64}"
 

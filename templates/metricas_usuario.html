@@ -20,7 +20,7 @@
                                         Métricas e indicadores de eventos
                                     </h2>
                                     <p class="text-sm text-gray-600">
-                                        Solo se muestran los eventos finalizados y cerrados
+                                        Solo se muestran eventos finalizados o cerrados
                                     </p>
                                 </div>
                 
@@ -141,6 +141,17 @@
                                             <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
                                                 {{ evento.unidad_ejecutora }}
                                             </span>
+{% if evento.estado_evento == 'cerrado' %}
+                                            <br />
+                                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-red-100 text-red-800">
+                                                Cerrado
+                                            </span>
+{% elif evento.estado_evento == 'publicado' %}
+                                            <br />
+                                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-green-100 text-green-800">
+                                                Finalizado
+                                            </span>
+{% endif %}
                                         </div>
                                     </td>
                                     <td class="size-px whitespace-nowrap text-center">
@@ -174,12 +185,24 @@
                                     </td>
                                     <td class="size-px whitespace-nowrap">
                                         <div class="px-6 py-2">
+                                            <a class="inline-flex items-center gap-x-1 text-sm text-gray-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('exportar_csv', codigo_evento=evento.codigo) }}">
+                                                Participantes
+                                            </a><br />
+{% if evento.instrumento == 'encuesta_v2' %}
+                                            <a class="inline-flex items-center gap-x-1 text-sm text-pink-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('exportar_encuesta_v2_csv', codigo_evento=evento.codigo) }}">
+                                                Encuesta v2
+                                            </a><br />
+                                            <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('informe_avanzado_v2', codigo_evento=evento.codigo) }}">
+                                                Informe v2
+                                            </a><br />
+{% else %}
                                             <a class="inline-flex items-center gap-x-1 text-sm text-pink-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('exportar_encuesta_csv', codigo_evento=evento.codigo) }}">
-                                                Datos brutos
+                                                Encuesta
                                             </a><br />
                                             <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('informe_avanzado', codigo_evento=evento.codigo) }}">
-                                                Informe avanzado
+                                                Informe
                                             </a><br />
+{% endif %}
                                         </div>
                                     </td>
                                 </tr>
