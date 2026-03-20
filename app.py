@@ -5768,7 +5768,8 @@ def informe_avanzado_v2(codigo_evento):
         grafica_spider=grafica_spider,
         grafica_demografia_sexo=grafica_demografia_sexo,
         grafica_demografia_grupoetario=grafica_demografia_grupoetario,
-        alfa_cronbach=calcular_alfa_cronbach_v2(respuestas_validas))
+        alfa_cronbach=calcular_alfa_cronbach_v2(respuestas_validas),
+        alfa_cronbach_global=calcular_alfa_cronbach_v2_global())
 
 
 def calcular_alfa_cronbach_v2(respuestas):
@@ -5779,6 +5780,43 @@ def calcular_alfa_cronbach_v2(respuestas):
         return None
 
     respuestas_data_list = [r.get('respuestas', {}) for r in respuestas]
+    df = pd.DataFrame(respuestas_data_list)
+    items_e = [f'E{i}' for i in range(1, 6)]
+
+    if not all(col in df.columns for col in items_e):
+        return None
+
+    df_items = df[items_e]
+    for col in items_e:
+        df_items[col] = pd.to_numeric(df_items[col], errors='coerce')
+    df_items.dropna(inplace=True)
+
+    if df_items.empty or len(df_items.columns) < 2:
+        return None
+
+    k = len(items_e)
+    variances_item = df_items.var(axis=0, ddof=1)
+    sum_variances_item = variances_item.sum()
+    total_score = df_items.sum(axis=1)
+    variance_total_score = total_score.var(ddof=1)
+
+    if variance_total_score == 0:
+        return 1.0
+
+    alpha = (k / (k - 1)) * (1 - (sum_variances_item / variance_total_score))
+    return round(alpha, 2)
+
+
+def calcular_alfa_cronbach_v2_global():
+    """
+    Calcula el Alfa de Cronbach global para E1-E5 usando TODAS las encuestas_v2
+    de toda la plataforma.
+    """
+    todas = list(collection_encuestas_v2.find({}))
+    if not todas:
+        return None
+
+    respuestas_data_list = [r.get('respuestas', {}) for r in todas]
     df = pd.DataFrame(respuestas_data_list)
     items_e = [f'E{i}' for i in range(1, 6)]
 
