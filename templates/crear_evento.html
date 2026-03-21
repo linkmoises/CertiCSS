@@ -182,8 +182,7 @@
                         <div class="sm:col-span-9">
                             <div class="flex items-center mt-2.5">
                                 <input type="checkbox" id="checkin_masivo" name="checkin_masivo"
-                                    class="shrink-0 border-gray-200 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
-                                    {{ 'checked' if prefill.checkin_masivo else '' }}>
+                                    class="shrink-0 border-gray-200 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800">
                                 <label for="checkin_masivo" class="text-sm text-gray-500 ms-3 dark:text-neutral-400">
                                     Habilitar sistema de asistencia controlada
                                 </label>
@@ -206,8 +205,7 @@
                         <div class="sm:col-span-9">
                             <div class="flex items-center mt-2.5">
                                 <input type="checkbox" id="concurso_poster" name="concurso_poster"
-                                    class="shrink-0 border-gray-200 rounded text-purple-600 focus:ring-purple-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-purple-500 dark:checked:border-purple-500 dark:focus:ring-offset-gray-800"
-                                    {{ 'checked' if prefill.concurso_poster else '' }}>
+                                    class="shrink-0 border-gray-200 rounded text-purple-600 focus:ring-purple-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-purple-500 dark:checked:border-purple-500 dark:focus:ring-offset-gray-800">
                                 <label for="concurso_poster" class="text-sm text-gray-500 ms-3 dark:text-neutral-400">
                                     Habilitar concurso de investigación con sistema de evaluación por jurados
                                 </label>
@@ -230,8 +228,7 @@
                         <div class="sm:col-span-9">
                             <div class="flex items-center mt-2.5">
                                 <input type="checkbox" id="registro_abierto" name="registro_abierto"
-                                    class="shrink-0 border-gray-200 rounded text-green-600 focus:ring-green-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-green-500 dark:checked:border-green-500 dark:focus:ring-offset-gray-800"
-                                    {{ 'checked' if prefill.registro_abierto else '' }}>
+                                    class="shrink-0 border-gray-200 rounded text-green-600 focus:ring-green-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-green-500 dark:checked:border-green-500 dark:focus:ring-offset-gray-800">
                                 <label for="registro_abierto" class="text-sm text-gray-500 ms-3 dark:text-neutral-400">
                                     Habilitar registro abierto para colaboradores de la CSS en actividades acreditadas
                                 </label>
@@ -773,6 +770,23 @@
         if (unidadPrefill) {
             actualizarUnidades();
         }
+
+        // Auto-fill end date +1 hour when start date changes
+        const fechaInicio = document.getElementById("fecha_inicio");
+        const fechaFin = document.getElementById("fecha_fin");
+
+        fechaInicio.addEventListener("change", function() {
+            if (fechaInicio.value) {
+                const startDate = new Date(fechaInicio.value);
+                startDate.setHours(startDate.getHours() + 1);
+                const year = startDate.getFullYear();
+                const month = String(startDate.getMonth() + 1).padStart(2, '0');
+                const day = String(startDate.getDate()).padStart(2, '0');
+                const hours = String(startDate.getHours()).padStart(2, '0');
+                const minutes = String(startDate.getMinutes()).padStart(2, '0');
+                fechaFin.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+            }
+        });
     });
 </script>
 </body>
