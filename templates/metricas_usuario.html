@@ -195,12 +195,18 @@
                                             <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('informe_avanzado_v2', codigo_evento=evento.codigo) }}">
                                                 Informe v2
                                             </a><br />
+                                            <a class="inline-flex items-center gap-x-1 text-sm text-purple-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('tablero_metricas_lms_evento', codigo_evento=evento.codigo) }}">
+                                                LMS
+                                            </a><br />
 {% else %}
                                             <a class="inline-flex items-center gap-x-1 text-sm text-pink-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('exportar_encuesta_csv', codigo_evento=evento.codigo) }}">
                                                 Encuesta
                                             </a><br />
                                             <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('informe_avanzado', codigo_evento=evento.codigo) }}">
                                                 Informe
+                                            </a><br />
+                                            <a class="inline-flex items-center gap-x-1 text-sm text-purple-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('tablero_metricas_lms_evento', codigo_evento=evento.codigo) }}">
+                                                LMS
                                             </a><br />
 {% endif %}
                                         </div>
