@@ -3905,7 +3905,7 @@ def mis_metricas(page=1):
         **filtro_usuario,
         "$or": [
             {"estado_evento": "cerrado"},
-            {"estado_evento": "publicado"}
+            {"estado_evento": "publicado", "fecha_fin": {"$lte": datetime.now()}}
         ]
     }
 
