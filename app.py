@@ -2913,10 +2913,9 @@ def crear_evento():
             'cupos': request.args.get('cupos', ''),
             'carga_horaria': request.args.get('carga_horaria', ''),
             'descripcion': request.args.get('descripcion', ''),
-            'checkin_masivo': request.args.get('checkin_masivo', False),
-            'concurso_poster': request.args.get('concurso_poster', False),
-            'registro_abierto': request.args.get('registro_abierto', False),
-            'avales': request.args.getlist('avales'),
+            'checkin_masivo': request.args.get('checkin_masivo', '') == 'True',
+            'concurso_poster': request.args.get('concurso_poster', '') == 'True',
+            'registro_abierto': request.args.get('registro_abierto', '') == 'True',
         }
 
     if request.method == 'POST':
@@ -3062,8 +3061,6 @@ def copiar_evento(codigo_evento):
         'checkin_masivo': evento.get('checkin_masivo', False),
         'concurso_poster': evento.get('concurso_poster', False),
         'registro_abierto': evento.get('registro_abierto', False),
-        'avales': evento.get('avales', []),
-        'instrumento': evento.get('instrumento', 'encuesta_v2'),
     }
     
     return redirect(url_for('crear_evento', **campos_copiar))
