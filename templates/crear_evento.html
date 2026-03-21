@@ -12,10 +12,10 @@
             <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-7 dark:bg-neutral-800">
                 <div class="mb-8">
                     <h2 class="text-xl font-bold text-gray-800 dark:text-neutral-200">
-                        Nuevo evento
+                        {{ 'Copiar evento' if prefill else 'Nuevo evento' }}
                     </h2>
                     <p class="text-sm text-gray-600 dark:text-neutral-400">
-                        Añadir nuevo evento académico
+                        {{ 'Copiar datos de evento existente' if prefill else 'Añadir nuevo evento académico' }}
                     </p>
                 </div>
 
@@ -49,7 +49,8 @@
                         <div class="sm:col-span-9">
                             <input id="nombre" name="nombre" type="text"
                                 class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
-                                placeholder="Título de la actividad docente...">
+                                placeholder="Título de la actividad docente..."
+                                value="{{ prefill.nombre | default('') }}">
                         </div>
                         <!-- End Col -->
 
@@ -65,19 +66,19 @@
                                 class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
                                 required>
                                 <option value="">Seleccione una provincia / región / unidad administrativa</option>
-                                <option value="administrativas">Direcciones / Departamentos / Coordinaciones / Programas
+                                <option value="administrativas" {{ 'selected' if prefill.region == 'administrativas' else '' }}>Direcciones / Departamentos / Coordinaciones / Programas
                                 </option>
-                                <option value="panama">Panamá Metro</option>
-                                <option value="sanmiguelito">San Miguelito</option>
-                                <option value="panamaoeste">Panamá Oeste</option>
-                                <option value="panamaeste">Panamá Este</option>
-                                <option value="bocasdeltoro">Bocas del Toro</option>
-                                <option value="cocle">Coclé</option>
-                                <option value="colon">Colón</option>
-                                <option value="chiriqui">Chiriquí</option>
-                                <option value="herrera">Herrera</option>
-                                <option value="lossantos">Los Santos</option>
-                                <option value="veraguas">Veraguas</option>
+                                <option value="panama" {{ 'selected' if prefill.region == 'panama' else '' }}>Panamá Metro</option>
+                                <option value="sanmiguelito" {{ 'selected' if prefill.region == 'sanmiguelito' else '' }}>San Miguelito</option>
+                                <option value="panamaoeste" {{ 'selected' if prefill.region == 'panamaoeste' else '' }}>Panamá Oeste</option>
+                                <option value="panamaeste" {{ 'selected' if prefill.region == 'panamaeste' else '' }}>Panamá Este</option>
+                                <option value="bocasdeltoro" {{ 'selected' if prefill.region == 'bocasdeltoro' else '' }}>Bocas del Toro</option>
+                                <option value="cocle" {{ 'selected' if prefill.region == 'cocle' else '' }}>Coclé</option>
+                                <option value="colon" {{ 'selected' if prefill.region == 'colon' else '' }}>Colón</option>
+                                <option value="chiriqui" {{ 'selected' if prefill.region == 'chiriqui' else '' }}>Chiriquí</option>
+                                <option value="herrera" {{ 'selected' if prefill.region == 'herrera' else '' }}>Herrera</option>
+                                <option value="lossantos" {{ 'selected' if prefill.region == 'lossantos' else '' }}>Los Santos</option>
+                                <option value="veraguas" {{ 'selected' if prefill.region == 'veraguas' else '' }}>Veraguas</option>
                             </select>
                         </div>
                         <!-- End Col -->
@@ -91,7 +92,7 @@
                         <div class="sm:col-span-9">
                             <select id="unidad_ejecutora" name="unidad_ejecutora"
                                 class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
-                                required>
+                                required data-prefill="{{ prefill.unidad_ejecutora | default('') }}">
                                 <option value="">Seleccione una unidad ejecutora</option>
                             </select>
                         </div>
@@ -106,7 +107,8 @@
                         <div class="sm:col-span-9">
                             <input id="lugar" name="lugar" type="text"
                                 class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
-                                placeholder="Sitio donde se realizará el evento...">
+                                placeholder="Sitio donde se realizará el evento..."
+                                value="{{ prefill.lugar | default('') }}">
                         </div>
                         <!-- End Col -->
 
@@ -120,10 +122,10 @@
                                 class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
                                 id="modalidad" name="modalidad" required>
                                 <option value="">Seleccione la modalidad del evento académico</option>
-                                <option value="Presencial">Presencial</option>
-                                <option value="Híbrida">Híbrida</option>
-                                <option value="Virtual asincrónica">Virtual asincrónica</option>
-                                <option value="Virtual sincrónica">Virtual sincrónica</option>
+                                <option value="Presencial" {{ 'selected' if prefill.modalidad == 'Presencial' else '' }}>Presencial</option>
+                                <option value="Híbrida" {{ 'selected' if prefill.modalidad == 'Híbrida' else '' }}>Híbrida</option>
+                                <option value="Virtual asincrónica" {{ 'selected' if prefill.modalidad == 'Virtual asincrónica' else '' }}>Virtual asincrónica</option>
+                                <option value="Virtual sincrónica" {{ 'selected' if prefill.modalidad == 'Virtual sincrónica' else '' }}>Virtual sincrónica</option>
                             </select>
                         </div>
 
@@ -139,17 +141,17 @@
                                 class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
                                 id="tipo" name="tipo" required>
                                 <option value="">Seleccione la categoría del evento</option>
-                                <option value="Congreso">Congreso</option>
-                                <option value="Seminario">Seminario</option>
-                                <option value="Jornada">Jornada</option>
-                                <option value="Sesión Docente">Sesión Docente</option>
-                                <option value="Simposio">Simposio</option>
-                                <option value="Mesa Redonda">Mesa Redonda</option>
-                                <option value="Taller">Taller</option>
-                                <option value="Curso">Curso</option>
-                                <option value="Diplomado">Diplomado</option>
-                                <option value="Inducción">Inducción</option>
-                                <option value="Seminario-Taller">Seminario-Taller</option>
+                                <option value="Congreso" {{ 'selected' if prefill.tipo == 'Congreso' else '' }}>Congreso</option>
+                                <option value="Seminario" {{ 'selected' if prefill.tipo == 'Seminario' else '' }}>Seminario</option>
+                                <option value="Jornada" {{ 'selected' if prefill.tipo == 'Jornada' else '' }}>Jornada</option>
+                                <option value="Sesión Docente" {{ 'selected' if prefill.tipo == 'Sesión Docente' else '' }}>Sesión Docente</option>
+                                <option value="Simposio" {{ 'selected' if prefill.tipo == 'Simposio' else '' }}>Simposio</option>
+                                <option value="Mesa Redonda" {{ 'selected' if prefill.tipo == 'Mesa Redonda' else '' }}>Mesa Redonda</option>
+                                <option value="Taller" {{ 'selected' if prefill.tipo == 'Taller' else '' }}>Taller</option>
+                                <option value="Curso" {{ 'selected' if prefill.tipo == 'Curso' else '' }}>Curso</option>
+                                <option value="Diplomado" {{ 'selected' if prefill.tipo == 'Diplomado' else '' }}>Diplomado</option>
+                                <option value="Inducción" {{ 'selected' if prefill.tipo == 'Inducción' else '' }}>Inducción</option>
+                                <option value="Seminario-Taller" {{ 'selected' if prefill.tipo == 'Seminario-Taller' else '' }}>Seminario-Taller</option>
                             </select>
                         </div>
                         <!-- End Col -->
@@ -164,7 +166,8 @@
                         <div class="sm:col-span-9">
                             <input
                                 class="py-2 px-3 pe-11 border-gray-200 rounded-lg inline-block text-gray-800 mt-2.5 dark:text-neutral-200"
-                                type="text" inputmode="numeric" pattern="[0-9]*" id="cupos" name="cupos" required>
+                                type="text" inputmode="numeric" pattern="[0-9]*" id="cupos" name="cupos" required
+                                value="{{ prefill.cupos | default('') }}">
                         </div>
                         <!-- End Col -->
 
@@ -179,7 +182,8 @@
                         <div class="sm:col-span-9">
                             <div class="flex items-center mt-2.5">
                                 <input type="checkbox" id="checkin_masivo" name="checkin_masivo"
-                                    class="shrink-0 border-gray-200 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800">
+                                    class="shrink-0 border-gray-200 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
+                                    {{ 'checked' if prefill.checkin_masivo else '' }}>
                                 <label for="checkin_masivo" class="text-sm text-gray-500 ms-3 dark:text-neutral-400">
                                     Habilitar sistema de asistencia controlada
                                 </label>
@@ -202,7 +206,8 @@
                         <div class="sm:col-span-9">
                             <div class="flex items-center mt-2.5">
                                 <input type="checkbox" id="concurso_poster" name="concurso_poster"
-                                    class="shrink-0 border-gray-200 rounded text-purple-600 focus:ring-purple-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-purple-500 dark:checked:border-purple-500 dark:focus:ring-offset-gray-800">
+                                    class="shrink-0 border-gray-200 rounded text-purple-600 focus:ring-purple-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-purple-500 dark:checked:border-purple-500 dark:focus:ring-offset-gray-800"
+                                    {{ 'checked' if prefill.concurso_poster else '' }}>
                                 <label for="concurso_poster" class="text-sm text-gray-500 ms-3 dark:text-neutral-400">
                                     Habilitar concurso de investigación con sistema de evaluación por jurados
                                 </label>
@@ -225,7 +230,8 @@
                         <div class="sm:col-span-9">
                             <div class="flex items-center mt-2.5">
                                 <input type="checkbox" id="registro_abierto" name="registro_abierto"
-                                    class="shrink-0 border-gray-200 rounded text-green-600 focus:ring-green-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-green-500 dark:checked:border-green-500 dark:focus:ring-offset-gray-800">
+                                    class="shrink-0 border-gray-200 rounded text-green-600 focus:ring-green-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-green-500 dark:checked:border-green-500 dark:focus:ring-offset-gray-800"
+                                    {{ 'checked' if prefill.registro_abierto else '' }}>
                                 <label for="registro_abierto" class="text-sm text-gray-500 ms-3 dark:text-neutral-400">
                                     Habilitar registro abierto para colaboradores de la CSS en actividades acreditadas
                                 </label>
@@ -250,7 +256,8 @@
                             <input
                                 class="py-2 px-3 pe-11 border-gray-200 rounded-lg inline-block text-gray-800 mt-2.5 dark:text-neutral-200"
                                 type="text" inputmode="numeric" pattern="[0-9]*" id="carga_horaria" name="carga_horaria"
-                                required>
+                                required
+                                value="{{ prefill.carga_horaria | default('') }}">
                         </div>
                         <!-- End Col -->
 
@@ -295,7 +302,7 @@
                         <div class="sm:col-span-9">
                             <textarea id="descripcion" name="descripcion" maxlength="255"
                                 class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
-                                rows="6" placeholder="Breve descripción de la actividad docente..."></textarea>
+                                rows="6" placeholder="Breve descripción de la actividad docente...">{{ prefill.descripcion | default('') }}</textarea>
                             <div class="mt-1 text-right">
                                 <span id="contador_descripcion" class="text-xs text-gray-500">0/255</span>
                             </div>
@@ -317,7 +324,8 @@
                             <!-- Colegio Médico de Panamá -->
                             <div class="flex items-center mt-2.5">
                                 <input type="checkbox" id="aval-cmp" name="aval" value="aval-cmp"
-                                    class="shrink-0 border-gray-200 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800">
+                                    class="shrink-0 border-gray-200 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
+                                    {{ 'checked' if 'aval-cmp' in (prefill.avales | list) else '' }}>
                                 <label for="aval-cmp" class="text-sm text-gray-500 ms-3 dark:text-neutral-400">
                                     Colegio Médico de Panamá
                                 </label>
@@ -326,7 +334,8 @@
                             <!-- Asociación Odontológica Panameña -->
                             <div class="flex items-center mt-2.5">
                                 <input type="checkbox" id="aval-aop" name="aval" value="aval-aop"
-                                    class="shrink-0 border-gray-200 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800">
+                                    class="shrink-0 border-gray-200 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
+                                    {{ 'checked' if 'aval-aop' in (prefill.avales | list) else '' }}>
                                 <label for="aval-aop" class="text-sm text-gray-500 ms-3 dark:text-neutral-400">
                                     Asociación Odontológica Panameña
                                 </label>
@@ -335,7 +344,8 @@
                             <!-- Asociación Nacional de Enfermeras de Panamá -->
                             <div class="flex items-center mt-2.5">
                                 <input type="checkbox" id="aval-anep" name="aval" value="aval-anep"
-                                    class="shrink-0 border-gray-200 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800">
+                                    class="shrink-0 border-gray-200 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
+                                    {{ 'checked' if 'aval-anep' in (prefill.avales | list) else '' }}>
                                 <label for="aval-anep" class="text-sm text-gray-500 ms-3 dark:text-neutral-400">
                                     Asociación Nacional de Enfermeras de Panamá
                                 </label>
@@ -344,7 +354,8 @@
                             <!-- Universidad de Panamá - Facultad de Medicina -->
                             <div class="flex items-center mt-2.5">
                                 <input type="checkbox" id="aval-facmed" name="aval" value="aval-facmed"
-                                    class="shrink-0 border-gray-200 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800">
+                                    class="shrink-0 border-gray-200 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
+                                    {{ 'checked' if 'aval-facmed' in (prefill.avales | list) else '' }}>
                                 <label for="aval-facmed" class="text-sm text-gray-500 ms-3 dark:text-neutral-400">
                                     Universidad de Panamá - Facultad de Medicina
                                 </label>
@@ -742,6 +753,7 @@
     function actualizarUnidades() {
         const provinciaSeleccionada = document.getElementById("region").value;
         const unidadSelect = document.getElementById("unidad_ejecutora");
+        const unidadPrefill = unidadSelect.getAttribute('data-prefill');
 
         // Limpiar opciones previas
         unidadSelect.innerHTML = '<option value="">-- Selecciona una unidad --</option>';
@@ -751,10 +763,21 @@
                 const option = document.createElement("option");
                 option.value = unidad;
                 option.textContent = unidad;
+                if (unidadPrefill && unidad === unidadPrefill) {
+                    option.selected = true;
+                }
                 unidadSelect.appendChild(option);
             });
         }
     }
+
+    // Pre-fill unidad ejecutora on page load if prefill data exists
+    document.addEventListener('DOMContentLoaded', function() {
+        const unidadPrefill = document.getElementById("unidad_ejecutora").getAttribute('data-prefill');
+        if (unidadPrefill) {
+            actualizarUnidades();
+        }
+    });
 </script>
 </body>
 

@@ -2901,6 +2901,24 @@ def exportar_csv(codigo_evento):
 @app.route('/tablero/eventos/nuevo', methods=['GET', 'POST'])
 @login_required
 def crear_evento():
+    prefill = {}
+    if request.args:
+        prefill = {
+            'nombre': request.args.get('nombre', ''),
+            'region': request.args.get('region', ''),
+            'unidad_ejecutora': request.args.get('unidad_ejecutora', ''),
+            'lugar': request.args.get('lugar', ''),
+            'modalidad': request.args.get('modalidad', ''),
+            'tipo': request.args.get('tipo', ''),
+            'cupos': request.args.get('cupos', ''),
+            'carga_horaria': request.args.get('carga_horaria', ''),
+            'descripcion': request.args.get('descripcion', ''),
+            'checkin_masivo': request.args.get('checkin_masivo', False),
+            'concurso_poster': request.args.get('concurso_poster', False),
+            'registro_abierto': request.args.get('registro_abierto', False),
+            'avales': request.args.getlist('avales'),
+        }
+
     if request.method == 'POST':
         nombre = request.form['nombre']
         region = request.form['region']
@@ -3016,7 +3034,39 @@ def crear_evento():
         log_event(f"Usuario [{current_user.email}] ha creado el evento {codigo} exitosamente.")
         return redirect(url_for('mis_eventos'))  # Redirigir a la lista de eventos
 
-    return render_template('crear_evento.html')
+    return render_template('crear_evento.html', prefill=prefill)
+
+
+###
+### Copiar evento
+###
+@app.route('/tablero/eventos/<codigo_evento>/copiar')
+@login_required
+def copiar_evento(codigo_evento):
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    
+    if not evento:
+        flash("Evento no encontrado", "danger")
+        return redirect(url_for('listar_eventos'))
+    
+    campos_copiar = {
+        'nombre': evento.get('nombre', ''),
+        'region': evento.get('region', ''),
+        'unidad_ejecutora': evento.get('unidad_ejecutora', ''),
+        'lugar': evento.get('lugar', ''),
+        'modalidad': evento.get('modalidad', ''),
+        'tipo': evento.get('tipo', ''),
+        'cupos': evento.get('cupos', ''),
+        'carga_horaria': evento.get('carga_horaria', ''),
+        'descripcion': evento.get('descripcion', ''),
+        'checkin_masivo': evento.get('checkin_masivo', False),
+        'concurso_poster': evento.get('concurso_poster', False),
+        'registro_abierto': evento.get('registro_abierto', False),
+        'avales': evento.get('avales', []),
+        'instrumento': evento.get('instrumento', 'encuesta_v2'),
+    }
+    
+    return redirect(url_for('crear_evento', **campos_copiar))
 
 
 ###
