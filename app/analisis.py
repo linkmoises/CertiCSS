@@ -105,6 +105,5 @@ def analisis_evento(codigo_evento):
         swot=swot_data,
         incidences=incidences,
         puede_editar=puede_editar,
-        mensaje=mensaje,
         active_section='metricas'
     )
