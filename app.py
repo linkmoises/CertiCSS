@@ -48,6 +48,13 @@ def format_date(value, format='%d/%m/%y'):
 # Registrar el filtro en la aplicación
 app.jinja_env.filters['date'] = format_date
 
+def nl2br(text):
+    if not text:
+        return ''
+    return text.replace('\n', '<br>')
+
+app.jinja_env.filters['nl2br'] = nl2br
+
 
 ###
 ### Configuraciones comunes

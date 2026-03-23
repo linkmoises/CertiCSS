@@ -258,8 +258,8 @@
                                 </thead>
                                 <tbody class="divide-y divide-gray-200">
                                 <tr>
-                                    <td class="px-4 py-2 border-r text-gray-700">{{ evento.fortalezas | default("N/D") if evento.fortalezas else "N/D" }}</td>
-                                    <td class="px-4 py-2 text-gray-700">{{ evento.oportunidades | default("N/D") if evento.oportunidades else "N/D" }}</td>
+                                    <td class="px-4 py-2 border-r text-gray-700">{{ (evento.fortalezas | nl2br) | safe if evento.fortalezas else "N/D" }}</td>
+                                    <td class="px-4 py-2 text-gray-700">{{ (evento.oportunidades | nl2br) | safe if evento.oportunidades else "N/D" }}</td>
                                 </tr>
                                 </tbody>
                                 <thead class="bg-gray-100">
@@ -270,8 +270,8 @@
                                 </thead>
                                 <tbody class="divide-y divide-gray-200">
                                 <tr>
-                                    <td class="px-4 py-2 border-r text-gray-700">{{ evento.debilidades | default("N/D") if evento.debilidades else "N/D" }}</td>
-                                    <td class="px-4 py-2 text-gray-700">{{ evento.amenazas | default("N/D") if evento.amenazas else "N/D" }}</td>
+                                    <td class="px-4 py-2 border-r text-gray-700">{{ (evento.debilidades | nl2br) | safe if evento.debilidades else "N/D" }}</td>
+                                    <td class="px-4 py-2 text-gray-700">{{ (evento.amenazas | nl2br) | safe if evento.amenazas else "N/D" }}</td>
                                 </tr>
                                 </tbody>
                             </table>
