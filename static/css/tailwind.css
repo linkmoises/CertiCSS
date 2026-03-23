@@ -1470,6 +1470,10 @@ select {
   top: 100%;
 }
 
+.right-2 {
+  right: 0.5rem;
+}
+
 .z-10 {
   z-index: 10;
 }
@@ -4926,6 +4930,14 @@ select {
 
   .sm\:col-span-6 {
     grid-column: span 6 / span 6;
+  }
+
+  .sm\:col-span-2 {
+    grid-column: span 2 / span 2;
+  }
+
+  .sm\:col-span-7 {
+    grid-column: span 7 / span 7;
   }
 
   .sm\:mx-0 {

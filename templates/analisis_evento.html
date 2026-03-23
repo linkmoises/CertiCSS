@@ -120,17 +120,29 @@
                         <div class="sm:col-span-12" id="incidences-container">
                             {% if incidences %}
                             {% for incidencia in incidences %}
-                            <div class="incidencia-row mb-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                            <div class="incidencia-row mb-4 p-4 bg-gray-50 border border-gray-200 rounded-lg relative">
+                                {% if puede_editar %}
+                                <button type="button" onclick="eliminarIncidencia(this)" class="absolute top-2 right-2 text-red-500 hover:text-red-700 p-1">
+                                    <svg class="size-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                </button>
+                                {% endif %}
                                 <div class="grid sm:grid-cols-12 gap-2 sm:gap-4">
                                     <div class="sm:col-span-3">
                                         <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
-                                            Tipo de incidencia
+                                            Categoría
                                         </label>
-                                        <input type="text" name="incidencia_tipo" value="{{ incidencia.tipo }}"
-                                            class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500"
-                                            placeholder="Tipo de incidencia" {% if not puede_editar %}disabled{% endif %}>
+                                        <select name="incidencia_tipo"
+                                            class="py-2 px-3 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500"
+                                            {% if not puede_editar %}disabled{% endif %}>
+                                            <option value="">Seleccione categoría</option>
+                                            <option value="Técnica" {% if incidencia.tipo == 'Técnica' %}selected{% endif %}>Técnica</option>
+                                            <option value="Logística" {% if incidencia.tipo == 'Logística' %}selected{% endif %}>Logística</option>
+                                            <option value="Comunicación" {% if incidencia.tipo == 'Comunicación' %}selected{% endif %}>Comunicación</option>
+                                            <option value="Organizativa" {% if incidencia.tipo == 'Organizativa' %}selected{% endif %}>Organizativa</option>
+                                            <option value="Humana / Participantes" {% if incidencia.tipo == 'Humana / Participantes' %}selected{% endif %}>Humana / Participantes</option>
+                                        </select>
                                     </div>
-                                    <div class="sm:col-span-6">
+                                    <div class="sm:col-span-7">
                                         <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                             Descripción
                                         </label>
@@ -138,7 +150,7 @@
                                             class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
                                             rows="2" placeholder="Descripción de la incidencia" {% if not puede_editar %}disabled{% endif %}>{{ incidencia.descripcion }}</textarea>
                                     </div>
-                                    <div class="sm:col-span-3">
+                                    <div class="sm:col-span-2">
                                         <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                             Fecha
                                         </label>
@@ -152,17 +164,27 @@
                             {% endif %}
                             
                             <!-- Template for new incidence -->
-                            <div class="incidencia-row mb-4 p-4 bg-gray-50 border border-gray-200 rounded-lg hidden" id="incidencia-template">
+                            <div class="incidencia-row mb-4 p-4 bg-gray-50 border border-gray-200 rounded-lg relative hidden" id="incidencia-template">
+                                <button type="button" onclick="eliminarIncidencia(this)" class="absolute top-2 right-2 text-red-500 hover:text-red-700 p-1">
+                                    <svg class="size-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                </button>
                                 <div class="grid sm:grid-cols-12 gap-2 sm:gap-4">
                                     <div class="sm:col-span-3">
                                         <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
-                                            Tipo de incidencia
+                                            Categoría
                                         </label>
-                                        <input type="text" name="incidencia_tipo" value=""
-                                            class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500"
-                                            placeholder="Tipo de incidencia">
+                                        <select name="incidencia_tipo"
+                                            class="py-2 px-3 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500">
+                                            <option value="">Seleccione categoría</option>
+                                            <option value="Técnica">Técnica</option>
+                                            <option value="Logística">Logística</option>
+                                            <option value="Comunicación">Comunicación</option>
+                                            <option value="Organizativa">Organizativa</option>
+                                            <option value="Humana / Participantes">Humana / Participantes</option>
+                                            <option value="Humana / Participantes">Humana / Participantes</option>
+                                        </select>
                                     </div>
-                                    <div class="sm:col-span-6">
+                                    <div class="sm:col-span-7">
                                         <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                             Descripción
                                         </label>
@@ -170,7 +192,7 @@
                                             class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
                                             rows="2" placeholder="Descripción de la incidencia"></textarea>
                                     </div>
-                                    <div class="sm:col-span-3">
+                                    <div class="sm:col-span-2">
                                         <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                             Fecha
                                         </label>
@@ -196,8 +218,8 @@
 
                     <div class="mt-5 flex justify-end gap-x-2">
                         <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50"
-                            href="{{ url_for('mis_metricas') }}">
-                            Volver a Métricas
+                            href="{{ url_for('informe_avanzado_v2', codigo_evento=evento.codigo) if evento.informe_v2 else url_for('informe_avanzado', codigo_evento=evento.codigo) }}">
+                            Volver al Informe
                         </a>
                         {% if puede_editar %}
                         <button type="submit"
@@ -231,11 +253,16 @@
         clone.removeAttribute('id');
         
         // Reset values
-        clone.querySelector('input[name="incidencia_tipo"]').value = '';
+        clone.querySelector('select[name="incidencia_tipo"]').value = '';
         clone.querySelector('textarea[name="incidencia_descripcion"]').value = '';
         clone.querySelector('input[name="incidencia_fecha"]').value = new Date().toISOString().split('T')[0];
         
         container.appendChild(clone);
+    }
+    
+    function eliminarIncidencia(button) {
+        const row = button.closest('.incidencia-row');
+        row.remove();
     }
 </script>
 </body>
