@@ -1,0 +1,243 @@
+{% include 'tablero-header.html' %}
+
+{% include 'tablero-sidebar.html' %}
+
+<!-- CONTENIDO -->
+<div class="w-full lg:ps-64">
+    <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+
+        <!-- Card Section -->
+        <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+            <!-- Card -->
+            <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-7 dark:bg-neutral-800">
+                <div class="mb-8">
+                    <h2 class="text-xl font-bold text-gray-800 dark:text-neutral-200">
+                        Análisis del Evento
+                    </h2>
+                    <p class="text-sm text-gray-600 dark:text-neutral-400">
+                        Análisis FODA e Incidencias - {{ evento.nombre }}
+                    </p>
+                </div>
+
+                <!-- Mostrar mensajes -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div class="mb-4">
+                    <ul>
+                        {% for category, message in messages %}
+                        <li
+                            class="{{ 'p-2 text-sm bg-red-100 text-red-800 rounded-xl' if category == 'error' else 'p-2 text-sm bg-green-100 text-green-800 rounded-xl' }}">
+                            {{ message }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                {% endwith %}
+
+                {% if not puede_editar %}
+                <div class="p-4 mb-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+                    <div class="flex items-center gap-2">
+                        <svg class="shrink-0 size-5 text-yellow-800" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                        <span class="text-sm text-yellow-800">{{ mensaje }}</span>
+                    </div>
+                </div>
+                {% endif %}
+
+                <form action="{{ url_for('analisis.analisis_evento', codigo_evento=evento.codigo) }}" method="post">
+                    <!-- Grid -->
+                    <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
+
+                        <!-- SWOT Section Title -->
+                        <div class="sm:col-span-12">
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-neutral-200 mt-4 mb-2">
+                                Análisis FODA
+                            </h3>
+                            <p class="text-sm text-gray-600 dark:text-neutral-400">
+                                Complete los campos del análisis FODA para el evento.
+                            </p>
+                        </div>
+
+                        <!-- Fortalezas -->
+                        <div class="sm:col-span-3">
+                            <label for="fortalezas" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                Fortalezas
+                            </label>
+                        </div>
+                        <div class="sm:col-span-9">
+                            <textarea id="fortalezas" name="fortalezas" maxlength="1000"
+                                class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                                rows="4" placeholder=" fortalezas del evento...">{{ swot.fortalezas | default('') }}</textarea>
+                        </div>
+
+                        <!-- Oportunidades -->
+                        <div class="sm:col-span-3">
+                            <label for="oportunidades" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                Oportunidades
+                            </label>
+                        </div>
+                        <div class="sm:col-span-9">
+                            <textarea id="oportunidades" name="oportunidades" maxlength="1000"
+                                class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                                rows="4" placeholder="Oportunidades del evento...">{{ swot.oportunidades | default('') }}</textarea>
+                        </div>
+
+                        <!-- Debilidades -->
+                        <div class="sm:col-span-3">
+                            <label for="debilidades" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                Debilidades
+                            </label>
+                        </div>
+                        <div class="sm:col-span-9">
+                            <textarea id="debilidades" name="debilidades" maxlength="1000"
+                                class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                                rows="4" placeholder="Debilidades del evento...">{{ swot.debilidades | default('') }}</textarea>
+                        </div>
+
+                        <!-- Amenazas -->
+                        <div class="sm:col-span-3">
+                            <label for="amenazas" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                Amenazas
+                            </label>
+                        </div>
+                        <div class="sm:col-span-9">
+                            <textarea id="amenazas" name="amenazas" maxlength="1000"
+                                class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                                rows="4" placeholder="Amenazas del evento...">{{ swot.amenazas | default('') }}</textarea>
+                        </div>
+
+                        <!-- Incidences Section Title -->
+                        <div class="sm:col-span-12">
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-neutral-200 mt-6 mb-2">
+                                Registro de Incidencias
+                            </h3>
+                            <p class="text-sm text-gray-600 dark:text-neutral-400">
+                                Documente las incidencias ocurridas durante el evento.
+                            </p>
+                        </div>
+
+                        <!-- Incidences Container -->
+                        <div class="sm:col-span-12" id="incidences-container">
+                            {% if incidences %}
+                            {% for incidencia in incidences %}
+                            <div class="incidencia-row mb-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                                <div class="grid sm:grid-cols-12 gap-2 sm:gap-4">
+                                    <div class="sm:col-span-3">
+                                        <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                            Tipo de incidencia
+                                        </label>
+                                        <input type="text" name="incidencia_tipo" value="{{ incidencia.tipo }}"
+                                            class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500"
+                                            placeholder="Tipo de incidencia" {% if not puede_editar %}disabled{% endif %}>
+                                    </div>
+                                    <div class="sm:col-span-6">
+                                        <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                            Descripción
+                                        </label>
+                                        <textarea name="incidencia_descripcion" maxlength="500"
+                                            class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
+                                            rows="2" placeholder="Descripción de la incidencia" {% if not puede_editar %}disabled{% endif %}>{{ incidencia.descripcion }}</textarea>
+                                    </div>
+                                    <div class="sm:col-span-3">
+                                        <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                            Fecha
+                                        </label>
+                                        <input type="date" name="incidencia_fecha" value="{{ incidencia.fecha }}"
+                                            class="py-2 px-3 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500"
+                                            {% if not puede_editar %}disabled{% endif %}>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% endif %}
+                            
+                            <!-- Template for new incidence -->
+                            <div class="incidencia-row mb-4 p-4 bg-gray-50 border border-gray-200 rounded-lg hidden" id="incidencia-template">
+                                <div class="grid sm:grid-cols-12 gap-2 sm:gap-4">
+                                    <div class="sm:col-span-3">
+                                        <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                            Tipo de incidencia
+                                        </label>
+                                        <input type="text" name="incidencia_tipo" value=""
+                                            class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500"
+                                            placeholder="Tipo de incidencia">
+                                    </div>
+                                    <div class="sm:col-span-6">
+                                        <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                            Descripción
+                                        </label>
+                                        <textarea name="incidencia_descripcion" maxlength="500"
+                                            class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
+                                            rows="2" placeholder="Descripción de la incidencia"></textarea>
+                                    </div>
+                                    <div class="sm:col-span-3">
+                                        <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                            Fecha
+                                        </label>
+                                        <input type="date" name="incidencia_fecha" value=""
+                                            class="py-2 px-3 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if puede_editar %}
+                        <div class="sm:col-span-12">
+                            <button type="button" onclick="agregarIncidencia()"
+                                class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
+                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                Agregar Incidencia
+                            </button>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                    <!-- End Grid -->
+
+                    <div class="mt-5 flex justify-end gap-x-2">
+                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50"
+                            href="{{ url_for('mis_metricas') }}">
+                            Volver a Métricas
+                        </a>
+                        {% if puede_editar %}
+                        <button type="submit"
+                            class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                            Guardar Análisis
+                        </button>
+                        {% endif %}
+                    </div>
+                </form>
+
+            </div>
+            <!-- End Card -->
+        </div>
+        <!-- End Card Section -->
+
+        {% include 'tablero-footer.html' %}
+
+    </div>
+</div>
+<!-- FIN CONTENIDO -->
+
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+<script>
+    function agregarIncidencia() {
+        const container = document.getElementById('incidences-container');
+        const template = document.getElementById('incidencia-template');
+        const clone = template.cloneNode(true);
+        
+        clone.classList.remove('hidden');
+        clone.removeAttribute('id');
+        
+        // Reset values
+        clone.querySelector('input[name="incidencia_tipo"]').value = '';
+        clone.querySelector('textarea[name="incidencia_descripcion"]').value = '';
+        clone.querySelector('input[name="incidencia_fecha"]').value = new Date().toISOString().split('T')[0];
+        
+        container.appendChild(clone);
+    }
+</script>
+</body>
+
+</html>

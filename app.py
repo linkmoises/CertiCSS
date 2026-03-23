@@ -21,11 +21,14 @@ from functools import wraps
 from app.helpers import generate_otp, generate_nanoid, generar_codigo_evento, obtener_codigo_unico, allowed_file, otp_storage
 from app.template_selection import determine_template_path, parse_event_date
 from app.logs import get_logger
+from app.analisis import analisis_bp, puede_editar_analisis
 
 # Inicializar logger
 logger = get_logger()
 
 app = Flask(__name__)
+
+app.register_blueprint(analisis_bp)
 
 # Filtro personalizado de fecha para plantillas
 def format_date(value, format='%d/%m/%y'):
@@ -5723,6 +5726,8 @@ def informe_avanzado(codigo_evento):
     # Calcular Net Promoter Score (NPS) CertiCSS
     nps_certicss = calcular_nps_certicss()
 
+    puede_editar = puede_editar_analisis(evento)
+
     return render_template('metrica_avanzada.html', 
         evento=evento,
         metricas=metricas,
@@ -5733,7 +5738,8 @@ def informe_avanzado(codigo_evento):
         grafica_demografia_grupoetario=grafica_demografia_grupoetario,
         alfa_cronbach=alfa_cronbach,
         nps=nps,
-        nps_certicss=nps_certicss)
+        nps_certicss=nps_certicss,
+        puede_editar_analisis=puede_editar)
 
 
 @app.route('/tablero/metricas/<codigo_evento>/informe_v2')
@@ -5814,6 +5820,8 @@ def informe_avanzado_v2(codigo_evento):
     grafica_demografia_sexo = generar_grafica_demografia_sexo(metricas['demograficos']['D1'], evento.get('nombre', 'Evento'))
     grafica_demografia_grupoetario = generar_grafica_demografia_grupoetario(metricas['demograficos']['D2'], evento.get('nombre', 'Evento'))
 
+    puede_editar = puede_editar_analisis(evento)
+
     return render_template('metrica_avanzada_v2.html',
         evento=evento,
         metricas=metricas,
@@ -5823,7 +5831,8 @@ def informe_avanzado_v2(codigo_evento):
         grafica_demografia_sexo=grafica_demografia_sexo,
         grafica_demografia_grupoetario=grafica_demografia_grupoetario,
         alfa_cronbach=calcular_alfa_cronbach_v2(respuestas_validas),
-        alfa_cronbach_global=calcular_alfa_cronbach_v2_global())
+        alfa_cronbach_global=calcular_alfa_cronbach_v2_global(),
+        puede_editar_analisis=puede_editar)
 
 
 def calcular_alfa_cronbach_v2(respuestas):
