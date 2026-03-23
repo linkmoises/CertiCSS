@@ -5627,17 +5627,27 @@ def informe_avanzado(codigo_evento):
         flash('Evento no encontrado', 'error')
         return redirect(url_for('home'))
 
-    # Obtener el total de participantes
-    total_participantes = collection_participantes.count_documents({
-        "codigo_evento": codigo_evento,
-        "rol": "participante"
-    })
+    # Obtener el total de unique participantes
+    total_participantes = len(collection_participantes.distinct(
+        "cedula",
+        {"codigo_evento": codigo_evento, "rol": "participante"}
+    ))
 
-    # Obtener todos los participantes del evento para generar gráfica de perfil
-    participantes = list(collection_participantes.find({
-        "codigo_evento": codigo_evento,
-        "rol": "participante"
-    }))
+    # Obtener unique participantes por cedula para gráfica
+    participantes_cedulas = collection_participantes.distinct(
+        "cedula",
+        {"codigo_evento": codigo_evento, "rol": "participante"}
+    )
+    
+    participantes = []
+    for cedula in participantes_cedulas:
+        participante = collection_participantes.find_one({
+            "codigo_evento": codigo_evento,
+            "cedula": cedula,
+            "rol": "participante"
+        })
+        if participante:
+            participantes.append(participante)
 
     # Generar gráfica de perfil profesional
     grafica_perfil = generar_grafica_perfil(participantes, evento.get('nombre', 'Evento'))
@@ -5733,7 +5743,7 @@ def informe_avanzado(codigo_evento):
     # Calcular Net Promoter Score (NPS) CertiCSS
     nps_certicss = calcular_nps_certicss()
 
-    puede_editar = puede_editar_analisis(evento)
+    puede_editar, _ = puede_editar_analisis(evento)
 
     return render_template('metrica_avanzada.html', 
         evento=evento,
@@ -5766,10 +5776,21 @@ def informe_avanzado_v2(codigo_evento):
         {"codigo_evento": codigo_evento, "rol": "participante"}
     ))
 
-    participantes = list(collection_participantes.find({
-        "codigo_evento": codigo_evento,
-        "rol": "participante"
-    }))
+    # Obtener unique participantes por cedula para gráficas
+    participantes_cedulas = collection_participantes.distinct(
+        "cedula",
+        {"codigo_evento": codigo_evento, "rol": "participante"}
+    )
+    
+    participantes = []
+    for cedula in participantes_cedulas:
+        participante = collection_participantes.find_one({
+            "codigo_evento": codigo_evento,
+            "cedula": cedula,
+            "rol": "participante"
+        })
+        if participante:
+            participantes.append(participante)
 
     grafica_perfil = generar_grafica_perfil(participantes, evento.get('nombre', 'Evento'))
     grafica_region = generar_grafica_region(participantes, evento.get('nombre', 'Evento'))
@@ -5827,7 +5848,7 @@ def informe_avanzado_v2(codigo_evento):
     grafica_demografia_sexo = generar_grafica_demografia_sexo(metricas['demograficos']['D1'], evento.get('nombre', 'Evento'))
     grafica_demografia_grupoetario = generar_grafica_demografia_grupoetario(metricas['demograficos']['D2'], evento.get('nombre', 'Evento'))
 
-    puede_editar = puede_editar_analisis(evento)
+    puede_editar, _ = puede_editar_analisis(evento)
 
     return render_template('metrica_avanzada_v2.html',
         evento=evento,

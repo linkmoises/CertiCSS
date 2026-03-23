@@ -10,23 +10,23 @@ from app import collection_eventos, collection_participantes
 
 def puede_editar_analisis(evento):
     if not evento:
-        return False
+        return False, "Evento no encontrado"
     
     if evento.get('estado_evento') == 'cerrado':
-        return False
+        return False, "El evento está cerrado y no permite ediciones"
     
     if evento.get('estado_evento') != 'publicado':
-        return False
+        return False, "El evento no está publicado"
     
     fecha_fin = evento.get('fecha_fin')
     if fecha_fin and isinstance(fecha_fin, datetime):
         if fecha_fin > datetime.now():
-            return False
+            return False, "El evento aún no ha finalizado"
     else:
-        return False
+        return False, "El evento no tiene fecha de finalización válida"
     
     if getattr(current_user, 'rol', None) == 'administrador':
-        return True
+        return True, None
     
     es_autor = str(current_user.id) == str(evento.get('autor'))
     es_coorganizador = collection_participantes.find_one({
@@ -35,7 +35,10 @@ def puede_editar_analisis(evento):
         'rol': 'coorganizador'
     }) is not None
     
-    return es_autor or es_coorganizador
+    if not (es_autor or es_coorganizador):
+        return False, "No tienes permisos para editar este análisis"
+    
+    return True, None
 
 
 @analisis_bp.route('/tablero/metricas/<codigo_evento>/analisis', methods=['GET', 'POST'])
@@ -47,7 +50,7 @@ def analisis_evento(codigo_evento):
         flash('Evento no encontrado', 'error')
         return redirect(url_for('mis_metricas'))
     
-    puede_editar = puede_editar_analisis(evento)
+    puede_editar, mensaje = puede_editar_analisis(evento)
     
     swot_data = evento.get('swot', {})
     incidences = evento.get('incidencias', [])
@@ -108,5 +111,6 @@ def analisis_evento(codigo_evento):
         swot=swot_data,
         incidences=incidences,
         puede_editar=puede_editar,
+        mensaje=mensaje,
         active_section='metricas'
     )
