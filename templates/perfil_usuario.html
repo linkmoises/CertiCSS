@@ -98,6 +98,86 @@
             </div>
             <!-- End Card Section -->
 
+            <!-- Eventos Section -->
+{% if eventos %}
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <div class="bg-white rounded-xl shadow">
+                    <div class="p-4 sm:p-7">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Eventos Creados</h3>
+                        <!-- Table -->
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Inicio</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    {% for evento in eventos %}
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            {{ evento.codigo }}
+                                        </td>
+                                        <td class="px-6 py-4 text-sm text-gray-900">
+                                            <div class="max-w-xs truncate" title="{{ evento.nombre }}">
+                                                {{ evento.nombre }}
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {% if evento.fecha_inicio %}
+                                                {{ evento.fecha_inicio.strftime('%d/%m/%Y') }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            {% set estados = {
+                                                'abierto': 'Abierto',
+                                                'cerrado': 'Cerrado',
+                                                'planificado': 'Planificado'
+                                            } %}
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                                {% if evento.estado_evento == 'abierto' %}bg-green-100 text-green-800
+                                                {% elif evento.estado_evento == 'cerrado' %}bg-gray-100 text-gray-800
+                                                {% elif evento.estado_evento == 'planificado' %}bg-blue-100 text-blue-800
+                                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                                {{ estados[evento.estado_evento] if evento.estado_evento in estados else evento.estado_evento }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <a class="inline-flex items-center gap-x-1 text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium"
+                                                href="{{ url_for('ver_evento', codigo_evento=evento.codigo) }}">
+                                                Ver datos
+                                            </a>
+                                            <span class="mx-2">|</span>
+                                            {% if evento.get('instrumento') == 'encuesta_v2' %}
+                                            <a class="inline-flex items-center gap-x-1 text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium"
+                                                href="{{ url_for('informe_avanzado_v2', codigo_evento=evento.codigo) }}">
+                                                Informe
+                                            </a>
+                                            {% else %}
+                                            <a class="inline-flex items-center gap-x-1 text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium"
+                                                href="{{ url_for('informe_avanzado', codigo_evento=evento.codigo) }}">
+                                                Informe
+                                            </a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- End Table -->
+                    </div>
+                </div>
+            </div>
+{% endif %}
+            <!-- End Eventos Section -->
+
 {% include 'tablero-footer.html' %}
         
         </div>

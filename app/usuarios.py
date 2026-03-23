@@ -20,14 +20,16 @@ usuarios_bp = Blueprint('usuarios', __name__)
 # Estas se configurarán cuando se registre el blueprint
 collection_usuarios = None
 collection_participantes = None
+collection_eventos = None
 app_config = None
 log_event = None
 
-def init_usuarios_module(usuarios_collection, participantes_collection, config, log_function):
+def init_usuarios_module(usuarios_collection, participantes_collection, eventos_collection, config, log_function):
     """Inicializar el módulo con las dependencias necesarias"""
-    global collection_usuarios, collection_participantes, app_config, log_event
+    global collection_usuarios, collection_participantes, collection_eventos, app_config, log_event
     collection_usuarios = usuarios_collection
     collection_participantes = participantes_collection
+    collection_eventos = eventos_collection
     app_config = config
     log_event = log_function
 
@@ -605,7 +607,12 @@ def mostrar_usuario(user_id):
         flash("Usuario no encontrado", "danger")
         return redirect(url_for('usuarios.listar_usuarios'))  # Redirigir a la lista de usuarios si no se encuentra
 
-    return render_template('perfil_usuario.html', usuario=usuario, foto_url=foto_url)
+    # Obtener eventos creados por el usuario (ordenados por fecha de inicio descendente)
+    eventos = list(collection_eventos.find(
+        {"autor": user_id}
+    ).sort("fecha_inicio", -1))
+
+    return render_template('perfil_usuario.html', usuario=usuario, foto_url=foto_url, eventos=eventos)
 
 
 ###
