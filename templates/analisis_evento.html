@@ -12,10 +12,10 @@
             <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-7 dark:bg-neutral-800">
                 <div class="mb-8">
                     <h2 class="text-xl font-bold text-gray-800 dark:text-neutral-200">
-                        Análisis del Evento
+                        Análisis post evento
                     </h2>
                     <p class="text-sm text-gray-600 dark:text-neutral-400">
-                        Análisis FODA e Incidencias - {{ evento.nombre }}
+                       {{ evento.nombre }}
                     </p>
                 </div>
 
@@ -140,17 +140,19 @@
                                             <option value="Comunicación" {% if incidencia.tipo == 'Comunicación' %}selected{% endif %}>Comunicación</option>
                                             <option value="Organizativa" {% if incidencia.tipo == 'Organizativa' %}selected{% endif %}>Organizativa</option>
                                             <option value="Humana / Participantes" {% if incidencia.tipo == 'Humana / Participantes' %}selected{% endif %}>Humana / Participantes</option>
+                                            <option value="Ponencia / contenidos" {% if incidencia.tipo == 'Ponencia / contenidos' %}selected{% endif %}>Ponencia / contenidos</option>
+                                            <option value="Otros" {% if incidencia.tipo == 'Otros' %}selected{% endif %}>Otros</option>
                                         </select>
                                     </div>
-                                    <div class="sm:col-span-7">
+                                    <div class="sm:col-span-8">
                                         <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                             Descripción
                                         </label>
                                         <textarea name="incidencia_descripcion" maxlength="500"
                                             class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
-                                            rows="2" placeholder="Descripción de la incidencia" {% if not puede_editar %}disabled{% endif %}>{{ incidencia.descripcion }}</textarea>
+                                            rows="4" placeholder="Descripción de la incidencia" {% if not puede_editar %}disabled{% endif %}>{{ incidencia.descripcion }}</textarea>
                                     </div>
-                                    <div class="sm:col-span-2">
+                                    <div class="sm:col-span-1">
                                         <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                             Fecha
                                         </label>
@@ -181,18 +183,19 @@
                                             <option value="Comunicación">Comunicación</option>
                                             <option value="Organizativa">Organizativa</option>
                                             <option value="Humana / Participantes">Humana / Participantes</option>
-                                            <option value="Humana / Participantes">Humana / Participantes</option>
+                                            <option value="Ponencia / contenidos">Ponencia / contenidos</option>
+                                            <option value="Otros">Otros</option>
                                         </select>
                                     </div>
-                                    <div class="sm:col-span-7">
+                                    <div class="sm:col-span-8">
                                         <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                             Descripción
                                         </label>
                                         <textarea name="incidencia_descripcion" maxlength="500"
                                             class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
-                                            rows="2" placeholder="Descripción de la incidencia"></textarea>
+                                            rows="4" placeholder="Descripción de la incidencia"></textarea>
                                     </div>
-                                    <div class="sm:col-span-2">
+                                    <div class="sm:col-span-1">
                                         <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                             Fecha
                                         </label>
