@@ -225,7 +225,7 @@
 
                     <div class="mt-5 flex justify-end gap-x-2">
                         <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50"
-                            href="{{ url_for('informe_avanzado_v2', codigo_evento=evento.codigo) if evento.informe_v2 else url_for('informe_avanzado', codigo_evento=evento.codigo) }}">
+                            href="{{ url_for('informe_avanzado_v2', codigo_evento=evento.codigo) if evento.instrumento == 'encuesta_v2' else url_for('informe_avanzado', codigo_evento=evento.codigo) }}">
                             Volver al Informe
                         </a>
                         {% if puede_editar %}
