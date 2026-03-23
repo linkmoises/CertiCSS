@@ -6461,7 +6461,7 @@ def generar_grafica_demografia_sexo(sexo_data, evento_nombre):
         img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
         plt.close()
 
-        return img_base64
+        return f"data:image/png;base64,{img_base64}"
     except Exception as e:
         print(f"Error generating grafica_demografia_sexo: {e}")
         plt.close()
