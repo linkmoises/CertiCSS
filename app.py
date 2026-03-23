@@ -6411,56 +6411,61 @@ def generar_grafica_demografia_sexo(sexo_data, evento_nombre):
     """
     Genera una gráfica de barras con la distribución por Sexo.
     """
-    if not sexo_data or all(v == 0 for v in sexo_data.values()):
+    try:
+        if not sexo_data or all(v == 0 for v in sexo_data.values()):
+            return None
+
+        title = 'Distribución por Sexo'
+        labels_map = {'Masculino': 'Masculino', 'Femenino': 'Femenino'}
+
+        # Obtener datos y mapear etiquetas
+        data_counts = {k: sexo_data.get(k, 0) for k in labels_map.keys()}
+        
+        # Filtrar categorías con 0 conteo para no mostrarlas si no hay datos
+        valid_labels = [labels_map[k] for k, v in data_counts.items() if v > 0]
+        valid_values = [v for k, v in data_counts.items() if v > 0]
+
+        if not valid_values: # Si no hay datos válidos, retornar None
+            return None
+
+        fig, ax = plt.subplots(figsize=(7, 5)) # Ajustar tamaño para un solo gráfico
+
+        # Definir colores: celeste para masculino, rosado para femenino
+        color_map = {'Masculino': '#4FC3F7', 'Femenino': '#F06292'}
+        bar_colors = [color_map.get(label, '#BDBDBD') for label in valid_labels]
+
+        bars = ax.bar(valid_labels, valid_values, color=bar_colors, alpha=0.8)
+        
+        # Personalizar el subplot
+        ax.set_title(title, fontsize=10, fontweight='bold', pad=20)
+        # Subtítulo con el nombre del evento en cursiva
+        evento_nombre = wrap_text(evento_nombre)
+        plt.text(0.5, 1.15, evento_nombre, ha='center', va='bottom', transform=ax.transAxes, fontsize=12, style='italic')
+        ax.set_ylabel('Número de encuestados', fontsize=10)
+        
+        ax.tick_params(axis='x', rotation=0, labelsize=9) # No rotar si son pocas categorías
+        ax.tick_params(axis='y', labelsize=9)
+
+        # Agregar valores en las barras
+        for bar, value in zip(bars, valid_values):
+            height = bar.get_height()
+            plt.text(bar.get_x() + bar.get_width()/2., height + 0.1,
+                    f'{value}', ha='center', va='bottom', fontweight='bold', fontsize=8)
+        
+        plt.tight_layout(rect=[0, 0, 1, 0.95]) # Ajustar rect para dejar espacio al subtítulo
+
+        # Convertir la gráfica a imagen base64
+        img_buffer = io.BytesIO()
+        plt.savefig(img_buffer, format='png', dpi=300, bbox_inches='tight')
+        img_buffer.seek(0)
+        img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
+        plt.close()
+
+        return img_base64
+    except Exception as e:
+        print(f"Error generating grafica_demografia_sexo: {e}")
+        plt.close()
         return None
-
-    title = 'Distribución por Sexo'
-    labels_map = {'Masculino': 'Masculino', 'Femenino': 'Femenino'}
-
-    # Obtener datos y mapear etiquetas
-    data_counts = {k: sexo_data.get(k, 0) for k in labels_map.keys()}
-    
-    # Filtrar categorías con 0 conteo para no mostrarlas si no hay datos
-    valid_labels = [labels_map[k] for k, v in data_counts.items() if v > 0]
-    valid_values = [v for k, v in data_counts.items() if v > 0]
-
-    if not valid_values: # Si no hay datos válidos, retornar None
-        return None
-
-    fig, ax = plt.subplots(figsize=(7, 5)) # Ajustar tamaño para un solo gráfico
-
-    # Definir colores: celeste para masculino, rosado para femenino
-    color_map = {'Masculino': '#4FC3F7', 'Femenino': '#F06292'}
-    bar_colors = [color_map.get(label, '#BDBDBD') for label in valid_labels]
-
-    bars = ax.bar(valid_labels, valid_values, color=bar_colors, alpha=0.8)
-    
-    # Personalizar el subplot
-    ax.set_title(title, fontsize=10, fontweight='bold', pad=20)
-    # Subtítulo con el nombre del evento en cursiva
-    evento_nombre = wrap_text(evento_nombre)
-    plt.text(0.5, 1.15, evento_nombre, ha='center', va='bottom', transform=ax.transAxes, fontsize=12, style='italic')
-    ax.set_ylabel('Número de encuestados', fontsize=10)
-    
-    ax.tick_params(axis='x', rotation=0, labelsize=9) # No rotar si son pocas categorías
-    ax.tick_params(axis='y', labelsize=9)
-
-    # Agregar valores en las barras
-    for bar, value in zip(bars, valid_values):
-        height = bar.get_height()
-        plt.text(bar.get_x() + bar.get_width()/2., height + 0.1,
-                f'{value}', ha='center', va='bottom', fontweight='bold', fontsize=8)
-    
-    plt.tight_layout(rect=[0, 0, 1, 0.95]) # Ajustar rect para dejar espacio al subtítulo
-
-    # Convertir la gráfica a imagen base64
-    img_buffer = io.BytesIO()
-    plt.savefig(img_buffer, format='png', dpi=300, bbox_inches='tight')
-    img_buffer.seek(0)
-    img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
-    plt.close()
-
-    return img_base64
 
 
 def generar_grafica_demografia_grupoetario(edad_data, evento_nombre):
