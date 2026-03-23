@@ -25,6 +25,9 @@ def puede_editar_analisis(evento):
     else:
         return False
     
+    if getattr(current_user, 'rol', None) == 'administrador':
+        return True
+    
     es_autor = str(current_user.id) == str(evento.get('autor'))
     es_coorganizador = collection_participantes.find_one({
         'codigo_evento': evento.get('codigo'),
