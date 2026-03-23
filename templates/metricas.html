@@ -107,7 +107,7 @@
                                 <div>
                                     <div class="inline-flex gap-x-2">
 {% if current_user.rol != 'administrador' %}
-                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="#">
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="{{ url_for('mis_metricas') }}">
                                             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-heart"><path d="M3 10h18V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7"/><path d="M8 2v4"/><path d="M16 2v4"/><path d="M21.29 14.7a2.43 2.43 0 0 0-2.65-.52c-.3.12-.57.3-.8.53l-.34.34-.35-.34a2.43 2.43 0 0 0-2.65-.53c-.3.12-.56.3-.79.53-.95.94-1 2.53.2 3.74L17.5 22l3.6-3.55c1.2-1.21 1.14-2.8.19-3.74Z"/></svg>
                                             Mis métricas
                                         </a>
@@ -179,25 +179,25 @@
                 
                                 <th scope="col" class="px-6 py-3 text-start">
                                     <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
-                                        Cupos disponibles
-                                    </a>
-                                </th>
-                
-                                <th scope="col" class="px-6 py-3 text-start">
-                                    <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
-                                        Total de participantes
+                                        Participantes únicos
                                     </a>
                                 </th>
 
                                 <th scope="col" class="px-6 py-3 text-start">
                                     <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
-                                        % asistencia
+                                        Encuestas recibidas
                                     </a>
                                 </th>
 
                                 <th scope="col" class="px-6 py-3 text-start">
                                     <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
-                                        Total de ponencias
+                                        % Encuestados
+                                    </a>
+                                </th>
+
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <a class="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-none focus:text-gray-500" href="#">
+                                        Ponentes
                                     </a>
                                 </th>
                 
@@ -228,16 +228,22 @@
                                             <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
                                                 {{ evento.unidad_ejecutora }}
                                             </span>
+{% if evento.estado_evento == 'cerrado' %}
+                                            <br />
+                                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-red-100 text-red-800">
+                                                Cerrado
+                                            </div>span>
+{% elif evento.estado_evento == 'publicado' %}
+                                            <br />
+                                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-green-100 text-green-800">
+                                                Finalizado
+                                            </span>
+{% endif %}
                                         </div>
                                     </td>
                                     <td class="size-px whitespace-nowrap text-center">
                                         <a class="block relative z-10" href="#">
-                                            <span class="text-sm text-gray-500">{{ evento.fecha_inicio.strftime('%d %b, %Y') }}</span>
-                                        </a>
-                                    </td>
-                                    <td class="size-px whitespace-nowrap text-center">
-                                        <a class="block relative z-10" href="#">
-                                            <span class="text-sm text-gray-500">{{ evento.cupos | default("N/D") }}</span>
+                                            <span class="text-sm text-gray-500">{% if evento.fecha_inicio.date() == evento.fecha_fin.date() %}{{ evento.fecha_inicio.strftime('%d %b, %Y') }}{% else %}{{ evento.fecha_inicio.strftime('%d') }} - {{ evento.fecha_fin.strftime('%d %b, %Y') }}{% endif %}</span>
                                         </a>
                                     </td>
                                     <td class="size-px whitespace-nowrap text-center">
@@ -247,8 +253,13 @@
                                     </td>
                                     <td class="size-px whitespace-nowrap text-center">
                                         <a class="block relative z-10" href="#">
-                                            <span class="text-sm text-gray-500">{% if evento.cupos and evento.cupos|int > 0 %}
-                                                {{ ((evento.total_participantes / evento.cupos|int) * 100) | round(1) }}%
+                                            <span class="text-sm text-gray-500">{{ evento.total_encuestas }}</span>
+                                        </a>
+                                    </td>
+                                    <td class="size-px whitespace-nowrap text-center">
+                                        <a class="block relative z-10" href="#">
+                                            <span class="text-sm text-gray-500">{% if evento.total_participantes > 0 %}
+                                                {{ ((evento.total_encuestas / evento.total_participantes) * 100) | round(1) }}%
                                             {% else %}
                                                 N/D
                                             {% endif %}</span>
@@ -261,20 +272,33 @@
                                     </td>
                                     <td class="size-px whitespace-nowrap">
                                         <div class="px-6 py-2">
+                                            <a class="inline-flex items-center gap-x-1 text-sm text-gray-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('exportar_csv', codigo_evento=evento.codigo) }}">
+                                                Dataset participantes
+                                            </a><br />
 {% if evento.instrumento == 'encuesta_v2' %}
                                             <a class="inline-flex items-center gap-x-1 text-sm text-pink-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('exportar_encuesta_v2_csv', codigo_evento=evento.codigo) }}">
-                                                Datos brutos v2
+                                                Dataset encuesta v2
                                             </a><br />
                                             <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('informe_avanzado_v2', codigo_evento=evento.codigo) }}">
-                                                Informe avanzado v2
+                                                Informe v2
                                             </a><br />
+{% if evento.modalidad != 'Presencial' %}
+                                            <a class="inline-flex items-center gap-x-1 text-sm text-purple-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('tablero_metricas_lms_evento', codigo_evento=evento.codigo) }}">
+                                                LMS
+                                            </a><br />
+{% endif %}
 {% else %}
                                             <a class="inline-flex items-center gap-x-1 text-sm text-pink-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('exportar_encuesta_csv', codigo_evento=evento.codigo) }}">
-                                                Datos brutos
+                                                Dataset encuesta
                                             </a><br />
                                             <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('informe_avanzado', codigo_evento=evento.codigo) }}">
-                                                Informe avanzado
+                                                Informe
                                             </a><br />
+{% if evento.modalidad != 'Presencial' %}
+                                            <a class="inline-flex items-center gap-x-1 text-sm text-purple-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('tablero_metricas_lms_evento', codigo_evento=evento.codigo) }}">
+                                                Informe LMS
+                                            </a><br />
+{% endif %}
 {% endif %}
                                         </div>
                                     </td>
