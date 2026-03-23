@@ -3823,12 +3823,15 @@ def tablero_metricas(page=1):
     # Obtener el número total de eventos (excluyendo registro abierto y sesiones docentes)
     total_eventos = collection_eventos.count_documents({'registro_abierto': {'$ne': True}, 'tipo': {'$ne': 'Sesión Docente'}})
     # Obtener el número total de eventos cerrados (excluyendo registro abierto y sesiones docentes)
-    total_eventos_cerrados = collection_eventos.count_documents({
-        "estado_evento": "cerrado",
+    filtro_cerrados = {
+        "$or": [
+            {"estado_evento": "cerrado"},
+            {"estado_evento": "publicado", "fecha_fin": {"$lte": datetime.now()}}
+        ],
         'registro_abierto': {'$ne': True},
         'tipo': {'$ne': 'Sesión Docente'}
-    })
-    # Contar el número total de ponentes
+    }
+    total_eventos_cerrados = collection_eventos.count_documents(filtro_cerrados)    # Contar el número total de ponentes
     total_ponentes = collection_participantes.count_documents({"rol": "ponente"})
     # Contar el número total de participantes
     total_participantes = collection_participantes.count_documents({"rol": "participante"})
@@ -3837,12 +3840,8 @@ def tablero_metricas(page=1):
     eventos_por_pagina = 20
     total_paginas = (total_eventos_cerrados + eventos_por_pagina - 1) // eventos_por_pagina
 
-    # Obtener los eventos con estado cerrado para la página actual (excluyendo registro abierto y sesiones docentes)
-    eventos_cursor = collection_eventos.find({
-        "estado_evento": "cerrado",
-        'registro_abierto': {'$ne': True},
-        'tipo': {'$ne': 'Sesión Docente'}
-    }).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    # Obtener los eventos finalizados y cerrados para la página actual (excluyendo registro abierto y sesiones docentes)
+    eventos_cursor = collection_eventos.find(filtro_cerrados).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     
     eventos = list(eventos_cursor)
 
