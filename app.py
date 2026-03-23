@@ -5728,6 +5728,18 @@ def informe_avanzado(codigo_evento):
 
     puede_editar = puede_editar_analisis(evento)
 
+    swot_autor = None
+    swot_data = evento.get('swot', {})
+    if swot_data.get('actualizado_por'):
+        usuario = collection_usuarios.find_one(
+            {'_id': ObjectId(swot_data['actualizado_por'])},
+            {'nombres': 1, 'apellidos': 1}
+        )
+        if usuario:
+            nombres = usuario.get('nombres', '').split()[0] if usuario.get('nombres') else ''
+            apellidos = usuario.get('apellidos', '').split()[0] if usuario.get('apellidos') else ''
+            swot_autor = f"{nombres} {apellidos}".strip() if nombres or apellidos else None
+
     return render_template('metrica_avanzada.html', 
         evento=evento,
         metricas=metricas,
@@ -5739,7 +5751,8 @@ def informe_avanzado(codigo_evento):
         alfa_cronbach=alfa_cronbach,
         nps=nps,
         nps_certicss=nps_certicss,
-        puede_editar_analisis=puede_editar)
+        puede_editar_analisis=puede_editar,
+        swot_autor=swot_autor)
 
 
 @app.route('/tablero/metricas/<codigo_evento>/informe_v2')
@@ -5822,6 +5835,18 @@ def informe_avanzado_v2(codigo_evento):
 
     puede_editar = puede_editar_analisis(evento)
 
+    swot_autor = None
+    swot_data = evento.get('swot', {})
+    if swot_data.get('actualizado_por'):
+        usuario = collection_usuarios.find_one(
+            {'_id': ObjectId(swot_data['actualizado_por'])},
+            {'nombres': 1, 'apellidos': 1}
+        )
+        if usuario:
+            nombres = usuario.get('nombres', '').split()[0] if usuario.get('nombres') else ''
+            apellidos = usuario.get('apellidos', '').split()[0] if usuario.get('apellidos') else ''
+            swot_autor = f"{nombres} {apellidos}".strip() if nombres or apellidos else None
+
     return render_template('metrica_avanzada_v2.html',
         evento=evento,
         metricas=metricas,
@@ -5832,7 +5857,8 @@ def informe_avanzado_v2(codigo_evento):
         grafica_demografia_grupoetario=grafica_demografia_grupoetario,
         alfa_cronbach=calcular_alfa_cronbach_v2(respuestas_validas),
         alfa_cronbach_global=calcular_alfa_cronbach_v2_global(),
-        puede_editar_analisis=puede_editar)
+        puede_editar_analisis=puede_editar,
+        swot_autor=swot_autor)
 
 
 def calcular_alfa_cronbach_v2(respuestas):
