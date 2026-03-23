@@ -6097,6 +6097,27 @@ def calcular_nps_certicss():
     return round(nps_score, 2) # Redondear a 2 decimales para presentación
 
 
+def wrap_text(text, max_len=85):
+    if len(text) <= max_len:
+        return text
+    words = text.split()
+    lines = []
+    current_line = ""
+    for word in words:
+        if len(current_line) + len(word) + 1 > max_len:
+            if current_line:
+                lines.append(current_line)
+            current_line = word
+        else:
+            if current_line:
+                current_line += " " + word
+            else:
+                current_line = word
+    if current_line:
+        lines.append(current_line)
+    return "\n".join(lines)
+
+
 def generar_grafica_perfil(participantes, evento_nombre):
     """
     Genera una gráfica de barras con la distribución de participantes por perfil profesional
@@ -6159,6 +6180,8 @@ def generar_grafica_perfil(participantes, evento_nombre):
     plt.title(f'Distribución de Participantes por Perfil Profesional', 
           fontsize=10, fontweight='bold', pad=20)
 
+    evento_nombre = wrap_text(evento_nombre)
+    
     # Subtítulo: por ejemplo, fecha o lugar
     plt.text(0.5, 1.15, evento_nombre, 
             ha='center', va='bottom', transform=plt.gca().transAxes,
@@ -6235,6 +6258,8 @@ def generar_grafica_region(participantes, evento_nombre):
     plt.title(f'Distribución de Participantes por Región/Provincia', 
            fontsize=10, fontweight='bold', pad=20)
 
+    evento_nombre = wrap_text(evento_nombre)
+    
     # Subtítulo: por ejemplo, fecha o lugar
     plt.text(0.5, 1.15, evento_nombre, 
             ha='center', va='bottom', transform=plt.gca().transAxes,
@@ -6360,6 +6385,8 @@ def generar_grafica_spider(respuestas, evento_nombre):
     ax.set_title(f'Evaluación del Evento Académico', 
                  fontsize=14, fontweight='bold', pad=20)
     
+    evento_nombre = wrap_text(evento_nombre)
+    
     plt.text(0.5, 1.2, evento_nombre, 
              horizontalalignment='center', verticalalignment='center', 
              transform=ax.transAxes, fontsize=12, style='italic')
@@ -6411,6 +6438,7 @@ def generar_grafica_demografia_sexo(sexo_data, evento_nombre):
     # Personalizar el subplot
     ax.set_title(title, fontsize=10, fontweight='bold', pad=20)
     # Subtítulo con el nombre del evento en cursiva
+    evento_nombre = wrap_text(evento_nombre)
     plt.text(0.5, 1.15, evento_nombre, ha='center', va='bottom', transform=ax.transAxes, fontsize=12, style='italic')
     ax.set_ylabel('Número de encuestados', fontsize=10)
     
@@ -6430,9 +6458,9 @@ def generar_grafica_demografia_sexo(sexo_data, evento_nombre):
     plt.savefig(img_buffer, format='png', dpi=300, bbox_inches='tight')
     img_buffer.seek(0)
     img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
-    plt.close() # Cierra la figura para liberar memoria
-    
-    return f"data:image/png;base64,{img_base64}"
+    plt.close()
+
+    return img_base64
 
 
 def generar_grafica_demografia_grupoetario(edad_data, evento_nombre):
@@ -6478,6 +6506,7 @@ def generar_grafica_demografia_grupoetario(edad_data, evento_nombre):
     # Personalizar el subplot
     ax.set_title(title, fontsize=10, fontweight='bold', pad=20)
     # Subtítulo con el nombre del evento en cursiva
+    evento_nombre = wrap_text(evento_nombre)
     plt.text(0.5, 1.15, evento_nombre, ha='center', va='bottom', transform=ax.transAxes, fontsize=12, style='italic')
     ax.set_ylabel('Número de encuestados', fontsize=10)
 
@@ -6559,6 +6588,8 @@ def generar_grafica_spider_v2(respuestas, evento_nombre):
     ax.set_title('Evaluación del Evento Académico',
                  fontsize=14, fontweight='bold', pad=20)
 
+    evento_nombre = wrap_text(evento_nombre)
+    
     plt.text(0.5, 1.2, evento_nombre,
              horizontalalignment='center', verticalalignment='center',
              transform=ax.transAxes, fontsize=12, style='italic')
