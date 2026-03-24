@@ -184,6 +184,8 @@
                                             href="{{ url_for('ver_evento', codigo_evento=evento.codigo) }}">
                                             Ver datos
                                         </a>
+                                        {% set es_finalizado_o_cerrado = (evento.estado_evento == 'cerrado') or (evento.fecha_inicio and evento.fecha_fin and evento.fecha_fin.date() < now().date()) %}
+                                        {% if es_finalizado_o_cerrado %}
                                         <span class="mx-2">|</span>
                                         {% if evento.get('instrumento') == 'encuesta_v2' %}
                                         <a class="inline-flex items-center gap-x-1 text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium"
@@ -195,6 +197,7 @@
                                             href="{{ url_for('informe_avanzado', codigo_evento=evento.codigo) }}">
                                             Informe
                                         </a>
+                                        {% endif %}
                                         {% endif %}
                                     </td>
                                 </tr>
