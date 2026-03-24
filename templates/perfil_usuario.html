@@ -173,7 +173,7 @@
                                         {% if evento.estado_evento != 'cerrado' and evento.fecha_inicio and evento.fecha_fin %}
                                             {% set fecha_inicio_dt = evento.fecha_inicio.date() if evento.fecha_inicio else none %}
                                             {% set fecha_fin_dt = evento.fecha_fin.date() if evento.fecha_fin else none %}
-                                            {% set hoy = now.date() %}
+                                            {% set hoy = now().date() %}
                                             {% if fecha_fin_dt and fecha_fin_dt < hoy %}
                                                 <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-green-100 text-green-800">
                                                     Finalizado
