@@ -1917,6 +1917,11 @@ select {
   height: 1px;
 }
 
+.size-24 {
+  width: 6rem;
+  height: 6rem;
+}
+
 .\!h-2\.5 {
   height: 0.625rem !important;
 }
