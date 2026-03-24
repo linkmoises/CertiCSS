@@ -118,7 +118,7 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Afiche</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Afiche</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
@@ -128,7 +128,7 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 {% for evento in eventos %}
                                 <tr>
-                                    <td class="p-4">
+                                    <td class="p-4 w-32">
                                         <div class="w-24 h-24 rounded-lg overflow-hidden bg-gray-100">
 {% if evento.afiche_750 %}
                                             <img src="{{ url_for('static', filename='uploads/' + evento.afiche_750.split('/')[-1]) }}" alt="{{ evento.nombre }}" class="size-full object-cover">
