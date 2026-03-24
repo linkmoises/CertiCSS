@@ -131,7 +131,7 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         <div class="relative h-24 w-24 shrink-0">
 {% if evento.afiche_750 %}
-                                            <img src="{{ url_for('static', filename='uploads/' + evento.afiche_750.split('/')[-1]) }}" alt="{{ evento.nombre }}" class="w-32 h-32 object-cover rounded-lg absolute top-0 start-0">
+                                            <img src="{{ url_for('static', filename='uploads/' + evento.afiche_750.split('/')[-1]) }}" alt="{{ evento.nombre }}" class="w-24 h-24 object-cover rounded-lg absolute top-0 start-0">
 {% else %}
                                             <img class="size-full absolute top-0 start-0 object-cover rounded-l-xl" src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}" alt="{{ evento.nombre }}">
 {% endif %}                                        
