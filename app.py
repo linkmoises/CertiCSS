@@ -3087,7 +3087,55 @@ def ver_evento(codigo_evento):
     }) is not None
     evento["es_organizador"] = es_organizador
 
-    return render_template('ver_evento.html', evento=evento, validate_certificate_template=validate_certificate_template, validate_attendance_template=validate_attendance_template)
+    autor_evento = None
+    if evento.get("autor"):
+        autor_evento = collection_usuarios.find_one(
+            {"_id": ObjectId(evento["autor"])},
+            {"nombres": 1, "apellidos": 1, "email": 1}
+        )
+
+    usuarios = None
+    if current_user.rol == 'administrador':
+        usuarios = list(collection_usuarios.find(
+            {"rol": {"$ne": "administrador"}},
+            {"nombres": 1, "apellidos": 1, "email": 1}
+        ).sort([("nombres", 1), ("apellidos", 1)]))
+
+    return render_template('ver_evento.html', evento=evento, validate_certificate_template=validate_certificate_template, validate_attendance_template=validate_attendance_template, usuarios=usuarios, autor_evento=autor_evento)
+
+
+###
+### Cambiar autor de evento
+###
+@app.route('/tablero/eventos/<codigo_evento>/cambiar_autor', methods=['POST'])
+@login_required
+def cambiar_autor_evento(codigo_evento):
+    if current_user.rol != 'administrador':
+        flash("No tienes permisos para realizar esta acción", "danger")
+        return redirect(url_for('ver_evento', codigo_evento=codigo_evento))
+    
+    nuevo_autor_id = request.form.get('nuevo_autor_id')
+    if not nuevo_autor_id:
+        flash("Selecciona un usuario", "danger")
+        return redirect(url_for('ver_evento', codigo_evento=codigo_evento))
+    
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        flash("Evento no encontrado", "danger")
+        return redirect(url_for('listar_eventos'))
+    
+    nuevo_autor = collection_usuarios.find_one({"_id": ObjectId(nuevo_autor_id)})
+    if not nuevo_autor:
+        flash("Usuario no encontrado", "danger")
+        return redirect(url_for('ver_evento', codigo_evento=codigo_evento))
+    
+    collection_eventos.update_one(
+        {"codigo": codigo_evento},
+        {"$set": {"autor": nuevo_autor_id}}
+    )
+    
+    flash(f"Autor cambiado a {nuevo_autor.get('nombres', '')} {nuevo_autor.get('apellidos', '')} ({nuevo_autor.get('email', '')})", "success")
+    return redirect(url_for('ver_evento', codigo_evento=codigo_evento))
 
 
 ###
