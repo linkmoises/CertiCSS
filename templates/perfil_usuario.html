@@ -129,14 +129,13 @@
                                 {% for evento in eventos %}
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                                            <div class="relative h-32 w-32 shrink-0">
+                                        <div class="relative h-24 w-24 shrink-0">
 {% if evento.afiche_750 %}
-                                        <img src="{{ url_for('static', filename='uploads/' + evento.afiche_750.split('/')[-1]) }}" alt="{{ evento.nombre }}" class="w-32 h-32 object-cover rounded-lg absolute top-0 start-0">
+                                            <img src="{{ url_for('static', filename='uploads/' + evento.afiche_750.split('/')[-1]) }}" alt="{{ evento.nombre }}" class="w-32 h-32 object-cover rounded-lg absolute top-0 start-0">
 {% else %}
-                                        <img class="size-full absolute top-0 start-0 object-cover rounded-l-xl" src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}" alt="{{ evento.nombre }}">
+                                            <img class="size-full absolute top-0 start-0 object-cover rounded-l-xl" src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}" alt="{{ evento.nombre }}">
 {% endif %}                                        
-                                    </div>
-                                        {{ evento.codigo }}
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-900">
                                         <div class="max-w-xs truncate" title="{{ evento.nombre }}">
@@ -160,7 +159,6 @@
                                         {% set estados = {
                                             'abierto': 'Abierto',
                                             'cerrado': 'Cerrado',
-                                            'planificado': 'Planificado',
                                             'publicado': 'Publicado',
                                             'borrador': 'Borrador'
                                         } %}
@@ -168,11 +166,28 @@
                                             {% if evento.estado_evento == 'publicado' %}bg-blue-100 text-blue-800
                                             {% elif evento.estado_evento == 'cerrado' %}bg-green-100 text-green-800
                                             {% elif evento.estado_evento == 'abierto' %}bg-green-100 text-green-800
-                                            {% elif evento.estado_evento == 'planificado' %}bg-blue-100 text-blue-800
                                             {% elif evento.estado_evento == 'borrador' %}bg-gray-100 text-gray-800
                                             {% else %}bg-gray-100 text-gray-800{% endif %}">
                                             {{ estados[evento.estado_evento] if evento.estado_evento in estados else evento.estado_evento }}
                                         </span>
+                                        {% if evento.estado_evento != 'cerrado' and evento.fecha_inicio and evento.fecha_fin %}
+                                            {% set fecha_inicio_dt = evento.fecha_inicio.date() if evento.fecha_inicio else none %}
+                                            {% set fecha_fin_dt = evento.fecha_fin.date() if evento.fecha_fin else none %}
+                                            {% set hoy = now.date() %}
+                                            {% if fecha_fin_dt and fecha_fin_dt < hoy %}
+                                                <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-green-100 text-green-800">
+                                                    Finalizado
+                                                </span>
+                                            {% elif fecha_inicio_dt and fecha_inicio_dt == hoy %}
+                                                <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                    En curso
+                                                </span>
+                                            {% elif fecha_inicio_dt and fecha_inicio_dt > hoy %}
+                                                <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-indigo-100 text-indigo-800">
+                                                    Planificado
+                                                </span>
+                                            {% endif %}
+                                        {% endif %}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
                                         <a class="inline-flex items-center gap-x-1 text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium"
