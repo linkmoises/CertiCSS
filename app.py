@@ -139,11 +139,11 @@ login_manager.user_loader(load_user)
 ### Crear índice único para evitar duplicados
 ###
 try:
-    # Eliminar índices existentes
-    collection_participantes.drop_indexes()
-    # Crear el nuevo índice
-    collection_participantes.create_index([("cedula", 1), ("codigo_evento", 1), ("titulo_ponencia", 1), ("indice_registro", 1)], unique=True)
-    logger.info("Índice único creado en collection_participantes")
+    existing_indexes = collection_participantes.index_information()
+    if "cedula_1_codigo_evento_1_titulo_ponencia_1_indice_registro_1" not in existing_indexes:
+        collection_participantes.drop_indexes()
+        collection_participantes.create_index([("cedula", 1), ("codigo_evento", 1), ("titulo_ponencia", 1), ("indice_registro", 1)], unique=True)
+        logger.info("Índice único creado en collection_participantes")
 except Exception as e:
     logger.error(f"Error al crear índice en collection_participantes: {e}")
 
@@ -152,21 +152,23 @@ except Exception as e:
 ### Crear índices para seguimiento de completitud de encuestas (encuestas_v2)
 ###
 try:
-    # Crear índice compuesto único en (cedula, codigo_evento) para prevenir encuestas duplicadas
-    collection_encuestas_v2.create_index(
-        [("cedula", 1), ("codigo_evento", 1)], 
-        unique=True,
-        name="cedula_evento_unique"
-    )
-    logger.info("Índice cedula_evento_unique creado en collection_encuestas_v2")
+    existing_indexes = collection_encuestas_v2.index_information()
     
-    # Crear índice en codigo_evento para consultas basadas en eventos
-    collection_encuestas_v2.create_index("codigo_evento", name="codigo_evento_idx")
-    logger.info("Índice codigo_evento_idx creado en collection_encuestas_v2")
+    if "cedula_evento_unique" not in existing_indexes:
+        collection_encuestas_v2.create_index(
+            [("cedula", 1), ("codigo_evento", 1)], 
+            unique=True,
+            name="cedula_evento_unique"
+        )
+        logger.info("Índice cedula_evento_unique creado en collection_encuestas_v2")
     
-    # Crear índice en cedula para consultas basadas en participantes
-    collection_encuestas_v2.create_index("cedula", name="cedula_idx")
-    logger.info("Índice cedula_idx creado en collection_encuestas_v2")
+    if "codigo_evento_idx" not in existing_indexes:
+        collection_encuestas_v2.create_index("codigo_evento", name="codigo_evento_idx")
+        logger.info("Índice codigo_evento_idx creado en collection_encuestas_v2")
+    
+    if "cedula_idx" not in existing_indexes:
+        collection_encuestas_v2.create_index("cedula", name="cedula_idx")
+        logger.info("Índice cedula_idx creado en collection_encuestas_v2")
     
 except Exception as e:
     logger.error(f"Error al crear índices para encuestas_v2: {e}")
