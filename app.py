@@ -7892,7 +7892,7 @@ def generar_constancia_asistencia(participante, afiche_path):
         c.drawString(x_position, y_position, text)
 
     # Texto de la constancia
-    draw_centered_text(5.5 * inch, "CONSTANCIA DE ASISTENCIA", font='Helvetica-Bold', size=18)
+    draw_centered_text(7.0 * inch, "CONSTANCIA DE ASISTENCIA", font='Helvetica-Bold', size=18)
 
     # Configurar estilos para los párrafos
     styles = getSampleStyleSheet()
