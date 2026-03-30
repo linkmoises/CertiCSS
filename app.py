@@ -461,7 +461,7 @@ def tablero_coordinadores():
 
     eventos = list(eventos_cursor)
 
-    # Marcar si el usuario es organizador de cada evento
+    # Marcar si el usuario es organizador de cada evento y obtener info del autor
     for evento in eventos:
         es_organizador = collection_participantes.find_one({
             "codigo_evento": evento.get("codigo"),
@@ -469,6 +469,12 @@ def tablero_coordinadores():
             "rol": "coorganizador",
         }) is not None or (str(current_user.id) == str(evento.get("autor")))
         evento["es_organizador"] = es_organizador
+        
+        if evento.get("autor"):
+            evento["autor_info"] = collection_usuarios.find_one(
+                {"_id": ObjectId(evento["autor"])},
+                {"nombres": 1, "apellidos": 1, "foto": 1}
+            )
 
     num_eventos = len(eventos)
 
@@ -1884,7 +1890,7 @@ def listar_eventos_proximos(page=1):
     eventos_cursor = collection_eventos.find(filtro_eventos).sort('fecha_inicio').skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
 
-    # Verificar si el usuario es organizador en cada evento
+    # Verificar si el usuario es organizador en cada evento y obtener info del autor
     for evento in eventos:
         es_organizador = collection_participantes.find_one({
             "codigo_evento": evento["codigo"],
@@ -1893,6 +1899,12 @@ def listar_eventos_proximos(page=1):
         }) is not None 
 
         evento["es_organizador"] = es_organizador
+        
+        if evento.get("autor"):
+            evento["autor_info"] = collection_usuarios.find_one(
+                {"_id": ObjectId(evento["autor"])},
+                {"nombres": 1, "apellidos": 1, "foto": 1}
+            )
 
     return render_template('eventos-proximos.html',
         eventos=eventos,
@@ -1928,7 +1940,7 @@ def listar_eventos_anteriores(page=1):
     eventos_cursor = collection_eventos.find(filtro_eventos).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
 
-    # Verificar si el usuario es organizador en cada evento
+    # Verificar si el usuario es organizador en cada evento y obtener info del autor
     for evento in eventos:
         es_organizador = collection_participantes.find_one({
             "codigo_evento": evento["codigo"],
@@ -1937,6 +1949,12 @@ def listar_eventos_anteriores(page=1):
         }) is not None 
 
         evento["es_organizador"] = es_organizador
+        
+        if evento.get("autor"):
+            evento["autor_info"] = collection_usuarios.find_one(
+                {"_id": ObjectId(evento["autor"])},
+                {"nombres": 1, "apellidos": 1, "foto": 1}
+            )
 
     return render_template('eventos-anteriores.html',
         eventos=eventos,
@@ -1970,7 +1988,7 @@ def listar_eventos(page=1):
     eventos_cursor = collection_eventos.find(filtro_eventos).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
 
-    # Verificar si el usuario es organizador en cada evento
+    # Verificar si el usuario es organizador en cada evento y obtener info del autor
     for evento in eventos:
         es_organizador = collection_participantes.find_one({
             "codigo_evento": evento["codigo"],
@@ -1979,6 +1997,12 @@ def listar_eventos(page=1):
         }) is not None 
 
         evento["es_organizador"] = es_organizador
+        
+        if evento.get("autor"):
+            evento["autor_info"] = collection_usuarios.find_one(
+                {"_id": ObjectId(evento["autor"])},
+                {"nombres": 1, "apellidos": 1, "foto": 1}
+            )
 
     return render_template('eventos.html',
         eventos=eventos,
@@ -2012,7 +2036,7 @@ def mis_eventos(page=1):
     eventos_cursor = collection_eventos.find(filtro).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     eventos = list(eventos_cursor)
 
-    # Verificar si el usuario es organizador en cada evento
+    # Verificar si el usuario es organizador en cada evento y obtener info del autor
     for evento in eventos:
         es_organizador = collection_participantes.find_one({
             "codigo_evento": evento["codigo"],
@@ -2021,6 +2045,12 @@ def mis_eventos(page=1):
         }) is not None 
 
         evento["es_organizador"] = es_organizador
+        
+        if evento.get("autor"):
+            evento["autor_info"] = collection_usuarios.find_one(
+                {"_id": ObjectId(evento["autor"])},
+                {"nombres": 1, "apellidos": 1, "foto": 1}
+            )
 
     return render_template('mis_eventos.html',
         eventos=eventos,

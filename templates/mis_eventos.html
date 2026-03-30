@@ -119,10 +119,14 @@
                             <tr class="bg-white hover:bg-gray-50">
                                 <td class="h-px w-72 min-w-72">
                                     <div class="px-6 py-2">
-                                        <p class="text-sm text-gray-500 mb-2">
-                                            <strong><a class="text-sm text-blue-600 decoration-2 hover:underline" href="{{ url_for('mostrar_evento', codigo_evento=evento.codigo) }}">
-                                            {{ evento.nombre }}</a></strong>
-                                        </p>
+                                        <div class="flex items-center gap-2 mb-2">
+                                            {% from '_avatar.html' import avatar %}
+                                            {{ avatar(evento.autor_info, size='size-8') }}
+                                            <p class="text-sm text-gray-500">
+                                                <strong><a class="text-sm text-blue-600 decoration-2 hover:underline" href="{{ url_for('mostrar_evento', codigo_evento=evento.codigo) }}">
+                                                {{ evento.nombre }}</a></strong>
+                                            </p>
+                                        </div>
                                         <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
                                             {{ evento.tipo }}
                                         </span>
