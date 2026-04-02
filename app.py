@@ -2519,7 +2519,7 @@ def db_encuestas(page=1):
     if year_filtro:
         try:
             year_int = int(year_filtro)
-            filtro['fecha'] = {'$gte': f'{year_int}-01-01', '$lte': f'{year_int}-12-31'}
+            filtro['fecha'] = {'$regex': f'^{year_int}'}
         except ValueError:
             pass
     
@@ -2528,7 +2528,7 @@ def db_encuestas(page=1):
             month_int = int(month_filtro)
             if 1 <= month_int <= 12:
                 mes_str = f'{month_int:02d}'
-                filtro['fecha'] = {'$gte': f'{year_filtro}-{mes_str}-01', '$lte': f'{year_filtro}-{mes_str}-31'}
+                filtro['fecha'] = {'$regex': f'^{year_filtro}-{mes_str}'}
         except ValueError:
             pass
 
@@ -2631,7 +2631,7 @@ def descargar_encuestas_csv():
     if year_filtro:
         try:
             year_int = int(year_filtro)
-            filtro['fecha'] = {'$gte': f'{year_int}-01-01', '$lte': f'{year_int}-12-31'}
+            filtro['fecha'] = {'$regex': f'^{year_int}'}
         except ValueError:
             pass
     
@@ -2640,7 +2640,7 @@ def descargar_encuestas_csv():
             month_int = int(month_filtro)
             if 1 <= month_int <= 12:
                 mes_str = f'{month_int:02d}'
-                filtro['fecha'] = {'$gte': f'{year_filtro}-{mes_str}-01', '$lte': f'{year_filtro}-{mes_str}-31'}
+                filtro['fecha'] = {'$regex': f'^{year_filtro}-{mes_str}'}
         except ValueError:
             pass
 
