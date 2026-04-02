@@ -118,10 +118,8 @@
                                                     class="inline-flex items-center justify-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800 hover:bg-gray-200 transition-all">
                                                     {{ evento.codigo }}
                                                 </button><br />
-                                                <span>
-                                                    {% from '_avatar.html' import avatar %}
-                                                    {{ avatar(evento.autor_info, size='size-8') }}
-                                                </span>
+                                                {% from '_avatar.html' import avatar %}
+                                                {{ avatar(evento.autor_info, size='size-8') }}
                                             </div>
                                         </td>
 

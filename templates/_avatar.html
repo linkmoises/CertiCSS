@@ -7,7 +7,7 @@
 <a href="{{ profile_url }}" class="inline-block"{% if tooltip %} title="{{ user.nombres }} {{ user.apellidos }}"{% endif %}>
 {% endif %}
     {% if user.foto %}
-    <img class="{{ size }} rounded-full object-cover mt-4" src="{{ foto_url }}" alt="{{ user.nombres }} {{ user.apellidos }}">
+    <img class="{{ size }} rounded-full object-cover mt-2" src="{{ foto_url }}" alt="{{ user.nombres }} {{ user.apellidos }}">
     {% else %}
     <div class="{{ size }} rounded-full mt-2 bg-blue-600 flex items-center justify-center text-white font-medium{% if size == 'size-8' %} text-xs{% elif size == 'size-10' %} text-sm{% else %} text-base{% endif %}"{% if tooltip %} title="{{ user.nombres }} {{ user.apellidos }}"{% endif %}>
         {{ initials }}
