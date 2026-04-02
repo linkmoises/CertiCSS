@@ -340,6 +340,90 @@ def eliminar_contenido(codigo_evento, orden):
 
 
 ###
+### LMS - Copiar contenidos a otro evento
+###
+@plataforma_bp.route("/tablero/eventos/<codigo_evento>/lms/copiar", methods=["GET", "POST"])
+@login_required
+@lms_required
+def copiar_lms(codigo_evento):
+    evento_origen = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento_origen:
+        abort(404)
+
+    if request.method == "POST":
+        codigo_destino = request.form.get("codigo_destino").strip()
+        
+        evento_destino = collection_eventos.find_one({"codigo": codigo_destino})
+        if not evento_destino:
+            flash("El evento destino no existe", "danger")
+            return redirect(url_for("plataforma.copiar_lms", codigo_evento=codigo_evento))
+        
+        contenidos = list(collection_eva.find({"codigo_evento": codigo_evento}).sort("orden", 1))
+        
+        if not contenidos:
+            flash("No hay contenidos LMS para copiar", "warning")
+            return redirect(url_for("ver_evento", codigo_evento=codigo_evento))
+        
+        # Verificar que el evento destino sea virtual/tenga modalidad no presencial
+        if evento_destino.get("modalidad") == "Presencial":
+            flash("No se puede copiar LMS a un evento presencial", "danger")
+            return redirect(url_for("plataforma.copiar_lms", codigo_evento=codigo_evento))
+        
+        upload_folder = current_app.config["UPLOAD_FOLDER"]
+        
+        for contenido in contenidos:
+            nuevo_orden = contenido["orden"]
+            
+            nuevo_contenido = {
+                "codigo_evento": codigo_destino,
+                "orden": nuevo_orden,
+                "titulo": contenido.get("titulo", ""),
+                "descripcion": contenido.get("descripcion", ""),
+                "tipo": contenido.get("tipo", ""),
+            }
+            
+            if contenido.get("tipo") == "video":
+                nuevo_contenido["url_video"] = contenido.get("url_video", "")
+            
+            elif contenido.get("tipo") == "texto":
+                nuevo_contenido["contenido_texto"] = contenido.get("contenido_texto", "")
+            
+            elif contenido.get("tipo") == "documento":
+                if contenido.get("documento"):
+                    doc_path = contenido["documento"]
+                    if "/" in doc_path:
+                        old_filename = doc_path.split("/")[-1]
+                        old_evento_folder = os.path.join(upload_folder, codigo_evento)
+                        old_file_path = os.path.join(old_evento_folder, old_filename)
+                        
+                        if os.path.exists(old_file_path):
+                            evento_folder_destino = os.path.join(upload_folder, codigo_destino)
+                            os.makedirs(evento_folder_destino, exist_ok=True)
+                            
+                            extension = os.path.splitext(old_filename)[1] or ".pdf"
+                            new_filename = f"documento-{codigo_destino}-{nuevo_orden:02d}{extension}"
+                            new_file_path = os.path.join(evento_folder_destino, new_filename)
+                            
+                            import shutil
+                            shutil.copy2(old_file_path, new_file_path)
+                            
+                            nuevo_contenido["documento"] = f"{codigo_destino}/{new_filename}"
+            
+            elif contenido.get("tipo") == "caso_chatgpt":
+                nuevo_contenido["contenido_json"] = contenido.get("contenido_json", "")
+            
+            elif contenido.get("tipo") == "examen":
+                nuevo_contenido["qbank_config"] = contenido.get("qbank_config", "")
+            
+            collection_eva.insert_one(nuevo_contenido)
+        
+        flash(f"Se copiaron {len(contenidos)} contenidos LMS al evento {codigo_destino}", "success")
+        return redirect(url_for("plataforma.listar_contenidos", codigo_evento=codigo_destino))
+    
+    return render_template("copiar_lms.html", evento=evento_origen)
+
+
+###
 ### LMS - Landing page de un evento virtual
 ###
 @plataforma_bp.route("/plataforma/<codigo_evento>")
