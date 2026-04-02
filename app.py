@@ -2565,18 +2565,27 @@ def db_encuestas(page=1):
     codigos_eventos = collection_encuestas.distinct('codigo_evento')
     codigos_eventos = sorted([codigo for codigo in codigos_eventos if codigo])  # Filtrar valores vacíos y ordenar
 
-    # Obtener años disponibles desde la colección
-    all_encuestas_for_years = list(collection_encuestas.find({}, {'fecha': 1}))
-    years = set()
-    for enc in all_encuestas_for_years:
-        if enc.get('fecha'):
-            try:
-                year = enc['fecha'][:4]
-                if year.isdigit():
-                    years.add(int(year))
-            except:
-                pass
-    years = sorted(years, reverse=True)
+    # Obtener años disponibles desde la colección usando agregación
+    # Maneja tanto fechas string como datetime
+    pipeline = [
+        {'$match': {'fecha': {'$exists': True, '$ne': None}}},
+        {'$project': {
+            'year': {
+                '$year': {
+                    '$cond': {
+                        'if': {'$eq': [{'$type': '$fecha'}, 'string']},
+                        'then': {'$dateFromString': {'dateString': '$fecha', 'onError': None}},
+                        'else': '$fecha'
+                    }
+                }
+            }
+        }},
+        {'$match': {'year': {'$ne': None}}},
+        {'$group': {'_id': '$year'}},
+        {'$sort': {'_id': -1}}
+    ]
+    years_result = list(collection_encuestas.aggregate(pipeline))
+    years = [doc['_id'] for doc in years_result if doc.get('_id')]
 
     # Meses disponibles
     meses = [
