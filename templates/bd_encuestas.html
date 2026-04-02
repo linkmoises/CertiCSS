@@ -29,6 +29,22 @@
                                     <div class="inline-flex gap-x-2">
                                         <!-- Formulario de filtro -->
                                         <form method="GET" action="{{ url_for('db_encuestas') }}" class="flex gap-2 items-center">
+                                            <select name="year" class="py-2 px-3 pe-9 block border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none">
+                                                <option value="">Todos los años</option>
+                                                {% for year in years %}
+                                                <option value="{{ year }}" {% if year == year_filtro|int %}selected{% endif %}>
+                                                    {{ year }}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                            <select name="month" class="py-2 px-3 pe-9 block border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" {% if not year_filtro %}disabled{% endif %}>
+                                                <option value="">Todos los meses</option>
+                                                {% for mes_num, mes_nombre in meses %}
+                                                <option value="{{ mes_num }}" {% if mes_num == month_filtro|int %}selected{% endif %}>
+                                                    {{ mes_nombre }}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
                                             <select name="codigo_evento" class="py-2 px-3 pe-9 block border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none">
                                                 <option value="">Todos los eventos</option>
                                                 {% for codigo in codigos_eventos %}
@@ -44,7 +60,7 @@
                                                 </svg>
                                                 Filtrar
                                             </button>
-                                            {% if codigo_evento_filtro %}
+                                            {% if codigo_evento_filtro or year_filtro or month_filtro %}
                                             <a href="{{ url_for('db_encuestas') }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
                                                 <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                     <path d="M18 6 6 18"/>
@@ -53,6 +69,14 @@
                                                 Limpiar
                                             </a>
                                             {% endif %}
+                                            <a href="{{ url_for('descargar_encuestas_csv', year=year_filtro, month=month_filtro, codigo_evento=codigo_evento_filtro) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
+                                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                                    <polyline points="7 10 12 15 17 10"/>
+                                                    <line x1="12" x2="12" y1="15" y2="3"/>
+                                                </svg>
+                                                CSV
+                                            </a>
                                         </form>
                                     </div>
                                 </div>
@@ -98,7 +122,10 @@
                                     <p class="text-sm text-gray-600 dark:text-neutral-400">
                                         <span class="font-semibold text-gray-800 dark:text-neutral-200">{{ total_encuestas }}</span> {{ 'encuesta en esta colección' if total_encuestas == 1 else 'encuestas en esta colección' }}
                                         {% if codigo_evento_filtro %}
-                                        <span class="text-blue-600">(filtrado por: {{ codigo_evento_filtro }})</span>
+                                        <span class="text-blue-600">(evento: {{ codigo_evento_filtro }})</span>
+                                        {% endif %}
+                                        {% if year_filtro %}
+                                        <span class="text-blue-600">{% if codigo_evento_filtro %}, {% else %}({% endif %}{{ year_filtro }}{% if month_filtro %}-{{ month_filtro }}{% endif %}{% if not codigo_evento_filtro %}){% endif %}</span>
                                         {% endif %}
                                     </p>
                                 </div>
@@ -106,7 +133,7 @@
                                 <div>
                                     <div class="inline-flex gap-x-2">
                                         {% if page > 1 %}
-                                        <a href="{{ url_for('db_encuestas', page=page-1, codigo_evento=codigo_evento_filtro) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
+                                        <a href="{{ url_for('db_encuestas', page=page-1, year=year_filtro, month=month_filtro, codigo_evento=codigo_evento_filtro) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
                                             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
                                             Anterior
                                         </a>
@@ -119,7 +146,7 @@
                                         {% endif %}
                                         
                                         {% if page < total_paginas %}
-                                        <a href="{{ url_for('db_encuestas', page=page+1, codigo_evento=codigo_evento_filtro) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
+                                        <a href="{{ url_for('db_encuestas', page=page+1, year=year_filtro, month=month_filtro, codigo_evento=codigo_evento_filtro) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
                                             Siguiente
                                             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                                         </a>
@@ -154,6 +181,18 @@
 document.addEventListener("DOMContentLoaded", function () {
 const hiddenInputs = document.querySelectorAll("#buscadorForm input[type='hidden']");
 hiddenInputs.forEach((input) => input.remove());
+
+// Habilitar/deshabilitar mes según año seleccionado
+const yearSelect = document.querySelector('select[name="year"]');
+const monthSelect = document.querySelector('select[name="month"]');
+if (yearSelect && monthSelect) {
+    yearSelect.addEventListener('change', function() {
+        monthSelect.disabled = !this.value;
+        if (!this.value) {
+            monthSelect.value = '';
+        }
+    });
+}
 });
 document.getElementById("buscadorForm").addEventListener("submit", function (event) {
 event.preventDefault(); // Prevenir envío estándar del formulario

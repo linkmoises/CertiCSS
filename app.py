@@ -2506,13 +2506,31 @@ def db_encuestas(page=1):
     encuestas_por_pagina = 50
     skip = (page - 1) * encuestas_por_pagina
 
-    # Obtener el filtro de código de evento desde los parámetros de la URL
+    # Obtener filtros desde los parámetros de la URL
     codigo_evento_filtro = request.args.get('codigo_evento', '').strip()
+    year_filtro = request.args.get('year', '').strip()
+    month_filtro = request.args.get('month', '').strip()
     
     # Construir el filtro de búsqueda
     filtro = {}
     if codigo_evento_filtro:
         filtro['codigo_evento'] = codigo_evento_filtro
+    
+    if year_filtro:
+        try:
+            year_int = int(year_filtro)
+            filtro['fecha'] = {'$gte': f'{year_int}-01-01', '$lte': f'{year_int}-12-31'}
+        except ValueError:
+            pass
+    
+    if month_filtro and year_filtro:
+        try:
+            month_int = int(month_filtro)
+            if 1 <= month_int <= 12:
+                mes_str = f'{month_int:02d}'
+                filtro['fecha'] = {'$gte': f'{year_filtro}-{mes_str}-01', '$lte': f'{year_filtro}-{mes_str}-31'}
+        except ValueError:
+            pass
 
     # Obtener encuestas con filtro aplicado
     encuestas = list(collection_encuestas.find(filtro).sort("fecha", -1).skip(skip).limit(encuestas_por_pagina))
@@ -2547,6 +2565,26 @@ def db_encuestas(page=1):
     codigos_eventos = collection_encuestas.distinct('codigo_evento')
     codigos_eventos = sorted([codigo for codigo in codigos_eventos if codigo])  # Filtrar valores vacíos y ordenar
 
+    # Obtener años disponibles desde la colección
+    all_encuestas_for_years = list(collection_encuestas.find({}, {'fecha': 1}))
+    years = set()
+    for enc in all_encuestas_for_years:
+        if enc.get('fecha'):
+            try:
+                year = enc['fecha'][:4]
+                if year.isdigit():
+                    years.add(int(year))
+            except:
+                pass
+    years = sorted(years, reverse=True)
+
+    # Meses disponibles
+    meses = [
+        (1, 'Enero'), (2, 'Febrero'), (3, 'Marzo'), (4, 'Abril'),
+        (5, 'Mayo'), (6, 'Junio'), (7, 'Julio'), (8, 'Agosto'),
+        (9, 'Septiembre'), (10, 'Octubre'), (11, 'Noviembre'), (12, 'Diciembre')
+    ]
+
     return render_template('bd_encuestas.html',
         encuestas=encuestas_expandidas,
         campos=campos,
@@ -2554,7 +2592,110 @@ def db_encuestas(page=1):
         total_paginas=total_paginas,
         total_encuestas=total_encuestas,
         codigo_evento_filtro=codigo_evento_filtro,
-        codigos_eventos=codigos_eventos)
+        codigos_eventos=codigos_eventos,
+        year_filtro=year_filtro,
+        month_filtro=month_filtro,
+        years=years,
+        meses=meses)
+
+
+###
+### Descargar encuestas en CSV
+###
+@app.route('/tablero/bases-de-datos/encuestas/csv')
+@login_required
+def descargar_encuestas_csv():
+    if current_user.rol != 'administrador':
+        flash('No tienes permiso para acceder a esta página.', 'error')
+        return redirect(url_for('home'))
+
+    # Obtener filtros desde los parámetros de la URL
+    codigo_evento_filtro = request.args.get('codigo_evento', '').strip()
+    year_filtro = request.args.get('year', '').strip()
+    month_filtro = request.args.get('month', '').strip()
+    
+    # Construir el filtro de búsqueda
+    filtro = {}
+    if codigo_evento_filtro:
+        filtro['codigo_evento'] = codigo_evento_filtro
+    
+    if year_filtro:
+        try:
+            year_int = int(year_filtro)
+            filtro['fecha'] = {'$gte': f'{year_int}-01-01', '$lte': f'{year_int}-12-31'}
+        except ValueError:
+            pass
+    
+    if month_filtro and year_filtro:
+        try:
+            month_int = int(month_filtro)
+            if 1 <= month_int <= 12:
+                mes_str = f'{month_int:02d}'
+                filtro['fecha'] = {'$gte': f'{year_filtro}-{mes_str}-01', '$lte': f'{year_filtro}-{mes_str}-31'}
+        except ValueError:
+            pass
+
+    # Obtener todas las encuestas con filtro aplicado (sin paginación)
+    encuestas = list(collection_encuestas.find(filtro).sort("fecha", -1))
+
+    if not encuestas:
+        flash('No hay encuestas para descargar con los filtros seleccionados.', 'warning')
+        return redirect(url_for('db_encuestas', year=year_filtro, month=month_filtro, codigo_evento=codigo_evento_filtro))
+
+    # Obtener todos los campos posibles
+    campos = set()
+    for encuesta in encuestas:
+        campos.update(encuesta.keys())
+        if 'respuestas' in encuesta and isinstance(encuesta['respuestas'], dict):
+            for key in encuesta['respuestas'].keys():
+                campos.add(f"respuestas.{key}")
+    
+    campos_importantes = ['_id', 'codigo_evento', 'fecha', 'cedula']
+    for campo in campos_importantes:
+        campos.add(campo)
+    campos = sorted(campos)
+
+    # Generar CSV
+    import csv
+    import io
+    
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Encabezados
+    writer.writerow(campos)
+    
+    # Filas
+    for encuesta in encuestas:
+        fila = []
+        for campo in campos:
+            if campo == '_id':
+                valor = str(encuesta.get(campo, ''))
+            elif campo.startswith('respuestas.'):
+                respuesta_key = campo.replace('respuestas.', '')
+                valor = encuesta.get('respuestas', {}).get(respuesta_key, '')
+            else:
+                valor = encuesta.get(campo, '')
+            fila.append(str(valor) if valor is not None else '')
+        writer.writerow(fila)
+    
+    output.seek(0)
+    
+    # Generar nombre de archivo
+    nombre_archivo = 'encuestas'
+    if year_filtro:
+        nombre_archivo += f'_{year_filtro}'
+    if month_filtro:
+        nombre_archivo += f'_{month_filtro}'
+    if codigo_evento_filtro:
+        nombre_archivo += f'_{codigo_evento_filtro}'
+    nombre_archivo += '.csv'
+    
+    return Response(
+        output.getvalue(),
+        mimetype='text/csv',
+        headers={'Content-Disposition': f'attachment; filename={nombre_archivo}'}
+    )
 
 
 ###
