@@ -1847,6 +1847,10 @@ select {
   display: none;
 }
 
+.aspect-square {
+  aspect-ratio: 1 / 1;
+}
+
 .size-10 {
   width: 2.5rem;
   height: 2.5rem;

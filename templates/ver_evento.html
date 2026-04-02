@@ -235,7 +235,7 @@
                                 <!-- Contenedor -->
                                 <div class="md:col-span-1 bg-gray-100 p-4 rounded-xl">
                                     <h2 class="text-lg font-medium mb-2">Afiches, enlaces y documentos</h2>
-                                    <div class="relative pt-[100%] sm:pt-[100%]">
+                                    <div class="relative aspect-square">
 {% if evento.afiche_750 %}
                                         <a href="{{ BASE_URL }}{{ evento.afiche }}" target="_blank"><img class="size-full absolute top-0 start-0 object-cover rounded-xl" src="{{ BASE_URL }}{{ evento.afiche_750 }}" alt="{{ evento.nombre }}"></a>
 {% else %}
