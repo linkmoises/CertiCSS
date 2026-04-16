@@ -1,23 +1,21 @@
 ###
 ###
 ###  Este archivo contiene funciones relacionadas con la administración de usuarios
-###  de CertiCSS y con el inicio y cierres de sesión.
+###  de CertiCSS.
 ###
 ###
-from flask import Blueprint, request, render_template, redirect, url_for, flash, session, abort
-from flask_login import LoginManager, login_user, UserMixin, logout_user, current_user, login_required
+from flask import Blueprint, request, render_template, redirect, url_for, flash, abort
+from flask_login import login_user, current_user, login_required
 from bson.objectid import ObjectId
-from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime, timedelta
+from werkzeug.security import generate_password_hash
+from datetime import datetime
 from PIL import Image
-from functools import wraps
 import os
 
-# Crear el blueprint
+from app.auth import UserRole, ALLOWED_USER_ROLES, User, roles_required, role_required, hash_password
+
 usuarios_bp = Blueprint('usuarios', __name__)
 
-# Importar las colecciones de MongoDB desde el módulo principal
-# Estas se configurarán cuando se registre el blueprint
 collection_usuarios = None
 collection_participantes = None
 collection_eventos = None
@@ -25,7 +23,6 @@ app_config = None
 log_event = None
 
 def init_usuarios_module(usuarios_collection, participantes_collection, eventos_collection, config, log_function):
-    """Inicializar el módulo con las dependencias necesarias"""
     global collection_usuarios, collection_participantes, collection_eventos, app_config, log_event
     collection_usuarios = usuarios_collection
     collection_participantes = participantes_collection
@@ -33,123 +30,8 @@ def init_usuarios_module(usuarios_collection, participantes_collection, eventos_
     app_config = config
     log_event = log_function
 
-# Enum de roles de usuario (copiado desde app.py)
-from enum import Enum
-
-class UserRole(str, Enum):
-    COORDINADOR_DEPARTAMENTAL = 'coordinador-departamental'
-    COORDINADOR_LOCAL = 'coordinador-local'
-    COORDINADOR_REGIONAL = 'coordinador-regional'
-    COORDINADOR_NACIONAL = 'coordinador-nacional'
-    SUBDIRECTOR_DOCENCIA = 'subdirector-docencia'
-    COORDINADOR_ADMINISTRATIVO = 'coordinador-administrativo'
-    DENADOI = 'denadoi'
-    SIMULACION = 'simulacion'
-    ADMINISTRADOR = 'administrador'  # Reservado, no se crea desde el formulario
-
-ALLOWED_USER_ROLES = {
-    UserRole.COORDINADOR_DEPARTAMENTAL.value,
-    UserRole.COORDINADOR_LOCAL.value,
-    UserRole.COORDINADOR_REGIONAL.value,
-    UserRole.COORDINADOR_NACIONAL.value,
-    UserRole.SUBDIRECTOR_DOCENCIA.value,
-    UserRole.COORDINADOR_ADMINISTRATIVO.value,
-    UserRole.DENADOI.value,
-    UserRole.SIMULACION.value,
-}
-
-class User(UserMixin):
-    def __init__(self, email, password, rol, nombres, apellidos, cedula, foto=None, permisos=None, region=None):
-        self.email = email
-        self.password = password
-        self.rol = rol
-        self.nombres = nombres
-        self.apellidos = apellidos
-        self.cedula = cedula
-        self.foto = foto
-        self.permisos = permisos if permisos is not None else []
-        self.region = region
-        self.id = None
-
-    @property
-    def role(self):
-        try:
-            return UserRole(self.rol)
-        except ValueError:
-            return None
-
-    def has_role(self, role):
-        role_str = role.value if isinstance(role, UserRole) else str(role)
-        return self.rol == role_str
-
-    def has_any_role(self, roles):
-        return any(self.has_role(r) for r in roles)
-
-    def is_admin(self):
-        return self.rol == UserRole.ADMINISTRADOR.value
-    
-    def has_permission(self, permission):
-        """Verifica si el usuario tiene un permiso específico"""
-        if self.is_admin():
-            return True
-        return permission in self.permisos
-    
-    def has_any_permission(self, *permissions):
-        """Verifica si el usuario tiene al menos uno de los permisos especificados"""
-        if self.is_admin():
-            return True
-        return any(permission in self.permisos for permission in permissions)
-
-    def is_authenticated(self):
-        return True
-
-    def is_active(self):
-        return True
-
-    def is_anonymous(self):
-        return False
-
-    def get_id(self):
-        return str(self.id)
-
-def load_user(user_id):
-    user_data = collection_usuarios.find_one({"_id": ObjectId(user_id)})
-    if user_data:
-        user = User(
-            email=user_data['email'],
-            password=user_data['password'],
-            rol=user_data['rol'],
-            cedula=user_data.get('cedula', ''),
-            nombres=user_data.get('nombres', ''),
-            apellidos=user_data.get('apellidos', ''),
-            foto=user_data.get('foto'),
-            permisos=user_data.get('permisos', []),
-            region=user_data.get('region', '')
-        )
-        user.id = str(user_data['_id'])
-        return user
-    return None
-
-def roles_required(*roles):
-    allowed = {r.value if isinstance(r, UserRole) else str(r) for r in roles}
-    def decorator(view_func):
-        @wraps(view_func)
-        def wrapped_view(*args, **kwargs):
-            if not current_user.is_authenticated:
-                from flask_login import LoginManager
-                login_manager = LoginManager()
-                return login_manager.unauthorized()
-            if current_user.rol not in allowed:
-                abort(403)
-            return view_func(*args, **kwargs)
-        return wrapped_view
-    return decorator
-
-def role_required(role):
-    return roles_required(role)
 
 def allowed_file(filename):
-    """Función auxiliar para validar archivos permitidos"""
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -211,78 +93,6 @@ def registro():
         return redirect(url_for('usuarios.listar_usuarios'))
 
     return render_template('registrar_usuario.html')
-
-###
-### Login
-###
-@usuarios_bp.route('/iniciar_sesion', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-
-        user_data = collection_usuarios.find_one({"email": email})
-
-        if user_data:
-            # Verificar si el usuario está bloqueado
-            if user_data.get('blocked_until') and user_data['blocked_until'] > datetime.utcnow():
-                log_event(f"Usuario [{email}] intentó ingresar con la cuenta bloqueada temporalmente.")
-                flash('Esta cuenta está bloqueada temporalmente. Intente más tarde.', 'error')
-                return render_template('iniciar_sesion.html')
-
-            # Verificar si el usuario está activo
-            if not user_data.get('activo', False):  # Si 'activo' es False o no existe
-                log_event(f"Usuario [{email}] intentó ingresar con una cuenta inactiva.")
-                flash('Esta cuenta está inactiva. Contacte al administrador.', 'error')
-                return render_template('iniciar_sesion.html')
-
-            # Verificar la contraseña
-            if check_password_hash(user_data['password'], password):
-                # Reiniciar intentos fallidos si el inicio de sesión es exitoso
-                collection_usuarios.update_one(
-                    {"email": email},
-                    {"$set": {"failed_attempts": 0, "last_failed_attempt": None, "blocked_until": None}}
-                )
-                user = User(
-                    email=user_data['email'],
-                    password=user_data['password'],
-                    rol=user_data['rol'],
-                    cedula=user_data.get('cedula', ''),
-                    nombres=user_data.get('nombres', ''),
-                    apellidos=user_data.get('apellidos', '')
-                )
-                user.id = str(user_data['_id'])
-                login_user(user)
-                session.permanent = True
-                log_event(f"Usuario [{email}] ingresó exitosamente.")
-                return redirect(url_for('tablero_coordinadores'))
-            else:
-                # Incrementar intentos fallidos
-                failed_attempts = user_data.get('failed_attempts', 0) + 1
-                last_failed_attempt = datetime.utcnow()
-
-                # Bloquear después de 5 intentos fallidos
-                if failed_attempts >= 5:
-                    blocked_until = last_failed_attempt + timedelta(minutes=15)
-                    collection_usuarios.update_one(
-                        {"email": email},
-                        {"$set": {"failed_attempts": failed_attempts, "last_failed_attempt": last_failed_attempt, "blocked_until": blocked_until}}
-                    )
-                    log_event(f"Usuario [{email}] ha bloqueado la cuenta.")
-                    flash('Has excedido el número máximo de intentos. La cuenta ha sido bloqueada por 15 minutos.', 'error')
-                else:
-                    collection_usuarios.update_one(
-                        {"email": email},
-                        {"$set": {"failed_attempts": failed_attempts, "last_failed_attempt": last_failed_attempt}}
-                    )
-                    log_event(f"Usuario [{email}] intentó ingresar con credenciales incorrectas.")
-                    flash('Credenciales incorrectas. Inténtalo de nuevo.', 'error')
-
-        else:
-            log_event(f"Usuario [{email}] intentó ingresar con credenciales incorrectas.")
-            flash('Credenciales incorrectas. Inténtalo de nuevo.', 'error')
-
-    return render_template('iniciar_sesion.html')
 
 
 ###
@@ -702,12 +512,3 @@ def toggle_activo(user_id):
 
     log_event(f"Usuario [{current_user.email}] cambió el estado de {email} a {'activo' if nuevo_estado else 'inactivo'}.")
     return redirect(url_for('usuarios.listar_usuarios'))
-
-
-###
-### Cerrar sesión
-###
-@usuarios_bp.route('/salir', methods=['POST'])
-def salir():
-    logout_user()
-    return redirect(url_for('home'))

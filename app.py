@@ -90,9 +90,17 @@ collection_progreso = db['progreso']
 collection_unidades = db['unidades']
 
 ###
-### Roles de usuario (importados desde usuarios.py)
+### Auth module initialization
 ###
-from app.usuarios import UserRole, ALLOWED_USER_ROLES
+from app.auth import auth_bp, init_auth_services, init_auth_routes
+init_auth_services(collection_usuarios)
+init_auth_routes(get_logger())
+app.register_blueprint(auth_bp)
+
+###
+### Roles de usuario
+###
+from app.auth import UserRole, ALLOWED_USER_ROLES
 
 
 ###
@@ -125,7 +133,7 @@ def inject_umami():
 ###
 ### Login (importado desde usuarios.py)
 ###
-from app.usuarios import User, load_user, roles_required, role_required
+from app.auth import User, load_user, roles_required, role_required
 
 
 ###
