@@ -336,7 +336,7 @@ def crear_evento():
         })
         
         log_event(f"Usuario [{current_user.email}] ha creado el evento {codigo} exitosamente.")
-        return redirect(url_for('mis_eventos'))
+        return redirect(url_for('events.mis_eventos'))
 
     return render_template('crear_evento.html', prefill=prefill)
 
@@ -350,7 +350,7 @@ def copiar_evento(codigo_evento):
     
     if not evento:
         flash("Evento no encontrado", "danger")
-        return redirect(url_for('listar_eventos'))
+        return redirect(url_for('events.listar_eventos'))
     
     campos_copiar = {
         'nombre': evento.get('nombre', ''),
@@ -364,7 +364,7 @@ def copiar_evento(codigo_evento):
         'descripcion': evento.get('descripcion', ''),
     }
     
-    return redirect(url_for('crear_evento', **campos_copiar))
+    return redirect(url_for('events.crear_evento', **campos_copiar))
 
 
 @events_bp.route('/eventos/<codigo_evento>')
@@ -420,22 +420,22 @@ def cambiar_autor_evento(codigo_evento):
     
     if current_user.rol != 'administrador':
         flash("No tienes permisos para realizar esta acción", "danger")
-        return redirect(url_for('ver_evento', codigo_evento=codigo_evento))
+        return redirect(url_for('events.ver_evento', codigo_evento=codigo_evento))
     
     nuevo_autor_id = request.form.get('nuevo_autor_id')
     if not nuevo_autor_id:
         flash("Selecciona un usuario", "danger")
-        return redirect(url_for('ver_evento', codigo_evento=codigo_evento))
+        return redirect(url_for('events.ver_evento', codigo_evento=codigo_evento))
     
     evento = get_event_by_code(get_collection_eventos(), codigo_evento)
     if not evento:
         flash("Evento no encontrado", "danger")
-        return redirect(url_for('listar_eventos'))
+        return redirect(url_for('events.listar_eventos'))
     
     nuevo_autor = get_collection_usuarios().find_one({"_id": ObjectId(nuevo_autor_id)})
     if not nuevo_autor:
         flash("Usuario no encontrado", "danger")
-        return redirect(url_for('ver_evento', codigo_evento=codigo_evento))
+        return redirect(url_for('events.ver_evento', codigo_evento=codigo_evento))
     
     get_collection_eventos().update_one(
         {"codigo": codigo_evento},
@@ -443,7 +443,7 @@ def cambiar_autor_evento(codigo_evento):
     )
     
     flash(f"Autor cambiado a {nuevo_autor.get('nombres', '')} {nuevo_autor.get('apellidos', '')} ({nuevo_autor.get('email', '')})", "success")
-    return redirect(url_for('ver_evento', codigo_evento=codigo_evento))
+    return redirect(url_for('events.ver_evento', codigo_evento=codigo_evento))
 
 
 @events_bp.route('/eventos/<codigo_evento>/editar', methods=['GET', 'POST'])
@@ -458,11 +458,11 @@ def editar_evento(codigo_evento):
     
     if not evento:
         flash("Evento no encontrado", "danger")
-        return redirect(url_for('listar_eventos'))
+        return redirect(url_for('events.listar_eventos'))
     
     if not check_user_can_edit_event(evento, current_user, get_collection_participantes()):
         flash("No tienes permisos para editar este evento", "danger")
-        return redirect(url_for('ver_evento', codigo_evento=codigo_evento))
+        return redirect(url_for('events.ver_evento', codigo_evento=codigo_evento))
     
     if request.method == 'POST':
         nombre = request.form['nombre']
@@ -573,7 +573,7 @@ def editar_evento(codigo_evento):
         )
         
         log_event(f"Usuario [{current_user.email}] ha editado el evento {codigo_evento}.")
-        return redirect(url_for('ver_evento', codigo_evento=codigo_evento))
+        return redirect(url_for('events.ver_evento', codigo_evento=codigo_evento))
     
     return render_template('editar_evento.html', evento=evento)
 
@@ -586,11 +586,11 @@ def cerrar_evento(codigo_evento):
     evento = get_event_by_code(get_collection_eventos(), codigo_evento)
     if not evento:
         flash("Evento no encontrado", "danger")
-        return redirect(url_for('listar_eventos'))
+        return redirect(url_for('events.listar_eventos'))
     
     if not check_user_can_edit_event(evento, current_user, get_collection_participantes()):
         flash("No tienes permisos para cerrar este evento", "danger")
-        return redirect(url_for('ver_evento', codigo_evento=codigo_evento))
+        return redirect(url_for('events.ver_evento', codigo_evento=codigo_evento))
     
     get_collection_eventos().update_one(
         {"codigo": codigo_evento},
@@ -599,7 +599,7 @@ def cerrar_evento(codigo_evento):
     
     log_event(f"Usuario [{current_user.email}] ha cerrado el evento {codigo_evento}.")
     flash(f"Evento {codigo_evento} cerrado exitosamente.", "success")
-    return redirect(url_for('ver_evento', codigo_evento=codigo_evento))
+    return redirect(url_for('events.ver_evento', codigo_evento=codigo_evento))
 
 
 @events_bp.route('/eventos/<codigo_evento>/eliminar', methods=['POST'])
@@ -610,17 +610,17 @@ def eliminar_evento(codigo_evento):
     evento = get_event_by_code(get_collection_eventos(), codigo_evento)
     if not evento:
         flash("Evento no encontrado", "danger")
-        return redirect(url_for('listar_eventos'))
+        return redirect(url_for('events.listar_eventos'))
     
     if current_user.rol != 'administrador':
         flash("No tienes permisos para eliminar este evento", "danger")
-        return redirect(url_for('ver_evento', codigo_evento=codigo_evento))
+        return redirect(url_for('events.ver_evento', codigo_evento=codigo_evento))
     
     get_collection_eventos().delete_one({"codigo": codigo_evento})
     
     log_event(f"Usuario [{current_user.email}] ha eliminado el evento {codigo_evento}.")
     flash(f"Evento {codigo_evento} eliminado exitosamente.", "success")
-    return redirect(url_for('listar_eventos'))
+    return redirect(url_for('events.listar_eventos'))
 
 
 @events_bp.route('/eventos/digitales')
