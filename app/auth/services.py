@@ -224,3 +224,120 @@ def check_user_active(email: str) -> bool:
     if not user_data:
         return False
     return user_data.get('activo', False)
+
+
+import secrets
+from datetime import datetime, timedelta
+
+collection_tokens = None
+
+def init_token_services(tokens_collection):
+    global collection_tokens
+    collection_tokens = tokens_collection
+
+
+def generate_token(cedula: str) -> str:
+    token = secrets.token_urlsafe(32)
+    expiry = datetime.now() + timedelta(hours=2)
+    collection_tokens.update_one(
+        {'cedula': cedula},
+        {'$set': {'token': token, 'expiry': expiry}},
+        upsert=True
+    )
+    return token
+
+
+def verify_token(cedula: str, token: str) -> bool:
+    token_data = collection_tokens.find_one({'cedula': cedula})
+    if not token_data:
+        return False
+    if datetime.now() > token_data['expiry']:
+        collection_tokens.delete_one({'cedula': cedula})
+        return False
+    return token_data['token'] == token
+
+
+def lms_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        from flask_login import current_user
+        from flask import abort
+        if not current_user.is_authenticated:
+            abort(401)
+        if current_user.rol == 'administrador':
+            return f(*args, **kwargs)
+        if current_user.rol == 'denadoi':
+            return f(*args, **kwargs)
+        permisos_usuario = getattr(current_user, 'permisos', [])
+        if 'lms_admin' in permisos_usuario or 'lms_edit' in permisos_usuario:
+            return f(*args, **kwargs)
+        abort(403)
+    return decorated_function
+
+
+def lms_edit_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        from flask_login import current_user
+        from flask import abort
+        if not current_user.is_authenticated:
+            abort(401)
+        if current_user.rol in ['administrador', 'denadoi']:
+            return f(*args, **kwargs)
+        permisos_usuario = getattr(current_user, 'permisos', [])
+        if 'lms_admin' in permisos_usuario:
+            return f(*args, **kwargs)
+        if 'lms_edit' in permisos_usuario:
+            codigo_qbank = kwargs.get('codigo_qbank')
+            if codigo_qbank:
+                from app import collection_qbanks
+                qbank = collection_qbanks.find_one({"codigo": codigo_qbank})
+                if qbank and qbank.get('autor') == current_user.id:
+                    return f(*args, **kwargs)
+                else:
+                    abort(403)
+            else:
+                return f(*args, **kwargs)
+        abort(403)
+    return decorated_function
+
+
+def permission_required(*permisos):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            from flask_login import current_user
+            from flask import abort
+            if not current_user.is_authenticated:
+                abort(401)
+            if current_user.rol == 'administrador':
+                return f(*args, **kwargs)
+            permisos_usuario = getattr(current_user, 'permisos', [])
+            if not permisos_usuario:
+                from app import collection_usuarios
+                from bson.objectid import ObjectId
+                user_data = collection_usuarios.find_one({"_id": ObjectId(current_user.id)})
+                permisos_usuario = user_data.get('permisos', []) if user_data else []
+                current_user.permisos = permisos_usuario
+            if any(permiso in permisos_usuario for permiso in permisos):
+                return f(*args, **kwargs)
+            abort(403)
+        return decorated_function
+    return decorator
+
+
+def token_required(f):
+    @wraps(f)
+    def decorated_function(codigo_evento, *args, **kwargs):
+        from flask_login import current_user
+        from flask import request, abort
+        if (current_user.is_authenticated 
+            and current_user.rol == 'administrador' 
+            and request.path.startswith('/plataforma')):
+            return f(codigo_evento, *args, **kwargs)
+        token = request.args.get('token')
+        cedula = request.args.get('cedula')
+        if not cedula or not token or not verify_token(cedula, token):
+            abort(401)
+        return f(codigo_evento, *args, **kwargs)
+    return decorated_function

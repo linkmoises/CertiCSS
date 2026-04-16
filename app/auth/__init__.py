@@ -13,6 +13,13 @@ from app.auth.services import (
     check_user_blocked,
     check_user_active,
     init_auth_services,
+    generate_token,
+    verify_token,
+    token_required,
+    lms_required,
+    lms_edit_required,
+    permission_required,
+    init_token_services,
 )
 
 from app.auth.routes import auth_bp, login, logout, init_auth_routes
@@ -32,6 +39,13 @@ __all__ = [
     'check_user_blocked',
     'check_user_active',
     'init_auth_services',
+    'generate_token',
+    'verify_token',
+    'token_required',
+    'lms_required',
+    'lms_edit_required',
+    'permission_required',
+    'init_token_services',
     'auth_bp',
     'login',
     'logout',
