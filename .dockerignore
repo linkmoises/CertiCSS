@@ -1,3 +1,42 @@
+# Control de versiones
+.git
 .github
 .gitattributes
 .gitignore
+
+# Entorno virtual
+venv/
+.venv/
+
+# Cache de Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Node modules
+node_modules/
+static/node_modules/
+tailwind/node_modules/
+
+# Variables de entorno (sensibles)
+.env
+.env.*
+
+# Logs
+logs/
+
+# Archivos de desarrollo/IDE
+.vscode/
+.kiro/
+*.md
+
+# Archivos temporales y de prueba
+tests/
+*.sh
+
+# Archivos generados en runtime
+static/certificados/
+static/uploads/
+static/nube/
+static/audio/
+static/usuarios/
