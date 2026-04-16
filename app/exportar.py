@@ -37,7 +37,7 @@ def exportar_eventos():
             return exportar_archivos_zip(evento)
         elif tipo_exportacion == 'evento':
             # Exportar datos del evento en CSV
-            return exportar_evento_csv(evento)
+            return _exportar_evento_csv(evento)
         else:  # tipo_exportacion == 'participantes'
             # Exportar datos de participantes en CSV
             return exportar_participantes_csv(evento, codigo_evento)
@@ -189,8 +189,19 @@ def exportar_archivos_zip(evento):
     )
 
 
-def exportar_evento_csv(evento):
+@exportar_bp.route('/tablero/exportar/evento/<codigo_evento>')
+@login_required
+def exportar_evento_csv(codigo_evento):
     """Exportar datos del evento en formato CSV"""
+    evento = collection_eventos.find_one({'codigo': codigo_evento})
+    if not evento:
+        flash('Evento no encontrado', 'error')
+        return redirect(url_for('exportar.exportar_eventos'))
+    return _exportar_evento_csv(evento)
+
+
+def _exportar_evento_csv(evento):
+    """Exportar datos del evento en formato CSV (helper)"""
     # Crear un buffer en memoria para el archivo CSV
     output = io.StringIO()
     writer = csv.writer(output)
