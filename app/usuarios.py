@@ -35,6 +35,19 @@ def allowed_file(filename):
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+
+@usuarios_bp.route('/iniciar_sesion', methods=['GET', 'POST'])
+def login():
+    from flask import redirect, url_for
+    return redirect(url_for('auth_routes.login'))
+
+
+@usuarios_bp.route('/salir', methods=['POST'])
+def salir():
+    from flask import redirect, url_for
+    return redirect(url_for('auth_routes.logout'))
+
+
 ###
 ### Página de registro
 ###
