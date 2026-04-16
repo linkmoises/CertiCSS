@@ -98,6 +98,13 @@ init_token_services(collection_tokens)
 app.register_blueprint(auth_routes_bp)
 
 ###
+### Events module initialization
+###
+from app.events import events_bp, init_events_services
+init_events_services(collection_eventos, collection_participantes, collection_usuarios, collection_preregistro)
+app.register_blueprint(events_bp)
+
+###
 ### Roles de usuario
 ###
 from app.auth import UserRole, ALLOWED_USER_ROLES
