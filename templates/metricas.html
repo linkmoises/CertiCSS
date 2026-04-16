@@ -291,7 +291,7 @@
                                             </a><br />
 {% endif %}
 {% else %}
-                                            <a class="inline-flex items-center gap-x-1 text-sm text-pink-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('exportar.exportar_encuesta_csv', codigo_evento=evento.codigo) }}">
+                                            <a class="inline-flex items-center gap-x-1 text-sm text-pink-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('exportar.exportar_evento_csv', codigo_evento=evento.codigo) }}">
                                                 Dataset encuesta
                                             </a><br />
                                             <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('informe_avanzado', codigo_evento=evento.codigo) }}">
