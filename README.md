@@ -4,6 +4,18 @@
 
 ![CertiCSS](screenshot.jpg)
 
+<div style="border: 2px solid red; background-color: #ffe6e6; padding: 15px; border-radius: 5px; margin: 20px 0;">
+  <h2 style="color: #cc0000; margin-top: 0;">⚠️ Refactorización en curso</h2>
+  <p><strong>Estado actual:</strong> Refactorización arquitectónica en progreso.</p>
+  <p>CertiCSS se encuentra en un proceso de <strong>refactorización modular continua</strong>. Los objetivos son:</p>
+  <ul>
+    <li>Mejorar mantenibilidad: descomponer el monolito en módulos lógicos</li>
+    <li>Facilitar testing y auditoría de seguridad por secciones</li>
+    <li>Preparar la base de código para escalabilidad futura</li>
+  </ul>
+  <p><strong>Impacto en usuarios finales:</strong> Ninguno. Solo cambios internos.</p>
+</div>
+
 ## ¿Qué se puede hacer con CertiCSS?
 
 - **Crear Eventos**: Define eventos con detalles como nombre, tipo, fechas, etc.
