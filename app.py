@@ -55,7 +55,6 @@ def nl2br(text):
 
 app.jinja_env.filters['nl2br'] = nl2br
 
-
 ###
 ### Configuraciones comunes
 ###
@@ -109,7 +108,6 @@ app.register_blueprint(events_bp)
 ###
 from app.auth import UserRole, ALLOWED_USER_ROLES
 
-
 ###
 ### Variables globales personalizadas
 ###
@@ -136,12 +134,10 @@ def inject_version():
 def inject_umami():
     return dict(UMAMI_URL=app.config.get('UMAMI_URL', ''))
 
-
 ###
 ### Login (importado desde usuarios.py)
 ###
 from app.auth import User, load_user, roles_required, role_required
-
 
 ###
 ### Configurar Flask-Login
@@ -161,7 +157,6 @@ try:
         logger.info("Índice único creado en collection_participantes")
 except Exception as e:
     logger.error(f"Error al crear índice en collection_participantes: {e}")
-
 
 ###
 ### Crear índices para seguimiento de completitud de encuestas (encuestas_v2)
@@ -188,7 +183,6 @@ try:
 except Exception as e:
     logger.error(f"Error al crear índices para encuestas_v2: {e}")
 
-
 ###
 ### OTP dinámico
 ###
@@ -207,10 +201,6 @@ def get_otp(codigo_evento):
 
     # Devolver el OTP en formato JSON
     return jsonify(otp=otp_code)
-
-
-
-
 
 ###
 ###
@@ -251,7 +241,6 @@ def editar_participante(nanoid):
         return redirect(url_for('listar_participantes', codigo_evento=participante['codigo_evento']))
 
     return render_template('editar_participante.html', participante=participante, evento=evento)
-
 
 ###
 ###
@@ -315,10 +304,6 @@ def editar_ponente(nanoid):
                          evento=evento, 
                          fechas_disponibles=fechas_disponibles)
 
-
-
-
-
 ###
 ### Home
 ###
@@ -371,7 +356,6 @@ def home():
     
     return render_template('home.html', eventos=eventos_a_mostrar, mostrar_recientes=mostrar_recientes)
 
-
 ###
 ### Catálogo eventos
 ###
@@ -399,7 +383,6 @@ def catalogo(page=1):
     eventos = collection_eventos.find(filtro_catalogo).sort("fecha_inicio", -1).skip(skip).limit(per_page)
 
     return render_template('catalogo.html', eventos=eventos, page=page, total_pages=total_pages)
-
 
 ###
 ### Catálogo eventos abiertos
@@ -429,7 +412,6 @@ def catalogo_abiertos(page=1):
     eventos = list(eventos_cursor)
 
     return render_template('catalogo_abiertos.html', eventos=eventos, page=page, total_pages=total_pages)
-
 
 ###
 ### Dashboard
@@ -502,7 +484,6 @@ def tablero_coordinadores():
         num_eventos=num_eventos
     )
 
-
 ###
 ### Formulario de registro de participantes
 ###
@@ -553,7 +534,6 @@ def registrar_participante(codigo_evento):
             afiche_url=evento.get('afiche_750') if evento.get('afiche_750') else None,
             programa_url=evento.get('programa_url')
         )
-
 
 @app.route('/registrar', methods=['POST'])
 def registrar():
@@ -628,7 +608,6 @@ def registrar():
     # Mensaje de éxito
     flash("Registro exitoso. El certificado de participación se podrá descargar al finalizar el evento.", "success")
     return redirect(url_for('registrar_participante', codigo_evento=codigo_evento))
-
 
 ###
 ### Cache para cédulas de funcionarios CSS
@@ -764,14 +743,12 @@ def registrar_abierto(codigo_evento):
                          afiche_url=afiche_url,
                          evento_cerrado=evento_cerrado)
 
-
 ###
 ### Redirección corta (solo registro de evento)
 ###
 @app.route('/<codigo_evento>')
 def redirigir_ruta_corta(codigo_evento):
     return redirect(url_for('registrar_participante', codigo_evento=codigo_evento))
-
 
 ###
 ### Check-in system for large events (100+ people)
@@ -816,7 +793,6 @@ def checkin_evento(codigo_evento):
                          total_temporales=total_temporales,
                          total_confirmados=total_confirmados,
                          material_entregado=material_entregado)
-
 
 @app.route('/tablero/asistencia-controlada/<codigo_evento>/upload', methods=['GET', 'POST'])
 @login_required
@@ -895,7 +871,6 @@ def upload_participantes_csv(codigo_evento):
             return redirect(url_for('checkin_evento', codigo_evento=codigo_evento))
     
     return render_template('upload_csv.html', evento=evento)
-
 
 @app.route('/tablero/asistencia-controlada/<codigo_evento>/validar', methods=['GET', 'POST'])
 @login_required
@@ -1007,7 +982,6 @@ def validar_asistencia(codigo_evento):
     
     return render_template('validar_asistencia.html', evento=evento)
 
-
 @app.route('/tablero/asistencia-controlada/<codigo_evento>/listado-preregistro')
 @login_required
 def listar_participantes_temporales(codigo_evento):
@@ -1035,7 +1009,6 @@ def listar_participantes_temporales(codigo_evento):
     return render_template('participantes_temporales.html', 
                          evento=evento, 
                          participantes=participantes_temporales)
-
 
 @app.route('/tablero/asistencia-controlada/<codigo_evento>/preregistro', methods=['GET', 'POST'])
 @login_required
@@ -1100,7 +1073,6 @@ def preregistro_manual(codigo_evento):
     
     return render_template('preregistro_manual.html', evento=evento)
 
-
 @app.route('/api/checkin/<codigo_evento>/buscar/<cedula>')
 @login_required
 def buscar_participante_temporal(codigo_evento, cedula):
@@ -1157,7 +1129,6 @@ def buscar_participante_temporal(codigo_evento, cedula):
         "material_ya_entregado": bool(material_ya_entregado),
         "asistencia_confirmada": participante.get("asistencia_confirmada", False)
     })
-
 
 @app.route('/tablero/asistencia-controlada/<codigo_evento>/exportar')
 @login_required
@@ -1229,7 +1200,6 @@ def export_checkin_data(codigo_evento):
         }
     )
 
-
 @app.route('/api/checkin/<codigo_evento>/stats')
 @login_required
 def checkin_stats(codigo_evento):
@@ -1280,7 +1250,6 @@ def checkin_stats(codigo_evento):
         "stats_por_dia": stats_por_dia
     })
 
-
 @app.route('/tablero/asistencia-controlada/<codigo_evento>/material')
 @login_required
 def listado_material_educativo(codigo_evento):
@@ -1318,7 +1287,6 @@ def listado_material_educativo(codigo_evento):
                          total_confirmados=total_confirmados,
                          material_entregado=material_entregado,
                          material_pendiente=material_pendiente)
-
 
 @app.route('/api/checkin/<codigo_evento>/marcar-material', methods=['POST'])
 @login_required
@@ -1379,7 +1347,6 @@ def marcar_material_entregado(codigo_evento):
     else:
         return jsonify({"error": "Participante no encontrado"}), 404
 
-
 ###
 ### Formulario de preregistro
 ###
@@ -1392,7 +1359,6 @@ def preregistro(codigo_evento):
     evento = collection_eventos.find_one({"codigo": codigo_evento})
     nombre_evento = evento['nombre'] if evento else "Evento no encontrado"
     fecha_inicio = evento.get('fecha_inicio') if evento else None
-
 
     if request.method == "POST":
         datos_formulario = request.form.get("cedulas", "")
@@ -1451,7 +1417,6 @@ def preregistro(codigo_evento):
                            total_preregistrados=total_preregistrados,
                            cupos=cupos,
                            total_registrados=total_registrados)
-
 
 ###
 ### Formulario de registro de ponentes
@@ -1524,7 +1489,6 @@ def registrar_ponente(codigo_evento):
         fechas_disponibles=fechas_disponibles
     )
 
-
 ###
 ### Formulario de registro de organizadores
 ###
@@ -1577,7 +1541,6 @@ def registrar_organizador(codigo_evento):
         evento=evento,
         afiche_url=afiche_url
     )
-
 
 ###
 ### Funciones de extracción y validación de datos de formulario para registro extemporáneo
@@ -1877,290 +1840,9 @@ def registrar_extemporaneo(codigo_evento):
             flash('Error interno del sistema. Por favor, inténtelo de nuevo.', 'error')
             return redirect(url_for('registrar_extemporaneo', codigo_evento=codigo_evento))
 
+### Routes moved to /app/events/ module
 
-###
-### Listado de eventos próximos
-###
-@app.route('/tablero/eventos/proximos')
-@app.route('/tablero/eventos/proximos/page/<int:page>')
-@login_required
-def listar_eventos_proximos(page=1):
-    ahora = datetime.utcnow()
-    inicio_hoy = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    eventos_por_pagina = 20
-
-    # Filtro para excluir eventos con registro abierto
-    filtro_eventos = {
-        'fecha_inicio': {'$gte': inicio_hoy},
-        'registro_abierto': {'$ne': True}
-    }
-
-    # Contar el total de eventos próximos (excluyendo registro abierto)
-    total_eventos = collection_eventos.count_documents(filtro_eventos)
-
-    # Calcular el número total de páginas
-    total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
-
-    # Obtener los eventos próximos para la página actual
-    eventos_cursor = collection_eventos.find(filtro_eventos).sort('fecha_inicio').skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
-    eventos = list(eventos_cursor)
-
-    # Verificar si el usuario es organizador en cada evento y obtener info del autor
-    for evento in eventos:
-        es_organizador = collection_participantes.find_one({
-            "codigo_evento": evento["codigo"],
-            "cedula": str(current_user.cedula),
-            "rol": "coorganizador"
-        }) is not None 
-
-        evento["es_organizador"] = es_organizador
-        
-        if evento.get("autor"):
-            evento["autor_info"] = collection_usuarios.find_one(
-                {"_id": ObjectId(evento["autor"])},
-                {"nombres": 1, "apellidos": 1, "foto": 1}
-            )
-
-    return render_template('eventos-proximos.html',
-        eventos=eventos,
-        page=page,
-        total_paginas=total_paginas,
-        total_eventos=total_eventos
-    )
-
-
-
-###
-### Listado de eventos anteriores
-###
-@app.route('/tablero/eventos/anteriores')
-@app.route('/tablero/eventos/anteriores/page/<int:page>')
-@login_required
-def listar_eventos_anteriores(page=1):
-    ahora = datetime.utcnow()
-    eventos_por_pagina = 20
-
-    # Filtro para excluir eventos con registro abierto
-    filtro_eventos = {
-        "fecha_inicio": {"$lt": ahora},
-        'registro_abierto': {'$ne': True}
-    }
-
-    # Contar el total de eventos pasados (excluyendo registro abierto)
-    total_eventos = collection_eventos.count_documents(filtro_eventos)
-    # Calcular el número total de páginas
-    total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
-
-    # Obtener los eventos pasados para la página actual
-    eventos_cursor = collection_eventos.find(filtro_eventos).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
-    eventos = list(eventos_cursor)
-
-    # Verificar si el usuario es organizador en cada evento y obtener info del autor
-    for evento in eventos:
-        es_organizador = collection_participantes.find_one({
-            "codigo_evento": evento["codigo"],
-            "cedula": str(current_user.cedula),
-            "rol": "coorganizador"
-        }) is not None 
-
-        evento["es_organizador"] = es_organizador
-        
-        if evento.get("autor"):
-            evento["autor_info"] = collection_usuarios.find_one(
-                {"_id": ObjectId(evento["autor"])},
-                {"nombres": 1, "apellidos": 1, "foto": 1}
-            )
-
-    return render_template('eventos-anteriores.html',
-        eventos=eventos,
-        page=page,
-        total_paginas=total_paginas,
-        total_eventos=total_eventos
-    )
-
-
-###
-### Todos los eventos
-###
-@app.route('/tablero/eventos')
-@app.route('/tablero/eventos/page/<int:page>')
-@login_required
-def listar_eventos(page=1):
-    eventos_por_pagina = 20
-
-    # Filtro para excluir eventos con registro abierto
-    filtro_eventos = {
-        'registro_abierto': {'$ne': True},
-        'tipo': {'$ne': 'Sesión Docente'}
-    }
-
-    # Calcular el número total de eventos (excluyendo registro abierto)
-    total_eventos = collection_eventos.count_documents(filtro_eventos)
-    # Calcular el número total de páginas
-    total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
-
-    # Obtener los eventos para la página actual
-    eventos_cursor = collection_eventos.find(filtro_eventos).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
-    eventos = list(eventos_cursor)
-
-    # Verificar si el usuario es organizador en cada evento y obtener info del autor
-    for evento in eventos:
-        es_organizador = collection_participantes.find_one({
-            "codigo_evento": evento["codigo"],
-            "cedula": str(current_user.cedula),
-            "rol": "coorganizador"
-        }) is not None 
-
-        evento["es_organizador"] = es_organizador
-        
-        if evento.get("autor"):
-            evento["autor_info"] = collection_usuarios.find_one(
-                {"_id": ObjectId(evento["autor"])},
-                {"nombres": 1, "apellidos": 1, "foto": 1}
-            )
-
-    return render_template('eventos.html',
-        eventos=eventos,
-        total_eventos=total_eventos,
-        page=page,
-        total_paginas=total_paginas
-    )
-
-
-###
-### Mis Eventos
-###
-@app.route('/tablero/eventos/mios')
-@app.route('/tablero/eventos/mios/page/<int:page>')
-@login_required
-def mis_eventos(page=1):
-    eventos_por_pagina = 20
-
-    # Filtrar eventos donde el autor sea el usuario actual y excluir registro abierto
-    filtro = {
-        "autor": current_user.id,
-        'registro_abierto': {'$ne': True}
-    }
-
-    # Calcular el número total de eventos del usuario (excluyendo registro abierto)
-    total_eventos = collection_eventos.count_documents(filtro)
-    # Calcular el número total de páginas
-    total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
-
-    # Obtener los eventos para la página actual
-    eventos_cursor = collection_eventos.find(filtro).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
-    eventos = list(eventos_cursor)
-
-    # Verificar si el usuario es organizador en cada evento y obtener info del autor
-    for evento in eventos:
-        es_organizador = collection_participantes.find_one({
-            "codigo_evento": evento["codigo"],
-            "cedula": str(current_user.cedula),
-            "rol": "coorganizador"
-        }) is not None 
-
-        evento["es_organizador"] = es_organizador
-        
-        if evento.get("autor"):
-            evento["autor_info"] = collection_usuarios.find_one(
-                {"_id": ObjectId(evento["autor"])},
-                {"nombres": 1, "apellidos": 1, "foto": 1}
-            )
-
-    return render_template('mis_eventos.html',
-        eventos=eventos,
-        total_eventos=total_eventos,
-        page=page,
-        total_paginas=total_paginas
-    )
-
-
-###
-### Mis Eventos
-###
-@app.route('/tablero/eventos/mios/digitales')
-@app.route('/tablero/eventos/mios/digitales/page/<int:page>')
-@login_required
-def mis_eventos_digitales(page=1):
-    eventos_por_pagina = 20
-
-    # Filtrar eventos donde el autor sea el usuario actual, modalidad != presencial y excluir registro abierto
-    filtro = {
-        "autor": current_user.id,
-        "modalidad": {"$ne": "Presencial"},
-        'registro_abierto': {'$ne': True}
-    }
-
-    # Calcular el número total de eventos del usuario (excluyendo registro abierto)
-    total_eventos = collection_eventos.count_documents(filtro)
-    # Calcular el número total de páginas
-    total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
-
-    # Obtener los eventos para la página actual
-    eventos_cursor = collection_eventos.find(filtro).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
-    eventos = list(eventos_cursor)
-
-    # Verificar si el usuario es organizador en cada evento
-    for evento in eventos:
-        es_organizador = collection_participantes.find_one({
-            "codigo_evento": evento["codigo"],
-            "cedula": str(current_user.cedula),
-            "rol": "coorganizador"
-        }) is not None 
-
-        evento["es_organizador"] = es_organizador
-
-    return render_template('mis_eventos_digitales.html',
-        eventos=eventos,
-        total_eventos=total_eventos,
-        page=page,
-        total_paginas=total_paginas
-    )
-
-
-###
 ### Docencia continua
-###
-@app.route('/tablero/eventos/sesiones')
-@app.route('/tablero/eventos/sesiones/page/<int:page>')
-@login_required
-def mis_sesiones_docentes(page=1):
-    eventos_por_pagina = 20
-
-    # Filtrar eventos donde el autor sea el usuario actual y excluir registro abierto
-    filtro = {
-        "autor": current_user.id,
-        'registro_abierto': {'$ne': True},
-        "tipo": "Sesión Docente"
-    }
-
-    # Calcular el número total de eventos del usuario (excluyendo registro abierto)
-    total_eventos = collection_eventos.count_documents(filtro)
-    # Calcular el número total de páginas
-    total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondear hacia arriba
-
-    # Obtener los eventos para la página actual
-    eventos_cursor = collection_eventos.find(filtro).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
-    eventos = list(eventos_cursor)
-
-    # Verificar si el usuario es organizador en cada evento
-    for evento in eventos:
-        es_organizador = collection_participantes.find_one({
-            "codigo_evento": evento["codigo"],
-            "cedula": str(current_user.cedula),
-            "rol": "coorganizador"
-        }) is not None 
-
-        evento["es_organizador"] = es_organizador
-
-    return render_template('mis_sesiones_docentes.html',
-        eventos=eventos,
-        total_eventos=total_eventos,
-        page=page,
-        total_paginas=total_paginas
-    )
-
-
 ###
 ### Administración de Colección de Eventos
 ###
@@ -2199,7 +1881,6 @@ def db_eventos(page=1):
         total_paginas=total_paginas,
         total_eventos=total_eventos)
 
-
 ###
 ### Actualizar campo de evento
 ###
@@ -2231,7 +1912,6 @@ def actualizar_campo_evento():
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
-
 
 ###
 ### Participantes huérfanos (sin evento asociado)
@@ -2285,7 +1965,6 @@ def participantes_huerfanos(page=1):
         total_paginas=total_paginas,
         total_participantes=total_participantes)
 
-
 ###
 ### Eliminar participantes huérfanos en lote
 ###
@@ -2317,7 +1996,6 @@ def eliminar_huerfanos_lote():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
-
 ###
 ### Colección de participantes de evento
 ###
@@ -2343,7 +2021,6 @@ def db_individual(codigo_evento):
         total_registros=total_registros,
         evento=evento
     )
-
 
 ###
 ### Administración de Colección de Evaluaciones (EVA)
@@ -2383,7 +2060,6 @@ def db_evaluaciones(page=1):
         total_paginas=total_paginas,
         total_evaluaciones=total_evaluaciones)
 
-
 ###
 ### Administración de Colección de Resultados de Exámenes
 ###
@@ -2422,7 +2098,6 @@ def db_resultados_examenes(page=1):
         total_paginas=total_paginas,
         total_resultados=total_resultados)
 
-
 ###
 ### Actualizar campo de evaluación
 ###
@@ -2459,7 +2134,6 @@ def actualizar_campo_evaluacion():
             
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
-
 
 ###
 ### Actualizar campo de resultado de examen
@@ -2504,7 +2178,6 @@ def actualizar_campo_resultado_examen():
             
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
-
 
 ###
 ### Administración de Colección de Encuestas
@@ -2622,7 +2295,6 @@ def db_encuestas(page=1):
         years=years,
         meses=meses)
 
-
 ###
 ### Descargar encuestas en CSV
 ###
@@ -2721,7 +2393,6 @@ def descargar_encuestas_csv():
         headers={'Content-Disposition': f'attachment; filename={nombre_archivo}'}
     )
 
-
 ###
 ### Eliminar encuesta desde vista de BD
 ###
@@ -2748,7 +2419,6 @@ def eliminar_encuesta_bd(id_encuesta):
         flash('Encuesta no encontrada.', 'error')
     
     return redirect(url_for('db_encuestas'))
-
 
 ###
 ### Actualizar campo de participante
@@ -2794,7 +2464,6 @@ def actualizar_campo_participante():
     except Exception as e:
         logger.error(f"Error en actualizar_campo_participante: {str(e)}")
         return jsonify({'success': False, 'error': str(e)})
-
 
 ###
 ### Eliminar participante desde vista de BD
@@ -2869,78 +2538,7 @@ def eliminar_participante_bd(codigo_evento, id_participante, origen=None):
         return redirect(url_for('participantes_huerfanos', page=page))
     return redirect(url_for('db_individual', codigo_evento=codigo_evento))
 
-
-###
-### Aula Digital
-###
-@app.route('/tablero/eventos/digitales')
-@app.route('/tablero/eventos/digitales/page/<int:page>')
-@login_required
-def listar_eventos_digitales(page=1):
-    eventos_por_pagina = 20
-
-    # Filtrar eventos que no sean presenciales y excluir registro abierto
-    filtro = {
-        "modalidad": {"$ne": "Presencial"},
-        'registro_abierto': {'$ne': True}
-    }
-
-    # Calcular el número total de eventos que cumplen la condición (excluyendo registro abierto)
-    total_eventos = collection_eventos.count_documents(filtro)
-    total_paginas = (total_eventos + eventos_por_pagina - 1) // eventos_por_pagina  # Redondeo hacia arriba
-
-    # Obtener los eventos que cumplen la condición para la página actual
-    eventos_cursor = (
-        collection_eventos.find(filtro)
-        .sort("fecha_inicio", -1)
-        .skip((page - 1) * eventos_por_pagina)
-        .limit(eventos_por_pagina)
-    )
-    eventos = list(eventos_cursor)
-
-    # Verificar si el usuario es organizador en cada evento y calcular contadores
-    for evento in eventos:
-        es_organizador = collection_participantes.find_one({
-            "codigo_evento": evento["codigo"],
-            "cedula": str(current_user.cedula),
-            "rol": "coorganizador"
-        }) is not None 
-
-        evento["es_organizador"] = es_organizador
-        
-        # Calcular contadores para el resumen LMS
-        evento["total_participantes"] = collection_participantes.count_documents({
-            "codigo_evento": evento["codigo"],
-            "rol": "participante"
-        })
-        
-        evento["total_contenidos"] = collection_eva.count_documents({
-            "codigo_evento": evento["codigo"]
-        })
-        
-        evento["total_examenes"] = collection_eva.count_documents({
-            "codigo_evento": evento["codigo"],
-            "tipo": "examen"
-        })
-        
-        # Verificar si tiene LMS configurado (tiene contenidos)
-        evento["tiene_lms"] = evento["total_contenidos"] > 0
-
-    return render_template(
-        'docencia_digital.html',
-        eventos=eventos,
-        total_eventos=total_eventos,
-        page=page,
-        total_paginas=total_paginas
-    )
-
-
-###
-### Listado de participantes de un evento
-###
-@app.route('/tablero/eventos/<codigo_evento>/participantes')
-@login_required
-def listar_participantes(codigo_evento):
+### Routes moved to /app/events/ module
     # Recuperar participantes registrados para el evento específico
     evento = collection_eventos.find_one({"codigo": codigo_evento})
 
@@ -3009,7 +2607,6 @@ def listar_participantes(codigo_evento):
         puede_editar=puede_editar,
     )
 
-
 ###
 ### Exportar participantes en CSV
 ###
@@ -3058,193 +2655,17 @@ REGION_MAP = {
     "veraguas": "Veraguas"
 }
 
-@app.route('/tablero/eventos/<codigo_evento>/participantes/exportar_csv')
-@login_required
-def exportar_csv(codigo_evento):
-    # Recuperar participantes registrados para el evento específico
-    participantes_cursor = collection_participantes.find({"codigo_evento": codigo_evento})
-    participantes = list(participantes_cursor)
-
-    # Crear un archivo CSV en memoria
-    output = io.StringIO()
-    writer = csv.writer(output, delimiter=';')  # se cambia a ; por excel...
-
-
-    # Escribir la cabecera del CSV
-    writer.writerow(['Nombre', 'Apellido', 'Cédula', 'Rol', 'Perfil', 'Región', 'Unidad Ejecutora'])
-
-    # Escribir los datos de los participantes
-    for participante in participantes:
-
-        perfil = PERFILES_MAP.get(participante.get('perfil', 'N/A'), participante.get('perfil', 'N/A'))
-
-        region = REGION_MAP.get(participante.get('region', 'N/A'), participante.get('region', 'N/A'))
-
-        writer.writerow([
-            participante.get('nombres', 'N/A'),
-            participante.get('apellidos', 'N/A'),
-            participante.get('cedula', 'N/A'),
-            participante.get('rol', 'N/A'),
-            perfil,
-            region,
-            participante.get('unidad', 'N/A')
-        ])
-
-    # Preparar la respuesta para descargar el archivo CSV
-    output.seek(0)
-    bom = '\ufeff'  # BOM para UTF-8, este hack es para que excel reconozca el csv como utf-8
-    csv_with_bom = bom + output.getvalue()
-    
-    response = make_response(csv_with_bom)
-    response.headers['Content-Disposition'] = f'attachment; filename={codigo_evento}_participantes.csv'
-    response.headers['Content-type'] = 'text/csv; charset=utf-8'
-
-    return response
-
+### Routes moved to /app/events/ module
 
 ###
 ### Formulario de creación de evento
 ###
-@app.route('/tablero/eventos/nuevo', methods=['GET', 'POST'])
-@login_required
-def crear_evento():
-    prefill = {}
-    if request.args:
-        prefill = {
-            'nombre': request.args.get('nombre', ''),
-            'region': request.args.get('region', ''),
-            'unidad_ejecutora': request.args.get('unidad_ejecutora', ''),
-            'lugar': request.args.get('lugar', ''),
-            'modalidad': request.args.get('modalidad', ''),
-            'tipo': request.args.get('tipo', ''),
-            'cupos': request.args.get('cupos', ''),
-            'carga_horaria': request.args.get('carga_horaria', ''),
-            'descripcion': request.args.get('descripcion', ''),
-        }
-
-    if request.method == 'POST':
-        nombre = request.form['nombre']
-        region = request.form['region']
-        unidad_ejecutora = request.form['unidad_ejecutora']
-        lugar = request.form['lugar']
-        tipo = request.form['tipo']
-        cupos = request.form['cupos']
-        carga_horaria = request.form['carga_horaria']
-        modalidad = request.form['modalidad']
-        descripcion = request.form['descripcion']
-        checkin_masivo = request.form.get('checkin_masivo') == 'on'
-        concurso_poster = request.form.get('concurso_poster') == 'on'
-        registro_abierto = request.form.get('registro_abierto') == 'on'
-        avales = request.form.getlist('aval')
-
-        fecha_inicio_str = request.form['fecha_inicio']
-        fecha_fin_str = request.form['fecha_fin']
-
-        fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%dT%H:%M')
-        fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%dT%H:%M')
-
-        estado_evento = request.form['estado_evento']
-
-        timestamp = request.form['timestamp']
-        
-        # Obtener el instrumento de encuesta (por defecto encuesta_v2 para eventos nuevos)
-        instrumento = request.form.get('instrumento', 'encuesta_v2')
-
-        # Obtener un código único
-        codigo = obtener_codigo_unico(collection_eventos)
-
-        # Carga de archivos
-        afiche_file = request.files.get('afiche_evento')
-        fondo_file = request.files.get('fondo_evento')
-        programa_file = request.files.get('programa_evento')
-        certificado_file = request.files.get('certificado_evento')
-        constancia_file = request.files.get('constancia_evento')
-
-        afiche_path = None
-        fondo_path = None
-        programa_path = None
-        certificado_path = None
-        constancia_path = None
-
-        if afiche_file:
-            afiche_filename = f"{codigo}-afiche.jpg"
-            afiche_path = os.path.join(app.config['UPLOAD_FOLDER'], afiche_filename)
-
-            # Convertir y guardar la imagen como JPG
-            image = Image.open(afiche_file)
-            image.convert('RGB').save(afiche_path, 'JPEG')  # Convertir a JPG y guardar
-
-            # Redimensionar la imagen a 750x750 píxeles
-            image.thumbnail((750, 750))  # Mantiene la relación de aspecto
-            resized_afiche_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{codigo}-afiche-750.jpg")
-            image.save(resized_afiche_path, 'JPEG')  # Guardar la versión redimensionada
-            logger.info(f"Archivo afiche guardado: {afiche_path}")
-            logger.info(f"Archivo afiche redimensionado guardado: {resized_afiche_path}")
-
-        if fondo_file:
-            fondo_filename = f"{codigo}-fondo.jpg"
-            fondo_path = os.path.join(app.config['UPLOAD_FOLDER'], fondo_filename)
-
-            # Convertir y guardar la imagen como JPG
-            image = Image.open(fondo_file)
-            image.convert('RGB').save(fondo_path, 'JPEG')  # Convertir a JPG y guardar
-            logger.info(f"Archivo fondo guardado: {fondo_path}")
-
-        if programa_file:
-            programa_filename = f"{codigo}-programa.pdf"
-            programa_path = os.path.join(app.config['UPLOAD_FOLDER'], programa_filename)
-            programa_file.save(programa_path)
-
-        if certificado_file:
-            certificado_filename = f"{codigo}-certificado.pdf"
-            certificado_path = os.path.join(app.config['UPLOAD_FOLDER'], certificado_filename)
-            certificado_file.save(certificado_path)
-
-        if constancia_file:
-            constancia_filename = f"{codigo}-constancia.pdf"
-            constancia_path = os.path.join(app.config['UPLOAD_FOLDER'], constancia_filename)
-            constancia_file.save(constancia_path)
-
-        # Insertar nuevo evento en la colección
-        collection_eventos.insert_one({
-            'nombre': nombre,
-            'codigo': codigo,
-            'region': region,
-            'unidad_ejecutora': unidad_ejecutora,
-            'lugar': lugar,
-            'tipo': tipo,
-            'modalidad': modalidad,
-            'descripcion': descripcion,
-            'cupos': cupos,
-            'carga_horaria': carga_horaria,
-            'fecha_inicio': fecha_inicio,
-            'fecha_fin': fecha_fin,
-            'estado_evento': estado_evento,
-            'afiche': afiche_path if afiche_file else None,
-            'afiche_750': resized_afiche_path if afiche_file else None,
-            'fondo': fondo_path if fondo_file else None,
-            'programa': programa_path if programa_file else None,
-            'certificado': certificado_path if certificado_file else None,
-            'constancia': constancia_path if constancia_file else None,
-            'timestamp': timestamp,
-            'autor': current_user.id,
-            'checkin_masivo': checkin_masivo,
-            'concurso_poster': concurso_poster,
-            'registro_abierto': registro_abierto,
-            'avales': avales,
-            'instrumento': instrumento
-        })
-        log_event(f"Usuario [{current_user.email}] ha creado el evento {codigo} exitosamente.")
-        return redirect(url_for('mis_eventos'))  # Redirigir a la lista de eventos
-
-    return render_template('crear_evento.html', prefill=prefill)
-
+### Routes moved to /app/events/ module
 
 ###
 ### Copiar evento
 ###
-@app.route('/tablero/eventos/<codigo_evento>/copiar')
-@login_required
+
 def copiar_evento(codigo_evento):
     evento = collection_eventos.find_one({"codigo": codigo_evento})
     
@@ -3266,12 +2687,10 @@ def copiar_evento(codigo_evento):
     
     return redirect(url_for('crear_evento', **campos_copiar))
 
-
 ###
 ### Ver detalles de evento
 ###
-@app.route('/tablero/eventos/<codigo_evento>')
-@login_required
+
 def ver_evento(codigo_evento):
     # Obtener el evento actual de la base de datos
     evento = collection_eventos.find_one({"codigo": codigo_evento})
@@ -3300,172 +2719,15 @@ def ver_evento(codigo_evento):
 
     return render_template('ver_evento.html', evento=evento, validate_certificate_template=validate_certificate_template, validate_attendance_template=validate_attendance_template, usuarios=usuarios, autor_evento=autor_evento)
 
-
 ###
 ### Cambiar autor de evento
 ###
-@app.route('/tablero/eventos/<codigo_evento>/cambiar_autor', methods=['POST'])
-@login_required
-def cambiar_autor_evento(codigo_evento):
-    if current_user.rol != 'administrador':
-        flash("No tienes permisos para realizar esta acción", "danger")
-        return redirect(url_for('ver_evento', codigo_evento=codigo_evento))
-    
-    nuevo_autor_id = request.form.get('nuevo_autor_id')
-    if not nuevo_autor_id:
-        flash("Selecciona un usuario", "danger")
-        return redirect(url_for('ver_evento', codigo_evento=codigo_evento))
-    
-    evento = collection_eventos.find_one({"codigo": codigo_evento})
-    if not evento:
-        flash("Evento no encontrado", "danger")
-        return redirect(url_for('listar_eventos'))
-    
-    nuevo_autor = collection_usuarios.find_one({"_id": ObjectId(nuevo_autor_id)})
-    if not nuevo_autor:
-        flash("Usuario no encontrado", "danger")
-        return redirect(url_for('ver_evento', codigo_evento=codigo_evento))
-    
-    collection_eventos.update_one(
-        {"codigo": codigo_evento},
-        {"$set": {"autor": nuevo_autor_id}}
-    )
-    
-    flash(f"Autor cambiado a {nuevo_autor.get('nombres', '')} {nuevo_autor.get('apellidos', '')} ({nuevo_autor.get('email', '')})", "success")
-    return redirect(url_for('ver_evento', codigo_evento=codigo_evento))
-
+### Routes moved to /app/events/ module
 
 ###
 ### Editar evento
 ###
-@app.route('/tablero/eventos/<codigo_evento>/editar', methods=['GET', 'POST'])
-@login_required
-def editar_evento(codigo_evento):
-    # Obtener el evento actual de la base de datos
-    evento = collection_eventos.find_one({"codigo": codigo_evento})
-
-    if not evento:
-        flash("Evento no encontrado", "danger")
-        return redirect(url_for('listar_eventos'))
-
-    if request.method == 'POST':
-        # Recoger los datos del formulario
-        nombre = request.form['nombre']
-        region = request.form['region']
-        unidad_ejecutora = request.form['unidad_ejecutora']
-        lugar = request.form['lugar']
-        tipo = request.form['tipo']
-        modalidad = request.form['modalidad']
-        descripcion = request.form['descripcion']
-        cupos = request.form['cupos']
-        carga_horaria = request.form['carga_horaria']
-        checkin_masivo = request.form.get('checkin_masivo') == 'on'
-        concurso_poster = request.form.get('concurso_poster') == 'on'
-        registro_abierto = request.form.get('registro_abierto') == 'on'
-        avales = request.form.getlist('aval')
-        aval_cmp_tipo = request.form.get('aval_cmp_tipo')
-        aval_cmp_horas = request.form.get('aval_cmp_horas')
-        aval_cmp_codigo = request.form.get('aval_cmp_codigo')
-        fecha_inicio_str = request.form['fecha_inicio']
-        fecha_fin_str = request.form['fecha_fin']
-
-        fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%dT%H:%M')
-        fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%dT%H:%M')
-
-        estado_evento = request.form['estado_evento']
-
-        timestamp = request.form['timestamp']
-
-        # Carga de archivos (opcional)
-        afiche_file = request.files.get('afiche_evento')
-        fondo_file = request.files.get('fondo_evento')
-        programa_file = request.files.get('programa_evento')
-        certificado_file = request.files.get('certificado_evento')
-        constancia_file = request.files.get('constancia_evento')
-
-        afiche_path = evento.get('afiche')
-        fondo_path = evento.get('fondo')
-        resized_afiche_path = evento.get('afiche_750')
-        programa_path = evento.get('programa')
-        certificado_path = evento.get('certificado')
-        constancia_path = evento.get('constancia')
-
-        if afiche_file:
-            afiche_filename = f"{codigo_evento}-afiche.jpg"
-            afiche_path = os.path.join(app.config['UPLOAD_FOLDER'], afiche_filename)
-
-            # Convertir y guardar la imagen como JPG
-            image = Image.open(afiche_file)
-            image.convert('RGB').save(afiche_path, 'JPEG')  # Convertir a JPG y guardar
-
-            # Redimensionar la imagen a 750x750 píxeles
-            image.thumbnail((750, 750))  # Mantiene la relación de aspecto
-            resized_afiche_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{codigo_evento}-afiche-750.jpg")
-            image.save(resized_afiche_path, 'JPEG')  # Guardar la versión redimensionada
-
-        if fondo_file:
-            fondo_filename = f"{codigo_evento}-fondo.jpg"
-            fondo_path = os.path.join(app.config['UPLOAD_FOLDER'], fondo_filename)
-
-            # Convertir y guardar la imagen como JPG
-            image = Image.open(fondo_file)
-            image.convert('RGB').save(fondo_path, 'JPEG')  # Convertir a JPG y guardar
-
-        if programa_file:
-            programa_filename = f"{codigo_evento}-programa.pdf"
-            programa_path = os.path.join(app.config['UPLOAD_FOLDER'], programa_filename)
-            programa_file.save(programa_path)
-
-        if certificado_file:
-            certificado_filename = f"{codigo_evento}-certificado.pdf"
-            certificado_path = os.path.join(app.config['UPLOAD_FOLDER'], certificado_filename)
-            certificado_file.save(certificado_path)
-
-        if constancia_file:
-            constancia_filename = f"{codigo_evento}-constancia.pdf"
-            constancia_path = os.path.join(app.config['UPLOAD_FOLDER'], constancia_filename)
-            constancia_file.save(constancia_path)
-
-        # Actualizar el evento en la base de datos
-        collection_eventos.update_one(
-            {"codigo": codigo_evento},
-            {"$set": {
-                'nombre': nombre,
-                'region': region,
-                'unidad_ejecutora': unidad_ejecutora,
-                'lugar': lugar,
-                'tipo': tipo,
-                'modalidad': modalidad,
-                'descripcion': descripcion,
-                'cupos': cupos,
-                'carga_horaria': carga_horaria,
-                'checkin_masivo': checkin_masivo,
-                'concurso_poster': concurso_poster,
-                'registro_abierto': registro_abierto,
-                'fecha_inicio': fecha_inicio,
-                'fecha_fin': fecha_fin,
-                'estado_evento': estado_evento,
-                'afiche': afiche_path,
-                'afiche_750': resized_afiche_path,
-                'fondo': fondo_path,
-                'programa': programa_path,
-                'certificado': certificado_path,
-                'constancia': constancia_path,
-                'checkin_masivo': checkin_masivo,
-                'concurso_poster': concurso_poster,
-                'registro_abierto': registro_abierto,
-                'avales': avales,
-                'aval_cmp_tipo': aval_cmp_tipo,
-                'aval_cmp_horas': aval_cmp_horas,
-                'aval_cmp_codigo': aval_cmp_codigo
-            }}
-        )
-
-        log_event(f"Usuario [{current_user.email}] ha editado el evento {codigo_evento}.")
-        return redirect(url_for('mis_eventos'))  # Redirigir a la lista de eventos
-
-    return render_template('editar_evento.html', evento=evento)
-
+### Routes moved to /app/events/ module
 
 ###
 ### Eliminar archivos adjuntos del evento
@@ -3550,7 +2812,6 @@ def eliminar_archivo_evento(codigo_evento, tipo_archivo):
     flash(f"Archivo {tipo_archivo} eliminado exitosamente", "success")
     return redirect(url_for('editar_evento', codigo_evento=codigo_evento))
 
-
 ###
 ### Resumen de evento
 ###
@@ -3562,7 +2823,6 @@ def resumen_evento(codigo_evento):
         abort(404)
 
     return render_template('resumen_evento.html', evento=evento)
-
 
 ###
 ### Descargar archivo ICS para calendario
@@ -3582,7 +2842,6 @@ def descargar_ics(codigo_evento):
     response.headers['Content-Disposition'] = f'attachment; filename="{evento["codigo"]}.ics"'
     
     return response
-
 
 def generar_ics(evento):
     """Genera el contenido del archivo ICS para un evento"""
@@ -3708,38 +2967,7 @@ def generar_ics(evento):
     
     return '\r\n'.join(ics_lines)
 
-
-###
-###
-###
-@app.route('/tablero/eventos/<codigo_evento>/cerrar', methods=['POST'])
-@login_required
-def cerrar_evento(codigo_evento):
-    # Actualizar el estado del evento a "cerrado"
-    collection_eventos.update_one(
-        {"codigo": codigo_evento},
-        {"$set": {"estado_evento": "cerrado"}}
-    )
-    log_event(f"Usuario [{current_user.email}] cerró el evento {codigo_evento}.")
-    return redirect(url_for('listar_eventos'))  # Redirigir a la lista de eventos
-
-
-###
-### Validación para eliminar evento
-###
-@app.route('/tablero/eventos/<codigo_evento>/eliminar', methods=['POST'])
-@login_required
-def eliminar_evento(codigo_evento):
-    # Verificar si hay participantes asociados al evento
-    if collection_participantes.find_one({"codigo_evento": codigo_evento}) is not None:
-        log_event(f"Usuario [{current_user.email}] intentó eliminar el evento {codigo_evento} con usuarios asociados.")
-        return "No se puede eliminar el evento porque tiene participantes asociados.", 400
-
-    # Si no hay participantes, eliminar el evento
-    collection_eventos.delete_one({"codigo": codigo_evento})
-    log_event(f"Usuario [{current_user.email}] eliminó el evento {codigo_evento}.")
-    return redirect(url_for('listar_eventos'))  # Redirigir a la lista de eventos
-
+### Routes moved to /app/events/ module
 
 ###
 ### Eliminar participante
@@ -3791,7 +3019,6 @@ def eliminar_participante(nanoid):
         log_event(f"Usuario [{current_user.email}] intentó eliminar un participante que no existe con nanoid {nanoid}")
         return redirect(url_for('listar_participantes', codigo_evento=''))
 
-
 ###
 ### Página de evento
 ###
@@ -3818,7 +3045,6 @@ def mostrar_evento(codigo_evento):
     else:
         return "Evento no encontrado", 404
 
-
 ###
 ### QR evento
 ###
@@ -3835,7 +3061,6 @@ def generate_qr_code(codigo_evento):
         qr.save(qr_path)
 
     return qr_path
-
 
 ###
 ### Validación de certificados
@@ -3860,7 +3085,6 @@ def validar_certificado():
 
     return render_template('validar.html')
 
-
 ###
 ### Función para ordenar eventos 
 ###
@@ -3874,7 +3098,6 @@ def obtener_fecha_ordenable(item):
         return datetime.strptime(fecha, '%Y-%m-%d')
     except (ValueError, TypeError):
         return datetime.min
-
 
 ###
 ### listado de resultados 
@@ -4046,7 +3269,6 @@ def buscar_certificados():
 
     return render_template('buscar.html')
 
-
 ###
 ### Plantilla varias
 ###
@@ -4055,7 +3277,6 @@ def buscar_certificados():
 def plantillas():
     return render_template('plantillas.html', active_section='plantillas')
 
-
 ###
 ### Herramientas
 ###
@@ -4063,7 +3284,6 @@ def plantillas():
 @login_required
 def herramientas():
     return render_template('herramientas.html', active_section='herramientas')
-
 
 ###
 ### Tablero de Métricas
@@ -4151,7 +3371,6 @@ def tablero_metricas(page=1):
         total_participantes=total_participantes,
         eventos=eventos,
     )
-
 
 ###
 ### Tablero de métricas propias
@@ -4243,7 +3462,6 @@ def mis_metricas(page=1):
         total_participantes=total_participantes,
         eventos=eventos,
     )
-
 
 ###
 ### Funciones de agregación de datos nacionales
@@ -4396,7 +3614,6 @@ def get_national_statistics(year=None, region=None, unidad=None):
             "year": str(year)
         }
 
-
 def get_national_participants(year=None, region=None, unidad=None):
     """
     Obtiene todos los participantes de eventos válidos del año especificado.
@@ -4456,7 +3673,6 @@ def get_national_participants(year=None, region=None, unidad=None):
         logger.error(f"Error al obtener participantes nacionales: {e}")
         return []
 
-
 def get_national_events(year=None, region=None, unidad=None):
     """
     Obtiene todos los eventos válidos del año especificado.
@@ -4501,7 +3717,6 @@ def get_national_events(year=None, region=None, unidad=None):
     except Exception as e:
         logger.error(f"Error al obtener eventos nacionales: {e}")
         return []
-
 
 ###
 ### Métricas Nacionales
@@ -4623,7 +3838,6 @@ def tablero_metricas_nacional(year=None, region=None):
                              regiones_disponibles=regiones_disponibles,
                              titulo_region=titulo_region if region else 'Nacional',
                              years_available=years_available)
-
 
 ###
 ### Métricas - Mi región
@@ -4780,7 +3994,6 @@ def tablero_metricas_regional(year=None, unidad=None):
                              region_css_code=region_css_code,
                              years_available=years_available)
 
-
 ###
 ### LMS Metrics Dashboard - General
 ###
@@ -4902,7 +4115,6 @@ def tablero_metricas_lms(page=1):
         promedio_calificacion=promedio_calificacion,
         eventos=eventos,
     )
-
 
 ###
 ### LMS Metrics Dashboard - Specific Event
@@ -5038,13 +4250,10 @@ def tablero_metricas_lms_evento(codigo_evento):
         datos_participantes=datos_participantes
     )
 
-
 ###
 ### Eventos Abiertos - Con Registro Abierto
 ###
-@app.route('/tablero/eventos/abiertos')
-@app.route('/tablero/eventos/abiertos/page/<int:page>')
-@login_required
+
 def listar_eventos_abiertos(page=1):
     
     # Filtrar eventos que tienen registro abierto habilitado
@@ -5105,14 +4314,12 @@ def listar_eventos_abiertos(page=1):
         eventos=eventos,
     )
 
-
 ###
 ### Política de privacidad y protección de datos personales
 ###
 @app.route('/politica-privacidad', methods=['GET'])
 def politica_privacidad():
     return render_template('politica_privacidad.html')
-
 
 ###
 ### Nosotros
@@ -5143,7 +4350,6 @@ def nosotros():
         subjefe_foto_url=subjefe_foto_url,
         denadoi_users=denadoi_users,
     )
-
 
 ###
 ### Coordinadores
@@ -5226,14 +4432,12 @@ def docentes():
     
     return render_template('coordinadores.html', coordinadores=coordinadores)
 
-
 ###
 ### LMS
 ###
 def zfill_filter(value, width=2):
     return str(value).zfill(width)
 app.jinja_env.filters['zfill'] = zfill_filter
-
 
 ###
 ### Repositorio de archivos de evento
@@ -5245,57 +4449,8 @@ import os
 import uuid
 from flask import request, render_template, redirect, url_for, abort, flash
 from werkzeug.utils import secure_filename
-@app.route('/tablero/eventos/<codigo_evento>/repositorio', methods=['GET', 'POST'])
-@login_required
-def subir_archivo(codigo_evento):
-    evento = collection_eventos.find_one({'codigo': codigo_evento})
-    if not evento:
-        abort(404)
 
-    carpeta_evento = os.path.join(app.config['UPLOAD_FOLDER'], codigo_evento)
-    os.makedirs(carpeta_evento, exist_ok=True)
-
-    if request.method == 'POST':
-        archivo = request.files.get('archivo')
-        titulo = request.form.get('titulo', '')
-        autor = request.form.get('autor', '')
-
-        if archivo and archivo.filename:
-            filename = secure_filename(archivo.filename)
-            ext = filename.rsplit('.', 1)[1].lower()
-
-            nombre_unico = f"{uuid.uuid4()}.{ext}"
-
-            ruta_guardado = os.path.join(carpeta_evento, nombre_unico)
-            archivo.save(ruta_guardado)
-
-            ultimo_archivo = collection_repositorio.find_one(
-                {'codigo_evento': codigo_evento},
-                sort=[('orden', -1)]
-            )
-            nuevo_orden = 1 if not ultimo_archivo else ultimo_archivo['orden'] + 1
-
-            nombre_descarga = f"{codigo_evento}_{nuevo_orden}.{ext}"
-
-            collection_repositorio.insert_one({
-                'codigo_evento': codigo_evento,
-                'titulo': titulo,
-                'autor': autor,
-                'nombre': nombre_unico,
-                'nombre_descarga': nombre_descarga,
-                'orden': nuevo_orden
-            })
-
-            flash('Archivo subido correctamente.', 'success')
-            return redirect(url_for('subir_archivo', codigo_evento=codigo_evento))
-        else:
-            flash('No se seleccionó ningún archivo.', 'danger')
-
-    # Obtener lista de archivos para mostrar plantilla
-    archivos = list(collection_repositorio.find({'codigo_evento': codigo_evento}).sort('orden', 1))
-
-    return render_template('subir_archivo.html', evento=evento, archivos=archivos, generar_url_descarga=generar_url_descarga)
-
+### Routes moved to /app/events/ module
 
 @app.route('/eliminar_archivo/<codigo_evento>/<nombre>', methods=['POST'])
 @login_required  # Asegura que solo usuarios autenticados puedan eliminar archivos
@@ -5331,14 +4486,12 @@ def eliminar_archivo(codigo_evento, nombre):
     
     return redirect(url_for('subir_archivo', codigo_evento=codigo_evento))
 
-
 import hashlib
 import time
 from flask import send_from_directory, abort, request
 def generar_firma(codigo_evento, nombre, expires):
     datos = f"{codigo_evento}:{nombre}:{expires}:{app.config['SECRET_KEY']}"
     return hashlib.sha256(datos.encode()).hexdigest()
-
 
 @app.route('/descargar_archivo/<codigo_evento>/<nombre>')
 def descargar_archivo(codigo_evento, nombre):
@@ -5375,13 +4528,11 @@ def descargar_archivo(codigo_evento, nombre):
         download_name=nombre_descarga
     )
 
-
 def generar_url_descarga(codigo_evento, nombre, tiempo_expiracion_minutos=5):
     expires = int(time.time()) + tiempo_expiracion_minutos * 60
     signature = generar_firma(codigo_evento, nombre, str(expires))
 
     return url_for('descargar_archivo', codigo_evento=codigo_evento, nombre=nombre, expires=expires, signature=signature, _external=True)
-
 
 ###
 ### Repositorio
@@ -5410,7 +4561,6 @@ def repositorio(codigo_evento):
                           archivos=archivos,
                           generar_url_descarga=generar_url_descarga)
 
-
 ###
 ### Encuesta de satisfacción
 ###
@@ -5427,7 +4577,6 @@ def encuesta_satisfaccion(codigo_evento):
         return encuesta_satisfaccion_v2(codigo_evento)
     else:
         return encuesta_satisfaccion_v1(codigo_evento)
-
 
 ###
 ###
@@ -5544,7 +4693,6 @@ def encuesta_satisfaccion_v2(codigo_evento):
         return redirect(url_for('encuesta_satisfaccion', codigo_evento=codigo_evento) + f'?cedula={cedula}')
 
     return render_template('encuesta.html', evento=evento, cedula=cedula)
-
 
 ###
 ### Encuesta de satisfacción (CertiCSS + Evento 2025)
@@ -5669,7 +4817,6 @@ def encuesta_satisfaccion_v1(codigo_evento):
 
     return render_template('encuesta_legacy.html', evento=evento, encuesta_disponible=encuesta_disponible)
 
-
 ###
 ### Cierre de evento
 ###
@@ -5713,7 +4860,6 @@ def cierre_evento(codigo_evento):
                          url_encuesta=url_encuesta,
                          afiche_path=afiche_path,
                          estado=estado)
-
 
 @app.route('/tablero/metricas/<codigo_evento>/exportar_csv')
 @login_required
@@ -5801,7 +4947,6 @@ def exportar_encuesta_csv(codigo_evento):
         }
     )
 
-
 @app.route('/tablero/metricas/<codigo_evento>/exportar_encuesta_v2_csv')
 @login_required
 def exportar_encuesta_v2_csv(codigo_evento):
@@ -5861,7 +5006,6 @@ def exportar_encuesta_v2_csv(codigo_evento):
             "Content-Type": "text/csv; charset=utf-8"
         }
     )
-
 
 @app.route('/tablero/metricas/<codigo_evento>/informe')
 @login_required
@@ -6003,7 +5147,6 @@ def informe_avanzado(codigo_evento):
         nps_certicss=nps_certicss,
         puede_editar_analisis=puede_editar)
 
-
 @app.route('/tablero/metricas/<codigo_evento>/informe_v2')
 @login_required
 def informe_avanzado_v2(codigo_evento):
@@ -6107,7 +5250,6 @@ def informe_avanzado_v2(codigo_evento):
         alfa_cronbach_global=calcular_alfa_cronbach_v2_global(),
         puede_editar_analisis=puede_editar)
 
-
 def calcular_alfa_cronbach_v2(respuestas):
     """
     Calcula el Alfa de Cronbach para las preguntas E1 a E5 (encuesta_v2).
@@ -6141,7 +5283,6 @@ def calcular_alfa_cronbach_v2(respuestas):
 
     alpha = (k / (k - 1)) * (1 - (sum_variances_item / variance_total_score))
     return round(alpha, 2)
-
 
 def calcular_alfa_cronbach_v2_global():
     """
@@ -6178,7 +5319,6 @@ def calcular_alfa_cronbach_v2_global():
 
     alpha = (k / (k - 1)) * (1 - (sum_variances_item / variance_total_score))
     return round(alpha, 2)
-
 
 def calcular_alfa_cronbach(respuestas):
     """
@@ -6242,7 +5382,6 @@ def calcular_alfa_cronbach(respuestas):
 
     return round(alpha, 2)  # Redondear a 2 decimales para presentación
 
-
 def calcular_nps(respuestas):
     """
     Calcula el Net Promoter Score (NPS) basado en la pregunta N1.
@@ -6292,7 +5431,6 @@ def calcular_nps(respuestas):
     nps_score = percent_promoters - percent_detractors
     return round(nps_score, 2) # Redondear a 2 decimales para presentación
 
-
 def calcular_nps_certicss():
     """
     Calcula el Net Promoter Score (NPS) global utilizando todas las encuestas
@@ -6341,7 +5479,6 @@ def calcular_nps_certicss():
     nps_score = percent_promoters - percent_detractors
     return round(nps_score, 2) # Redondear a 2 decimales para presentación
 
-
 def wrap_text(text, max_len=85):
     if len(text) <= max_len:
         return text
@@ -6361,7 +5498,6 @@ def wrap_text(text, max_len=85):
     if current_line:
         lines.append(current_line)
     return "\n".join(lines)
-
 
 def generar_grafica_perfil(participantes, evento_nombre):
     """
@@ -6456,7 +5592,6 @@ def generar_grafica_perfil(participantes, evento_nombre):
     
     return f"data:image/png;base64,{img_base64}"
 
-
 def generar_grafica_region(participantes, evento_nombre):
     """
     Genera una gráfica de barras con la distribución de participantes por región/provincia
@@ -6533,7 +5668,6 @@ def generar_grafica_region(participantes, evento_nombre):
     plt.close()
     
     return f"data:image/png;base64,{img_base64}"
-
 
 def generar_grafica_spider(respuestas, evento_nombre):
     """
@@ -6651,7 +5785,6 @@ def generar_grafica_spider(respuestas, evento_nombre):
     
     return f"data:image/png;base64,{img_base64}"
 
-
 def generar_grafica_demografia_sexo(sexo_data, evento_nombre):
     """
     Genera una gráfica de barras con la distribución por Sexo.
@@ -6711,7 +5844,6 @@ def generar_grafica_demografia_sexo(sexo_data, evento_nombre):
         print(f"Error generating grafica_demografia_sexo: {e}")
         plt.close()
         return None
-
 
 def generar_grafica_demografia_grupoetario(edad_data, evento_nombre):
     """
@@ -6781,7 +5913,6 @@ def generar_grafica_demografia_grupoetario(edad_data, evento_nombre):
     plt.close() # Cierra la figura para liberar memoria
 
     return f"data:image/png;base64,{img_base64}"
-
 
 def generar_grafica_spider_v2(respuestas, evento_nombre):
     """
@@ -6854,7 +5985,6 @@ def generar_grafica_spider_v2(respuestas, evento_nombre):
     plt.close()
 
     return f"data:image/png;base64,{img_base64}"
-
 
 def generar_grafica_modalidad(eventos, titulo_institucional, subtitulo_especifico="Distribución de Eventos por Modalidad"):
     """
@@ -6929,7 +6059,6 @@ def generar_grafica_modalidad(eventos, titulo_institucional, subtitulo_especific
         plt.close('all')  # Cerrar todas las figuras en caso de error
         return None
 
-
 def generar_grafica_categoria(eventos, titulo_institucional, subtitulo_especifico="Distribución de Eventos por Categoría"):
     """
     Genera una gráfica de barras con la distribución de eventos por categoría/tipo.
@@ -7002,7 +6131,6 @@ def generar_grafica_categoria(eventos, titulo_institucional, subtitulo_especific
         print(f"Error generando gráfica de categoría: {e}")
         plt.close('all')  # Cerrar todas las figuras en caso de error
         return None
-
 
 def generar_grafica_eventos_provincia(eventos, titulo_institucional, subtitulo_especifico="Distribución de Eventos por Provincia"):
     """
@@ -7093,7 +6221,6 @@ def generar_grafica_eventos_provincia(eventos, titulo_institucional, subtitulo_e
         plt.close('all')  # Cerrar todas las figuras en caso de error
         return None
 
-
 def generar_grafica_eventos_unidad(eventos, titulo_institucional, subtitulo_especifico="Distribución de Eventos por Unidad Ejecutora"):
     """
     Genera una gráfica de barras con la distribución de eventos por unidad ejecutora.
@@ -7172,7 +6299,6 @@ def generar_grafica_eventos_unidad(eventos, titulo_institucional, subtitulo_espe
         print(f"Error generando gráfica de eventos por unidad: {e}")
         plt.close('all')  # Cerrar todas las figuras en caso de error
         return None
-
 
 def generar_grafica_mensual(eventos, titulo_institucional, subtitulo_especifico="Distribución Mensual de Eventos"):
     """
@@ -7276,7 +6402,6 @@ def generar_grafica_mensual(eventos, titulo_institucional, subtitulo_especifico=
         traceback.print_exc()
         plt.close('all')  # Cerrar todas las figuras en caso de error
         return None
-
 
 def generar_histograma_horas_registro(eventos, titulo_institucional, subtitulo_especifico="Distribución de Registros por Hora del Día"):
     """
@@ -7441,7 +6566,6 @@ def generar_histograma_horas_registro(eventos, titulo_institucional, subtitulo_e
         plt.close('all')  # Cerrar todas las figuras en caso de error
         return None
 
-
 ###
 ### Etiqueta filtro de fecha
 ###
@@ -7509,7 +6633,6 @@ def estado_evento(evento):
 
 app.jinja_env.filters['estado_evento'] = estado_evento
 
-
 ###
 ### generación de certificado
 ###
@@ -7542,7 +6665,6 @@ def create_sample_participant(codigo_evento):
         'titulo_ponencia': None  # Not applicable for participants
     }
 
-
 def validate_certificate_template(evento):
     """
     Validate that a certificate template exists and is accessible for an event.
@@ -7571,7 +6693,6 @@ def validate_certificate_template(evento):
         # Handle any filesystem errors or invalid path types gracefully
         return False
 
-
 def validate_attendance_template(evento):
     """
     Validate that an attendance certificate template exists and is accessible for an event.
@@ -7599,7 +6720,6 @@ def validate_attendance_template(evento):
     except (OSError, TypeError):
         # Handle any filesystem errors or invalid path types gracefully
         return False
-
 
 def generar_pdf_participante(participante, afiche_path):
     codigo_evento = participante['codigo_evento']
@@ -7831,7 +6951,6 @@ def generar_pdf_participante(participante, afiche_path):
 
     return output_pdf_path  # Retornar la ruta del archivo guardado
 
-
 ###
 ###
 ###
@@ -7876,7 +6995,6 @@ def generar_pdf(nanoid):
     pdf_file = generar_pdf_participante(participante, afiche_path)
 
     return send_file(pdf_file)  # Enviar el archivo PDF al cliente para descarga
-
 
 ###
 ### Certificate Preview Route
@@ -7953,7 +7071,6 @@ def preview_certificado(codigo_evento):
         print(f"Error generating certificate preview: {e}")
         abort(500)  # Internal server error
 
-
 ###
 ### Attendance Certificate Preview Route
 ###
@@ -8017,7 +7134,6 @@ def preview_constancia(codigo_evento):
         log_event(f"Error generating attendance certificate preview for event {codigo_evento}: {e}")
         print(f"Error generating attendance certificate preview: {e}")
         abort(500)  # Internal server error
-
 
 ###
 ### Generación de constancia de asistencia
@@ -8288,7 +7404,6 @@ def generar_constancia_asistencia(participante, afiche_path):
 
     return output_buffer
 
-
 @app.route('/constancia/<nanoid>', methods=['GET'])
 def descargar_constancia(nanoid):
     # Buscar el participante en la base de datos usando el nanoid
@@ -8313,13 +7428,11 @@ def descargar_constancia(nanoid):
     # Enviar el PDF al cliente para descarga
     return send_file(pdf_buffer, as_attachment=True, download_name=f"constancia_{participante['nanoid']}.pdf", mimetype='application/pdf')
 
-
 ###
 ### Sistema de logs centralizado
 ###
 # Importar función de logging desde el módulo centralizado
 from app.logs import log_event
-
 
 ###
 ### Obtener IP
@@ -8335,7 +7448,6 @@ def get_client_ip():
     else:
         # Si no hay proxy, usar la IP directa
         return request.remote_addr
-
 
 ###
 ### Importaciones de app y blueprints
@@ -8402,7 +7514,6 @@ app.register_blueprint(usuarios_bp)
 from app.posters import posters_bp
 app.register_blueprint(posters_bp)
 
-
 import matplotlib
 matplotlib.use('Agg')  # Configurar matplotlib para usar backend no interactivo
 import matplotlib.pyplot as plt
@@ -8413,7 +7524,6 @@ import numpy as np
 import pandas as pd
 import io
 import base64
-
 
 ###
 ### Carga de plugins
@@ -8435,14 +7545,12 @@ def load_plugins():
 
 load_plugins()
 
-
 ###
 ### robots.txt
 ###
 @app.route("/robots.txt")
 def robots():
     return send_from_directory(app.static_folder, "robots.txt")
-
 
 ###
 ### Errores
@@ -8458,7 +7566,6 @@ def unauthorized_error(e):
 @app.errorhandler(403)
 def forbidden_error(e):
     return render_template('403.html'), 403
-
 
 if __name__ == '__main__':
     app.run(host=app.config['HOST'], port=app.config['PORT'])
