@@ -35,7 +35,7 @@
                 {% endif %}
                 {% endwith %}
 
-                <form action="{{ url_for('editar_evento', codigo_evento=evento.codigo) }}" method="post"
+                <form action="{{ url_for('events.editar_evento', codigo_evento=evento.codigo) }}" method="post"
                     enctype="multipart/form-data">
                     <!-- Grid -->
                     <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">

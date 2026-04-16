@@ -26,7 +26,7 @@
                                 </div>
 
                                 <div>
-                                    <a href="{{ url_for('crear_evento') }}"
+                                    <a href="{{ url_for('events.crear_evento') }}"
                                         class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
                                         <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
                                             height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -207,21 +207,21 @@
                                                 <div class="">
                                                     <!-- 1. Ver evento (información básica) -->
                                                     <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium"
-                                                        href="{{ url_for('ver_evento', codigo_evento=evento.codigo) }}">
+                                                        href="{{ url_for('events.ver_evento', codigo_evento=evento.codigo) }}">
                                                         Ver datos
                                                     </a><br />
 
                                                     <!-- 2. Editar evento (solo organizadores) -->
                                                     {% if current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor or evento.es_organizador)) %}
                                                     <a class="inline-flex items-center gap-x-1 text-sm text-orange-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium"
-                                                        href="{{ url_for('editar_evento', codigo_evento=evento.codigo) }}">
+                                                        href="{{ url_for('events.editar_evento', codigo_evento=evento.codigo) }}">
                                                         Editar evento
                                                     </a><br />
                                                     {% endif %}
 
                                                     {% if current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor)) %}
                                                     <form
-                                                        action="{{ url_for('eliminar_evento', codigo_evento=evento.codigo) }}"
+                                                        action="{{ url_for('events.eliminar_evento', codigo_evento=evento.codigo) }}"
                                                         method="post" style="display:inline;">
                                                         <button
                                                             class="text-sm text-red-600 decoration-2 hover:underline"
@@ -231,7 +231,7 @@
                                                         </button>
                                                     </form><br />
                                                     <form
-                                                        action="{{ url_for('cerrar_evento', codigo_evento=evento.codigo) }}"
+                                                        action="{{ url_for('events.cerrar_evento', codigo_evento=evento.codigo) }}"
                                                         method="post" style="display:inline;">
                                                         <button
                                                             class="text-sm text-red-800 decoration-2 hover:underline"
@@ -264,7 +264,7 @@
                                 <div>
                                     <div class="inline-flex gap-x-2">
                                         {% if page > 1 %}
-                                        <a href="{{ url_for('listar_eventos_abiertos', page=page-1) }}"
+                                        <a href="{{ url_for('events.listar_eventos_abiertos', page=page-1) }}"
                                             class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none">
                                             <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg"
                                                 width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -277,7 +277,7 @@
                                         {% endif %}
 
                                         {% if page < total_paginas %} <a
-                                            href="{{ url_for('listar_eventos_abiertos', page=page+1) }}"
+                                            href="{{ url_for('events.listar_eventos_abiertos', page=page+1) }}"
                                             class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none">
                                             Siguiente
                                             <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg"

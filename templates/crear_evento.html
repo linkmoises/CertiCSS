@@ -35,7 +35,7 @@
                 {% endif %}
                 {% endwith %}
 
-                <form action="{{ url_for('crear_evento') }}" method="post" enctype="multipart/form-data">
+                <form action="{{ url_for('events.crear_evento') }}" method="post" enctype="multipart/form-data">
                     <!-- Grid -->
                     <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
 
@@ -520,7 +520,7 @@
 
                     <div class="mt-5 flex justify-end gap-x-2">
                         <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50"
-                            href="{{ url_for('listar_eventos') }}">
+                            href="{{ url_for('events.listar_eventos') }}">
                             Ver todos los eventos
                         </a>
                         <button type="submit"
