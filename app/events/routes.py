@@ -378,7 +378,7 @@ def ver_evento(codigo_evento):
         abort(404)
     
     from app.events.services import get_collection_participantes, get_collection_usuarios
-    from app import validate_certificate_template, validate_attendance_template
+    from app.helpers import validate_certificate_template, validate_attendance_template
     
     collection_participantes = get_collection_participantes()
     collection_usuarios = get_collection_usuarios()

@@ -372,3 +372,27 @@ def sanitize_html(text: str) -> str:
         text = text.replace(char, replacement)
     
     return text
+
+
+def validate_certificate_template(evento):
+    """Validate that a certificate template exists and is accessible for an event."""
+    import os
+    certificado_path = evento.get('certificado')
+    if not certificado_path or not certificado_path.strip():
+        return False
+    try:
+        return os.path.exists(certificado_path) and os.path.isfile(certificado_path)
+    except (OSError, TypeError):
+        return False
+
+
+def validate_attendance_template(evento):
+    """Validate that an attendance certificate template exists and is accessible for an event."""
+    import os
+    constancia_path = evento.get('constancia')
+    if not constancia_path or not constancia_path.strip():
+        return False
+    try:
+        return os.path.exists(constancia_path) and os.path.isfile(constancia_path)
+    except (OSError, TypeError):
+        return False
