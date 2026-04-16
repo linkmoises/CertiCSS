@@ -82,7 +82,7 @@
                 {% endwith %}
 
                 <!-- Formulario de preregistro -->
-                <form action="{{ url_for('preregistro_manual', codigo_evento=evento.codigo) }}" method="post">
+                <form action="{{ url_for('events.preregistro_manual', codigo_evento=evento.codigo) }}" method="post">
                     <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
                         
                         <div class="sm:col-span-3">
@@ -199,7 +199,7 @@
                                     Preregistrar Participante
                                 </button>
                                 
-                                <a href="{{ url_for('checkin_evento', codigo_evento=evento.codigo) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                                <a href="{{ url_for('events.checkin_evento', codigo_evento=evento.codigo) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
                                     Volver a tablero de asistencia controlada
                                 </a>
                             </div>

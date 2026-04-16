@@ -66,7 +66,7 @@
 {% else %}
                         <h2 class="text-xl font-bold text-gray-800">Registro extemporáneo</h2>
                         <p class="text-sm text-gray-600 mb-4">{{ nombre_evento }}</p>
-                        <form action="{{ url_for('registrar_extemporaneo', codigo_evento=codigo_evento) }}" method="post">
+                        <form action="{{ url_for('events.registrar_extemporaneo', codigo_evento=codigo_evento) }}" method="post">
                             <!-- Grid -->
                             <div class="mt-4 grid sm:grid-cols-12 gap-2 sm:gap-6">
                                 

@@ -28,7 +28,7 @@
                                 <div>
                                     <div class="inline-flex gap-x-2">
                                         <!-- Formulario de filtro -->
-                                        <form method="GET" action="{{ url_for('db_encuestas') }}" class="flex gap-2 items-center">
+                                        <form method="GET" action="{{ url_for('events.db_encuestas') }}" class="flex gap-2 items-center">
                                             <select name="year" class="py-2 px-3 pe-9 block border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none">
                                                 <option value="">Todos los años</option>
                                                 {% for year in years %}
@@ -61,7 +61,7 @@
                                                 Filtrar
                                             </button>
                                             {% if codigo_evento_filtro or year_filtro or month_filtro %}
-                                            <a href="{{ url_for('db_encuestas') }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
+                                            <a href="{{ url_for('events.db_encuestas') }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
                                                 <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                     <path d="M18 6 6 18"/>
                                                     <path d="m6 6 12 12"/>
@@ -133,7 +133,7 @@
                                 <div>
                                     <div class="inline-flex gap-x-2">
                                         {% if page > 1 %}
-                                        <a href="{{ url_for('db_encuestas', page=page-1, year=year_filtro, month=month_filtro, codigo_evento=codigo_evento_filtro) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
+                                        <a href="{{ url_for('events.db_encuestas', page=page-1, year=year_filtro, month=month_filtro, codigo_evento=codigo_evento_filtro) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
                                             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
                                             Anterior
                                         </a>
@@ -146,7 +146,7 @@
                                         {% endif %}
                                         
                                         {% if page < total_paginas %}
-                                        <a href="{{ url_for('db_encuestas', page=page+1, year=year_filtro, month=month_filtro, codigo_evento=codigo_evento_filtro) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
+                                        <a href="{{ url_for('events.db_encuestas', page=page+1, year=year_filtro, month=month_filtro, codigo_evento=codigo_evento_filtro) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
                                             Siguiente
                                             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                                         </a>

@@ -191,12 +191,12 @@
                                                     Inscribir participante
                                                 </a><br />
                                                 <a class="inline-flex items-center gap-x-1 text-sm text-green-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium"
-                                                    href="{{ url_for('registrar_ponente', codigo_evento=evento.codigo) }}">
+                                                    href="{{ url_for('events.registrar_ponente', codigo_evento=evento.codigo) }}">
                                                     Añadir ponente
                                                 </a><br />
                                                 {% endif %}
                                                 <a class="inline-flex items-center gap-x-1 text-sm text-pink-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium"
-                                                    href="{{ url_for('listar_participantes', codigo_evento=evento.codigo) }}">
+                                                    href="{{ url_for('events.listar_participantes', codigo_evento=evento.codigo) }}">
                                                     Listado de participantes
                                                 </a>
                                             </div>

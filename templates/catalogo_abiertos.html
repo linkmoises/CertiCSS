@@ -32,7 +32,7 @@
                     </h1>
                     <p class="text-xl mb-8 text-gray-300">Empoderando la educación continua en los profesionales de la salud en nuestras unidades ejecutoras desde el Departamento Nacional de Docencia e Investigación de la Caja de Seguro Social.</p>
                     <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mb-8">
-                        <a href="{{ url_for('catalogo_abiertos', page=1) }}" class="bg-white text-blue-900 font-semibold px-8 py-3 rounded-full hover:bg-blue-100 transition duration-300 text-center">Explorar Eventos</a>
+                        <a href="{{ url_for('catalogo.catalogo_abiertos', page=1) }}" class="bg-white text-blue-900 font-semibold px-8 py-3 rounded-full hover:bg-blue-100 transition duration-300 text-center">Explorar Eventos</a>
                         <a href="{{ url_for('buscar_certificados') }}" class="border-2 border-white text-white font-semibold px-8 py-3 rounded-full hover:bg-white hover:text-blue-900 transition duration-300 text-center">Buscar Certificado</a>
                     </div>
                 </div>
@@ -141,14 +141,14 @@
         <div class="text-center mb-12">
             <div class="inline-flex gap-x-2">
                 {% if page > 1 %}
-                    <a href="{{ url_for('catalogo_abiertos', page=page-1) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                    <a href="{{ url_for('catalogo.catalogo_abiertos', page=page-1) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
                         <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
                         Anterior
                     </a>
                 {% endif %}
                 <p class="px-3 py-2 text-sm text-gray-600">Página {{ page }} de {{ total_pages }}</p>
                 {% if page < total_pages %}
-                    <a href="{{ url_for('catalogo_abiertos', page=page+1) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                    <a href="{{ url_for('catalogo.catalogo_abiertos', page=page+1) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
                         Siguiente
                         <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                     </a>

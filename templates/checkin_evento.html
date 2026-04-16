@@ -144,7 +144,7 @@
                 <!-- Grid -->
                 <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
                     <!-- Card -->
-                    <a href="{{ url_for('preregistro_manual', codigo_evento=evento.codigo) }}" class="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md focus:outline-none focus:shadow-md transition dark:bg-neutral-800 dark:border-neutral-700">
+                    <a href="{{ url_for('events.preregistro_manual', codigo_evento=evento.codigo) }}" class="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md focus:outline-none focus:shadow-md transition dark:bg-neutral-800 dark:border-neutral-700">
                         <div class="p-4 md:p-5">
                             <div class="flex justify-between items-center">
                                 <div>
@@ -164,7 +164,7 @@
                     </a>
                     <!-- End Card -->
                     <!-- Card -->
-                    <a href="{{ url_for('upload_participantes_csv', codigo_evento=evento.codigo) }}" class="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md focus:outline-none focus:shadow-md transition dark:bg-neutral-800 dark:border-neutral-700">
+                    <a href="{{ url_for('events.upload_participantes_csv', codigo_evento=evento.codigo) }}" class="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md focus:outline-none focus:shadow-md transition dark:bg-neutral-800 dark:border-neutral-700">
                         <div class="p-4 md:p-5">
                             <div class="flex justify-between items-center">
                                 <div>
@@ -184,7 +184,7 @@
                     </a>
                     <!-- End Card -->
                     <!-- Card -->
-                    <a href="{{ url_for('validar_asistencia', codigo_evento=evento.codigo) }}" class="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md focus:outline-none focus:shadow-md transition dark:bg-neutral-800 dark:border-neutral-700">
+                    <a href="{{ url_for('events.validar_asistencia', codigo_evento=evento.codigo) }}" class="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md focus:outline-none focus:shadow-md transition dark:bg-neutral-800 dark:border-neutral-700">
                         <div class="p-4 md:p-5">
                             <div class="flex justify-between items-center">
                                 <div>
@@ -204,7 +204,7 @@
                     </a>
                     <!-- End Card -->
                     <!-- Card -->
-                    <a href="{{ url_for('listar_participantes_temporales', codigo_evento=evento.codigo) }}" class="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md focus:outline-none focus:shadow-md transition dark:bg-neutral-800 dark:border-neutral-700">
+                    <a href="{{ url_for('events.listar_participantes_temporales', codigo_evento=evento.codigo) }}" class="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md focus:outline-none focus:shadow-md transition dark:bg-neutral-800 dark:border-neutral-700">
                         <div class="p-4 md:p-5">
                             <div class="flex justify-between items-center">
                                 <div>
@@ -224,7 +224,7 @@
                     </a>
                     <!-- End Card -->
                     <!-- Card -->
-                    <a href="{{ url_for('listado_material_educativo', codigo_evento=evento.codigo) }}" class="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md focus:outline-none focus:shadow-md transition dark:bg-neutral-800 dark:border-neutral-700">
+                    <a href="{{ url_for('events.listado_material_educativo', codigo_evento=evento.codigo) }}" class="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md focus:outline-none focus:shadow-md transition dark:bg-neutral-800 dark:border-neutral-700">
                         <div class="p-4 md:p-5">
                             <div class="flex justify-between items-center">
                                 <div>
@@ -250,7 +250,7 @@
             <div class="max-w-[85rem] px-2 pt-1 mx-auto">
                 <!-- Acciones secundarias -->
                 <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                    <a href="{{ url_for('export_checkin_data', codigo_evento=evento.codigo) }}" class="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md focus:outline-none focus:shadow-md transition dark:bg-neutral-800 dark:border-neutral-700">
+                    <a href="{{ url_for('events.export_checkin_data', codigo_evento=evento.codigo) }}" class="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md focus:outline-none focus:shadow-md transition dark:bg-neutral-800 dark:border-neutral-700">
                         <div class="p-4 md:p-5">
                             <div class="flex justify-between items-center">
                                 <div>
@@ -276,7 +276,7 @@
                         </div>
                     </a>
 
-                    <a href="{{ url_for('listar_participantes', codigo_evento=evento.codigo) }}" class="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md focus:outline-none focus:shadow-md transition dark:bg-neutral-800 dark:border-neutral-700">
+                    <a href="{{ url_for('events.listar_participantes', codigo_evento=evento.codigo) }}" class="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md focus:outline-none focus:shadow-md transition dark:bg-neutral-800 dark:border-neutral-700">
                         <div class="p-4 md:p-5">
                             <div class="flex justify-between items-center">
                                 <div>
