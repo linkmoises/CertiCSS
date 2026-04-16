@@ -801,3 +801,123 @@ def db_eventos(page=1):
         page=page,
         total_paginas=total_paginas,
         total_eventos=total_eventos)
+
+
+@events_bp.route('/asistencia-controlada/<codigo_evento>')
+@events_bp.route('/tablero/asistencia-controlada/<codigo_evento>')
+@login_required
+def checkin_evento(codigo_evento):
+    from app import checkin_evento as original_checkin_evento
+    return original_checkin_evento(codigo_evento)
+
+
+@events_bp.route('/asistencia-controlada/<codigo_evento>/upload', methods=['GET', 'POST'])
+@events_bp.route('/tablero/asistencia-controlada/<codigo_evento>/upload', methods=['GET', 'POST'])
+@login_required
+def upload_participantes_csv(codigo_evento):
+    from app import upload_participantes_csv as original_upload
+    return original_upload(codigo_evento)
+
+
+@events_bp.route('/asistencia-controlada/<codigo_evento>/validar', methods=['GET', 'POST'])
+@events_bp.route('/tablero/asistencia-controlada/<codigo_evento>/validar', methods=['GET', 'POST'])
+@login_required
+def validar_asistencia(codigo_evento):
+    from app import validar_asistencia as original_validar
+    return original_validar(codigo_evento)
+
+
+@events_bp.route('/asistencia-controlada/<codigo_evento>/listado-preregistro')
+@events_bp.route('/tablero/asistencia-controlada/<codigo_evento>/listado-preregistro')
+@login_required
+def listar_participantes_temporales(codigo_evento):
+    from app import listar_participantes_temporales as original
+    return original(codigo_evento)
+
+
+@events_bp.route('/asistencia-controlada/<codigo_evento>/preregistro', methods=['GET', 'POST'])
+@events_bp.route('/tablero/asistencia-controlada/<codigo_evento>/preregistro', methods=['GET', 'POST'])
+@login_required
+def preregistro_manual(codigo_evento):
+    from app import preregistro_manual as original
+    return original(codigo_evento)
+
+
+@events_bp.route('/asistencia-controlada/<codigo_evento>/exportar')
+@events_bp.route('/tablero/asistencia-controlada/<codigo_evento>/exportar')
+@login_required
+def export_checkin_data(codigo_evento):
+    from app import export_checkin_data as original
+    return original(codigo_evento)
+
+
+@events_bp.route('/asistencia-controlada/<codigo_evento>/material')
+@events_bp.route('/tablero/asistencia-controlada/<codigo_evento>/material')
+@login_required
+def listado_material_educativo(codigo_evento):
+    from app import listado_material_educativo as original
+    return original(codigo_evento)
+
+
+@events_bp.route('/preregistro/<codigo_evento>', methods=['GET', 'POST'])
+@login_required
+def preregistro(codigo_evento):
+    from app import preregistro as original
+    return original(codigo_evento)
+
+
+@events_bp.route('/registrar_ponente/<codigo_evento>', methods=['GET', 'POST'])
+@login_required
+def registrar_ponente(codigo_evento):
+    from app import registrar_ponente as original
+    return original(codigo_evento)
+
+
+@events_bp.route('/registrar_organizador/<codigo_evento>', methods=['GET', 'POST'])
+@login_required
+def registrar_organizador(codigo_evento):
+    from app import registrar_organizador as original
+    return original(codigo_evento)
+
+
+@events_bp.route('/registrar_extemporaneo/<codigo_evento>', methods=['GET', 'POST'])
+@login_required
+def registrar_extemporaneo(codigo_evento):
+    from app import registrar_extemporaneo as original
+    return original(codigo_evento)
+
+
+@events_bp.route('/bases-de-datos/participantes-huerfanos')
+@events_bp.route('/tablero/bases-de-datos/participantes-huerfanos')
+@events_bp.route('/tablero/bases-de-datos/participantes-huerfanos/page/<int:page>')
+@login_required
+def participantes_huerfanos(page=1):
+    from app import participantes_huerfanos as original
+    return original(page)
+
+
+@events_bp.route('/bases-de-datos/evaluaciones')
+@events_bp.route('/tablero/bases-de-datos/evaluaciones')
+@events_bp.route('/tablero/bases-de-datos/evaluaciones/page/<int:page>')
+@login_required
+def db_evaluaciones(page=1):
+    from app import db_evaluaciones as original
+    return original(page)
+
+
+@events_bp.route('/bases-de-datos/resultados-examenes')
+@events_bp.route('/tablero/bases-de-datos/resultados-examenes')
+@events_bp.route('/tablero/bases-de-datos/resultados-examenes/page/<int:page>')
+@login_required
+def db_resultados_examenes(page=1):
+    from app import db_resultados_examenes as original
+    return original(page)
+
+
+@events_bp.route('/bases-de-datos/encuestas')
+@events_bp.route('/tablero/bases-de-datos/encuestas')
+@events_bp.route('/tablero/bases-de-datos/encuestas/page/<int:page>')
+@login_required
+def db_encuestas(page=1):
+    from app import db_encuestas as original
+    return original(page)
