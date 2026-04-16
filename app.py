@@ -92,11 +92,11 @@ collection_unidades = db['unidades']
 ###
 ### Auth module initialization
 ###
-from app.auth import auth_bp, init_auth_services, init_auth_routes, init_token_services
+from app.auth import auth_routes_bp, init_auth_services, init_auth_routes, init_token_services
 init_auth_services(collection_usuarios)
 init_token_services(collection_tokens)
 init_auth_routes(get_logger())
-app.register_blueprint(auth_bp)
+app.register_blueprint(auth_routes_bp)
 
 ###
 ### Roles de usuario
@@ -8358,10 +8358,6 @@ app.register_blueprint(importar_bp)
 ### Plataforma LMS
 from app.plataforma import plataforma_bp
 app.register_blueprint(plataforma_bp)
-
-### Plataforma LMS auth
-from app.auth import auth_bp
-app.register_blueprint(auth_bp)
 
 ### Búsqueda avanzada y normalizador
 from app.normalizador import normalizador_bp

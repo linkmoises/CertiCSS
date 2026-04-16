@@ -22,7 +22,7 @@ from app.auth.services import (
     init_token_services,
 )
 
-from app.auth.routes import auth_bp, login, logout, init_auth_routes
+from app.auth.routes import auth_routes_bp, login, logout, init_auth_routes
 
 __all__ = [
     'UserRole',
@@ -46,7 +46,7 @@ __all__ = [
     'lms_edit_required',
     'permission_required',
     'init_token_services',
-    'auth_bp',
+    'auth_routes_bp',
     'login',
     'logout',
     'init_auth_routes',

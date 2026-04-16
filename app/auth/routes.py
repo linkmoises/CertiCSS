@@ -1,6 +1,6 @@
 from flask import Blueprint, request, redirect, url_for, flash, session, render_template
 
-auth_bp = Blueprint('auth', __name__, url_prefix='/')
+auth_routes_bp = Blueprint('auth_routes', __name__, url_prefix='/')
 
 log_event = None
 
@@ -9,7 +9,7 @@ def init_auth_routes(log_function):
     log_event = log_function
 
 
-@auth_bp.route('/iniciar_sesion', methods=['GET', 'POST'])
+@auth_routes_bp.route('/iniciar_sesion', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         from app.auth.services import (
@@ -66,7 +66,7 @@ def login():
     return render_template('iniciar_sesion.html')
 
 
-@auth_bp.route('/salir', methods=['POST'])
+@auth_routes_bp.route('/salir', methods=['POST'])
 def logout():
     from flask_login import logout_user
     logout_user()
