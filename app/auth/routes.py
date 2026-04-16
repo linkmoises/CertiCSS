@@ -1,12 +1,7 @@
 from flask import Blueprint, request, redirect, url_for, flash, session, render_template
+from app.logs import log_event
 
 auth_routes_bp = Blueprint('auth_routes', __name__, url_prefix='/')
-
-log_event = None
-
-def init_auth_routes(log_function):
-    global log_event
-    log_event = log_function
 
 
 @auth_routes_bp.route('/iniciar_sesion', methods=['GET', 'POST'])

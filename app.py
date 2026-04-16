@@ -92,10 +92,9 @@ collection_unidades = db['unidades']
 ###
 ### Auth module initialization
 ###
-from app.auth import auth_routes_bp, init_auth_services, init_auth_routes, init_token_services
+from app.auth import auth_routes_bp, init_auth_services, init_token_services
 init_auth_services(collection_usuarios)
 init_token_services(collection_tokens)
-init_auth_routes(get_logger())
 app.register_blueprint(auth_routes_bp)
 
 ###

@@ -22,7 +22,7 @@ from app.auth.services import (
     init_token_services,
 )
 
-from app.auth.routes import auth_routes_bp, login, logout, init_auth_routes
+from app.auth.routes import auth_routes_bp, login, logout
 
 __all__ = [
     'UserRole',
@@ -49,5 +49,4 @@ __all__ = [
     'auth_routes_bp',
     'login',
     'logout',
-    'init_auth_routes',
 ]
