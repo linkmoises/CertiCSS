@@ -188,7 +188,7 @@
                                             <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('events.ver_evento', codigo_evento=evento.codigo) }}">
                                                 Datos del evento
                                             </a><br />
-                                            <a class="inline-flex items-center gap-x-1 text-sm text-gray-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('exportar.exportar_csv', codigo_evento=evento.codigo) }}">
+                                            <a class="inline-flex items-center gap-x-1 text-sm text-gray-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('exportar.exportar_evento_csv', codigo_evento=evento.codigo) }}">
                                                 Dataset participantes
                                             </a><br />
 {% if evento.instrumento == 'encuesta_v2' %}
