@@ -1,5 +1,6 @@
 import os
 import re
+import uuid
 from datetime import datetime
 
 from bson import ObjectId
@@ -952,14 +953,11 @@ def editar_pregunta_qbank(codigo_qbank, pregunta_id):
         evento_folder = os.path.join(current_app.config["UPLOAD_FOLDER"], codigo_qbank)
         os.makedirs(evento_folder, exist_ok=True)
         
-        # Obtener el contador actual de archivos en la carpeta
-        existing_files = [f for f in os.listdir(evento_folder) if f.startswith(f"archivo-{codigo_qbank}-")]
-        archivo_counter = len(existing_files) + 1
-        
         # Función para generar nombre único de archivo
-        def generar_nombre_archivo(original_filename, counter):
+        def generar_nombre_archivo(original_filename):
             extension = os.path.splitext(original_filename)[1]
-            return f"archivo-{codigo_qbank}-{counter}{extension}"
+            unique_id = uuid.uuid4().hex[:8]
+            return f"archivo-{codigo_qbank}-{unique_id}{extension}"
 
         # Procesar opciones
         opciones = []
@@ -971,11 +969,9 @@ def editar_pregunta_qbank(codigo_qbank, pregunta_id):
             if f"opcion_imagen_{i}" in request.files:
                 file = request.files[f"opcion_imagen_{i}"]
                 if file and file.filename:
-                    filename = generar_nombre_archivo(file.filename, archivo_counter)
-                    archivo_counter += 1
+                    filename = generar_nombre_archivo(file.filename)
                     file_path = os.path.join(evento_folder, filename)
                     file.save(file_path)
-                    # Guardar la ruta relativa desde uploads
                     imagen = f"{codigo_qbank}/{filename}"
 
             # Si no se subió nueva imagen, intentar mantener la existente
@@ -988,11 +984,9 @@ def editar_pregunta_qbank(codigo_qbank, pregunta_id):
         imagenes = pregunta.get("imagenes", [])  # Mantener imágenes existentes
         for file in imagenes_pregunta:
             if file and file.filename:
-                filename = generar_nombre_archivo(file.filename, archivo_counter)
-                archivo_counter += 1
+                filename = generar_nombre_archivo(file.filename)
                 file_path = os.path.join(evento_folder, filename)
                 file.save(file_path)
-                # Guardar la ruta relativa desde uploads
                 imagenes.append(f"{codigo_qbank}/{filename}")
 
         # Actualizar en MongoDB
@@ -1172,13 +1166,11 @@ def nueva_pregunta_qbank(codigo_qbank):
         evento_folder = os.path.join(current_app.config["UPLOAD_FOLDER"], codigo_qbank)
         os.makedirs(evento_folder, exist_ok=True)
         
-        # Contador para archivos únicos
-        archivo_counter = 1
-        
         # Función para generar nombre único de archivo
-        def generar_nombre_archivo(original_filename, counter):
+        def generar_nombre_archivo(original_filename):
             extension = os.path.splitext(original_filename)[1]
-            return f"archivo-{codigo_qbank}-{counter}{extension}"
+            unique_id = uuid.uuid4().hex[:8]
+            return f"archivo-{codigo_qbank}-{unique_id}{extension}"
         
         # Procesar opciones y sus imágenes
         for i in range(int(request.form["num_opciones"])):
@@ -1187,11 +1179,9 @@ def nueva_pregunta_qbank(codigo_qbank):
             if f"opcion_imagen_{i}" in request.files:
                 file = request.files[f"opcion_imagen_{i}"]
                 if file and file.filename:
-                    filename = generar_nombre_archivo(file.filename, archivo_counter)
-                    archivo_counter += 1
+                    filename = generar_nombre_archivo(file.filename)
                     file_path = os.path.join(evento_folder, filename)
                     file.save(file_path)
-                    # Guardar la ruta relativa desde uploads
                     imagen = f"{codigo_qbank}/{filename}"
             opciones.append({"texto": texto, "imagen": imagen})
 
@@ -1199,11 +1189,9 @@ def nueva_pregunta_qbank(codigo_qbank):
         imagenes = []
         for file in imagenes_pregunta:
             if file and file.filename:
-                filename = generar_nombre_archivo(file.filename, archivo_counter)
-                archivo_counter += 1
+                filename = generar_nombre_archivo(file.filename)
                 file_path = os.path.join(evento_folder, filename)
                 file.save(file_path)
-                # Guardar la ruta relativa desde uploads
                 imagenes.append(f"{codigo_qbank}/{filename}")
 
         # Guardar en MongoDB
