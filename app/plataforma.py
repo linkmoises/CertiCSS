@@ -980,14 +980,24 @@ def editar_pregunta_qbank(codigo_qbank, pregunta_id):
 
             opciones.append({"texto": texto, "imagen": imagen})
 
-        # Guardar imágenes de la pregunta (solo si se suben nuevas)
-        imagenes = pregunta.get("imagenes", [])  # Mantener imágenes existentes
-        for file in imagenes_pregunta:
-            if file and file.filename:
+        # Guardar imágenes de la pregunta
+        nuevas_imagenes = [f for f in imagenes_pregunta if f and f.filename]
+        if nuevas_imagenes:
+            # Eliminar archivos anteriores del filesystem
+            for ruta_relativa in pregunta.get("imagenes", []):
+                if ruta_relativa:
+                    ruta_absoluta = os.path.join(current_app.config["UPLOAD_FOLDER"], ruta_relativa)
+                    if os.path.isfile(ruta_absoluta):
+                        os.remove(ruta_absoluta)
+            # Guardar las nuevas
+            imagenes = []
+            for file in nuevas_imagenes:
                 filename = generar_nombre_archivo(file.filename)
                 file_path = os.path.join(evento_folder, filename)
                 file.save(file_path)
                 imagenes.append(f"{codigo_qbank}/{filename}")
+        else:
+            imagenes = pregunta.get("imagenes", [])  # Mantener existentes si no se subió nada
 
         # Actualizar en MongoDB
         actualizacion = {
@@ -1057,6 +1067,18 @@ def eliminar_pregunta_qbank(codigo_qbank, pregunta_id):
         if not pregunta:
             flash("Pregunta no encontrada.", "error")
             return redirect(url_for("plataforma.ver_qbank", codigo_qbank=codigo_qbank))
+
+        # Eliminar archivos del filesystem (imágenes de la pregunta y opciones)
+        upload_folder = current_app.config["UPLOAD_FOLDER"]
+        archivos_a_eliminar = list(pregunta.get("imagenes", []))
+        for opcion in pregunta.get("opciones", []):
+            if opcion.get("imagen"):
+                archivos_a_eliminar.append(opcion["imagen"])
+        for ruta_relativa in archivos_a_eliminar:
+            if ruta_relativa:
+                ruta_absoluta = os.path.join(upload_folder, ruta_relativa)
+                if os.path.isfile(ruta_absoluta):
+                    os.remove(ruta_absoluta)
 
         # Eliminar la pregunta
         result = collection_qbanks_data.delete_one({"_id": ObjectId(pregunta_id)})
