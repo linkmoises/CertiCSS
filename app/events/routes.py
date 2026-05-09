@@ -813,49 +813,49 @@ def listar_participantes(codigo_evento):
 @events_bp.route('/registrar_ponente/<codigo_evento>', methods=['GET', 'POST'])
 @login_required
 def registrar_ponente(codigo_evento):
-    from app import registrar_ponente as original
+    from main_app import registrar_ponente as original
     return original(codigo_evento)
 
 
 @events_bp.route('/registrar_organizador/<codigo_evento>', methods=['GET', 'POST'])
 @login_required
 def registrar_organizador(codigo_evento):
-    from app import registrar_organizador as original
+    from main_app import registrar_organizador as original
     return original(codigo_evento)
 
 
 @events_bp.route('/registrar_extemporaneo/<codigo_evento>', methods=['GET', 'POST'])
 @login_required
 def registrar_extemporaneo(codigo_evento):
-    from app import registrar_extemporaneo as original
+    from main_app import registrar_extemporaneo as original
     return original(codigo_evento)
 
 
 @events_bp.route('/asistencia-controlada/<codigo_evento>')
 @login_required
 def checkin_evento(codigo_evento):
-    from app import checkin_evento as original
+    from main_app import checkin_evento as original
     return original(codigo_evento)
 
 
 @events_bp.route('/asistencia-controlada/<codigo_evento>/upload', methods=['GET', 'POST'])
 @login_required
 def upload_participantes_csv(codigo_evento):
-    from app import upload_participantes_csv as original
+    from main_app import upload_participantes_csv as original
     return original(codigo_evento)
 
 
 @events_bp.route('/asistencia-controlada/<codigo_evento>/validar', methods=['GET', 'POST'])
 @login_required
 def validar_asistencia(codigo_evento):
-    from app import validar_asistencia as original
+    from main_app import validar_asistencia as original
     return original(codigo_evento)
 
 
 @events_bp.route('/asistencia-controlada/<codigo_evento>/listado-preregistro')
 @login_required
 def listar_participantes_temporales(codigo_evento):
-    from app import listar_participantes_temporales as original
+    from main_app import listar_participantes_temporales as original
     return original(codigo_evento)
 
 
