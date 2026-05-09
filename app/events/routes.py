@@ -659,7 +659,7 @@ def listar_eventos_digitales(page=1):
         }) is not None 
         evento["es_organizador"] = es_organizador
     
-    return render_template('mis_eventos_digitales.html',
+    return render_template('docencia_digital.html',
         eventos=eventos,
         total_eventos=total_eventos,
         page=page,
