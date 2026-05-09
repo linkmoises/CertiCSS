@@ -1,4 +1,5 @@
-from flask import Flask
+from flask import Flask, render_template, abort
+from flask_login import current_user
 from pymongo import MongoClient
 from config import config
 from datetime import datetime
@@ -47,3 +48,36 @@ collection_evaluaciones_poster = db['evaluaciones_poster']
 
 # Exportar variables necesarias
 BASE_URL = config.BASE_URL                      # importado de config.py
+
+
+def listar_participantes(codigo_evento):
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+
+    puede_editar = (
+        current_user.rol == 'administrador' or
+        current_user.rol == 'denadoi' or
+        str(current_user.id) == str(evento.get("autor")) or
+        collection_participantes.find_one({
+            "codigo_evento": codigo_evento,
+            "cedula": str(current_user.cedula),
+            "rol": "coorganizador"
+        })
+    )
+
+    participantes = list(collection_participantes.find(
+        {"codigo_evento": codigo_evento}
+    ).sort("apellidos", 1))
+
+    total_participantes = len([p for p in participantes if p.get('rol') == 'participante'])
+    total_ponentes = len([p for p in participantes if p.get('rol') == 'ponente'])
+
+    return render_template('participantes.html',
+                           evento=evento,
+                           participantes=participantes,
+                           nombre_evento=evento['nombre'],
+                           total_participantes=total_participantes,
+                           total_ponentes=total_ponentes,
+                           codigo_evento=codigo_evento,
+                           puede_editar=puede_editar)
