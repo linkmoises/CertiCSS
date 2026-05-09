@@ -32,8 +32,6 @@ for arg in "$@"; do
   esac
 done
 
-STASH_REF=""
-
 if [ -n "$COMMIT" ]; then
   if ! git rev-parse --verify "$COMMIT" &> /dev/null; then
     echo "Error: El commit '$COMMIT' no existe."
@@ -43,11 +41,9 @@ if [ -n "$COMMIT" ]; then
   if [ -n "$(git status --porcelain)" ]; then
     echo "Guardando cambios locales en stash..."
     git stash push -m "run-docker.sh rollback $(date)"
-    STASH_REF="true"
   fi
 
   echo "Revirtiendo al commit: $COMMIT"
-  ORIGINAL_BRANCH=$(git rev-parse --abbrev-ref HEAD)
   git checkout "$COMMIT"
 
   BUILD_OPTS="--no-cache"
@@ -69,13 +65,9 @@ docker compose build $BUILD_OPTS && docker compose up --force-recreate -d
 echo "Limpiando imágenes no utilizadas..."
 docker image prune -f
 
-if [ -n "$COMMIT" ]; then
-  echo "Volviendo a la rama original: $ORIGINAL_BRANCH"
-  git checkout "$ORIGINAL_BRANCH"
-  if [ -n "$STASH_REF" ]; then
-    echo "Restaurando cambios locales..."
-    git stash pop
-  fi
+if [ -n "$(git stash list)" ]; then
+  echo "Restaurando cambios locales..."
+  git stash pop
 fi
 
 echo "¡Despliegue completado!"
