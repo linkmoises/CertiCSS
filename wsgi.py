@@ -8,6 +8,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import importlib.util
 spec = importlib.util.spec_from_file_location("main_app", os.path.join(os.path.dirname(__file__), "app.py"))
 module = importlib.util.module_from_spec(spec)
+sys.modules["main_app"] = module
 spec.loader.exec_module(module)
 
 app = module.app

@@ -862,28 +862,28 @@ def listar_participantes_temporales(codigo_evento):
 @events_bp.route('/asistencia-controlada/<codigo_evento>/preregistro', methods=['GET', 'POST'])
 @login_required
 def preregistro_manual(codigo_evento):
-    from app import preregistro_manual as original
+    from main_app import preregistro_manual as original
     return original(codigo_evento)
 
 
 @events_bp.route('/asistencia-controlada/<codigo_evento>/exportar')
 @login_required
 def export_checkin_data(codigo_evento):
-    from app import export_checkin_data as original
+    from main_app import export_checkin_data as original
     return original(codigo_evento)
 
 
 @events_bp.route('/asistencia-controlada/<codigo_evento>/material')
 @login_required
 def listado_material_educativo(codigo_evento):
-    from app import listado_material_educativo as original
+    from main_app import listado_material_educativo as original
     return original(codigo_evento)
 
 
 @events_bp.route('/preregistro/<codigo_evento>', methods=['GET', 'POST'])
 @login_required
 def preregistro(codigo_evento):
-    from app import preregistro as original
+    from main_app import preregistro as original
     return original(codigo_evento)
 
 
@@ -892,7 +892,7 @@ def preregistro(codigo_evento):
 @events_bp.route('/tablero/bases-de-datos/participantes-huerfanos/page/<int:page>')
 @login_required
 def participantes_huerfanos(page=1):
-    from app import participantes_huerfanos as original
+    from main_app import participantes_huerfanos as original
     return original(page)
 
 
@@ -901,7 +901,7 @@ def participantes_huerfanos(page=1):
 @events_bp.route('/tablero/bases-de-datos/evaluaciones/page/<int:page>')
 @login_required
 def db_evaluaciones(page=1):
-    from app import db_evaluaciones as original
+    from main_app import db_evaluaciones as original
     return original(page)
 
 
@@ -910,7 +910,7 @@ def db_evaluaciones(page=1):
 @events_bp.route('/tablero/bases-de-datos/resultados-examenes/page/<int:page>')
 @login_required
 def db_resultados_examenes(page=1):
-    from app import db_resultados_examenes as original
+    from main_app import db_resultados_examenes as original
     return original(page)
 
 
@@ -919,5 +919,5 @@ def db_resultados_examenes(page=1):
 @events_bp.route('/tablero/bases-de-datos/encuestas/page/<int:page>')
 @login_required
 def db_encuestas(page=1):
-    from app import db_encuestas as original
+    from main_app import db_encuestas as original
     return original(page)
