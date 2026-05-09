@@ -279,7 +279,7 @@
                                                 Dataset participantes
                                             </a><br />
 {% if evento.instrumento == 'encuesta_v2' %}
-                                            <a class="inline-flex items-center gap-x-1 text-sm text-pink-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('exportar.exportar_encuesta_v2_csv', codigo_evento=evento.codigo) }}">
+                                            <a class="inline-flex items-center gap-x-1 text-sm text-pink-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('exportar_encuesta_v2_csv', codigo_evento=evento.codigo) }}">
                                                 Dataset encuesta v2
                                             </a><br />
                                             <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('informe_avanzado_v2', codigo_evento=evento.codigo) }}">
