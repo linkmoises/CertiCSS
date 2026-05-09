@@ -66,9 +66,16 @@ def listar_participantes(codigo_evento):
         })
     )
 
+    role_order = {"organizador": 0, "coorganizador": 1, "ponente": 2, "participante": 3}
+
     participantes = list(collection_participantes.find(
         {"codigo_evento": codigo_evento}
-    ).sort("fecha_evento", -1).sort("timestamp", -1))
+    ))
+
+    participantes.sort(key=lambda p: (
+        role_order.get(p.get("rol", "participante"), 3),
+        p.get("fecha_evento") or p.get("timestamp") or ""
+    ))
 
     total_participantes = len([p for p in participantes if p.get('rol') == 'participante'])
     total_ponentes = len([p for p in participantes if p.get('rol') == 'ponente'])
