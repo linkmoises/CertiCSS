@@ -68,7 +68,7 @@ def listar_participantes(codigo_evento):
 
     participantes = list(collection_participantes.find(
         {"codigo_evento": codigo_evento}
-    ).sort("apellidos", 1))
+    ).sort("fecha_evento", -1).sort("timestamp", -1))
 
     total_participantes = len([p for p in participantes if p.get('rol') == 'participante'])
     total_ponentes = len([p for p in participantes if p.get('rol') == 'ponente'])
