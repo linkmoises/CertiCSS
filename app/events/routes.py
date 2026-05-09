@@ -754,7 +754,7 @@ def listar_eventos_abiertos(page=1):
                 {"nombres": 1, "apellidos": 1, "foto": 1}
             )
     
-    return render_template('eventos_abiertos.html',
+    return render_template('docencia_abiertas.html',
         eventos=eventos,
         total_eventos=total_eventos,
         page=page,
