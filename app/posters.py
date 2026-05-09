@@ -959,7 +959,7 @@ def admin_posters(codigo_evento):
     # Verificar que el concurso de póster esté habilitado
     if not evento.get('concurso_poster', False):
         flash('El concurso de póster no está habilitado para este evento.', 'error')
-        return redirect(url_for('listar_participantes', codigo_evento=codigo_evento))
+        return redirect(url_for('events.listar_participantes', codigo_evento=codigo_evento))
     
     # Obtener todos los pósters ordenados por número
     posters = list(collection_posters.find(
@@ -1027,7 +1027,7 @@ def resultados_poster(codigo_evento):
     # Verificar que el concurso de póster esté habilitado
     if not evento.get('concurso_poster', False):
         flash('El concurso de póster no está habilitado para este evento.', 'error')
-        return redirect(url_for('listar_participantes', codigo_evento=codigo_evento))
+        return redirect(url_for('events.listar_participantes', codigo_evento=codigo_evento))
     
     # Obtener pósters con sus promedios
     posters = list(collection_posters.find({"codigo_evento": codigo_evento}))

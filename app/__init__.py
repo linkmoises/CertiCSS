@@ -72,10 +72,14 @@ def listar_participantes(codigo_evento):
         {"codigo_evento": codigo_evento}
     ))
 
-    participantes.sort(key=lambda p: (
-        role_order.get(p.get("rol", "participante"), 3),
-        p.get("fecha_evento") or p.get("timestamp") or ""
-    ))
+    def sort_key(p):
+        fecha = p.get("fecha_evento")
+        if not fecha:
+            ts = p.get("timestamp")
+            fecha = ts.strftime('%Y-%m-%d') if isinstance(ts, datetime) else (ts or "")
+        return (role_order.get(p.get("rol", "participante"), 3), fecha)
+
+    participantes.sort(key=sort_key)
 
     total_participantes = len([p for p in participantes if p.get('rol') == 'participante'])
     total_ponentes = len([p for p in participantes if p.get('rol') == 'ponente'])

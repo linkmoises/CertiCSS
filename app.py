@@ -238,7 +238,7 @@ def editar_participante(nanoid):
             }}
         )
 
-        return redirect(url_for('listar_participantes', codigo_evento=participante['codigo_evento']))
+        return redirect(url_for('events.listar_participantes', codigo_evento=participante['codigo_evento']))
 
     return render_template('editar_participante.html', participante=participante, evento=evento)
 
@@ -294,7 +294,7 @@ def editar_ponente(nanoid):
         )
 
         flash("Datos del ponente actualizados exitosamente.", "success")
-        return redirect(url_for('listar_participantes', codigo_evento=ponente['codigo_evento']))
+        return redirect(url_for('events.listar_participantes', codigo_evento=ponente['codigo_evento']))
 
     # Get available dates for multi-day events
     fechas_disponibles = get_event_dates(evento)
@@ -1476,7 +1476,7 @@ def registrar_ponente(codigo_evento):
 
         flash("Ponente registrado con éxito.", "success")
         log_event(f"Usuario [{current_user.email}] registró al {rol} {cedula} en el evento {codigo_evento} para la fecha {fecha_evento}.")
-        return redirect(url_for('listar_participantes', codigo_evento=codigo_evento))
+        return redirect(url_for('events.listar_participantes', codigo_evento=codigo_evento))
 
     # Get available dates for multi-day events
     fechas_disponibles = get_event_dates(evento)
@@ -1534,7 +1534,7 @@ def registrar_organizador(codigo_evento):
 
         flash("Organizador registrado con éxito.", "success")
         log_event(f"Usuario [{current_user.email}] registró al {rol} {cedula} en el evento {codigo_evento}.")
-        return redirect(url_for('listar_participantes', codigo_evento=codigo_evento))
+        return redirect(url_for('events.listar_participantes', codigo_evento=codigo_evento))
 
     return render_template('registrar_organizador.html',
         codigo_evento=codigo_evento,
@@ -1743,7 +1743,7 @@ def registrar_extemporaneo(codigo_evento):
         log_event(f"Usuario [{current_user.email}] intentó acceso no autorizado a registro extemporáneo para evento {codigo_evento} - Rol: {current_user.rol}")
         
         flash('No tienes permiso para acceder a esta función.', 'error')
-        return redirect(url_for('listar_participantes', codigo_evento=codigo_evento))
+        return redirect(url_for('events.listar_participantes', codigo_evento=codigo_evento))
     
     if request.method == 'GET':
         # Registrar acceso al formulario
@@ -1831,7 +1831,7 @@ def registrar_extemporaneo(codigo_evento):
             
             # Respuesta de éxito
             flash(f'Participante {form_data["nombres"]} {form_data["apellidos"]} registrado exitosamente.', 'success')
-            return redirect(url_for('listar_participantes', codigo_evento=codigo_evento))
+            return redirect(url_for('events.listar_participantes', codigo_evento=codigo_evento))
             
         except Exception as e:
             # Registrar errores del sistema durante el registro
@@ -3013,11 +3013,11 @@ def eliminar_participante(nanoid):
             log_event(f"Usuario [{current_user.email}] eliminó al {rol} {cedula} del evento {codigo_evento}.")
         
         result = collection_participantes.delete_one({"nanoid": nanoid})
-        return redirect(url_for('listar_participantes', codigo_evento=codigo_evento))
+        return redirect(url_for('events.listar_participantes', codigo_evento=codigo_evento))
 
     else:
         log_event(f"Usuario [{current_user.email}] intentó eliminar un participante que no existe con nanoid {nanoid}")
-        return redirect(url_for('listar_participantes', codigo_evento=''))
+        return redirect(url_for('events.listar_participantes', codigo_evento=''))
 
 ###
 ### Página de evento
