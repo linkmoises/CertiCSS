@@ -344,7 +344,7 @@ def crear_evento():
 @events_bp.route('/eventos/<codigo_evento>/copiar')
 @login_required
 def copiar_evento(codigo_evento):
-    from app.events.services import get_event_by_code
+    from app.events.services import get_event_by_code, get_collection_eventos
     
     evento = get_event_by_code(get_collection_eventos(), codigo_evento)
     
