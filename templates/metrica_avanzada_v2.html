@@ -298,10 +298,35 @@
                     </div>
                 </div>
 
+                <div id="grafico-unidades" class="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+                    <div class="col-span-1 lg:col-span-3 flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="p-4 md:p-5">
+                            <h4 class="text-base font-semibold text-gray-800 mb-4">Gráfica No. 3. Participantes según Unidad Ejecutora</h4>
+{% if grafica_unidades %}
+                            <img src="{{ grafica_unidades }}" alt="Gráfica de participantes por unidad ejecutora" class="w-full h-auto" />
+{% else %}
+                            <div class="flex justify-center items-center h-64 bg-gray-50 rounded-lg">
+                                <p class="text-gray-500">No hay datos disponibles para generar la gráfica.</p>
+                            </div>
+{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="col-span-1 flex flex-col bg-white border shadow-sm rounded-xl">
+                        <div class="overflow-x-auto p-4">
+                            <h4 class="text-base font-semibold text-gray-800 mb-2">Sobre la Gráfica No. 3</h4>
+                            <p class="text-sm mb-2">
+                                Los datos con los que se genera esta gráfica proceden del llenado del formulario de
+                                registro de cada participante al momento de registrarse.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="grafico-demografia" class="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
                     <div class="col-span-1 lg:col-span-2 flex flex-col bg-white border shadow-sm rounded-xl">
                         <div class="p-4 md:p-5">
-                            <h4 class="text-base font-semibold text-gray-800 mb-4">Gráfica No. 3. Demografía - Distribución por sexo</h4>
+                            <h4 class="text-base font-semibold text-gray-800 mb-4">Gráfica No. 4. Demografía - Distribución por sexo</h4>
 {% if grafica_demografia_sexo %}
                             <img src="{{ grafica_demografia_sexo }}" alt="Gráfica de distribución por sexo" class="w-full h-auto" />
                             <p class="pt-4 text-xs text-gray-500">
@@ -317,7 +342,7 @@
 
                     <div class="col-span-1 lg:col-span-2 flex flex-col bg-white border shadow-sm rounded-xl">
                         <div class="p-4 md:p-5">
-                            <h4 class="text-base font-semibold text-gray-800 mb-4">Gráfica No. 4. Demografía - Distribución etaria</h4>
+                            <h4 class="text-base font-semibold text-gray-800 mb-4">Gráfica No. 5. Demografía - Distribución etaria</h4>
 {% if grafica_demografia_grupoetario %}
                             <img src="{{ grafica_demografia_grupoetario }}" alt="Gráfica de distribución etaria" class="w-full h-auto" />
                             <p class="pt-4 text-xs text-gray-500">
@@ -335,7 +360,7 @@
                 <div id="grafico-spider" class="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
                     <div class="col-span-1 lg:col-span-2 flex flex-col bg-white border shadow-sm rounded-xl">
                         <div class="p-4 md:p-5">
-                            <h4 class="text-base font-semibold text-gray-800 mb-4">Gráfico No. 5. Evaluación del Evento (E1-E5)</h4>
+                            <h4 class="text-base font-semibold text-gray-800 mb-4">Gráfico No. 6. Evaluación del Evento (E1-E5)</h4>
 {% if grafica_spider %}
                             <img src="{{ grafica_spider }}" alt="Gráfica de evaluación del evento" class="w-full h-auto" />
                             <p class="pt-4 text-xs text-gray-500">

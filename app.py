@@ -5197,6 +5197,7 @@ def informe_avanzado_v2(codigo_evento):
 
     grafica_perfil = generar_grafica_perfil(participantes, evento.get('nombre', 'Evento'))
     grafica_region = generar_grafica_region(participantes, evento.get('nombre', 'Evento'))
+    grafica_unidades = generar_grafica_unidades(participantes, evento.get('nombre', 'Evento'))
 
     respuestas = list(collection_encuestas_v2.find({'codigo_evento': codigo_evento}))
 
@@ -5258,6 +5259,7 @@ def informe_avanzado_v2(codigo_evento):
         metricas=metricas,
         grafica_perfil=grafica_perfil,
         grafica_region=grafica_region,
+        grafica_unidades=grafica_unidades,
         grafica_spider=grafica_spider,
         grafica_demografia_sexo=grafica_demografia_sexo,
         grafica_demografia_grupoetario=grafica_demografia_grupoetario,
@@ -5682,6 +5684,57 @@ def generar_grafica_region(participantes, evento_nombre):
     img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
     plt.close()
     
+    return f"data:image/png;base64,{img_base64}"
+
+def generar_grafica_unidades(participantes, evento_nombre):
+    """
+    Genera una gráfica de barras horizontal con la distribución de participantes
+    según la unidad ejecutora a la que pertenecen.
+    Y-axis: nombre de unidades ejecutoras, X-axis: número de participantes.
+    """
+    unidades_count = {}
+    for participante in participantes:
+        unidad = participante.get('unidad', 'Sin especificar')
+        if unidad and unidad.strip():
+            unidades_count[unidad.strip()] = unidades_count.get(unidad.strip(), 0) + 1
+
+    if not unidades_count:
+        return None
+
+    unidades_ordenadas = sorted(unidades_count.items(), key=lambda x: x[1], reverse=True)
+
+    labels = [unidad for unidad, _ in unidades_ordenadas]
+    values = [count for _, count in unidades_ordenadas]
+
+    plt.figure(figsize=(12, 8))
+
+    bars = plt.barh(labels, values, color='#8B5CF6', alpha=0.8)
+
+    plt.title('Distribución de Participantes por Unidad Ejecutora',
+              fontsize=10, fontweight='bold', pad=20)
+
+    evento_nombre = wrap_text(evento_nombre)
+
+    plt.text(0.5, 1.15, evento_nombre,
+             ha='center', va='bottom', transform=plt.gca().transAxes,
+             fontsize=12, style='italic')
+
+    plt.xlabel('Número de Participantes', fontsize=10, fontweight='bold')
+    plt.ylabel('Unidad Ejecutora', fontsize=10, fontweight='bold')
+
+    for bar, value in zip(bars, values):
+        width = bar.get_width()
+        plt.text(width + 0.1, bar.get_y() + bar.get_height()/2.,
+                 f'{value}', ha='left', va='center', fontweight='bold')
+
+    plt.tight_layout()
+
+    img_buffer = io.BytesIO()
+    plt.savefig(img_buffer, format='png', dpi=300, bbox_inches='tight')
+    img_buffer.seek(0)
+    img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
+    plt.close()
+
     return f"data:image/png;base64,{img_base64}"
 
 def generar_grafica_spider(respuestas, evento_nombre):
