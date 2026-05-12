@@ -18,7 +18,7 @@ from io import BytesIO, StringIO
 import csv
 from enum import Enum
 from functools import wraps
-from app.helpers import generate_otp, generate_nanoid, generar_codigo_evento, obtener_codigo_unico, allowed_file, otp_storage
+from app.helpers import generate_otp, generate_nanoid, generar_codigo_evento, obtener_codigo_unico, allowed_file
 from app.template_selection import determine_template_path, parse_event_date
 from app.logs import get_logger
 from app.analisis import analisis_bp, puede_editar_analisis
@@ -87,6 +87,7 @@ collection_posters = db['posters']
 collection_evaluaciones_poster = db['evaluaciones_poster']
 collection_progreso = db['progreso']
 collection_unidades = db['unidades']
+collection_otps = db['otps']
 
 ###
 ### Auth module initialization
@@ -184,22 +185,35 @@ except Exception as e:
     logger.error(f"Error al crear índices para encuestas_v2: {e}")
 
 ###
+### Crear índice TTL para OTPs (auto-expiración en MongoDB)
+###
+try:
+    existing_indexes = collection_otps.index_information()
+    if "valid_until_1" not in existing_indexes:
+        collection_otps.create_index("valid_until", expireAfterSeconds=0)
+        logger.info("Índice TTL creado en collection_otps")
+except Exception as e:
+    logger.error(f"Error al crear índice TTL en collection_otps: {e}")
+
+###
 ### OTP dinámico
 ###
 @app.route('/get-otp/<codigo_evento>')
 def get_otp(codigo_evento):
-    # Verificar si el OTP existe y no ha expirado
-    if codigo_evento in otp_storage and datetime.now() < otp_storage[codigo_evento]['valid_until']:
-        otp_code = otp_storage[codigo_evento]['code']
+    otp_doc = collection_otps.find_one({"_id": codigo_evento})
+    if otp_doc and datetime.now() < otp_doc['valid_until']:
+        otp_code = otp_doc['code']
     else:
-        # Generar un nuevo OTP
         otp_code = generate_otp()
-        otp_storage[codigo_evento] = {
-            'code': otp_code,
-            'valid_until': datetime.now() + timedelta(seconds=90)
-        }
+        collection_otps.update_one(
+            {"_id": codigo_evento},
+            {"$set": {
+                "code": otp_code,
+                "valid_until": datetime.now() + timedelta(seconds=90)
+            }},
+            upsert=True
+        )
 
-    # Devolver el OTP en formato JSON
     return jsonify(otp=otp_code)
 
 ###
@@ -508,14 +522,19 @@ def registrar_participante(codigo_evento):
     # Plantilla diferente según el tipo de evento
     if es_presencial:
         # Eventos presenciales
-        if codigo_evento not in otp_storage or datetime.now() >= otp_storage[codigo_evento]['valid_until']:
-            otp_code = generate_otp()
-            otp_storage[codigo_evento] = {
-                'code': otp_code,
-                'valid_until': datetime.now() + timedelta(minutes=1)
-            }
+        otp_doc = collection_otps.find_one({"_id": codigo_evento})
+        if otp_doc and datetime.now() < otp_doc['valid_until']:
+            otp_code = otp_doc['code']
         else:
-            otp_code = otp_storage[codigo_evento]['code']
+            otp_code = generate_otp()
+            collection_otps.update_one(
+                {"_id": codigo_evento},
+                {"$set": {
+                    "code": otp_code,
+                    "valid_until": datetime.now() + timedelta(minutes=1)
+                }},
+                upsert=True
+            )
 
         return render_template('registrar_presencial.html',
             otp=otp_code,
@@ -564,19 +583,11 @@ def registrar():
 
     # Proceso según tipo de evento
     if es_presencial:
-        # Eventos presenciales, validamos OTP
         otp_ingresado = request.form.get('otp', '')
 
-        # Verificar si el código OTP existe y su validez
-        if codigo_evento in otp_storage:
-            otp_info = otp_storage[codigo_evento]
-
-            # Validar si el registro se realizó durante la validez del OTP y si coincide con el OTP ingresado
-            if datetime.now() > otp_info['valid_until'] or otp_ingresado != otp_info['code']:
-                flash("El OTP ha expirado o es incorrecto.", "error")
-                return redirect(url_for('registrar_participante', codigo_evento=codigo_evento))
-        else:
-            flash("El código del evento no es válido.", "error")
+        otp_doc = collection_otps.find_one({"_id": codigo_evento})
+        if not otp_doc or datetime.now() > otp_doc['valid_until'] or otp_ingresado != otp_doc['code']:
+            flash("El OTP ha expirado o es incorrecto.", "error")
             return redirect(url_for('registrar_participante', codigo_evento=codigo_evento))
     else:
         # Para eventos no presenciales, validamos contra preregistro
@@ -3031,15 +3042,19 @@ def mostrar_evento(codigo_evento):
 
         qr_path = generate_qr_code(codigo_evento)
 
-        # Generar un nuevo OTP si no existe o ha expirado
-        if codigo_evento not in otp_storage or datetime.now() >= otp_storage[codigo_evento]['valid_until']:
-            otp_code = generate_otp()
-            otp_storage[codigo_evento] = {
-                'code': otp_code,
-                'valid_until': datetime.now() + timedelta(minutes=1)
-            }
+        otp_doc = collection_otps.find_one({"_id": codigo_evento})
+        if otp_doc and datetime.now() < otp_doc['valid_until']:
+            otp_code = otp_doc['code']
         else:
-            otp_code = otp_storage[codigo_evento]['code']
+            otp_code = generate_otp()
+            collection_otps.update_one(
+                {"_id": codigo_evento},
+                {"$set": {
+                    "code": otp_code,
+                    "valid_until": datetime.now() + timedelta(minutes=1)
+                }},
+                upsert=True
+            )
 
         return render_template('evento-individual.html', evento=evento, otp=otp_code)
     else:

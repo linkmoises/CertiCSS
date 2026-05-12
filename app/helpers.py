@@ -33,11 +33,6 @@ ALLOWED_DOCUMENT_MIMETYPES = {
     'text/markdown',
 }
 
-
-# Almacenamiento global para OTPs
-otp_storage = {}
-
-
 def generate_otp():
     """Genera un código OTP de 4 dígitos (mayúsculas y números)."""
     characters = string.ascii_uppercase + string.digits
