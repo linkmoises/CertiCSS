@@ -5694,8 +5694,8 @@ def generar_grafica_unidades(participantes, evento_nombre):
     """
     unidades_count = {}
     for participante in participantes:
-        unidad = participante.get('unidad', 'Sin especificar')
-        if unidad and unidad.strip():
+        unidad = participante.get('unidad') or 'Sin especificar'
+        if unidad.strip():
             unidades_count[unidad.strip()] = unidades_count.get(unidad.strip(), 0) + 1
 
     if not unidades_count:
