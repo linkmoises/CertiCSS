@@ -226,6 +226,17 @@ def _exportar_evento_csv(evento):
     )
 
 
+@exportar_bp.route('/tablero/exportar/participantes/<codigo_evento>')
+@login_required
+def exportar_participantes_csv_route(codigo_evento):
+    """Exportar datos de participantes en formato CSV (ruta pública)"""
+    evento = collection_eventos.find_one({'codigo': codigo_evento})
+    if not evento:
+        flash('Evento no encontrado', 'error')
+        return redirect(url_for('exportar.exportar_eventos'))
+    return exportar_participantes_csv(evento, codigo_evento)
+
+
 def exportar_participantes_csv(evento, codigo_evento):
     """Exportar datos de participantes en formato CSV"""
     # Crear un buffer en memoria para el archivo CSV
