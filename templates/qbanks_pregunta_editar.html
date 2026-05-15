@@ -107,12 +107,9 @@
                                                 {% for img in pregunta.imagenes %}
                                                 <div class="flex items-center gap-2 text-sm text-gray-500">
                                                     <span>{{ img }}</span>
-                                                    <form method="POST" action="{{ url_for('plataforma.eliminar_imagen_pregunta', codigo_qbank=codigo_qbank, pregunta_id=pregunta._id) }}" style="display:inline">
-                                                        <input type="hidden" name="imagen_path" value="{{ img }}">
-                                                        <button type="submit" onclick="return confirm('¿Eliminar esta imagen?')" class="inline-flex items-center gap-x-1 text-xs font-medium text-red-600 hover:text-red-800 hover:underline">
-                                                            Eliminar
-                                                        </button>
-                                                    </form>
+                                                    <button type="button" onclick="eliminarImagen('{{ img }}')" class="inline-flex items-center gap-x-1 text-xs font-medium text-red-600 hover:text-red-800 hover:underline">
+                                                        Eliminar
+                                                    </button>
                                                 </div>
                                                 {% endfor %}
                                             </div>
@@ -296,6 +293,7 @@
             </div>
             <div class="flex-grow">
                 <input type="text" name="opcion_texto_${opcionIndex}" placeholder="Texto de la opción" value="${texto}" class="py-2 px-3 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" required>
+                <input type="file" name="opcion_imagen_${opcionIndex}" accept="image/*" class="mt-1 py-2 px-3 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
             </div>
             <button type="button" onclick="eliminarOpcion(${opcionIndex})" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-red-200 bg-white text-red-600 shadow-sm hover:bg-red-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-red-50">
                 <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
@@ -355,6 +353,20 @@
     });
 
     window.onload = renderOpciones;
+
+    function eliminarImagen(imagenPath) {
+        if (!confirm('¿Eliminar esta imagen?')) return;
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ url_for("plataforma.eliminar_imagen_pregunta", codigo_qbank=codigo_qbank, pregunta_id=pregunta._id) }}';
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'imagen_path';
+        input.value = imagenPath;
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
 </script>
 </body>
 

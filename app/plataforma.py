@@ -980,24 +980,14 @@ def editar_pregunta_qbank(codigo_qbank, pregunta_id):
 
             opciones.append({"texto": texto, "imagen": imagen})
 
-        # Guardar imágenes de la pregunta
+        # Guardar imágenes de la pregunta (añadir nuevas sin eliminar existentes)
         nuevas_imagenes = [f for f in imagenes_pregunta if f and f.filename]
-        if nuevas_imagenes:
-            # Eliminar archivos anteriores del filesystem
-            for ruta_relativa in pregunta.get("imagenes", []):
-                if ruta_relativa:
-                    ruta_absoluta = os.path.join(current_app.config["UPLOAD_FOLDER"], ruta_relativa)
-                    if os.path.isfile(ruta_absoluta):
-                        os.remove(ruta_absoluta)
-            # Guardar las nuevas
-            imagenes = []
-            for file in nuevas_imagenes:
-                filename = generar_nombre_archivo(file.filename)
-                file_path = os.path.join(evento_folder, filename)
-                file.save(file_path)
-                imagenes.append(f"{codigo_qbank}/{filename}")
-        else:
-            imagenes = pregunta.get("imagenes", [])  # Mantener existentes si no se subió nada
+        imagenes = list(pregunta.get("imagenes", []))  # Mantener existentes
+        for file in nuevas_imagenes:
+            filename = generar_nombre_archivo(file.filename)
+            file_path = os.path.join(evento_folder, filename)
+            file.save(file_path)
+            imagenes.append(f"{codigo_qbank}/{filename}")
 
         # Actualizar en MongoDB
         actualizacion = {
