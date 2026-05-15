@@ -1035,6 +1035,55 @@ def editar_pregunta_qbank(codigo_qbank, pregunta_id):
 
 
 ###
+### Eliminar una imagen de una pregunta
+###
+@plataforma_bp.route(
+    "/tablero/qbanks/<codigo_qbank>/editar_pregunta/<pregunta_id>/eliminar_imagen",
+    methods=["POST"],
+)
+@login_required
+@lms_edit_required
+def eliminar_imagen_pregunta(codigo_qbank, pregunta_id):
+    pregunta = collection_qbanks_data.find_one(
+        {"_id": ObjectId(pregunta_id), "codigo_qbank": codigo_qbank}
+    )
+    if not pregunta:
+        flash("Pregunta no encontrada.", "error")
+        return redirect(url_for("plataforma.ver_qbank", codigo_qbank=codigo_qbank))
+
+    imagen_path = request.form.get("imagen_path")
+    if not imagen_path:
+        flash("No se especificó imagen.", "error")
+        return redirect(
+            url_for(
+                "plataforma.editar_pregunta_qbank",
+                codigo_qbank=codigo_qbank,
+                pregunta_id=pregunta_id,
+            )
+        )
+
+    ruta_absoluta = os.path.join(
+        current_app.config["UPLOAD_FOLDER"], imagen_path
+    )
+    if os.path.isfile(ruta_absoluta):
+        os.remove(ruta_absoluta)
+
+    collection_qbanks_data.update_one(
+        {"_id": ObjectId(pregunta_id)},
+        {"$pull": {"imagenes": imagen_path}},
+    )
+
+    flash("Imagen eliminada.", "success")
+    return redirect(
+        url_for(
+            "plataforma.editar_pregunta_qbank",
+            codigo_qbank=codigo_qbank,
+            pregunta_id=pregunta_id,
+        )
+    )
+
+
+###
 ### Eliminar una pregunta de un Banco de Preguntas
 ###
 @plataforma_bp.route(

@@ -103,8 +103,19 @@
                                                 accept="image/*"
                                                 class="py-2 px-3 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
                                             {% if pregunta.imagenes %}
-                                            <p class="text-sm text-gray-500 mt-1">Imágenes actuales: {{
-                                                pregunta.imagenes|join(', ') }}</p>
+                                            <div class="mt-2 space-y-1">
+                                                {% for img in pregunta.imagenes %}
+                                                <div class="flex items-center gap-2 text-sm text-gray-500">
+                                                    <span>{{ img }}</span>
+                                                    <form method="POST" action="{{ url_for('plataforma.eliminar_imagen_pregunta', codigo_qbank=codigo_qbank, pregunta_id=pregunta._id) }}" style="display:inline">
+                                                        <input type="hidden" name="imagen_path" value="{{ img }}">
+                                                        <button type="submit" onclick="return confirm('¿Eliminar esta imagen?')" class="inline-flex items-center gap-x-1 text-xs font-medium text-red-600 hover:text-red-800 hover:underline">
+                                                            Eliminar
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
                                             {% endif %}
                                         </div>
                                         <!-- End Col -->
