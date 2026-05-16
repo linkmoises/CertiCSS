@@ -142,14 +142,18 @@ def listar_usuarios(page=1):
         
         # 2. Luego usuarios por provincia/región (excluyendo DENADOI, coordinador-administrativo y simulacion)
         regiones_orden = ['css01', 'css02', 'css03', 'css04', 'css06', 'css07', 'css09', 'css13', 'css082', 'css081', 'css088']
-        roles_orden = ['coordinador-regional', 'subdirector-docencia', 'coordinador-local', 'coordinador-departamental']
         
         for region in regiones_orden:
             usuarios_region = [u for u in usuarios if u.get('region') == region and u.get('rol') not in ['denadoi', 'coordinador-administrativo', 'simulacion']]
             if usuarios_region:
-                # Ordenar por rol según el orden especificado, luego por apellidos y nombres
                 usuarios_region.sort(key=lambda x: (
-                    roles_orden.index(x.get('rol')) if x.get('rol') in roles_orden else 999,
+                    0 if x.get('rol') in ('coordinador-regional', 'subdirector-docencia') else
+                    1 if x.get('rol') in ('coordinador-local', 'coordinador-departamental') else 9,
+                    x.get('unidad_ejecutora', '') if x.get('rol') in ('coordinador-local', 'coordinador-departamental') else '',
+                    0 if x.get('rol') == 'coordinador-regional' else
+                    1 if x.get('rol') == 'subdirector-docencia' else
+                    0 if x.get('rol') == 'coordinador-local' else
+                    1 if x.get('rol') == 'coordinador-departamental' else 0,
                     x.get('apellidos', ''),
                     x.get('nombres', '')
                 ))
@@ -243,13 +247,14 @@ def listar_usuarios_region():
 
     # Función para ordenar usuarios según los criterios especificados
     def ordenar_usuarios(usuarios):
-        usuarios_ordenados = []
-        
-        roles_orden = ['coordinador-regional', 'subdirector-docencia', 'coordinador-local', 'coordinador-departamental']
-        
-        # Ordenar por rol según el orden especificado, luego por apellidos y nombres
         usuarios.sort(key=lambda x: (
-            roles_orden.index(x.get('rol')) if x.get('rol') in roles_orden else 999,
+            0 if x.get('rol') in ('coordinador-regional', 'subdirector-docencia') else
+            1 if x.get('rol') in ('coordinador-local', 'coordinador-departamental') else 9,
+            x.get('unidad_ejecutora', '') if x.get('rol') in ('coordinador-local', 'coordinador-departamental') else '',
+            0 if x.get('rol') == 'coordinador-regional' else
+            1 if x.get('rol') == 'subdirector-docencia' else
+            0 if x.get('rol') == 'coordinador-local' else
+            1 if x.get('rol') == 'coordinador-departamental' else 0,
             x.get('apellidos', ''),
             x.get('nombres', '')
         ))
