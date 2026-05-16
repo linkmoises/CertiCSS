@@ -72,6 +72,13 @@ def listar_participantes(codigo_evento):
         {"codigo_evento": codigo_evento}
     ))
 
+    for participante in participantes:
+        if isinstance(participante.get('timestamp'), str):
+            try:
+                participante['timestamp'] = datetime.fromisoformat(participante['timestamp'].replace('Z', '+00:00'))
+            except (ValueError, AttributeError):
+                participante['timestamp'] = datetime.now()
+
     def sort_key(p):
         fecha = p.get("fecha_evento")
         if not fecha:
