@@ -147,12 +147,14 @@ def listar_usuarios(page=1):
             usuarios_region = [u for u in usuarios if u.get('region') == region and u.get('rol') not in ['denadoi', 'coordinador-administrativo', 'simulacion']]
             if usuarios_region:
                 usuarios_region.sort(key=lambda x: (
-                    0 if x.get('rol') == 'coordinador-regional' else 1,
-                    x.get('unidad_ejecutora', '') if x.get('rol') != 'coordinador-regional' else '',
                     0 if x.get('rol') == 'coordinador-regional' else
                     1 if x.get('rol') == 'subdirector-docencia' else
-                    2 if x.get('rol') == 'coordinador-local' else
-                    3 if x.get('rol') == 'coordinador-departamental' else 9,
+                    2 if x.get('rol') in ('coordinador-local', 'coordinador-departamental') else 3,
+                    x.get('unidad_ejecutora', '') if x.get('rol') in ('coordinador-local', 'coordinador-departamental') else '',
+                    0 if x.get('rol') == 'coordinador-regional' else
+                    0 if x.get('rol') == 'subdirector-docencia' else
+                    0 if x.get('rol') == 'coordinador-local' else
+                    1 if x.get('rol') == 'coordinador-departamental' else 0,
                     x.get('apellidos', ''),
                     x.get('nombres', '')
                 ))
@@ -247,12 +249,14 @@ def listar_usuarios_region():
     # Función para ordenar usuarios según los criterios especificados
     def ordenar_usuarios(usuarios):
         usuarios.sort(key=lambda x: (
-            0 if x.get('rol') == 'coordinador-regional' else 1,
-            x.get('unidad_ejecutora', '') if x.get('rol') != 'coordinador-regional' else '',
             0 if x.get('rol') == 'coordinador-regional' else
             1 if x.get('rol') == 'subdirector-docencia' else
-            2 if x.get('rol') == 'coordinador-local' else
-            3 if x.get('rol') == 'coordinador-departamental' else 9,
+            2 if x.get('rol') in ('coordinador-local', 'coordinador-departamental') else 3,
+            x.get('unidad_ejecutora', '') if x.get('rol') in ('coordinador-local', 'coordinador-departamental') else '',
+            0 if x.get('rol') == 'coordinador-regional' else
+            0 if x.get('rol') == 'subdirector-docencia' else
+            0 if x.get('rol') == 'coordinador-local' else
+            1 if x.get('rol') == 'coordinador-departamental' else 0,
             x.get('apellidos', ''),
             x.get('nombres', '')
         ))
