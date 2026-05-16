@@ -7575,7 +7575,7 @@ app.register_blueprint(opciones_bp)
 
 ### Usuarios
 from app.usuarios import usuarios_bp, init_usuarios_module
-init_usuarios_module(collection_usuarios, collection_participantes, collection_eventos, app.config, log_event)
+init_usuarios_module(collection_usuarios, collection_participantes, collection_eventos, collection_unidades, app.config, log_event)
 app.register_blueprint(usuarios_bp)
 
 ### Posters

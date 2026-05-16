@@ -19,14 +19,16 @@ usuarios_bp = Blueprint('usuarios', __name__)
 collection_usuarios = None
 collection_participantes = None
 collection_eventos = None
+collection_unidades = None
 app_config = None
 log_event = None
 
-def init_usuarios_module(usuarios_collection, participantes_collection, eventos_collection, config, log_function):
-    global collection_usuarios, collection_participantes, collection_eventos, app_config, log_event
+def init_usuarios_module(usuarios_collection, participantes_collection, eventos_collection, unidades_collection, config, log_function):
+    global collection_usuarios, collection_participantes, collection_eventos, collection_unidades, app_config, log_event
     collection_usuarios = usuarios_collection
     collection_participantes = participantes_collection
     collection_eventos = eventos_collection
+    collection_unidades = unidades_collection
     app_config = config
     log_event = log_function
 
@@ -143,18 +145,23 @@ def listar_usuarios(page=1):
         # 2. Luego usuarios por provincia/región (excluyendo DENADOI, coordinador-administrativo y simulacion)
         regiones_orden = ['css01', 'css02', 'css03', 'css04', 'css06', 'css07', 'css09', 'css13', 'css082', 'css081', 'css088']
         
+        ue_lookup = {}
+        if collection_unidades is not None:
+            for ue in collection_unidades.find({}, {"nombre": 1, "nivel_asistencial": 1, "nivel_complejidad": 1}):
+                ue_lookup[ue['nombre']] = (ue.get('nivel_asistencial', 0), ue.get('nivel_complejidad', 0))
+        
         for region in regiones_orden:
             usuarios_region = [u for u in usuarios if u.get('region') == region and u.get('rol') not in ['denadoi', 'coordinador-administrativo', 'simulacion']]
             if usuarios_region:
                 usuarios_region.sort(key=lambda x: (
-                    0 if x.get('rol') == 'coordinador-regional' else
-                    1 if x.get('rol') == 'subdirector-docencia' else
-                    2 if x.get('rol') in ('coordinador-local', 'coordinador-departamental') else 3,
-                    x.get('unidad_ejecutora', '') if x.get('rol') in ('coordinador-local', 'coordinador-departamental') else '',
+                    0 if x.get('rol') == 'coordinador-regional' else 1,
+                    -ue_lookup.get(x.get('unidad_ejecutora', ''), (0, 0))[1],
+                    -ue_lookup.get(x.get('unidad_ejecutora', ''), (0, 0))[0],
+                    x.get('unidad_ejecutora', '') if x.get('rol') != 'coordinador-regional' else '',
                     0 if x.get('rol') == 'coordinador-regional' else
                     0 if x.get('rol') == 'subdirector-docencia' else
-                    0 if x.get('rol') == 'coordinador-local' else
-                    1 if x.get('rol') == 'coordinador-departamental' else 0,
+                    1 if x.get('rol') == 'coordinador-local' else
+                    2 if x.get('rol') == 'coordinador-departamental' else 9,
                     x.get('apellidos', ''),
                     x.get('nombres', '')
                 ))
@@ -248,15 +255,20 @@ def listar_usuarios_region():
 
     # Función para ordenar usuarios según los criterios especificados
     def ordenar_usuarios(usuarios):
+        ue_lookup = {}
+        if collection_unidades is not None:
+            for ue in collection_unidades.find({}, {"nombre": 1, "nivel_asistencial": 1, "nivel_complejidad": 1}):
+                ue_lookup[ue['nombre']] = (ue.get('nivel_asistencial', 0), ue.get('nivel_complejidad', 0))
+        
         usuarios.sort(key=lambda x: (
-            0 if x.get('rol') == 'coordinador-regional' else
-            1 if x.get('rol') == 'subdirector-docencia' else
-            2 if x.get('rol') in ('coordinador-local', 'coordinador-departamental') else 3,
-            x.get('unidad_ejecutora', '') if x.get('rol') in ('coordinador-local', 'coordinador-departamental') else '',
+            0 if x.get('rol') == 'coordinador-regional' else 1,
+            -ue_lookup.get(x.get('unidad_ejecutora', ''), (0, 0))[1],
+            -ue_lookup.get(x.get('unidad_ejecutora', ''), (0, 0))[0],
+            x.get('unidad_ejecutora', '') if x.get('rol') != 'coordinador-regional' else '',
             0 if x.get('rol') == 'coordinador-regional' else
             0 if x.get('rol') == 'subdirector-docencia' else
-            0 if x.get('rol') == 'coordinador-local' else
-            1 if x.get('rol') == 'coordinador-departamental' else 0,
+            1 if x.get('rol') == 'coordinador-local' else
+            2 if x.get('rol') == 'coordinador-departamental' else 9,
             x.get('apellidos', ''),
             x.get('nombres', '')
         ))
