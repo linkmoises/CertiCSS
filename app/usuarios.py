@@ -148,7 +148,11 @@ def listar_usuarios(page=1):
         ue_lookup = {}
         if collection_unidades is not None:
             for ue in collection_unidades.find({}, {"nombre": 1, "nivel_asistencial": 1, "nivel_complejidad": 1}):
-                ue_lookup[ue['nombre']] = (ue.get('nivel_asistencial', 0), ue.get('nivel_complejidad', 0))
+                na = ue.get('nivel_asistencial', 0)
+                nc = ue.get('nivel_complejidad', 0)
+                if not isinstance(nc, (int, float)):
+                    nc = 0
+                ue_lookup[ue['nombre']] = (na, nc)
         
         for region in regiones_orden:
             usuarios_region = [u for u in usuarios if u.get('region') == region and u.get('rol') not in ['denadoi', 'coordinador-administrativo', 'simulacion']]
@@ -258,7 +262,11 @@ def listar_usuarios_region():
         ue_lookup = {}
         if collection_unidades is not None:
             for ue in collection_unidades.find({}, {"nombre": 1, "nivel_asistencial": 1, "nivel_complejidad": 1}):
-                ue_lookup[ue['nombre']] = (ue.get('nivel_asistencial', 0), ue.get('nivel_complejidad', 0))
+                na = ue.get('nivel_asistencial', 0)
+                nc = ue.get('nivel_complejidad', 0)
+                if not isinstance(nc, (int, float)):
+                    nc = 0
+                ue_lookup[ue['nombre']] = (na, nc)
         
         usuarios.sort(key=lambda x: (
             0 if x.get('rol') == 'coordinador-regional' else 1,
