@@ -35,7 +35,7 @@
                 {% endif %}
                 {% endwith %}
 
-                <form action="{{ url_for('events.crear_evento') }}" method="post" enctype="multipart/form-data">
+                <form id="eventoForm" action="{{ url_for('events.crear_evento') }}" method="post" enctype="multipart/form-data">
                     <!-- Grid -->
                     <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
 
@@ -279,6 +279,9 @@
                             <input
                                 class="border-gray-200 rounded-lg inline-block text-gray-800 mt-2.5 dark:text-neutral-200"
                                 type="datetime-local" id="fecha_fin" name="fecha_fin" required>
+                            <div id="date-warning" class="text-sm text-red-600 mt-1 hidden">
+                                La fecha de finalización debe ser posterior a la fecha de inicio.
+                            </div>
                         </div>
                         <!-- End Col -->
 
@@ -782,6 +785,30 @@
                 const hours = String(startDate.getHours()).padStart(2, '0');
                 const minutes = String(startDate.getMinutes()).padStart(2, '0');
                 fechaFin.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+            }
+            validarFechas();
+        });
+
+        // Date validation
+        const dateWarning = document.getElementById('date-warning');
+
+        function validarFechas() {
+            if (fechaInicio.value && fechaFin.value) {
+                if (new Date(fechaFin.value) <= new Date(fechaInicio.value)) {
+                    dateWarning.classList.remove('hidden');
+                    return false;
+                }
+            }
+            dateWarning.classList.add('hidden');
+            return true;
+        }
+
+        fechaInicio.addEventListener('change', validarFechas);
+        fechaFin.addEventListener('change', validarFechas);
+
+        document.getElementById('eventoForm').addEventListener('submit', function(e) {
+            if (!validarFechas()) {
+                e.preventDefault();
             }
         });
     });
