@@ -4579,12 +4579,15 @@ def subir_archivo_evento(codigo_evento):
             flash('El título es obligatorio.', 'error')
             return redirect(url_for('subir_archivo_evento', codigo_evento=codigo_evento))
 
-        filename = secure_filename(file.filename)
+        original_filename = secure_filename(file.filename)
+        name, ext = os.path.splitext(original_filename)
+        count = collection_repositorio.count_documents({'codigo_evento': codigo_evento})
+        orden = count + 1
+        filename = f"{codigo_evento}-{orden:02d}{ext}"
+
         carpeta_evento = os.path.join(app.config['UPLOAD_FOLDER'], codigo_evento)
         os.makedirs(carpeta_evento, exist_ok=True)
         file.save(os.path.join(carpeta_evento, filename))
-
-        count = collection_repositorio.count_documents({'codigo_evento': codigo_evento})
 
         collection_repositorio.insert_one({
             'codigo_evento': codigo_evento,
@@ -4592,7 +4595,7 @@ def subir_archivo_evento(codigo_evento):
             'nombre_descarga': filename,
             'titulo': titulo,
             'autor': autor,
-            'orden': count + 1
+            'orden': orden
         })
 
         log_event(f"Usuario [{current_user.email}] subió el archivo {filename} al repositorio del evento {codigo_evento}.")
