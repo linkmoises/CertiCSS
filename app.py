@@ -4478,7 +4478,7 @@ def eliminar_archivo(codigo_evento, nombre):
     
     if not archivo:
         flash('El archivo no existe.', 'danger')
-        return redirect(url_for('subir_archivo', codigo_evento=codigo_evento))
+        return redirect(url_for('subir_archivo_evento', codigo_evento=codigo_evento))
     
     # Verificar que el archivo exista en el sistema de archivos
     carpeta_evento = os.path.join(app.config['UPLOAD_FOLDER'], codigo_evento)
@@ -4499,7 +4499,7 @@ def eliminar_archivo(codigo_evento, nombre):
     except Exception as e:
         flash(f'Error al eliminar el archivo: {str(e)}', 'danger')
     
-    return redirect(url_for('subir_archivo', codigo_evento=codigo_evento))
+    return redirect(url_for('subir_archivo_evento', codigo_evento=codigo_evento))
 
 import hashlib
 import time
@@ -4548,6 +4548,63 @@ def generar_url_descarga(codigo_evento, nombre, tiempo_expiracion_minutos=5):
     signature = generar_firma(codigo_evento, nombre, str(expires))
 
     return url_for('descargar_archivo', codigo_evento=codigo_evento, nombre=nombre, expires=expires, signature=signature, _external=True)
+
+from app.helpers import allowed_file
+
+@app.route('/repositorio/<codigo_evento>/subir', methods=['GET', 'POST'])
+@login_required
+def subir_archivo_evento(codigo_evento):
+    evento = collection_eventos.find_one({'codigo': codigo_evento})
+    if not evento:
+        abort(404)
+
+    if request.method == 'POST':
+        if 'archivo' not in request.files:
+            flash('No se seleccionó ningún archivo.', 'error')
+            return redirect(url_for('subir_archivo_evento', codigo_evento=codigo_evento))
+
+        file = request.files['archivo']
+        if file.filename == '':
+            flash('No se seleccionó ningún archivo.', 'error')
+            return redirect(url_for('subir_archivo_evento', codigo_evento=codigo_evento))
+
+        if not allowed_file(file.filename):
+            flash('Tipo de archivo no permitido.', 'error')
+            return redirect(url_for('subir_archivo_evento', codigo_evento=codigo_evento))
+
+        titulo = request.form.get('titulo', '').strip()
+        autor = request.form.get('autor', '').strip()
+
+        if not titulo:
+            flash('El título es obligatorio.', 'error')
+            return redirect(url_for('subir_archivo_evento', codigo_evento=codigo_evento))
+
+        filename = secure_filename(file.filename)
+        carpeta_evento = os.path.join(app.config['UPLOAD_FOLDER'], codigo_evento)
+        os.makedirs(carpeta_evento, exist_ok=True)
+        file.save(os.path.join(carpeta_evento, filename))
+
+        count = collection_repositorio.count_documents({'codigo_evento': codigo_evento})
+
+        collection_repositorio.insert_one({
+            'codigo_evento': codigo_evento,
+            'nombre': filename,
+            'nombre_descarga': filename,
+            'titulo': titulo,
+            'autor': autor,
+            'orden': count + 1
+        })
+
+        log_event(f"Usuario [{current_user.email}] subió el archivo {filename} al repositorio del evento {codigo_evento}.")
+        flash('Archivo subido exitosamente.', 'success')
+        return redirect(url_for('subir_archivo_evento', codigo_evento=codigo_evento))
+
+    archivos = list(collection_repositorio.find({'codigo_evento': codigo_evento}).sort('orden', 1))
+
+    return render_template('subir_archivo.html',
+                          evento=evento,
+                          archivos=archivos,
+                          generar_url_descarga=generar_url_descarga)
 
 ###
 ### Repositorio

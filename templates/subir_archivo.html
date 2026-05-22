@@ -80,7 +80,7 @@
                                             <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ generar_url_descarga(evento['codigo'], archivo['nombre']) }}">
                                                 Descargar
                                             </a><br />
-                                            <form style="display:inline;" method="POST" action="{{ url_for('nube.eliminar_archivo', codigo_evento=evento['codigo'], nombre=archivo['nombre']) }}">
+                                            <form style="display:inline;" method="POST" action="{{ url_for('eliminar_archivo', codigo_evento=evento['codigo'], nombre=archivo['nombre']) }}">
                                                 <button class="text-sm text-red-600 decoration-2 hover:underline" type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este archivo?');">
                                                     Eliminar
                                                 </button>
