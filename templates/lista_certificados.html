@@ -207,7 +207,7 @@
                                             </thead>
                                             <tbody>
                                                 {% if p.sumas_por_rol %}
-                                                {% for tipo, horas in p.sumas_por_rol.items() | dictsort %}
+                                                {% for tipo, horas in p.sumas_por_rol | dictsort %}
                                                 <tr class="border-b border-gray-50 dark:border-neutral-800">
                                                     <td class="py-1.5 pr-4 text-gray-800 dark:text-neutral-200">{{ tipo }}</td>
                                                     <td class="py-1.5 pl-4 text-right text-gray-800 dark:text-neutral-200 font-mono">{{ "%.1f"|format(horas) }}</td>
