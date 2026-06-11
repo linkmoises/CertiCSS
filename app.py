@@ -3206,6 +3206,7 @@ def buscar_certificados():
                     'fecha_inicio': evento.get('fecha_inicio', None),
                     'modalidad_evento': evento.get('modalidad', 'No disponible'),
                     'tipo_evento': evento.get('tipo', 'General'),  # Agregar tipo de evento
+                    'carga_horaria': evento.get('carga_horaria', '0'),
                     'tiene_archivos': tiene_archivos,
                     'hora_inicio': evento.get('hora_inicio', 8),
                     'hora_fin': evento.get('hora_fin', 15),
@@ -3233,6 +3234,7 @@ def buscar_certificados():
                     'fecha_inicio': None,
                     'modalidad_evento': 'No disponible',
                     'tipo_evento': 'General',  # Agregar tipo de evento por defecto
+                    'carga_horaria': '0',
                     'tiene_archivos': False,
                     'hora_inicio': 8,
                     'hora_fin': 15,
@@ -3273,13 +3275,66 @@ def buscar_certificados():
 
         resultados.sort(key=obtener_fecha_ordenable, reverse=True)
 
+        # Calcular sumatoria de horas por rol en períodos académicos (sep - ago)
+        if fecha_actual.month >= 9:
+            inicio_actual = datetime(fecha_actual.year, 9, 1).date()
+            fin_actual = datetime(fecha_actual.year + 1, 8, 31).date()
+        else:
+            inicio_actual = datetime(fecha_actual.year - 1, 9, 1).date()
+            fin_actual = datetime(fecha_actual.year, 8, 31).date()
+
+        inicio_anterior = datetime(inicio_actual.year - 1, 9, 1).date()
+        fin_anterior = datetime(inicio_actual.year, 8, 31).date()
+
+        def _calcular_sumas(resultados, inicio, fin):
+            sumas = {}
+            for r in resultados:
+                fecha = r.get('fecha_evento')
+                if isinstance(fecha, datetime):
+                    fecha = fecha.date()
+                if fecha and inicio <= fecha <= fin:
+                    rol = r['rol']
+                    try:
+                        carga = float(r.get('carga_horaria', 0))
+                    except (ValueError, TypeError):
+                        carga = 0
+                    if r.get('tipo_evento') == 'Sesión Docente':
+                        equivalencia = carga * 0.5
+                    else:
+                        equivalencia = carga
+                    sumas[rol] = sumas.get(rol, 0) + equivalencia
+            return sumas
+
+        sumas_actual = _calcular_sumas(resultados, inicio_actual, fin_actual)
+        sumas_anterior = _calcular_sumas(resultados, inicio_anterior, fin_anterior)
+
+        periodos = [
+            {
+                'id': 'actual',
+                'label': f'1 sep {inicio_actual.year} - 31 ago {fin_actual.year}',
+                'sumas_por_rol': sumas_actual,
+                'total': sum(sumas_actual.values()),
+                'inicio': inicio_actual,
+                'fin': fin_actual,
+            },
+            {
+                'id': 'anterior',
+                'label': f'1 sep {inicio_anterior.year} - 31 ago {fin_anterior.year}',
+                'sumas_por_rol': sumas_anterior,
+                'total': sum(sumas_anterior.values()),
+                'inicio': inicio_anterior,
+                'fin': fin_anterior,
+            },
+        ]
+
         return render_template(
             'lista_certificados.html',
             cedula=cedula,
             resultados=resultados,
             fecha_actual=fecha_actual,
             hora_actual=hora_actual,
-            token=token
+            token=token,
+            periodos=periodos,
         )
 
     return render_template('buscar.html')
