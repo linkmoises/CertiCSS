@@ -178,6 +178,77 @@
                                 </div>
                             </div>
 
+                            {% if periodos %}
+                            <!-- Sumatoria de horas -->
+                            <div class="px-6 py-4 border-b border-gray-200 dark:border-neutral-700">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <svg class="w-5 h-5 text-blue-600 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                    </svg>
+                                    <h3 class="text-sm font-semibold text-gray-800 dark:text-neutral-200">
+                                        Horas acumuladas
+                                    </h3>
+                                    <select id="periodSelector" onchange="togglePeriodo()"
+                                        class="ml-auto w-56 py-1 px-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white">
+                                        {% for p in periodos %}
+                                        <option value="{{ p.id }}">{{ p.label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                {% set labels = {
+                                    'participante': 'Participante',
+                                    'ponente': 'Ponente',
+                                    'organizador': 'Organizador',
+                                    'coorganizador': 'Coorganizador',
+                                    'jurado_poster': 'Jurado Poster',
+                                    'presentador_poster': 'Presentador Poster'
+                                } %}
+                                {% for p in periodos %}
+                                <div id="periodo-{{ p.id }}" class="periodo-content {% if not loop.first %}hidden{% endif %}">
+                                    <div class="overflow-hidden">
+                                        <table class="min-w-full text-sm">
+                                            <thead>
+                                                <tr class="border-b border-gray-100 dark:border-neutral-700">
+                                                    <th class="py-1.5 pr-4 text-left font-medium text-gray-600 dark:text-neutral-400 text-xs uppercase">Rol</th>
+                                                    <th class="py-1.5 pl-4 text-right font-medium text-gray-600 dark:text-neutral-400 text-xs uppercase">Horas</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% if p.sumas_por_rol %}
+                                                {% for rol, horas in p.sumas_por_rol.items() %}
+                                                <tr class="border-b border-gray-50 dark:border-neutral-800">
+                                                    <td class="py-1.5 pr-4 text-gray-800 dark:text-neutral-200">{{ labels.get(rol, rol) }}</td>
+                                                    <td class="py-1.5 pl-4 text-right text-gray-800 dark:text-neutral-200 font-mono">{{ "%.1f"|format(horas) }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                                {% else %}
+                                                <tr>
+                                                    <td colspan="2" class="py-3 text-center text-sm text-gray-500 dark:text-neutral-400">Sin eventos en este período</td>
+                                                </tr>
+                                                {% endif %}
+                                            </tbody>
+                                            <tfoot>
+                                                <tr class="font-semibold">
+                                                    <td class="py-1.5 pr-4 text-gray-900 dark:text-neutral-100">Total</td>
+                                                    <td class="py-1.5 pl-4 text-right text-gray-900 dark:text-neutral-100 font-mono">{{ "%.1f"|format(p.total) }}</td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <script>
+                            function togglePeriodo() {
+                                var selected = document.getElementById('periodSelector').value;
+                                document.querySelectorAll('.periodo-content').forEach(function(el) {
+                                    el.classList.add('hidden');
+                                });
+                                document.getElementById('periodo-' + selected).classList.remove('hidden');
+                            }
+                            </script>
+                            {% endif %}
+
                             <!-- Macro para renderizar tabla -->
                             {% macro render_event_table(eventos, category_id) %}
                             <div id="{{ category_id }}" class="category-content hidden">
@@ -433,77 +504,6 @@
                             
                             {% if eventos_abiertos %}
                                 {{ render_event_table(eventos_abiertos, 'abiertos') }}
-                            {% endif %}
-
-                            {% if periodos %}
-                            <!-- Sumatoria de horas -->
-                            <div class="px-6 py-4 border-b border-gray-200 dark:border-neutral-700">
-                                <div class="flex items-center gap-2 mb-3">
-                                    <svg class="w-5 h-5 text-blue-600 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                    </svg>
-                                    <h3 class="text-sm font-semibold text-gray-800 dark:text-neutral-200">
-                                        Horas acumuladas
-                                    </h3>
-                                    <select id="periodSelector" onchange="togglePeriodo()"
-                                        class="ml-auto w-56 py-1 px-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white">
-                                        {% for p in periodos %}
-                                        <option value="{{ p.id }}">{{ p.label }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                {% set labels = {
-                                    'participante': 'Participante',
-                                    'ponente': 'Ponente',
-                                    'organizador': 'Organizador',
-                                    'coorganizador': 'Coorganizador',
-                                    'jurado_poster': 'Jurado Poster',
-                                    'presentador_poster': 'Presentador Poster'
-                                } %}
-                                {% for p in periodos %}
-                                <div id="periodo-{{ p.id }}" class="periodo-content {% if not loop.first %}hidden{% endif %}">
-                                    <div class="overflow-hidden">
-                                        <table class="min-w-full text-sm">
-                                            <thead>
-                                                <tr class="border-b border-gray-100 dark:border-neutral-700">
-                                                    <th class="py-1.5 pr-4 text-left font-medium text-gray-600 dark:text-neutral-400 text-xs uppercase">Rol</th>
-                                                    <th class="py-1.5 pl-4 text-right font-medium text-gray-600 dark:text-neutral-400 text-xs uppercase">Horas</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {% if p.sumas_por_rol %}
-                                                {% for rol, horas in p.sumas_por_rol.items() %}
-                                                <tr class="border-b border-gray-50 dark:border-neutral-800">
-                                                    <td class="py-1.5 pr-4 text-gray-800 dark:text-neutral-200">{{ labels.get(rol, rol) }}</td>
-                                                    <td class="py-1.5 pl-4 text-right text-gray-800 dark:text-neutral-200 font-mono">{{ "%.1f"|format(horas) }}</td>
-                                                </tr>
-                                                {% endfor %}
-                                                {% else %}
-                                                <tr>
-                                                    <td colspan="2" class="py-3 text-center text-sm text-gray-500 dark:text-neutral-400">Sin eventos en este período</td>
-                                                </tr>
-                                                {% endif %}
-                                            </tbody>
-                                            <tfoot>
-                                                <tr class="font-semibold">
-                                                    <td class="py-1.5 pr-4 text-gray-900 dark:text-neutral-100">Total</td>
-                                                    <td class="py-1.5 pl-4 text-right text-gray-900 dark:text-neutral-100 font-mono">{{ "%.1f"|format(p.total) }}</td>
-                                                </tr>
-                                            </tfoot>
-                                        </table>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
-                            <script>
-                            function togglePeriodo() {
-                                var selected = document.getElementById('periodSelector').value;
-                                document.querySelectorAll('.periodo-content').forEach(function(el) {
-                                    el.classList.add('hidden');
-                                });
-                                document.getElementById('periodo-' + selected).classList.remove('hidden');
-                            }
-                            </script>
                             {% endif %}
 
                             <!-- Footer -->
