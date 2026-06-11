@@ -3287,19 +3287,24 @@ def buscar_certificados():
         fin_anterior = datetime(inicio_actual.year, 8, 31).date()
 
         def _calcular_sumas(resultados, inicio, fin):
+            eventos_vistos = set()
             sumas = {}
             for r in resultados:
                 fecha = r.get('fecha_evento')
                 if isinstance(fecha, datetime):
                     fecha = fecha.date()
-                if fecha and inicio <= fecha <= fin:
-                    rol = r['rol']
-                    try:
-                        carga = float(r.get('carga_horaria', 0))
-                    except (ValueError, TypeError):
-                        carga = 0
-                    equivalencia = carga
-                    sumas[rol] = sumas.get(rol, 0) + equivalencia
+                if not (fecha and inicio <= fecha <= fin):
+                    continue
+                codigo = r.get('codigo_evento')
+                if codigo in eventos_vistos:
+                    continue
+                eventos_vistos.add(codigo)
+                tipo = r.get('tipo_evento', 'General')
+                try:
+                    carga = float(r.get('carga_horaria', 0))
+                except (ValueError, TypeError):
+                    carga = 0
+                sumas[tipo] = sumas.get(tipo, 0) + carga
             return sumas
 
         sumas_actual = _calcular_sumas(resultados, inicio_actual, fin_actual)

@@ -186,7 +186,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                     </svg>
                                     <h3 class="text-sm font-semibold text-gray-800 dark:text-neutral-200">
-                                        Horas acumuladas
+                                        Horas docentes acumuladas
                                     </h3>
                                     <select id="periodSelector" onchange="togglePeriodo()"
                                         class="ml-auto w-56 py-1 px-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white">
@@ -195,29 +195,21 @@
                                         {% endfor %}
                                     </select>
                                 </div>
-                                {% set labels = {
-                                    'participante': 'Participante',
-                                    'ponente': 'Ponente',
-                                    'organizador': 'Organizador',
-                                    'coorganizador': 'Coorganizador',
-                                    'jurado_poster': 'Jurado Poster',
-                                    'presentador_poster': 'Presentador Poster'
-                                } %}
                                 {% for p in periodos %}
                                 <div id="periodo-{{ p.id }}" class="periodo-content {% if not loop.first %}hidden{% endif %}">
                                     <div class="overflow-hidden">
                                         <table class="min-w-full text-sm">
                                             <thead>
                                                 <tr class="border-b border-gray-100 dark:border-neutral-700">
-                                                    <th class="py-1.5 pr-4 text-left font-medium text-gray-600 dark:text-neutral-400 text-xs uppercase">Rol</th>
+                                                    <th class="py-1.5 pr-4 text-left font-medium text-gray-600 dark:text-neutral-400 text-xs uppercase">Tipo de evento</th>
                                                     <th class="py-1.5 pl-4 text-right font-medium text-gray-600 dark:text-neutral-400 text-xs uppercase">Horas</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {% if p.sumas_por_rol %}
-                                                {% for rol, horas in p.sumas_por_rol.items() %}
+                                                {% for tipo, horas in p.sumas_por_rol.items() | dictsort %}
                                                 <tr class="border-b border-gray-50 dark:border-neutral-800">
-                                                    <td class="py-1.5 pr-4 text-gray-800 dark:text-neutral-200">{{ labels.get(rol, rol) }}</td>
+                                                    <td class="py-1.5 pr-4 text-gray-800 dark:text-neutral-200">{{ tipo }}</td>
                                                     <td class="py-1.5 pl-4 text-right text-gray-800 dark:text-neutral-200 font-mono">{{ "%.1f"|format(horas) }}</td>
                                                 </tr>
                                                 {% endfor %}
