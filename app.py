@@ -3298,10 +3298,7 @@ def buscar_certificados():
                         carga = float(r.get('carga_horaria', 0))
                     except (ValueError, TypeError):
                         carga = 0
-                    if r.get('tipo_evento') == 'Sesión Docente':
-                        equivalencia = carga * 0.5
-                    else:
-                        equivalencia = carga
+                    equivalencia = carga
                     sumas[rol] = sumas.get(rol, 0) + equivalencia
             return sumas
 
