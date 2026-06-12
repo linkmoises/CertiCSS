@@ -90,7 +90,7 @@
                                 {% for evento in eventos %}
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-4 py-2 text-sm text-gray-800 whitespace-nowrap">
-                                        <a href="{{ url_for('asistencia.db_individual', codigo_evento=evento.get('codigo', '')) }}" 
+                                        <a href="{{ url_for('db_individual', codigo_evento=evento.get('codigo', '')) }}" 
                                            class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline">
                                             BD: {{ evento.get('nombre', '') }}
                                         </a>
