@@ -261,14 +261,20 @@
                         <!-- End Col -->
 
                         <div class="sm:col-span-9">
-                            <input
-                                class="border-gray-200 rounded-lg inline-block text-gray-800 mt-2.5 dark:text-neutral-200"
-                                type="datetime-local" id="fecha_inicio" name="fecha_inicio" required>
+                            <div class="flex gap-2 items-center mt-2.5">
+                                <input type="date" id="fecha_inicio_date"
+                                    class="py-2 px-3 border-gray-200 rounded-lg text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400"
+                                    required>
+                                <input type="time" id="fecha_inicio_time"
+                                    class="py-2 px-3 border-gray-200 rounded-lg text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400"
+                                    required>
+                            </div>
+                            <input type="hidden" id="fecha_inicio" name="fecha_inicio">
                         </div>
                         <!-- End Col -->
 
                         <div class="sm:col-span-3">
-                            <label for="fecha_fin"
+                            <label for="fecha_fin_date"
                                 class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                 Fecha de finalización
                             </label>
@@ -276,9 +282,15 @@
                         <!-- End Col -->
 
                         <div class="sm:col-span-9">
-                            <input
-                                class="border-gray-200 rounded-lg inline-block text-gray-800 mt-2.5 dark:text-neutral-200"
-                                type="datetime-local" id="fecha_fin" name="fecha_fin" required>
+                            <div class="flex gap-2 items-center mt-2.5">
+                                <input type="date" id="fecha_fin_date"
+                                    class="py-2 px-3 border-gray-200 rounded-lg text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400"
+                                    required>
+                                <input type="time" id="fecha_fin_time"
+                                    class="py-2 px-3 border-gray-200 rounded-lg text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400"
+                                    required>
+                            </div>
+                            <input type="hidden" id="fecha_fin" name="fecha_fin">
                             <div id="date-warning" class="text-sm text-red-600 mt-1 hidden">
                                 La fecha de finalización debe ser posterior a la fecha de inicio.
                             </div>
@@ -771,40 +783,48 @@
             actualizarUnidades();
         }
 
-        // Auto-fill end date +1 hour when start date changes
-        const fechaInicio = document.getElementById("fecha_inicio");
-        const fechaFin = document.getElementById("fecha_fin");
-
-        fechaInicio.addEventListener("change", function() {
-            if (fechaInicio.value) {
-                const startDate = new Date(fechaInicio.value);
-                startDate.setHours(startDate.getHours() + 1);
-                const year = startDate.getFullYear();
-                const month = String(startDate.getMonth() + 1).padStart(2, '0');
-                const day = String(startDate.getDate()).padStart(2, '0');
-                const hours = String(startDate.getHours()).padStart(2, '0');
-                const minutes = String(startDate.getMinutes()).padStart(2, '0');
-                fechaFin.value = `${year}-${month}-${day}T${hours}:${minutes}`;
-            }
-            validarFechas();
-        });
-
-        // Date validation
+        // Lógica de campos de fecha separados (date + time)
+        const fechaInicioDate = document.getElementById("fecha_inicio_date");
+        const fechaInicioTime = document.getElementById("fecha_inicio_time");
+        const fechaFinDate = document.getElementById("fecha_fin_date");
+        const fechaFinTime = document.getElementById("fecha_fin_time");
+        const fechaInicioHidden = document.getElementById("fecha_inicio");
+        const fechaFinHidden = document.getElementById("fecha_fin");
         const dateWarning = document.getElementById('date-warning');
 
+        function combinarFechaHora(date, time) {
+            if (date && time) return `${date}T${time}`;
+            return '';
+        }
+
         function validarFechas() {
-            if (fechaInicio.value && fechaFin.value) {
-                if (new Date(fechaFin.value) <= new Date(fechaInicio.value)) {
-                    dateWarning.classList.remove('hidden');
-                    return false;
-                }
+            const inicio = combinarFechaHora(fechaInicioDate.value, fechaInicioTime.value);
+            const fin = combinarFechaHora(fechaFinDate.value, fechaFinTime.value);
+            fechaInicioHidden.value = inicio;
+            fechaFinHidden.value = fin;
+            if (inicio && fin && new Date(fin) <= new Date(inicio)) {
+                dateWarning.classList.remove('hidden');
+                return false;
             }
             dateWarning.classList.add('hidden');
             return true;
         }
 
-        fechaInicio.addEventListener('change', validarFechas);
-        fechaFin.addEventListener('change', validarFechas);
+        // Auto-fill fecha fin +1 hora al cambiar fecha inicio
+        function autoFillFechaFin() {
+            if (fechaInicioDate.value && fechaInicioTime.value) {
+                const start = new Date(`${fechaInicioDate.value}T${fechaInicioTime.value}`);
+                start.setHours(start.getHours() + 1);
+                fechaFinDate.value = start.toISOString().slice(0, 10);
+                fechaFinTime.value = String(start.getHours()).padStart(2, '0') + ':' + String(start.getMinutes()).padStart(2, '0');
+            }
+            validarFechas();
+        }
+
+        fechaInicioDate.addEventListener('change', autoFillFechaFin);
+        fechaInicioTime.addEventListener('change', autoFillFechaFin);
+        fechaFinDate.addEventListener('change', validarFechas);
+        fechaFinTime.addEventListener('change', validarFechas);
 
         document.getElementById('eventoForm').addEventListener('submit', function(e) {
             if (!validarFechas()) {

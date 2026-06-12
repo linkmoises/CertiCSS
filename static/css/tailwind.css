@@ -1930,6 +1930,10 @@ select {
   height: 0.625rem !important;
 }
 
+.h-10 {
+  height: 2.5rem;
+}
+
 .h-12 {
   height: 3rem;
 }
@@ -2000,10 +2004,6 @@ select {
 
 .h-px {
   height: 1px;
-}
-
-.h-10 {
-  height: 2.5rem;
 }
 
 .max-h-full {
