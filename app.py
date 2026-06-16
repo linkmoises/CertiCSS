@@ -7043,18 +7043,94 @@ def generar_pdf_participante(participante, afiche_path):
         # Asegurar un espaciado mínimo consistente
         min_next_y = poster_y - 0.9 * inch  # Espaciado mínimo para títulos cortos
         next_y = min(final_y - 0.3 * inch, min_next_y)
+    elif participante['rol'] == 'participante':
+        # --- Prorating logic for participants only ---
+        todos_registros = list(collection_participantes.find({
+            "cedula": participante['cedula'],
+            "codigo_evento": codigo_evento,
+            "rol": "participante"
+        }))
+
+        registros_validos = []
+        for registro in todos_registros:
+            if registro.get('indice_registro'):
+                try:
+                    fecha_registro = datetime.strptime(registro['indice_registro'], '%Y%m%d').date()
+                    if fecha_inicio_evento.date() <= fecha_registro <= fecha_fin_evento.date():
+                        registros_validos.append(registro)
+                except (ValueError, TypeError):
+                    continue
+
+        duracion_evento_dias = (fecha_fin_evento.date() - fecha_inicio_evento.date()).days + 1
+        texto_horas = "hora" if str(carga_horaria_evento) == "1" else "horas"
+        tipo_actividad = "Actividad académica virtual" if evento.get('registro_abierto') is True else "Actividad académica"
+
+        if duracion_evento_dias == 1 or len(registros_validos) == 0:
+            actividad_y = draw_centered_text(base_y, f"{tipo_actividad} con una duración de {carga_horaria_evento} {texto_horas}")
+            if evento.get('registro_abierto') is not True:
+                fecha_y = draw_centered_text(actividad_y - 0.3 * inch, f"Asistencia: {fecha_fin_formateada}")
+            else:
+                fecha_y = actividad_y
+            next_y = fecha_y - 0.3 * inch
+        elif len(registros_validos) == 1:
+            fecha_asistencia = datetime.strptime(registros_validos[0]['indice_registro'], '%Y%m%d')
+            horas_totales = int(carga_horaria_evento)
+            horas_por_dia = horas_totales / duracion_evento_dias
+            horas_asistencia = round(horas_por_dia)
+            horas_texto = "hora" if horas_asistencia == 1 else "horas"
+
+            fecha_asistencia_formateada = fecha_asistencia.strftime('%d de %B de %Y')
+            actividad_y = draw_centered_text(base_y, f"{tipo_actividad} con una duración de {horas_asistencia} {horas_texto}")
+            fecha_y = draw_centered_text(actividad_y - 0.3 * inch, f"Asistencia: {fecha_asistencia_formateada}")
+            next_y = fecha_y - 0.3 * inch
+        else:
+            fechas_asistencia = []
+            for registro in registros_validos:
+                if registro.get('indice_registro'):
+                    fecha = datetime.strptime(registro['indice_registro'], '%Y%m%d')
+                    fechas_asistencia.append(fecha)
+
+            fechas_asistencia.sort()
+
+            horas_totales = int(carga_horaria_evento)
+            horas_por_dia = horas_totales / duracion_evento_dias
+            horas_asistencia = round(horas_por_dia * len(registros_validos))
+            horas_texto = "hora" if horas_asistencia == 1 else "horas"
+
+            if len(registros_validos) == duracion_evento_dias:
+                actividad_y = draw_centered_text(base_y, f"{tipo_actividad} con una duración de {carga_horaria_evento} {texto_horas}")
+                if evento.get('registro_abierto') is not True:
+                    fecha_y = draw_centered_text(actividad_y - 0.3 * inch, f"Asistencia: {fecha_fin_formateada}")
+                else:
+                    fecha_y = actividad_y
+            else:
+                actividad_y = draw_centered_text(base_y, f"{tipo_actividad} con una duración de {horas_asistencia} {horas_texto}")
+
+                if fechas_asistencia:
+                    primer_mes = fechas_asistencia[0].month
+                    mismo_mes = all(f.month == primer_mes for f in fechas_asistencia)
+                    if mismo_mes:
+                        dias_str = ', '.join(f.strftime('%d') for f in fechas_asistencia[:-1])
+                        fecha_texto = f"Asistencia: {dias_str} y {fechas_asistencia[-1].strftime('%d')} de {fechas_asistencia[0].strftime('%B de %Y')}"
+                    else:
+                        fechas_str = ', '.join(f.strftime('%d de %B') for f in fechas_asistencia[:-1])
+                        fecha_texto = f"Asistencia: {fechas_str} y {fechas_asistencia[-1].strftime('%d de %B de %Y')}"
+                else:
+                    fecha_texto = f"Asistencia: {fecha_fin_formateada}"
+
+                fecha_y = draw_centered_text(actividad_y - 0.3 * inch, fecha_texto, max_width=9.5 * inch)
+
+            next_y = fecha_y - 0.3 * inch
     else:
         texto_horas = "hora" if str(carga_horaria_evento) == "1" else "horas"
         tipo_actividad = "Actividad académica virtual" if evento.get('registro_abierto') is True else "Actividad académica"
         actividad_y = draw_centered_text(base_y, f"{tipo_actividad} con una duración de {carga_horaria_evento} {texto_horas}")
-        
-        # Show the pre-formatted date range
+
         if evento.get('registro_abierto') is True:
-            # No mostrar nada si registro_abierto es True
             fecha_y = actividad_y
         else:
             fecha_y = draw_centered_text(actividad_y - 0.3 * inch, fecha_fin_formateada)
-        
+
         next_y = fecha_y - 0.3 * inch
 
     # Format just the end date for the 'Dado en...' line
