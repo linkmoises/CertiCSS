@@ -630,6 +630,7 @@ def listar_eventos_digitales(page=1):
     from app.events.services import (
         get_collection_eventos, 
         get_collection_participantes,
+        get_collection_usuarios,
         get_collection_eva,
         paginate_events
     )
@@ -658,6 +659,7 @@ def listar_eventos_digitales(page=1):
     )
     
     collection_participantes = get_collection_participantes()
+    collection_usuarios = get_collection_usuarios()
     collection_eva = get_collection_eva()
     
     for evento in eventos:
@@ -685,6 +687,12 @@ def listar_eventos_digitales(page=1):
         })
         
         evento["tiene_lms"] = evento["total_contenidos"] > 0
+        
+        if evento.get("autor"):
+            evento["autor_info"] = collection_usuarios.find_one(
+                {"_id": ObjectId(evento["autor"])},
+                {"nombres": 1, "apellidos": 1, "foto": 1}
+            )
     
     return render_template('docencia_digital.html',
         eventos=eventos,
