@@ -635,11 +635,18 @@ def listar_eventos_digitales(page=1):
     )
     
     eventos_por_pagina = 20
-    filtro = {
-        "autor": current_user.id,
-        "modalidad": {"$ne": "Presencial"},
-        'registro_abierto': {'$ne': True}
-    }
+
+    if current_user.rol == "denadoi":
+        filtro = {
+            "modalidad": {"$ne": "Presencial"},
+            'registro_abierto': {'$ne': True}
+        }
+    else:
+        filtro = {
+            "autor": current_user.id,
+            "modalidad": {"$ne": "Presencial"},
+            'registro_abierto': {'$ne': True}
+        }
     
     eventos, total_eventos, total_paginas = paginate_events(
         get_collection_eventos(),
