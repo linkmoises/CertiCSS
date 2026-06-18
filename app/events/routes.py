@@ -630,6 +630,7 @@ def listar_eventos_digitales(page=1):
     from app.events.services import (
         get_collection_eventos, 
         get_collection_participantes,
+        get_collection_eva,
         paginate_events
     )
     
@@ -650,14 +651,33 @@ def listar_eventos_digitales(page=1):
     )
     
     collection_participantes = get_collection_participantes()
+    collection_eva = get_collection_eva()
     
     for evento in eventos:
+        codigo_evento = evento["codigo"]
+        
         es_organizador = collection_participantes.find_one({
-            "codigo_evento": evento["codigo"],
+            "codigo_evento": codigo_evento,
             "cedula": str(current_user.cedula),
             "rol": "coorganizador"
         }) is not None 
         evento["es_organizador"] = es_organizador
+        
+        evento["total_participantes"] = collection_participantes.count_documents({
+            "codigo_evento": codigo_evento,
+            "rol": "participante"
+        })
+        
+        evento["total_contenidos"] = collection_eva.count_documents({
+            "codigo_evento": codigo_evento
+        })
+        
+        evento["total_examenes"] = collection_eva.count_documents({
+            "codigo_evento": codigo_evento,
+            "tipo": "examen"
+        })
+        
+        evento["tiene_lms"] = evento["total_contenidos"] > 0
     
     return render_template('docencia_digital.html',
         eventos=eventos,
@@ -719,6 +739,7 @@ def listar_eventos_abiertos(page=1):
         get_collection_eventos, 
         get_collection_participantes,
         get_collection_usuarios,
+        get_collection_eva,
         paginate_events
     )
     
@@ -739,10 +760,13 @@ def listar_eventos_abiertos(page=1):
     
     collection_participantes = get_collection_participantes()
     collection_usuarios = get_collection_usuarios()
+    collection_eva = get_collection_eva()
     
     for evento in eventos:
+        codigo_evento = evento["codigo"]
+        
         es_organizador = collection_participantes.find_one({
-            "codigo_evento": evento["codigo"],
+            "codigo_evento": codigo_evento,
             "cedula": str(current_user.cedula),
             "rol": "coorganizador"
         }) is not None 
@@ -753,6 +777,22 @@ def listar_eventos_abiertos(page=1):
                 {"_id": ObjectId(evento["autor"])},
                 {"nombres": 1, "apellidos": 1, "foto": 1}
             )
+        
+        evento["total_participantes"] = collection_participantes.count_documents({
+            "codigo_evento": codigo_evento,
+            "rol": "participante"
+        })
+        
+        evento["total_contenidos"] = collection_eva.count_documents({
+            "codigo_evento": codigo_evento
+        })
+        
+        evento["total_examenes"] = collection_eva.count_documents({
+            "codigo_evento": codigo_evento,
+            "tipo": "examen"
+        })
+        
+        evento["tiene_lms"] = evento["total_contenidos"] > 0
     
     return render_template('docencia_abiertas.html',
         eventos=eventos,

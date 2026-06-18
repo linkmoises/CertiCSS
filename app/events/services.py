@@ -7,14 +7,16 @@ _collection_eventos = None
 _collection_participantes = None
 _collection_usuarios = None
 _collection_preregistro = None
+_collection_eva = None
 
 
-def init_events_services(collection_eventos, collection_participantes, collection_usuarios, collection_preregistro):
-    global _collection_eventos, _collection_participantes, _collection_usuarios, _collection_preregistro
+def init_events_services(collection_eventos, collection_participantes, collection_usuarios, collection_preregistro, collection_eva=None):
+    global _collection_eventos, _collection_participantes, _collection_usuarios, _collection_preregistro, _collection_eva
     _collection_eventos = collection_eventos
     _collection_participantes = collection_participantes
     _collection_usuarios = collection_usuarios
     _collection_preregistro = collection_preregistro
+    _collection_eva = collection_eva
 
 
 def get_collection_eventos():
@@ -31,6 +33,10 @@ def get_collection_usuarios():
 
 def get_collection_preregistro():
     return _collection_preregistro
+
+
+def get_collection_eva():
+    return _collection_eva
 
 
 def parse_event_date(date_value):

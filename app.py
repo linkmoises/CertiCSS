@@ -101,7 +101,7 @@ app.register_blueprint(auth_routes_bp)
 ### Events module initialization
 ###
 from app.events import events_bp, init_events_services
-init_events_services(collection_eventos, collection_participantes, collection_usuarios, collection_preregistro)
+init_events_services(collection_eventos, collection_participantes, collection_usuarios, collection_preregistro, collection_eva)
 app.register_blueprint(events_bp)
 
 ###
@@ -3192,6 +3192,31 @@ def buscar_certificados():
                     # Generate survey URL with cedula as query parameter
                     survey_url = url_for('encuesta_satisfaccion', codigo_evento=codigo_evento) + f'?cedula={cedula}'
 
+                # Prorrateo para participantes en eventos multi-día
+                carga_prorrateada = None
+                if participante.get('rol') == 'participante':
+                    fi_evento = evento.get('fecha_inicio')
+                    ff_evento = evento.get('fecha_fin')
+                    if fi_evento and ff_evento:
+                        if isinstance(fi_evento, str):
+                            fi_evento = datetime.strptime(fi_evento, '%Y-%m-%d %H:%M:%S')
+                        if isinstance(ff_evento, str):
+                            ff_evento = datetime.strptime(ff_evento, '%Y-%m-%d %H:%M:%S')
+                        duracion_dias = (ff_evento.date() - fi_evento.date()).days + 1
+                        if duracion_dias > 1:
+                            count = collection_participantes.count_documents({
+                                "cedula": participante['cedula'],
+                                "codigo_evento": codigo_evento,
+                                "rol": "participante",
+                                "indice_registro": {
+                                    "$gte": fi_evento.strftime('%Y%m%d'),
+                                    "$lte": ff_evento.strftime('%Y%m%d')
+                                }
+                            })
+                            if 0 < count < duracion_dias:
+                                carga_total = float(evento.get('carga_horaria', 0))
+                                carga_prorrateada = round((carga_total / duracion_dias) * count)
+
                 resultado = {
                     'nombres': participante['nombres'],
                     'apellidos': participante['apellidos'],
@@ -3207,6 +3232,7 @@ def buscar_certificados():
                     'modalidad_evento': evento.get('modalidad', 'No disponible'),
                     'tipo_evento': evento.get('tipo', 'General'),  # Agregar tipo de evento
                     'carga_horaria': evento.get('carga_horaria', '0'),
+                    'carga_prorrateada': carga_prorrateada,
                     'tiene_archivos': tiene_archivos,
                     'hora_inicio': evento.get('hora_inicio', 8),
                     'hora_fin': evento.get('hora_fin', 15),
@@ -3235,6 +3261,7 @@ def buscar_certificados():
                     'modalidad_evento': 'No disponible',
                     'tipo_evento': 'General',  # Agregar tipo de evento por defecto
                     'carga_horaria': '0',
+                    'carga_prorrateada': None,
                     'tiene_archivos': False,
                     'hora_inicio': 8,
                     'hora_fin': 15,
@@ -3301,7 +3328,11 @@ def buscar_certificados():
                 eventos_vistos.add(codigo)
                 tipo = r.get('tipo_evento', 'General')
                 try:
-                    carga = float(r.get('carga_horaria', 0))
+                    carga_prorrateada = r.get('carga_prorrateada')
+                    if carga_prorrateada is not None:
+                        carga = float(carga_prorrateada)
+                    else:
+                        carga = float(r.get('carga_horaria', 0))
                 except (ValueError, TypeError):
                     carga = 0
                 sumas[tipo] = sumas.get(tipo, 0) + carga
