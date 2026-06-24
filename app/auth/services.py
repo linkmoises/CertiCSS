@@ -177,6 +177,8 @@ def create_user_session(email: str) -> Optional[dict]:
         {"email": email},
         {"$set": {"failed_attempts": 0, "last_failed_attempt": None, "blocked_until": None}}
     )
+    if collection_failed_attempts is not None:
+        collection_failed_attempts.delete_one({"unknown_email": email})
     return {
         'id': str(user_data['_id']),
         'email': user_data['email'],
@@ -186,36 +188,80 @@ def create_user_session(email: str) -> Optional[dict]:
 
 def record_failed_login_attempt(email: str) -> dict:
     from datetime import datetime, timedelta
-    user_data = collection_usuarios.find_one({"email": email})
-    if not user_data:
-        return {'blocked': False}
-    
-    failed_attempts = user_data.get('failed_attempts', 0) + 1
-    last_failed_attempt = datetime.utcnow()
+    from flask import current_app
 
-    if failed_attempts >= 5:
-        blocked_until = last_failed_attempt + timedelta(minutes=15)
-        collection_usuarios.update_one(
-            {"email": email},
-            {"$set": {"failed_attempts": failed_attempts, "last_failed_attempt": last_failed_attempt, "blocked_until": blocked_until}}
-        )
-        return {'blocked': True, 'blocked_until': blocked_until}
+    max_attempts = current_app.config.get('MAX_LOGIN_ATTEMPTS', 5)
+    lockout_minutes = current_app.config.get('ACCOUNT_LOCKOUT_MINUTES', 15)
+    now = datetime.utcnow()
+
+    user_data = collection_usuarios.find_one({"email": email})
+    if user_data:
+        failed_attempts = user_data.get('failed_attempts', 0) + 1
+        if failed_attempts >= max_attempts:
+            blocked_until = now + timedelta(minutes=lockout_minutes)
+            collection_usuarios.update_one(
+                {"email": email},
+                {"$set": {"failed_attempts": failed_attempts, "last_failed_attempt": now, "blocked_until": blocked_until}}
+            )
+            return {'blocked': True, 'blocked_until': blocked_until}
+        else:
+            collection_usuarios.update_one(
+                {"email": email},
+                {"$set": {"failed_attempts": failed_attempts, "last_failed_attempt": now}}
+            )
+            return {'blocked': False, 'failed_attempts': failed_attempts}
+
+    if collection_failed_attempts is None:
+        return {'blocked': False}
+
+    record = collection_failed_attempts.find_one({"unknown_email": email})
+    if record:
+        failed_attempts = record['attempts'] + 1
+        if failed_attempts >= max_attempts:
+            blocked_until = now + timedelta(minutes=lockout_minutes)
+            collection_failed_attempts.update_one(
+                {"unknown_email": email},
+                {"$set": {"attempts": failed_attempts, "last_attempt": now, "blocked_until": blocked_until}}
+            )
+            return {'blocked': True, 'blocked_until': blocked_until}
+        else:
+            collection_failed_attempts.update_one(
+                {"unknown_email": email},
+                {"$set": {"attempts": failed_attempts, "last_attempt": now}}
+            )
+            return {'blocked': False, 'failed_attempts': failed_attempts}
     else:
-        collection_usuarios.update_one(
-            {"email": email},
-            {"$set": {"failed_attempts": failed_attempts, "last_failed_attempt": last_failed_attempt}}
-        )
-        return {'blocked': False, 'failed_attempts': failed_attempts}
+        collection_failed_attempts.insert_one({
+            "unknown_email": email,
+            "attempts": 1,
+            "last_attempt": now,
+            "blocked_until": None
+        })
+        return {'blocked': False, 'failed_attempts': 1}
 
 
 def check_user_blocked(email: str) -> tuple:
     from datetime import datetime
     user_data = collection_usuarios.find_one({"email": email})
-    if not user_data:
+    if user_data:
+        blocked_until = user_data.get('blocked_until')
+        if blocked_until and blocked_until > datetime.utcnow():
+            return True, blocked_until
+        if blocked_until and blocked_until <= datetime.utcnow():
+            collection_usuarios.update_one(
+                {"email": email},
+                {"$set": {"failed_attempts": 0, "blocked_until": None}}
+            )
         return False, None
-    blocked_until = user_data.get('blocked_until')
-    if blocked_until and blocked_until > datetime.utcnow():
-        return True, blocked_until
+
+    if collection_failed_attempts is not None:
+        record = collection_failed_attempts.find_one({"unknown_email": email})
+        if record:
+            blocked_until = record.get('blocked_until')
+            if blocked_until and blocked_until > datetime.utcnow():
+                return True, blocked_until
+            if blocked_until and blocked_until <= datetime.utcnow():
+                collection_failed_attempts.delete_one({"unknown_email": email})
     return False, None
 
 
@@ -226,6 +272,71 @@ def check_user_active(email: str) -> bool:
     return user_data.get('activo', False)
 
 
+def record_failed_ip_attempt(ip_address: str) -> dict:
+    from datetime import datetime, timedelta
+    from flask import current_app
+    if collection_failed_attempts is None:
+        return {'blocked': False}
+    now = datetime.utcnow()
+    max_attempts = current_app.config.get('MAX_IP_ATTEMPTS', 20)
+    lockout_minutes = current_app.config.get('IP_LOCKOUT_MINUTES', 30)
+    record = collection_failed_attempts.find_one({"ip": ip_address})
+    if record:
+        attempts = record['attempts'] + 1
+        if attempts >= max_attempts:
+            blocked_until = now + timedelta(minutes=lockout_minutes)
+            collection_failed_attempts.update_one(
+                {"ip": ip_address},
+                {"$set": {"attempts": attempts, "last_attempt": now, "blocked_until": blocked_until}}
+            )
+            return {'blocked': True, 'blocked_until': blocked_until}
+        else:
+            collection_failed_attempts.update_one(
+                {"ip": ip_address},
+                {"$set": {"attempts": attempts, "last_attempt": now}}
+            )
+            return {'blocked': False, 'attempts': attempts}
+    else:
+        collection_failed_attempts.insert_one({
+            "ip": ip_address,
+            "attempts": 1,
+            "last_attempt": now,
+            "blocked_until": None
+        })
+        return {'blocked': False, 'attempts': 1}
+
+
+def check_ip_blocked(ip_address: str) -> tuple:
+    from datetime import datetime
+    if collection_failed_attempts is None:
+        return False, None
+    record = collection_failed_attempts.find_one({"ip": ip_address})
+    if not record:
+        return False, None
+    blocked_until = record.get('blocked_until')
+    if blocked_until and blocked_until > datetime.utcnow():
+        return True, blocked_until
+    if blocked_until and blocked_until <= datetime.utcnow():
+        collection_failed_attempts.delete_one({"ip": ip_address})
+    return False, None
+
+
+def generate_csrf_token() -> str:
+    import secrets
+    from flask import session
+    token = secrets.token_hex(32)
+    session['csrf_token'] = token
+    return token
+
+
+def validate_csrf_token(token: str) -> bool:
+    from flask import session
+    stored = session.pop('csrf_token', None)
+    if not stored or not token:
+        return False
+    return stored == token
+
+
 import secrets
 from datetime import datetime, timedelta
 
@@ -234,6 +345,20 @@ collection_tokens = None
 def init_token_services(tokens_collection):
     global collection_tokens
     collection_tokens = tokens_collection
+
+
+collection_failed_attempts = None
+
+def init_rate_limit_services(failed_attempts_collection):
+    global collection_failed_attempts
+    collection_failed_attempts = failed_attempts_collection
+
+
+def get_client_ip() -> str:
+    from flask import request
+    if request.headers.get('X-Forwarded-For'):
+        return request.headers['X-Forwarded-For'].split(',')[0].strip()
+    return request.remote_addr or 'unknown'
 
 
 def generate_token(cedula: str) -> str:

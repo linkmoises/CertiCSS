@@ -76,7 +76,7 @@ def get_judge_session(codigo_evento, cedula_jurado):
 
 # Import helper functions
 from app.helpers import generate_nanoid, allowed_file
-from app.auth import token_required
+from app.auth import token_required, generate_csrf_token, validate_csrf_token, get_client_ip, check_ip_blocked, record_failed_ip_attempt
 from app.usuarios import roles_required
 
 
@@ -239,6 +239,16 @@ def poster_login(codigo_evento):
         return redirect(url_for('home'))
     
     if request.method == 'POST':
+        if not validate_csrf_token(request.form.get('csrf_token', '')):
+            flash('Sesión inválida. Intente nuevamente.', 'error')
+            return render_template('poster_login.html', evento=evento, csrf_token=generate_csrf_token())
+
+        ip_address = get_client_ip()
+        is_ip_blocked, _ = check_ip_blocked(ip_address)
+        if is_ip_blocked:
+            flash('Demasiados intentos desde esta dirección IP. Intente más tarde.', 'error')
+            return render_template('poster_login.html', evento=evento, csrf_token=generate_csrf_token())
+
         cedula = request.form.get('cedula', '').strip()
         passphrase = request.form.get('passphrase', '').strip()
         
@@ -255,9 +265,10 @@ def poster_login(codigo_evento):
             }
             return redirect(url_for('posters.editar_poster', codigo_evento=codigo_evento))
         else:
+            record_failed_ip_attempt(ip_address)
             flash('Cédula o passphrase incorrectos.', 'error')
     
-    return render_template('poster_login.html', evento=evento)
+    return render_template('poster_login.html', evento=evento, csrf_token=generate_csrf_token())
 
 
 ###
@@ -567,6 +578,16 @@ def jurado_login(codigo_evento):
         return redirect(url_for('home'))
     
     if request.method == 'POST':
+        if not validate_csrf_token(request.form.get('csrf_token', '')):
+            flash('Sesión inválida. Intente nuevamente.', 'error')
+            return render_template('jurado_login.html', evento=evento, csrf_token=generate_csrf_token())
+
+        ip_address = get_client_ip()
+        is_ip_blocked, _ = check_ip_blocked(ip_address)
+        if is_ip_blocked:
+            flash('Demasiados intentos desde esta dirección IP. Intente más tarde.', 'error')
+            return render_template('jurado_login.html', evento=evento, csrf_token=generate_csrf_token())
+
         cedula = request.form.get('cedula', '').strip()
         passphrase = request.form.get('passphrase', '').strip()
         
@@ -584,9 +605,10 @@ def jurado_login(codigo_evento):
             }
             return redirect(url_for('posters.evaluar_posters', codigo_evento=codigo_evento))
         else:
+            record_failed_ip_attempt(ip_address)
             flash('Cédula o passphrase incorrectos.', 'error')
     
-    return render_template('jurado_login.html', evento=evento)
+    return render_template('jurado_login.html', evento=evento, csrf_token=generate_csrf_token())
 
 
 ###

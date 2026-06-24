@@ -58,6 +58,7 @@
                     <div class="mt-5">
                         <!-- Form -->
                         <form method="POST" action="/iniciar_sesion">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                             <div class="grid gap-y-4">
                                 <!-- Form Group -->
                                 <div>

@@ -20,6 +20,12 @@ from app.auth.services import (
     lms_edit_required,
     permission_required,
     init_token_services,
+    init_rate_limit_services,
+    get_client_ip,
+    record_failed_ip_attempt,
+    check_ip_blocked,
+    generate_csrf_token,
+    validate_csrf_token,
 )
 
 from app.auth.routes import auth_routes_bp, login, logout
@@ -46,6 +52,12 @@ __all__ = [
     'lms_edit_required',
     'permission_required',
     'init_token_services',
+    'init_rate_limit_services',
+    'get_client_ip',
+    'record_failed_ip_attempt',
+    'check_ip_blocked',
+    'generate_csrf_token',
+    'validate_csrf_token',
     'auth_routes_bp',
     'login',
     'logout',

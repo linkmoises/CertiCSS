@@ -20,6 +20,12 @@ class Config:
     PERMANENT_SESSION_LIFETIME = timedelta(minutes=30)              # duración de sesión a 30 minutos
     ALLOWED_EXTENSIONS = ('png', 'jpg', 'jpeg', 'pdf', 'ppt', 'pptx', 'doc', 'docx', 'txt', 'md', 'xls', 'xlsx')
 
+    # Security settings
+    MAX_LOGIN_ATTEMPTS = int(os.getenv('MAX_LOGIN_ATTEMPTS', 5))
+    ACCOUNT_LOCKOUT_MINUTES = int(os.getenv('ACCOUNT_LOCKOUT_MINUTES', 15))
+    MAX_IP_ATTEMPTS = int(os.getenv('MAX_IP_ATTEMPTS', 20))
+    IP_LOCKOUT_MINUTES = int(os.getenv('IP_LOCKOUT_MINUTES', 30))
+
 
 class DevelopmentConfig(Config):
     # Configuraciones para desarrollo local

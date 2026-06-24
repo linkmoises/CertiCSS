@@ -88,13 +88,15 @@ collection_evaluaciones_poster = db['evaluaciones_poster']
 collection_progreso = db['progreso']
 collection_unidades = db['unidades']
 collection_otps = db['otps']
+collection_failed_attempts = db['failed_login_attempts']
 
 ###
 ### Auth module initialization
 ###
-from app.auth import auth_routes_bp, init_auth_services, init_token_services
+from app.auth import auth_routes_bp, init_auth_services, init_token_services, init_rate_limit_services
 init_auth_services(collection_usuarios)
 init_token_services(collection_tokens)
+init_rate_limit_services(collection_failed_attempts)
 app.register_blueprint(auth_routes_bp)
 
 ###
