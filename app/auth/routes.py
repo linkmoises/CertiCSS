@@ -1,5 +1,6 @@
 from flask import Blueprint, request, redirect, url_for, flash, session, render_template
 from app.logs import log_event
+from app.auth.services import generate_csrf_token
 
 auth_routes_bp = Blueprint('auth_routes', __name__, url_prefix='/')
 
@@ -16,7 +17,6 @@ def login():
             record_failed_ip_attempt,
             check_ip_blocked,
             validate_csrf_token,
-            generate_csrf_token,
             get_client_ip,
             User
         )
