@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Informe {{ evento.nombre }} - CertiCSS</title>
+    <style>
+        @page {
+            size: letter;
+            margin: 1.5cm 2cm;
+        }
+        @page :first {
+            @top-center {
+                content: "";
+            }
+        }
+        body {
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.5;
+            color: #1f2937;
+        }
+        h1 { font-size: 18pt; margin: 0 0 4pt; color: #111827; }
+        h2 { font-size: 14pt; margin: 0 0 2pt; color: #1f2937; }
+        h3 { font-size: 11pt; margin: 0 0 2pt; color: #374151; }
+        h4 { font-size: 10pt; margin: 0 0 6pt; color: #374151; }
+        p { margin: 0 0 6pt; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 10pt; }
+        th, td { padding: 4pt 6pt; text-align: left; border: 1pt solid #d1d5db; font-size: 9pt; }
+        th { background: #f3f4f6; font-weight: 600; }
+        .header { margin-bottom: 16pt; border-bottom: 2pt solid #2563eb; padding-bottom: 8pt; }
+        .header h1 { font-size: 20pt; }
+        .header .meta { font-size: 9pt; color: #6b7280; }
+        .card { border: 1pt solid #e5e7eb; border-radius: 4pt; padding: 8pt 10pt; margin-bottom: 10pt; }
+        .card-title { font-weight: 700; font-size: 10pt; margin-bottom: 4pt; color: #111827; }
+        .grid-4 { display: flex; flex-wrap: wrap; gap: 8pt; margin-bottom: 12pt; }
+        .grid-4 .card { flex: 1 1 calc(25% - 8pt); min-width: 120pt; }
+        .grid-2 { display: flex; flex-wrap: wrap; gap: 8pt; margin-bottom: 12pt; }
+        .grid-2 .card { flex: 1 1 calc(50% - 8pt); min-width: 200pt; }
+        .stat-value { font-size: 16pt; font-weight: 700; color: #111827; }
+        .stat-label { font-size: 7pt; text-transform: uppercase; letter-spacing: 0.5pt; color: #6b7280; }
+        .chart-img { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+        .page-break { page-break-before: always; }
+        .footer { margin-top: 16pt; padding-top: 8pt; border-top: 1pt solid #e5e7eb; font-size: 7pt; color: #9ca3af; text-align: center; }
+        .badge { display: inline-block; padding: 1pt 5pt; border-radius: 3pt; font-size: 7pt; font-weight: 600; background: #f3f4f6; color: #374151; margin-right: 3pt; }
+        .badge-blue { background: #dbeafe; color: #1e40af; }
+        .foda-table td { vertical-align: top; width: 50%; }
+        .info-box { background: #eff6ff; border: 1pt solid #bfdbfe; border-radius: 4pt; padding: 8pt 10pt; font-size: 9pt; color: #1e40af; margin-bottom: 10pt; }
+        .incidencia { border: 1pt solid #e5e7eb; border-radius: 3pt; padding: 5pt 8pt; margin-bottom: 4pt; font-size: 9pt; }
+        .incidencia .tipo { font-weight: 600; }
+        .incidencia .fecha { float: right; color: #6b7280; font-size: 8pt; }
+        .e-detail { margin-bottom: 4pt; padding-bottom: 4pt; border-bottom: 1pt solid #e5e7eb; display: flex; justify-content: space-between; font-size: 9pt; }
+        .e-detail:last-child { border-bottom: none; }
+        .e-label { font-weight: 500; }
+        .e-scale { color: #6b7280; font-size: 8pt; }
+        .data-src { font-size: 8pt; color: #6b7280; margin-top: 6pt; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>{{ evento.tipo }}</h1>
+        <div class="meta">
+            {{ evento.unidad_ejecutora }} &mdash;
+            {{ evento.modalidad }} &mdash;
+            <span class="badge badge-blue">Encuesta v2</span>
+        </div>
+        <div class="meta">Generado el {{ now().strftime('%d/%m/%Y %H:%M') }}</div>
+    </div>
+
+    <div class="card">
+        <h2>{{ evento.nombre }}</h2>
+        <p style="font-size:9pt;color:#4b5563;">{{ evento.descripcion | default("S/D") }}</p>
+    </div>
+
+    <!-- Summary cards -->
+    <div class="grid-4">
+        <div class="card">
+            <div class="stat-label">Cupos disponibles</div>
+            <div class="stat-value">{{ evento.cupos | default("N/D") }}</div>
+        </div>
+        <div class="card">
+            <div class="stat-label">Participantes registrados</div>
+            <div class="stat-value">{{ metricas.total_participantes }}</div>
+        </div>
+        <div class="card">
+            <div class="stat-label">% asistencia</div>
+            <div class="stat-value">
+                {% if evento.cupos and evento.cupos|int > 0 %}
+                    {{ ((metricas.total_participantes / evento.cupos|int) * 100) | round(1) }}%
+                {% else %}
+                    N/D
+                {% endif %}
+            </div>
+        </div>
+        <div class="card">
+            <div class="stat-label">Encuestas recibidas (v2)</div>
+            <div class="stat-value">{{ metricas.total_respuestas | default("N/D") }}</div>
+        </div>
+    </div>
+
+    {% if metricas.total_respuestas > 0 %}
+    <div class="grid-2">
+        <div class="card">
+            <div class="stat-label">% Participantes Encuestados</div>
+            <div class="stat-value">
+                {% if metricas.total_participantes > 0 %}
+                    {{ ((metricas.total_respuestas / metricas.total_participantes) * 100) | round(1) }}%
+                {% else %}N/D{% endif %}
+            </div>
+        </div>
+        <div class="card">
+            <div class="stat-label">Alfa de Cronbach (global)</div>
+            <div class="stat-value">
+                {% if alfa_cronbach_global is not none %}
+                    {{ alfa_cronbach_global }}
+                {% else %}
+                    Datos insuficientes
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="info-box">
+        No hay respuestas de encuesta disponibles para este evento. Las métricas de satisfacción se mostrarán solo cuando existan participantes que completen la encuesta.
+    </div>
+    {% endif %}
+
+    <!-- FODA -->
+    <div class="card">
+        <div class="card-title">Análisis post-evento</div>
+        <table class="foda-table">
+            <tr>
+                <th style="width:50%">Fortalezas</th>
+                <th style="width:50%">Oportunidades</th>
+            </tr>
+            <tr>
+                <td>{{ (evento.fortalezas | nl2br) | safe if evento.fortalezas else "N/D" }}</td>
+                <td>{{ (evento.oportunidades | nl2br) | safe if evento.oportunidades else "N/D" }}</td>
+            </tr>
+            <tr>
+                <th>Debilidades</th>
+                <th>Amenazas</th>
+            </tr>
+            <tr>
+                <td>{{ (evento.debilidades | nl2br) | safe if evento.debilidades else "N/D" }}</td>
+                <td>{{ (evento.amenazas | nl2br) | safe if evento.amenazas else "N/D" }}</td>
+            </tr>
+        </table>
+
+        {% if evento.incidencias %}
+        <div style="margin-top:6pt;">
+            <div class="card-title">Incidencias ({{ evento.incidencias | length }})</div>
+            {% for incidencia in evento.incidencias %}
+            <div class="incidencia">
+                <span class="tipo">{{ incidencia.tipo }}</span>
+                <span class="fecha">{{ incidencia.fecha }}</span>
+                <div>{{ incidencia.descripcion }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="font-size:9pt;color:#6b7280;font-style:italic;margin-top:4pt;">No se registraron incidencias</p>
+        {% endif %}
+    </div>
+
+    {% if metricas.total_respuestas > 0 %}
+
+    <!-- Gráfica 1: Perfil -->
+    <div class="card">
+        <div class="card-title">Gráfica No 1. Participantes según perfil profesional</div>
+        {% if grafica_perfil %}
+        <img src="{{ grafica_perfil }}" alt="Perfil profesional" class="chart-img" />
+        {% else %}
+        <p style="color:#6b7280;">No hay datos disponibles.</p>
+        {% endif %}
+        <div class="data-src">Fuente: formulario de registro de participantes.</div>
+    </div>
+
+    <!-- Gráfica 2: Región -->
+    <div class="page-break"></div>
+    <div class="card">
+        <div class="card-title">Gráfica No 2. Participantes según región/provincia de procedencia</div>
+        {% if grafica_region %}
+        <img src="{{ grafica_region }}" alt="Región" class="chart-img" />
+        {% else %}
+        <p style="color:#6b7280;">No hay datos disponibles.</p>
+        {% endif %}
+        <div class="data-src">Fuente: formulario de registro de participantes.</div>
+    </div>
+
+    <!-- Gráfica 3: Unidades -->
+    <div class="card">
+        <div class="card-title">Gráfica No 3. Participantes según Unidad Ejecutora</div>
+        {% if grafica_unidades %}
+        <img src="{{ grafica_unidades }}" alt="Unidad ejecutora" class="chart-img" />
+        {% else %}
+        <p style="color:#6b7280;">No hay datos disponibles.</p>
+        {% endif %}
+        <div class="data-src">Fuente: formulario de registro de participantes.</div>
+    </div>
+
+    <!-- Gráfica 4 y 5: Demografía -->
+    <div class="page-break"></div>
+    <div class="grid-2">
+        <div class="card">
+            <div class="card-title">Gráfica No 4. Demografía — Distribución por sexo</div>
+            {% if grafica_demografia_sexo %}
+            <img src="{{ grafica_demografia_sexo }}" alt="Sexo" class="chart-img" />
+            <div class="data-src" style="margin-top:4pt;">n = {{ metricas.total_respuestas | default("S/D") }}</div>
+            {% else %}
+            <p style="color:#6b7280;">No hay datos disponibles en encuesta.</p>
+            {% endif %}
+            <div class="data-src">Fuente: encuesta de satisfacción v2.</div>
+        </div>
+        <div class="card">
+            <div class="card-title">Gráfica No 5. Demografía — Distribución etaria</div>
+            {% if grafica_demografia_grupoetario %}
+            <img src="{{ grafica_demografia_grupoetario }}" alt="Edad" class="chart-img" />
+            <div class="data-src" style="margin-top:4pt;">n = {{ metricas.total_respuestas | default("S/D") }}</div>
+            {% else %}
+            <p style="color:#6b7280;">No hay datos disponibles en encuesta.</p>
+            {% endif %}
+            <div class="data-src">Fuente: encuesta de satisfacción v2.</div>
+        </div>
+    </div>
+
+    <!-- Gráfica 6: Spider -->
+    <div class="card">
+        <div class="card-title">Gráfico No 6. Evaluación del Evento (E1–E5)</div>
+        {% if grafica_spider %}
+        <img src="{{ grafica_spider }}" alt="Spider E1-E5" class="chart-img" style="max-width:70%;" />
+        <div class="data-src" style="margin-top:4pt;">n = {{ metricas.total_respuestas | default("S/D") }}</div>
+        {% else %}
+        <p style="color:#6b7280;">No hay datos disponibles en encuesta.</p>
+        {% endif %}
+        <div class="data-src">Fuente: encuesta de satisfacción v2.</div>
+    </div>
+
+    <!-- Detalle E1-E5 -->
+    <div class="card">
+        <div class="card-title">Detalle de Preguntas (E1–E5)</div>
+        <div class="e-detail"><span class="e-label">E1. Pertinencia del contenido</span><span class="e-scale">Escala 1–5</span></div>
+        <div class="e-detail"><span class="e-label">E2. Claridad de la información</span><span class="e-scale">Escala 1–5</span></div>
+        <div class="e-detail"><span class="e-label">E3. Actualización científica</span><span class="e-scale">Escala 1–5</span></div>
+        <div class="e-detail"><span class="e-label">E4. Dominio del tema (ponente)</span><span class="e-scale">Escala 1–5</span></div>
+        <div class="e-detail"><span class="e-label">E5. Organización del evento</span><span class="e-scale">Escala 1–5</span></div>
+    </div>
+
+    {% endif %}
+
+    <!-- Fuentes de datos -->
+    <div class="card">
+        <div class="card-title">Sobre las fuentes de datos</div>
+        <p style="font-size:9pt;color:#6b7280;">
+            La información presentada en este informe se deriva de los formularios de registro de participantes
+            y las respuestas recopiladas a través de la encuesta de satisfacción v2 (Encuesta de Satisfacción —
+            Sistema Evaluar) aplicada al finalizar el evento.
+        </p>
+    </div>
+
+    <div class="footer">
+        Sistema de verificación de autenticidad de certificados — CertiCSS &copy; {{ now().year }}
+    </div>
+
+</body>
+</html>

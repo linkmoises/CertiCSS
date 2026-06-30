@@ -30,3 +30,4 @@ yarg==0.1.10
 gunicorn==23.0.0
 openai==1.95.1
 seaborn==0.13.2
+weasyprint==69.0

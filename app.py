@@ -5463,6 +5463,119 @@ def informe_avanzado_v2(codigo_evento):
         alfa_cronbach_global=calcular_alfa_cronbach_v2_global(),
         puede_editar_analisis=puede_editar)
 
+from weasyprint import HTML
+
+@app.route('/tablero/metricas/<codigo_evento>/informe_v2/pdf')
+@login_required
+def informe_avanzado_v2_pdf(codigo_evento):
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        flash('Evento no encontrado', 'error')
+        return redirect(url_for('home'))
+
+    instrumento = evento.get('instrumento', evento.get('instrumento_encuesta', 'legacy'))
+    if instrumento != 'encuesta_v2':
+        return redirect(url_for('informe_avanzado', codigo_evento=codigo_evento))
+
+    total_participantes = len(collection_participantes.distinct(
+        "cedula",
+        {"codigo_evento": codigo_evento, "rol": "participante"}
+    ))
+
+    participantes_cedulas = collection_participantes.distinct(
+        "cedula",
+        {"codigo_evento": codigo_evento, "rol": "participante"}
+    )
+
+    participantes = []
+    for cedula in participantes_cedulas:
+        participante = collection_participantes.find_one({
+            "codigo_evento": codigo_evento,
+            "cedula": cedula,
+            "rol": "participante"
+        })
+        if participante:
+            participantes.append(participante)
+
+    grafica_perfil = generar_grafica_perfil(participantes, evento.get('nombre', 'Evento'))
+    grafica_region = generar_grafica_region(participantes, evento.get('nombre', 'Evento'))
+    grafica_unidades = generar_grafica_unidades(participantes, evento.get('nombre', 'Evento'))
+
+    respuestas = list(collection_encuestas_v2.find({'codigo_evento': codigo_evento}))
+    respuestas_validas = []
+    for respuesta in respuestas:
+        if respuesta.get('respuestas') and isinstance(respuesta['respuestas'], dict) and len(respuesta['respuestas']) > 0:
+            respuestas_validas.append(respuesta)
+
+    total_respuestas = len(respuestas_validas)
+
+    metricas = {
+        'total_respuestas': total_respuestas,
+        'total_participantes': total_participantes,
+        'promedio_evento': 0,
+        'demograficos': {},
+        'respuestas_validas': respuestas_validas
+    }
+
+    grafica_spider = generar_grafica_spider_v2(respuestas_validas, evento.get('nombre', 'Evento'))
+    grafica_demografia_sexo = generar_grafica_demografia_sexo({}, evento.get('nombre', 'Evento'))
+    grafica_demografia_grupoetario = generar_grafica_demografia_grupoetario({}, evento.get('nombre', 'Evento'))
+
+    if respuestas_validas:
+        demograficos = {
+            'D1': {'Masculino': 0, 'Femenino': 0},
+            'D2': {'20–30': 0, '31–40': 0, '41–50': 0, '51–60': 0, '61+': 0},
+            'D3': {},
+            'D4': {'0': 0, '1': 0, '2': 0, '3': 0, '4': 0},
+            'D5': {'<5': 0, '5–10': 0, '11–20': 0, '21–30': 0, '31–40': 0, '+40': 0}
+        }
+        for respuesta in respuestas_validas:
+            respuestas_data = respuesta.get('respuestas', {})
+            for key in demograficos:
+                if key in respuestas_data:
+                    valor = respuestas_data[key]
+                    demograficos[key][valor] = demograficos[key].get(valor, 0) + 1
+        metricas['demograficos'] = demograficos
+
+        grafica_demografia_sexo = generar_grafica_demografia_sexo(demograficos['D1'], evento.get('nombre', 'Evento'))
+        grafica_demografia_grupoetario = generar_grafica_demografia_grupoetario(demograficos['D2'], evento.get('nombre', 'Evento'))
+
+        promedios_e = {'total': 0, 'count': 0}
+        for i in range(1, 6):
+            for respuesta in respuestas_validas:
+                respuestas_data = respuesta.get('respuestas', {})
+                key = f'E{i}'
+                if key in respuestas_data:
+                    try:
+                        promedios_e['total'] += int(respuestas_data[key])
+                        promedios_e['count'] += 1
+                    except (ValueError, TypeError):
+                        pass
+        metricas['promedio_evento'] = round(promedios_e['total'] / promedios_e['count'], 2) if promedios_e['count'] > 0 else 0
+
+    html = render_template('metrica_avanzada_v2_pdf.html',
+        evento=evento,
+        metricas=metricas,
+        grafica_perfil=grafica_perfil,
+        grafica_region=grafica_region,
+        grafica_unidades=grafica_unidades,
+        grafica_spider=grafica_spider,
+        grafica_demografia_sexo=grafica_demografia_sexo,
+        grafica_demografia_grupoetario=grafica_demografia_grupoetario,
+        alfa_cronbach=calcular_alfa_cronbach_v2(respuestas_validas),
+        alfa_cronbach_global=calcular_alfa_cronbach_v2_global())
+
+    pdf_bytes = HTML(string=html, base_url=request.url_root).write_pdf()
+    return Response(
+        pdf_bytes,
+        mimetype='application/pdf',
+        headers={
+            'Content-Disposition': f'attachment; filename="informe_{codigo_evento}.pdf"',
+            'Content-Length': str(len(pdf_bytes))
+        }
+    )
+
+
 def calcular_alfa_cronbach_v2(respuestas):
     """
     Calcula el Alfa de Cronbach para las preguntas E1 a E5 (encuesta_v2).
