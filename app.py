@@ -5556,6 +5556,15 @@ def informe_avanzado_v2_pdf(codigo_evento):
                         pass
         metricas['promedio_evento'] = round(promedios_e['total'] / promedios_e['count'], 2) if promedios_e['count'] > 0 else 0
 
+    import base64
+    membrete_path = os.path.join(app.static_folder, 'assets', 'membrete-css-generico.jpg')
+    if not os.path.exists(membrete_path):
+        membrete_path = os.path.join(app.static_folder, 'assets', 'membrete-css-generico.pdf')
+    membrete_b64 = ''
+    if os.path.exists(membrete_path):
+        with open(membrete_path, 'rb') as f:
+            membrete_b64 = base64.b64encode(f.read()).decode('ascii')
+
     html = render_template('metrica_avanzada_v2_pdf.html',
         evento=evento,
         metricas=metricas,
@@ -5566,7 +5575,8 @@ def informe_avanzado_v2_pdf(codigo_evento):
         grafica_demografia_sexo=grafica_demografia_sexo,
         grafica_demografia_grupoetario=grafica_demografia_grupoetario,
         alfa_cronbach=calcular_alfa_cronbach_v2(respuestas_validas),
-        alfa_cronbach_global=calcular_alfa_cronbach_v2_global())
+        alfa_cronbach_global=calcular_alfa_cronbach_v2_global(),
+        membrete_b64=membrete_b64)
 
     pdf_bytes = HTML(string=html, base_url=request.url_root).write_pdf()
     return Response(

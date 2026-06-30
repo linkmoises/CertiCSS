@@ -33,7 +33,7 @@
         .card { border: 1pt solid #e5e7eb; border-radius: 4pt; padding: 8pt 10pt; margin-bottom: 10pt; }
         .card-title { font-weight: 700; font-size: 10pt; margin-bottom: 4pt; color: #111827; }
         .grid-4 { display: flex; flex-wrap: wrap; gap: 8pt; margin-bottom: 12pt; }
-        .grid-4 .card { flex: 1 1 calc(33.333% - 8pt); min-width: 160pt; }
+        .grid-4 .card { flex: 1 1 calc(33.333% - 8pt); min-width: 140pt; }
         .grid-2 { display: flex; flex-wrap: wrap; gap: 8pt; margin-bottom: 12pt; }
         .grid-2 .card { flex: 1 1 calc(50% - 8pt); min-width: 200pt; }
         .stat-value { font-size: 16pt; font-weight: 700; color: #111827; }
@@ -53,9 +53,22 @@
         .e-label { font-weight: 500; }
         .e-scale { color: #6b7280; font-size: 8pt; }
         .data-src { font-size: 8pt; color: #6b7280; margin-top: 6pt; }
+        .membrete-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1000;
+            background-image: url('data:image/jpeg;base64,{{ membrete_b64 }}');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+        }
     </style>
 </head>
 <body>
+
+    <div class="membrete-bg"></div>
 
     <div class="header">
         <div class="meta">Informe generado el {{ now().strftime('%d/%m/%Y %H:%M') }}</div>
