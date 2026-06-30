@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Adjuntar certificado externo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
+    <meta name="apple-mobile-web-app-title" content="CertiCSS" />
+    <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
+    {% if UMAMI_URL %}
+    {{ UMAMI_URL | safe }}
+    {% endif %}
+</head>
+
+<body class="bg-gray-50 dark:bg-neutral-900">
+
+    <main id="content">
+        <div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
+            <div class="flex flex-col">
+                <div class="-m-1.5 overflow-x-auto">
+                    <div class="p-1.5 min-w-full inline-block align-middle">
+                        <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden dark:bg-neutral-900 dark:border-neutral-700">
+
+                            <div class="px-6 py-4 border-b border-gray-200 gap-x-4 flex dark:border-neutral-700">
+                                <img src="{{ url_for('static', filename='assets/css-logo-192x192.png') }}"
+                                     alt="Caja de Seguro Social" class="w-12 h-12">
+                                <div>
+                                    <h2 class="text-xl font-semibold text-gray-800 dark:text-neutral-200">
+                                        Adjuntar certificado externo
+                                    </h2>
+                                    <p class="text-sm text-gray-600 dark:text-neutral-400">
+                                        Registre actividades académicas realizadas fuera del sistema DENADOI para su validación.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="px-6 py-4 border-b border-gray-200 dark:border-neutral-700">
+                                <div class="flex items-center gap-3">
+                                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                        </svg>
+                                    </span>
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-800 dark:text-neutral-200">{{ nombres }} {{ apellidos }}</p>
+                                        <p class="text-xs text-gray-500 dark:text-neutral-400">{{ cedula }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="px-6 py-6">
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                                {% if messages %}
+                                {% for category, message in messages %}
+                                <div class="mb-4 px-4 py-3 rounded-lg text-sm {% if category == 'error' %}bg-red-100 text-red-800 border border-red-200{% else %}bg-green-100 text-green-800 border border-green-200{% endif %}">
+                                    {{ message }}
+                                </div>
+                                {% endfor %}
+                                {% endif %}
+                                {% endwith %}
+
+                                <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-300">
+                                    <p class="font-medium mb-1">Instrucciones:</p>
+                                    <ul class="list-disc list-inside space-y-1">
+                                        <li>Adjunte el certificado en formato PDF emitido por la institución organizadora.</li>
+                                        <li>Complete todos los campos del formulario.</li>
+                                        <li>Si la actividad fue de varios días, indique el rango de fechas.</li>
+                                        <li>Seleccione su rol durante la actividad.</li>
+                                        <li>Una vez enviado, quedará en estado <strong>revisión</strong> hasta que el equipo de DENADOI lo valide.</li>
+                                    </ul>
+                                </div>
+
+                                <form method="POST" action="{{ url_for('certificados_externos.nuevo_externo') }}" enctype="multipart/form-data">
+                                    <input type="hidden" name="cedula" value="{{ cedula }}">
+                                    <input type="hidden" name="token" value="{{ token }}">
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div class="md:col-span-2">
+                                            <label for="titulo" class="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-2">
+                                                Título de la actividad <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="text" id="titulo" name="titulo" value="{{ titulo or '' }}" required
+                                                   class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400"
+                                                   placeholder="Ej: Congreso Internacional de Medicina">
+                                        </div>
+
+                                        <div>
+                                            <label for="fecha_inicio" class="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-2">
+                                                Fecha de inicio <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="date" id="fecha_inicio" name="fecha_inicio" value="{{ fecha_inicio or '' }}" required
+                                                   class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400">
+                                        </div>
+
+                                        <div>
+                                            <label for="fecha_fin" class="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-2">
+                                                Fecha de fin <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="date" id="fecha_fin" name="fecha_fin" value="{{ fecha_fin or '' }}" required
+                                                   class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400">
+                                        </div>
+
+                                        <div>
+                                            <label for="rol" class="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-2">
+                                                Rol durante la actividad
+                                            </label>
+                                            <select id="rol" name="rol"
+                                                    class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400">
+                                                {% for val, label in roles %}
+                                                <option value="{{ val }}" {% if rol == val %}selected{% endif %}>{{ label }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label for="horas" class="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-2">
+                                                Horas académicas <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="number" id="horas" name="horas" value="{{ horas or '' }}" required
+                                                   min="0.5" max="999" step="0.5"
+                                                   class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400"
+                                                   placeholder="Ej: 8">
+                                        </div>
+
+                                        <div class="md:col-span-2">
+                                            <label for="archivo" class="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-2">
+                                                Certificado (PDF) <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="file" id="archivo" name="archivo" accept=".pdf" required
+                                                   class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-8 flex flex-wrap gap-3">
+                                        <button type="submit"
+                                                class="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-700 text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 disabled:opacity-50 disabled:pointer-events-none dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                                            </svg>
+                                            Enviar para revisión
+                                        </button>
+                                        <a href="{{ url_for('buscar_certificados') }}"
+                                           class="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                                            Cancelar
+                                        </a>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
+                                <p class="text-sm text-gray-600 dark:text-neutral-400">
+                                    <span class="font-semibold text-gray-800 dark:text-neutral-200">Sistema de verificación de autenticidad de certificados</span>
+                                </p>
+                                <div class="print:hidden">
+                                    <a href="{{ url_for('buscar_certificados') }}"
+                                       class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+                                            <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                                        </svg>
+                                        Volver al inicio
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

@@ -1,0 +1,182 @@
+{% include 'tablero-header.html' %}
+{% include 'tablero-sidebar.html' %}
+
+<div class="w-full lg:ps-64">
+    <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+
+        <div class="max-w-[85rem] mx-auto">
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="mb-4 px-4 py-3 rounded-lg text-sm {% if category == 'error' %}bg-red-100 text-red-800 border border-red-200{% else %}bg-green-100 text-green-800 border border-green-200{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <div>
+                    <h1 class="text-xl font-semibold text-gray-800 dark:text-neutral-200">Certificados externos</h1>
+                    <p class="text-sm text-gray-600 dark:text-neutral-400">Gestión de certificados de actividades externas</p>
+                </div>
+                <div class="flex gap-2">
+                    <a href="{{ url_for('certificados_externos.listar_pendientes') }}"
+                       class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 {% if not request.path.endswith('completados') %}bg-blue-50 border-blue-200 text-blue-800{% endif %}">
+                        Pendientes
+                    </a>
+                    <a href="{{ url_for('certificados_externos.listar_completados') }}"
+                       class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 {% if request.path.endswith('completados') %}bg-blue-50 border-blue-200 text-blue-800{% endif %}">
+                        Completados
+                    </a>
+                </div>
+            </div>
+
+            {% if pendientes is defined %}
+            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden dark:bg-neutral-900 dark:border-neutral-700">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-neutral-700">
+                    <h2 class="text-base font-semibold text-gray-800 dark:text-neutral-200">
+                        Pendientes de revisión
+                        <span class="inline-flex items-center justify-center w-6 h-6 ml-2 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">{{ pendientes|length }}</span>
+                    </h2>
+                </div>
+
+                {% if pendientes %}
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
+                        <thead class="bg-gray-50 dark:bg-neutral-800">
+                            <tr>
+                                <th class="px-6 py-3 text-start text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Cédula</th>
+                                <th class="px-6 py-3 text-start text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Nombre</th>
+                                <th class="px-6 py-3 text-start text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Título</th>
+                                <th class="px-6 py-3 text-start text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Fecha</th>
+                                <th class="px-6 py-3 text-start text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Horas</th>
+                                <th class="px-6 py-3 text-start text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Recibido</th>
+                                <th class="px-6 py-3 text-end text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-neutral-700">
+                            {% for cert in pendientes %}
+                            <tr class="bg-white hover:bg-gray-50 dark:bg-neutral-900 dark:hover:bg-neutral-800">
+                                <td class="px-6 py-3 text-sm text-gray-800 dark:text-neutral-200 font-mono">{{ cert.cedula }}</td>
+                                <td class="px-6 py-3 text-sm text-gray-800 dark:text-neutral-200">{{ cert.nombres }} {{ cert.apellidos }}</td>
+                                <td class="px-6 py-3 text-sm text-gray-800 dark:text-neutral-200 max-w-xs truncate">{{ cert.titulo }}</td>
+                                <td class="px-6 py-3 text-sm text-gray-600 dark:text-neutral-400">{{ cert.fecha_str }}</td>
+                                <td class="px-6 py-3 text-sm text-gray-800 dark:text-neutral-200 font-mono">{{ "%.1f"|format(cert.horas) }}</td>
+                                <td class="px-6 py-3 text-sm text-gray-500 dark:text-neutral-400">{{ cert.creado_str if cert.creado_str else '—' }}</td>
+                                <td class="px-6 py-3 text-end">
+                                    <a href="{{ url_for('certificados_externos.detalle', id=cert['_id']) }}"
+                                       class="inline-flex items-center gap-x-1.5 py-1.5 px-3 text-xs font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-700">
+                                        <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                        </svg>
+                                        Revisar
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="px-6 py-12 text-center">
+                    <svg class="mx-auto w-12 h-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    <p class="mt-3 text-sm text-gray-500 dark:text-neutral-400">No hay certificados externos pendientes de revisión.</p>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if aprobados is defined or rechazados is defined %}
+            <div class="space-y-6">
+                {% if aprobados is defined %}
+                <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden dark:bg-neutral-900 dark:border-neutral-700">
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-neutral-700">
+                        <h2 class="text-base font-semibold text-gray-800 dark:text-neutral-200">
+                            Aprobados
+                            <span class="inline-flex items-center justify-center w-6 h-6 ml-2 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">{{ aprobados|length }}</span>
+                        </h2>
+                    </div>
+                    {% if aprobados %}
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
+                            <thead class="bg-gray-50 dark:bg-neutral-800">
+                                <tr>
+                                    <th class="px-6 py-3 text-start text-xs font-semibold uppercase">Cédula</th>
+                                    <th class="px-6 py-3 text-start text-xs font-semibold uppercase">Nombre</th>
+                                    <th class="px-6 py-3 text-start text-xs font-semibold uppercase">Título</th>
+                                    <th class="px-6 py-3 text-start text-xs font-semibold uppercase">Fecha</th>
+                                    <th class="px-6 py-3 text-start text-xs font-semibold uppercase">Horas</th>
+                                    <th class="px-6 py-3 text-start text-xs font-semibold uppercase">Validado</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 dark:divide-neutral-700">
+                                {% for cert in aprobados %}
+                                <tr class="bg-white hover:bg-gray-50 dark:bg-neutral-900 dark:hover:bg-neutral-800">
+                                    <td class="px-6 py-3 text-sm font-mono">{{ cert.cedula }}</td>
+                                    <td class="px-6 py-3 text-sm">{{ cert.nombres }} {{ cert.apellidos }}</td>
+                                    <td class="px-6 py-3 text-sm max-w-xs truncate">{{ cert.titulo }}</td>
+                                    <td class="px-6 py-3 text-sm text-gray-500">{{ cert.fecha_str }}</td>
+                                    <td class="px-6 py-3 text-sm font-mono">{{ "%.1f"|format(cert.horas) }}</td>
+                                    <td class="px-6 py-3 text-sm text-gray-500">{{ cert.validado_str if cert.validado_str else '—' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="px-6 py-8 text-center text-sm text-gray-500">No hay certificados aprobados.</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if rechazados is defined %}
+                <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden dark:bg-neutral-900 dark:border-neutral-700">
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-neutral-700">
+                        <h2 class="text-base font-semibold text-gray-800 dark:text-neutral-200">
+                            Rechazados
+                            <span class="inline-flex items-center justify-center w-6 h-6 ml-2 text-xs font-medium rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">{{ rechazados|length }}</span>
+                        </h2>
+                    </div>
+                    {% if rechazados %}
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
+                            <thead class="bg-gray-50 dark:bg-neutral-800">
+                                <tr>
+                                    <th class="px-6 py-3 text-start text-xs font-semibold uppercase">Cédula</th>
+                                    <th class="px-6 py-3 text-start text-xs font-semibold uppercase">Nombre</th>
+                                    <th class="px-6 py-3 text-start text-xs font-semibold uppercase">Título</th>
+                                    <th class="px-6 py-3 text-start text-xs font-semibold uppercase">Motivo</th>
+                                    <th class="px-6 py-3 text-start text-xs font-semibold uppercase">Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 dark:divide-neutral-700">
+                                {% for cert in rechazados %}
+                                <tr class="bg-white hover:bg-gray-50 dark:bg-neutral-900 dark:hover:bg-neutral-800">
+                                    <td class="px-6 py-3 text-sm font-mono">{{ cert.cedula }}</td>
+                                    <td class="px-6 py-3 text-sm">{{ cert.nombres }} {{ cert.apellidos }}</td>
+                                    <td class="px-6 py-3 text-sm max-w-xs truncate">{{ cert.titulo }}</td>
+                                    <td class="px-6 py-3 text-sm text-red-600 max-w-xs truncate">{{ cert.motivo_rechazo }}</td>
+                                    <td class="px-6 py-3 text-sm text-gray-500">{{ cert.validado_str if cert.validado_str else '—' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="px-6 py-8 text-center text-sm text-gray-500">No hay certificados rechazados.</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+{% include 'tablero-footer.html' %}

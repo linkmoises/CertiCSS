@@ -89,6 +89,7 @@ collection_progreso = db['progreso']
 collection_unidades = db['unidades']
 collection_otps = db['otps']
 collection_failed_attempts = db['failed_login_attempts']
+collection_certificados_externos = db['certificados_externos']
 
 ###
 ### Auth module initialization
@@ -3343,6 +3344,40 @@ def buscar_certificados():
         sumas_actual = _calcular_sumas(resultados, inicio_actual, fin_actual)
         sumas_anterior = _calcular_sumas(resultados, inicio_anterior, fin_anterior)
 
+        # Integrar certificados externos aprobados
+        externos_raw = list(collection_certificados_externos.find({
+            "cedula": cedula,
+            "status": "aprobado"
+        }))
+        externos_actividades = []
+        for ext in externos_raw:
+            fi = ext.get('fecha_inicio') or ext.get('fecha')
+            ff = ext.get('fecha_fin') or ext.get('fecha')
+            hext = float(ext.get('horas', 0))
+            if isinstance(ff, datetime):
+                ff_date = ff.date() if hasattr(ff, 'date') else ff
+            else:
+                ff_date = None
+            if ff_date and inicio_actual <= ff_date <= fin_actual:
+                sumas_actual['Actividades externas'] = sumas_actual.get('Actividades externas', 0) + hext
+            if ff_date and inicio_anterior <= ff_date <= fin_anterior:
+                sumas_anterior['Actividades externas'] = sumas_anterior.get('Actividades externas', 0) + hext
+            externos_actividades.append({
+                'es_externo': True,
+                'nombres': ext.get('nombres', ''),
+                'apellidos': ext.get('apellidos', ''),
+                'cedula': ext.get('cedula', cedula),
+                'titulo_evento': ext.get('titulo', 'Actividad externa'),
+                'fecha_evento': ff,
+                'fecha_inicio': fi,
+                'rol': ext.get('rol', 'participante'),
+                'carga_horaria': hext,
+                'externo_id': str(ext['_id']),
+                'archivo': ext.get('archivo'),
+                'archivo_original': ext.get('archivo_original'),
+                'tipo_evento': 'Actividades externas',
+            })
+
         periodos = [
             {
                 'id': 'actual',
@@ -3370,6 +3405,7 @@ def buscar_certificados():
             hora_actual=hora_actual,
             token=token,
             periodos=periodos,
+            externos_actividades=externos_actividades,
         )
 
     return render_template('buscar.html')
@@ -7807,6 +7843,10 @@ app.register_blueprint(usuarios_bp)
 ### Posters
 from app.posters import posters_bp
 app.register_blueprint(posters_bp)
+
+### Certificados externos
+from app.certificados_externos import certificados_externos_bp
+app.register_blueprint(certificados_externos_bp)
 
 import matplotlib
 matplotlib.use('Agg')  # Configurar matplotlib para usar backend no interactivo

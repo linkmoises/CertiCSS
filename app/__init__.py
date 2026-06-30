@@ -45,6 +45,7 @@ collection_nube = db['nube_archivos']
 collection_unidades = db['unidades']
 collection_posters = db['posters']
 collection_evaluaciones_poster = db['evaluaciones_poster']
+collection_certificados_externos = db['certificados_externos']
 
 # Exportar variables necesarias
 BASE_URL = config.BASE_URL                      # importado de config.py
