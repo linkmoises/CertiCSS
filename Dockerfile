@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Instalar locales, libmagic y dependencias del sistema para WeasyPrint
 RUN apt-get update && apt-get install -y --no-install-recommends locales libmagic1 \
-    libpango-1.0-0 libpangocairo-1.0-0 libpangoft2-1.0-0 libgdk-pixbuf2.0-0 \
+    libpango-1.0-0 libpangocairo-1.0-0 libpangoft2-1.0-0 libgdk-pixbuf-2.0-0 \
     libffi-dev libcairo2 libcairo2-dev libglib2.0-0 shared-mime-info && \
     echo "es_PA.UTF-8 UTF-8" >> /etc/locale.gen && \
     locale-gen && \
