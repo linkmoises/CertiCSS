@@ -6,18 +6,14 @@
     <style>
         @page {
             size: letter;
-            margin: 2.54cm;
+            margin: 0;
             background-image: url('data:image/jpeg;base64,{{ membrete_b64 }}');
-            background-size: 100% 100%;
+            background-size: 21.59cm 27.94cm;
             background-repeat: no-repeat;
             background-position: center center;
         }
-        @page :first {
-            @top-center {
-                content: "";
-            }
-        }
         body {
+            margin: 2.54cm;
             font-family: "Helvetica Neue", Arial, sans-serif;
             font-size: 10pt;
             line-height: 1.5;
@@ -36,11 +32,12 @@
         .header .meta { font-size: 9pt; color: #6b7280; }
         .card { border: 1pt solid #e5e7eb; border-radius: 4pt; padding: 8pt 10pt; margin-bottom: 10pt; }
         .card-title { font-weight: 700; font-size: 10pt; margin-bottom: 4pt; color: #111827; }
-        .metrics-row { width: 100%; margin-bottom: 8pt; overflow: hidden; }
-        .metrics-row .card { width: 32%; float: left; box-sizing: border-box; }
-        .metrics-row .card + .card { margin-left: 2%; }
-        .grid-2 { width: 100%; margin-bottom: 8pt; overflow: hidden; }
-        .grid-2 .card { width: 49%; float: left; box-sizing: border-box; }
+        .metrics-table { width: 100%; border-collapse: separate; border-spacing: 6pt; margin-bottom: 8pt; }
+        .metrics-table td { width: 33.333%; vertical-align: top; padding: 0; border: none; }
+        .metrics-table td .card { margin-bottom: 0; }
+        .grid-2 { width: 100%; margin-bottom: 8pt; }
+        .grid-2::after { content: ""; display: table; clear: both; }
+        .grid-2 .card { width: 49%; float: left; box-sizing: border-box; margin-bottom: 0; }
         .grid-2 .card + .card { margin-left: 2%; }
         .stat-value { font-size: 16pt; font-weight: 700; color: #111827; }
         .stat-label { font-size: 7pt; text-transform: uppercase; letter-spacing: 0.5pt; color: #6b7280; }
@@ -73,52 +70,22 @@
     </div>
 
     <!-- Summary cards -->
-    <div class="metrics-row">
-        <div class="card">
-            <div class="stat-label">Cupos disponibles</div>
-            <div class="stat-value">{{ evento.cupos | default("N/D") }}</div>
-        </div>
-        <div class="card">
-            <div class="stat-label">Participantes registrados</div>
-            <div class="stat-value">{{ metricas.total_participantes }}</div>
-        </div>
-        <div class="card">
-            <div class="stat-label">% asistencia</div>
-            <div class="stat-value">
-                {% if evento.cupos and evento.cupos|int > 0 %}
-                    {{ ((metricas.total_participantes / evento.cupos|int) * 100) | round(1) }}%
-                {% else %}
-                    N/D
-                {% endif %}
-            </div>
-        </div>
-    </div>
+    <table class="metrics-table">
+        <tr>
+            <td><div class="card"><div class="stat-label">Cupos disponibles</div><div class="stat-value">{{ evento.cupos | default("N/D") }}</div></div></td>
+            <td><div class="card"><div class="stat-label">Participantes registrados</div><div class="stat-value">{{ metricas.total_participantes }}</div></div></td>
+            <td><div class="card"><div class="stat-label">% asistencia</div><div class="stat-value">{% if evento.cupos and evento.cupos|int > 0 %}{{ ((metricas.total_participantes / evento.cupos|int) * 100) | round(1) }}%{% else %}N/D{% endif %}</div></div></td>
+        </tr>
+    </table>
 
     {% if metricas.total_respuestas > 0 %}
-    <div class="metrics-row">
-        <div class="card">
-            <div class="stat-label">Encuestas recibidas (v2)</div>
-            <div class="stat-value">{{ metricas.total_respuestas | default("N/D") }}</div>
-        </div>
-        <div class="card">
-            <div class="stat-label">% Participantes Encuestados</div>
-            <div class="stat-value">
-                {% if metricas.total_participantes > 0 %}
-                    {{ ((metricas.total_respuestas / metricas.total_participantes) * 100) | round(1) }}%
-                {% else %}N/D{% endif %}
-            </div>
-        </div>
-        <div class="card">
-            <div class="stat-label">Alfa de Cronbach (global)</div>
-            <div class="stat-value">
-                {% if alfa_cronbach_global is not none %}
-                    {{ alfa_cronbach_global }}
-                {% else %}
-                    Datos insuficientes
-                {% endif %}
-            </div>
-        </div>
-    </div>
+    <table class="metrics-table">
+        <tr>
+            <td><div class="card"><div class="stat-label">Encuestas recibidas (v2)</div><div class="stat-value">{{ metricas.total_respuestas | default("N/D") }}</div></div></td>
+            <td><div class="card"><div class="stat-label">% Participantes Encuestados</div><div class="stat-value">{% if metricas.total_participantes > 0 %}{{ ((metricas.total_respuestas / metricas.total_participantes) * 100) | round(1) }}%{% else %}N/D{% endif %}</div></div></td>
+            <td><div class="card"><div class="stat-label">Alfa de Cronbach (global)</div><div class="stat-value">{% if alfa_cronbach_global is not none %}{{ alfa_cronbach_global }}{% else %}Datos insuficientes{% endif %}</div></div></td>
+        </tr>
+    </table>
     {% else %}
     <div class="info-box">
         No hay respuestas de encuesta disponibles para este evento. Las métricas de satisfacción se mostrarán solo cuando existan participantes que completen la encuesta.
