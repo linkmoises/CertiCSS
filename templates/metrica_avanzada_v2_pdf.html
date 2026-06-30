@@ -6,10 +6,11 @@
     <style>
         @page {
             size: letter;
-            padding: 2.54cm;
+            margin: 2.54cm;
             background-image: url('data:image/jpeg;base64,{{ membrete_b64 }}');
             background-size: 100% 100%;
             background-repeat: no-repeat;
+            background-position: center center;
         }
         @page :first {
             @top-center {
@@ -35,10 +36,12 @@
         .header .meta { font-size: 9pt; color: #6b7280; }
         .card { border: 1pt solid #e5e7eb; border-radius: 4pt; padding: 8pt 10pt; margin-bottom: 10pt; }
         .card-title { font-weight: 700; font-size: 10pt; margin-bottom: 4pt; color: #111827; }
-        .grid-4 { display: flex; flex-wrap: wrap; gap: 8pt; margin-bottom: 12pt; }
-        .grid-4 .card { flex: 1 1 calc(33.333% - 8pt); box-sizing: border-box; }
-        .grid-2 { display: flex; flex-wrap: wrap; gap: 8pt; margin-bottom: 12pt; }
-        .grid-2 .card { flex: 1 1 calc(50% - 8pt); box-sizing: border-box; }
+        .metrics-row { width: 100%; margin-bottom: 8pt; overflow: hidden; }
+        .metrics-row .card { width: 32%; float: left; box-sizing: border-box; }
+        .metrics-row .card + .card { margin-left: 2%; }
+        .grid-2 { width: 100%; margin-bottom: 8pt; overflow: hidden; }
+        .grid-2 .card { width: 49%; float: left; box-sizing: border-box; }
+        .grid-2 .card + .card { margin-left: 2%; }
         .stat-value { font-size: 16pt; font-weight: 700; color: #111827; }
         .stat-label { font-size: 7pt; text-transform: uppercase; letter-spacing: 0.5pt; color: #6b7280; }
         .chart-img { max-width: 100%; height: auto; display: block; margin: 0 auto; }
@@ -70,7 +73,7 @@
     </div>
 
     <!-- Summary cards -->
-    <div class="grid-4">
+    <div class="metrics-row">
         <div class="card">
             <div class="stat-label">Cupos disponibles</div>
             <div class="stat-value">{{ evento.cupos | default("N/D") }}</div>
@@ -92,7 +95,7 @@
     </div>
 
     {% if metricas.total_respuestas > 0 %}
-    <div class="grid-4">
+    <div class="metrics-row">
         <div class="card">
             <div class="stat-label">Encuestas recibidas (v2)</div>
             <div class="stat-value">{{ metricas.total_respuestas | default("N/D") }}</div>
