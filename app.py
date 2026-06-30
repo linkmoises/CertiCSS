@@ -5463,11 +5463,14 @@ def informe_avanzado_v2(codigo_evento):
         alfa_cronbach_global=calcular_alfa_cronbach_v2_global(),
         puede_editar_analisis=puede_editar)
 
-from weasyprint import HTML
-
 @app.route('/tablero/metricas/<codigo_evento>/informe_v2/pdf')
 @login_required
 def informe_avanzado_v2_pdf(codigo_evento):
+    try:
+        from weasyprint import HTML
+    except OSError:
+        flash('No se puede generar el PDF: faltan librerías del sistema (Pango, Cairo, GLib). Contacte al administrador.', 'error')
+        return redirect(url_for('informe_avanzado_v2', codigo_evento=codigo_evento))
     evento = collection_eventos.find_one({"codigo": codigo_evento})
     if not evento:
         flash('Evento no encontrado', 'error')
