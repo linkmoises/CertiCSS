@@ -399,3 +399,92 @@ def descargar_archivo(id):
         download_name=cert.get('archivo_original', 'certificado.pdf'),
         as_attachment=True
     )
+
+
+@certificados_externos_bp.route('/tablero/certificados-externos/<id>/reabrir', methods=['POST'])
+@login_required
+def reabrir(id):
+    if current_user.rol not in ROLES_PERMITIDOS:
+        flash('No tiene permisos para realizar esta acción.', 'error')
+        return redirect(url_for('tablero_coordinadores'))
+
+    cert = collection_certificados_externos.find_one({"_id": ObjectId(id)})
+    if not cert:
+        flash('Certificado externo no encontrado.', 'error')
+        return redirect(url_for('certificados_externos.listar_pendientes'))
+
+    update = {
+        "status": "revision",
+        "validado_por": None,
+        "validado_en": None,
+        "rechazado_por": None,
+        "motivo_rechazo": None,
+        "updated_at": datetime.now(),
+    }
+
+    fecha_inicio_str = request.form.get('fecha_inicio', '').strip()
+    fecha_fin_str = request.form.get('fecha_fin', '').strip()
+    horas_str = request.form.get('horas', '').strip()
+    rol = request.form.get('rol', '').strip()
+
+    if fecha_inicio_str:
+        try:
+            update["fecha_inicio"] = datetime.strptime(fecha_inicio_str, '%Y-%m-%d')
+        except ValueError:
+            flash('Formato de fecha de inicio inválido.', 'error')
+            return redirect(url_for('certificados_externos.detalle', id=id))
+
+    if fecha_fin_str:
+        try:
+            update["fecha_fin"] = datetime.strptime(fecha_fin_str, '%Y-%m-%d')
+        except ValueError:
+            flash('Formato de fecha de fin inválido.', 'error')
+            return redirect(url_for('certificados_externos.detalle', id=id))
+
+    if horas_str:
+        try:
+            h = float(horas_str)
+            if h > 0:
+                update["horas"] = h
+        except ValueError:
+            flash('Formato de horas inválido.', 'error')
+            return redirect(url_for('certificados_externos.detalle', id=id))
+
+    if rol and rol in [r[0] for r in ROLES_DISPONIBLES]:
+        update["rol"] = rol
+
+    collection_certificados_externos.update_one(
+        {"_id": ObjectId(id)},
+        {"$set": update}
+    )
+
+    log_event(f"Certificado externo REABIERTO por [{current_user.email}]: {cert.get('titulo')} "
+              f"(cédula: {cert.get('cedula')})")
+    flash('Certificado externo reabierto para revisión.', 'success')
+    return redirect(url_for('certificados_externos.listar_pendientes'))
+
+
+@certificados_externos_bp.route('/tablero/certificados-externos/<id>/eliminar', methods=['POST'])
+@login_required
+def eliminar(id):
+    if current_user.rol not in ROLES_PERMITIDOS:
+        flash('No tiene permisos para realizar esta acción.', 'error')
+        return redirect(url_for('tablero_coordinadores'))
+
+    cert = collection_certificados_externos.find_one({"_id": ObjectId(id)})
+    if not cert:
+        flash('Certificado externo no encontrado.', 'error')
+        return redirect(url_for('certificados_externos.listar_pendientes'))
+
+    # Eliminar archivo físico
+    if cert.get('archivo'):
+        file_path = os.path.join(_get_upload_path(), cert['archivo'])
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+    collection_certificados_externos.delete_one({"_id": ObjectId(id)})
+
+    log_event(f"Certificado externo ELIMINADO por [{current_user.email}]: {cert.get('titulo')} "
+              f"(cédula: {cert.get('cedula')}, {cert.get('horas', 0)}h)")
+    flash('Certificado externo eliminado permanentemente.', 'success')
+    return redirect(url_for('certificados_externos.listar_completados'))
