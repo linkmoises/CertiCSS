@@ -2,11 +2,11 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Informe {{ evento.nombre }} - CertiCSS</title>
+    <title>Informe {{ evento.nombre }} - DENADOI CertiCSS</title>
     <style>
         @page {
             size: letter;
-            margin: 1.5cm 2cm;
+            margin: 2.54cm;
         }
         @page :first {
             @top-center {
@@ -33,7 +33,7 @@
         .card { border: 1pt solid #e5e7eb; border-radius: 4pt; padding: 8pt 10pt; margin-bottom: 10pt; }
         .card-title { font-weight: 700; font-size: 10pt; margin-bottom: 4pt; color: #111827; }
         .grid-4 { display: flex; flex-wrap: wrap; gap: 8pt; margin-bottom: 12pt; }
-        .grid-4 .card { flex: 1 1 calc(25% - 8pt); min-width: 120pt; }
+        .grid-4 .card { flex: 1 1 calc(33.333% - 8pt); min-width: 160pt; }
         .grid-2 { display: flex; flex-wrap: wrap; gap: 8pt; margin-bottom: 12pt; }
         .grid-2 .card { flex: 1 1 calc(50% - 8pt); min-width: 200pt; }
         .stat-value { font-size: 16pt; font-weight: 700; color: #111827; }
@@ -58,13 +58,7 @@
 <body>
 
     <div class="header">
-        <h1>{{ evento.tipo }}</h1>
-        <div class="meta">
-            {{ evento.unidad_ejecutora }} &mdash;
-            {{ evento.modalidad }} &mdash;
-            <span class="badge badge-blue">Encuesta v2</span>
-        </div>
-        <div class="meta">Generado el {{ now().strftime('%d/%m/%Y %H:%M') }}</div>
+        <div class="meta">Informe generado el {{ now().strftime('%d/%m/%Y %H:%M') }}</div>
     </div>
 
     <div class="card">
@@ -92,14 +86,14 @@
                 {% endif %}
             </div>
         </div>
+    </div>
+
+    {% if metricas.total_respuestas > 0 %}
+    <div class="grid-4">
         <div class="card">
             <div class="stat-label">Encuestas recibidas (v2)</div>
             <div class="stat-value">{{ metricas.total_respuestas | default("N/D") }}</div>
         </div>
-    </div>
-
-    {% if metricas.total_respuestas > 0 %}
-    <div class="grid-2">
         <div class="card">
             <div class="stat-label">% Participantes Encuestados</div>
             <div class="stat-value">
@@ -163,6 +157,8 @@
         {% endif %}
     </div>
 
+    <div class="page-break"></div>
+
     {% if metricas.total_respuestas > 0 %}
 
     <!-- Gráfica 1: Perfil -->
@@ -173,7 +169,7 @@
         {% else %}
         <p style="color:#6b7280;">No hay datos disponibles.</p>
         {% endif %}
-        <div class="data-src">Fuente: formulario de registro de participantes.</div>
+        <div class="data-src">Fuente: Formulario de registro de participantes.</div>
     </div>
 
     <!-- Gráfica 2: Región -->
@@ -185,7 +181,7 @@
         {% else %}
         <p style="color:#6b7280;">No hay datos disponibles.</p>
         {% endif %}
-        <div class="data-src">Fuente: formulario de registro de participantes.</div>
+        <div class="data-src">Fuente: Formulario de registro de participantes.</div>
     </div>
 
     <!-- Gráfica 3: Unidades -->
@@ -196,7 +192,7 @@
         {% else %}
         <p style="color:#6b7280;">No hay datos disponibles.</p>
         {% endif %}
-        <div class="data-src">Fuente: formulario de registro de participantes.</div>
+        <div class="data-src">Fuente: Formulario de registro de participantes.</div>
     </div>
 
     <!-- Gráfica 4 y 5: Demografía -->
@@ -210,7 +206,7 @@
             {% else %}
             <p style="color:#6b7280;">No hay datos disponibles en encuesta.</p>
             {% endif %}
-            <div class="data-src">Fuente: encuesta de satisfacción v2.</div>
+            <div class="data-src">Fuente: Encuesta de satisfacción v2.</div>
         </div>
         <div class="card">
             <div class="card-title">Gráfica No 5. Demografía — Distribución etaria</div>
@@ -220,7 +216,7 @@
             {% else %}
             <p style="color:#6b7280;">No hay datos disponibles en encuesta.</p>
             {% endif %}
-            <div class="data-src">Fuente: encuesta de satisfacción v2.</div>
+            <div class="data-src">Fuente: Encuesta de satisfacción v2.</div>
         </div>
     </div>
 
@@ -233,17 +229,17 @@
         {% else %}
         <p style="color:#6b7280;">No hay datos disponibles en encuesta.</p>
         {% endif %}
-        <div class="data-src">Fuente: encuesta de satisfacción v2.</div>
+        <div class="data-src">Fuente: Encuesta de satisfacción v2.</div>
     </div>
 
     <!-- Detalle E1-E5 -->
     <div class="card">
         <div class="card-title">Detalle de Preguntas (E1–E5)</div>
-        <div class="e-detail"><span class="e-label">E1. Pertinencia del contenido</span><span class="e-scale">Escala 1–5</span></div>
-        <div class="e-detail"><span class="e-label">E2. Claridad de la información</span><span class="e-scale">Escala 1–5</span></div>
-        <div class="e-detail"><span class="e-label">E3. Actualización científica</span><span class="e-scale">Escala 1–5</span></div>
-        <div class="e-detail"><span class="e-label">E4. Dominio del tema (ponente)</span><span class="e-scale">Escala 1–5</span></div>
-        <div class="e-detail"><span class="e-label">E5. Organización del evento</span><span class="e-scale">Escala 1–5</span></div>
+        <div class="e-detail"><span class="e-label">E1. El contenido fue pertinente para mi práctica</span><span class="e-scale">Escala 1–5</span></div>
+        <div class="e-detail"><span class="e-label">E2. La información fue clara y comprensible</span><span class="e-scale">Escala 1–5</span></div>
+        <div class="e-detail"><span class="e-label">E3. El contenido estuvo científicamente actualizado</span><span class="e-scale">Escala 1–5</span></div>
+        <div class="e-detail"><span class="e-label">E4. El(los) ponente(s) demostró(aron) dominio del tema</span><span class="e-scale">Escala 1–5</span></div>
+        <div class="e-detail"><span class="e-label">E5. La organización del evento fue adecuada</span><span class="e-scale">Escala 1–5</span></div>
     </div>
 
     {% endif %}
@@ -259,7 +255,7 @@
     </div>
 
     <div class="footer">
-        Sistema de verificación de autenticidad de certificados — CertiCSS &copy; {{ now().year }}
+        <div class="meta">Informe generado el {{ now().strftime('%d/%m/%Y %H:%M') }}</div>
     </div>
 
 </body>
