@@ -78,6 +78,51 @@
                         </div>
                     </div>
 
+                    {% if existentes %}
+                    <div class="mb-6 p-4 border border-amber-200 bg-amber-50 rounded-lg dark:bg-amber-900/20 dark:border-amber-800">
+                        <div class="flex items-center gap-2 mb-3">
+                            <svg class="w-5 h-5 text-amber-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                            </svg>
+                            <h3 class="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                                Certificados existentes de {{ cert.nombres }} {{ cert.apellidos }}
+                            </h3>
+                            <span class="text-xs text-amber-600 dark:text-amber-400">({{ existentes|length }})</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-xs">
+                                <thead>
+                                    <tr class="border-b border-amber-200 dark:border-amber-800">
+                                        <th class="py-1 pr-2 text-left font-medium text-amber-700 dark:text-amber-300">Estado</th>
+                                        <th class="py-1 pr-2 text-left font-medium text-amber-700 dark:text-amber-300">Título</th>
+                                        <th class="py-1 pr-2 text-left font-medium text-amber-700 dark:text-amber-300">Fechas</th>
+                                        <th class="py-1 pr-2 text-left font-medium text-amber-700 dark:text-amber-300">Horas</th>
+                                        <th class="py-1 text-left font-medium text-amber-700 dark:text-amber-300">Recibido</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for e in existentes %}
+                                    <tr class="border-b border-amber-100 dark:border-amber-900">
+                                        <td class="py-1 pr-2">
+                                            <span class="inline-flex items-center gap-x-1 py-0.5 px-1.5 rounded-full text-xs font-medium
+                                                {% if e.status == 'aprobado' %}bg-green-100 text-green-700
+                                                {% elif e.status == 'rechazado' %}bg-red-100 text-red-700
+                                                {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                                                {{ e.status }}
+                                            </span>
+                                        </td>
+                                        <td class="py-1 pr-2 text-amber-900 dark:text-amber-200 max-w-[200px] truncate">{{ e.titulo }}</td>
+                                        <td class="py-1 pr-2 text-amber-800 dark:text-amber-300 whitespace-nowrap">{{ e.fecha_str }} — {{ e.fecha_fin_str }}</td>
+                                        <td class="py-1 pr-2 text-amber-800 dark:text-amber-300 font-mono">{{ "%.1f"|format(e.horas) }} h</td>
+                                        <td class="py-1 text-amber-700 dark:text-amber-400 whitespace-nowrap">{{ e.created_at.strftime('%d/%m/%Y') if e.created_at else '—' }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% endif %}
+
                     {% if cert.archivo %}
                     <div class="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg dark:bg-neutral-800 dark:border-neutral-700">
                         <div class="flex items-center justify-between">

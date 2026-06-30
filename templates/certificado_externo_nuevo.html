@@ -106,18 +106,6 @@
                                         </div>
 
                                         <div>
-                                            <label for="rol" class="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-2">
-                                                Rol durante la actividad
-                                            </label>
-                                            <select id="rol" name="rol"
-                                                    class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400">
-                                                {% for val, label in roles %}
-                                                <option value="{{ val }}" {% if rol == val %}selected{% endif %}>{{ label }}</option>
-                                                {% endfor %}
-                                            </select>
-                                        </div>
-
-                                        <div>
                                             <label for="horas" class="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-2">
                                                 Horas académicas <span class="text-red-500">*</span>
                                             </label>

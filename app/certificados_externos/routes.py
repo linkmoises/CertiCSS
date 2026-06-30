@@ -64,8 +64,7 @@ def nuevo_externo():
         return render_template('certificado_externo_nuevo.html',
                                cedula=cedula, token=token,
                                nombres=participante.get('nombres', ''),
-                               apellidos=participante.get('apellidos', ''),
-                               roles=ROLES_DISPONIBLES)
+                               apellidos=participante.get('apellidos', ''))
 
     # POST
     cedula = request.form.get('cedula', '').strip()
@@ -136,9 +135,7 @@ def nuevo_externo():
                                titulo=titulo,
                                fecha_inicio=fecha_inicio_str,
                                fecha_fin=fecha_fin_str,
-                               horas=horas_str,
-                               rol=rol,
-                               roles=ROLES_DISPONIBLES)
+                               horas=horas_str)
 
     file = request.files['archivo']
     original_filename = secure_filename(file.filename)
@@ -173,7 +170,7 @@ def nuevo_externo():
 
     log_event(f"Certificado externo subido por cédula {cedula}: {titulo} ({horas}h, rol: {rol})")
     flash('Certificado externo subido exitosamente. Quedará en revisión por el equipo de DENADOI.', 'success')
-    return redirect(url_for('buscar_certificados'))
+    return redirect(url_for('buscar_certificados', cedula=cedula, token=token))
 
 
 @certificados_externos_bp.route('/certificado-externo/<id>/ver')
@@ -275,8 +272,20 @@ def detalle(id):
     cert['fecha_inicio_input'] = _fmt_date_input(fi)
     cert['fecha_fin_input'] = _fmt_date_input(ff)
 
+    # Certificados existentes de la misma persona (para detectar duplicados)
+    existentes = list(collection_certificados_externos.find({
+        "cedula": cert['cedula'],
+        "_id": {"$ne": ObjectId(id)}
+    }).sort("created_at", -1))
+    for e in existentes:
+        fi2 = e.get('fecha_inicio') or e.get('fecha')
+        ff2 = e.get('fecha_fin') or e.get('fecha')
+        e['fecha_str'] = _fmt_date(fi2)
+        e['fecha_fin_str'] = _fmt_date(ff2)
+
     return render_template('certificado_externo_detalle.html',
                            cert=cert, roles=ROLES_DISPONIBLES,
+                           existentes=existentes,
                            active_section='certificados_externos')
 
 

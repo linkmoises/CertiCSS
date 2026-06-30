@@ -3125,288 +3125,298 @@ from app.verifica_encuesta import has_completed_survey_v2, requires_survey_compl
 
 @app.route('/buscar_certificados', methods=['GET', 'POST'])
 def buscar_certificados():
+    if request.method == 'GET':
+        cedula = request.args.get('cedula', '').strip()
+        token = request.args.get('token', '').strip()
+        if cedula and token and verify_token(cedula, token):
+            return _buscar_certificados_resultados(cedula, token)
+
     if request.method == 'POST':
-        # Obtener la cédula del formulario
         cedula = request.form.get('cedula')
         token = generate_token(cedula)
+        return _buscar_certificados_resultados(cedula, token)
 
-        # Buscar registros del participante
-        participantes = list(collection_participantes.find({"cedula": cedula}))
+    return render_template('buscar.html')
 
-        if not participantes:
-            return render_template('lista_certificados.html', cedula=cedula, resultados=None)
 
-        resultados = []
+def _buscar_certificados_resultados(cedula, token):
+    # Buscar registros del participante
+    participantes = list(collection_participantes.find({"cedula": cedula}))
 
-        for participante in participantes:
-            codigo_evento = participante.get('codigo_evento')
-            evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not participantes:
+        return render_template('lista_certificados.html', cedula=cedula, resultados=None)
 
-            tiene_archivos = collection_repositorio.count_documents({'codigo_evento': codigo_evento}) > 0
+    resultados = []
 
-            if evento:
-                fecha_evento = evento.get('fecha_fin', None)
+    for participante in participantes:
+        codigo_evento = participante.get('codigo_evento')
+        evento = collection_eventos.find_one({"codigo": codigo_evento})
 
-                # Verificar si el participante completó el examen
-                examen_completado = False
-                puntaje_examen = 0
-                tiene_examen = False
+        tiene_archivos = collection_repositorio.count_documents({'codigo_evento': codigo_evento}) > 0
+
+        if evento:
+            fecha_evento = evento.get('fecha_fin', None)
+
+            # Verificar si el participante completó el examen
+            examen_completado = False
+            puntaje_examen = 0
+            tiene_examen = False
+            
+            # Verificar si el evento tiene exámenes sumativos (no formativos)
+            examenes_sumativos = list(collection_eva.find({
+                'codigo_evento': codigo_evento,
+                'tipo': 'examen'
+            }))
+            # Filtrar solo los que tienen qbank_config sin formativo=si
+            from app.plataforma import parse_qbank_config
+            ordenes_sumativos = []
+            for ex in examenes_sumativos:
+                qbank_config = ex.get('qbank_config', '')
+                if qbank_config:
+                    _, _, _, formativo = parse_qbank_config(qbank_config)
+                    if not formativo:
+                        ordenes_sumativos.append(ex.get('orden'))
+                else:
+                    # Sin qbank_config configurado, no cuenta como sumativo
+                    pass
+
+            if ordenes_sumativos:
+                tiene_examen = True
+                # Buscar el mejor resultado solo entre exámenes sumativos
+                resultados_examen = list(collection_exam_results.find({
+                    'codigo_evento': codigo_evento,
+                    'cedula_participante': participante['cedula'],
+                    'orden_examen': {'$in': ordenes_sumativos},
+                    'formativo': {'$ne': True}
+                }).sort('calificacion', -1).limit(1))
                 
-                # Verificar si el evento tiene exámenes sumativos (no formativos)
-                examenes_sumativos = list(collection_eva.find({
-                    'codigo_evento': codigo_evento,
-                    'tipo': 'examen'
-                }))
-                # Filtrar solo los que tienen qbank_config sin formativo=si
-                from app.plataforma import parse_qbank_config
-                ordenes_sumativos = []
-                for ex in examenes_sumativos:
-                    qbank_config = ex.get('qbank_config', '')
-                    if qbank_config:
-                        _, _, _, formativo = parse_qbank_config(qbank_config)
-                        if not formativo:
-                            ordenes_sumativos.append(ex.get('orden'))
-                    else:
-                        # Sin qbank_config configurado, no cuenta como sumativo
-                        pass
+                if resultados_examen:
+                    mejor_resultado = resultados_examen[0]
+                    puntaje_examen = mejor_resultado.get('calificacion', 0)
+                    examen_completado = True
 
-                if ordenes_sumativos:
-                    tiene_examen = True
-                    # Buscar el mejor resultado solo entre exámenes sumativos
-                    resultados_examen = list(collection_exam_results.find({
-                        'codigo_evento': codigo_evento,
-                        'cedula_participante': participante['cedula'],
-                        'orden_examen': {'$in': ordenes_sumativos},
-                        'formativo': {'$ne': True}
-                    }).sort('calificacion', -1).limit(1))
-                    
-                    if resultados_examen:
-                        mejor_resultado = resultados_examen[0]
-                        puntaje_examen = mejor_resultado.get('calificacion', 0)
-                        examen_completado = True
+            # Check survey completion status
+            requires_survey = requires_survey_completion(evento)
+            survey_completed = False
+            survey_url = ''
+            
+            if requires_survey:
+                survey_completed = has_completed_survey_v2(cedula, codigo_evento)
+                # Generate survey URL with cedula as query parameter
+                survey_url = url_for('encuesta_satisfaccion', codigo_evento=codigo_evento) + f'?cedula={cedula}'
 
-                # Check survey completion status
-                requires_survey = requires_survey_completion(evento)
-                survey_completed = False
-                survey_url = ''
-                
-                if requires_survey:
-                    survey_completed = has_completed_survey_v2(cedula, codigo_evento)
-                    # Generate survey URL with cedula as query parameter
-                    survey_url = url_for('encuesta_satisfaccion', codigo_evento=codigo_evento) + f'?cedula={cedula}'
+            # Prorrateo para participantes en eventos multi-día
+            carga_prorrateada = None
+            if participante.get('rol') == 'participante':
+                fi_evento = evento.get('fecha_inicio')
+                ff_evento = evento.get('fecha_fin')
+                if fi_evento and ff_evento:
+                    if isinstance(fi_evento, str):
+                        fi_evento = datetime.strptime(fi_evento, '%Y-%m-%d %H:%M:%S')
+                    if isinstance(ff_evento, str):
+                        ff_evento = datetime.strptime(ff_evento, '%Y-%m-%d %H:%M:%S')
+                    duracion_dias = (ff_evento.date() - fi_evento.date()).days + 1
+                    if duracion_dias > 1:
+                        count = collection_participantes.count_documents({
+                            "cedula": participante['cedula'],
+                            "codigo_evento": codigo_evento,
+                            "rol": "participante",
+                            "indice_registro": {
+                                "$gte": fi_evento.strftime('%Y%m%d'),
+                                "$lte": ff_evento.strftime('%Y%m%d')
+                            }
+                        })
+                        if 0 < count < duracion_dias:
+                            carga_total = float(evento.get('carga_horaria', 0))
+                            carga_prorrateada = round((carga_total / duracion_dias) * count)
 
-                # Prorrateo para participantes en eventos multi-día
-                carga_prorrateada = None
-                if participante.get('rol') == 'participante':
-                    fi_evento = evento.get('fecha_inicio')
-                    ff_evento = evento.get('fecha_fin')
-                    if fi_evento and ff_evento:
-                        if isinstance(fi_evento, str):
-                            fi_evento = datetime.strptime(fi_evento, '%Y-%m-%d %H:%M:%S')
-                        if isinstance(ff_evento, str):
-                            ff_evento = datetime.strptime(ff_evento, '%Y-%m-%d %H:%M:%S')
-                        duracion_dias = (ff_evento.date() - fi_evento.date()).days + 1
-                        if duracion_dias > 1:
-                            count = collection_participantes.count_documents({
-                                "cedula": participante['cedula'],
-                                "codigo_evento": codigo_evento,
-                                "rol": "participante",
-                                "indice_registro": {
-                                    "$gte": fi_evento.strftime('%Y%m%d'),
-                                    "$lte": ff_evento.strftime('%Y%m%d')
-                                }
-                            })
-                            if 0 < count < duracion_dias:
-                                carga_total = float(evento.get('carga_horaria', 0))
-                                carga_prorrateada = round((carga_total / duracion_dias) * count)
-
-                resultado = {
-                    'nombres': participante['nombres'],
-                    'apellidos': participante['apellidos'],
-                    'cedula': participante['cedula'],
-                    'nanoid': participante['nanoid'],
-                    'rol': participante['rol'],
-                    'ponencia': participante.get('titulo_ponencia', 'N/A'),
-                    'codigo_evento': codigo_evento,
-                    'certificado_evento': evento.get('certificado', None),
-                    'titulo_evento': evento.get('nombre', 'Título no disponible'),
-                    'fecha_evento': fecha_evento,
-                    'fecha_inicio': evento.get('fecha_inicio', None),
-                    'modalidad_evento': evento.get('modalidad', 'No disponible'),
-                    'tipo_evento': evento.get('tipo', 'General'),  # Agregar tipo de evento
-                    'carga_horaria': evento.get('carga_horaria', '0'),
-                    'carga_prorrateada': carga_prorrateada,
-                    'tiene_archivos': tiene_archivos,
-                    'hora_inicio': evento.get('hora_inicio', 8),
-                    'hora_fin': evento.get('hora_fin', 15),
-                    'registro_abierto': evento.get('registro_abierto', False),
-                    'examen_completado': examen_completado,
-                    'puntaje_examen': puntaje_examen,
-                    'tiene_examen': tiene_examen,
-                    'requires_survey': requires_survey,
-                    'survey_completed': survey_completed,
-                    'survey_url': survey_url,
-                }
-                resultados.append(resultado)
-            else:
-                resultado = {
-                    'nombres': participante.get('nombres', 'N/A'),
-                    'apellidos': participante.get('apellidos', 'N/A'),
-                    'cedula': participante['cedula'],
-                    'nanoid': participante['nanoid'],
-                    'rol': participante.get('rol', 'participante'),
-                    'ponencia': participante.get('titulo_ponencia', 'N/A'),
-                    'codigo_evento': codigo_evento,
-                    'certificado_evento': None,
-                    'titulo_evento': 'Evento no encontrado',
-                    'fecha_evento': None,
-                    'fecha_inicio': None,
-                    'modalidad_evento': 'No disponible',
-                    'tipo_evento': 'General',  # Agregar tipo de evento por defecto
-                    'carga_horaria': '0',
-                    'carga_prorrateada': None,
-                    'tiene_archivos': False,
-                    'hora_inicio': 8,
-                    'hora_fin': 15,
-                    'registro_abierto': False,
-                    'examen_completado': False,
-                    'puntaje_examen': 0,
-                    'tiene_examen': False,
-                    'requires_survey': False,
-                    'survey_completed': False,
-                    'survey_url': '',
-                }
-                resultados.append(resultado)
-
-        # ========= FILTRAR DUPLICADOS DE PARTICIPANTE ==========
-        filtrados = []
-        unicos_participantes = {}
-
-        for r in resultados:
-            if r['rol'] == 'participante':
-                clave = (r['cedula'], r['codigo_evento'], r['rol'])
-                if clave not in unicos_participantes:
-                    unicos_participantes[clave] = r
-            else:
-                filtrados.append(r)
-
-        # Añadir los únicos registros de participante
-        filtrados.extend(unicos_participantes.values())
-        resultados = filtrados
-        # ========================================================
-
-        # Ordenar por fecha del evento
-        fecha_actual = datetime.now().date()
-        hora_actual = datetime.now().time()
-
-        def obtener_fecha_ordenable(item):
-            fecha = item.get('fecha_evento')
-            return fecha or datetime.min
-
-        resultados.sort(key=obtener_fecha_ordenable, reverse=True)
-
-        # Calcular sumatoria de horas por rol en períodos académicos (sep - ago)
-        if fecha_actual.month >= 9:
-            inicio_actual = datetime(fecha_actual.year, 9, 1).date()
-            fin_actual = datetime(fecha_actual.year + 1, 8, 31).date()
+            resultado = {
+                'nombres': participante['nombres'],
+                'apellidos': participante['apellidos'],
+                'cedula': participante['cedula'],
+                'nanoid': participante['nanoid'],
+                'rol': participante['rol'],
+                'ponencia': participante.get('titulo_ponencia', 'N/A'),
+                'codigo_evento': codigo_evento,
+                'certificado_evento': evento.get('certificado', None),
+                'titulo_evento': evento.get('nombre', 'Título no disponible'),
+                'fecha_evento': fecha_evento,
+                'fecha_inicio': evento.get('fecha_inicio', None),
+                'modalidad_evento': evento.get('modalidad', 'No disponible'),
+                'tipo_evento': evento.get('tipo', 'General'),  # Agregar tipo de evento
+                'carga_horaria': evento.get('carga_horaria', '0'),
+                'carga_prorrateada': carga_prorrateada,
+                'tiene_archivos': tiene_archivos,
+                'hora_inicio': evento.get('hora_inicio', 8),
+                'hora_fin': evento.get('hora_fin', 15),
+                'registro_abierto': evento.get('registro_abierto', False),
+                'examen_completado': examen_completado,
+                'puntaje_examen': puntaje_examen,
+                'tiene_examen': tiene_examen,
+                'requires_survey': requires_survey,
+                'survey_completed': survey_completed,
+                'survey_url': survey_url,
+            }
+            resultados.append(resultado)
         else:
-            inicio_actual = datetime(fecha_actual.year - 1, 9, 1).date()
-            fin_actual = datetime(fecha_actual.year, 8, 31).date()
+            resultado = {
+                'nombres': participante.get('nombres', 'N/A'),
+                'apellidos': participante.get('apellidos', 'N/A'),
+                'cedula': participante['cedula'],
+                'nanoid': participante['nanoid'],
+                'rol': participante.get('rol', 'participante'),
+                'ponencia': participante.get('titulo_ponencia', 'N/A'),
+                'codigo_evento': codigo_evento,
+                'certificado_evento': None,
+                'titulo_evento': 'Evento no encontrado',
+                'fecha_evento': None,
+                'fecha_inicio': None,
+                'modalidad_evento': 'No disponible',
+                'tipo_evento': 'General',  # Agregar tipo de evento por defecto
+                'carga_horaria': '0',
+                'carga_prorrateada': None,
+                'tiene_archivos': False,
+                'hora_inicio': 8,
+                'hora_fin': 15,
+                'registro_abierto': False,
+                'examen_completado': False,
+                'puntaje_examen': 0,
+                'tiene_examen': False,
+                'requires_survey': False,
+                'survey_completed': False,
+                'survey_url': '',
+            }
+            resultados.append(resultado)
 
-        inicio_anterior = datetime(inicio_actual.year - 1, 9, 1).date()
-        fin_anterior = datetime(inicio_actual.year, 8, 31).date()
+    # ========= FILTRAR DUPLICADOS DE PARTICIPANTE ==========
+    filtrados = []
+    unicos_participantes = {}
 
-        def _calcular_sumas(resultados, inicio, fin):
-            eventos_vistos = set()
-            sumas = {}
-            for r in resultados:
-                fecha = r.get('fecha_evento')
-                if isinstance(fecha, datetime):
-                    fecha = fecha.date()
-                if not (fecha and inicio <= fecha <= fin):
-                    continue
-                codigo = r.get('codigo_evento')
-                if codigo in eventos_vistos:
-                    continue
-                eventos_vistos.add(codigo)
-                tipo = r.get('tipo_evento', 'General')
-                try:
-                    carga_prorrateada = r.get('carga_prorrateada')
-                    if carga_prorrateada is not None:
-                        carga = float(carga_prorrateada)
-                    else:
-                        carga = float(r.get('carga_horaria', 0))
-                except (ValueError, TypeError):
-                    carga = 0
-                sumas[tipo] = sumas.get(tipo, 0) + carga
-            return sumas
+    for r in resultados:
+        if r['rol'] == 'participante':
+            clave = (r['cedula'], r['codigo_evento'], r['rol'])
+            if clave not in unicos_participantes:
+                unicos_participantes[clave] = r
+        else:
+            filtrados.append(r)
 
-        sumas_actual = _calcular_sumas(resultados, inicio_actual, fin_actual)
-        sumas_anterior = _calcular_sumas(resultados, inicio_anterior, fin_anterior)
+    # Añadir los únicos registros de participante
+    filtrados.extend(unicos_participantes.values())
+    resultados = filtrados
+    # ========================================================
 
-        # Integrar certificados externos aprobados
-        externos_raw = list(collection_certificados_externos.find({
-            "cedula": cedula,
-            "status": "aprobado"
-        }))
-        externos_actividades = []
-        for ext in externos_raw:
-            fi = ext.get('fecha_inicio') or ext.get('fecha')
-            ff = ext.get('fecha_fin') or ext.get('fecha')
-            hext = float(ext.get('horas', 0))
-            if isinstance(ff, datetime):
-                ff_date = ff.date() if hasattr(ff, 'date') else ff
-            else:
-                ff_date = None
-            if ff_date and inicio_actual <= ff_date <= fin_actual:
-                sumas_actual['Actividades externas'] = sumas_actual.get('Actividades externas', 0) + hext
-            if ff_date and inicio_anterior <= ff_date <= fin_anterior:
-                sumas_anterior['Actividades externas'] = sumas_anterior.get('Actividades externas', 0) + hext
-            externos_actividades.append({
-                'es_externo': True,
-                'nombres': ext.get('nombres', ''),
-                'apellidos': ext.get('apellidos', ''),
-                'cedula': ext.get('cedula', cedula),
-                'titulo_evento': ext.get('titulo', 'Actividad externa'),
-                'fecha_evento': ff,
-                'fecha_inicio': fi,
-                'rol': ext.get('rol', 'participante'),
-                'carga_horaria': hext,
-                'externo_id': str(ext['_id']),
-                'archivo': ext.get('archivo'),
-                'archivo_original': ext.get('archivo_original'),
-                'tipo_evento': 'Actividades externas',
-            })
+    # Ordenar por fecha del evento
+    fecha_actual = datetime.now().date()
+    hora_actual = datetime.now().time()
 
-        periodos = [
-            {
-                'id': 'actual',
-                'label': f'1 sep {inicio_actual.year} - 31 ago {fin_actual.year}',
-                'sumas_por_rol': sumas_actual,
-                'total': sum(sumas_actual.values()),
-                'inicio': inicio_actual,
-                'fin': fin_actual,
-            },
-            {
-                'id': 'anterior',
-                'label': f'1 sep {inicio_anterior.year} - 31 ago {fin_anterior.year}',
-                'sumas_por_rol': sumas_anterior,
-                'total': sum(sumas_anterior.values()),
-                'inicio': inicio_anterior,
-                'fin': fin_anterior,
-            },
-        ]
+    def obtener_fecha_ordenable(item):
+        fecha = item.get('fecha_evento')
+        return fecha or datetime.min
 
-        return render_template(
-            'lista_certificados.html',
-            cedula=cedula,
-            resultados=resultados,
-            fecha_actual=fecha_actual,
-            hora_actual=hora_actual,
-            token=token,
-            periodos=periodos,
-            externos_actividades=externos_actividades,
-        )
+    resultados.sort(key=obtener_fecha_ordenable, reverse=True)
+
+    # Calcular sumatoria de horas por rol en períodos académicos (sep - ago)
+    if fecha_actual.month >= 9:
+        inicio_actual = datetime(fecha_actual.year, 9, 1).date()
+        fin_actual = datetime(fecha_actual.year + 1, 8, 31).date()
+    else:
+        inicio_actual = datetime(fecha_actual.year - 1, 9, 1).date()
+        fin_actual = datetime(fecha_actual.year, 8, 31).date()
+
+    inicio_anterior = datetime(inicio_actual.year - 1, 9, 1).date()
+    fin_anterior = datetime(inicio_actual.year, 8, 31).date()
+
+    def _calcular_sumas(resultados, inicio, fin):
+        eventos_vistos = set()
+        sumas = {}
+        for r in resultados:
+            fecha = r.get('fecha_evento')
+            if isinstance(fecha, datetime):
+                fecha = fecha.date()
+            if not (fecha and inicio <= fecha <= fin):
+                continue
+            codigo = r.get('codigo_evento')
+            if codigo in eventos_vistos:
+                continue
+            eventos_vistos.add(codigo)
+            tipo = r.get('tipo_evento', 'General')
+            try:
+                carga_prorrateada = r.get('carga_prorrateada')
+                if carga_prorrateada is not None:
+                    carga = float(carga_prorrateada)
+                else:
+                    carga = float(r.get('carga_horaria', 0))
+            except (ValueError, TypeError):
+                carga = 0
+            sumas[tipo] = sumas.get(tipo, 0) + carga
+        return sumas
+
+    sumas_actual = _calcular_sumas(resultados, inicio_actual, fin_actual)
+    sumas_anterior = _calcular_sumas(resultados, inicio_anterior, fin_anterior)
+
+    # Integrar certificados externos aprobados
+    externos_raw = list(collection_certificados_externos.find({
+        "cedula": cedula,
+        "status": "aprobado"
+    }))
+    externos_actividades = []
+    for ext in externos_raw:
+        fi = ext.get('fecha_inicio') or ext.get('fecha')
+        ff = ext.get('fecha_fin') or ext.get('fecha')
+        hext = float(ext.get('horas', 0))
+        if isinstance(ff, datetime):
+            ff_date = ff.date() if hasattr(ff, 'date') else ff
+        else:
+            ff_date = None
+        if ff_date and inicio_actual <= ff_date <= fin_actual:
+            sumas_actual['Actividades externas'] = sumas_actual.get('Actividades externas', 0) + hext
+        if ff_date and inicio_anterior <= ff_date <= fin_anterior:
+            sumas_anterior['Actividades externas'] = sumas_anterior.get('Actividades externas', 0) + hext
+        externos_actividades.append({
+            'es_externo': True,
+            'nombres': ext.get('nombres', ''),
+            'apellidos': ext.get('apellidos', ''),
+            'cedula': ext.get('cedula', cedula),
+            'titulo_evento': ext.get('titulo', 'Actividad externa'),
+            'fecha_evento': ff,
+            'fecha_inicio': fi,
+            'rol': ext.get('rol', 'participante'),
+            'carga_horaria': hext,
+            'externo_id': str(ext['_id']),
+            'archivo': ext.get('archivo'),
+            'archivo_original': ext.get('archivo_original'),
+            'tipo_evento': 'Actividades externas',
+        })
+
+    periodos = [
+        {
+            'id': 'actual',
+            'label': f'1 sep {inicio_actual.year} - 31 ago {fin_actual.year}',
+            'sumas_por_rol': sumas_actual,
+            'total': sum(sumas_actual.values()),
+            'inicio': inicio_actual,
+            'fin': fin_actual,
+        },
+        {
+            'id': 'anterior',
+            'label': f'1 sep {inicio_anterior.year} - 31 ago {fin_anterior.year}',
+            'sumas_por_rol': sumas_anterior,
+            'total': sum(sumas_anterior.values()),
+            'inicio': inicio_anterior,
+            'fin': fin_anterior,
+        },
+    ]
+
+    return render_template(
+        'lista_certificados.html',
+        cedula=cedula,
+        resultados=resultados,
+        fecha_actual=fecha_actual,
+        hora_actual=hora_actual,
+        token=token,
+        periodos=periodos,
+        externos_actividades=externos_actividades,
+    )
 
     return render_template('buscar.html')
 
