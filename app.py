@@ -3120,7 +3120,7 @@ def obtener_fecha_ordenable(item):
 ###
 ### listado de resultados 
 ###
-from app.auth import generate_token
+from app.auth import generate_token, verify_token
 from app.verifica_encuesta import has_completed_survey_v2, requires_survey_completion
 
 @app.route('/buscar_certificados', methods=['GET', 'POST'])

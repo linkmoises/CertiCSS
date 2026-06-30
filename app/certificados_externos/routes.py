@@ -308,6 +308,10 @@ def aprobar(id):
         "updated_at": datetime.now(),
     }
 
+    titulo = request.form.get('titulo', '').strip()
+    if titulo:
+        update["titulo"] = titulo
+
     fecha_inicio_str = request.form.get('fecha_inicio', '').strip()
     fecha_fin_str = request.form.get('fecha_fin', '').strip()
     horas_str = request.form.get('horas', '').strip()
@@ -421,6 +425,10 @@ def reabrir(id):
         "motivo_rechazo": None,
         "updated_at": datetime.now(),
     }
+
+    titulo = request.form.get('titulo', '').strip()
+    if titulo:
+        update["titulo"] = titulo
 
     fecha_inicio_str = request.form.get('fecha_inicio', '').strip()
     fecha_fin_str = request.form.get('fecha_fin', '').strip()
