@@ -3386,7 +3386,45 @@ def _buscar_certificados_resultados(cedula, token):
             'archivo': ext.get('archivo'),
             'archivo_original': ext.get('archivo_original'),
             'tipo_evento': 'Actividades externas',
+            'status': ext.get('status'),
         })
+
+    # Certificados no aprobados (rechazados y pendientes) para mostrar al participante
+    externos_no_aprobados = list(collection_certificados_externos.find({
+        "cedula": cedula,
+        "status": {"$ne": "aprobado"},
+        "$or": [
+            {"adjunto_eliminado": {"$ne": True}},
+            {"adjunto_eliminado": {"$exists": False}}
+        ]
+    }))
+    externos_rechazados = []
+    externos_pendientes = []
+    for ext in externos_no_aprobados:
+        fi = ext.get('fecha_inicio') or ext.get('fecha')
+        ff = ext.get('fecha_fin') or ext.get('fecha')
+        hext = float(ext.get('horas', 0))
+        item = {
+            'es_externo': True,
+            'nombres': ext.get('nombres', ''),
+            'apellidos': ext.get('apellidos', ''),
+            'cedula': ext.get('cedula', cedula),
+            'titulo_evento': ext.get('titulo', 'Actividad externa'),
+            'fecha_evento': ff,
+            'fecha_inicio': fi,
+            'rol': ext.get('rol', 'participante'),
+            'carga_horaria': hext,
+            'externo_id': str(ext['_id']),
+            'archivo': ext.get('archivo'),
+            'archivo_original': ext.get('archivo_original'),
+            'tipo_evento': 'Actividades externas',
+            'status': ext.get('status'),
+            'motivo_rechazo': ext.get('motivo_rechazo'),
+        }
+        if ext.get('status') == 'rechazado':
+            externos_rechazados.append(item)
+        else:
+            externos_pendientes.append(item)
 
     periodos = [
         {
@@ -3407,6 +3445,8 @@ def _buscar_certificados_resultados(cedula, token):
         },
     ]
 
+    total_externos = len(externos_actividades) + len(externos_rechazados) + len(externos_pendientes)
+
     return render_template(
         'lista_certificados.html',
         cedula=cedula,
@@ -3416,6 +3456,9 @@ def _buscar_certificados_resultados(cedula, token):
         token=token,
         periodos=periodos,
         externos_actividades=externos_actividades,
+        externos_rechazados=externos_rechazados,
+        externos_pendientes=externos_pendientes,
+        total_externos=total_externos,
     )
 
     return render_template('buscar.html')

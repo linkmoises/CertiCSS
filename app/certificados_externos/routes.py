@@ -417,6 +417,10 @@ def reabrir(id):
         flash('Certificado externo no encontrado.', 'error')
         return redirect(url_for('certificados_externos.listar_pendientes'))
 
+    if cert.get('adjunto_eliminado'):
+        flash('No es posible reabrir este registro porque el participante eliminó el adjunto. El histórico debe conservarse.', 'error')
+        return redirect(url_for('certificados_externos.detalle', id=id))
+
     update = {
         "status": "revision",
         "validado_por": None,
@@ -496,3 +500,46 @@ def eliminar(id):
               f"(cédula: {cert.get('cedula')}, {cert.get('horas', 0)}h)")
     flash('Certificado externo eliminado permanentemente.', 'success')
     return redirect(url_for('certificados_externos.listar_completados'))
+
+
+@certificados_externos_bp.route('/certificado-externo/<id>/eliminar-participante', methods=['POST'])
+def eliminar_adjunto_participante(id):
+    cedula = request.form.get('cedula', '').strip()
+    token = request.form.get('token', '').strip()
+
+    if not cedula or not token or not verify_token(cedula, token):
+        flash('Sesión inválida o expirada.', 'error')
+        return redirect(url_for('buscar_certificados'))
+
+    cert = collection_certificados_externos.find_one({"_id": ObjectId(id), "cedula": cedula})
+    if not cert:
+        flash('Certificado no encontrado.', 'error')
+        return redirect(url_for('buscar_certificados'))
+
+    if cert.get('status') != 'rechazado':
+        flash('Solo puede eliminar el adjunto de certificados rechazados.', 'error')
+        return redirect(url_for('buscar_certificados', cedula=cedula, token=token))
+
+    if cert.get('adjunto_eliminado'):
+        flash('El adjunto ya fue eliminado anteriormente.', 'error')
+        return redirect(url_for('buscar_certificados', cedula=cedula, token=token))
+
+    # Eliminar archivo físico
+    if cert.get('archivo'):
+        file_path = os.path.join(_get_upload_path(), cert['archivo'])
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+    # Marcar adjunto como eliminado (el registro se conserva)
+    collection_certificados_externos.update_one(
+        {"_id": ObjectId(id)},
+        {"$set": {
+            "adjunto_eliminado": True,
+            "archivo_eliminado_en": datetime.now(),
+            "updated_at": datetime.now(),
+        }}
+    )
+
+    log_event(f"Certificado externo adjunto ELIMINADO POR PARTICIPANTE cédula {cedula}: {cert.get('titulo')}")
+    flash('Adjunto eliminado correctamente.', 'success')
+    return redirect(url_for('buscar_certificados', cedula=cedula, token=token))

@@ -132,9 +132,23 @@
                                 </svg>
                                 <div>
                                     <p class="text-sm font-medium text-gray-800 dark:text-neutral-200">{{ cert.archivo_original }}</p>
-                                    <p class="text-xs text-gray-500 dark:text-neutral-400">Documento PDF adjunto por el participante</p>
+                                    <p class="text-xs text-gray-500 dark:text-neutral-400">
+                                        {% if cert.get('adjunto_eliminado') %}
+                                        <span class="text-red-600 font-medium">Adjunto eliminado por el participante</span>
+                                        {% else %}
+                                        Documento PDF adjunto por el participante
+                                        {% endif %}
+                                    </p>
                                 </div>
                             </div>
+                            {% if cert.get('adjunto_eliminado') %}
+                            <span class="inline-flex items-center gap-x-1.5 py-1.5 px-3 text-xs font-medium rounded-lg border border-red-200 bg-red-50 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">
+                                <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" />
+                                </svg>
+                                No disponible
+                            </span>
+                            {% else %}
                             <a href="{{ url_for('certificados_externos.descargar_archivo', id=cert['_id']) }}"
                                target="_blank"
                                class="inline-flex items-center gap-x-1.5 py-1.5 px-3 text-xs font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 dark:bg-neutral-700 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-600">
@@ -143,6 +157,7 @@
                                 </svg>
                                 Descargar PDF
                             </a>
+                            {% endif %}
                         </div>
                     </div>
                     {% endif %}
@@ -221,6 +236,13 @@
                             <p class="text-sm text-red-700 dark:text-red-300">{{ cert.motivo_rechazo }}</p>
                         </div>
                         {% endif %}
+                        {% if cert.get('adjunto_eliminado') %}
+                        <div class="p-4 mb-4 border border-amber-200 bg-amber-50 rounded-lg dark:bg-amber-900/20 dark:border-amber-800">
+                            <p class="text-sm text-amber-700 dark:text-amber-300">
+                                El participante eliminó el adjunto. No es posible reabrir y corregir este registro para conservar el histórico.
+                            </p>
+                        </div>
+                        {% else %}
                         <h3 class="text-base font-semibold text-gray-800 dark:text-neutral-200 mb-4">Corregir y reabrir</h3>
                         <form method="POST" action="{{ url_for('certificados_externos.reabrir', id=cert['_id']) }}"
                               class="mb-4 p-4 border border-gray-200 bg-gray-50 rounded-lg dark:bg-neutral-800 dark:border-neutral-700">
@@ -281,6 +303,7 @@
                             }
                         }
                         </script>
+                        {% endif %}
                     </div>
                     {% endif %}
                 </div>
