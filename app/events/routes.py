@@ -607,12 +607,16 @@ def cerrar_evento(codigo_evento):
 def eliminar_evento(codigo_evento):
     from app.events.services import get_event_by_code, get_collection_eventos, get_collection_participantes
     
+    collection_participantes = get_collection_participantes()
     evento = get_event_by_code(get_collection_eventos(), codigo_evento)
     if not evento:
         flash("Evento no encontrado", "danger")
         return redirect(url_for('events.listar_eventos'))
     
-    if current_user.rol != 'administrador':
+    es_autor = str(current_user.id) == str(evento.get('autor'))
+    total_participantes = collection_participantes.count_documents({"codigo_evento": codigo_evento})
+    
+    if current_user.rol != 'administrador' and not (es_autor and total_participantes == 0):
         flash("No tienes permisos para eliminar este evento", "danger")
         return redirect(url_for('events.ver_evento', codigo_evento=codigo_evento))
     
