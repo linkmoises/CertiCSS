@@ -1,0 +1,315 @@
+{% include 'tablero-header.html' %}
+
+{% include 'tablero-sidebar.html' %}
+
+    <!-- CONTENIDO -->
+    <div class="w-full lg:ps-64">
+        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+
+            <!-- BUSCADOR DE EVENTOS -->
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <!-- Card -->
+                <div class="flex flex-col">
+                <div class="-m-1.5 overflow-x-auto">
+                    <div class="p-1.5 min-w-full inline-block align-middle">
+                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+
+                        <!-- Header -->
+                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-800">
+                                    Buscar eventos
+                                </h2>
+                                <p class="text-sm text-gray-600">
+                                    Busca eventos por nombre, código, región, tipo o cualquier campo
+                                </p>
+                            </div>
+                        </div>
+                        <!-- End Header -->
+
+                        <!-- Formulario de búsqueda -->
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <form method="POST" class="space-y-4">
+                                <!-- Búsqueda por texto -->
+                                <div class="flex gap-2">
+                                    <div class="flex-1">
+                                        <input type="text" 
+                                               name="termino_busqueda" 
+                                               value="{{ termino_busqueda }}"
+                                               class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" 
+                                               placeholder="Buscar por nombre, código, región, unidad ejecutora, lugar...">
+                                    </div>
+                                    <button type="submit" 
+                                            class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                                        Buscar
+                                    </button>
+                                </div>
+
+                                <!-- Filtros -->
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                    <!-- Región -->
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Región</label>
+                                        <select name="region" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500">
+                                            <option value="">Todas</option>
+                                            <option value="administrativas" {{ 'selected' if filtro_region == 'administrativas' }}>Direcciones / Departamentos</option>
+                                            <option value="panama" {{ 'selected' if filtro_region == 'panama' }}>Panamá Metro</option>
+                                            <option value="sanmiguelito" {{ 'selected' if filtro_region == 'sanmiguelito' }}>San Miguelito</option>
+                                            <option value="panamaoeste" {{ 'selected' if filtro_region == 'panamaoeste' }}>Panamá Oeste</option>
+                                            <option value="panamaeste" {{ 'selected' if filtro_region == 'panamaeste' }}>Panamá Este</option>
+                                            <option value="bocasdeltoro" {{ 'selected' if filtro_region == 'bocasdeltoro' }}>Bocas del Toro</option>
+                                            <option value="cocle" {{ 'selected' if filtro_region == 'cocle' }}>Coclé</option>
+                                            <option value="colon" {{ 'selected' if filtro_region == 'colon' }}>Colón</option>
+                                            <option value="chiriqui" {{ 'selected' if filtro_region == 'chiriqui' }}>Chiriquí</option>
+                                            <option value="herrera" {{ 'selected' if filtro_region == 'herrera' }}>Herrera</option>
+                                            <option value="lossantos" {{ 'selected' if filtro_region == 'lossantos' }}>Los Santos</option>
+                                            <option value="veraguas" {{ 'selected' if filtro_region == 'veraguas' }}>Veraguas</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Tipo -->
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Tipo</label>
+                                        <select name="tipo" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500">
+                                            <option value="">Todos</option>
+                                            <option value="Congreso" {{ 'selected' if filtro_tipo == 'Congreso' }}>Congreso</option>
+                                            <option value="Curso" {{ 'selected' if filtro_tipo == 'Curso' }}>Curso</option>
+                                            <option value="Diplomado" {{ 'selected' if filtro_tipo == 'Diplomado' }}>Diplomado</option>
+                                            <option value="Jornada" {{ 'selected' if filtro_tipo == 'Jornada' }}>Jornada</option>
+                                            <option value="Inducción" {{ 'selected' if filtro_tipo == 'Inducción' }}>Inducción</option>
+                                            <option value="Mesa Redonda" {{ 'selected' if filtro_tipo == 'Mesa Redonda' }}>Mesa Redonda</option>
+                                            <option value="Reunión" {{ 'selected' if filtro_tipo == 'Reunión' }}>Reunión</option>
+                                            <option value="Seminario" {{ 'selected' if filtro_tipo == 'Seminario' }}>Seminario</option>
+                                            <option value="Seminario-Taller" {{ 'selected' if filtro_tipo == 'Seminario-Taller' }}>Seminario-Taller</option>
+                                            <option value="Sesión Docente" {{ 'selected' if filtro_tipo == 'Sesión Docente' }}>Sesión Docente</option>
+                                            <option value="Simposio" {{ 'selected' if filtro_tipo == 'Simposio' }}>Simposio</option>
+                                            <option value="Taller" {{ 'selected' if filtro_tipo == 'Taller' }}>Taller</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Modalidad -->
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Modalidad</label>
+                                        <select name="modalidad" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500">
+                                            <option value="">Todas</option>
+                                            <option value="Presencial" {{ 'selected' if filtro_modalidad == 'Presencial' }}>Presencial</option>
+                                            <option value="Virtual" {{ 'selected' if filtro_modalidad == 'Virtual' }}>Virtual</option>
+                                            <option value="Híbrido" {{ 'selected' if filtro_modalidad == 'Híbrido' }}>Híbrido</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Estado -->
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Estado</label>
+                                        <select name="estado" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500">
+                                            <option value="">Todos</option>
+                                            <option value="publicado" {{ 'selected' if filtro_estado == 'publicado' }}>Publicado</option>
+                                            <option value="borrador" {{ 'selected' if filtro_estado == 'borrador' }}>Borrador</option>
+                                            <option value="cerrado" {{ 'selected' if filtro_estado == 'cerrado' }}>Cerrado</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Table -->
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <span class="text-xs font-semibold uppercase text-gray-800">Nombre</span>
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <span class="text-xs font-semibold uppercase text-gray-800">Código</span>
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <span class="text-xs font-semibold uppercase text-gray-800">Región</span>
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <span class="text-xs font-semibold uppercase text-gray-800">Tipo</span>
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <span class="text-xs font-semibold uppercase text-gray-800">Estado</span>
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <span class="text-xs font-semibold uppercase text-gray-800">Fechas</span>
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-start">
+                                    <span class="text-xs font-semibold uppercase text-gray-800">Acciones</span>
+                                </th>
+                                </tr>
+                            </thead>
+
+                        <tbody class="divide-y divide-gray-200">
+                            {% if resultados %}
+                                {% for evento in resultados %}
+                                {% set es_admin = current_user.rol == 'administrador' %}
+                                {% set es_denadoi = current_user.rol == 'denadoi' %}
+                                {% set es_autor = current_user.id|string == evento.autor|string %}
+                                {% set es_organizador = evento.es_organizador %}
+                                {% set puede_editar = es_admin or (evento.estado_evento != 'cerrado' and (es_denadoi or es_autor or es_organizador)) %}
+                                <tr class="bg-white hover:bg-gray-50">
+                                    <td class="size-px min-w-[200px]">
+                                        <div class="px-6 py-2">
+                                            <a class="text-sm font-medium text-blue-600 hover:underline" href="{{ url_for('events.ver_evento', codigo_evento=evento.codigo) }}">
+                                                {{ resaltar_termino(evento.nombre, termino_busqueda) | safe }}
+                                            </a>
+                                            <br>
+                                            <span class="text-xs text-gray-500">{{ evento.unidad_ejecutora }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="size-px whitespace-nowrap">
+                                        <div class="px-6 py-2">
+                                            <button onclick="navigator.clipboard.writeText('{{ evento.codigo }}'); this.innerText='Copiado'; setTimeout(() => this.innerText='{{ evento.codigo }}', 2000);" class="inline-flex items-center gap-1 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800 hover:bg-gray-200 transition-all">
+                                                {{ resaltar_termino(evento.codigo, termino_busqueda) | safe }}
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td class="size-px whitespace-nowrap">
+                                        <div class="px-6 py-2">
+                                            <span class="text-sm text-gray-800">{{ resaltar_termino(evento.region, termino_busqueda) | safe }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="size-px whitespace-nowrap">
+                                        <div class="px-6 py-2">
+                                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                                {{ resaltar_termino(evento.tipo, termino_busqueda) | safe }}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td class="size-px whitespace-nowrap">
+                                        <div class="px-6 py-2">
+                                            <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium {% if evento.estado_evento == 'publicado' %}bg-blue-100 text-blue-800{% elif evento.estado_evento == 'cerrado' %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                                {% if evento.estado_evento == 'publicado' %}Publicado{% elif evento.estado_evento == 'cerrado' %}Cerrado{% else %}Borrador{% endif %}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td class="size-px whitespace-nowrap">
+                                        <div class="px-6 py-2">
+                                            <span class="text-sm text-gray-500">{% if evento.fecha_inicio and evento.fecha_fin %}{% if evento.fecha_inicio.date() == evento.fecha_fin.date() %}{{ evento.fecha_inicio.strftime('%d %b, %Y') }}{% else %}{{ evento.fecha_inicio.strftime('%d') }} - {{ evento.fecha_fin.strftime('%d %b, %Y') }}{% endif %}{% else %}N/A{% endif %}</span>
+                                        </div>
+                                    </td>
+                                    <td class="size-px whitespace-nowrap">
+                                        <div class="px-6 py-2">
+                                            <div class="flex gap-2">
+                                                <a href="{{ url_for('events.ver_evento', codigo_evento=evento.codigo) }}" 
+                                                   class="text-blue-600 hover:text-blue-800" title="Ver evento">
+                                                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                                </a>
+{% if puede_editar %}
+                                                <a href="{{ url_for('events.editar_evento', codigo_evento=evento.codigo) }}" 
+                                                   class="text-green-600 hover:text-green-800" title="Editar evento">
+                                                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+                                                </a>
+{% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                {% if termino_busqueda or filtro_region or filtro_tipo or filtro_modalidad or filtro_estado %}
+                                <tr class="bg-white">
+                                    <td colspan="7" class="px-6 py-8 text-center">
+                                        <p class="text-sm text-gray-500">No se encontraron eventos con los filtros aplicados</p>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr class="bg-white">
+                                    <td colspan="7" class="px-6 py-8 text-center">
+                                        <p class="text-sm text-gray-500">Ingrese un término de búsqueda o seleccione filtros para comenzar</p>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            {% endif %}
+                        </tbody>
+                        </table>
+                        <!-- End Table -->
+
+                        <!-- Footer -->
+                        <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200">
+                            <div>
+                                <p class="text-sm text-gray-600">
+                                    <span class="font-semibold text-gray-800">{{ total_resultados }}</span> resultados
+                                    {% if total_resultados >= 100 %}
+                                        <span class="text-xs text-gray-500">(mostrando máximo 100 resultados)</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+
+                            <div>
+                                <div class="inline-flex gap-x-2">
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50" href="{{ url_for('tablero_coordinadores') }}">
+                                        Regresar al tablero
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Footer -->
+
+                    </div>
+                    </div>
+                </div>
+                </div>
+                <!-- End Card -->
+            </div>
+            <!-- FIN BUSCADOR DE EVENTOS -->
+
+{% include 'tablero-footer.html' %}
+
+        </div>
+    </div>
+    <!-- FIN CONTENIDO -->
+
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const hiddenInputs = document.querySelectorAll("#buscadorForm input[type='hidden']");
+        hiddenInputs.forEach((input) => input.remove());
+    });
+
+    document.getElementById("buscadorForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const valor = document.getElementById("buscador").value.trim();
+        const patterns = {
+            cedula: /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/,
+            pasaporte: /^[A-Z]{2}\d{6,9}$/,
+            id_certificado: /^[a-zA-Z0-9]{8}$/
+        };
+
+        let action, field;
+
+        if (patterns.cedula.test(valor)) {
+            action = "/buscar_certificados";
+            field = "cedula";
+        } else if (patterns.pasaporte.test(valor)) {
+            action = "/buscar_certificados";
+            field = "cedula";
+        } else if (patterns.id_certificado.test(valor)) {
+            action = "/validar_certificado";
+            field = "nanoid";
+        } else {
+            alert("Formato no válido. Introduzca un documento de identificación o un ID de certificado válido.");
+            return;
+        }
+
+        const form = event.target;
+        form.action = action;
+        form.method = "POST";
+
+        const hiddenInputs = form.querySelectorAll("input[type='hidden']");
+        hiddenInputs.forEach((input) => input.remove());
+
+        const hiddenInput = document.createElement("input");
+        hiddenInput.type = "hidden";
+        hiddenInput.name = field;
+        hiddenInput.value = valor;
+        form.appendChild(hiddenInput);
+        form.submit();
+    });
+</script>
+</body>
+</html>
