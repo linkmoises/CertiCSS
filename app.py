@@ -4507,7 +4507,7 @@ def tablero_metricas_lms_evento(codigo_evento):
             sns.kdeplot(calificaciones, ax=ax, color=color,
                         label=f"{examen.get('titulo', f'Examen {examen['orden']}')}  μ={media:.1f}  σ={desviacion:.1f}",
                         fill=True, alpha=0.15, linewidth=2)
-            for label, mult, ls, alpha in [("μ", 0, (6, 3), 0.9), ("±1σ", 1, (3, 3), 0.5), ("±2σ", 2, (1, 4), 0.25)]:
+            for label, mult, ls, alpha in [("μ", 0, '--', 0.9), ("±1σ", 1, ':', 0.5), ("±2σ", 2, '-.', 0.25)]:
                 for sign in [1, -1]:
                     val = media + sign * mult * desviacion
                     if 0 <= val <= 100:
