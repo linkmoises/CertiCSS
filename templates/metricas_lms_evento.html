@@ -289,6 +289,14 @@
                                                 </span>
                                             </div>
                                         </th>
+
+                                        <th scope="col" class="px-6 py-3 text-start">
+                                            <div class="flex items-center gap-x-2">
+                                                <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
+                                                    Distribución
+                                                </span>
+                                            </div>
+                                        </th>
                                     </tr>
                                 </thead>
 
@@ -321,6 +329,22 @@
                                         <td class="size-px whitespace-nowrap">
                                             <div class="px-6 py-3">
                                                 <span class="text-sm text-gray-800">{{ examen.promedio_calificacion }}%</span>
+                                            </div>
+                                        </td>
+
+                                        <td class="size-px whitespace-nowrap">
+                                            <div class="px-6 py-3">
+                                                {% if examen.boxplot %}
+                                                <svg width="120" height="24" viewBox="0 0 100 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <line x1="{{ examen.boxplot.min }}" y1="12" x2="{{ examen.boxplot.max }}" y2="12" stroke="#9ca3af" stroke-width="1.5"/>
+                                                    <line x1="{{ examen.boxplot.min }}" y1="8" x2="{{ examen.boxplot.min }}" y2="16" stroke="#9ca3af" stroke-width="1.5"/>
+                                                    <line x1="{{ examen.boxplot.max }}" y1="8" x2="{{ examen.boxplot.max }}" y2="16" stroke="#9ca3af" stroke-width="1.5"/>
+                                                    <rect x="{{ examen.boxplot.q1 }}" y="5" width="{{ examen.boxplot.q3 - examen.boxplot.q1 }}" height="14" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5" rx="2"/>
+                                                    <line x1="{{ examen.boxplot.median }}" y1="5" x2="{{ examen.boxplot.median }}" y2="19" stroke="#ef4444" stroke-width="2"/>
+                                                </svg>
+                                                {% else %}
+                                                <span class="text-sm text-gray-300">—</span>
+                                                {% endif %}
                                             </div>
                                         </td>
                                     </tr>
@@ -363,23 +387,7 @@
                                         <th scope="col" class="ps-6 py-3 text-start">
                                             <div class="flex items-center gap-x-2">
                                                 <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
-                                                    Apellidos
-                                                </span>
-                                            </div>
-                                        </th>
-
-                                        <th scope="col" class="px-6 py-3 text-start">
-                                            <div class="flex items-center gap-x-2">
-                                                <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
-                                                    Nombres
-                                                </span>
-                                            </div>
-                                        </th>
-
-                                        <th scope="col" class="px-6 py-3 text-start">
-                                            <div class="flex items-center gap-x-2">
-                                                <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
-                                                    Cédula
+                                                    Participante
                                                 </span>
                                             </div>
                                         </th>

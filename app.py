@@ -4383,10 +4383,18 @@ def tablero_metricas_lms_evento(codigo_evento):
     distribucion_calificaciones = list(collection_exam_results.aggregate(pipeline_distribucion))
     
     # Obtener todos los participantes del evento con sus datos
-    participantes_lista = list(collection_participantes.find({
+    participantes_raw = collection_participantes.find({
         "codigo_evento": codigo_evento,
         "rol": "participante"
-    }).sort("apellidos", 1))
+    }).sort("apellidos", 1)
+    
+    participantes_por_cedula = {}
+    for p in participantes_raw:
+        cedula = p.get("cedula", "")
+        if cedula not in participantes_por_cedula:
+            participantes_por_cedula[cedula] = p
+    
+    participantes_lista = list(participantes_por_cedula.values())
     
     # Obtener resultados de exámenes por cédula y por examen
     pipeline_intentos = [
@@ -4456,6 +4464,23 @@ def tablero_metricas_lms_evento(codigo_evento):
         ]
         resultado_examen = list(collection_exam_results.aggregate(pipeline_examen))
         examen["promedio_calificacion"] = round(resultado_examen[0]["promedio"], 2) if resultado_examen else 0
+        
+        # Boxplot stats
+        calificaciones_raw = list(collection_exam_results.find(
+            {"codigo_evento": codigo_evento, "orden_examen": examen["orden"]},
+            {"calificacion": 1}
+        ))
+        calificaciones = sorted([r["calificacion"] for r in calificaciones_raw])
+        if calificaciones:
+            examen["boxplot"] = {
+                "min": calificaciones[0],
+                "q1": float(np.percentile(calificaciones, 25)),
+                "median": float(np.percentile(calificaciones, 50)),
+                "q3": float(np.percentile(calificaciones, 75)),
+                "max": calificaciones[-1],
+            }
+        else:
+            examen["boxplot"] = None
     
     return render_template(
         'metricas_lms_evento.html',
