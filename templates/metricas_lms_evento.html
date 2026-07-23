@@ -363,26 +363,36 @@
                                         <th scope="col" class="ps-6 py-3 text-start">
                                             <div class="flex items-center gap-x-2">
                                                 <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
+                                                    Apellidos
+                                                </span>
+                                            </div>
+                                        </th>
+
+                                        <th scope="col" class="px-6 py-3 text-start">
+                                            <div class="flex items-center gap-x-2">
+                                                <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
+                                                    Nombres
+                                                </span>
+                                            </div>
+                                        </th>
+
+                                        <th scope="col" class="px-6 py-3 text-start">
+                                            <div class="flex items-center gap-x-2">
+                                                <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
                                                     Cédula
                                                 </span>
                                             </div>
                                         </th>
 
+                                        {% for examen in examenes %}
                                         <th scope="col" class="px-6 py-3 text-start">
                                             <div class="flex items-center gap-x-2">
                                                 <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
-                                                    Total Intentos
+                                                    {{ examen.titulo }}
                                                 </span>
                                             </div>
                                         </th>
-
-                                        <th scope="col" class="px-6 py-3 text-start">
-                                            <div class="flex items-center gap-x-2">
-                                                <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
-                                                    Mejor Calificación
-                                                </span>
-                                            </div>
-                                        </th>
+                                        {% endfor %}
                                     </tr>
                                 </thead>
 
@@ -391,29 +401,35 @@
                                     <tr>
                                         <td class="size-px whitespace-nowrap">
                                             <div class="ps-6 py-3">
-                                                <span class="text-sm font-semibold text-gray-800">{{ participante._id }}</span>
+                                                <span class="text-sm font-semibold text-gray-800">{{ participante.apellidos }}</span>
+                                                <span class="text-sm text-gray-500">, {{ participante.nombres }}</span>
+                                                <br>
+                                                <span class="text-xs text-gray-400">{{ participante.cedula }}</span>
                                             </div>
                                         </td>
-                                        
+
+                                        {% for examen in examenes %}
+                                        {% set res = participante.resultados.get(examen.orden|string, participante.resultados.get(examen.orden, {})) %}
                                         <td class="size-px whitespace-nowrap">
                                             <div class="px-6 py-3">
-                                                <span class="text-sm text-gray-800">{{ participante.total_intentos }}</span>
-                                            </div>
-                                        </td>
-                                        
-                                        <td class="size-px whitespace-nowrap">
-                                            <div class="px-6 py-3">
-                                                <span class="text-sm text-gray-800 
-                                                    {% if participante.mejor_calificacion >= 90 %}text-green-600
-                                                    {% elif participante.mejor_calificacion >= 80 %}text-blue-600
-                                                    {% elif participante.mejor_calificacion >= 70 %}text-yellow-600
-                                                    {% elif participante.mejor_calificacion >= 60 %}text-orange-600
+                                                {% if res %}
+                                                <span class="text-xs text-gray-500">{{ res.total_intentos }} intento{% if res.total_intentos != 1 %}s{% endif %}</span>
+                                                <br>
+                                                <span class="text-sm font-semibold
+                                                    {% if res.mejor_calificacion >= 90 %}text-green-600
+                                                    {% elif res.mejor_calificacion >= 80 %}text-blue-600
+                                                    {% elif res.mejor_calificacion >= 70 %}text-yellow-600
+                                                    {% elif res.mejor_calificacion >= 60 %}text-orange-600
                                                     {% else %}text-red-600
                                                     {% endif %}">
-                                                    {{ participante.mejor_calificacion }}%
+                                                    {{ res.mejor_calificacion }}%
                                                 </span>
+                                                {% else %}
+                                                <span class="text-sm text-gray-300">—</span>
+                                                {% endif %}
                                             </div>
                                         </td>
+                                        {% endfor %}
                                     </tr>
                                     {% endfor %}
                                 </tbody>

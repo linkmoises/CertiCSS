@@ -4382,22 +4382,45 @@ def tablero_metricas_lms_evento(codigo_evento):
     ]
     distribucion_calificaciones = list(collection_exam_results.aggregate(pipeline_distribucion))
     
-    # Métricas de intentos
+    # Obtener todos los participantes del evento con sus datos
+    participantes_lista = list(collection_participantes.find({
+        "codigo_evento": codigo_evento,
+        "rol": "participante"
+    }).sort("apellidos", 1))
+    
+    # Obtener resultados de exámenes por cédula y por examen
     pipeline_intentos = [
         {"$match": {"codigo_evento": codigo_evento}},
         {"$group": {
-            "_id": "$cedula_participante",
+            "_id": {"cedula": "$cedula_participante", "orden": "$orden_examen"},
             "total_intentos": {"$max": "$numero_intento"},
             "mejor_calificacion": {"$max": "$calificacion"}
         }}
     ]
-    datos_participantes = list(collection_exam_results.aggregate(pipeline_intentos))
+    resultados_raw = list(collection_exam_results.aggregate(pipeline_intentos))
     
-    # Promedio de intentos por participante
-    promedio_intentos = round(sum(p["total_intentos"] for p in datos_participantes) / len(datos_participantes), 2) if datos_participantes else 0
+    resultados_por_cedula = {}
+    for r in resultados_raw:
+        cedula = r["_id"]["cedula"]
+        orden = r["_id"]["orden"]
+        if cedula not in resultados_por_cedula:
+            resultados_por_cedula[cedula] = {}
+        resultados_por_cedula[cedula][orden] = {
+            "total_intentos": r.get("total_intentos", 0),
+            "mejor_calificacion": r.get("mejor_calificacion", 0),
+        }
     
-    # Participantes que han realizado exámenes
-    participantes_con_examenes = len(datos_participantes)
+    # Combinar datos de participantes con resultados de exámenes
+    datos_participantes = []
+    for p in participantes_lista:
+        cedula = p.get("cedula", "")
+        res_por_examen = resultados_por_cedula.get(cedula, {})
+        datos_participantes.append({
+            "cedula": cedula,
+            "nombres": p.get("nombres", ""),
+            "apellidos": p.get("apellidos", ""),
+            "resultados": res_por_examen,
+        })
     
     # Obtener detalles de exámenes del evento
     examenes = list(collection_eva.find({
