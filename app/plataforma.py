@@ -604,6 +604,27 @@ def ver_contenido(codigo_evento, orden):
             )
             nanoid = participante.get("nanoid") if participante else None
 
+            # Historial de intentos para exámenes sumativos
+            intentos_historial = []
+            if cedula and not formativo:
+                intentos_historial = list(
+                    collection_exam_results.find(
+                        {
+                            "codigo_evento": codigo_evento,
+                            "orden_examen": orden,
+                            "cedula_participante": cedula,
+                        },
+                        {
+                            "numero_intento": 1,
+                            "calificacion": 1,
+                            "total_preguntas": 1,
+                            "respuestas_correctas": 1,
+                            "fecha_envio": 1,
+                            "_id": 0,
+                        },
+                    ).sort("numero_intento", 1)
+                )
+
             return render_template(
                 "examen.html",
                 preguntas=preguntas,
@@ -617,6 +638,7 @@ def ver_contenido(codigo_evento, orden):
                 nanoid=nanoid,
                 contenidos=contenidos,
                 formativo=formativo,  # Pasar al template
+                intentos_historial=intentos_historial,
             )
 
     # Encontrar el contenido anterior y el siguiente

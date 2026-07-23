@@ -2186,6 +2186,10 @@ select {
   min-width: 24rem;
 }
 
+.min-w-\[200px\] {
+  min-width: 200px;
+}
+
 .min-w-full {
   min-width: 100%;
 }
@@ -4590,6 +4594,10 @@ select {
 .hover\:bg-white:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
+}
+
+.hover\:bg-blue-100\/50:hover {
+  background-color: rgb(219 234 254 / 0.5);
 }
 
 .hover\:text-black:hover {

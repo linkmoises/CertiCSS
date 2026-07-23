@@ -159,7 +159,7 @@
                                 Nota: <b>{{ '%.1f' % porcentaje }}%</b>
                                 {% if porcentaje >= 80 %}
                                 <span class="ml-2">✔️ Aprobado</span>
-                                {% if nanoid %}
+                                {% if nanoid and not formativo %}
                                 <br>
                                 <a href="{{ url_for('descargar_constancia', nanoid=nanoid) }}"
                                     class="mt-2 inline-flex items-center gap-x-2 text-sm font-semibold text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400">
@@ -227,7 +227,43 @@
                                 {% endif %}
                             </div>
                             {% endfor %}
-                            {% else %}
+                            {% elif not formativo and intentos_historial %}
+                            <div class="mb-6 p-4 border border-blue-200 rounded-lg bg-blue-50">
+                                <h3 class="text-lg font-semibold text-blue-800 mb-3">Historial de intentos</h3>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-sm text-left text-gray-600">
+                                        <thead class="text-xs text-gray-700 uppercase bg-blue-100">
+                                            <tr>
+                                                <th class="px-4 py-2">#</th>
+                                                <th class="px-4 py-2">Puntaje</th>
+                                                <th class="px-4 py-2">Nota</th>
+                                                <th class="px-4 py-2">Resultado</th>
+                                                <th class="px-4 py-2">Fecha</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for intento in intentos_historial %}
+                                            {% set intento_pct = (intento.respuestas_correctas / intento.total_preguntas * 100) if intento.total_preguntas > 0 else 0 %}
+                                            <tr class="border-b hover:bg-blue-100/50">
+                                                <td class="px-4 py-2">{{ intento.numero_intento }}</td>
+                                                <td class="px-4 py-2">{{ intento.respuestas_correctas }}/{{ intento.total_preguntas }}</td>
+                                                <td class="px-4 py-2">{{ '%.1f' % intento_pct }}%</td>
+                                                <td class="px-4 py-2">
+                                                    {% if intento_pct >= 80 %}
+                                                    <span class="text-green-600 font-medium">Aprobado</span>
+                                                    {% else %}
+                                                    <span class="text-red-600 font-medium">No aprobado</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="px-4 py-2">{{ intento.fecha_envio.strftime('%d/%m/%Y %H:%M') if intento.fecha_envio else '' }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if puntaje is none %}
                             <form method="POST">
                                 {% for pregunta in preguntas %}
                                 {% set idx = loop.index0 %}
