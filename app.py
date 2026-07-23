@@ -4536,7 +4536,8 @@ def tablero_metricas_lms_evento(codigo_evento):
                 ax.plot(x_pos, media, 'D', color=color, markersize=6, zorder=5)
 
             ax.set_ylabel('Calificación', fontsize=9)
-            ax.set_ylim(0, 100)
+            ax.set_ylim(0, 105)
+            ax.set_yticks(range(0, 101, 10))
             ax.tick_params(labelsize=8)
             for spine in ['top', 'right']:
                 ax.spines[spine].set_visible(False)
@@ -4548,7 +4549,8 @@ def tablero_metricas_lms_evento(codigo_evento):
                        markersize=6, label=f"{s['titulo']}  \u00b5 = {s['media']:.1f} / n = {s['n']}")
                 for s in exam_stats
             ]
-            ax.legend(handles=legend_elements, fontsize=7, loc='lower left', framealpha=0.8)
+            ax.legend(handles=legend_elements, fontsize=7, loc='lower center', bbox_to_anchor=(0.5, 1),
+                      ncol=min(len(exam_stats), 3), framealpha=0.8)
 
             buf = io.BytesIO()
             fig.savefig(buf, format='png', dpi=120, bbox_inches='tight', transparent=False)
