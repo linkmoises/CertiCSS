@@ -4504,7 +4504,7 @@ def tablero_metricas_lms_evento(codigo_evento):
             color = colors[i % len(colors)]
             media = np.mean(calificaciones)
             desviacion = np.std(calificaciones, ddof=1)
-            exam_stats.append({"media": media, "desviacion": desviacion, "color": color, "titulo": titulo})
+            exam_stats.append({"media": media, "desviacion": desviacion, "color": color, "titulo": titulo, "n": len(calificaciones)})
 
             if rows:
                 df = pd.DataFrame(rows)
@@ -4524,9 +4524,9 @@ def tablero_metricas_lms_evento(codigo_evento):
                             medianprops=dict(color="#6b7280", alpha=0.5, linewidth=1))
 
                 if len(df) > 500:
-                sns.stripplot(data=df, x="Examen", y="Calificación", palette=palette, ax=ax, size=3, alpha=0.5, jitter=0.3)
-            else:
-                sns.swarmplot(data=df, x="Examen", y="Calificación", palette=palette, ax=ax, size=4, alpha=0.7)
+                    sns.stripplot(data=df, x="Examen", y="Calificación", palette=palette, ax=ax, size=3, alpha=0.5, jitter=0.3)
+                else:
+                    sns.swarmplot(data=df, x="Examen", y="Calificación", palette=palette, ax=ax, size=4, alpha=0.7)
 
             for i, stat in enumerate(exam_stats):
                 x_pos = i
@@ -4545,7 +4545,7 @@ def tablero_metricas_lms_evento(codigo_evento):
             from matplotlib.lines import Line2D
             legend_elements = [
                 Line2D([0], [0], marker='D', color='w', markerfacecolor=s['color'],
-                       markersize=6, label=f"{s['titulo']}  μ={s['media']:.1f}  σ={s['desviacion']:.1f}")
+                       markersize=6, label=f"{s['titulo']}  \u00b5 = {s['media']:.1f} / n = {s['n']}")
                 for s in exam_stats
             ]
             ax.legend(handles=legend_elements, fontsize=7, loc='lower left', framealpha=0.8)
