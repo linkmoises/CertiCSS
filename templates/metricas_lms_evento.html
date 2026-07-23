@@ -200,7 +200,7 @@
         </div>
 
         <!-- DISTRIBUCIÓN DE CALIFICACIONES -->
-        {% if distribucion_calificaciones %}
+        {% if bell_curve_img %}
         <div class="max-w-[85rem] px-2 pt-1 mx-auto">
             <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-200">
@@ -208,27 +208,11 @@
                         Distribución de Calificaciones
                     </h2>
                     <p class="text-sm text-gray-600">
-                        Rangos de calificaciones obtenidas por los participantes
+                        Curva de densidad por examen
                     </p>
                 </div>
-                
-                <div class="p-6">
-                    <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                        {% for rango in distribucion_calificaciones %}
-                        <div class="text-center p-4 bg-gray-50 rounded-lg">
-                            <div class="text-2xl font-bold text-gray-800">{{ rango.count }}</div>
-                            <div class="text-sm text-gray-600">
-                                {% if rango._id == 0 %}0-59%
-                                {% elif rango._id == 60 %}60-69%
-                                {% elif rango._id == 70 %}70-79%
-                                {% elif rango._id == 80 %}80-89%
-                                {% elif rango._id == 90 %}90-100%
-                                {% else %}{{ rango._id }}
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
+                <div class="p-6 flex justify-center">
+                    <img src="data:image/png;base64,{{ bell_curve_img }}" alt="Distribución de calificaciones" class="max-w-full h-auto">
                 </div>
             </div>
         </div>

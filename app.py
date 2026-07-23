@@ -4482,6 +4482,40 @@ def tablero_metricas_lms_evento(codigo_evento):
         else:
             examen["boxplot"] = None
     
+    # Bell curve chart (curva de campana por examen)
+    bell_curve_img = None
+    if examenes and any(e.get("boxplot") for e in examenes):
+        fig, ax = plt.subplots(figsize=(8, 3))
+        fig.patch.set_facecolor('white')
+        ax.set_facecolor('white')
+        colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4']
+        for i, examen in enumerate(examenes):
+            if not examen.get("boxplot"):
+                continue
+            calificaciones_raw = list(collection_exam_results.find(
+                {"codigo_evento": codigo_evento, "orden_examen": examen["orden"]},
+                {"calificacion": 1}
+            ))
+            calificaciones = [r["calificacion"] for r in calificaciones_raw]
+            if len(set(calificaciones)) < 2:
+                continue
+            sns.kdeplot(calificaciones, ax=ax, color=colors[i % len(colors)],
+                        label=examen.get("titulo", f"Examen {examen['orden']}"),
+                        fill=True, alpha=0.15, linewidth=2)
+        ax.set_xlim(0, 100)
+        ax.set_xlabel('Calificación', fontsize=9)
+        ax.set_ylabel('Densidad', fontsize=9)
+        ax.tick_params(labelsize=8)
+        ax.legend(fontsize=8, loc='upper right')
+        for spine in ['top', 'right']:
+            ax.spines[spine].set_visible(False)
+        ax.grid(True, alpha=0.3)
+        buf = io.BytesIO()
+        fig.savefig(buf, format='png', dpi=120, bbox_inches='tight', transparent=False)
+        buf.seek(0)
+        bell_curve_img = base64.b64encode(buf.getvalue()).decode('utf-8')
+        plt.close(fig)
+
     boxplot_mins = [e["boxplot"]["min"] for e in examenes if e.get("boxplot")]
     boxplot_maxs = [e["boxplot"]["max"] for e in examenes if e.get("boxplot")]
     if boxplot_mins and boxplot_maxs:
@@ -4511,7 +4545,8 @@ def tablero_metricas_lms_evento(codigo_evento):
         examenes=examenes,
         datos_participantes=datos_participantes,
         boxplot_view_min=boxplot_view_min,
-        boxplot_view_max=boxplot_view_max
+        boxplot_view_max=boxplot_view_max,
+        bell_curve_img=bell_curve_img
     )
 
 ###
