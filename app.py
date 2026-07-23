@@ -4482,6 +4482,18 @@ def tablero_metricas_lms_evento(codigo_evento):
         else:
             examen["boxplot"] = None
     
+    boxplot_mins = [e["boxplot"]["min"] for e in examenes if e.get("boxplot")]
+    boxplot_maxs = [e["boxplot"]["max"] for e in examenes if e.get("boxplot")]
+    if boxplot_mins and boxplot_maxs:
+        global_min = min(boxplot_mins)
+        global_max = max(boxplot_maxs)
+        padding = max((global_max - global_min) * 0.05, 5)
+        boxplot_view_min = max(0, global_min - padding)
+        boxplot_view_max = min(100, global_max + padding)
+    else:
+        boxplot_view_min = 0
+        boxplot_view_max = 100
+
     return render_template(
         'metricas_lms_evento.html',
         active_section='metricas',
@@ -4497,7 +4509,9 @@ def tablero_metricas_lms_evento(codigo_evento):
         promedio_intentos=promedio_intentos,
         participantes_con_examenes=participantes_con_examenes,
         examenes=examenes,
-        datos_participantes=datos_participantes
+        datos_participantes=datos_participantes,
+        boxplot_view_min=boxplot_view_min,
+        boxplot_view_max=boxplot_view_max
     )
 
 ###
