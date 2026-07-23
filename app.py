@@ -4489,6 +4489,7 @@ def tablero_metricas_lms_evento(codigo_evento):
         fig.patch.set_facecolor('white')
         ax.set_facecolor('white')
         colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4']
+        exam_stats = []
         for i, examen in enumerate(examenes):
             if not examen.get("boxplot"):
                 continue
@@ -4499,14 +4500,23 @@ def tablero_metricas_lms_evento(codigo_evento):
             calificaciones = [r["calificacion"] for r in calificaciones_raw]
             if len(set(calificaciones)) < 2:
                 continue
-            sns.kdeplot(calificaciones, ax=ax, color=colors[i % len(colors)],
-                        label=examen.get("titulo", f"Examen {examen['orden']}"),
+            color = colors[i % len(colors)]
+            media = np.mean(calificaciones)
+            desviacion = np.std(calificaciones, ddof=1)
+            exam_stats.append({"media": media, "desviacion": desviacion, "color": color})
+            sns.kdeplot(calificaciones, ax=ax, color=color,
+                        label=f"{examen.get('titulo', f'Examen {examen['orden']}')}  μ={media:.1f}  σ={desviacion:.1f}",
                         fill=True, alpha=0.15, linewidth=2)
+            for label, mult, ls, alpha in [("μ", 0, (6, 3), 0.9), ("±1σ", 1, (3, 3), 0.5), ("±2σ", 2, (1, 4), 0.25)]:
+                for sign in [1, -1]:
+                    val = media + sign * mult * desviacion
+                    if 0 <= val <= 100:
+                        ax.axvline(val, color=color, linestyle=ls, linewidth=1, alpha=alpha)
         ax.set_xlim(0, 100)
         ax.set_xlabel('Calificación', fontsize=9)
         ax.set_ylabel('Densidad', fontsize=9)
         ax.tick_params(labelsize=8)
-        ax.legend(fontsize=8, loc='upper right')
+        ax.legend(fontsize=7, loc='upper right', framealpha=0.8)
         for spine in ['top', 'right']:
             ax.spines[spine].set_visible(False)
         ax.grid(True, alpha=0.3)
