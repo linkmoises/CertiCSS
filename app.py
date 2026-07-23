@@ -4422,6 +4422,13 @@ def tablero_metricas_lms_evento(codigo_evento):
             "resultados": res_por_examen,
         })
     
+    total_intentos_lista = [
+        sum(r.get("total_intentos", 0) for r in p["resultados"].values())
+        for p in datos_participantes
+    ]
+    promedio_intentos = round(sum(total_intentos_lista) / len(total_intentos_lista), 2) if total_intentos_lista else 0
+    participantes_con_examenes = sum(1 for t in total_intentos_lista if t > 0)
+    
     # Obtener detalles de exámenes del evento
     examenes = list(collection_eva.find({
         "codigo_evento": codigo_evento,
