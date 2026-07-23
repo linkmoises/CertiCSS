@@ -4482,17 +4482,16 @@ def tablero_metricas_lms_evento(codigo_evento):
         else:
             examen["boxplot"] = None
     
-    # Bell curve chart (curva de campana por examen)
+    # Swarm plot por examen
     bell_curve_img = None
     if examenes and any(e.get("boxplot") for e in examenes):
-        fig, ax = plt.subplots(figsize=(8, 3))
-        fig.patch.set_facecolor('white')
-        ax.set_facecolor('white')
         colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4']
+        rows = []
         exam_stats = []
         for i, examen in enumerate(examenes):
             if not examen.get("boxplot"):
                 continue
+            titulo = examen.get("titulo", f"Examen {examen['orden']}")
             calificaciones_raw = list(collection_exam_results.find(
                 {"codigo_evento": codigo_evento, "orden_examen": examen["orden"]},
                 {"calificacion": 1}
@@ -4500,31 +4499,55 @@ def tablero_metricas_lms_evento(codigo_evento):
             calificaciones = [r["calificacion"] for r in calificaciones_raw]
             if len(set(calificaciones)) < 2:
                 continue
+            for r in calificaciones_raw:
+                rows.append({"Calificación": r["calificacion"], "Examen": titulo})
             color = colors[i % len(colors)]
             media = np.mean(calificaciones)
             desviacion = np.std(calificaciones, ddof=1)
-            exam_stats.append({"media": media, "desviacion": desviacion, "color": color})
-            sns.kdeplot(calificaciones, ax=ax, color=color,
-                        label=f"{examen.get('titulo', f'Examen {examen['orden']}')}  μ={media:.1f}  σ={desviacion:.1f}",
-                        fill=True, alpha=0.15, linewidth=2)
-            for label, mult, ls, alpha in [("μ", 0, '--', 0.9), ("±1σ", 1, ':', 0.5), ("±2σ", 2, '-.', 0.25)]:
-                for sign in [1, -1]:
-                    val = media + sign * mult * desviacion
-                    if 0 <= val <= 100:
-                        ax.axvline(val, color=color, linestyle=ls, linewidth=1, alpha=alpha)
-        ax.set_xlim(0, 100)
-        ax.set_xlabel('Calificación', fontsize=9)
-        ax.set_ylabel('Densidad', fontsize=9)
-        ax.tick_params(labelsize=8)
-        ax.legend(fontsize=7, loc='upper right', framealpha=0.8)
-        for spine in ['top', 'right']:
-            ax.spines[spine].set_visible(False)
-        ax.grid(True, alpha=0.3)
-        buf = io.BytesIO()
-        fig.savefig(buf, format='png', dpi=120, bbox_inches='tight', transparent=False)
-        buf.seek(0)
-        bell_curve_img = base64.b64encode(buf.getvalue()).decode('utf-8')
-        plt.close(fig)
+            exam_stats.append({"media": media, "desviacion": desviacion, "color": color, "titulo": titulo})
+
+        if rows:
+            df = pd.DataFrame(rows)
+            exam_order = [s["titulo"] for s in exam_stats]
+            df["Examen"] = pd.Categorical(df["Examen"], categories=exam_order, ordered=True)
+            palette = [s["color"] for s in exam_stats]
+            n_exams = len(exam_order)
+            fig, ax = plt.subplots(figsize=(max(6, n_exams * 1.8), 4))
+            fig.patch.set_facecolor('white')
+            ax.set_facecolor('white')
+
+            if len(df) > 500:
+                sns.stripplot(data=df, x="Examen", y="Calificación", palette=palette, ax=ax, size=3, alpha=0.5, jitter=0.3)
+            else:
+                sns.swarmplot(data=df, x="Examen", y="Calificación", palette=palette, ax=ax, size=4, alpha=0.7)
+
+            for i, stat in enumerate(exam_stats):
+                x_pos = i
+                color = stat["color"]
+                media = stat["media"]
+                desviacion = stat["desviacion"]
+                ax.plot(x_pos, media, 'D', color=color, markersize=6, zorder=5)
+
+            ax.set_ylabel('Calificación', fontsize=9)
+            ax.set_ylim(0, 100)
+            ax.tick_params(labelsize=8)
+            for spine in ['top', 'right']:
+                ax.spines[spine].set_visible(False)
+            ax.grid(True, axis='y', alpha=0.3)
+
+            from matplotlib.lines import Line2D
+            legend_elements = [
+                Line2D([0], [0], marker='D', color='w', markerfacecolor=s['color'],
+                       markersize=6, label=f"{s['titulo']}  μ={s['media']:.1f}  σ={s['desviacion']:.1f}")
+                for s in exam_stats
+            ]
+            ax.legend(handles=legend_elements, fontsize=7, loc='lower left', framealpha=0.8)
+
+            buf = io.BytesIO()
+            fig.savefig(buf, format='png', dpi=120, bbox_inches='tight', transparent=False)
+            buf.seek(0)
+            bell_curve_img = base64.b64encode(buf.getvalue()).decode('utf-8')
+            plt.close(fig)
 
     boxplot_mins = [e["boxplot"]["min"] for e in examenes if e.get("boxplot")]
     boxplot_maxs = [e["boxplot"]["max"] for e in examenes if e.get("boxplot")]

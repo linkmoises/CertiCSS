@@ -216,9 +216,9 @@
                         <img src="data:image/png;base64,{{ bell_curve_img }}" alt="Distribución de calificaciones" class="max-w-full h-auto">
                     </div>
                     <div class="text-sm text-gray-600 leading-relaxed max-w-xs">
-                        <p class="mb-2"><strong>Curva de densidad</strong> — muestra cómo se distribuyen las calificaciones de cada examen. El eje vertical representa la densidad de probabilidad (el área bajo cada curva suma 1).</p>
-                        <p class="mb-2">El pico indica las notas más frecuentes. Una curva angosta y alta indica calificaciones concentradas; una curva ancha y baja indica mayor dispersión.</p>
-                        <p><strong>Líneas verticales:</strong> la media (—) y desviaciones ±1σ (···) y ±2σ (-··) de cada examen, en el color de su curva.</p>
+                        <p class="mb-2"><strong>Swarm plot</strong> — cada punto representa la calificación de un intento de examen. Los puntos se separan para evitar superposición, mostrando la densidad real de los datos.</p>
+                        <p class="mb-2">Las zonas con más puntos apilados indican las notas más frecuentes. La dispersión horizontal dentro de cada examen no tiene significado; solo separa los puntos para que sean visibles.</p>
+                        <p><strong>Marcador:</strong> rombo para la media (◆) de cada examen.</p>
                     </div>
                 </div>
             </div>
