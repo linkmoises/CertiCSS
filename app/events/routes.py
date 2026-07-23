@@ -645,7 +645,7 @@ def listar_eventos_digitales(page=1):
     
     eventos_por_pagina = 20
 
-    if current_user.rol == "denadoi":
+    if current_user.rol in ("denadoi", "administrador"):
         filtro = {
             "lms_activo": True,
             'registro_abierto': {'$ne': True}
