@@ -3243,6 +3243,7 @@ def _buscar_certificados_resultados(cedula, token):
                 'fecha_evento': fecha_evento,
                 'fecha_inicio': evento.get('fecha_inicio', None),
                 'modalidad_evento': evento.get('modalidad', 'No disponible'),
+                'lms_activo': evento.get('lms_activo', evento.get('modalidad') != 'Presencial'),
                 'tipo_evento': evento.get('tipo', 'General'),  # Agregar tipo de evento
                 'carga_horaria': evento.get('carga_horaria', '0'),
                 'carga_prorrateada': carga_prorrateada,
@@ -4196,9 +4197,9 @@ def tablero_metricas_regional(year=None, unidad=None):
 @login_required
 def tablero_metricas_lms(page=1):
     
-    # Filtrar eventos con modalidad virtual (todas las modalidades) y excluir registro abierto
+    # Filtrar eventos con LMS activado (excluyendo registro abierto)
     eventos_lms_query = {
-        "modalidad": {"$in": ["Virtual asincrónica", "Virtual sincrónica", "Híbrida"]},
+        "lms_activo": True,
         'registro_abierto': {'$ne': True}
     }
     
@@ -4317,10 +4318,10 @@ def tablero_metricas_lms(page=1):
 @login_required
 def tablero_metricas_lms_evento(codigo_evento):
     
-    # Verificar que el evento existe y tiene modalidad virtual o híbrida
+    # Verificar que el evento existe y tiene LMS activado
     evento = collection_eventos.find_one({
         "codigo": codigo_evento,
-        "modalidad": {"$in": ["Virtual asincrónica", "Virtual sincrónica", "Híbrida"]}
+        "lms_activo": True
     })
     
     if not evento:

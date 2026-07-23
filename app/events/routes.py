@@ -244,6 +244,7 @@ def crear_evento():
         checkin_masivo = request.form.get('checkin_masivo') == 'on'
         concurso_poster = request.form.get('concurso_poster') == 'on'
         registro_abierto = request.form.get('registro_abierto') == 'on'
+        lms_activo = request.form.get('lms_activo') == 'on'
         avales = request.form.getlist('aval')
 
         fecha_inicio_str = request.form['fecha_inicio']
@@ -331,6 +332,7 @@ def crear_evento():
             'checkin_masivo': checkin_masivo,
             'concurso_poster': concurso_poster,
             'registro_abierto': registro_abierto,
+            'lms_activo': lms_activo,
             'avales': avales,
             'instrumento': instrumento
         })
@@ -477,6 +479,7 @@ def editar_evento(codigo_evento):
         checkin_masivo = request.form.get('checkin_masivo') == 'on'
         concurso_poster = request.form.get('concurso_poster') == 'on'
         registro_abierto = request.form.get('registro_abierto') == 'on'
+        lms_activo = request.form.get('lms_activo') == 'on'
         avales = request.form.getlist('aval')
         aval_cmp_tipo = request.form.get('aval_cmp_tipo')
         aval_cmp_horas = request.form.get('aval_cmp_horas')
@@ -561,6 +564,7 @@ def editar_evento(codigo_evento):
             'checkin_masivo': checkin_masivo,
             'concurso_poster': concurso_poster,
             'registro_abierto': registro_abierto,
+            'lms_activo': lms_activo,
             'avales': avales,
             'aval_cmp_tipo': aval_cmp_tipo,
             'aval_cmp_horas': aval_cmp_horas,
@@ -643,13 +647,13 @@ def listar_eventos_digitales(page=1):
 
     if current_user.rol == "denadoi":
         filtro = {
-            "modalidad": {"$ne": "Presencial"},
+            "lms_activo": True,
             'registro_abierto': {'$ne': True}
         }
     else:
         filtro = {
             "autor": current_user.id,
-            "modalidad": {"$ne": "Presencial"},
+            "lms_activo": True,
             'registro_abierto': {'$ne': True}
         }
     

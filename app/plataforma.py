@@ -366,7 +366,7 @@ def copiar_lms(codigo_evento):
             return redirect(url_for("ver_evento", codigo_evento=codigo_evento))
         
         # Verificar que el evento destino sea virtual/tenga modalidad no presencial
-        if evento_destino.get("modalidad") == "Presencial":
+        if not evento_destino.get("lms_activo", evento_destino.get("modalidad") != "Presencial"):
             flash("No se puede copiar LMS a un evento presencial", "danger")
             return redirect(url_for("plataforma.copiar_lms", codigo_evento=codigo_evento))
         
@@ -556,7 +556,7 @@ def ver_contenido(codigo_evento, orden):
                 # Verificar que el evento es virtual antes de guardar
                 # Solo guardar si NO es formativo o si es formativo pero queremos registro
                 if (
-                    evento.get("modalidad") in ["Virtual asincrónica", "Virtual sincrónica", "Híbrida"]
+                    evento.get("lms_activo", evento.get("modalidad") in ["Virtual asincrónica", "Virtual sincrónica", "Híbrida"])
                     and cedula_participante
                 ):
                     # Obtener el número de intento (contar intentos previos + 1)
@@ -1344,7 +1344,7 @@ def enviar_resultado_examen():
 
         # Verificar que el evento existe y tiene modalidad virtual o híbrida
         evento = collection_eventos.find_one(
-            {"codigo": codigo_evento, "modalidad": {"$in": ["Virtual asincrónica", "Virtual sincrónica", "Híbrida"]}}
+            {"codigo": codigo_evento, "$or": [{"lms_activo": True}, {"modalidad": {"$in": ["Virtual asincrónica", "Virtual sincrónica", "Híbrida"]}}]}
         )
 
         if not evento:
