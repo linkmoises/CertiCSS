@@ -4506,27 +4506,27 @@ def tablero_metricas_lms_evento(codigo_evento):
             desviacion = np.std(calificaciones, ddof=1)
             exam_stats.append({"media": media, "desviacion": desviacion, "color": color, "titulo": titulo, "n": len(calificaciones)})
 
-            if rows:
-                df = pd.DataFrame(rows)
-                exam_order = [s["titulo"] for s in exam_stats]
-                df["Examen"] = pd.Categorical(df["Examen"], categories=exam_order, ordered=True)
-                palette = [s["color"] for s in exam_stats]
-                n_exams = len(exam_order)
-                fig, ax = plt.subplots(figsize=(max(6, n_exams * 1.8), 4))
-                fig.patch.set_facecolor('white')
-                ax.set_facecolor('white')
+        if rows:
+            df = pd.DataFrame(rows)
+            exam_order = [s["titulo"] for s in exam_stats]
+            df["Examen"] = pd.Categorical(df["Examen"], categories=exam_order, ordered=True)
+            palette = [s["color"] for s in exam_stats]
+            n_exams = len(exam_order)
+            fig, ax = plt.subplots(figsize=(max(6, n_exams * 1.8), 4))
+            fig.patch.set_facecolor('white')
+            ax.set_facecolor('white')
 
-                sns.boxplot(data=df, x="Examen", y="Calificación", ax=ax,
-                            palette=["white"] * n_exams, width=0.5, linewidth=1, fliersize=0,
-                            boxprops=dict(edgecolor="#9ca3af", alpha=0.5),
-                            whiskerprops=dict(color="#9ca3af", alpha=0.5),
-                            capprops=dict(color="#9ca3af", alpha=0.5),
-                            medianprops=dict(color="#6b7280", alpha=0.5, linewidth=1))
+            sns.boxplot(data=df, x="Examen", y="Calificación", ax=ax,
+                        palette=palette, width=0.5, linewidth=1, fliersize=0,
+                        boxprops=dict(alpha=0.5),
+                        whiskerprops=dict(color='none'),
+                        capprops=dict(color='none'),
+                        medianprops=dict(color="#374151", linewidth=1.5))
 
-                if len(df) > 500:
-                    sns.stripplot(data=df, x="Examen", y="Calificación", palette=palette, ax=ax, size=3, alpha=0.5, jitter=0.3)
-                else:
-                    sns.swarmplot(data=df, x="Examen", y="Calificación", palette=palette, ax=ax, size=4, alpha=0.7)
+            if len(df) > 500:
+                sns.stripplot(data=df, x="Examen", y="Calificación", palette=palette, ax=ax, size=3, alpha=0.5, jitter=0.3)
+            else:
+                sns.swarmplot(data=df, x="Examen", y="Calificación", palette=palette, ax=ax, size=4, alpha=0.7)
 
             for i, stat in enumerate(exam_stats):
                 x_pos = i
