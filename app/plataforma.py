@@ -625,6 +625,13 @@ def ver_contenido(codigo_evento, orden):
                     ).sort("numero_intento", 1)
                 )
 
+            # Redirigir a encuesta si el examen sumativo fue aprobado y el evento requiere encuesta
+            if request.method == "POST" and not formativo and puntaje and puntaje[0] / puntaje[1] >= 0.8:
+                from app.verifica_encuesta import requires_survey_completion, has_completed_survey_v2
+                if requires_survey_completion(evento) and not has_completed_survey_v2(cedula, codigo_evento):
+                    flash('¡Examen aprobado! Completa la encuesta de evaluación para descargar tu certificado.', 'success')
+                    return redirect(url_for('encuesta_satisfaccion', codigo_evento=codigo_evento, cedula=cedula, from_examen=1))
+
             return render_template(
                 "examen.html",
                 preguntas=preguntas,

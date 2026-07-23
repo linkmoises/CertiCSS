@@ -43,6 +43,13 @@
                         La encuesta no tomará más de 2 minutos. Agradecemos de antemano su tiempo y colaboración.
                     </p>
                     
+                    {% if from_examen and not already_completed %}
+                    <div class="mt-4 p-4 bg-blue-100 text-blue-800 rounded-lg">
+                        <p class="font-semibold">✓ ¡Examen aprobado!</p>
+                        <p class="mt-2">Completa la encuesta de evaluación para descargar tu certificado de participación.</p>
+                    </div>
+                    {% endif %}
+
                     {% if already_completed %}
                     <div class="mt-4 p-4 bg-green-100 text-green-800 rounded-lg">
                         <p class="font-semibold">✓ Encuesta completada</p>

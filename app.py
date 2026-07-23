@@ -4846,6 +4846,7 @@ def encuesta_satisfaccion_v2(codigo_evento):
 
     # Get cedula from query parameter
     cedula = request.args.get('cedula', '').strip()
+    from_examen = request.args.get('from_examen')
 
     # If no cedula provided, show form to enter it
     if not cedula:
@@ -4864,7 +4865,7 @@ def encuesta_satisfaccion_v2(codigo_evento):
         # Get participant nanoid for certificate download
         participante = collection_participantes.find_one({"cedula": cedula, "codigo_evento": codigo_evento})
         nanoid = participante.get('nanoid') if participante else None
-        return render_template('encuesta.html', evento=evento, already_completed=True, cedula=cedula, nanoid=nanoid)
+        return render_template('encuesta.html', evento=evento, already_completed=True, cedula=cedula, nanoid=nanoid, from_examen=from_examen)
 
     if request.method == 'POST':
         # Get cedula from form (hidden field)
@@ -4943,11 +4944,11 @@ def encuesta_satisfaccion_v2(codigo_evento):
             # Get participant nanoid for certificate download
             participante = collection_participantes.find_one({"cedula": cedula, "codigo_evento": codigo_evento})
             nanoid = participante.get('nanoid') if participante else None
-            return render_template('encuesta.html', evento=evento, already_completed=True, cedula=cedula, nanoid=nanoid, just_completed=True)
+            return render_template('encuesta.html', evento=evento, already_completed=True, cedula=cedula, nanoid=nanoid, just_completed=True, from_examen=from_examen)
         
         return redirect(url_for('encuesta_satisfaccion', codigo_evento=codigo_evento) + f'?cedula={cedula}')
 
-    return render_template('encuesta.html', evento=evento, cedula=cedula)
+    return render_template('encuesta.html', evento=evento, cedula=cedula, from_examen=from_examen)
 
 ###
 ### Encuesta de satisfacción (CertiCSS + Evento 2025)
@@ -7493,6 +7494,37 @@ def generar_pdf(nanoid):
         if not has_completed_survey_v2(participante['cedula'], codigo_evento):
             flash('Debe completar la encuesta antes de descargar el certificado.', 'error')
             return redirect(url_for('buscar_certificados'))
+
+    # Check exam completion for LMS events
+    if evento.get('lms_activo'):
+        from app.plataforma import parse_qbank_config
+        examenes = list(collection_eva.find({
+            'codigo_evento': codigo_evento,
+            'tipo': 'examen'
+        }))
+        ordenes_sumativos = []
+        for ex in examenes:
+            qbank_config = ex.get('qbank_config', '')
+            if qbank_config:
+                _, _, _, formativo = parse_qbank_config(qbank_config)
+                if not formativo:
+                    ordenes_sumativos.append(ex.get('orden'))
+
+        if ordenes_sumativos:
+            resultados = list(collection_exam_results.find({
+                'codigo_evento': codigo_evento,
+                'cedula_participante': participante['cedula'],
+                'orden_examen': {'$in': ordenes_sumativos}
+            }))
+            for orden in ordenes_sumativos:
+                mejor = max(
+                    [r for r in resultados if r.get('orden_examen') == orden],
+                    key=lambda r: r.get('calificacion', 0),
+                    default=None
+                )
+                if not mejor or mejor.get('calificacion', 0) < 80:
+                    flash('Debe aprobar todos los exámenes sumativos con puntaje ≥80% para descargar el certificado.', 'error')
+                    return redirect(url_for('buscar_certificados'))
 
     ##afiche_path = f"static/assets/plantilla-certificado.pdf"
     afiche_path = evento.get('certificado')
