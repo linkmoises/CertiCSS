@@ -4481,6 +4481,23 @@ def tablero_metricas_lms_evento(codigo_evento):
             }
         else:
             examen["boxplot"] = None
+        
+        # Boxplot stats (solo primer intento)
+        calificaciones_inicial_raw = list(collection_exam_results.find(
+            {"codigo_evento": codigo_evento, "orden_examen": examen["orden"], "numero_intento": 1},
+            {"calificacion": 1}
+        ))
+        calificaciones_inicial = sorted([r["calificacion"] for r in calificaciones_inicial_raw])
+        if calificaciones_inicial:
+            examen["boxplot_inicial"] = {
+                "min": calificaciones_inicial[0],
+                "q1": float(np.percentile(calificaciones_inicial, 25)),
+                "median": float(np.percentile(calificaciones_inicial, 50)),
+                "q3": float(np.percentile(calificaciones_inicial, 75)),
+                "max": calificaciones_inicial[-1],
+            }
+        else:
+            examen["boxplot_inicial"] = None
     
     # Swarm plot por examen
     bell_curve_img = None
@@ -4518,7 +4535,7 @@ def tablero_metricas_lms_evento(codigo_evento):
 
             sns.boxplot(data=df, x="Examen", y="Calificación", ax=ax,
                         palette=palette, width=0.5, linewidth=1, fliersize=0,
-                        boxprops=dict(alpha=0.5),
+                        boxprops=dict(alpha=0.25),
                         whiskerprops=dict(color='none'),
                         capprops=dict(color='none'),
                         medianprops=dict(color="#374151", linewidth=1.5))
@@ -4549,8 +4566,8 @@ def tablero_metricas_lms_evento(codigo_evento):
                        markersize=6, label=f"{s['titulo']}  \u00b5 = {s['media']:.1f} / n = {s['n']}")
                 for s in exam_stats
             ]
-            ax.legend(handles=legend_elements, fontsize=7, loc='lower center', bbox_to_anchor=(0.5, 1),
-                      ncol=min(len(exam_stats), 3), framealpha=0.8)
+            ax.legend(handles=legend_elements, fontsize=7, loc='upper left', bbox_to_anchor=(1.02, 1),
+                      framealpha=0.8)
 
             buf = io.BytesIO()
             fig.savefig(buf, format='png', dpi=120, bbox_inches='tight', transparent=False)
@@ -4558,8 +4575,8 @@ def tablero_metricas_lms_evento(codigo_evento):
             bell_curve_img = base64.b64encode(buf.getvalue()).decode('utf-8')
             plt.close(fig)
 
-    boxplot_mins = [e["boxplot"]["min"] for e in examenes if e.get("boxplot")]
-    boxplot_maxs = [e["boxplot"]["max"] for e in examenes if e.get("boxplot")]
+    boxplot_mins = [e["boxplot"]["min"] for e in examenes if e.get("boxplot")] + [e["boxplot_inicial"]["min"] for e in examenes if e.get("boxplot_inicial")]
+    boxplot_maxs = [e["boxplot"]["max"] for e in examenes if e.get("boxplot")] + [e["boxplot_inicial"]["max"] for e in examenes if e.get("boxplot_inicial")]
     if boxplot_mins and boxplot_maxs:
         global_min = min(boxplot_mins)
         global_max = max(boxplot_maxs)

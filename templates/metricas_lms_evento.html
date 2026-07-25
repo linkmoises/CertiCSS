@@ -284,7 +284,15 @@
                                         <th scope="col" class="px-6 py-3 text-start">
                                             <div class="flex items-center gap-x-2">
                                                 <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
-                                                    Distribución
+                                                    Boxplot inicial
+                                                </span>
+                                            </div>
+                                        </th>
+
+                                        <th scope="col" class="px-6 py-3 text-start">
+                                            <div class="flex items-center gap-x-2">
+                                                <span class="text-xs font-semibold uppercase tracking-wide text-gray-800">
+                                                    Boxplot global
                                                 </span>
                                             </div>
                                         </th>
@@ -320,6 +328,31 @@
                                         <td class="size-px whitespace-nowrap">
                                             <div class="px-6 py-3">
                                                 <span class="text-sm text-gray-800">{{ examen.promedio_calificacion }}%</span>
+                                            </div>
+                                        </td>
+
+                                        <td class="size-px whitespace-nowrap">
+                                            <div class="px-6 py-3">
+                                                {% if examen.boxplot_inicial %}
+                                                <svg width="120" height="28" viewBox="{{ boxplot_view_min }} 0 {{ boxplot_view_max - boxplot_view_min }} 28" xmlns="http://www.w3.org/2000/svg">
+                                                    <circle cx="10" cy="3" r="1.5" fill="#d1d5db"/>
+                                                    <circle cx="20" cy="3" r="1.5" fill="#d1d5db"/>
+                                                    <circle cx="30" cy="3" r="1.5" fill="#d1d5db"/>
+                                                    <circle cx="40" cy="3" r="1.5" fill="#d1d5db"/>
+                                                    <circle cx="50" cy="3" r="1.5" fill="#d1d5db"/>
+                                                    <circle cx="60" cy="3" r="1.5" fill="#d1d5db"/>
+                                                    <circle cx="70" cy="3" r="1.5" fill="#d1d5db"/>
+                                                    <circle cx="80" cy="3" r="1.5" fill="#d1d5db"/>
+                                                    <circle cx="90" cy="3" r="1.5" fill="#d1d5db"/>
+                                                    <line x1="{{ examen.boxplot_inicial.min }}" y1="16" x2="{{ examen.boxplot_inicial.max }}" y2="16" stroke="#9ca3af" stroke-width="1.5"/>
+                                                    <line x1="{{ examen.boxplot_inicial.min }}" y1="12" x2="{{ examen.boxplot_inicial.min }}" y2="20" stroke="#9ca3af" stroke-width="1.5"/>
+                                                    <line x1="{{ examen.boxplot_inicial.max }}" y1="12" x2="{{ examen.boxplot_inicial.max }}" y2="20" stroke="#9ca3af" stroke-width="1.5"/>
+                                                    <rect x="{{ examen.boxplot_inicial.q1 }}" y="9" width="{{ examen.boxplot_inicial.q3 - examen.boxplot_inicial.q1 }}" height="14" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5" rx="2"/>
+                                                    <line x1="{{ examen.boxplot_inicial.median }}" y1="9" x2="{{ examen.boxplot_inicial.median }}" y2="23" stroke="#ef4444" stroke-width="2"/>
+                                                </svg>
+                                                {% else %}
+                                                <span class="text-sm text-gray-300">—</span>
+                                                {% endif %}
                                             </div>
                                         </td>
 
