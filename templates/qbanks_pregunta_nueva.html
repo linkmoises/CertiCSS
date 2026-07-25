@@ -58,6 +58,7 @@
                                             <option value="seleccion_simple">Selección simple (una respuesta correcta)</option>
                                             <option value="seleccion_multiple">Selección múltiple (varias respuestas correctas)</option>
                                             <option value="verdadero_falso">Verdadero / Falso</option>
+                                            <option value="encuesta">Encuesta (selección múltiple, sin respuestas correctas)</option>
                                         </select>
                                     </div>
                                     <!-- End Col -->
@@ -236,8 +237,9 @@ form.submit();
             inputRespuesta = `<input type=\"radio\" name=\"respuestas_correctas\" value=\"${opcionIndex}\" required>`;
         } else if (tipo === "seleccion_multiple") {
             inputRespuesta = `<input type=\"checkbox\" name=\"respuestas_correctas\" value=\"${opcionIndex}\">`;
+        } else if (tipo === "encuesta") {
+            inputRespuesta = '';
         } else if (tipo === "verdadero_falso") {
-            // Se generan solo dos opciones: Verdadero y Falso
             return;
         }
     

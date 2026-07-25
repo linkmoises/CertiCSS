@@ -150,7 +150,17 @@
                     <div class="m-8">
                         <div class="mx-auto">
                             <h2 class="text-2xl font-bold mb-4">{{ contenido.titulo }}</h2>
-                            {% if puntaje is not none %}
+                            {% if puntaje is not none and puntaje[1] == 0 %}
+                            {% set ns = namespace(msg='Encuesta completada. Gracias por participar.') %}
+                            {% for p in preguntas %}
+                            {% if p.tipo == 'encuesta' and p.justificacion_html %}
+                            {% set ns.msg = p.justificacion_html %}
+                            {% endif %}
+                            {% endfor %}
+                            <div class="mb-4 p-4 rounded bg-blue-100 text-blue-800">
+                                {{ ns.msg|safe }}
+                            </div>
+                            {% elif puntaje is not none %}
                             {% set porcentaje = (puntaje[0] / puntaje[1] * 100) if puntaje[1] > 0 else 0 %}
                             <div
                                 class="mb-4 p-4 rounded {{ 'bg-green-100 text-green-800' if porcentaje >= 80 else 'bg-red-100 text-red-800' }}">
@@ -215,9 +225,11 @@
                                     {% set es_correcta = (loop.index0 in pregunta.respuestas_correctas) %}
                                     {% set fue_seleccionada = (loop.index0|string) in seleccion %}
                                     <label class="flex items-center gap-2">
-                                        <input type="{{ 'checkbox' if pregunta.tipo == 'seleccion_multiple' else 'radio' }}" disabled {% if fue_seleccionada %}checked{% endif %}>
+                                        <input type="{{ 'checkbox' if pregunta.tipo in ('seleccion_multiple', 'encuesta') else 'radio' }}" disabled {% if fue_seleccionada %}checked{% endif %}>
                                         <span class="px-2 py-1 rounded
-                                            {% if fue_seleccionada and es_correcta %}bg-green-200 text-green-800
+                                            {% if pregunta.tipo == 'encuesta' and fue_seleccionada %}bg-blue-100 text-blue-800
+                                            {% elif pregunta.tipo == 'encuesta' %}bg-gray-50 text-gray-700
+                                            {% elif fue_seleccionada and es_correcta %}bg-green-200 text-green-800
                                             {% elif fue_seleccionada and not es_correcta %}bg-red-200 text-red-800
                                             {% elif es_correcta %}bg-green-50 text-green-700
                                             {% endif %}">
@@ -304,7 +316,7 @@
                                             {% endif %}
                                         </label>
                                         {% endfor %}
-                                        {% elif pregunta.tipo == 'seleccion_multiple' %}
+                                        {% elif pregunta.tipo == 'seleccion_multiple' or pregunta.tipo == 'encuesta' %}
                                         {% for opcion in pregunta.opciones %}
                                         <label class="flex items-center gap-2">
                                             <input type="checkbox" name="resp_{{ idx }}" value="{{ loop.index0 }}">

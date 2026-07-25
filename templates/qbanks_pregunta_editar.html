@@ -70,6 +70,8 @@
                                                     múltiple (varias respuestas correctas)</option>
                                                 <option value="verdadero_falso" {% if pregunta.tipo=='verdadero_falso'
                                                     %}selected{% endif %}>Verdadero / Falso</option>
+                                                <option value="encuesta" {% if pregunta.tipo=='encuesta'
+                                                    %}selected{% endif %}>Encuesta (selección múltiple, sin respuestas correctas)</option>
                                             </select>
                                         </div>
                                         <!-- End Col -->
@@ -283,6 +285,8 @@
             inputRespuesta = `<input type=\"radio\" name=\"respuestas_correctas\" value=\"${opcionIndex}\" ${esCorrecta ? 'checked' : ''} required>`;
         } else if (tipo === "seleccion_multiple") {
             inputRespuesta = `<input type=\"checkbox\" name=\"respuestas_correctas\" value=\"${opcionIndex}\" ${esCorrecta ? 'checked' : ''}>`;
+        } else if (tipo === "encuesta") {
+            inputRespuesta = '';
         } else if (tipo === "verdadero_falso") {
             return;
         }
@@ -337,7 +341,7 @@
         {% if pregunta.opciones %}
         {% for opcion in pregunta.opciones %}
         {% set es_correcta = loop.index0 in pregunta.respuestas_correctas %}
-        crearOpcion('{{ pregunta.tipo }}', '{{ opcion.texto|replace("'", "\\'") }}', {{ 'true' if es_correcta else 'false' }});
+        crearOpcion({{ pregunta.tipo|tojson }}, {{ opcion.texto|tojson }}, {{ 'true' if es_correcta else 'false' }});
     {% endfor %}
     {% else %}
     crearOpcion(tipo);

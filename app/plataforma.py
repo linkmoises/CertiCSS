@@ -523,17 +523,20 @@ def ver_contenido(codigo_evento, orden):
                     for pid in pregunta_ids_list
                     if pid
                 ]
-                puntaje = (
-                    resultado_persistente["respuestas_correctas"],
-                    resultado_persistente["total_preguntas"],
+                son_todas_encuesta = all(
+                    p.get("tipo") == "encuesta" for p in preguntas if p
                 )
+                if son_todas_encuesta:
+                    puntaje = (0, 0)
+                else:
+                    puntaje = (
+                        resultado_persistente["respuestas_correctas"],
+                        resultado_persistente["total_preguntas"],
+                    )
                 respuestas_guardadas = {}
                 for i, r in enumerate(preguntas_ids):
                     respuestas_guardadas[str(i)] = r.get("respuesta", [])
             elif request.method == "POST":
-                if persistencia:
-                    flash("Ya ha completado esta evaluación y no puede volver a realizarla.", "warning")
-                    return redirect(request.url)
                 preguntas_ids = request.form.get("preguntas_ids", "").split(",")
                 preguntas = [
                     collection_qbanks_data.find_one({"_id": ObjectId(pid)})
@@ -556,26 +559,39 @@ def ver_contenido(codigo_evento, orden):
                 puntaje = None
             if request.method == "POST" and not resultado_persistente:
                 correctas = 0
+                total_evaluables = 0
                 respuestas_usuario = []
                 for i, pregunta in enumerate(preguntas):
                     respuesta_usuario = request.form.getlist(f"resp_{i}")
-                    respuestas_usuario.append(
-                        {
-                            "pregunta_id": str(pregunta["_id"]),
-                            "respuesta": respuesta_usuario,
-                            "correcta": set(map(str, pregunta["respuestas_correctas"]))
-                            == set(respuesta_usuario),
-                        }
-                    )
-                    if set(map(str, pregunta["respuestas_correctas"])) == set(
-                        respuesta_usuario
-                    ):
-                        correctas += 1
-                puntaje = (correctas, len(preguntas))
+                    if pregunta.get("tipo") == "encuesta":
+                        respuestas_usuario.append(
+                            {
+                                "pregunta_id": str(pregunta["_id"]),
+                                "respuesta": respuesta_usuario,
+                            }
+                        )
+                    else:
+                        es_correcta = set(map(str, pregunta["respuestas_correctas"])) == set(respuesta_usuario)
+                        respuestas_usuario.append(
+                            {
+                                "pregunta_id": str(pregunta["_id"]),
+                                "respuesta": respuesta_usuario,
+                                "correcta": es_correcta,
+                            }
+                        )
+                        if es_correcta:
+                            correctas += 1
+                        total_evaluables += 1
+                puntaje = (correctas, total_evaluables)
 
-                # Calcular calificación como porcentaje
+                respuestas_guardadas = {}
+                for i, r in enumerate(respuestas_usuario):
+                    respuestas_guardadas[str(i)] = r.get("respuesta", [])
+
+                # Calcular calificación como porcentaje (solo preguntas evaluables)
+                total_para_puntaje = total_evaluables if total_evaluables > 0 else len(preguntas)
                 calificacion = (
-                    (correctas / len(preguntas)) * 100 if len(preguntas) > 0 else 0
+                    (correctas / total_para_puntaje) * 100 if total_para_puntaje > 0 else 0
                 )
 
                 # Obtener cédula del participante desde los parámetros
@@ -609,8 +625,8 @@ def ver_contenido(codigo_evento, orden):
                         "fecha_envio": datetime.now(),
                         "titulo_examen": contenido_actual.get("titulo", "Sin título"),
                         "titulo_evento": evento.get("titulo", "Sin título"),
-                        "total_preguntas": len(preguntas),
-                        "respuestas_correctas": correctas,
+                        "total_preguntas": total_evaluables if total_evaluables > 0 else len(preguntas),
+                        "respuestas_correctas": correctas if total_evaluables > 0 else len(preguntas),
                         "formativo": formativo,  # Marcar si es formativo o no
                     }
 
@@ -641,6 +657,7 @@ def ver_contenido(codigo_evento, orden):
                             "codigo_evento": codigo_evento,
                             "orden_examen": orden,
                             "cedula_participante": cedula,
+                            "formativo": formativo,
                         },
                         {
                             "numero_intento": 1,
@@ -654,7 +671,7 @@ def ver_contenido(codigo_evento, orden):
                 )
 
             # Redirigir a encuesta si el examen sumativo fue aprobado y el evento requiere encuesta
-            if request.method == "POST" and not formativo and puntaje and puntaje[0] / puntaje[1] >= 0.8:
+            if request.method == "POST" and not formativo and puntaje and puntaje[1] > 0 and puntaje[0] / puntaje[1] >= 0.8:
                 from app.verifica_encuesta import requires_survey_completion, has_completed_survey_v2
                 if requires_survey_completion(evento) and not has_completed_survey_v2(cedula, codigo_evento):
                     flash('¡Examen aprobado! Completa la encuesta de evaluación para descargar tu certificado.', 'success')
@@ -1337,22 +1354,23 @@ def nueva_pregunta_qbank(codigo_qbank):
 
 def parse_qbank_config(config_str):
     # Ejemplo: [O5W4YTK2 preguntas=3 aleatorio=no formativo=si persistencia=no evaluable=si]
-    match = re.match(
-        r"\[(\w+) preguntas=(\d+) aleatorio=(si|no)"
-        r"(?: formativo=(si|no))?"
-        r"(?: persistencia=(si|no))?"
-        r"(?: evaluable=(si|no))?\]",
-        config_str
-    )
-    if match:
-        codigo = match.group(1)
-        num_preguntas = int(match.group(2))
-        aleatorio = match.group(3) == "si"
-        formativo = match.group(4) == "si" if match.group(4) else False
-        persistencia = match.group(5) == "si" if match.group(5) else False
-        evaluable = match.group(6) == "si" if match.group(6) else True
-        return codigo, num_preguntas, aleatorio, formativo, persistencia, evaluable
-    return None, None, None, False, False, True
+    params = {}
+    match = re.match(r"\[(\w+)", config_str)
+    if not match:
+        return None, None, None, False, False, True
+    params["codigo"] = match.group(1)
+    for kv in re.finditer(r"(\w+)=(si|no|\d+)", config_str):
+        key, val = kv.group(1), kv.group(2)
+        params[key] = val
+    codigo = params.get("codigo")
+    num_preguntas = int(params.get("preguntas", 0))
+    aleatorio = params.get("aleatorio", "no") == "si"
+    formativo = params.get("formativo", "no") == "si"
+    persistencia = params.get("persistencia", "no") == "si"
+    evaluable = params.get("evaluable", "si") == "si"
+    if not codigo or num_preguntas == 0:
+        return None, None, None, False, False, True
+    return codigo, num_preguntas, aleatorio, formativo, persistencia, evaluable
 
 
 ###
