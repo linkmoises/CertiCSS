@@ -4465,6 +4465,21 @@ def tablero_metricas_lms_evento(codigo_evento):
         resultado_examen = list(collection_exam_results.aggregate(pipeline_examen))
         examen["promedio_calificacion"] = round(resultado_examen[0]["promedio"], 2) if resultado_examen else 0
         
+        # Promedio solo primer intento
+        pipeline_inicial = [
+            {"$match": {
+                "codigo_evento": codigo_evento,
+                "orden_examen": examen["orden"],
+                "numero_intento": 1
+            }},
+            {"$group": {
+                "_id": None,
+                "promedio": {"$avg": "$calificacion"}
+            }}
+        ]
+        resultado_inicial = list(collection_exam_results.aggregate(pipeline_inicial))
+        examen["promedio_inicial"] = round(resultado_inicial[0]["promedio"], 2) if resultado_inicial else 0
+        
         # Boxplot stats
         calificaciones_raw = list(collection_exam_results.find(
             {"codigo_evento": codigo_evento, "orden_examen": examen["orden"]},
