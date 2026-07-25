@@ -4451,6 +4451,21 @@ def tablero_metricas_lms_evento(codigo_evento):
         })
         examen["total_resultados"] = examen_resultados
         
+        # Media de intentos por participante para este examen
+        pipeline_media_intentos = [
+            {"$match": {"codigo_evento": codigo_evento, "orden_examen": examen["orden"]}},
+            {"$group": {
+                "_id": "$cedula_participante",
+                "max_intento": {"$max": "$numero_intento"}
+            }},
+            {"$group": {
+                "_id": None,
+                "media": {"$avg": "$max_intento"}
+            }}
+        ]
+        resultado_media = list(collection_exam_results.aggregate(pipeline_media_intentos))
+        examen["media_intentos"] = round(resultado_media[0]["media"], 2) if resultado_media else 0
+        
         # Promedio de calificación para este examen específico
         pipeline_examen = [
             {"$match": {
