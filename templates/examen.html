@@ -187,6 +187,11 @@
                                 </a>
                                 {% endif %}
                             </div>
+                            {% if formativo %}
+                            <div class="mb-4 p-4 rounded bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm">
+                                Ya realizó esta evaluación formativa anteriormente. Puede realizarla cuantas veces desee si desea practicar sobre el tema.
+                            </div>
+                            {% endif %}
                             {% for pregunta in preguntas %}
                             <div class="mb-6 border-b pb-4">
                                 <div class="mb-2 font-semibold">{{ loop.index }}. {{ pregunta.pregunta_html|safe }}
@@ -201,7 +206,11 @@
                                 {% endif %}
                                 <div class="space-y-2">
                                     {% set idx = loop.index0 %}
+                                    {% if respuestas_guardadas %}
+                                    {% set seleccion = respuestas_guardadas.get(idx|string, []) %}
+                                    {% else %}
                                     {% set seleccion = request.form.getlist('resp_' ~ idx) %}
+                                    {% endif %}
                                     {% for opcion in pregunta.opciones %}
                                     {% set es_correcta = (loop.index0 in pregunta.respuestas_correctas) %}
                                     {% set fue_seleccionada = (loop.index0|string) in seleccion %}

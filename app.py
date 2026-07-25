@@ -3173,7 +3173,7 @@ def _buscar_certificados_resultados(cedula, token):
             for ex in examenes_sumativos:
                 qbank_config = ex.get('qbank_config', '')
                 if qbank_config:
-                    _, _, _, formativo = parse_qbank_config(qbank_config)
+                    _, _, _, formativo, _, _ = parse_qbank_config(qbank_config)
                     if not formativo:
                         ordenes_sumativos.append(ex.get('orden'))
                 else:
@@ -4340,18 +4340,36 @@ def tablero_metricas_lms_evento(codigo_evento):
         "rol": "participante"
     })
     
-    total_examenes = collection_eva.count_documents({
+    # Obtener exámenes y filtrar solo evaluables
+    from app.plataforma import parse_qbank_config
+    examenes_raw = list(collection_eva.find({
         "codigo_evento": codigo_evento,
         "tipo": "examen"
-    })
+    }).sort("orden", 1))
     
-    total_resultados = collection_exam_results.count_documents({
-        "codigo_evento": codigo_evento
-    })
+    examenes = []
+    ordenes_evaluables = []
+    for ex in examenes_raw:
+        qbank_config = ex.get('qbank_config', '')
+        if qbank_config:
+            _, _, _, _, _, evaluable = parse_qbank_config(qbank_config)
+        else:
+            evaluable = True
+        if evaluable:
+            ordenes_evaluables.append(ex["orden"])
+            examenes.append(ex)
+    
+    total_examenes = len(examenes)
+    
+    match_evaluable = {"codigo_evento": codigo_evento}
+    if ordenes_evaluables:
+        match_evaluable["orden_examen"] = {"$in": ordenes_evaluables}
+    
+    total_resultados = collection_exam_results.count_documents(match_evaluable)
     
     # Métricas de calificaciones
     pipeline_calificaciones = [
-        {"$match": {"codigo_evento": codigo_evento}},
+        {"$match": match_evaluable},
         {"$group": {
             "_id": None,
             "promedio": {"$avg": "$calificacion"},
@@ -4372,7 +4390,7 @@ def tablero_metricas_lms_evento(codigo_evento):
     
     # Distribución de calificaciones
     pipeline_distribucion = [
-        {"$match": {"codigo_evento": codigo_evento}},
+        {"$match": match_evaluable},
         {"$bucket": {
             "groupBy": "$calificacion",
             "boundaries": [0, 60, 70, 80, 90, 100],
@@ -4396,9 +4414,9 @@ def tablero_metricas_lms_evento(codigo_evento):
     
     participantes_lista = list(participantes_por_cedula.values())
     
-    # Obtener resultados de exámenes por cédula y por examen
+    # Obtener resultados de exámenes por cédula y por examen (solo evaluables)
     pipeline_intentos = [
-        {"$match": {"codigo_evento": codigo_evento}},
+        {"$match": match_evaluable},
         {"$group": {
             "_id": {"cedula": "$cedula_participante", "orden": "$orden_examen"},
             "total_intentos": {"$max": "$numero_intento"},
@@ -4436,12 +4454,6 @@ def tablero_metricas_lms_evento(codigo_evento):
     ]
     promedio_intentos = round(sum(total_intentos_lista) / len(total_intentos_lista), 2) if total_intentos_lista else 0
     participantes_con_examenes = sum(1 for t in total_intentos_lista if t > 0)
-    
-    # Obtener detalles de exámenes del evento
-    examenes = list(collection_eva.find({
-        "codigo_evento": codigo_evento,
-        "tipo": "examen"
-    }).sort("orden", 1))
     
     # Añadir estadísticas por examen
     for examen in examenes:
@@ -7699,7 +7711,7 @@ def generar_pdf(nanoid):
         for ex in examenes:
             qbank_config = ex.get('qbank_config', '')
             if qbank_config:
-                _, _, _, formativo = parse_qbank_config(qbank_config)
+                _, _, _, formativo, _, _ = parse_qbank_config(qbank_config)
                 if not formativo:
                     ordenes_sumativos.append(ex.get('orden'))
 

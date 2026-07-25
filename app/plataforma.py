@@ -240,7 +240,7 @@ def previsualizar_contenido(codigo_evento, orden):
     # Si es examen, cargar las preguntas para la previsualización
     preguntas = []
     if contenido.get("tipo") == "examen" and "qbank_config" in contenido:
-        codigo_qbank, num_preguntas, aleatorio, formativo = parse_qbank_config(
+        codigo_qbank, num_preguntas, aleatorio, formativo, persistencia, evaluable = parse_qbank_config(
             contenido["qbank_config"]
         )
         if codigo_qbank:
@@ -501,18 +501,46 @@ def ver_contenido(codigo_evento, orden):
 
     # Mostrar examen si el tipo es 'examen' y tiene qbank_config
     if contenido_actual.get("tipo") == "examen" and "qbank_config" in contenido_actual:
-        codigo_qbank, num_preguntas, aleatorio, formativo = parse_qbank_config(
+        codigo_qbank, num_preguntas, aleatorio, formativo, persistencia, evaluable = parse_qbank_config(
             contenido_actual["qbank_config"]
         )
         if codigo_qbank:
-            if request.method == "POST":
-                # Recuperar los IDs de las preguntas del campo oculto
+            # Persistencia: cargar resultado guardado si existe
+            resultado_persistente = None
+            respuestas_guardadas = None
+            if persistencia and cedula:
+                resultado_persistente = collection_exam_results.find_one({
+                    "codigo_evento": codigo_evento,
+                    "orden_examen": orden,
+                    "cedula_participante": cedula,
+                })
+
+            if resultado_persistente:
+                preguntas_ids = resultado_persistente.get("respuestas", [])
+                pregunta_ids_list = [r["pregunta_id"] for r in preguntas_ids]
+                preguntas = [
+                    collection_qbanks_data.find_one({"_id": ObjectId(pid)})
+                    for pid in pregunta_ids_list
+                    if pid
+                ]
+                puntaje = (
+                    resultado_persistente["respuestas_correctas"],
+                    resultado_persistente["total_preguntas"],
+                )
+                respuestas_guardadas = {}
+                for i, r in enumerate(preguntas_ids):
+                    respuestas_guardadas[str(i)] = r.get("respuesta", [])
+            elif request.method == "POST":
+                if persistencia:
+                    flash("Ya ha completado esta evaluación y no puede volver a realizarla.", "warning")
+                    return redirect(request.url)
                 preguntas_ids = request.form.get("preguntas_ids", "").split(",")
                 preguntas = [
                     collection_qbanks_data.find_one({"_id": ObjectId(pid)})
                     for pid in preguntas_ids
                     if pid
                 ]
+                puntaje = None
             else:
                 preguntas = list(
                     collection_qbanks_data.find({"codigo_qbank": codigo_qbank})
@@ -525,8 +553,8 @@ def ver_contenido(codigo_evento, orden):
                     )
                 else:
                     preguntas = preguntas[:num_preguntas]
-            puntaje = None
-            if request.method == "POST":
+                puntaje = None
+            if request.method == "POST" and not resultado_persistente:
                 correctas = 0
                 respuestas_usuario = []
                 for i, pregunta in enumerate(preguntas):
@@ -646,6 +674,7 @@ def ver_contenido(codigo_evento, orden):
                 contenidos=contenidos,
                 formativo=formativo,  # Pasar al template
                 intentos_historial=intentos_historial,
+                respuestas_guardadas=respuestas_guardadas,
             )
 
     # Encontrar el contenido anterior y el siguiente
@@ -1307,15 +1336,23 @@ def nueva_pregunta_qbank(codigo_qbank):
 
 
 def parse_qbank_config(config_str):
-    # Ejemplo: [O5W4YTK2 preguntas=3 aleatorio=no formativo=si]
-    match = re.match(r"\[(\w+) preguntas=(\d+) aleatorio=(si|no)(?: formativo=(si|no))?\]", config_str)
+    # Ejemplo: [O5W4YTK2 preguntas=3 aleatorio=no formativo=si persistencia=no evaluable=si]
+    match = re.match(
+        r"\[(\w+) preguntas=(\d+) aleatorio=(si|no)"
+        r"(?: formativo=(si|no))?"
+        r"(?: persistencia=(si|no))?"
+        r"(?: evaluable=(si|no))?\]",
+        config_str
+    )
     if match:
         codigo = match.group(1)
         num_preguntas = int(match.group(2))
         aleatorio = match.group(3) == "si"
         formativo = match.group(4) == "si" if match.group(4) else False
-        return codigo, num_preguntas, aleatorio, formativo
-    return None, None, None, False
+        persistencia = match.group(5) == "si" if match.group(5) else False
+        evaluable = match.group(6) == "si" if match.group(6) else True
+        return codigo, num_preguntas, aleatorio, formativo, persistencia, evaluable
+    return None, None, None, False, False, True
 
 
 ###
