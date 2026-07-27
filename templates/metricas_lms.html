@@ -15,7 +15,7 @@
                         <div class="p-4 md:p-5">
                         <div class="flex items-center gap-x-2">
                             <p class="text-xs uppercase tracking-wide text-gray-500">
-                                # Actividades EMC
+                                # Actividades LMS
                             </p>
                         </div>
                 
@@ -33,7 +33,7 @@
                     <div class="p-4 md:p-5">
                         <div class="flex items-center gap-x-2">
                             <p class="text-xs uppercase tracking-wide text-gray-500">
-                                Actividades EMC Cerradas
+                                Actividades LMS Cerradas
                             </p>
                         </div>
             
@@ -51,7 +51,7 @@
                     <div class="p-4 md:p-5">
                         <div class="flex items-center gap-x-2">
                             <p class="text-xs uppercase tracking-wide text-gray-500">
-                                # Participantes EMC
+                                # Participantes LMS
                             </p>
                         </div>
             
@@ -147,7 +147,7 @@
                             <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
                                 <div>
                                     <h2 class="text-xl font-semibold text-gray-800">
-                                        Actividades EMC
+                                        Actividades LMS
                                     </h2>
                                     <p class="text-sm text-gray-600">
                                         Métricas de actividades de educación médica continua
@@ -207,15 +207,18 @@
                                 <tbody class="divide-y divide-gray-200">
                                     {% for evento in eventos %}
                                     <tr>
-                                        <td class="size-px whitespace-nowrap">
-                                            <div class="ps-6 py-3">
-                                                <div class="flex items-center gap-x-3">
-                                                    <div class="grow">
-                                                        <span class="block text-sm font-semibold text-gray-800">{{ evento.titulo }}</span>
-                                                        <span class="block text-sm text-gray-500">{{ evento.codigo }}</span>
-                                                        <span class="block text-xs text-gray-400">{{ evento.fecha_inicio.strftime('%d/%m/%Y') if evento.fecha_inicio else 'Sin fecha' }}</span>
-                                                    </div>
+                                        <td class="h-px w-80 min-w-80">
+                                            <div class="ps-6 py-2">
+                                                <div class="flex items-center gap-2 mb-2">
+                                                    <p class="text-sm text-gray-500">
+                                                        <strong><a class="text-sm text-blue-600 decoration-2 hover:underline" href="{{ url_for('mostrar_evento', codigo_evento=evento.codigo) }}">
+                                                        {{ evento.titulo }}</a></strong>
+                                                    </p>
                                                 </div>
+                                                <button onclick="this.innerText='Código copiado'; navigator.clipboard.writeText('{{ evento.codigo }}'); setTimeout(() => this.innerText='{{ evento.codigo }}', 2000);" class="inline-flex items-center justify-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800 hover:bg-gray-200 transition-all">
+                                                    {{ evento.codigo }}
+                                                </button>
+                                                <span class="text-sm text-gray-500 ms-2">{% if evento.fecha_inicio and evento.fecha_fin %}{% if evento.fecha_inicio.date() == evento.fecha_fin.date() %}{{ evento.fecha_inicio.strftime('%d %b, %Y') }}{% else %}{{ evento.fecha_inicio.strftime('%d') }} - {{ evento.fecha_fin.strftime('%d %b, %Y') }}{% endif %}{% else %}Sin fecha{% endif %}</span>
                                             </div>
                                         </td>
                                         

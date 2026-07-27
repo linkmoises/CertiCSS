@@ -449,7 +449,8 @@
                                                     {% endif %}
                                                     {% if resultado.certificado_evento %}
                                                     {# Si el evento tiene examen, verificar que esté completado con puntaje ≥80% #}
-                                                    {% if resultado.tiene_examen %}
+                                                    {# Los roles exentos (ponente/organizador/coorganizador) no necesitan examen #}
+                                                    {% if resultado.tiene_examen and not resultado.es_exento %}
                                                     {% if not resultado.examen_completado or resultado.puntaje_examen < 80 %}
                                                     {% set certificado_disponible = false %}
                                                     {% if resultado.registro_abierto %}
@@ -460,8 +461,8 @@
                                                     {% endif %}
                                                     {% endif %}
                                                     {# Survey completion check for certificado download #}
-                                                    {# Desactivar encuestas para Sesiones Docentes y roles específicos #}
-                                                    {% set skip_survey = (resultado.tipo_evento == 'Sesión Docente') or (resultado.rol in ['ponente', 'organizador', 'coorganizador']) %}
+                                                    {# Desactivar encuestas para Sesiones Docentes y roles exentos #}
+                                                    {% set skip_survey = (resultado.tipo_evento == 'Sesión Docente') or resultado.es_exento %}
                                                     
                                                     {% if resultado.requires_survey and not skip_survey %}
                                                         {% if resultado.survey_completed %}

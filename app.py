@@ -3205,6 +3205,18 @@ def _buscar_certificados_resultados(cedula, token):
                 # Generate survey URL with cedula as query parameter
                 survey_url = url_for('encuesta_satisfaccion', codigo_evento=codigo_evento) + f'?cedula={cedula}'
 
+            # Verificar si el usuario tiene un rol exento (ponente/organizador/coorganizador)
+            # ya sea en este registro o en otro registro del mismo evento
+            es_exento = participante.get('rol') in ['ponente', 'organizador', 'coorganizador']
+            if not es_exento:
+                registro_exento = collection_participantes.find_one({
+                    'cedula': cedula,
+                    'codigo_evento': codigo_evento,
+                    'rol': {'$in': ['ponente', 'organizador', 'coorganizador']}
+                })
+                if registro_exento:
+                    es_exento = True
+
             # Prorrateo para participantes en eventos multi-día
             carga_prorrateada = None
             if participante.get('rol') == 'participante':
@@ -3257,6 +3269,7 @@ def _buscar_certificados_resultados(cedula, token):
                 'requires_survey': requires_survey,
                 'survey_completed': survey_completed,
                 'survey_url': survey_url,
+                'es_exento': es_exento,
             }
             resultados.append(resultado)
         else:
@@ -3286,6 +3299,7 @@ def _buscar_certificados_resultados(cedula, token):
                 'requires_survey': False,
                 'survey_completed': False,
                 'survey_url': '',
+                'es_exento': False,
             }
             resultados.append(resultado)
 
@@ -4192,8 +4206,8 @@ def tablero_metricas_regional(year=None, unidad=None):
 ###
 ### LMS Metrics Dashboard - General
 ###
-@app.route('/tablero/metricas/emc')
-@app.route('/tablero/metricas/emc/page/<int:page>')
+@app.route('/tablero/metricas/lms')
+@app.route('/tablero/metricas/lms/page/<int:page>')
 @login_required
 def tablero_metricas_lms(page=1):
     
@@ -4248,13 +4262,12 @@ def tablero_metricas_lms(page=1):
     
     # Paginación para eventos LMS
     eventos_por_pagina = 20
-    total_paginas = (total_eventos_lms_cerrados + eventos_por_pagina - 1) // eventos_por_pagina
+    total_paginas = (total_eventos_lms + eventos_por_pagina - 1) // eventos_por_pagina
     
-    # Obtener eventos LMS cerrados para la página actual
-    eventos_cursor = collection_eventos.find({
-        **eventos_lms_query,
-        "estado_evento": "cerrado"
-    }).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
+    # Obtener todos los eventos con LMS activo para la página actual
+    eventos_cursor = collection_eventos.find(
+        eventos_lms_query
+    ).sort("fecha_inicio", -1).skip((page - 1) * eventos_por_pagina).limit(eventos_por_pagina)
     
     eventos = list(eventos_cursor)
     
@@ -7693,15 +7706,28 @@ def generar_pdf(nanoid):
     # 2. Ponentes, organizadores y coorganizadores
     tipo_evento = evento.get('tipo', 'General')
     rol_participante = participante.get('rol', 'participante')
-    skip_survey = (tipo_evento == 'Sesión Docente') or (rol_participante in ['ponente', 'organizador', 'coorganizador'])
+    
+    # Verificar si el usuario tiene un rol exento en este evento,
+    # ya sea en este registro o en otro registro del mismo evento
+    es_exento = rol_participante in ['ponente', 'organizador', 'coorganizador']
+    if not es_exento:
+        registro_exento = collection_participantes.find_one({
+            'cedula': participante['cedula'],
+            'codigo_evento': codigo_evento,
+            'rol': {'$in': ['ponente', 'organizador', 'coorganizador']}
+        })
+        if registro_exento:
+            es_exento = True
+    
+    skip_survey = (tipo_evento == 'Sesión Docente') or es_exento
     
     if requires_survey_completion(evento) and not skip_survey:
         if not has_completed_survey_v2(participante['cedula'], codigo_evento):
             flash('Debe completar la encuesta antes de descargar el certificado.', 'error')
             return redirect(url_for('buscar_certificados'))
 
-    # Check exam completion for LMS events
-    if evento.get('lms_activo'):
+    # Check exam completion for LMS events (exento de requisitos de examen)
+    if evento.get('lms_activo') and not es_exento:
         from app.plataforma import parse_qbank_config
         examenes = list(collection_eva.find({
             'codigo_evento': codigo_evento,
