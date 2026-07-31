@@ -4393,9 +4393,9 @@ def tablero_metricas_lms_evento(codigo_evento):
     resultado_calificaciones = list(collection_exam_results.aggregate(pipeline_calificaciones))
     
     if resultado_calificaciones:
-        promedio_calificacion = round(resultado_calificaciones[0]["promedio"], 2)
-        calificacion_maxima = resultado_calificaciones[0]["maximo"]
-        calificacion_minima = resultado_calificaciones[0]["minimo"]
+        promedio_calificacion = round(resultado_calificaciones[0]["promedio"], 1)
+        calificacion_maxima = round(resultado_calificaciones[0]["maximo"], 1)
+        calificacion_minima = round(resultado_calificaciones[0]["minimo"], 1)
     else:
         promedio_calificacion = 0
         calificacion_maxima = 0
@@ -4446,7 +4446,7 @@ def tablero_metricas_lms_evento(codigo_evento):
             resultados_por_cedula[cedula] = {}
         resultados_por_cedula[cedula][orden] = {
             "total_intentos": r.get("total_intentos", 0),
-            "mejor_calificacion": r.get("mejor_calificacion", 0),
+            "mejor_calificacion": round(r.get("mejor_calificacion", 0), 1),
         }
     
     # Combinar datos de participantes con resultados de exámenes
@@ -4503,7 +4503,7 @@ def tablero_metricas_lms_evento(codigo_evento):
             }}
         ]
         resultado_examen = list(collection_exam_results.aggregate(pipeline_examen))
-        examen["promedio_calificacion"] = round(resultado_examen[0]["promedio"], 2) if resultado_examen else 0
+        examen["promedio_calificacion"] = round(resultado_examen[0]["promedio"], 1) if resultado_examen else 0
         
         # Promedio solo primer intento
         pipeline_inicial = [
@@ -4518,7 +4518,7 @@ def tablero_metricas_lms_evento(codigo_evento):
             }}
         ]
         resultado_inicial = list(collection_exam_results.aggregate(pipeline_inicial))
-        examen["promedio_inicial"] = round(resultado_inicial[0]["promedio"], 2) if resultado_inicial else 0
+        examen["promedio_inicial"] = round(resultado_inicial[0]["promedio"], 1) if resultado_inicial else 0
         
         # Boxplot stats
         calificaciones_raw = list(collection_exam_results.find(
@@ -4528,11 +4528,11 @@ def tablero_metricas_lms_evento(codigo_evento):
         calificaciones = sorted([r["calificacion"] for r in calificaciones_raw])
         if calificaciones:
             examen["boxplot"] = {
-                "min": calificaciones[0],
-                "q1": float(np.percentile(calificaciones, 25)),
-                "median": float(np.percentile(calificaciones, 50)),
-                "q3": float(np.percentile(calificaciones, 75)),
-                "max": calificaciones[-1],
+                "min": round(calificaciones[0], 1),
+                "q1": round(float(np.percentile(calificaciones, 25)), 1),
+                "median": round(float(np.percentile(calificaciones, 50)), 1),
+                "q3": round(float(np.percentile(calificaciones, 75)), 1),
+                "max": round(calificaciones[-1], 1),
             }
         else:
             examen["boxplot"] = None
@@ -4545,11 +4545,11 @@ def tablero_metricas_lms_evento(codigo_evento):
         calificaciones_inicial = sorted([r["calificacion"] for r in calificaciones_inicial_raw])
         if calificaciones_inicial:
             examen["boxplot_inicial"] = {
-                "min": calificaciones_inicial[0],
-                "q1": float(np.percentile(calificaciones_inicial, 25)),
-                "median": float(np.percentile(calificaciones_inicial, 50)),
-                "q3": float(np.percentile(calificaciones_inicial, 75)),
-                "max": calificaciones_inicial[-1],
+                "min": round(calificaciones_inicial[0], 1),
+                "q1": round(float(np.percentile(calificaciones_inicial, 25)), 1),
+                "median": round(float(np.percentile(calificaciones_inicial, 50)), 1),
+                "q3": round(float(np.percentile(calificaciones_inicial, 75)), 1),
+                "max": round(calificaciones_inicial[-1], 1),
             }
         else:
             examen["boxplot_inicial"] = None

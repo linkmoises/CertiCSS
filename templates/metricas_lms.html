@@ -212,7 +212,7 @@
                                                 <div class="flex items-center gap-2 mb-2">
                                                     <p class="text-sm text-gray-500">
                                                         <strong><a class="text-sm text-blue-600 decoration-2 hover:underline" href="{{ url_for('mostrar_evento', codigo_evento=evento.codigo) }}">
-                                                        {{ evento.titulo }}</a></strong>
+                                                        {{ evento.nombre }}</a></strong>
                                                     </p>
                                                 </div>
                                                 <button onclick="this.innerText='Código copiado'; navigator.clipboard.writeText('{{ evento.codigo }}'); setTimeout(() => this.innerText='{{ evento.codigo }}', 2000);" class="inline-flex items-center justify-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800 hover:bg-gray-200 transition-all">
