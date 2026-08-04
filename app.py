@@ -512,7 +512,9 @@ def registrar_participante(codigo_evento):
     if evento is None:
         abort(404)
 
-    es_presencial = evento.get("modalidad", "") == "Presencial"
+    modalidad = evento.get("modalidad", "")
+    usa_otp = modalidad in ["Presencial", "Virtual sincrónica"]
+    requiere_preregistro = modalidad == "Híbrida"
 
     # Verificar si el evento está cerrado
     if evento.get('estado_evento') == 'cerrado':
@@ -523,8 +525,8 @@ def registrar_participante(codigo_evento):
         )
 
     # Plantilla diferente según el tipo de evento
-    if es_presencial:
-        # Eventos presenciales
+    if usa_otp:
+        # Eventos presenciales y virtual sincrónica usan OTP
         otp_doc = collection_otps.find_one({"_id": codigo_evento})
         if otp_doc and datetime.now() < otp_doc['valid_until']:
             otp_code = otp_doc['code']
@@ -548,13 +550,14 @@ def registrar_participante(codigo_evento):
             programa_url=evento.get('programa_url')
         )
     else:
-        # Eventos no presenciales
+        # Eventos que requieren preregistro (híbrida, virtual asincrónica)
         return render_template('registrar_virtual.html',
             evento=evento,
             codigo_evento=codigo_evento,
             nombre_evento=evento['nombre'],
             afiche_url=evento.get('afiche_750') if evento.get('afiche_750') else None,
-            programa_url=evento.get('programa_url')
+            programa_url=evento.get('programa_url'),
+            requiere_preregistro=requiere_preregistro
         )
 
 @app.route('/registrar', methods=['POST'])
@@ -577,7 +580,9 @@ def registrar():
         flash("El código del evento no es válido.", "error")
         return redirect(url_for('registrar_participante', codigo_evento=codigo_evento))
 
-    es_presencial = evento.get("modalidad", "") == "Presencial"
+    modalidad = evento.get("modalidad", "")
+    usa_otp = modalidad in ["Presencial", "Virtual sincrónica"]
+    requiere_preregistro = modalidad == "Híbrida"
 
     # Verificar si el participante ya está registrado en este evento
     if collection_participantes.find_one({"cedula": cedula, "codigo_evento": codigo_evento, "rol": "participante", "indice_registro": datetime.now().strftime('%Y%m%d')}):
@@ -585,15 +590,22 @@ def registrar():
         return redirect(url_for('registrar_participante', codigo_evento=codigo_evento))
 
     # Proceso según tipo de evento
-    if es_presencial:
+    if usa_otp:
+        # Eventos presenciales y virtual sincrónica usan OTP
         otp_ingresado = request.form.get('otp', '')
 
         otp_doc = collection_otps.find_one({"_id": codigo_evento})
         if not otp_doc or datetime.now() > otp_doc['valid_until'] or otp_ingresado != otp_doc['code']:
             flash("El OTP ha expirado o es incorrecto.", "error")
             return redirect(url_for('registrar_participante', codigo_evento=codigo_evento))
+    elif requiere_preregistro:
+        # Para eventos híbridos, validamos contra preregistro
+        preregistro = collection_preregistro.find_one({"codigo_evento": codigo_evento, "cedula": cedula})
+        if preregistro is None:
+            flash("Su cédula no está preregistrada para este evento híbrido.", "error")
+            return redirect(url_for('registrar_participante', codigo_evento=codigo_evento))
     else:
-        # Para eventos no presenciales, validamos contra preregistro
+        # Para eventos virtual asincrónica, validamos contra preregistro
         preregistro = collection_preregistro.find_one({"codigo_evento": codigo_evento, "cedula": cedula})
         if preregistro is None:
             flash("Su cédula no está preregistrada para este evento virtual.", "error")
@@ -616,7 +628,7 @@ def registrar():
         'nanoid': nanoid,
         'timestamp': timestamp,
         'indice_registro': datetime.now().strftime('%Y%m%d'),
-        'tipo_evento': 'Presencial' if es_presencial else 'Virtual'
+        'tipo_evento': 'Presencial' if usa_otp else ('Híbrida' if requiere_preregistro else 'Virtual')
     })
 
     # Mensaje de éxito

@@ -1,6 +1,8 @@
 from flask import Blueprint, request, redirect, url_for, flash, session, render_template
 from app.logs import log_event
 from app.auth.services import generate_csrf_token
+from app.auth import roles_required, UserRole
+from flask_login import login_required, current_user
 
 auth_routes_bp = Blueprint('auth_routes', __name__, url_prefix='/')
 
@@ -85,3 +87,72 @@ def logout():
     from flask_login import logout_user
     logout_user()
     return redirect(url_for('home'))
+
+
+@auth_routes_bp.route('/tablero/admin/desbloquear-usuarios', methods=['GET', 'POST'])
+@login_required
+@roles_required(UserRole.ADMINISTRADOR)
+def admin_desbloquear_usuarios():
+    from app.auth.services import unlock_user, get_blocked_users
+    from app import collection_usuarios
+    from app.logs import log_event
+    from datetime import datetime
+
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip()
+        if email:
+            success, message = unlock_user(email)
+            if success:
+                log_event(f"Administrador [{current_user.email}] desbloqueó al usuario [{email}].")
+                flash(message, 'success')
+            else:
+                flash(message, 'error')
+        return redirect(url_for('auth_routes.admin_desbloquear_usuarios'))
+
+    blocked_users, unknown_blocked = get_blocked_users()
+    
+    # Enriquecer datos de usuarios bloqueados
+    usuarios_bloqueados = []
+    for user in blocked_users:
+        blocked_until = user.get('blocked_until')
+        tiempo_restante = None
+        if blocked_until:
+            diff = blocked_until - datetime.utcnow()
+            if diff.total_seconds() > 0:
+                minutos = int(diff.total_seconds() / 60)
+                segundos = int(diff.total_seconds() % 60)
+                tiempo_restante = f"{minutos}m {segundos}s"
+        
+        usuarios_bloqueados.append({
+            'email': user.get('email'),
+            'nombres': user.get('nombres', ''),
+            'apellidos': user.get('apellidos', ''),
+            'cedula': user.get('cedula', ''),
+            'rol': user.get('rol', ''),
+            'failed_attempts': user.get('failed_attempts', 0),
+            'blocked_until': blocked_until,
+            'tiempo_restante': tiempo_restante
+        })
+    
+    # Usuarios desconocidos (emails no registrados)
+    emails_desconocidos = []
+    for record in unknown_blocked:
+        blocked_until = record.get('blocked_until')
+        tiempo_restante = None
+        if blocked_until:
+            diff = blocked_until - datetime.utcnow()
+            if diff.total_seconds() > 0:
+                minutos = int(diff.total_seconds() / 60)
+                segundos = int(diff.total_seconds() % 60)
+                tiempo_restante = f"{minutos}m {segundos}s"
+        
+        emails_desconocidos.append({
+            'email': record.get('unknown_email'),
+            'attempts': record.get('attempts', 0),
+            'blocked_until': blocked_until,
+            'tiempo_restante': tiempo_restante
+        })
+
+    return render_template('admin_desbloquear_usuarios.html',
+        usuarios_bloqueados=usuarios_bloqueados,
+        emails_desconocidos=emails_desconocidos)

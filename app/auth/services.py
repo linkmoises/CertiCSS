@@ -272,6 +272,55 @@ def check_user_active(email: str) -> bool:
     return user_data.get('activo', False)
 
 
+def unlock_user(email: str) -> tuple:
+    """Desbloquea un usuario manualmente (solo administradores).
+    Retorna (success: bool, message: str)."""
+    user_data = collection_usuarios.find_one({"email": email})
+    if not user_data:
+        return False, "Usuario no encontrado en el sistema."
+    
+    was_blocked = bool(user_data.get('blocked_until'))
+    
+    collection_usuarios.update_one(
+        {"email": email},
+        {"$set": {
+            "failed_attempts": 0,
+            "last_failed_attempt": None,
+            "blocked_until": None
+        }}
+    )
+    
+    # También limpiar en collection_failed_attempts si existe
+    if collection_failed_attempts is not None:
+        collection_failed_attempts.delete_one({"unknown_email": email})
+    
+    if was_blocked:
+        return True, f"Usuario {email} desbloqueado exitosamente."
+    else:
+        return True, f"Se limpiaron los intentos fallidos de {email} (no estaba bloqueado)."
+
+
+def get_blocked_users() -> list:
+    """Obtiene lista de usuarios actualmente bloqueados."""
+    from datetime import datetime
+    now = datetime.utcnow()
+    
+    # Usuarios bloqueados en collection_usuarios
+    blocked_users = list(collection_usuarios.find({
+        "blocked_until": {"$gt": now}
+    }))
+    
+    # Usuarios desconocidos bloqueados en collection_failed_attempts
+    unknown_blocked = []
+    if collection_failed_attempts is not None:
+        unknown_blocked = list(collection_failed_attempts.find({
+            "unknown_email": {"$exists": True},
+            "blocked_until": {"$gt": now}
+        }))
+    
+    return blocked_users, unknown_blocked
+
+
 def record_failed_ip_attempt(ip_address: str) -> dict:
     from datetime import datetime, timedelta
     from flask import current_app
