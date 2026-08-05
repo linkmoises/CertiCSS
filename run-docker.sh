@@ -62,8 +62,10 @@ echo "Versión generada: $VERSION"
 echo "Construyendo y levantando contenedores..."
 docker compose build $BUILD_OPTS && docker compose up --force-recreate -d
 
-echo "Limpiando imágenes no utilizadas..."
+echo "Limpiando imágenes, contenedores y cache no utilizados..."
 docker image prune -f
+docker container prune -f
+docker builder prune -f --filter "until=24h"
 
 if [ -n "$(git stash list)" ]; then
   echo "Restaurando cambios locales..."

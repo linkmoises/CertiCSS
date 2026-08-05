@@ -40,3 +40,23 @@ static/uploads/
 static/nube/
 static/audio/
 static/usuarios/
+
+# Backups y archivos grandes que revientan el build context
+app/backups/
+**/*.tar.gz
+**/*.tar
+**/*.zip
+**/*.bak
+static/resources/
+static/assets/
+tailwind/
+docs/
+plugins/
+__pycache__/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+.package-lock.json
+screenshot.jpg
+*.log
+.DS_Store
