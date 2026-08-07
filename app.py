@@ -3254,6 +3254,22 @@ def _buscar_certificados_resultados(cedula, token):
                             carga_total = float(evento.get('carga_horaria', 0))
                             carga_prorrateada = round((carga_total / duracion_dias) * count)
 
+            # Datos de contacto del organizador (autor del evento) para el mensaje
+            # "Contacte al organizador" cuando falte la constancia.
+            autor_info = None
+            if evento.get("autor"):
+                autor_info = collection_usuarios.find_one(
+                    {"_id": ObjectId(evento["autor"])},
+                    {"nombres": 1, "apellidos": 1, "phone": 1}
+                )
+            if autor_info:
+                autor_nombre = f"{autor_info.get('nombres', '')} {autor_info.get('apellidos', '')}".strip()
+                autor_phone = autor_info.get('phone') or ''
+                autor_whatsapp = autor_phone.replace('+', '').replace('-', '').replace(' ', '')
+            else:
+                autor_nombre = ''
+                autor_whatsapp = ''
+
             # Disponibilidad de plantillas. Los eventos legacy usan la plantilla antigua
             # (membrete legacy) automáticamente; los modernos requieren plantilla custom.
             es_legacy = is_legacy_event(evento.get('fecha_inicio'))
@@ -3292,6 +3308,8 @@ def _buscar_certificados_resultados(cedula, token):
                 'survey_completed': survey_completed,
                 'survey_url': survey_url,
                 'es_exento': es_exento,
+                'autor_nombre': autor_nombre,
+                'autor_whatsapp': autor_whatsapp,
             }
             resultados.append(resultado)
         else:
