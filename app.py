@@ -19,7 +19,7 @@ import csv
 from enum import Enum
 from functools import wraps
 from app.helpers import generate_otp, generate_nanoid, generar_codigo_evento, obtener_codigo_unico, allowed_file
-from app.template_selection import determine_template_path, parse_event_date
+from app.template_selection import determine_template_path, parse_event_date, is_legacy_event
 from app.logs import get_logger
 from app.analisis import analisis_bp, puede_editar_analisis
 
@@ -3167,7 +3167,7 @@ def _buscar_certificados_resultados(cedula, token):
         tiene_archivos = collection_repositorio.count_documents({'codigo_evento': codigo_evento}) > 0
 
         if evento:
-            fecha_evento = evento.get('fecha_fin', None)
+            fecha_evento = parse_event_date(evento.get('fecha_fin', None))
 
             # Verificar si el participante completó el examen
             examen_completado = False
@@ -3254,6 +3254,14 @@ def _buscar_certificados_resultados(cedula, token):
                             carga_total = float(evento.get('carga_horaria', 0))
                             carga_prorrateada = round((carga_total / duracion_dias) * count)
 
+            # Disponibilidad de plantillas. Los eventos legacy usan la plantilla antigua
+            # (membrete legacy) automáticamente; los modernos requieren plantilla custom.
+            es_legacy = is_legacy_event(evento.get('fecha_inicio'))
+            constancia_custom = evento.get('constancia')
+            certificado_custom = evento.get('certificado')
+            constancia_plantilla = es_legacy or bool(constancia_custom and constancia_custom.strip())
+            certificado_plantilla = bool(certificado_custom and certificado_custom.strip())
+
             resultado = {
                 'nombres': participante['nombres'],
                 'apellidos': participante['apellidos'],
@@ -3263,6 +3271,8 @@ def _buscar_certificados_resultados(cedula, token):
                 'ponencia': participante.get('titulo_ponencia', 'N/A'),
                 'codigo_evento': codigo_evento,
                 'certificado_evento': evento.get('certificado', None),
+                'constancia_plantilla': constancia_plantilla,
+                'certificado_plantilla': certificado_plantilla,
                 'titulo_evento': evento.get('nombre', 'Título no disponible'),
                 'fecha_evento': fecha_evento,
                 'fecha_inicio': evento.get('fecha_inicio', None),
@@ -3335,6 +3345,7 @@ def _buscar_certificados_resultados(cedula, token):
     # Ordenar por fecha del evento
     fecha_actual = datetime.now().date()
     hora_actual = datetime.now().time()
+    fecha_hora_actual = datetime.now()
 
     def obtener_fecha_ordenable(item):
         fecha = item.get('fecha_evento')
@@ -3480,6 +3491,7 @@ def _buscar_certificados_resultados(cedula, token):
         resultados=resultados,
         fecha_actual=fecha_actual,
         hora_actual=hora_actual,
+        fecha_hora_actual=fecha_hora_actual,
         token=token,
         periodos=periodos,
         externos_actividades=externos_actividades,
@@ -5074,6 +5086,11 @@ def encuesta_satisfaccion_v2(codigo_evento):
     if not evento:
         abort(404)
 
+    # Determinar si el certificado está habilitado por tiempo (fecha de finalización).
+    # Los eventos de "registro abierto" no se bloquean por tiempo.
+    fecha_fin_evento = parse_event_date(evento.get('fecha_fin', None))
+    certificado_habilitado = evento.get('registro_abierto', False) or (fecha_fin_evento is not None and datetime.now() >= fecha_fin_evento)
+
     # Get cedula from query parameter
     cedula = request.args.get('cedula', '').strip()
     from_examen = request.args.get('from_examen')
@@ -5095,7 +5112,7 @@ def encuesta_satisfaccion_v2(codigo_evento):
         # Get participant nanoid for certificate download
         participante = collection_participantes.find_one({"cedula": cedula, "codigo_evento": codigo_evento})
         nanoid = participante.get('nanoid') if participante else None
-        return render_template('encuesta.html', evento=evento, already_completed=True, cedula=cedula, nanoid=nanoid, from_examen=from_examen)
+        return render_template('encuesta.html', evento=evento, already_completed=True, cedula=cedula, nanoid=nanoid, certificado_habilitado=certificado_habilitado, from_examen=from_examen)
 
     if request.method == 'POST':
         # Get cedula from form (hidden field)
@@ -5186,7 +5203,7 @@ def encuesta_satisfaccion_v2(codigo_evento):
             # Get participant nanoid for certificate download
             participante = collection_participantes.find_one({"cedula": cedula, "codigo_evento": codigo_evento})
             nanoid = participante.get('nanoid') if participante else None
-            return render_template('encuesta.html', evento=evento, already_completed=True, cedula=cedula, nanoid=nanoid, just_completed=True, from_examen=from_examen)
+            return render_template('encuesta.html', evento=evento, already_completed=True, cedula=cedula, nanoid=nanoid, certificado_habilitado=certificado_habilitado, just_completed=True, from_examen=from_examen)
         
         return redirect(url_for('encuesta_satisfaccion', codigo_evento=codigo_evento) + f'?cedula={cedula}')
 
@@ -7758,6 +7775,16 @@ def generar_pdf(nanoid):
     
     skip_survey = (tipo_evento == 'Sesión Docente') or es_exento
     
+    # Bloqueo por fecha y hora de finalización del evento (solo eventos regulares).
+    # Los eventos de "registro abierto" no se bloquean por tiempo.
+    # Los administradores autenticados pueden descargar antes de la hora final.
+    es_admin = current_user.is_authenticated and getattr(current_user, 'rol', None) in ['administrador', 'denadoi']
+    if not evento.get('registro_abierto', False) and not es_admin:
+        fecha_fin_evento = parse_event_date(evento.get('fecha_fin', None))
+        if fecha_fin_evento and datetime.now() < fecha_fin_evento:
+            flash('El certificado estará disponible al finalizar el evento.', 'error')
+            return redirect(url_for('buscar_certificados'))
+    
     if requires_survey_completion(evento) and not skip_survey:
         if not has_completed_survey_v2(participante['cedula'], codigo_evento):
             flash('Debe completar la encuesta antes de descargar el certificado.', 'error')
@@ -8228,6 +8255,16 @@ def descargar_constancia(nanoid):
     
     if not evento:
         abort(404)  # Si no se encuentra el evento
+
+    # Bloqueo por fecha y hora de finalización del evento (solo eventos regulares).
+    # Los eventos de "registro abierto" no se bloquean por tiempo.
+    # Los administradores autenticados pueden descargar antes de la hora final.
+    es_admin = current_user.is_authenticated and getattr(current_user, 'rol', None) in ['administrador', 'denadoi']
+    if not evento.get('registro_abierto', False) and not es_admin:
+        fecha_fin_evento = parse_event_date(evento.get('fecha_fin', None))
+        if fecha_fin_evento and datetime.now() < fecha_fin_evento:
+            flash('La constancia estará disponible al finalizar el evento.', 'error')
+            return redirect(url_for('buscar_certificados'))
 
     # Determinar la ruta de la plantilla usando el algoritmo de selección
     afiche_path = determine_template_path(evento)
