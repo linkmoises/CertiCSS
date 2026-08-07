@@ -437,6 +437,12 @@
                                                         </svg>
                                                         Constancia
                                                     </a>
+                                                    {% elif not resultado.registro_abierto and not resultado.constancia_plantilla %}
+                                                    <div class="inline-flex items-center gap-x-1 text-sm">
+                                                        <div class="inline-flex text-center gap-x-1 text-sm py-1 px-2 bg-yellow-50 text-yellow-700 rounded-md">
+                                                            <span>Contacte al organizador del evento</span>
+                                                        </div>
+                                                    </div>
                                                     {% endif %}
                                                     {# CERTIFICADO: examen -> encuesta -> certificado para eventos con examen sumativo. #}
                                                     {% if resultado.certificado_plantilla %}
@@ -506,12 +512,6 @@
                                                     </a>
                                                     {% endif %}
                                                     {% endif %}
-                                                    {% else %}
-                                                    <div class="inline-flex items-center gap-x-1 text-sm">
-                                                        <div class="inline-flex text-center gap-x-1 text-sm py-1 px-2 bg-yellow-50 text-yellow-700 rounded-md">
-                                                            <span>Contacte al organizador del evento</span>
-                                                        </div>
-                                                    </div>
                                                     {% endif %}
                                                 </div>
                                             </td>
