@@ -321,6 +321,33 @@ def get_blocked_users() -> list:
     return blocked_users, unknown_blocked
 
 
+def get_blocked_ips() -> list:
+    """Obtiene lista de IPs actualmente bloqueadas por intentos masivos."""
+    from datetime import datetime
+    if collection_failed_attempts is None:
+        return []
+    now = datetime.utcnow()
+    return list(collection_failed_attempts.find({
+        "ip": {"$exists": True},
+        "blocked_until": {"$gt": now}
+    }))
+
+
+def unlock_ip(ip_address: str) -> tuple:
+    """Desbloquea una IP y limpia sus intentos fallidos."""
+    if collection_failed_attempts is None:
+        return False, "No se pudo acceder a la colección de intentos fallidos."
+    record = collection_failed_attempts.find_one({"ip": ip_address})
+    if not record:
+        return False, f"La IP {ip_address} no tiene registros de bloqueo."
+    was_blocked = bool(record.get('blocked_until'))
+    collection_failed_attempts.delete_one({"ip": ip_address})
+    if was_blocked:
+        return True, f"IP {ip_address} desbloqueada exitosamente."
+    else:
+        return True, f"Se limpiaron los intentos fallidos de la IP {ip_address} (no estaba bloqueada)."
+
+
 def record_failed_ip_attempt(ip_address: str) -> dict:
     from datetime import datetime, timedelta
     from flask import current_app

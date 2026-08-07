@@ -93,13 +93,14 @@ def logout():
 @login_required
 @roles_required(UserRole.ADMINISTRADOR)
 def admin_desbloquear_usuarios():
-    from app.auth.services import unlock_user, get_blocked_users
+    from app.auth.services import unlock_user, get_blocked_users, get_blocked_ips, unlock_ip
     from app import collection_usuarios
     from app.logs import log_event
     from datetime import datetime
 
     if request.method == 'POST':
         email = request.form.get('email', '').strip()
+        ip_address = request.form.get('ip', '').strip()
         if email:
             success, message = unlock_user(email)
             if success:
@@ -107,10 +108,18 @@ def admin_desbloquear_usuarios():
                 flash(message, 'success')
             else:
                 flash(message, 'error')
+        if ip_address:
+            success, message = unlock_ip(ip_address)
+            if success:
+                log_event(f"Administrador [{current_user.email}] desbloqueó la IP [{ip_address}].")
+                flash(message, 'success')
+            else:
+                flash(message, 'error')
         return redirect(url_for('auth_routes.admin_desbloquear_usuarios'))
 
     blocked_users, unknown_blocked = get_blocked_users()
-    
+    ips_bloqueadas = get_blocked_ips()
+
     # Enriquecer datos de usuarios bloqueados
     usuarios_bloqueados = []
     for user in blocked_users:
@@ -153,6 +162,26 @@ def admin_desbloquear_usuarios():
             'tiempo_restante': tiempo_restante
         })
 
+    # IPs bloqueadas por intentos masivos
+    ips_enriquecidas = []
+    for record in ips_bloqueadas:
+        blocked_until = record.get('blocked_until')
+        tiempo_restante = None
+        if blocked_until:
+            diff = blocked_until - datetime.utcnow()
+            if diff.total_seconds() > 0:
+                minutos = int(diff.total_seconds() / 60)
+                segundos = int(diff.total_seconds() % 60)
+                tiempo_restante = f"{minutos}m {segundos}s"
+
+        ips_enriquecidas.append({
+            'ip': record.get('ip'),
+            'attempts': record.get('attempts', 0),
+            'blocked_until': blocked_until,
+            'tiempo_restante': tiempo_restante
+        })
+
     return render_template('admin_desbloquear_usuarios.html',
         usuarios_bloqueados=usuarios_bloqueados,
-        emails_desconocidos=emails_desconocidos)
+        emails_desconocidos=emails_desconocidos,
+        ips_bloqueadas=ips_enriquecidas)
