@@ -401,7 +401,7 @@ def descargar_archivo(id):
         os.path.abspath(UPLOAD_FOLDER),
         cert['archivo'],
         download_name=cert.get('archivo_original', 'certificado.pdf'),
-        as_attachment=True
+        as_attachment=False
     )
 
 

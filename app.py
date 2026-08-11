@@ -7795,21 +7795,33 @@ def generar_pdf(nanoid):
     
     # Bloqueo por fecha y hora de finalización del evento (solo eventos regulares).
     # Los eventos de "registro abierto" no se bloquean por tiempo.
-    # Los administradores autenticados pueden descargar antes de la hora final.
+    # Los usuarios autenticados con permiso de edición sobre el evento
+    # (administrador, denadoi, autor o coorganizador) pueden descargar antes de la
+    # hora final para imprimir y entregar los certificados al cierre de la actividad.
     es_admin = current_user.is_authenticated and getattr(current_user, 'rol', None) in ['administrador', 'denadoi']
-    if not evento.get('registro_abierto', False) and not es_admin:
+    puede_editar = current_user.is_authenticated and (
+        es_admin or
+        str(current_user.id) == str(evento.get("autor")) or
+        collection_participantes.find_one({
+            "codigo_evento": codigo_evento,
+            "cedula": str(current_user.cedula),
+            "rol": "coorganizador"
+        })
+    )
+    if not evento.get('registro_abierto', False) and not puede_editar:
         fecha_fin_evento = parse_event_date(evento.get('fecha_fin', None))
         if fecha_fin_evento and datetime.now() < fecha_fin_evento:
             flash('El certificado estará disponible al finalizar el evento.', 'error')
             return redirect(url_for('buscar_certificados'))
     
-    if requires_survey_completion(evento) and not skip_survey:
+    if requires_survey_completion(evento) and not skip_survey and not puede_editar:
         if not has_completed_survey_v2(participante['cedula'], codigo_evento):
             flash('Debe completar la encuesta antes de descargar el certificado.', 'error')
             return redirect(url_for('buscar_certificados'))
 
-    # Check exam completion for LMS events (exento de requisitos de examen)
-    if evento.get('lms_activo') and not es_exento:
+    # Check exam completion for LMS events (exento de requisitos de examen).
+    # El personal autorizado del evento puede imprimir certificados anticipadamente.
+    if evento.get('lms_activo') and not es_exento and not puede_editar:
         from app.plataforma import parse_qbank_config
         examenes = list(collection_eva.find({
             'codigo_evento': codigo_evento,
