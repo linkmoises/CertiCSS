@@ -266,7 +266,7 @@ function validarCedula(input) {
 }
 </script>
 <script>
-    const unidadesPorProvincia = {{ unidades_por_region | tojson }};
+    const unidadesPorProvincia = {{ unidades_por_region | default({}) | tojson }};
     
     function actualizarUnidades() {
         const provinciaSeleccionada = document.getElementById("region").value;

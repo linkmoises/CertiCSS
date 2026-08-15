@@ -113,7 +113,7 @@
 <script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
 <script>
     // Autocompletar región con la del canónico seleccionado
-    const unidadesPorRegion = {{ unidades_por_region | tojson }};
+    const unidadesPorRegion = {{ unidades_por_region | default({}) | tojson }};
     const regionDeUnidad = {};
     {% for u in unidades %}
     regionDeUnidad[{{ u.nombre | tojson }}] = {{ (u.region or '') | tojson }};

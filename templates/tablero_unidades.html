@@ -660,7 +660,7 @@
         'colon': 'Colón', 'chiriqui': 'Chiriquí', 'herrera': 'Herrera', 'lossantos': 'Los Santos',
         'veraguas': 'Veraguas', 'administrativas': 'Administrativas'
     };
-    const UNIDADES_EXISTENTES = {{ unidades | tojson }};
+    const UNIDADES_EXISTENTES = {{ unidades_existentes | default([]) | tojson }};
     const MAPA_NOMBRES = new Map();
     UNIDADES_EXISTENTES.forEach(u => {
         if (u.nombre) {

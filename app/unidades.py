@@ -122,8 +122,15 @@ def tablero_unidades():
         else:
             unidad['foto_url'] = "/static/assets/unidades/default.jpg"
         unidad['region'] = region_de_unidad(unidad)
-    
-    return render_template('tablero_unidades.html', unidades=unidades)
+
+    # Lista serializable (solo nombre + región) para el JS de sugerencia de slug
+    unidades_existentes = [
+        {'nombre': u.get('nombre'), 'region': u.get('region')}
+        for u in unidades
+    ]
+
+    return render_template('tablero_unidades.html', unidades=unidades,
+                           unidades_existentes=unidades_existentes)
 
 
 ###

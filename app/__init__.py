@@ -57,15 +57,32 @@ BASE_URL = config.BASE_URL                      # importado de config.py
 
 @app.context_processor
 def injectar_unidades():
+    resultado = {
+        'unidades_por_region': {},
+        'unidades_por_region_usuario': {},
+        'unidades_jerarquizadas': {},
+    }
     try:
-        from app.unidades_data import unidades_por_region, unidades_por_region_usuario, opciones_jerarquizadas_por_region
-        return {
-            'unidades_por_region': unidades_por_region(),
-            'unidades_por_region_usuario': unidades_por_region_usuario(),
-            'unidades_jerarquizadas': opciones_jerarquizadas_por_region(),
-        }
+        from app.unidades_data import (
+            unidades_por_region,
+            unidades_por_region_usuario,
+            opciones_jerarquizadas_por_region,
+        )
     except Exception:
-        return {}
+        return resultado
+    try:
+        resultado['unidades_por_region'] = unidades_por_region()
+    except Exception:
+        pass
+    try:
+        resultado['unidades_por_region_usuario'] = unidades_por_region_usuario()
+    except Exception:
+        pass
+    try:
+        resultado['unidades_jerarquizadas'] = opciones_jerarquizadas_por_region()
+    except Exception:
+        pass
+    return resultado
 
 
 def listar_participantes(codigo_evento):

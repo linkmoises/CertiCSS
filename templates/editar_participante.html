@@ -182,8 +182,8 @@
     </footer>
 
 <script>
-    const unidadesPorProvincia = {{ unidades_por_region | tojson }};
-    const unidadesJerarquizadas = {{ unidades_jerarquizadas | tojson }};
+    const unidadesPorProvincia = {{ unidades_por_region | default({}) | tojson }};
+    const unidadesJerarquizadas = {{ unidades_jerarquizadas | default({}) | tojson }};
 
     function actualizarUnidades() {
         const provinciaSeleccionada = document.getElementById("region").value;

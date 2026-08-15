@@ -466,7 +466,7 @@ const CSS_TO_REGION_SLUG = {
 };
 
 // Mapeo de unidades por región
-const unidadesPorRegion = {{ unidades_por_region | tojson }};
+const unidadesPorRegion = {{ unidades_por_region | default({}) | tojson }};
 
 // Inicializar el selector de unidades al cargar la página
 document.addEventListener("DOMContentLoaded", function () {

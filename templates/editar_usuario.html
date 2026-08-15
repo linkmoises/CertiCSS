@@ -321,8 +321,8 @@ document.getElementById('phone').addEventListener('input', function (e) {
 });
 </script>
 <script>
-    const unidadesPorRegion = {{ unidades_por_region_usuario | tojson }};
-    const unidadesJerarquizadas = {{ unidades_jerarquizadas | tojson }};
+    const unidadesPorRegion = {{ unidades_por_region_usuario | default({}) | tojson }};
+    const unidadesJerarquizadas = {{ unidades_jerarquizadas | default({}) | tojson }};
 
     function actualizarUnidadesUsuario() {
         const regionSeleccionada = document.getElementById("region").value;
