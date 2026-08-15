@@ -53,9 +53,13 @@
                                     <label for="tipo" class="block text-sm font-medium mb-2">Tipo *</label>
                                     <select id="tipo" name="tipo" class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" required>
                                         <option value="Dirección" {% if unidad.tipo == 'Dirección' %}selected{% endif %}>Dirección</option>
+                                        <option value="Dirección Ejecutiva" {% if unidad.tipo == 'Dirección Ejecutiva' %}selected{% endif %}>Dirección Ejecutiva</option>
+                                        <option value="Dirección Nacional" {% if unidad.tipo == 'Dirección Nacional' %}selected{% endif %}>Dirección Nacional</option>
                                         <option value="Departamento" {% if unidad.tipo == 'Departamento' %}selected{% endif %}>Departamento</option>
+                                        <option value="Departamento Nacional" {% if unidad.tipo == 'Departamento Nacional' %}selected{% endif %}>Departamento Nacional</option>
                                         <option value="Coordinación" {% if unidad.tipo == 'Coordinación' %}selected{% endif %}>Coordinación</option>
                                         <option value="Programa" {% if unidad.tipo == 'Programa' %}selected{% endif %}>Programa</option>
+                                        <option value="Programa Nacional" {% if unidad.tipo == 'Programa Nacional' %}selected{% endif %}>Programa Nacional</option>
                                         <option value="Centro" {% if unidad.tipo == 'Centro' %}selected{% endif %}>Centro</option>
                                         <option value="Comisión" {% if unidad.tipo == 'Comisión' %}selected{% endif %}>Comisión</option>
                                         <option value="Otra" {% if unidad.tipo == 'Otra' %}selected{% endif %}>Otra</option>
