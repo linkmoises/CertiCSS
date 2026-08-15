@@ -139,6 +139,35 @@ def inject_version():
 def inject_umami():
     return dict(UMAMI_URL=app.config.get('UMAMI_URL', ''))
 
+@app.context_processor                                      # Selects de unidades
+def injectar_unidades():
+    resultado = {
+        'unidades_por_region': {},
+        'unidades_por_region_usuario': {},
+        'unidades_jerarquizadas': {},
+    }
+    try:
+        from app.unidades_data import (
+            unidades_por_region,
+            unidades_por_region_usuario,
+            opciones_jerarquizadas_por_region,
+        )
+    except Exception:
+        return resultado
+    try:
+        resultado['unidades_por_region'] = unidades_por_region()
+    except Exception:
+        pass
+    try:
+        resultado['unidades_por_region_usuario'] = unidades_por_region_usuario()
+    except Exception:
+        pass
+    try:
+        resultado['unidades_jerarquizadas'] = opciones_jerarquizadas_por_region()
+    except Exception:
+        pass
+    return resultado
+
 ###
 ### Login (importado desde usuarios.py)
 ###
