@@ -1,0 +1,131 @@
+{% include 'tablero-header.html' %}
+
+{% include 'tablero-sidebar.html' %}
+
+    <!-- CONTENIDO -->
+    <div class="w-full lg:ps-64">
+        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+
+            <!-- FORMULARIO RENOMBRAMIENTO -->
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <!-- Header -->
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-800">
+                                    {% if renombramiento and renombramiento._id %}Editar Renombramiento{% else %}Nuevo Renombramiento{% endif %}
+                                </h2>
+                                <p class="text-sm text-gray-600">
+                                    Mapeo de nombre anterior a unidad canónica
+                                </p>
+                            </div>
+                            <a href="{{ url_for('unidades.renombramientos_list') }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50">
+                                Volver
+                            </a>
+                        </div>
+                    </div>
+                    <!-- End Header -->
+
+                    <!-- Body -->
+                    <div class="p-6">
+                        <form method="POST"
+                            action="{{ url_for('unidades.renombramiento_editar', renombramiento_id=renombramiento._id) if renombramiento and renombramiento._id else url_for('unidades.renombramiento_crear') }}">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                                <!-- Nombre anterior -->
+                                <div>
+                                    <label for="nombre_anterior" class="block text-sm font-medium mb-2">Nombre anterior *</label>
+                                    <input type="text" id="nombre_anterior" name="nombre_anterior"
+                                        value="{{ renombramiento.nombre_anterior if renombramiento else '' }}"
+                                        class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
+                                        placeholder="ej: ULAPS Vacamonte" required>
+                                    <p class="text-xs text-gray-500 mt-1">Nombre con el que quedaron registrados los eventos/participantes/usuarios antiguos.</p>
+                                </div>
+
+                                <!-- Unidad canónica -->
+                                <div>
+                                    <label for="canonico" class="block text-sm font-medium mb-2">Unidad canónica *</label>
+                                    <select id="canonico" name="canonico" class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" required>
+                                        <option value="">Seleccionar unidad</option>
+                                        {% for u in unidades %}
+                                        <option value="{{ u.nombre }}" {% if renombramiento and renombramiento.canonico == u.nombre %}selected{% endif %}>
+                                            {{ u.nombre }} ({{ REGION_LABEL.get(u.region, u.region or 'sin región') }})
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <!-- Región -->
+                                <div>
+                                    <label for="region" class="block text-sm font-medium mb-2">Región</label>
+                                    <select id="region" name="region" class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500">
+                                        <option value="">Todas (solo si no hay homónimos)</option>
+                                        {% for slug, label in REGION_LABEL.items() %}
+                                        <option value="{{ slug }}" {% if renombramiento and renombramiento.region == slug %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <p class="text-xs text-gray-500 mt-1">Obligatoria cuando el canónico tiene homónimos en otras regiones.</p>
+                                </div>
+
+                                <!-- Fecha de renombre -->
+                                <div>
+                                    <label for="fecha_renombre" class="block text-sm font-medium mb-2">Fecha de renombre</label>
+                                    <input type="date" id="fecha_renombre" name="fecha_renombre"
+                                        value="{{ renombramiento.fecha_renombre if renombramiento and renombramiento.fecha_renombre else '' }}"
+                                        class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500">
+                                    <p class="text-xs text-gray-500 mt-1">Si se deja vacía se normalizan todas las ocurrencias del nombre anterior.</p>
+                                </div>
+
+                                <!-- Aliases del canónico -->
+                                <div class="md:col-span-2">
+                                    <label for="nombres_anteriores" class="block text-sm font-medium mb-2">Nombres anteriores de la unidad canónica</label>
+                                    <textarea id="nombres_anteriores" name="nombres_anteriores" rows="3"
+                                        class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
+                                        placeholder="Un nombre por línea">{{ aliases_actuales if aliases_actuales else '' }}</textarea>
+                                    <p class="text-xs text-gray-500 mt-1">Alias (uno por línea) que se guardan en la unidad canónica. El nombre anterior del mapeo se agrega automáticamente al aplicar.</p>
+                                </div>
+                            </div>
+
+                            <!-- Botones -->
+                            <div class="flex justify-end items-center gap-x-2 pt-6 border-t border-gray-200 mt-6">
+                                <a href="{{ url_for('unidades.renombramientos_list') }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50">
+                                    Cancelar
+                                </a>
+                                <button type="submit" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700">
+                                    Guardar Renombramiento
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- End Body -->
+                </div>
+            </div>
+            <!-- FIN FORMULARIO RENOMBRAMIENTO -->
+
+{% include 'tablero-footer.html' %}
+
+        </div>
+    </div>
+    <!-- FIN CONTENIDO -->
+
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+<script>
+    // Autocompletar región con la del canónico seleccionado
+    const unidadesPorRegion = {{ unidades_por_region | tojson }};
+    const regionDeUnidad = {};
+    {% for u in unidades %}
+    regionDeUnidad[{{ u.nombre | tojson }}] = {{ (u.region or '') | tojson }};
+    {% endfor %}
+    document.getElementById('canonico').addEventListener('change', function() {
+        const regionSelect = document.getElementById('region');
+        const region = regionDeUnidad[this.value];
+        if (region && !regionSelect.value) {
+            regionSelect.value = region;
+        }
+    });
+</script>
+{% include 'tablero-toasts.html' %}
+</body>
+</html>

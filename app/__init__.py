@@ -3,6 +3,7 @@ from flask_login import current_user
 from pymongo import MongoClient
 from config import config
 from datetime import datetime
+from app.unidades_data import REGION_LABEL
 # from app.auth import token_required
 # from flask_login import login_required, current_user
 
@@ -28,6 +29,8 @@ def format_date(value, format='%d/%m/%y'):
 # Registrar el filtro en la aplicación
 app.jinja_env.filters['date'] = format_date                  # importado de config.py
 
+app.jinja_env.globals['REGION_LABEL'] = REGION_LABEL
+
 # Configuración de MongoDB
 client = MongoClient(config.MONGO_URI)          # importado de config.py
 db = client['certi_css']                         # importado de config.py
@@ -43,12 +46,26 @@ collection_qbanks_data = db['qbanks_data']
 collection_exam_results = db['exam_results']
 collection_nube = db['nube_archivos']
 collection_unidades = db['unidades']
+collection_renombramientos = db['renombramientos']
 collection_posters = db['posters']
 collection_evaluaciones_poster = db['evaluaciones_poster']
 collection_certificados_externos = db['certificados_externos']
 
 # Exportar variables necesarias
 BASE_URL = config.BASE_URL                      # importado de config.py
+
+
+@app.context_processor
+def injectar_unidades():
+    try:
+        from app.unidades_data import unidades_por_region, unidades_por_region_usuario, opciones_jerarquizadas_por_region
+        return {
+            'unidades_por_region': unidades_por_region(),
+            'unidades_por_region_usuario': unidades_por_region_usuario(),
+            'unidades_jerarquizadas': opciones_jerarquizadas_por_region(),
+        }
+    except Exception:
+        return {}
 
 
 def listar_participantes(codigo_evento):

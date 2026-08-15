@@ -71,7 +71,7 @@
                                     <!-- Provincia -->
                                     <div>
                                         <label for="provincia" class="block text-sm font-medium mb-2">Provincia *</label>
-                                        <select id="provincia" name="provincia" class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" required>
+                                        <select id="provincia" name="provincia" class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" required onchange="actualizarRegionAutoEdit()">
                                             <option value="">Seleccionar provincia</option>
                                             <option value="Bocas Del Toro" {% if unidad.provincia == 'Bocas Del Toro' %}selected{% endif %}>Bocas Del Toro</option>
                                             <option value="Coclé" {% if unidad.provincia == 'Coclé' %}selected{% endif %}>Coclé</option>
@@ -84,6 +84,34 @@
                                             <option value="Panamá Oeste" {% if unidad.provincia == 'Panamá Oeste' %}selected{% endif %}>Panamá Oeste</option>
                                             <option value="Veraguas" {% if unidad.provincia == 'Veraguas' %}selected{% endif %}>Veraguas</option>
                                         </select>
+                                    </div>
+
+                                    <!-- Región / Segmento -->
+                                    <div>
+                                        <label for="region" class="block text-sm font-medium mb-2">Región / Segmento *</label>
+                                        <select id="region" name="region" class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500" required>
+                                            <option value="panama" {% if region_actual == 'panama' %}selected{% endif %}>Panamá Metro</option>
+                                            <option value="sanmiguelito" {% if region_actual == 'sanmiguelito' %}selected{% endif %}>San Miguelito</option>
+                                            <option value="panamaoeste" {% if region_actual == 'panamaoeste' %}selected{% endif %}>Panamá Oeste</option>
+                                            <option value="panamaeste" {% if region_actual == 'panamaeste' %}selected{% endif %}>Panamá Este</option>
+                                            <option value="bocasdeltoro" {% if region_actual == 'bocasdeltoro' %}selected{% endif %}>Bocas del Toro</option>
+                                            <option value="cocle" {% if region_actual == 'cocle' %}selected{% endif %}>Coclé</option>
+                                            <option value="colon" {% if region_actual == 'colon' %}selected{% endif %}>Colón</option>
+                                            <option value="chiriqui" {% if region_actual == 'chiriqui' %}selected{% endif %}>Chiriquí</option>
+                                            <option value="herrera" {% if region_actual == 'herrera' %}selected{% endif %}>Herrera</option>
+                                            <option value="lossantos" {% if region_actual == 'lossantos' %}selected{% endif %}>Los Santos</option>
+                                            <option value="veraguas" {% if region_actual == 'veraguas' %}selected{% endif %}>Veraguas</option>
+                                        </select>
+                                        <p class="text-xs text-gray-500 mt-1">Se rellena automáticamente según la provincia; puede sobrescribirse (p. ej. San Miguelito)</p>
+                                    </div>
+
+                                    <!-- Nombres anteriores (aliases) -->
+                                    <div>
+                                        <label for="nombres_anteriores" class="block text-sm font-medium mb-2">Nombres anteriores (aliases)</label>
+                                        <textarea id="nombres_anteriores" name="nombres_anteriores" rows="3"
+                                            class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
+                                            placeholder="Un nombre por línea o separados por comas">{{ unidad.nombres_anteriores | join('\n') if unidad.nombres_anteriores else '' }}</textarea>
+                                        <p class="text-xs text-gray-500 mt-1">Nombres históricos de esta unidad (renombramientos), p. ej. "ULAPS Vacamonte".</p>
                                     </div>
 
                                     <!-- Coordenadas Geográficas -->
@@ -246,6 +274,29 @@
             slugField.value = slug;
         }
     });
+
+    // Auto-rellenar región según provincia
+    const PROVINCIA_A_REGION = {
+        'Bocas Del Toro': 'bocasdeltoro',
+        'Coclé': 'cocle',
+        'Colón': 'colon',
+        'Chiriquí': 'chiriqui',
+        'Herrera': 'herrera',
+        'Los Santos': 'lossantos',
+        'Veraguas': 'veraguas',
+        'Panamá Oeste': 'panamaoeste',
+        'Panamá Este': 'panamaeste',
+        'Panamá': 'panama'
+    };
+
+    function actualizarRegionAutoEdit() {
+        const provinciaSelect = document.getElementById('provincia');
+        const regionSelect = document.getElementById('region');
+        const regionAuto = PROVINCIA_A_REGION[provinciaSelect.value];
+        if (regionAuto) {
+            regionSelect.value = regionAuto;
+        }
+    }
 
     // Manejar cambio de tipo de unidad en edición
     function handleTipoChangeEdit() {

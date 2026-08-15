@@ -1,0 +1,142 @@
+{% include 'tablero-header.html' %}
+
+{% include 'tablero-sidebar.html' %}
+
+    <!-- CONTENIDO -->
+    <div class="w-full lg:ps-64">
+        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+
+            <div class="max-w-6xl mx-auto">
+                <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <!-- Header -->
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-800">
+                                    <span class="line-through text-gray-500">{{ renombramiento.nombre_anterior }}</span>
+                                    <span class="text-gray-400">→</span>
+                                    {{ renombramiento.canonico }}
+                                </h2>
+                                <p class="text-sm text-gray-600">
+                                    Región: {{ REGION_LABEL.get(renombramiento.region, renombramiento.region or 'todas') }}
+                                    · Fecha de renombre: {{ renombramiento.fecha_renombre or 'todas las ocurrencias' }}
+                                </p>
+                            </div>
+                            <div class="flex gap-x-2">
+                                <a href="{{ url_for('unidades.renombramientos_list') }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50">
+                                    Volver
+                                </a>
+                                <a href="{{ url_for('unidades.renombramiento_editar', renombramiento_id=renombramiento._id) }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50">
+                                    Editar
+                                </a>
+                                <form method="POST" action="{{ url_for('unidades.renombramiento_revisar', renombramiento_id=renombramiento._id) }}">
+                                    <button type="submit" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50">
+                                        Recalcular
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End Header -->
+
+                    <!-- Estado -->
+                    <div class="px-6 py-3 border-b border-gray-200 flex items-center gap-3">
+                        {% if renombramiento.estado == 'aplicado' %}
+                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-green-100 text-green-800">Aplicado</span>
+                        <span class="text-xs text-gray-500">por {{ renombramiento.aplicado_por or '—' }} el {{ (renombramiento.aplicado_en or '').strftime('%d/%m/%Y %H:%M') if renombramiento.aplicado_en else '—' }}</span>
+                        {% else %}
+                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-yellow-100 text-yellow-800">{{ renombramiento.estado or 'pendiente' }}</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Colisiones -->
+                    {% if revision.colisiones %}
+                    <div class="px-6 py-4 border-b border-gray-200 bg-red-50">
+                        <h3 class="text-sm font-semibold text-red-700 mb-2">Problemas de validación</h3>
+                        <ul class="list-disc ps-5 space-y-1 text-sm text-red-700">
+                            {% for p in revision.colisiones %}<li>{{ p }}</li>{% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <!-- Conteos -->
+                    <div class="px-6 py-6">
+                        <h3 class="text-base font-semibold text-gray-800 mb-4">Clasificación por fecha de referencia</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {% for coleccion, label in [('eventos', 'Eventos'), ('participantes', 'Participantes'), ('usuarios', 'Usuarios')] %}
+                            <div class="border border-gray-200 rounded-xl overflow-hidden">
+                                <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
+                                    <h4 class="text-sm font-semibold text-gray-800">{{ label }}</h4>
+                                </div>
+                                <table class="w-full text-sm">
+                                    <tbody class="divide-y divide-gray-100">
+                                        <tr class="bg-green-50">
+                                            <td class="px-4 py-2 text-gray-700">Post-fecha (se normalizará)</td>
+                                            <td class="px-4 py-2 text-end font-semibold text-green-700">{{ revision.totales[coleccion].post_fecha }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-2 text-gray-700">Pre-fecha (conserva, lo cubre el alias)</td>
+                                            <td class="px-4 py-2 text-end font-semibold text-gray-700">{{ revision.totales[coleccion].pre_fecha }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-2 text-gray-500">Sin clasificar (sin fecha/evento/región)</td>
+                                            <td class="px-4 py-2 text-end font-semibold text-gray-500">{{ revision.totales[coleccion].sin_clasificar }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-2 text-gray-500">Otra región (homónimo, no se toca)</td>
+                                            <td class="px-4 py-2 text-end font-semibold text-gray-500">{{ revision.totales[coleccion].otra_region }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    {% if renombramiento.estado != 'aplicado' %}
+                    <!-- Aplicar -->
+                    <div class="px-6 py-6 border-t border-gray-200 bg-gray-50 rounded-b-xl">
+                        <h3 class="text-base font-semibold text-gray-800 mb-2">Aplicar normalización</h3>
+                        <p class="text-sm text-gray-600 mb-4">
+                            Antes de aplicar debes descargar el respaldo JSON (snapshot de los documentos post-fecha que se modificarán).
+                            Solo se modifican registros post-fecha del mapeo confirmado; nunca se tocan pre-fecha, sin clasificar ni homónimos de otras regiones.
+                        </p>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <a href="{{ url_for('unidades.renombramiento_respaldo', renombramiento_id=renombramiento._id) }}"
+                                class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-300 bg-white text-gray-800 shadow-sm hover:bg-gray-50">
+                                Descargar respaldo JSON
+                            </a>
+                            <form method="POST" action="{{ url_for('unidades.renombramiento_aplicar', renombramiento_id=renombramiento._id) }}"
+                                onsubmit="return confirm('¿Estás seguro de aplicar la normalización? Asegúrate de haber descargado el respaldo.')">
+                                <label class="flex items-center gap-2 text-sm text-gray-700">
+                                    <input type="checkbox" name="confirmo_respaldo" class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500" required>
+                                    Confirmo que descargué el respaldo
+                                </label>
+                                <div class="mt-3">
+                                    <button type="submit" {% if revision.colisiones %}disabled{% endif %}
+                                        class="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:pointer-events-none">
+                                        Aplicar normalización
+                                    </button>
+                                    {% if revision.colisiones %}
+                                    <p class="text-xs text-red-600 mt-2">Corrige los problemas de validación antes de aplicar.</p>
+                                    {% endif %}
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+
+{% include 'tablero-footer.html' %}
+
+        </div>
+    </div>
+    <!-- FIN CONTENIDO -->
+
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+{% include 'tablero-toasts.html' %}
+</body>
+</html>

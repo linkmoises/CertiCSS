@@ -22,6 +22,7 @@ from app.helpers import generate_otp, generate_nanoid, generar_codigo_evento, ob
 from app.template_selection import determine_template_path, parse_event_date, is_legacy_event
 from app.logs import get_logger
 from app.analisis import analisis_bp, puede_editar_analisis
+from app.unidades_data import resolver_unidad, nombres_equivalentes, REGION_A_CSS
 
 # Inicializar logger
 logger = get_logger()
@@ -3752,8 +3753,17 @@ def get_national_statistics(year=None, region=None, unidad=None):
         filtro_eventos["region"] = region
     
     # Agregar filtro de unidad si se especifica
+    # Si la unidad resuelve a un documento canónico, se usan sus aliases
+    # históricos (nombres_anteriores) además del nombre y se restringe por región.
     if unidad:
-        filtro_eventos["unidad_ejecutora"] = unidad
+        doc_unidad = resolver_unidad(unidad, region)
+        if doc_unidad is not None:
+            filtro_eventos["unidad_ejecutora"] = {"$in": nombres_equivalentes(doc_unidad)}
+            if not region and doc_unidad.get('region'):
+                filtro_eventos["region"] = doc_unidad['region']
+        else:
+            # No resuelve (desconocida o ambigua): mantener el valor escalar
+            filtro_eventos["unidad_ejecutora"] = unidad
     
     try:
         # Obtener códigos de eventos válidos
@@ -3899,10 +3909,17 @@ def get_national_participants(year=None, region=None, unidad=None):
         filtro_eventos["region"] = region
     
     # Agregar filtro de unidad si se especifica
+    # Si la unidad resuelve a un documento canónico, se usan sus aliases
+    # históricos (nombres_anteriores) además del nombre y se restringe por región.
     if unidad:
-        filtro_eventos["unidad_ejecutora"] = unidad
-    if region:
-        filtro_eventos["region"] = region
+        doc_unidad = resolver_unidad(unidad, region)
+        if doc_unidad is not None:
+            filtro_eventos["unidad_ejecutora"] = {"$in": nombres_equivalentes(doc_unidad)}
+            if not region and doc_unidad.get('region'):
+                filtro_eventos["region"] = doc_unidad['region']
+        else:
+            # No resuelve (desconocida o ambigua): mantener el valor escalar
+            filtro_eventos["unidad_ejecutora"] = unidad
     
     try:
         # Obtener códigos de eventos válidos
@@ -3958,8 +3975,17 @@ def get_national_events(year=None, region=None, unidad=None):
         filtro_eventos["region"] = region
     
     # Agregar filtro de unidad si se especifica
+    # Si la unidad resuelve a un documento canónico, se usan sus aliases
+    # históricos (nombres_anteriores) además del nombre y se restringe por región.
     if unidad:
-        filtro_eventos["unidad_ejecutora"] = unidad
+        doc_unidad = resolver_unidad(unidad, region)
+        if doc_unidad is not None:
+            filtro_eventos["unidad_ejecutora"] = {"$in": nombres_equivalentes(doc_unidad)}
+            if not region and doc_unidad.get('region'):
+                filtro_eventos["region"] = doc_unidad['region']
+        else:
+            # No resuelve (desconocida o ambigua): mantener el valor escalar
+            filtro_eventos["unidad_ejecutora"] = unidad
     
     try:
         eventos = list(collection_eventos.find(filtro_eventos))

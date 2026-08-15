@@ -1,0 +1,200 @@
+{% include 'tablero-header.html' %}
+
+{% include 'tablero-sidebar.html' %}
+
+<!-- CONTENIDO -->
+<div class="w-full lg:ps-64">
+    <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+
+        <!-- RESULTADO DE DETECCIÓN -->
+        {% if detectar_result %}
+        <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-800">Resultado de la detección</h3>
+                    <p class="text-sm text-gray-600">
+                        {{ detectar_result.total_nombres }} nombres en registros, {{ detectar_result.total_huerfanos }}
+                        huérfano(s), {{ detectar_result.propuestas|length }} propuesta(s) guardadas.
+                    </p>
+                </div>
+                {% if detectar_result.advertencias %}
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h4 class="text-sm font-semibold text-amber-700 mb-2">Advertencias (homónimos en la misma región)</h4>
+                    <ul class="list-disc ps-5 space-y-1 text-sm text-amber-700">
+                        {% for adv in detectar_result.advertencias %}
+                        <li>{{ adv.nombre }} — región {{ adv.region }} ({{ adv.cantidad }} unidades)</li>
+                        {% endfor %}
+                    </ul>
+                    <p class="text-xs text-gray-500 mt-2">Estos casos no son representables con el modelo actual: requieren un sufijo manual en el nombre.</p>
+                </div>
+                {% endif %}
+                {% if detectar_result.huerfanos %}
+                <div class="px-6 py-4">
+                    <h4 class="text-sm font-semibold text-gray-800 mb-2">Nombres huérfanos encontrados</h4>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 text-sm">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-2 text-start text-xs font-medium text-gray-500 uppercase">Nombre en registros</th>
+                                    <th class="px-4 py-2 text-start text-xs font-medium text-gray-500 uppercase">Regiones</th>
+                                    <th class="px-4 py-2 text-start text-xs font-medium text-gray-500 uppercase">Candidatos por similitud</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                {% for h in detectar_result.huerfanos %}
+                                <tr>
+                                    <td class="px-4 py-3 font-medium text-gray-900">{{ h.nombre }}</td>
+                                    <td class="px-4 py-3">
+                                        {% for r in h.regiones %}<span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800 me-1">{{ r }}</span>{% else %}<span class="text-gray-400">sin región</span>{% endfor %}
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        {% for c in h.candidatos %}
+                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-blue-100 text-blue-800 me-1 mb-1">{{ c.unidad }} ({{ c.region }}, {{ c.score }})</span>
+                                        {% else %}
+                                        <span class="text-gray-400">Sin candidato automático</span>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- TABLA RENOMBRAMIENTOS -->
+        <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+            <div class="flex flex-col">
+                <div class="-m-1.5 overflow-x-auto">
+                    <div class="p-1.5 min-w-full inline-block align-middle">
+                        <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+
+                            <!-- Header -->
+                            <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200">
+                                <div>
+                                    <h2 class="text-xl font-semibold text-gray-800">Renombramientos de Unidades</h2>
+                                    <p class="text-sm text-gray-600">
+                                        Normalización de renombramientos históricos de unidades ejecutoras
+                                    </p>
+                                </div>
+                                <div>
+                                    <div class="inline-flex gap-x-2">
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50"
+                                            href="{{ url_for('unidades.renombramientos_report') }}">
+                                            Reporte de cobertura
+                                        </a>
+                                        <form method="POST" action="{{ url_for('unidades.renombramientos_detectar') }}">
+                                            <button type="submit"
+                                                class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50">
+                                                Detectar huérfanos
+                                            </button>
+                                        </form>
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700"
+                                            href="{{ url_for('unidades.renombramiento_crear') }}">
+                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M5 12h14" /><path d="M12 5v14" />
+                                            </svg>
+                                            Nuevo Renombramiento
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- End Header -->
+
+                            <!-- Body -->
+                            {% if renombramientos %}
+                            <div class="overflow-hidden">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Mapeo</th>
+                                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Región</th>
+                                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Fecha renombre</th>
+                                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Conteos</th>
+                                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Estado</th>
+                                            <th class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        {% for r in renombramientos %}
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-6 py-4">
+                                                <div class="text-sm font-semibold text-gray-900">
+                                                    <span class="line-through text-gray-500">{{ r.nombre_anterior }}</span>
+                                                    <span class="text-gray-400">→</span>
+                                                    {{ r.canonico }}
+                                                </div>
+                                                {% if r.creado_por %}
+                                                <span class="text-xs text-gray-500">por {{ r.creado_por }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="px-2 py-4 whitespace-nowrap">
+                                                <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                                    {{ REGION_LABEL.get(r.region, r.region or 'todas') }}
+                                                </span>
+                                            </td>
+                                            <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-600">
+                                                {{ r.fecha_renombre or '—' }}
+                                            </td>
+                                            <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-600">
+                                                {{ r.conteos.eventos }} ev. · {{ r.conteos.participantes }} part. · {{ r.conteos.usuarios }} usr.
+                                            </td>
+                                            <td class="px-2 py-4 whitespace-nowrap">
+                                                {% if r.estado == 'aplicado' %}
+                                                <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-green-100 text-green-800">Aplicado</span>
+                                                {% elif r.estado == 'propuesto' %}
+                                                <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-yellow-100 text-yellow-800">Propuesto</span>
+                                                {% else %}
+                                                <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">{{ r.estado }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-end text-sm font-medium">
+                                                <div class="flex justify-end space-x-3">
+                                                    <a href="{{ url_for('unidades.renombramiento_detalle', renombramiento_id=r._id) }}" class="text-blue-600 hover:text-blue-900" title="Ver detalle">Ver</a>
+                                                    <a href="{{ url_for('unidades.renombramiento_editar', renombramiento_id=r._id) }}" class="text-indigo-600 hover:text-indigo-900" title="Editar">Editar</a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="max-w-sm w-full min-h-[300px] flex flex-col justify-center mx-auto px-6 py-4">
+                                <div class="flex justify-center items-center size-[46px] bg-gray-100 rounded-lg">
+                                    <svg class="shrink-0 size-6 text-gray-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                                        <path d="M21 3v5h-5" />
+                                        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                                        <path d="M3 21v-5h5" />
+                                    </svg>
+                                </div>
+                                <h2 class="mt-5 font-semibold text-gray-800">No hay renombramientos</h2>
+                                <p class="mt-2 text-sm text-gray-600">
+                                    Usa "Detectar huérfanos" para proponer renombramientos o crea uno manualmente.
+                                </p>
+                            </div>
+                            {% endif %}
+                            <!-- End Body -->
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- FIN TABLA RENOMBRAMIENTOS -->
+
+        {% include 'tablero-footer.html' %}
+
+    </div>
+</div>
+<!-- FIN CONTENIDO -->
+
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+{% include 'tablero-toasts.html' %}
+</body>
+</html>

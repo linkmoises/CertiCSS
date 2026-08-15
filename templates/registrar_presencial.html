@@ -174,6 +174,7 @@
                                         <option value="herrera">Herrera</option>
                                         <option value="lossantos">Los Santos</option>
                                         <option value="veraguas">Veraguas</option>
+                                        <option value="administrativas">Direcciones / Departamentos / Coordinaciones / Programas</option>
                                     </select>
                                 </div>
                                 <!-- End Col -->
@@ -265,124 +266,7 @@ function validarCedula(input) {
 }
 </script>
 <script>
-    const unidadesPorProvincia = {
-        panama: [
-            "Departamento Nacional de Docencia e Investigación",
-            "Ciudad De La Salud",
-            "Complejo Hospitalario Metropolitano Dr. Arnulfo Arias Madrid",
-            "Hospital de Especialidades Pediátricas Omar Torrijos Herrera",
-            "Centro Nacional Especializado de la Salud y Seguridad de los Trabajadores Dr. Francisco Díaz Mérida",
-            "Policlínica Presidente Remón",
-            "Policlínica Dr. Manuel Ferrer Valdés",
-            "Policlínica Dr. Carlos N. Brin",
-            "Policlínica Don Alejandro De La Guardia Hijo",
-            "Policlínica Don Joaquín José Vallarino",
-            "ULAPS Máximo Herrera",
-            "ULAPS Prof. Carlos Velarde",
-            "CAPPS Plaza Tocumen",
-            "CAPPS Pedregal",
-            "CAPPS Los Nogales",
-            "Otra unidad"
-        ],
-        sanmiguelito: [
-            "Hospital Dra. Susana Jones Cano",
-            "Policlínica Lic. Manuel María Valdés",
-            "Policlínica Don Generoso Guardia",
-            "Policlínica Dr. Edilberto Culiolis",
-            "Policlínica Dra. Cecilia Guerra",
-            "CAPPS Torrijos Carter",
-            "Otra unidad"
-        ],
-        panamaoeste: [
-            "Coordinación Regional - Panamá Oeste",
-            "Hospital Hogar de La Esperanza",
-            "Policlínica Dr. Santiago Barraza",
-            "Policlínica Dr. Blas Gómez Chetro",
-            "Policlínica Dr. Juan Vega Méndez",
-            "ULAPS Vista Alegre",
-            "ULAPS Guadalupe",
-            "ULAPS San José",
-            "CAPPS Capira",
-            "CAPPS Vacamonte",
-            "CAPPS El Tecal",
-            "Otra unidad"
-        ],
-        panamaeste: [
-            "Coordinación Regional - Panamá Este",
-            "Hospital Regional de Chepo",
-            "Hospital Irma de Lourdes Tzanetatos",
-            "Policlínica de Cañitas",
-            "Otra unidad"
-        ],
-        bocasdeltoro: [
-            "Coordinación Regional - Bocas Del Toro",
-            "Hospital Regional de Changuinola",
-            "Hospital Regional de Almirante",
-            "Hospital de Chiriquí Grande",
-            "Policlínica de Guabito",
-            "ULAPS Las Tablas",
-            "Otra unidad"
-        ],
-        cocle: [
-            "Coordinación Regional - Coclé",
-            "Hospital Regional Dr. Rafael Estévez",
-            "Policlínica Dr. Manuel De Jesús Rojas",
-            "Policlínica San Juan De Dios",
-            "Policlínica Dr. Manuel Paulino Ocaña",
-            "CAPPS La Pintada",
-            "Otra unidad"
-        ],
-        colon: [
-            "Coordinación Regional - Colón",
-            "Complejo Hospitalario Dr. Manuel Amador Guerrero",
-            "Policlínica de Nuevo San Juan",
-            "Policlínica de Sabanitas",
-            "Policlínica Dr. Hugo Spadafora",
-            "ULAPS Portobelo",
-            "Otra unidad"
-        ],
-        chiriqui: [
-            "Coordinación Regional - Chiriquí",
-            "Hospital Regional Dr. Rafael Hernández",
-            "Hospital Dr. Dionisio Arrocha",
-            "Policlínica Dr. Gustavo Adolfo Ross",
-            "Policlínica Dr. Pablo Espinosa",
-            "Policlínica Dr. Ernesto Perez Balladares",
-            "Policlínica Dr. Rodrigo Hidalgo",
-            "Policlínica de Divalá",
-            "ULAPS Nuevo Vedado",
-            "ULAPS Volcán",
-            "ULAPS Dolega",
-            "CAPPS",
-            "Otra unidad"
-        ],
-        herrera: [
-            "Coordinación Regional - Herrera",
-            "Hospital Dr. Gustavo Nelson Collado",
-            "Policlínica Dr. Roberto Ramírez De Diego",
-            "CAPPS Los Pozos",
-            "CAPPS Ocú",
-            "CAPPS Pesé",
-            "Otra unidad"
-        ],
-        lossantos: [
-            "Coordinación Regional - Los Santos",
-            "Policlínica Dr. Miguel Cárdenas Barahona",
-            "Policlínica San Juan de Dios",
-            "CAPPS Guararé",
-            "CAPPS Tonosí",
-            "CAPPS Macaracas",
-            "Otra unidad"
-        ],
-        veraguas: [
-            "Coordinación Regional - Veraguas",
-            "Hospital Dr. Ezequiel Abadía",
-            "Policlínica Dr. Horacio Díaz Gómez",
-            "ULAPS Alberto León",
-            "CAPPS Zapotillo",
-            "Otra unidad"
-        ]
-    };
+    const unidadesPorProvincia = {{ unidades_por_region | tojson }};
     
     function actualizarUnidades() {
         const provinciaSeleccionada = document.getElementById("region").value;
@@ -399,6 +283,12 @@ function validarCedula(input) {
                 unidadSelect.appendChild(option);
             });
         }
+
+        // Opción "Otra unidad"
+        const opcionOtra = document.createElement("option");
+        opcionOtra.value = "Otra unidad";
+        opcionOtra.textContent = "Otra unidad";
+        unidadSelect.appendChild(opcionOtra);
     }
 </script>
 </body>

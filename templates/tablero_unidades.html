@@ -73,6 +73,9 @@
                                                 Tipo/Provincia</th>
                                             <th scope="col"
                                                 class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">
+                                                Región</th>
+                                            <th scope="col"
+                                                class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">
                                                 Nivel/Complejidad</th>
                                             <th scope="col"
                                                 class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">
@@ -130,6 +133,25 @@
                                                 {% elif unidad.provincia == 'Bocas Del Toro' %}bg-teal-100 text-teal-800
                                                 {% else %}bg-gray-100 text-gray-800{% endif %}">
                                                     {{ unidad.provincia if unidad.provincia else 'No especificada' }}
+                                                </span>
+                                            </td>
+                                            <td class="px-2 py-4 whitespace-nowrap">
+                                                {% set region_labels = {
+                                                    'panama': 'Panamá Metro',
+                                                    'sanmiguelito': 'San Miguelito',
+                                                    'panamaoeste': 'Panamá Oeste',
+                                                    'panamaeste': 'Panamá Este',
+                                                    'bocasdeltoro': 'Bocas del Toro',
+                                                    'cocle': 'Coclé',
+                                                    'colon': 'Colón',
+                                                    'chiriqui': 'Chiriquí',
+                                                    'herrera': 'Herrera',
+                                                    'lossantos': 'Los Santos',
+                                                    'veraguas': 'Veraguas',
+                                                    'administrativas': 'Administrativas'
+                                                } %}
+                                                <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
+                                                    {{ region_labels.get(unidad.region, unidad.region) }}
                                                 </span>
                                             </td>
                                             <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -342,7 +364,7 @@
                                     <div>
                                         <label for="provincia" class="block text-sm font-medium mb-2">Provincia
                                             *</label>
-                                        <select id="provincia" name="provincia"
+                                        <select id="provincia" name="provincia" onchange="actualizarRegionAuto()"
                                             class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
                                             required>
                                             <option value="">Seleccionar provincia</option>
@@ -358,6 +380,42 @@
                                             <option value="Veraguas">Veraguas</option>
                                         </select>
                                     </div>
+
+                                    <!-- Región / Segmento -->
+                                    <div>
+                                        <label for="region" class="block text-sm font-medium mb-2">Región /
+                                            Segmento *</label>
+                                        <select id="region" name="region"
+                                            class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
+                                            required>
+                                            <option value="">Seleccionar región</option>
+                                            <option value="panama">Panamá Metro</option>
+                                            <option value="sanmiguelito">San Miguelito</option>
+                                            <option value="panamaoeste">Panamá Oeste</option>
+                                            <option value="panamaeste">Panamá Este</option>
+                                            <option value="bocasdeltoro">Bocas del Toro</option>
+                                            <option value="cocle">Coclé</option>
+                                            <option value="colon">Colón</option>
+                                            <option value="chiriqui">Chiriquí</option>
+                                            <option value="herrera">Herrera</option>
+                                            <option value="lossantos">Los Santos</option>
+                                            <option value="veraguas">Veraguas</option>
+                                        </select>
+                                        <p class="text-xs text-gray-500 mt-1">Se rellena automáticamente según la
+                                            provincia; puede sobrescribirse (p. ej. San Miguelito)</p>
+                                    </div>
+
+                                    <!-- Nombres anteriores (aliases) -->
+                                    <div>
+                                        <label for="nombres_anteriores" class="block text-sm font-medium mb-2">Nombres anteriores (aliases)</label>
+                                        <textarea id="nombres_anteriores" name="nombres_anteriores" rows="3"
+                                            class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
+                                            placeholder="Un nombre por línea o separados por comas"></textarea>
+                                        <p class="text-xs text-gray-500 mt-1">Nombres históricos de esta unidad (renombramientos), p. ej. "ULAPS Vacamonte".</p>
+                                    </div>
+
+                                    <!-- Sugerencia de slug por homonimia -->
+                                    <div id="sugerencia-homonima" class="hidden rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800"></div>
 
                                     <!-- Coordenadas Geográficas -->
                                     <div class="space-y-3">
@@ -534,6 +592,29 @@
         document.getElementById('slug').value = slug;
     });
 
+    // Auto-rellenar región según provincia
+    const PROVINCIA_A_REGION = {
+        'Bocas Del Toro': 'bocasdeltoro',
+        'Coclé': 'cocle',
+        'Colón': 'colon',
+        'Chiriquí': 'chiriqui',
+        'Herrera': 'herrera',
+        'Los Santos': 'lossantos',
+        'Veraguas': 'veraguas',
+        'Panamá Oeste': 'panamaoeste',
+        'Panamá Este': 'panamaeste',
+        'Panamá': 'panama'
+    };
+
+    function actualizarRegionAuto() {
+        const provinciaSelect = document.getElementById('provincia');
+        const regionSelect = document.getElementById('region');
+        const regionAuto = PROVINCIA_A_REGION[provinciaSelect.value];
+        if (regionAuto) {
+            regionSelect.value = regionAuto;
+        }
+    }
+
     // Manejar cambio de tipo de unidad
     function handleTipoChange() {
         const tipoSelect = document.getElementById('tipo');
@@ -568,6 +649,57 @@
             }
         }
     }
+
+    // Sugerir slug con prefijo de región si el nombre ya existe en otra región
+    const REGION_LABEL_JS = {
+        'panama': 'Panamá Metro', 'sanmiguelito': 'San Miguelito', 'panamaoeste': 'Panamá Oeste',
+        'panamaeste': 'Panamá Este', 'bocasdeltoro': 'Bocas del Toro', 'cocle': 'Coclé',
+        'colon': 'Colón', 'chiriqui': 'Chiriquí', 'herrera': 'Herrera', 'lossantos': 'Los Santos',
+        'veraguas': 'Veraguas', 'administrativas': 'Administrativas'
+    };
+    const UNIDADES_EXISTENTES = {{ unidades | tojson }};
+    const MAPA_NOMBRES = new Map();
+    UNIDADES_EXISTENTES.forEach(u => {
+        if (u.nombre) {
+            const clave = u.nombre.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+            if (!MAPA_NOMBRES.has(clave)) MAPA_NOMBRES.set(clave, []);
+            MAPA_NOMBRES.get(clave).push(u.region || '');
+        }
+    });
+
+    function normalizarNombreJS(texto) {
+        return (texto || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+    }
+    function slugifyJS(texto) {
+        return normalizarNombreJS(texto).replace(/\s+/g, '-');
+    }
+
+    function sugerirSlugPorHomonimia() {
+        const nombre = document.getElementById('nombre').value.trim();
+        const region = document.getElementById('region').value;
+        const hint = document.getElementById('sugerencia-homonima');
+        const slugField = document.getElementById('slug');
+        if (!nombre || !region) { hint.classList.add('hidden'); return; }
+
+        const clave = normalizarNombreJS(nombre);
+        const regiones = MAPA_NOMBRES.get(clave) || [];
+        const otrasRegiones = [...new Set(regiones)].filter(r => r && r !== region);
+        if (otrasRegiones.length > 0) {
+            const sugerido = region + '-' + slugifyJS(nombre);
+            hint.innerHTML = 'El nombre ya existe en ' + otrasRegiones.map(r => REGION_LABEL_JS[r] || r).join(', ') +
+                '. Slug sugerido: <strong>' + sugerido + '</strong>.';
+            hint.classList.remove('hidden');
+            if (!slugField.value.trim() || slugField.dataset.sugerido === '1') {
+                slugField.value = sugerido;
+                slugField.dataset.sugerido = '1';
+            }
+        } else {
+            hint.classList.add('hidden');
+        }
+    }
+
+    document.getElementById('nombre').addEventListener('input', sugerirSlugPorHomonimia);
+    document.getElementById('region').addEventListener('change', sugerirSlugPorHomonimia);
 
     // Mostrar mensajes flash
     {% with messages = get_flashed_messages(with_categories = true) %}
