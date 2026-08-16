@@ -83,7 +83,7 @@
                                         {% for unidad, nivel in unidades %}
                                         <tr class="hover:bg-gray-50">
                                             <td class="h-px px-6 py-4">
-                                                <div class="flex items-center gap-3">
+                                                <div class="flex items-center gap-3" style="margin-left: {{ nivel * 1.5 }}rem;">
                                                     {% if unidad.get('foto') %}
                                                     <img src="/static/uploads/unidades/{{ unidad.foto }}"
                                                         alt="{{ unidad.nombre }}"
