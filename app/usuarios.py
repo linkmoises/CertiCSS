@@ -13,6 +13,7 @@ from PIL import Image
 import os
 
 from app.auth import UserRole, ALLOWED_USER_ROLES, User, roles_required, role_required, hash_password
+from app.helpers import validate_email
 
 usuarios_bp = Blueprint('usuarios', __name__)
 
@@ -343,6 +344,18 @@ def editar_usuario(user_id):
             "subjefe": subjefe,
         }
 
+        # Administradores pueden corregir el correo electrónico
+        if current_user.rol == 'administrador' and email and email.strip().lower() != usuario.get('email', ''):
+            valido, error = validate_email(email)
+            if not valido:
+                flash(error, 'error')
+                return redirect(url_for('usuarios.editar_usuario', user_id=user_id))
+            duplicado = collection_usuarios.find_one({"email": email.strip().lower(), "_id": {"$ne": ObjectId(user_id)}})
+            if duplicado:
+                flash('Ya existe otro usuario con ese correo electrónico.', 'error')
+                return redirect(url_for('usuarios.editar_usuario', user_id=user_id))
+            updated_user_data["email"] = email.strip().lower()
+
         # Procesar la foto de perfil
         foto_file = request.files.get('foto')
         if foto_file and allowed_file(foto_file.filename):
@@ -385,12 +398,16 @@ def editar_usuario(user_id):
         # Actualizar el usuario en la base de datos
         collection_usuarios.update_one({"_id": ObjectId(user_id)}, {"$set": updated_user_data})
 
-        email = usuario.get('email')
+        email_original = usuario.get('email')
+        email_nuevo = updated_user_data.get("email", email_original)
 
-        if current_user.email == email:
+        if current_user.email == email_original:
             log_event(f"Usuario [{current_user.email}] actualizó su perfil.")
         else:
-            log_event(f"Usuario [{current_user.email}] actualizó el perfil de usuario de {email}.")
+            detalle = f"perfil de {email_original}"
+            if email_nuevo and email_nuevo != email_original:
+                detalle += f" (correo corregido a {email_nuevo})"
+            log_event(f"Usuario [{current_user.email}] actualizó {detalle}.")
         return redirect(url_for('usuarios.listar_usuarios'))  # Redirigir a la lista de usuarios
 
     # Obtener los datos del usuario
