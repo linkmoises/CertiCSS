@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados - {{ votacion.titulo }} - CertiCSS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
+    <meta name="apple-mobile-web-app-title" content="CertiCSS" />
+    <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
+{% if UMAMI_URL %}
+    {{ UMAMI_URL | safe }}
+{% endif %}
+    <style>
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 2rem;
+            color: white;
+        }
+        .result-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 1rem;
+            padding: 2.5rem;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
+            color: #1f2937;
+        }
+        .bar-container {
+            background: #e5e7eb;
+            border-radius: 0.5rem;
+            height: 2.5rem;
+            overflow: hidden;
+            position: relative;
+        }
+        .bar-fill {
+            height: 100%;
+            border-radius: 0.5rem;
+            transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+        }
+        .bar-text {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: white;
+            white-space: nowrap;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        .bar-label {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+            color: #374151;
+        }
+        .bar-pct {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-bottom: 0.35rem;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-open { background: #dcfce7; color: #166534; }
+        .badge-closed { background: #fee2e2; color: #991b1b; }
+        .total-box {
+            text-align: center;
+            padding: 1rem;
+            background: #f3f4f6;
+            border-radius: 0.75rem;
+            margin-top: 1.5rem;
+        }
+        @media (min-width: 768px) {
+            body { padding: 3rem; }
+            .result-card { padding: 3rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="result-card">
+        <div style="text-align:center; margin-bottom:1.5rem;">
+            <img src="{{ url_for('static', filename='assets/css-logo.png') }}" alt="CertiCSS" style="height:3rem; margin:0 auto 1rem;">
+            <h1 style="font-size:1.75rem; font-weight:800; color:#1e3a8a; margin:0;">{{ votacion.titulo }}</h1>
+            {% if votacion.descripcion %}
+            <p style="color:#6b7280; margin-top:0.5rem; font-size:0.9rem;">{{ votacion.descripcion }}</p>
+            {% endif %}
+            <div style="margin-top:0.75rem;">
+                {% if votacion.estado == 'abierta' %}
+                <span class="badge badge-open">
+                    <span style="width:0.4rem;height:0.4rem;border-radius:50%;background:#22c55e;display:inline-block;"></span>
+                    En curso
+                </span>
+                {% else %}
+                <span class="badge badge-closed">
+                    <span style="width:0.4rem;height:0.4rem;border-radius:50%;background:#ef4444;display:inline-block;"></span>
+                    Cerrada
+                </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div id="resultados">
+            {% for texto, conteo in opciones_conteo.items() %}
+            {% set pct = (conteo / total_votos * 100) | round(1) if total_votos > 0 else 0 %}
+            {% set colores = ['#2563eb','#7c3aed','#059669','#d97706','#dc2626','#0891b2','#c026d3','#65a30d'] %}
+            {% set color = colores[loop.index0 % colores|length] %}
+            <div class="resultado-item" data-opcion="{{ texto }}" style="margin-bottom:1.25rem;">
+                <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                    <span class="bar-label">{{ texto }}</span>
+                    <span class="bar-pct"><span class="votos-count">{{ conteo }}</span> votos (<span class="votos-pct">{{ pct }}</span>%)</span>
+                </div>
+                <div class="bar-container">
+                    <div class="bar-fill barra-progreso" style="width:{{ pct }}%; background:{{ color }};">
+                        <span class="bar-text">{{ pct }}%</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="total-box">
+            <div style="font-size:2rem; font-weight:800; color:#1e3a8a;"><span id="total-votos">{{ total_votos }}</span></div>
+            <div style="color:#6b7280; font-size:0.85rem;">votos registrados</div>
+        </div>
+
+        {% if votacion.estado == 'abierta' %}
+        <div style="text-align:center; margin-top:1rem;">
+            <span style="font-size:0.75rem; color:#6b7280;">
+                <span style="width:0.4rem;height:0.4rem;border-radius:50%;background:#22c55e;display:inline-block;animation:pulse 2s infinite;"></span>
+                Actualizacion automatica cada 3 segundos
+            </span>
+        </div>
+        {% endif %}
+
+        <div style="text-align:center; margin-top:1.5rem;">
+            <a href="{{ url_for('votacion.votar', codigo=votacion.codigo) }}" style="color:#2563eb; font-size:0.85rem; font-weight:600;">Votar en esta encuesta</a>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        const codigo = '{{ votacion.codigo }}';
+        const colores = ['#2563eb','#7c3aed','#059669','#d97706','#dc2626','#0891b2','#c026d3','#65a30d'];
+
+        async function fetchResultados() {
+            try {
+                const resp = await fetch('/api/votacion/' + codigo + '/resultados');
+                if (!resp.ok) return;
+                const data = await resp.json();
+
+                document.getElementById('total-votos').textContent = data.total_votos;
+
+                const container = document.getElementById('resultados');
+                container.innerHTML = '';
+
+                data.resultados.forEach(function(r, i) {
+                    const color = colores[i % colores.length];
+                    const div = document.createElement('div');
+                    div.className = 'resultado-item';
+                    div.style.marginBottom = '1.25rem';
+                    div.innerHTML =
+                        '<div style="display:flex;justify-content:space-between;align-items:baseline;">' +
+                            '<span class="bar-label">' + r.opcion + '</span>' +
+                            '<span class="bar-pct"><span class="votos-count">' + r.votos + '</span> votos (<span class="votos-pct">' + r.porcentaje + '</span>%)</span>' +
+                        '</div>' +
+                        '<div class="bar-container">' +
+                            '<div class="bar-fill barra-progreso" style="width:' + r.porcentaje + '%;background:' + color + ';">' +
+                                '<span class="bar-text">' + r.porcentaje + '%</span>' +
+                            '</div>' +
+                        '</div>';
+                    container.appendChild(div);
+                });
+            } catch(e) {}
+        }
+
+        if ('{{ votacion.estado }}' === 'abierta') {
+            setInterval(fetchResultados, 3000);
+        }
+    })();
+    </script>
+</body>
+</html>

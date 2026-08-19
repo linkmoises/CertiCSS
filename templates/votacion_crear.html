@@ -1,0 +1,169 @@
+{% include 'tablero-header.html' %}
+{% include 'tablero-sidebar.html' %}
+
+    <!-- Content -->
+    <div class="w-full lg:ps-64">
+        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <section>
+                    <div class="mb-5 pb-5 flex justify-between items-center border-b border-gray-200 dark:border-neutral-700">
+                        <div>
+                            <h2 class="text-2xl font-semibold text-gray-800 dark:text-neutral-200">
+                                {% if editando %}Editar votacion{% else %}Nueva votacion{% endif %}
+                            </h2>
+                        </div>
+                        <a href="{{ url_for('votacion.lista_votaciones') }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700">
+                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+                            Volver
+                        </a>
+                    </div>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="mb-4 p-4 rounded-lg text-sm {% if category == 'success' %}bg-green-100 text-green-800 border border-green-200{% elif category == 'danger' %}bg-red-100 text-red-800 border border-red-200{% else %}bg-blue-100 text-blue-800 border border-blue-200{% endif %}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    {% endwith %}
+
+                    <div class="bg-white border shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-800 p-6">
+                        <form method="POST" id="form-votacion">
+                            <div class="space-y-6">
+                                <!-- Titulo -->
+                                <div>
+                                    <label for="titulo" class="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-2">Titulo de la votacion *</label>
+                                    <input type="text" id="titulo" name="titulo" required maxlength="200"
+                                           value="{{ votacion.titulo if votacion else '' }}"
+                                           placeholder="Ej: Mejor ponente del dia"
+                                           class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400">
+                                </div>
+
+                                <!-- Descripcion -->
+                                <div>
+                                    <label for="descripcion" class="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-2">Descripcion (opcional)</label>
+                                    <textarea id="descripcion" name="descripcion" rows="2" maxlength="500"
+                                              placeholder="Descripcion breve de la votacion"
+                                              class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400">{{ votacion.descripcion if votacion else '' }}</textarea>
+                                </div>
+
+                                {% if not editando %}
+                                <!-- Tipo de pregunta -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-2">Tipo de pregunta</label>
+                                    <div class="flex flex-wrap gap-3">
+                                        <label class="flex items-center gap-x-3 bg-white border border-gray-200 rounded-lg p-3 cursor-pointer hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700">
+                                            <input type="radio" name="tipo_pregunta" value="opcion_multiple" checked
+                                                   class="text-blue-600 focus:ring-blue-500" onchange="toggleTipoPregunta()">
+                                            <span class="text-sm text-gray-700 dark:text-neutral-300">Opcion multiple</span>
+                                        </label>
+                                        <label class="flex items-center gap-x-3 bg-white border border-gray-200 rounded-lg p-3 cursor-pointer hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700">
+                                            <input type="radio" name="tipo_pregunta" value="si_no"
+                                                   class="text-blue-600 focus:ring-blue-500" onchange="toggleTipoPregunta()">
+                                            <span class="text-sm text-gray-700 dark:text-neutral-300">Si / No</span>
+                                        </label>
+                                        <label class="flex items-center gap-x-3 bg-white border border-gray-200 rounded-lg p-3 cursor-pointer hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700">
+                                            <input type="radio" name="tipo_pregunta" value="mixta"
+                                                   class="text-blue-600 focus:ring-blue-500" onchange="toggleTipoPregunta()">
+                                            <span class="text-sm text-gray-700 dark:text-neutral-300">Mixta (Si/No + opciones)</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <input type="hidden" name="tipo_pregunta" value="{{ votacion.tipo_pregunta }}">
+                                {% endif %}
+
+                                <!-- Opciones -->
+                                <div id="seccion-opciones">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-2">Opciones *</label>
+                                    <div id="lista-opciones" class="space-y-3">
+                                        {% if votacion and votacion.opciones %}
+                                            {% for op in votacion.opciones %}
+                                            {% set texto = op.texto if op is mapping else op %}
+                                            {% set es_si_no = texto in ['Si', 'No'] %}
+                                            <div class="flex items-center gap-x-2{% if es_si_no and votacion.tipo_pregunta == 'mixta' %} hidden{% endif %}">
+                                                <input type="text" name="opciones[]" value="{{ texto }}"
+                                                       class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400"
+                                                       placeholder="Texto de la opcion" {% if es_si_no and votacion.tipo_pregunta == 'mixta' %}readonly{% endif %}>
+                                                {% if not es_si_no or votacion.tipo_pregunta != 'mixta' %}
+                                                <button type="button" onclick="this.parentElement.remove()" class="shrink-0 p-2 text-red-500 hover:text-red-700">
+                                                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                                </button>
+                                                {% endif %}
+                                            </div>
+                                            {% endfor %}
+                                        {% else %}
+                                        <div class="flex items-center gap-x-2">
+                                            <input type="text" name="opciones[]" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400" placeholder="Opcion 1">
+                                            <button type="button" onclick="this.parentElement.remove()" class="shrink-0 p-2 text-red-500 hover:text-red-700">
+                                                <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                            </button>
+                                        </div>
+                                        <div class="flex items-center gap-x-2">
+                                            <input type="text" name="opciones[]" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400" placeholder="Opcion 2">
+                                            <button type="button" onclick="this.parentElement.remove()" class="shrink-0 p-2 text-red-500 hover:text-red-700">
+                                                <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                            </button>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <button type="button" onclick="agregarOpcion()" id="btn-agregar-opcion"
+                                            class="mt-3 inline-flex items-center gap-x-2 text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-500">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                        Agregar opcion
+                                    </button>
+                                </div>
+
+                                <!-- Submit -->
+                                <div class="flex items-center gap-x-3 pt-4 border-t border-gray-200 dark:border-neutral-700">
+                                    <button type="submit" class="py-2.5 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                        {% if editando %}Guardar cambios{% else %}Crear votacion{% endif %}
+                                    </button>
+                                    <a href="{{ url_for('votacion.lista_votaciones') }}" class="py-2.5 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700">
+                                        Cancelar
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+{% include 'tablero-footer.html' %}
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+<script>
+let contadorOpciones = document.querySelectorAll('#lista-opciones .flex.items-center.gap-x-2').length;
+
+function toggleTipoPregunta() {
+    const tipo = document.querySelector('input[name="tipo_pregunta"]:checked').value;
+    const seccion = document.getElementById('seccion-opciones');
+    if (tipo === 'si_no') {
+        seccion.style.display = 'none';
+    } else {
+        seccion.style.display = 'block';
+    }
+}
+
+function agregarOpcion() {
+    contadorOpciones++;
+    const lista = document.getElementById('lista-opciones');
+    const div = document.createElement('div');
+    div.className = 'flex items-center gap-x-2';
+    div.innerHTML = `
+        <input type="text" name="opciones[]" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400" placeholder="Opcion ${contadorOpciones}">
+        <button type="button" onclick="this.parentElement.remove()" class="shrink-0 p-2 text-red-500 hover:text-red-700">
+            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+    `;
+    lista.appendChild(div);
+    div.querySelector('input').focus();
+}
+
+toggleTipoPregunta();
+</script>
+</body>
+</html>

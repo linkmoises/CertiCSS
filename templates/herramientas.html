@@ -101,6 +101,27 @@
                             </a>
                         </div>
                         <!-- End Card -->
+                        <!-- Card -->
+                        <div class="flex flex-col bg-white border shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-800">
+                            <div class="p-4 md:p-5 flex justify-between gap-x-3 h-32">
+                                <div>
+                                    <p class="text-sm uppercase tracking-wide text-gray-500 dark:text-neutral-500">
+                                        Votaciones
+                                    </p>
+                                    <div class="mt-1 flex items-center gap-x-2">
+                                        <p class="text-xs text-gray-400">Encuestas interactivas tipo Mentimeter con QR y resultados en vivo.</p>
+                                    </div>
+                                </div>
+                                <div class="shrink-0 flex justify-center items-center size-[46px] bg-purple-600 text-white rounded-full dark:bg-purple-900 dark:text-purple-200">
+                                    <svg class="shrink-0 size-7" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                                </div>
+                            </div>
+                            <a href="{{ url_for('votacion.lista_votaciones') }}" class="py-3 px-4 md:px-5 inline-flex justify-between items-center text-sm text-gray-600 border-t border-gray-200 hover:bg-gray-50 focus:outline-none focus:bg-gray-50 rounded-b-xl dark:border-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">
+                                Abrir
+                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-external-link-icon lucide-external-link"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                            </a>
+                        </div>
+                        <!-- End Card -->
                     </div>
                     <!-- End Grid -->
                 </section>

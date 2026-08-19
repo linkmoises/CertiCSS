@@ -8450,6 +8450,12 @@ app.register_blueprint(posters_bp)
 from app.certificados_externos import certificados_externos_bp
 app.register_blueprint(certificados_externos_bp)
 
+### Votaciones tipo Mentimeter
+from app.votacion import votacion_bp
+from app.votacion.services import init_votacion_services
+init_votacion_services(db)
+app.register_blueprint(votacion_bp)
+
 import matplotlib
 matplotlib.use('Agg')  # Configurar matplotlib para usar backend no interactivo
 import matplotlib.pyplot as plt
