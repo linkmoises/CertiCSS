@@ -677,6 +677,64 @@ def ver_contenido(codigo_evento, orden):
                     flash('¡Examen aprobado! Completa la encuesta de evaluación para descargar tu certificado.', 'success')
                     return redirect(url_for('encuesta_satisfaccion', codigo_evento=codigo_evento, cedula=cedula, from_examen=1))
 
+            # Calcular progreso de sumativas y estado del certificado (solo para exámenes sumativos)
+            total_sumativos = 0
+            aprobados_sumativos = 0
+            todos_aprobados = False
+            encuesta_completada = False
+            certificado_disponible = False
+
+            if not formativo and cedula and nanoid and evento.get('lms_activo'):
+                from app.verifica_encuesta import requires_survey_completion, has_completed_survey_v2
+
+                # Obtener todos los exámenes sumativos del evento
+                examenes_evento = list(collection_eva.find({
+                    'codigo_evento': codigo_evento,
+                    'tipo': 'examen'
+                }))
+                for ex in examenes_evento:
+                    qbank_config = ex.get('qbank_config', '')
+                    if qbank_config:
+                        _, _, _, ex_formativo, _, _ = parse_qbank_config(qbank_config)
+                        if not ex_formativo:
+                            total_sumativos += 1
+
+                # Verificar cuáles sumativos están aprobados (>=80%)
+                if total_sumativos > 0:
+                    ordenes_sumativos = []
+                    for ex in examenes_evento:
+                        qbank_config = ex.get('qbank_config', '')
+                        if qbank_config:
+                            _, _, _, ex_formativo, _, _ = parse_qbank_config(qbank_config)
+                            if not ex_formativo:
+                                ordenes_sumativos.append(ex.get('orden'))
+
+                    resultados_sumativos = list(collection_exam_results.find({
+                        'codigo_evento': codigo_evento,
+                        'cedula_participante': cedula,
+                        'orden_examen': {'$in': ordenes_sumativos}
+                    }))
+                    for orden_s in ordenes_sumativos:
+                        mejor = max(
+                            [r for r in resultados_sumativos if r.get('orden_examen') == orden_s],
+                            key=lambda r: r.get('calificacion', 0),
+                            default=None
+                        )
+                        if mejor and mejor.get('calificacion', 0) >= 80:
+                            aprobados_sumativos += 1
+
+                    todos_aprobados = (aprobados_sumativos == total_sumativos)
+
+                # Verificar encuesta
+                requiere_encuesta = requires_survey_completion(evento)
+                if requiere_encuesta:
+                    encuesta_completada = has_completed_survey_v2(cedula, codigo_evento)
+                else:
+                    encuesta_completada = True
+
+                # Certificado disponible: todos los sumativos aprobados + encuesta completada (si aplica)
+                certificado_disponible = todos_aprobados and encuesta_completada
+
             return render_template(
                 "examen.html",
                 preguntas=preguntas,
@@ -692,6 +750,11 @@ def ver_contenido(codigo_evento, orden):
                 formativo=formativo,  # Pasar al template
                 intentos_historial=intentos_historial,
                 respuestas_guardadas=respuestas_guardadas,
+                total_sumativos=total_sumativos,
+                aprobados_sumativos=aprobados_sumativos,
+                todos_aprobados=todos_aprobados,
+                encuesta_completada=encuesta_completada,
+                certificado_disponible=certificado_disponible,
             )
 
     # Encontrar el contenido anterior y el siguiente
