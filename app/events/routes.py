@@ -256,6 +256,7 @@ def crear_evento():
         estado_evento = request.form['estado_evento']
         timestamp = request.form['timestamp']
         instrumento = request.form.get('instrumento', 'encuesta_v2')
+        enlace_virtual = request.form.get('enlace_virtual', '').strip() or None
 
         codigo = obtener_codigo_unico(get_collection_eventos())
 
@@ -334,7 +335,8 @@ def crear_evento():
             'registro_abierto': registro_abierto,
             'lms_activo': lms_activo,
             'avales': avales,
-            'instrumento': instrumento
+            'instrumento': instrumento,
+            'enlace_virtual': enlace_virtual
         })
         
         log_event(f"Usuario [{current_user.email}] ha creado el evento {codigo} exitosamente.")
@@ -484,6 +486,7 @@ def editar_evento(codigo_evento):
         aval_cmp_tipo = request.form.get('aval_cmp_tipo')
         aval_cmp_horas = request.form.get('aval_cmp_horas')
         aval_cmp_codigo = request.form.get('aval_cmp_codigo')
+        enlace_virtual = request.form.get('enlace_virtual', '').strip() or None
         fecha_inicio_str = request.form['fecha_inicio']
         fecha_fin_str = request.form['fecha_fin']
         
@@ -568,7 +571,8 @@ def editar_evento(codigo_evento):
             'avales': avales,
             'aval_cmp_tipo': aval_cmp_tipo,
             'aval_cmp_horas': aval_cmp_horas,
-            'aval_cmp_codigo': aval_cmp_codigo
+            'aval_cmp_codigo': aval_cmp_codigo,
+            'enlace_virtual': enlace_virtual
         }
         
         get_collection_eventos().update_one(
