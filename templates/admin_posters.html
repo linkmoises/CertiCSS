@@ -203,7 +203,7 @@
                                             <p class="text-sm text-blue-700">
                                                 <strong>Modo Jurado Activado:</strong> Estás evaluando como <strong>{{
                                                     jurado_activo.nombres }} {{ jurado_activo.apellidos }}</strong>.
-                                                <a href="{{ url_for('poster_logout', codigo_evento=evento.codigo) }}"
+                                                <a href="{{ url_for('posters.poster_logout', codigo_evento=evento.codigo) }}"
                                                     class="ml-2 text-blue-600 hover:text-blue-800 font-medium">
                                                     Salir del modo jurado
                                                 </a>
@@ -243,7 +243,7 @@
                                                     <div class="ml-2">
                                                         <td
                                                             class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 space-x-1">
-                                                            <a href="{{ url_for('login_as_judge', codigo_evento=evento.codigo, cedula_jurado=jurado.cedula) }}"
+                                                            <a href="{{ url_for('posters.login_as_judge', codigo_evento=evento.codigo, cedula_jurado=jurado.cedula) }}"
                                                                 class="inline-flex items-center p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-full transition-colors duration-200"
                                                                 title="Iniciar sesión como este jurado">
                                                                 <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg"
