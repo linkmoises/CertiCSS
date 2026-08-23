@@ -11,7 +11,8 @@ from flask import (
 from flask_login import login_required, current_user
 from app.votacion.services import (
     init_votacion_services, crear_votacion, obtener_votacion_por_codigo,
-    obtener_votaciones_por_creador, actualizar_votacion, cerrar_votacion,
+    obtener_votaciones_por_creador, obtener_todas_votaciones,
+    actualizar_votacion, cerrar_votacion,
     eliminar_votacion, registrar_voto, contar_votos_por_opcion,
     obtener_respuestas, ya_voto
 )
@@ -54,6 +55,40 @@ def lista_votaciones():
     for v in votaciones:
         v['total_votos'] = len(obtener_respuestas(v['codigo']))
     return render_template('votacion_lista.html', votaciones=votaciones)
+
+
+@votacion_bp.route('/tablero/votaciones/admin')
+@login_required
+def admin_lista():
+    if current_user.rol != 'administrador':
+        abort(403)
+
+    from app import collection_usuarios
+
+    estado = request.args.get('estado', 'todas')
+    if estado not in ('abierta', 'cerrada', 'todas'):
+        estado = 'todas'
+
+    filtro = None if estado == 'todas' else estado
+    votaciones = obtener_todas_votaciones(filtro)
+
+    usuarios_cache = {}
+    for v in votaciones:
+        v['total_votos'] = len(obtener_respuestas(v['codigo']))
+        creador_id = v.get('creador', '')
+        if creador_id not in usuarios_cache:
+            usuario = collection_usuarios.find_one({"_id": ObjectId(creador_id)})
+            nombre = ''
+            email = ''
+            if usuario:
+                nombre = f"{usuario.get('nombres', '')} {usuario.get('apellidos', '')}".strip()
+                email = usuario.get('email', '')
+            usuarios_cache[creador_id] = {'nombre': nombre, 'email': email}
+        v['creador_info'] = usuarios_cache[creador_id]
+
+    return render_template('votacion_admin.html',
+                           votaciones=votaciones,
+                           estado=estado)
 
 
 @votacion_bp.route('/votacion/crear', methods=['GET', 'POST'])

@@ -6,23 +6,25 @@
         <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
             <div class="max-w-[85rem] px-2 pt-1 mx-auto">
                 <section>
-                    <div class="mb-5 pb-5 flex justify-between items-center border-b border-gray-200 dark:border-neutral-700">
-                        <div>
-                            <h2 class="text-2xl font-semibold text-gray-800 dark:text-neutral-200">Mis Votaciones</h2>
-                            <p class="text-sm text-gray-500 dark:text-neutral-400">Crea encuestas tipo Mentimeter para tus eventos.</p>
-                        </div>
-                        <div class="flex items-center gap-x-2">
-                            {% if current_user.rol == 'administrador' %}
-                            <a href="{{ url_for('votacion.admin_lista') }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700">
-                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/></svg>
-                                Todas las votaciones
-                            </a>
-                            {% endif %}
-                            <a href="{{ url_for('votacion.crear') }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700">
-                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                                Nueva votacion
-                            </a>
-                        </div>
+                    <div class="mb-5 pb-5 border-b border-gray-200 dark:border-neutral-700">
+                        <h2 class="text-2xl font-semibold text-gray-800 dark:text-neutral-200">Todas las Votaciones</h2>
+                        <p class="text-sm text-gray-500 dark:text-neutral-400">Vista de administrador: resultados de todas las encuestas activas y cerradas.</p>
+                    </div>
+
+                    <div class="mb-5 flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <span class="text-sm text-gray-500 dark:text-neutral-400 me-1">Estado:</span>
+                        <a href="{{ url_for('votacion.admin_lista', estado='todas') }}"
+                           class="py-1.5 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-full border {% if estado == 'todas' %}bg-blue-600 border-blue-600 text-white{% else %}border-gray-200 bg-white text-gray-800 hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-700{% endif %}">
+                            Todas
+                        </a>
+                        <a href="{{ url_for('votacion.admin_lista', estado='abierta') }}"
+                           class="py-1.5 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-full border {% if estado == 'abierta' %}bg-blue-600 border-blue-600 text-white{% else %}border-gray-200 bg-white text-gray-800 hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-700{% endif %}">
+                            Activas
+                        </a>
+                        <a href="{{ url_for('votacion.admin_lista', estado='cerrada') }}"
+                           class="py-1.5 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-full border {% if estado == 'cerrada' %}bg-blue-600 border-blue-600 text-white{% else %}border-gray-200 bg-white text-gray-800 hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-700{% endif %}">
+                            Cerradas
+                        </a>
                     </div>
 
                     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -40,15 +42,13 @@
                         {% for v in votaciones %}
                         <div class="flex flex-col bg-white border shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-800">
                             <div class="p-4 md:p-5 flex justify-between gap-x-3 h-32">
-                                <div>
-                                    <p class="text-sm uppercase tracking-wide text-gray-500 dark:text-neutral-500">
+                                <div class="min-w-0">
+                                    <p class="text-sm uppercase tracking-wide text-gray-500 dark:text-neutral-500 truncate" title="{{ v.titulo }}">
                                         {{ v.titulo }}
                                     </p>
-                                    <div class="mt-1 flex items-center gap-x-2">
-                                        {% if v.descripcion %}
-                                        <p class="text-xs text-gray-400">{{ v.descripcion[:80] }}{% if v.descripcion|length > 80 %}...{% endif %}</p>
-                                        {% endif %}
-                                    </div>
+                                    {% if v.descripcion %}
+                                    <p class="mt-1 text-xs text-gray-400">{{ v.descripcion[:80] }}{% if v.descripcion|length > 80 %}...{% endif %}</p>
+                                    {% endif %}
                                     <div class="mt-2 flex items-center gap-x-3">
                                         <span class="inline-flex items-center gap-x-1 text-xs {% if v.estado == 'abierta' %}text-green-600 bg-green-50{% else %}text-red-600 bg-red-50{% endif %} rounded-full px-2 py-0.5">
                                             <span class="size-1.5 rounded-full {% if v.estado == 'abierta' %}bg-green-500{% else %}bg-red-500{% endif %}"></span>
@@ -61,20 +61,21 @@
                                     <svg class="shrink-0 size-7" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
                                 </div>
                             </div>
+                            <div class="px-4 md:px-5 py-2.5 text-xs text-gray-500 dark:text-neutral-400 border-t border-gray-200 dark:border-neutral-800 truncate" title="{{ v.creador_info.email or v.creador }}">
+                                Creada por: {{ v.creador_info.nombre or v.creador_info.email or v.creador }}
+                            </div>
                             <div class="py-3 px-4 md:px-5 inline-flex justify-between items-center text-sm text-gray-600 border-t border-gray-200 dark:border-neutral-800 dark:text-neutral-400 rounded-b-xl">
                                 <a href="{{ url_for('votacion.panel', codigo=v.codigo) }}" class="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-500">Panel</a>
                                 <div class="flex items-center gap-x-2">
+                                    <a href="{{ url_for('votacion.resultados', codigo=v.codigo) }}" class="text-gray-400 hover:text-gray-600" title="Resultados">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    </a>
                                     <a href="{{ url_for('votacion.descargar_csv', codigo=v.codigo) }}" class="text-gray-400 hover:text-gray-600" title="CSV">
                                         <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
                                     </a>
                                     <a href="{{ url_for('votacion.descargar_pdf', codigo=v.codigo) }}" class="text-gray-400 hover:text-gray-600" title="PDF">
                                         <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
                                     </a>
-                                    <form action="{{ url_for('votacion.eliminar', codigo=v.codigo) }}" method="POST" class="inline" onsubmit="return confirm('Seguro que deseas eliminar esta votacion?')">
-                                        <button type="submit" class="text-gray-400 hover:text-red-600" title="Eliminar">
-                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-                                        </button>
-                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -84,13 +85,7 @@
                     <div class="text-center py-12">
                         <svg class="mx-auto size-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
                         <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">Sin votaciones</h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">Crea tu primera votacion tipo Mentimeter.</p>
-                        <div class="mt-6">
-                            <a href="{{ url_for('votacion.crear') }}" class="inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 px-3 py-2">
-                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                                Nueva votacion
-                            </a>
-                        </div>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">No hay votaciones {% if estado == 'abierta' %}activas{% elif estado == 'cerrada' %}cerradas{% else %}registradas{% endif %}.</p>
                     </div>
                     {% endif %}
                 </section>

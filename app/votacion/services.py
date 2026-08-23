@@ -65,6 +65,13 @@ def obtener_votaciones_por_creador(creador):
     )
 
 
+def obtener_todas_votaciones(estado=None):
+    filtro = {"estado": estado} if estado in ('abierta', 'cerrada') else {}
+    return list(
+        _collection_votaciones.find(filtro).sort("fecha_creacion", DESCENDING)
+    )
+
+
 def actualizar_votacion(codigo, datos):
     _collection_votaciones.update_one({"codigo": codigo}, {"$set": datos})
 
