@@ -70,7 +70,6 @@ def _construir_filtros_listado(args):
 
     filtro = {
         'registro_abierto': {'$ne': True},
-        'tipo': {'$ne': 'Sesión Docente'},
     }
 
     ahora = datetime.now()
@@ -89,7 +88,7 @@ def _construir_filtros_listado(args):
         filtros_args['q'] = q
     for campo, campo_mongo in _CAMPOS_FILTRO.items():
         valor = (args.get(campo) or '').strip()
-        if valor and not (campo == 'tipo' and valor == 'Sesión Docente'):
+        if valor:
             filtro[campo_mongo] = valor
             filtros_args[campo] = valor
 
@@ -144,7 +143,7 @@ def listar_eventos(page=1):
     collection_eventos = get_collection_eventos()
     opciones = {
         'estados': sorted(e for e in collection_eventos.distinct('estado_evento') if e),
-        'tipos': sorted(t for t in collection_eventos.distinct('tipo') if t and t != 'Sesión Docente'),
+        'tipos': sorted(t for t in collection_eventos.distinct('tipo') if t),
         'modalidades': sorted(m for m in collection_eventos.distinct('modalidad') if m),
         'regiones': sorted(r for r in collection_eventos.distinct('region') if r),
         'unidades': sorted(u for u in collection_eventos.distinct('unidad_ejecutora') if u),
