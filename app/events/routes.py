@@ -214,6 +214,56 @@ def mis_eventos(page=1):
     )
 
 
+@events_bp.route('/eventos/coorganizados')
+@events_bp.route('/eventos/coorganizados/page/<int:page>')
+@login_required
+def mis_coorganizados(page=1):
+    from app.events.services import (
+        get_collection_eventos,
+        get_collection_participantes,
+        get_collection_usuarios,
+        paginate_events
+    )
+
+    eventos_por_pagina = 20
+    collection_participantes = get_collection_participantes()
+    codigos_coorganizados = collection_participantes.distinct(
+        'codigo_evento',
+        {'cedula': str(current_user.cedula), 'rol': 'coorganizador'}
+    )
+
+    filtro = {
+        'codigo': {'$in': codigos_coorganizados},
+        'registro_abierto': {'$ne': True}
+    }
+
+    eventos, total_eventos, total_paginas = paginate_events(
+        get_collection_eventos(),
+        filtro,
+        page,
+        eventos_por_pagina,
+        sort_field="fecha_inicio",
+        sort_order=-1
+    )
+
+    collection_usuarios = get_collection_usuarios()
+
+    for evento in eventos:
+        evento["es_organizador"] = True
+        if evento.get("autor"):
+            evento["autor_info"] = collection_usuarios.find_one(
+                {"_id": ObjectId(evento["autor"])},
+                {"nombres": 1, "apellidos": 1, "foto": 1}
+            )
+
+    return render_template('eventos_coorganizados.html',
+        eventos=eventos,
+        total_eventos=total_eventos,
+        page=page,
+        total_paginas=total_paginas
+    )
+
+
 @events_bp.route('/eventos/nuevo', methods=['GET', 'POST'])
 @login_required
 def crear_evento():
