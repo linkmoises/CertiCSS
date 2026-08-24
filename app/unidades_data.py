@@ -283,8 +283,13 @@ def unidad_puede_ser_padre(unidad_id, candidato_padre_id):
 
 
 def opciones_jerarquizadas_por_region():
-    """Dict región -> [(nombre, nivel)] para selects anidados (valor = nombre plano)."""
+    """Dict región -> [(nombre, nivel)] para selects anidados (valor = nombre plano).
+
+    Se expone bajo 'administrativas' (crear_evento.html) y 'css00'
+    (registrar_usuario.html), los dos valores que usan los formularios
+    para la opción de unidades administrativas.
+    """
     arbol = arbol_administrativas()
     admin = aplanar_arbol(arbol)
-    resultado = {'administrativas': [(u['nombre'], nivel) for u, nivel in admin]}
-    return resultado
+    lista = [(u['nombre'], nivel) for u, nivel in admin]
+    return {'administrativas': lista, 'css00': lista}
