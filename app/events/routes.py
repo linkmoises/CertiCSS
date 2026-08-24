@@ -141,12 +141,22 @@ def listar_eventos(page=1):
             )
 
     collection_eventos = get_collection_eventos()
+
+    # Unidades en cascada: con región seleccionada, listar solo las unidades de esa región
+    region_filtro = filtros_args.get('region')
+    if region_filtro:
+        unidades_distintas = collection_eventos.distinct(
+            'unidad_ejecutora', {'region': region_filtro}
+        )
+    else:
+        unidades_distintas = collection_eventos.distinct('unidad_ejecutora')
+
     opciones = {
         'estados': sorted(e for e in collection_eventos.distinct('estado_evento') if e),
         'tipos': sorted(t for t in collection_eventos.distinct('tipo') if t),
         'modalidades': sorted(m for m in collection_eventos.distinct('modalidad') if m),
         'regiones': sorted(r for r in collection_eventos.distinct('region') if r),
-        'unidades': sorted(u for u in collection_eventos.distinct('unidad_ejecutora') if u),
+        'unidades': sorted(u for u in unidades_distintas if u),
     }
 
     return render_template('eventos.html',
