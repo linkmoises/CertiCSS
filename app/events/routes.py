@@ -6,6 +6,7 @@ import re
 
 from app.auth.services import roles_required, UserRole
 from app.logs import log_event
+from app.unidades_data import REGION_LABEL as _REGION_ETIQUETAS
 
 events_bp = Blueprint('events', __name__, url_prefix='/tablero')
 
@@ -19,14 +20,6 @@ _CAMPOS_FILTRO = {
     'region': 'region',
     'unidad_ejecutora': 'unidad_ejecutora',
 }
-
-try:
-    from main_app import REGION_MAP as _REGION_ETIQUETAS
-except Exception:
-    try:
-        from __main__ import REGION_MAP as _REGION_ETIQUETAS
-    except Exception:
-        _REGION_ETIQUETAS = {}
 
 
 def init_events_routes():
@@ -155,7 +148,10 @@ def listar_eventos(page=1):
         'estados': sorted(e for e in collection_eventos.distinct('estado_evento') if e),
         'tipos': sorted(t for t in collection_eventos.distinct('tipo') if t),
         'modalidades': sorted(m for m in collection_eventos.distinct('modalidad') if m),
-        'regiones': sorted(r for r in collection_eventos.distinct('region') if r),
+        'regiones': sorted(
+            (r for r in collection_eventos.distinct('region') if r),
+            key=lambda r: _REGION_ETIQUETAS.get(r, r)
+        ),
         'unidades': sorted(u for u in unidades_distintas if u),
     }
 
