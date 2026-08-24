@@ -1,3 +1,4 @@
+{% from '_selector_hora.html' import hora %}
 {% include 'tablero-header.html' %}
 
 {% include 'tablero-sidebar.html' %}
@@ -303,9 +304,7 @@
                                 <input type="date" id="fecha_inicio_date"
                                     class="py-2 px-3 border-gray-200 rounded-lg text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400"
                                     required>
-                                <input type="time" id="fecha_inicio_time"
-                                    class="py-2 px-3 border-gray-200 rounded-lg text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400"
-                                    required>
+                                {{ hora('fecha_inicio_time') }}
                             </div>
                             <input type="hidden" id="fecha_inicio" name="fecha_inicio">
                         </div>
@@ -324,9 +323,7 @@
                                 <input type="date" id="fecha_fin_date"
                                     class="py-2 px-3 border-gray-200 rounded-lg text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400"
                                     required>
-                                <input type="time" id="fecha_fin_time"
-                                    class="py-2 px-3 border-gray-200 rounded-lg text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400"
-                                    required>
+                                {{ hora('fecha_fin_time') }}
                             </div>
                             <input type="hidden" id="fecha_fin" name="fecha_fin">
                             <div id="date-warning" class="text-sm text-red-600 mt-1 hidden">
@@ -771,8 +768,12 @@
             if (fechaInicioDate.value && fechaInicioTime.value) {
                 const start = new Date(`${fechaInicioDate.value}T${fechaInicioTime.value}`);
                 start.setHours(start.getHours() + 1);
-                fechaFinDate.value = start.toISOString().slice(0, 10);
-                fechaFinTime.value = String(start.getHours()).padStart(2, '0') + ':' + String(start.getMinutes()).padStart(2, '0');
+                const y = start.getFullYear();
+                const m = String(start.getMonth() + 1).padStart(2, '0');
+                const d = String(start.getDate()).padStart(2, '0');
+                const hh = String(start.getHours()).padStart(2, '0');
+                fechaFinDate.value = `${y}-${m}-${d}`;
+                fechaFinTime.value = `${hh}:00`;
             }
             validarFechas();
         }

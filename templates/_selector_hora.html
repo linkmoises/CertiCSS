@@ -1,0 +1,17 @@
+{% macro hora(id, valor='') %}
+{% set clases = 'py-2 px-3 pe-9 border-gray-200 rounded-lg text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400' %}
+{% set grupos = [('Madrugada', range(0, 6)), ('Mañana', range(6, 12)), ('Tarde', range(12, 19)), ('Noche', range(19, 24))] %}
+<select id="{{ id }}" name="{{ id }}" required class="{{ clases }}">
+    <option value="">Hora</option>
+    {% for nombre_grupo, horas in grupos %}
+    <optgroup label="{{ nombre_grupo }}">
+        {% for h in horas %}
+        {% set valor_hora = '%02d:00'|format(h) %}
+        {% set sufijo = 'a.m.' if h < 12 else 'p.m.' %}
+        {% set etiqueta = ('12' if h % 12 == 0 else '%d'|format(h % 12)) ~ ':00 ' ~ sufijo %}
+        <option value="{{ valor_hora }}"{% if valor == valor_hora %} selected{% endif %}>{{ etiqueta }}</option>
+        {% endfor %}
+    </optgroup>
+    {% endfor %}
+</select>
+{% endmacro %}

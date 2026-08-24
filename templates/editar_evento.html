@@ -1,3 +1,4 @@
+{% from '_selector_hora.html' import hora %}
 {% include 'tablero-header.html' %}
 
 {% include 'tablero-sidebar.html' %}
@@ -337,9 +338,7 @@
                                 <input type="date" id="fecha_inicio_date"
                                     class="py-2 px-3 border-gray-200 rounded-lg text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400"
                                     value="{{ evento.fecha_inicio.strftime('%Y-%m-%d') }}" required>
-                                <input type="time" id="fecha_inicio_time"
-                                    class="py-2 px-3 border-gray-200 rounded-lg text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400"
-                                    value="{{ evento.fecha_inicio.strftime('%H:%M') }}" required>
+                                {{ hora('fecha_inicio_time', evento.fecha_inicio.strftime('%H:%M')) }}
                             </div>
                             <input type="hidden" id="fecha_inicio" name="fecha_inicio"
                                 value="{{ evento.fecha_inicio.strftime('%Y-%m-%dT%H:%M') }}">
@@ -359,9 +358,7 @@
                                 <input type="date" id="fecha_fin_date"
                                     class="py-2 px-3 border-gray-200 rounded-lg text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400"
                                     value="{{ evento.fecha_fin.strftime('%Y-%m-%d') }}" required>
-                                <input type="time" id="fecha_fin_time"
-                                    class="py-2 px-3 border-gray-200 rounded-lg text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400"
-                                    value="{{ evento.fecha_fin.strftime('%H:%M') }}" required>
+                                {{ hora('fecha_fin_time', evento.fecha_fin.strftime('%H:%M')) }}
                             </div>
                             <input type="hidden" id="fecha_fin" name="fecha_fin"
                                 value="{{ evento.fecha_fin.strftime('%Y-%m-%dT%H:%M') }}">
