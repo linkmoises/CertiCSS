@@ -35,6 +35,38 @@ ALLOWED_USER_ROLES: Set[str] = {
 }
 
 
+# Roles que cada perfil puede asignar al registrar usuarios.
+# Los roles ausentes del diccionario no pueden registrar usuarios.
+ROLES_CREABLES: dict = {
+    UserRole.COORDINADOR_LOCAL.value: {
+        UserRole.COORDINADOR_DEPARTAMENTAL.value,
+        UserRole.COORDINADOR_LOCAL.value,
+    },
+    UserRole.SUBDIRECTOR_DOCENCIA.value: {
+        UserRole.COORDINADOR_DEPARTAMENTAL.value,
+        UserRole.COORDINADOR_LOCAL.value,
+    },
+    UserRole.COORDINADOR_REGIONAL.value: {
+        UserRole.COORDINADOR_DEPARTAMENTAL.value,
+        UserRole.COORDINADOR_LOCAL.value,
+    },
+    UserRole.COORDINADOR_NACIONAL.value: {
+        UserRole.COORDINADOR_DEPARTAMENTAL.value,
+        UserRole.COORDINADOR_LOCAL.value,
+        UserRole.COORDINADOR_REGIONAL.value,
+    },
+    UserRole.DENADOI.value: {
+        UserRole.COORDINADOR_DEPARTAMENTAL.value,
+        UserRole.COORDINADOR_LOCAL.value,
+        UserRole.COORDINADOR_REGIONAL.value,
+        UserRole.COORDINADOR_NACIONAL.value,
+        UserRole.SUBDIRECTOR_DOCENCIA.value,
+        UserRole.COORDINADOR_ADMINISTRATIVO.value,
+    },
+    UserRole.ADMINISTRADOR.value: ALLOWED_USER_ROLES,
+}
+
+
 class User(UserMixin):
     def __init__(
         self,

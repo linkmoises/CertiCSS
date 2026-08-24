@@ -1,6 +1,7 @@
 from app.auth.services import (
     UserRole,
     ALLOWED_USER_ROLES,
+    ROLES_CREABLES,
     User,
     load_user,
     roles_required,
@@ -33,6 +34,7 @@ from app.auth.routes import auth_routes_bp, login, logout
 __all__ = [
     'UserRole',
     'ALLOWED_USER_ROLES',
+    'ROLES_CREABLES',
     'User',
     'load_user',
     'roles_required',

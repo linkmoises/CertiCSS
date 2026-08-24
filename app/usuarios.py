@@ -12,7 +12,7 @@ from datetime import datetime
 from PIL import Image
 import os
 
-from app.auth import UserRole, ALLOWED_USER_ROLES, User, roles_required, role_required, hash_password
+from app.auth import UserRole, ALLOWED_USER_ROLES, ROLES_CREABLES, User, roles_required, role_required, hash_password
 from app.helpers import validate_email
 
 usuarios_bp = Blueprint('usuarios', __name__)
@@ -73,9 +73,14 @@ def registro():
         phone = request.form['phone']
         timestamp = datetime.now()
 
-        # Validar rol permitido
-        if rol not in ALLOWED_USER_ROLES and rol != UserRole.ADMINISTRADOR.value:
-            flash('Rol inválido.', 'error')
+        # Validar que el perfil actual pueda registrar usuarios y asignar ese rol
+        roles_creables = ROLES_CREABLES.get(current_user.rol)
+        if roles_creables is None:
+            flash('No tienes permisos para registrar usuarios.', 'error')
+            return redirect(url_for('usuarios.listar_usuarios'))
+
+        if rol not in roles_creables:
+            flash('Rol inválido o no permitido para tu perfil.', 'error')
             return redirect(url_for('usuarios.registro'))
 
         # Verificar si el usuario ya existe
@@ -319,8 +324,14 @@ def editar_usuario(user_id):
         phone = request.form.get('phone')
         password = request.form.get('password')
 
-        jefe = request.form.get('jefe') == 'on' if 'jefe' in request.form else usuario.get('jefe', False)
-        subjefe = request.form.get('subjefe') == 'on' if 'subjefe' in request.form else usuario.get('subjefe', False)
+        # Solo administradores pueden cambiar el rol y la jerarquia DENADOI
+        if current_user.rol == 'administrador':
+            jefe = request.form.get('jefe') == 'on' if 'jefe' in request.form else usuario.get('jefe', False)
+            subjefe = request.form.get('subjefe') == 'on' if 'subjefe' in request.form else usuario.get('subjefe', False)
+        else:
+            rol = usuario.get('rol')
+            jefe = usuario.get('jefe', False)
+            subjefe = usuario.get('subjefe', False)
 
         # Validar rol permitido
         if rol not in ALLOWED_USER_ROLES and rol != UserRole.ADMINISTRADOR.value:
