@@ -2,11 +2,31 @@ from flask import Blueprint, request, redirect, url_for, flash, render_template,
 from flask_login import current_user, login_required
 from datetime import datetime, timedelta
 from bson.objectid import ObjectId
+import re
 
 from app.auth.services import roles_required, UserRole
 from app.logs import log_event
 
 events_bp = Blueprint('events', __name__, url_prefix='/tablero')
+
+_POR_PAGINA_OPCIONES = (20, 50, 100)
+
+# Parametro de filtro -> campo en la coleccion de eventos
+_CAMPOS_FILTRO = {
+    'estado': 'estado_evento',
+    'tipo': 'tipo',
+    'modalidad': 'modalidad',
+    'region': 'region',
+    'unidad_ejecutora': 'unidad_ejecutora',
+}
+
+try:
+    from main_app import REGION_MAP as _REGION_ETIQUETAS
+except Exception:
+    try:
+        from __main__ import REGION_MAP as _REGION_ETIQUETAS
+    except Exception:
+        _REGION_ETIQUETAS = {}
 
 
 def init_events_routes():
@@ -14,104 +34,71 @@ def init_events_routes():
 
 
 @events_bp.route('/eventos/proximos')
-@events_bp.route('/tablero/eventos/proximos/page/<int:page>')
+@events_bp.route('/eventos/proximos/page/<int:page>')
 @login_required
 def listar_eventos_proximos(page=1):
-    from app.events.services import (
-        get_collection_eventos, 
-        get_collection_participantes,
-        get_collection_usuarios,
-        paginate_events
-    )
-    from app.events import services
-    
-    eventos_por_pagina = 20
-    filtro_eventos = {
-        'fecha_inicio': {'$gte': datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)},
-        'registro_abierto': {'$ne': True}
-    }
-    
-    eventos, total_eventos, total_paginas = paginate_events(
-        get_collection_eventos(), 
-        filtro_eventos, 
-        page, 
-        eventos_por_pagina
-    )
-    
-    collection_participantes = get_collection_participantes()
-    collection_usuarios = get_collection_usuarios()
-    
-    for evento in eventos:
-        es_organizador = collection_participantes.find_one({
-            "codigo_evento": evento["codigo"],
-            "cedula": str(current_user.cedula),
-            "rol": "coorganizador"
-        }) is not None 
-        evento["es_organizador"] = es_organizador
-        
-        if evento.get("autor"):
-            evento["autor_info"] = collection_usuarios.find_one(
-                {"_id": ObjectId(evento["autor"])},
-                {"nombres": 1, "apellidos": 1, "foto": 1}
-            )
-    
-    return render_template('eventos-proximos.html',
-        eventos=eventos,
-        page=page,
-        total_paginas=total_paginas,
-        total_eventos=total_eventos
-    )
+    """Compatibilidad: redirige a la vista unificada con el filtro de periodo."""
+    destino = {'periodo': 'proximos'}
+    if page > 1:
+        destino['page'] = page
+    return redirect(url_for('events.listar_eventos', **destino))
 
 
 @events_bp.route('/eventos/anteriores')
 @events_bp.route('/eventos/anteriores/page/<int:page>')
 @login_required
 def listar_eventos_anteriores(page=1):
-    from app.events.services import (
-        get_collection_eventos, 
-        get_collection_participantes,
-        get_collection_usuarios,
-        paginate_events
-    )
-    
-    eventos_por_pagina = 20
-    filtro_eventos = {
-        "fecha_inicio": {"$lt": datetime.utcnow()},
-        'registro_abierto': {'$ne': True}
+    """Compatibilidad: redirige a la vista unificada con el filtro de periodo."""
+    destino = {'periodo': 'anteriores'}
+    if page > 1:
+        destino['page'] = page
+    return redirect(url_for('events.listar_eventos', **destino))
+
+
+def _construir_filtros_listado(args):
+    """
+    Construye el filtro Mongo y los argumentos activos del listado unificado.
+    Devuelve (filtro, filtros_args, periodo, por_pagina).
+    """
+    periodo = args.get('periodo', 'todos')
+    if periodo not in ('todos', 'proximos', 'anteriores'):
+        periodo = 'todos'
+
+    por_pagina = args.get('por_pagina', type=int)
+    if por_pagina not in _POR_PAGINA_OPCIONES:
+        por_pagina = 20
+
+    filtro = {
+        'registro_abierto': {'$ne': True},
+        'tipo': {'$ne': 'Sesión Docente'},
     }
-    
-    eventos, total_eventos, total_paginas = paginate_events(
-        get_collection_eventos(),
-        filtro_eventos, 
-        page, 
-        eventos_por_pagina,
-        sort_field="fecha_inicio",
-        sort_order=-1
-    )
-    
-    collection_participantes = get_collection_participantes()
-    collection_usuarios = get_collection_usuarios()
-    
-    for evento in eventos:
-        es_organizador = collection_participantes.find_one({
-            "codigo_evento": evento["codigo"],
-            "cedula": str(current_user.cedula),
-            "rol": "coorganizador"
-        }) is not None 
-        evento["es_organizador"] = es_organizador
-        
-        if evento.get("autor"):
-            evento["autor_info"] = collection_usuarios.find_one(
-                {"_id": ObjectId(evento["autor"])},
-                {"nombres": 1, "apellidos": 1, "foto": 1}
-            )
-    
-    return render_template('eventos-anteriores.html',
-        eventos=eventos,
-        page=page,
-        total_paginas=total_paginas,
-        total_eventos=total_eventos
-    )
+
+    ahora = datetime.now()
+    if periodo == 'proximos':
+        filtro['fecha_inicio'] = {'$gte': ahora.replace(hour=0, minute=0, second=0, microsecond=0)}
+    elif periodo == 'anteriores':
+        filtro['fecha_inicio'] = {'$lt': ahora}
+
+    q = (args.get('q') or '').strip()
+    if q:
+        patron = {'$regex': re.escape(q), '$options': 'i'}
+        filtro['$or'] = [{'nombre': patron}, {'codigo': patron}]
+
+    filtros_args = {}
+    if q:
+        filtros_args['q'] = q
+    for campo, campo_mongo in _CAMPOS_FILTRO.items():
+        valor = (args.get(campo) or '').strip()
+        if valor and not (campo == 'tipo' and valor == 'Sesión Docente'):
+            filtro[campo_mongo] = valor
+            filtros_args[campo] = valor
+
+    if periodo != 'todos':
+        filtros_args['periodo'] = periodo
+    if por_pagina != _POR_PAGINA_OPCIONES[0]:
+        filtros_args['por_pagina'] = por_pagina
+
+    return filtro, filtros_args, periodo, por_pagina
 
 
 @events_bp.route('/eventos')
@@ -119,49 +106,62 @@ def listar_eventos_anteriores(page=1):
 @login_required
 def listar_eventos(page=1):
     from app.events.services import (
-        get_collection_eventos, 
+        get_collection_eventos,
         get_collection_participantes,
         get_collection_usuarios,
         paginate_events
     )
-    
-    eventos_por_pagina = 20
-    filtro_eventos = {
-        'registro_abierto': {'$ne': True},
-        'tipo': {'$ne': 'Sesión Docente'}
-    }
-    
+
+    filtro, filtros_args, periodo, por_pagina = _construir_filtros_listado(request.args)
+
+    sort_order = 1 if periodo == 'proximos' else -1
     eventos, total_eventos, total_paginas = paginate_events(
         get_collection_eventos(),
-        filtro_eventos, 
-        page, 
-        eventos_por_pagina,
+        filtro,
+        page,
+        por_pagina,
         sort_field="fecha_inicio",
-        sort_order=-1
+        sort_order=sort_order
     )
-    
+
     collection_participantes = get_collection_participantes()
     collection_usuarios = get_collection_usuarios()
-    
+
     for evento in eventos:
         es_organizador = collection_participantes.find_one({
             "codigo_evento": evento["codigo"],
             "cedula": str(current_user.cedula),
             "rol": "coorganizador"
-        }) is not None 
+        }) is not None
         evento["es_organizador"] = es_organizador
-        
+
         if evento.get("autor"):
             evento["autor_info"] = collection_usuarios.find_one(
                 {"_id": ObjectId(evento["autor"])},
                 {"nombres": 1, "apellidos": 1, "foto": 1}
             )
-    
+
+    collection_eventos = get_collection_eventos()
+    opciones = {
+        'estados': sorted(e for e in collection_eventos.distinct('estado_evento') if e),
+        'tipos': sorted(t for t in collection_eventos.distinct('tipo') if t and t != 'Sesión Docente'),
+        'modalidades': sorted(m for m in collection_eventos.distinct('modalidad') if m),
+        'regiones': sorted(r for r in collection_eventos.distinct('region') if r),
+        'unidades': sorted(u for u in collection_eventos.distinct('unidad_ejecutora') if u),
+    }
+
     return render_template('eventos.html',
         eventos=eventos,
         total_eventos=total_eventos,
         page=page,
-        total_paginas=total_paginas
+        total_paginas=total_paginas,
+        periodo=periodo,
+        por_pagina=por_pagina,
+        por_pagina_opciones=_POR_PAGINA_OPCIONES,
+        filtros=filtros_args,
+        opciones=opciones,
+        region_etiquetas=_REGION_ETIQUETAS,
+        q=(request.args.get('q') or '').strip()
     )
 
 
