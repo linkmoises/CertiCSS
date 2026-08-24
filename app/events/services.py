@@ -215,6 +215,10 @@ def check_duplicate_extemporaneous_registration(cedula, codigo_evento, collectio
 
 
 def check_user_can_edit_event(evento, current_user, collection_participantes):
+    # Los eventos cerrados solo pueden ser editados por un administrador
+    if evento.get('estado_evento') == 'cerrado' and current_user.rol != 'administrador':
+        return False
+
     if current_user.rol == 'administrador':
         return True
     

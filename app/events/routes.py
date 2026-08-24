@@ -252,10 +252,19 @@ def crear_evento():
         fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%dT%H:%M')
         fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%dT%H:%M')
 
-        estado_evento = request.form['estado_evento']
+        estado_evento = request.form.get('estado_evento', '')
         timestamp = request.form['timestamp']
         instrumento = request.form.get('instrumento', 'encuesta_v2')
         enlace_virtual = request.form.get('enlace_virtual', '').strip() or None
+
+        if estado_evento not in ('publicado', 'borrador'):
+            flash('Debe seleccionar un estado de publicación válido.', 'danger')
+            return redirect(url_for('events.crear_evento',
+                                    nombre=nombre, region=region,
+                                    unidad_ejecutora=unidad_ejecutora,
+                                    lugar=lugar, tipo=tipo, cupos=cupos,
+                                    carga_horaria=carga_horaria,
+                                    modalidad=modalidad, descripcion=descripcion))
 
         codigo = obtener_codigo_unico(get_collection_eventos())
 
@@ -464,7 +473,10 @@ def editar_evento(codigo_evento):
         return redirect(url_for('events.listar_eventos'))
     
     if not check_user_can_edit_event(evento, current_user, get_collection_participantes()):
-        flash("No tienes permisos para editar este evento", "danger")
+        if evento.get('estado_evento') == 'cerrado':
+            flash("Los eventos cerrados solo pueden ser editados por un administrador.", "danger")
+        else:
+            flash("No tienes permisos para editar este evento", "danger")
         return redirect(url_for('events.ver_evento', codigo_evento=codigo_evento))
     
     if request.method == 'POST':
@@ -492,9 +504,13 @@ def editar_evento(codigo_evento):
         fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%dT%H:%M')
         fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%dT%H:%M')
         
-        estado_evento = request.form['estado_evento']
+        estado_evento = request.form.get('estado_evento', '')
         timestamp = request.form['timestamp']
-        
+
+        if estado_evento not in ('publicado', 'borrador', 'cerrado'):
+            flash('Debe seleccionar un estado de evento válido.', 'danger')
+            return redirect(url_for('events.editar_evento', codigo_evento=codigo_evento))
+
         afiche_file = request.files.get('afiche_evento')
         fondo_file = request.files.get('fondo_evento')
         programa_file = request.files.get('programa_evento')
