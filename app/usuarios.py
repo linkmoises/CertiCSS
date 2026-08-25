@@ -4,7 +4,7 @@
 ###  de CertiCSS.
 ###
 ###
-from flask import Blueprint, request, render_template, redirect, url_for, flash, abort
+from flask import Blueprint, request, render_template, redirect, url_for, flash, abort, jsonify
 from flask_login import login_user, current_user, login_required
 from bson.objectid import ObjectId
 from werkzeug.security import generate_password_hash
@@ -580,3 +580,92 @@ def toggle_activo(user_id):
 
     log_event(f"Usuario [{current_user.email}] cambió el estado de {email} a {'activo' if nuevo_estado else 'inactivo'}.")
     return redirect(url_for('usuarios.listar_usuarios'))
+
+
+###
+### Base de datos de usuarios (edición directa, solo administrador)
+### Parche temporal para corregir documentos corruptos (ej: campos null)
+###
+CAMPOS_PROTEGIDOS = {'_id', 'password', 'foto'}
+CAMPOS_BOOLEANOS = {'jefe', 'subjefe', 'activo'}
+
+@usuarios_bp.route('/tablero/bases-de-datos/usuarios')
+@usuarios_bp.route('/tablero/bases-de-datos/usuarios/page/<int:page>')
+@login_required
+def db_usuarios(page=1):
+    if current_user.rol != 'administrador':
+        flash('No tienes permiso para acceder a esta página.', 'error')
+        return redirect(url_for('home'))
+
+    usuarios_por_pagina = 50
+    skip = (page - 1) * usuarios_por_pagina
+
+    total_usuarios = collection_usuarios.count_documents({})
+    usuarios_pagina = list(
+        collection_usuarios.find({})
+        .sort('email', 1)
+        .skip(skip)
+        .limit(usuarios_por_pagina)
+    )
+
+    for usuario in usuarios_pagina:
+        usuario['id_str'] = str(usuario['_id'])
+        usuario['foto_url'] = f"/static/usuarios/{usuario['foto']}" if usuario.get('foto') else "/static/assets/user-avatar.png"
+
+    campos = set()
+    for usuario in usuarios_pagina:
+        campos.update(usuario.keys())
+
+    campos_importantes = ['nombres', 'apellidos', 'email', 'cedula', 'phone', 'rol', 'region',
+                          'unidad_ejecutora', 'departamento', 'cargo', 'genero', 'orcid',
+                          'jefe', 'subjefe', 'activo']
+    campos.update(campos_importantes)
+    campos.discard('_id')
+    campos.discard('id_str')
+
+    campos = sorted(campos)
+
+    total_paginas = (total_usuarios + usuarios_por_pagina - 1) // usuarios_por_pagina
+
+    return render_template('bd_usuarios.html',
+        usuarios=usuarios_pagina,
+        campos=campos,
+        page=page,
+        total_paginas=total_paginas,
+        total_usuarios=total_usuarios)
+
+
+@usuarios_bp.route('/actualizar_campo_usuario', methods=['POST'])
+@login_required
+def actualizar_campo_usuario():
+    if current_user.rol != 'administrador':
+        return jsonify({'success': False, 'error': 'No tienes permiso para realizar esta acción'})
+
+    data = request.get_json()
+    user_id = data.get('user_id')
+    campo = data.get('campo')
+    valor = data.get('valor', '')
+
+    if not all([user_id, campo]):
+        return jsonify({'success': False, 'error': 'Faltan datos requeridos'})
+
+    if campo in CAMPOS_PROTEGIDOS:
+        return jsonify({'success': False, 'error': f'El campo {campo} no puede editarse aquí'})
+
+    if campo in CAMPOS_BOOLEANOS:
+        valor = str(valor).strip().lower() in ('true', '1', 'si', 'sí', 'yes')
+
+    try:
+        result = collection_usuarios.update_one(
+            {'_id': ObjectId(user_id)},
+            {'$set': {campo: valor}}
+        )
+
+        if result.modified_count > 0 or result.matched_count > 0:
+            log_event(f"Usuario [{current_user.email}] editó directamente el campo '{campo}' del usuario {user_id} vía BD Usuarios.")
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False, 'error': 'No se pudo actualizar el campo'})
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
