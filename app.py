@@ -522,13 +522,39 @@ def tablero_coordinadores():
 
     num_eventos = len(eventos)
 
+    # Mensajería interna reciente (panel "Notificaciones institucionales" del tablero)
+    from bson.objectid import ObjectId as _ObjectId
+    collection_mensajes_tablero = db['mensajes']
+    uid = str(current_user.id)
+    query_mensajes_tablero = {
+        "$or": [{"destinatarios": uid}, {"es_global": True}],
+        "remitente_id": {"$ne": uid},
+        "eliminado_para": {"$ne": uid},
+    }
+    mensajes_recientes = list(collection_mensajes_tablero.find(query_mensajes_tablero)
+                              .sort("fecha", -1).limit(5))
+    ids_remitentes = list({m['remitente_id'] for m in mensajes_recientes})
+    remitentes_map = {}
+    if ids_remitentes:
+        remitentes_map = {str(u['_id']): u for u in collection_usuarios.find(
+            {"_id": {"$in": [_ObjectId(i) for i in ids_remitentes]}},
+            {"nombres": 1, "apellidos": 1, "foto": 1})}
+    for m in mensajes_recientes:
+        m['remitente_info'] = remitentes_map.get(m['remitente_id'])
+        m['no_leido'] = uid not in (m.get('leido_por') or [])
+        m['total_adjuntos'] = len(m.get('adjuntos') or [])
+    mensajes_sin_leer = collection_mensajes_tablero.count_documents(
+        {**query_mensajes_tablero, "leido_por": {"$ne": uid}})
+
     return render_template('tablero.html',
         total_usuarios=total_usuarios,
         total_eventos=total_eventos,
         total_ponentes=total_ponentes,
         total_participantes=total_participantes,
         eventos=eventos,
-        num_eventos=num_eventos
+        num_eventos=num_eventos,
+        mensajes_recientes=mensajes_recientes,
+        mensajes_sin_leer=mensajes_sin_leer
     )
 
 ###

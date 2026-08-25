@@ -41,8 +41,8 @@
                         {% for l in listas_globales %}
                         <li class="flex items-center gap-x-4 px-5 py-3.5">
                             <div class="min-w-0 flex-1">
-                                <p class="text-sm font-medium text-gray-800 dark:text-neutral-200">{{ l.nombre }}</p>
-                                <p class="text-xs text-gray-500 dark:text-neutral-400 truncate">
+                                <p class="text-base font-medium text-gray-800 dark:text-neutral-200">{{ l.nombre }}</p>
+                                <p class="text-sm text-gray-500 dark:text-neutral-400 truncate">
                                     {{ l.regiones | join(', ') }}{{ ', ' if l.regiones and l.unidades else '' }}{{ l.unidades | join(', ') }}
                                     {% if l.criterio_vacio %}<span class="text-red-500">(sin criterios)</span>{% endif %}
                                 </p>
@@ -82,8 +82,8 @@
                         {% for l in mis_listas %}
                         <li class="flex items-center gap-x-4 px-5 py-3.5 group">
                             <div class="min-w-0 flex-1">
-                                <p class="text-sm font-medium text-gray-800 dark:text-neutral-200">{{ l.nombre }}</p>
-                                <p class="text-xs text-gray-500 dark:text-neutral-400 truncate">
+                                <p class="text-base font-medium text-gray-800 dark:text-neutral-200">{{ l.nombre }}</p>
+                                <p class="text-sm text-gray-500 dark:text-neutral-400 truncate">
                                     {{ l.regiones | join(', ') }}{{ ', ' if l.regiones and l.unidades else '' }}{{ l.unidades | join(', ') }}
                                     {% if l.criterio_vacio %}<span class="text-red-500">(sin criterios)</span>{% endif %}
                                 </p>
@@ -145,7 +145,7 @@
                                     <label class="flex items-center gap-x-2 p-2 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer dark:border-neutral-700 dark:hover:bg-neutral-700/50">
                                         <input type="checkbox" name="regiones" value="{{ r.codigo }}"
                                             class="shrink-0 size-4 border-gray-300 rounded text-blue-600 focus:ring-blue-500">
-                                        <span class="text-xs text-gray-700 dark:text-neutral-300">{{ r.label }}</span>
+                                        <span class="text-sm text-gray-700 dark:text-neutral-300">{{ r.label }}</span>
                                     </label>
                                     {% endfor %}
                                 </div>
@@ -168,7 +168,7 @@
                                     {% endif %}
                                     {% endfor %}
                                 </select>
-                                <p class="text-xs text-gray-400 mt-1.5">Ctrl+clic para seleccionar varias. Puedes combinar regiones y unidades en la misma lista.</p>
+                                <p class="text-sm text-gray-400 mt-1.5">Ctrl+clic para seleccionar varias. Puedes combinar regiones y unidades en la misma lista.</p>
                             </div>
 
                             <div class="flex justify-end border-t border-gray-200 pt-4 dark:border-neutral-700">

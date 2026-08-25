@@ -52,7 +52,7 @@
                                     </option>
                                     {% endfor %}
                                 </select>
-                                <p class="text-xs text-gray-400 mt-1.5">Mantén presionado Ctrl (o Cmd) para seleccionar varios usuarios.</p>
+                                <p class="text-sm text-gray-400 mt-1.5">Mantén presionado Ctrl (o Cmd) para seleccionar varios usuarios.</p>
                             </div>
 
                             {% if puede_usar_listas %}
@@ -143,7 +143,7 @@ En respuesta a:
                                 <input type="file" name="adjuntos" id="adjuntos" multiple accept=".pdf,.png,.jpg,.jpeg,.ppt,.pptx"
                                     class="block w-full border border-gray-200 rounded-lg text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300"
                                     data-max="{{ max_adjuntos }}" data-maxmb="{{ max_archivo_mb }}">
-                                <p class="text-xs text-gray-400 mt-1.5">
+                                <p class="text-sm text-gray-400 mt-1.5">
                                     Hasta {{ max_adjuntos }} archivos, máximo {{ max_archivo_mb }} MB cada uno.
                                     Formatos permitidos: PDF, imágenes (PNG/JPG) y presentaciones (PPT/PPTX).
                                 </p>

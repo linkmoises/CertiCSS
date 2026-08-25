@@ -23,12 +23,12 @@
                     <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden dark:bg-neutral-800 dark:border-neutral-700
                         {{ 'md:ms-8' if not loop.first }}">
                         <!-- Cabecera del mensaje -->
-                        <div class="px-5 py-3.5 flex items-start gap-x-3 border-b border-gray-100 dark:border-neutral-700">
+                        <div class="px-6 py-4 flex items-start gap-x-3 border-b border-gray-100 dark:border-neutral-700">
                             <img class="shrink-0 size-10 rounded-full"
                                 src="{{ '/static/usuarios/' + m.remitente_info.foto if m.remitente_info and m.remitente_info.foto else '/static/assets/user-avatar.png' }}"
                                 alt="{{ m.remitente_nombre }}">
                             <div class="min-w-0 flex-1">
-                                <p class="text-sm font-semibold text-gray-800 dark:text-neutral-200">
+                                <p class="text-base font-semibold text-gray-800 dark:text-neutral-200">
                                     {{ m.remitente_nombre or 'Usuario' }}
                                     {% if m.remitente_id|string == current_user.id %}
                                     <span class="text-xs font-normal text-gray-400">(tú)</span>
@@ -40,7 +40,7 @@
                                     <span class="inline-flex items-center py-0.5 px-2 rounded-full text-xs font-medium bg-gray-100 text-gray-600 ms-1">Respuesta</span>
                                     {% endif %}
                                 </p>
-                                <p class="text-xs text-gray-400">
+                                <p class="text-sm text-gray-400">
                                     {{ m.fecha | date('%d/%m/%Y %H:%M') }} ·
                                     Para: {{ m.nombres_destinatarios | join(', ') if m.nombres_destinatarios else '—' }}
                                 </p>
@@ -48,7 +48,7 @@
                         </div>
                         <!-- Cuerpo -->
                         <div class="px-5 py-4">
-                            <p class="text-sm text-gray-700 whitespace-pre-line dark:text-neutral-300">{{ m.cuerpo }}</p>
+                            <p class="text-base text-gray-700 whitespace-pre-line leading-relaxed dark:text-neutral-300">{{ m.cuerpo }}</p>
                         </div>
                         {% if m.adjuntos %}
                         <!-- Adjuntos -->
@@ -62,7 +62,7 @@
                                         download="{{ a.nombre_original }}">
                                         <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
                                         {{ a.nombre_original }}
-                                        <span class="text-xs text-gray-400">({{ (a.tamano / 1024 / 1024) | round(1) }} MB)</span>
+                                        <span class="text-sm text-gray-400">({{ (a.tamano / 1024 / 1024) | round(1) }} MB)</span>
                                     </a>
                                 </li>
                                 {% endfor %}
@@ -78,13 +78,13 @@
                     <form method="POST" enctype="multipart/form-data"
                         action="{{ url_for('mensajeria.responder', mensaje_id=mensaje._id) }}" id="formRespuesta">
                         <div class="p-5 space-y-4">
-                            <p class="text-sm font-semibold text-gray-800 dark:text-neutral-200">Responder</p>
+                            <p class="text-base font-semibold text-gray-800 dark:text-neutral-200">Responder</p>
                             <textarea name="cuerpo" rows="4" required
                                 class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300"
                                 placeholder="Escribe tu respuesta..."></textarea>
                             <input type="file" name="adjuntos" multiple accept=".pdf,.png,.jpg,.jpeg,.ppt,.pptx"
                                 class="block w-full border border-gray-200 rounded-lg text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300">
-                            <p class="text-xs text-gray-400">La respuesta se envía al remitente original. Hasta 5 archivos de 10 MB (PDF, imágenes, PPT/PPTX).</p>
+                            <p class="text-sm text-gray-400">La respuesta se envía al remitente original. Hasta 5 archivos de 10 MB (PDF, imágenes, PPT/PPTX).</p>
                             <div class="flex justify-end">
                                 <button type="submit"
                                     class="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700">

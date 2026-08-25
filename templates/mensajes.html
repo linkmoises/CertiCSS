@@ -65,7 +65,7 @@
                     {% if mensajes %}
                     <ul class="divide-y divide-gray-200 dark:divide-neutral-700">
                         {% for m in mensajes %}
-                        <li class="group relative flex items-center gap-x-4 px-5 py-3.5 hover:bg-gray-50 dark:hover:bg-neutral-700/50
+                        <li class="group relative flex items-center gap-x-4 px-6 py-4 hover:bg-gray-50 dark:hover:bg-neutral-700/50
                             {{ 'bg-blue-50/60 dark:bg-blue-900/10' if m.no_leido else '' }}">
                             <!-- Avatar -->
                             <img class="shrink-0 size-10 rounded-full"
@@ -74,7 +74,7 @@
                             <!-- Contenido -->
                             <a class="min-w-0 flex-1" href="{{ url_for('mensajeria.ver', mensaje_id=m._id) }}">
                                 <div class="flex items-center gap-x-2">
-                                    <span class="font-semibold text-sm text-gray-800 truncate dark:text-neutral-200">
+                                    <span class="font-semibold text-base text-gray-800 truncate dark:text-neutral-200">
                                         {{ m.remitente_nombre or 'Usuario' }}
                                     </span>
                                     {% if m.es_global %}
@@ -83,17 +83,17 @@
                                     {% if m.no_leido %}
                                     <span class="size-2 rounded-full bg-blue-600 shrink-0"></span>
                                     {% endif %}
-                                    <span class="ms-auto text-xs text-gray-400 whitespace-nowrap">{{ m.fecha | date('%d/%m/%Y %H:%M') }}</span>
+                                    <span class="ms-auto text-sm text-gray-400 whitespace-nowrap">{{ m.fecha | date('%d/%m/%Y %H:%M') }}</span>
                                 </div>
-                                <p class="text-sm text-gray-800 truncate dark:text-neutral-300 {{ 'font-medium' if m.no_leido }}">
+                                <p class="text-base truncate {{ 'font-semibold' if m.no_leido }} text-gray-800 dark:text-neutral-300">
                                     {{ m.asunto }}
                                 </p>
-                                <p class="text-xs text-gray-500 truncate dark:text-neutral-400">
+                                <p class="text-sm truncate dark:text-neutral-400 {{ 'text-gray-600' if m.no_leido else 'text-gray-500' }}">
                                     {% if caja == 'enviados' %}Para: {{ m.resumen_destinatarios }} · {% endif %}{{ m.cuerpo }}
                                 </p>
                                 {% if m.total_adjuntos > 0 %}
-                                <p class="text-xs text-gray-400 mt-0.5 inline-flex items-center gap-x-1">
-                                    <svg class="shrink-0 size-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                                <p class="text-sm text-gray-400 mt-1 inline-flex items-center gap-x-1">
+                                    <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
                                     {{ m.total_adjuntos }} archivo{{ 's' if m.total_adjuntos != 1 }}
                                 </p>
                                 {% endif %}

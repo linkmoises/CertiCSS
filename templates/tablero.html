@@ -107,25 +107,109 @@
                                 </div>
 
                                 <div>
-                                    <div class="inline-flex gap-x-2">
-                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
-                                            href="#">
+                                    <div class="inline-flex gap-x-2 flex-wrap gap-y-2">
+                                        {% if current_user.rol in ['administrador', 'denadoi'] %}
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50"
+                                            href="{{ url_for('mensajeria.listas') }}">
                                             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
                                                 height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                                class="lucide lucide-file-search-corner-icon lucide-file-search-corner">
-                                                <path
-                                                    d="M11.1 22H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.589 3.588A2.4 2.4 0 0 1 20 8v3.25" />
-                                                <path d="M14 2v5a1 1 0 0 0 1 1h5" />
-                                                <path d="m21 22-2.88-2.88" />
-                                                <circle cx="16" cy="17" r="3" />
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M12 3v18" />
+                                                <path d="M3 7h9" />
+                                                <path d="M12 11h9" />
+                                                <path d="M12 15h5" />
+                                                <circle cx="7" cy="7" r="1" />
+                                                <circle cx="16" cy="11" r="1" />
+                                                <circle cx="10" cy="15" r="1" />
                                             </svg>
-                                            Archivo de notas
+                                            Listas de distribución
+                                        </a>
+                                        {% endif %}
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
+                                            href="{{ url_for('mensajeria.nuevo') }}">
+                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                                height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M5 12h14" />
+                                                <path d="M12 5v14" />
+                                            </svg>
+                                            Nuevo mensaje
                                         </a>
                                     </div>
                                 </div>
                             </div>
                             <!-- End Header -->
+
+                            {% if mensajes_recientes %}
+
+                            <!-- Body -->
+                            <ul class="divide-y divide-gray-200 dark:divide-neutral-700">
+                                {% for m in mensajes_recientes %}
+                                <li>
+                                    <a class="flex items-center gap-x-4 px-6 py-4 hover:bg-gray-50 dark:hover:bg-neutral-700/50 {{ 'bg-blue-50/60 dark:bg-blue-900/10' if m.no_leido }}"
+                                        href="{{ url_for('mensajeria.ver', mensaje_id=m._id) }}">
+                                        <img class="shrink-0 size-10 rounded-full"
+                                            src="{{ '/static/usuarios/' + m.remitente_info.foto if m.remitente_info and m.remitente_info.foto else '/static/assets/user-avatar.png' }}"
+                                            alt="{{ m.remitente_nombre }}">
+                                        <div class="min-w-0 flex-1">
+                                            <div class="flex items-center gap-x-2">
+                                                <span class="text-sm font-semibold text-gray-800 truncate dark:text-neutral-200">
+                                                    {{ m.remitente_nombre or 'Usuario' }}
+                                                </span>
+                                                {% if m.es_global %}
+                                                <span class="inline-flex items-center gap-x-1 py-0.5 px-2 rounded-full text-xs font-medium bg-purple-100 text-purple-800">Difusión</span>
+                                                {% endif %}
+                                                {% if m.no_leido %}
+                                                <span class="size-2 rounded-full bg-blue-600 shrink-0"></span>
+                                                {% endif %}
+                                                <span class="ms-auto text-sm text-gray-400 whitespace-nowrap">{{ m.fecha | date('%d/%m/%Y %H:%M') }}</span>
+                                            </div>
+                                            <p class="text-sm truncate {{ 'font-semibold' if m.no_leido }} text-gray-800 dark:text-neutral-300">
+                                                {{ m.asunto }}
+                                            </p>
+                                            <p class="text-sm text-gray-500 truncate dark:text-neutral-400">
+                                                {{ m.cuerpo }}
+                                                {% if m.total_adjuntos > 0 %}
+                                                <span class="inline-flex items-center gap-x-1 text-gray-400">
+                                                    ·
+                                                    <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                                                    {{ m.total_adjuntos }}
+                                                </span>
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            <!-- End Body -->
+
+                            <!-- Footer -->
+                            <div
+                                class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
+                                <div>
+                                    <p class="text-sm text-gray-600 dark:text-neutral-400">
+                                        <span class="font-semibold text-gray-800 dark:text-neutral-200">{{ mensajes_sin_leer }}</span>
+                                        mensaje{{ 's' if mensajes_sin_leer != 1 }} sin leer
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <div class="inline-flex gap-x-2">
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50"
+                                            href="{{ url_for('mensajeria.bandeja', caja='enviados') }}">
+                                            Enviados
+                                        </a>
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50"
+                                            href="{{ url_for('mensajeria.bandeja') }}">
+                                            Ver todos los mensajes
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- End Footer -->
+
+                            {% else %}
 
                             <!-- Body -->
                             <div class="max-w-sm w-full min-h-[100px] flex items-center mx-auto px-6 py-4 gap-4">
@@ -150,6 +234,21 @@
                                 </div>
                             </div>
                             <!-- End Body -->
+
+                            <!-- Footer -->
+                            <div
+                                class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
+                                <p class="text-sm text-gray-600 dark:text-neutral-400">
+                                    <span class="font-semibold text-gray-800 dark:text-neutral-200">0</span> sin leer
+                                </p>
+                                <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50"
+                                    href="{{ url_for('mensajeria.bandeja') }}">
+                                    Ver todos los mensajes
+                                </a>
+                            </div>
+                            <!-- End Footer -->
+                            {% endif %}
+
                         </div>
                     </div>
                 </div>
