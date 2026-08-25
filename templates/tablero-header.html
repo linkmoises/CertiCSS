@@ -137,14 +137,16 @@
                         <span class="sr-only">Registro de actividad</span>
                     </a>
 
-                    <a class="size-[38px] relative inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
-                        href="#">
+                    <a id="link-mensajes" class="size-[38px] relative inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+                        href="{{ url_for('mensajeria.bandeja') }}">
                         <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail-icon lucide-mail">
                             <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" />
                             <rect x="2" y="4" width="20" height="16" rx="2" />
                         </svg>
+                        <span id="badge-mensajes"
+                            class="hidden absolute top-0.5 end-0.5 min-w-[18px] h-[18px] py-0 px-1 inline-flex justify-center items-center gap-x-1 rounded-full bg-red-500 text-[11px] font-semibold text-white"></span>
                         <span class="sr-only">Mensajes</span>
                     </a>
 
@@ -241,3 +243,20 @@
         </nav>
     </header>
     <!-- ========== END HEADER ========== -->
+
+    <!-- Badge de mensajes no leídos -->
+    <script>
+        (function () {
+            fetch('{{ url_for("mensajeria.api_no_leidos") }}', {headers: {'Accept': 'application/json'}})
+                .then(function (r) { return r.ok ? r.json() : {count: 0}; })
+                .then(function (data) {
+                    var badge = document.getElementById('badge-mensajes');
+                    if (!badge) return;
+                    if (data.count > 0) {
+                        badge.textContent = data.count > 99 ? '99+' : data.count;
+                        badge.classList.remove('hidden');
+                    }
+                })
+                .catch(function () {});
+        })();
+    </script>

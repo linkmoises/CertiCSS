@@ -50,6 +50,8 @@ collection_renombramientos = db['renombramientos']
 collection_posters = db['posters']
 collection_evaluaciones_poster = db['evaluaciones_poster']
 collection_certificados_externos = db['certificados_externos']
+collection_mensajes = db['mensajes']
+collection_listas_mensajes = db['listas_mensajes']
 
 # Exportar variables necesarias
 BASE_URL = config.BASE_URL                      # importado de config.py

@@ -19,6 +19,13 @@ class Config:
     UMAMI_URL = os.getenv('UMAMI_URL', '')                          # URL seguimiento UMAMI
     PERMANENT_SESSION_LIFETIME = timedelta(minutes=30)              # duración de sesión a 30 minutos
     ALLOWED_EXTENSIONS = ('png', 'jpg', 'jpeg', 'pdf', 'ppt', 'pptx', 'doc', 'docx', 'txt', 'md', 'xls', 'xlsx')
+    MAX_CONTENT_LENGTH = 60 * 1024 * 1024                           # límite global de subida (60 MB)
+
+    # Mensajería interna
+    MENSAJES_FOLDER = 'static/uploads/mensajes'                     # Carpeta de adjuntos de mensajes
+    MENSAJES_MAX_ADJUNTOS = 5                                       # Máximo de archivos por mensaje
+    MENSAJES_MAX_ARCHIVO_MB = 10                                    # Tamaño máximo por archivo
+    MENSAJES_EXTENSIONES = {'pdf', 'png', 'jpg', 'jpeg', 'ppt', 'pptx'}
 
     # Security settings
     MAX_LOGIN_ATTEMPTS = int(os.getenv('MAX_LOGIN_ATTEMPTS', 5))

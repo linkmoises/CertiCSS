@@ -1,0 +1,120 @@
+{% include 'tablero-header.html' %}
+
+{% include 'tablero-sidebar.html' %}
+
+    <!-- CONTENIDO -->
+    <div class="w-full lg:ps-64">
+        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <!-- Encabezado -->
+                <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-4">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-neutral-200">{{ mensaje.asunto }}</h2>
+                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                        href="{{ url_for('mensajeria.bandeja') }}">
+                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                        Volver a la bandeja
+                    </a>
+                </div>
+
+                <!-- HILO -->
+                <div class="space-y-4 mb-6">
+                    {% for m in hilo %}
+                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden dark:bg-neutral-800 dark:border-neutral-700
+                        {{ 'md:ms-8' if not loop.first }}">
+                        <!-- Cabecera del mensaje -->
+                        <div class="px-5 py-3.5 flex items-start gap-x-3 border-b border-gray-100 dark:border-neutral-700">
+                            <img class="shrink-0 size-10 rounded-full"
+                                src="{{ '/static/usuarios/' + m.remitente_info.foto if m.remitente_info and m.remitente_info.foto else '/static/assets/user-avatar.png' }}"
+                                alt="{{ m.remitente_nombre }}">
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-semibold text-gray-800 dark:text-neutral-200">
+                                    {{ m.remitente_nombre or 'Usuario' }}
+                                    {% if m.remitente_id|string == current_user.id %}
+                                    <span class="text-xs font-normal text-gray-400">(tú)</span>
+                                    {% endif %}
+                                    {% if m.es_global %}
+                                    <span class="inline-flex items-center gap-x-1 py-0.5 px-2 rounded-full text-xs font-medium bg-purple-100 text-purple-800 ms-1">Difusión</span>
+                                    {% endif %}
+                                    {% if m.respuesta_a %}
+                                    <span class="inline-flex items-center py-0.5 px-2 rounded-full text-xs font-medium bg-gray-100 text-gray-600 ms-1">Respuesta</span>
+                                    {% endif %}
+                                </p>
+                                <p class="text-xs text-gray-400">
+                                    {{ m.fecha | date('%d/%m/%Y %H:%M') }} ·
+                                    Para: {{ m.nombres_destinatarios | join(', ') if m.nombres_destinatarios else '—' }}
+                                </p>
+                            </div>
+                        </div>
+                        <!-- Cuerpo -->
+                        <div class="px-5 py-4">
+                            <p class="text-sm text-gray-700 whitespace-pre-line dark:text-neutral-300">{{ m.cuerpo }}</p>
+                        </div>
+                        {% if m.adjuntos %}
+                        <!-- Adjuntos -->
+                        <div class="px-5 pb-4">
+                            <p class="text-xs uppercase tracking-wide text-gray-400 mb-2">Adjuntos ({{ m.adjuntos | length }})</p>
+                            <ul class="space-y-1.5">
+                                {% for a in m.adjuntos %}
+                                <li>
+                                    <a class="inline-flex items-center gap-x-2 text-sm text-blue-600 hover:underline dark:text-blue-400"
+                                        href="{{ url_for('mensajeria.descargar_adjunto', mensaje_id=m._id, indice=loop.index0) }}"
+                                        download="{{ a.nombre_original }}">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                                        {{ a.nombre_original }}
+                                        <span class="text-xs text-gray-400">({{ (a.tamano / 1024 / 1024) | round(1) }} MB)</span>
+                                    </a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- FORMULARIO DE RESPUESTA -->
+                <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden dark:bg-neutral-800 dark:border-neutral-700">
+                    <form method="POST" enctype="multipart/form-data"
+                        action="{{ url_for('mensajeria.responder', mensaje_id=mensaje._id) }}" id="formRespuesta">
+                        <div class="p-5 space-y-4">
+                            <p class="text-sm font-semibold text-gray-800 dark:text-neutral-200">Responder</p>
+                            <textarea name="cuerpo" rows="4" required
+                                class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300"
+                                placeholder="Escribe tu respuesta..."></textarea>
+                            <input type="file" name="adjuntos" multiple accept=".pdf,.png,.jpg,.jpeg,.ppt,.pptx"
+                                class="block w-full border border-gray-200 rounded-lg text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300">
+                            <p class="text-xs text-gray-400">La respuesta se envía al remitente original. Hasta 5 archivos de 10 MB (PDF, imágenes, PPT/PPTX).</p>
+                            <div class="flex justify-end">
+                                <button type="submit"
+                                    class="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700">
+                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                                    Enviar respuesta
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+{% include 'tablero-footer.html' %}
+
+        </div>
+    </div>
+    <!-- FIN CONTENIDO -->
+
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+
+<script>
+    document.getElementById('formRespuesta').addEventListener('submit', function () {
+        const btn = this.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = 'Enviando...';
+    });
+</script>
+
+{% include 'tablero-toasts.html' %}
+
+</body>
+</html>

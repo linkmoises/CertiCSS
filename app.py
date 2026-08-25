@@ -8433,6 +8433,10 @@ app.register_blueprint(creditos_bp)
 from app.nube import nube_bp
 app.register_blueprint(nube_bp)
 
+### Mensajería interna
+from app.mensajeria import mensajeria_bp
+app.register_blueprint(mensajeria_bp)
+
 ### Opciones globales
 from app.opciones import opciones_bp
 app.register_blueprint(opciones_bp)

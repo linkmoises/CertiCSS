@@ -1,0 +1,253 @@
+{% include 'tablero-header.html' %}
+
+{% include 'tablero-sidebar.html' %}
+
+    <!-- CONTENIDO -->
+    <div class="w-full lg:ps-64">
+        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <!-- Encabezado -->
+                <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mb-4 dark:bg-neutral-800 dark:border-neutral-700">
+                    <div class="px-6 py-4 flex flex-col md:flex-row md:justify-between md:items-center gap-3 border-b border-gray-200 dark:border-neutral-700">
+                        <div>
+                            <h2 class="text-xl font-semibold text-gray-800 dark:text-neutral-200">Nuevo mensaje</h2>
+                            <p class="text-sm text-gray-600 dark:text-neutral-400">Redacta un mensaje interno para otros usuarios</p>
+                        </div>
+                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                            href="{{ url_for('mensajeria.bandeja') }}">
+                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                            Volver
+                        </a>
+                    </div>
+                </div>
+
+                <form method="POST" enctype="multipart/form-data" id="formMensaje" action="{{ url_for('mensajeria.nuevo') }}">
+                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden dark:bg-neutral-800 dark:border-neutral-700">
+                        <div class="p-6 space-y-5">
+
+                            {% if difusion_permitida %}
+                            <!-- Difusión a todos -->
+                            <label class="flex items-start gap-x-3 p-3 rounded-lg bg-purple-50 border border-purple-200 cursor-pointer dark:bg-purple-900/20 dark:border-purple-800">
+                                <input type="checkbox" name="difusion" value="todos" id="chkDifusion"
+                                    class="mt-0.5 shrink-0 size-4 border-gray-300 rounded text-blue-600 focus:ring-blue-500">
+                                <span>
+                                    <span class="block text-sm font-medium text-gray-800 dark:text-neutral-200">Enviar a todos los usuarios</span>
+                                    <span class="block text-xs text-gray-500 dark:text-neutral-400">Difusión masiva visible en el tablero de todos los usuarios internos activos.</span>
+                                </span>
+                            </label>
+                            {% endif %}
+
+                            <!-- Destinatarios individuales -->
+                            <div id="seccionDestinatarios">
+                                <label for="destinatarios" class="block mb-2 text-sm font-medium text-gray-800 dark:text-neutral-200">
+                                    Destinatarios
+                                </label>
+                                <select multiple name="destinatarios" id="destinatarios" size="8"
+                                    class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300">
+                                    {% for u in usuarios %}
+                                    <option value="{{ u._id }}"
+                                        {{ 'selected' if destinatario_pre and destinatario_pre.id == u._id|string }}>
+                                        {{ u.nombre_completo }} — {{ u.rol }}{% if u.unidad_ejecutora %} · {{ u.unidad_ejecutora }}{% endif %}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <p class="text-xs text-gray-400 mt-1.5">Mantén presionado Ctrl (o Cmd) para seleccionar varios usuarios.</p>
+                            </div>
+
+                            {% if puede_usar_listas %}
+                            <!-- Listas de distribución -->
+                            <div id="seccionListas" class="border-t border-gray-200 pt-5 dark:border-neutral-700">
+                                <p class="block mb-2 text-sm font-medium text-gray-800 dark:text-neutral-200">
+                                    Listas de distribución
+                                    <span class="ms-1 inline-flex items-center py-0.5 px-1.5 rounded-full text-xs font-medium bg-teal-100 text-teal-800">opcional</span>
+                                </p>
+
+                                {% if listas_globales or mis_listas %}
+                                <div class="grid md:grid-cols-2 gap-3">
+                                    {% if listas_globales %}
+                                    <div class="space-y-2">
+                                        <p class="text-xs uppercase tracking-wide text-gray-400">Globales</p>
+                                        {% for l in listas_globales %}
+                                        <label class="flex items-center justify-between gap-x-2 p-2.5 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer dark:border-neutral-700 dark:hover:bg-neutral-700/50">
+                                            <span class="flex items-center gap-x-2.5 min-w-0">
+                                                <input type="checkbox" name="listas" value="{{ l.id }}" data-lista-id="{{ l.id }}"
+                                                    class="shrink-0 size-4 border-gray-300 rounded text-blue-600 focus:ring-blue-500 chk-lista">
+                                                <span class="min-w-0">
+                                                    <span class="block text-sm text-gray-800 truncate dark:text-neutral-200">{{ l.nombre }}</span>
+                                                    <span class="block text-xs text-gray-400 truncate">{{ l.regiones | join(', ') }}{{ ', ' if l.regiones and l.unidades else '' }}{{ l.unidades | length }} unidad(es)</span>
+                                                </span>
+                                            </span>
+                                            <span class="preview-total text-xs text-gray-500 whitespace-nowrap" data-preview-for="{{ l.id }}"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    {% if mis_listas %}
+                                    <div class="space-y-2">
+                                        <p class="text-xs uppercase tracking-wide text-gray-400">Mis listas</p>
+                                        {% for l in mis_listas %}
+                                        <label class="flex items-center justify-between gap-x-2 p-2.5 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer dark:border-neutral-700 dark:hover:bg-neutral-700/50">
+                                            <span class="flex items-center gap-x-2.5 min-w-0">
+                                                <input type="checkbox" name="listas" value="{{ l.id }}" data-lista-id="{{ l.id }}"
+                                                    class="shrink-0 size-4 border-gray-300 rounded text-blue-600 focus:ring-blue-500 chk-lista">
+                                                <span class="min-w-0">
+                                                    <span class="block text-sm text-gray-800 truncate dark:text-neutral-200">{{ l.nombre }}</span>
+                                                    <span class="block text-xs text-gray-400 truncate">{{ l.regiones | join(', ') }}{{ ', ' if l.regiones and l.unidades else '' }}{{ l.unidades | length }} unidad(es)</span>
+                                                </span>
+                                            </span>
+                                            <span class="preview-total text-xs text-gray-500 whitespace-nowrap" data-preview-for="{{ l.id }}"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% else %}
+                                <p class="text-sm text-gray-400">
+                                    No hay listas de distribución disponibles.
+                                    {% if current_user.rol == 'administrador' or current_user.rol == 'denadoi' %}
+                                    <a class="text-blue-600 hover:underline" href="{{ url_for('mensajeria.listas') }}">Crear una lista</a>.
+                                    {% endif %}
+                                </p>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+
+                            <!-- Asunto y cuerpo -->
+                            <div class="border-t border-gray-200 pt-5 space-y-4 dark:border-neutral-700">
+                                <div>
+                                    <label for="asunto" class="block mb-2 text-sm font-medium text-gray-800 dark:text-neutral-200">Asunto</label>
+                                    <input type="text" name="asunto" id="asunto" required maxlength="150"
+                                        value="{{ respuesta_pre.asunto if respuesta_pre else '' }}"
+                                        class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300"
+                                        placeholder="Asunto del mensaje">
+                                </div>
+                                <div>
+                                    <label for="cuerpo" class="block mb-2 text-sm font-medium text-gray-800 dark:text-neutral-200">Mensaje</label>
+                                    <textarea name="cuerpo" id="cuerpo" rows="7" required
+                                        class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300"
+                                        placeholder="Escribe tu mensaje...">{% if respuesta_pre %}
+
+----------
+En respuesta a:
+{{ respuesta_pre.cuerpo }}{% endif %}</textarea>
+                                </div>
+                            </div>
+
+                            <!-- Adjuntos -->
+                            <div class="border-t border-gray-200 pt-5 dark:border-neutral-700">
+                                <label class="block mb-2 text-sm font-medium text-gray-800 dark:text-neutral-200">
+                                    Archivos adjuntos
+                                    <span class="ms-1 inline-flex items-center py-0.5 px-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">opcional</span>
+                                </label>
+                                <input type="file" name="adjuntos" id="adjuntos" multiple accept=".pdf,.png,.jpg,.jpeg,.ppt,.pptx"
+                                    class="block w-full border border-gray-200 rounded-lg text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300"
+                                    data-max="{{ max_adjuntos }}" data-maxmb="{{ max_archivo_mb }}">
+                                <p class="text-xs text-gray-400 mt-1.5">
+                                    Hasta {{ max_adjuntos }} archivos, máximo {{ max_archivo_mb }} MB cada uno.
+                                    Formatos permitidos: PDF, imágenes (PNG/JPG) y presentaciones (PPT/PPTX).
+                                </p>
+                                <ul id="listaAdjuntos" class="mt-2 space-y-1"></ul>
+                            </div>
+
+                            <!-- Acciones -->
+                            <div class="flex items-center justify-end gap-x-3 border-t border-gray-200 pt-5 dark:border-neutral-700">
+                                <a class="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                                    href="{{ url_for('mensajeria.bandeja') }}">Cancelar</a>
+                                <button type="submit"
+                                    class="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700">
+                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                                    Enviar mensaje
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+{% include 'tablero-footer.html' %}
+
+        </div>
+    </div>
+    <!-- FIN CONTENIDO -->
+
+<!-- JS PLUGINS -->
+<script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
+
+<script>
+    const chkDifusion = document.getElementById('chkDifusion');
+    const seccionDestinatarios = document.getElementById('seccionDestinatarios');
+    const seccionListas = document.getElementById('seccionListas');
+
+    if (chkDifusion) {
+        chkDifusion.addEventListener('change', function () {
+            seccionDestinatarios.classList.toggle('hidden', this.checked);
+            if (seccionListas) seccionListas.classList.toggle('hidden', this.checked);
+        });
+    }
+
+    // Vista previa del total de destinatarios por lista
+    document.querySelectorAll('.chk-lista').forEach(function (chk) {
+        chk.addEventListener('change', function () {
+            const span = document.querySelector(`[data-preview-for="${this.dataset.listaId}"]`);
+            if (!this.checked) { if (span) span.textContent = ''; return; }
+            if (!span) return;
+            span.textContent = '...';
+            fetch(`/tablero/mensajes/api/listas/${this.dataset.listaId}/preview`, {
+                headers: {'Accept': 'application/json'}
+            })
+                .then(r => r.ok ? r.json() : Promise.reject())
+                .then(data => {
+                    span.textContent = data.total > 0
+                        ? `${data.total} usuario(s)`
+                        : 'sin coincidencias';
+                    span.classList.toggle('text-red-500', data.total === 0 || data.criterio_vacio);
+                })
+                .catch(() => { span.textContent = ''; });
+        });
+    });
+
+    // Validación de adjuntos en cliente
+    const inputAdjuntos = document.getElementById('adjuntos');
+    const listaAdjuntos = document.getElementById('listaAdjuntos');
+    const EXT_PERMITIDAS = ['pdf', 'png', 'jpg', 'jpeg', 'ppt', 'pptx'];
+
+    inputAdjuntos.addEventListener('change', function () {
+        listaAdjuntos.innerHTML = '';
+        const max = parseInt(this.dataset.max, 10);
+        const maxMb = parseInt(this.dataset.maxmb, 10);
+
+        if (this.files.length > max) {
+            alert(`Solo puedes adjuntar hasta ${max} archivos.`);
+            this.value = '';
+            return;
+        }
+        Array.from(this.files).forEach(function (f) {
+            const ext = f.name.split('.').pop().toLowerCase();
+            const li = document.createElement('li');
+            li.className = 'text-xs text-gray-500';
+            if (!EXT_PERMITIDAS.includes(ext)) {
+                li.className = 'text-xs text-red-500';
+                li.textContent = `${f.name}: formato no permitido`;
+            } else if (f.size > maxMb * 1024 * 1024) {
+                li.className = 'text-xs text-red-500';
+                li.textContent = `${f.name}: supera ${maxMb} MB`;
+            } else {
+                li.textContent = `${f.name} (${(f.size / 1024 / 1024).toFixed(1)} MB)`;
+            }
+            listaAdjuntos.appendChild(li);
+        });
+    });
+
+    // Validación antes de enviar
+    document.getElementById('formMensaje').addEventListener('submit', function () {
+        const btn = this.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = 'Enviando...';
+    });
+</script>
+
+{% include 'tablero-toasts.html' %}
+
+</body>
+</html>
