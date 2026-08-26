@@ -58,20 +58,25 @@ def salir():
 @login_required
 def registro():
     if request.method == 'POST':
-        nombres = request.form['nombres']
-        apellidos = request.form['apellidos']
-        genero = request.form['genero']
-        cedula = request.form['cedula']
-        orcid = request.form['orcid']
-        email = request.form['email']
-        password = request.form['password']
-        rol = request.form['rol']
-        cargo = request.form['cargo']
-        region = request.form['region']
-        unidad_ejecutora = request.form['unidad_ejecutora']
-        departamento = request.form['departamento']
-        phone = request.form['phone']
+        nombres = (request.form.get('nombres') or '').strip()
+        apellidos = (request.form.get('apellidos') or '').strip()
+        genero = request.form.get('genero')
+        cedula = request.form.get('cedula')
+        orcid = request.form.get('orcid')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        rol = request.form.get('rol')
+        cargo = request.form.get('cargo')
+        region = request.form.get('region')
+        unidad_ejecutora = request.form.get('unidad_ejecutora')
+        departamento = request.form.get('departamento')
+        phone = request.form.get('phone')
         timestamp = datetime.now()
+
+        # Validar campos obligatorios
+        if not nombres or not apellidos:
+            flash('Nombres y apellidos son obligatorios.', 'error')
+            return redirect(url_for('usuarios.registro'))
 
         # Validar que el perfil actual pueda registrar usuarios y asignar ese rol
         roles_creables = ROLES_CREABLES.get(current_user.rol)
@@ -117,6 +122,68 @@ def registro():
 
 
 ###
+### Ordenamiento de usuarios (tolerante a campos None o ausentes)
+###
+def _texto_orden(valor):
+    return valor if isinstance(valor, str) else ''
+
+
+def _ordenar_usuarios(usuarios):
+    """Ordena usuarios: DENADOI primero (jefe, subjefe, otros), luego por región,
+    finalmente administrativos. Tolerante a campos None o ausentes."""
+    usuarios_ordenados = []
+    
+    # 1. Primero usuarios DENADOI (jefe, subjefe, luego otros)
+    denadoi_jefe = [u for u in usuarios if u.get('rol') == 'denadoi' and u.get('jefe', False)]
+    denadoi_subjefe = [u for u in usuarios if u.get('rol') == 'denadoi' and u.get('subjefe', False)]
+    denadoi_otros = [u for u in usuarios if u.get('rol') == 'denadoi' and not u.get('jefe', False) and not u.get('subjefe', False)]
+    
+    # Ordenar cada grupo por apellidos y nombres
+    for grupo in [denadoi_jefe, denadoi_subjefe, denadoi_otros]:
+        grupo.sort(key=lambda x: (_texto_orden(x.get('apellidos')), _texto_orden(x.get('nombres'))))
+    
+    usuarios_ordenados.extend(denadoi_jefe)
+    usuarios_ordenados.extend(denadoi_subjefe)
+    usuarios_ordenados.extend(denadoi_otros)
+    
+    # 2. Luego usuarios por provincia/región (excluyendo DENADOI, coordinador-administrativo y simulacion)
+    regiones_orden = ['css01', 'css02', 'css03', 'css04', 'css06', 'css07', 'css09', 'css13', 'css082', 'css081', 'css088']
+    
+    ue_lookup = {}
+    if collection_unidades is not None:
+        for ue in collection_unidades.find({}, {"nombre": 1, "nivel_asistencial": 1, "nivel_complejidad": 1}):
+            na = ue.get('nivel_asistencial', 0)
+            nc = ue.get('nivel_complejidad', 0)
+            if not isinstance(nc, (int, float)):
+                nc = 0
+            ue_lookup[ue['nombre']] = (na, nc)
+    
+    for region in regiones_orden:
+        usuarios_region = [u for u in usuarios if u.get('region') == region and u.get('rol') not in ['denadoi', 'coordinador-administrativo', 'simulacion']]
+        if usuarios_region:
+            usuarios_region.sort(key=lambda x: (
+                0 if x.get('rol') == 'coordinador-regional' else 1,
+                -ue_lookup.get(x.get('unidad_ejecutora') or '', (0, 0))[1],
+                -ue_lookup.get(x.get('unidad_ejecutora') or '', (0, 0))[0],
+                '' if x.get('rol') == 'coordinador-regional' else _texto_orden(x.get('unidad_ejecutora')),
+                0 if x.get('rol') == 'coordinador-regional' else
+                0 if x.get('rol') == 'subdirector-docencia' else
+                1 if x.get('rol') == 'coordinador-local' else
+                2 if x.get('rol') == 'coordinador-departamental' else 9,
+                _texto_orden(x.get('apellidos')),
+                _texto_orden(x.get('nombres'))
+            ))
+            usuarios_ordenados.extend(usuarios_region)
+    
+    # 3. Finalmente usuarios administrativos (coordinador-administrativo y simulacion)
+    usuarios_admin = [u for u in usuarios if u.get('rol') in ['coordinador-administrativo', 'simulacion']]
+    usuarios_admin.sort(key=lambda x: (_texto_orden(x.get('apellidos')), _texto_orden(x.get('nombres'))))
+    usuarios_ordenados.extend(usuarios_admin)
+    
+    return usuarios_ordenados
+
+
+###
 ### Listado de usuarios
 ###
 @usuarios_bp.route('/tablero/usuarios')
@@ -131,61 +198,8 @@ def listar_usuarios(page=1):
     for usuario in usuarios:
         usuario['foto_url'] = f"/static/usuarios/{usuario['foto']}" if usuario.get('foto') else "/static/assets/user-avatar.png"
 
-    # Función para ordenar usuarios según los criterios especificados
-    def ordenar_usuarios(usuarios):
-        usuarios_ordenados = []
-        
-        # 1. Primero usuarios DENADOI (jefe, subjefe, luego otros)
-        denadoi_jefe = [u for u in usuarios if u.get('rol') == 'denadoi' and u.get('jefe', False)]
-        denadoi_subjefe = [u for u in usuarios if u.get('rol') == 'denadoi' and u.get('subjefe', False)]
-        denadoi_otros = [u for u in usuarios if u.get('rol') == 'denadoi' and not u.get('jefe', False) and not u.get('subjefe', False)]
-        
-        # Ordenar cada grupo por apellidos y nombres
-        for grupo in [denadoi_jefe, denadoi_subjefe, denadoi_otros]:
-            grupo.sort(key=lambda x: (x.get('apellidos', ''), x.get('nombres', '')))
-        
-        usuarios_ordenados.extend(denadoi_jefe)
-        usuarios_ordenados.extend(denadoi_subjefe)
-        usuarios_ordenados.extend(denadoi_otros)
-        
-        # 2. Luego usuarios por provincia/región (excluyendo DENADOI, coordinador-administrativo y simulacion)
-        regiones_orden = ['css01', 'css02', 'css03', 'css04', 'css06', 'css07', 'css09', 'css13', 'css082', 'css081', 'css088']
-        
-        ue_lookup = {}
-        if collection_unidades is not None:
-            for ue in collection_unidades.find({}, {"nombre": 1, "nivel_asistencial": 1, "nivel_complejidad": 1}):
-                na = ue.get('nivel_asistencial', 0)
-                nc = ue.get('nivel_complejidad', 0)
-                if not isinstance(nc, (int, float)):
-                    nc = 0
-                ue_lookup[ue['nombre']] = (na, nc)
-        
-        for region in regiones_orden:
-            usuarios_region = [u for u in usuarios if u.get('region') == region and u.get('rol') not in ['denadoi', 'coordinador-administrativo', 'simulacion']]
-            if usuarios_region:
-                usuarios_region.sort(key=lambda x: (
-                    0 if x.get('rol') == 'coordinador-regional' else 1,
-                    -ue_lookup.get(x.get('unidad_ejecutora', ''), (0, 0))[1],
-                    -ue_lookup.get(x.get('unidad_ejecutora', ''), (0, 0))[0],
-                    x.get('unidad_ejecutora', '') if x.get('rol') != 'coordinador-regional' else '',
-                    0 if x.get('rol') == 'coordinador-regional' else
-                    0 if x.get('rol') == 'subdirector-docencia' else
-                    1 if x.get('rol') == 'coordinador-local' else
-                    2 if x.get('rol') == 'coordinador-departamental' else 9,
-                    x.get('apellidos', ''),
-                    x.get('nombres', '')
-                ))
-                usuarios_ordenados.extend(usuarios_region)
-        
-        # 3. Finalmente usuarios administrativos (coordinador-administrativo y simulacion)
-        usuarios_admin = [u for u in usuarios if u.get('rol') in ['coordinador-administrativo', 'simulacion']]
-        usuarios_admin.sort(key=lambda x: (x.get('apellidos', ''), x.get('nombres', '')))
-        usuarios_ordenados.extend(usuarios_admin)
-        
-        return usuarios_ordenados
-
     # Aplicar el ordenamiento
-    usuarios_ordenados = ordenar_usuarios(usuarios)
+    usuarios_ordenados = _ordenar_usuarios(usuarios)
     
     # Aplicar paginación después del ordenamiento
     usuarios_por_pagina = 20
@@ -310,8 +324,8 @@ def editar_usuario(user_id):
             return redirect(url_for('usuarios.listar_usuarios'))
 
         # Recoger los datos del formulario
-        nombres = request.form.get('nombres')
-        apellidos = request.form.get('apellidos')
+        nombres = (request.form.get('nombres') or '').strip()
+        apellidos = (request.form.get('apellidos') or '').strip()
         genero = request.form.get('genero')
         cedula = request.form.get('cedula')
         orcid = request.form.get('orcid')
@@ -323,6 +337,11 @@ def editar_usuario(user_id):
         email = request.form.get('email')
         phone = request.form.get('phone')
         password = request.form.get('password')
+
+        # Validar campos obligatorios
+        if not nombres or not apellidos:
+            flash('Nombres y apellidos son obligatorios.', 'error')
+            return redirect(url_for('usuarios.editar_usuario', user_id=user_id))
 
         # Solo administradores pueden cambiar el rol y la jerarquia DENADOI
         if current_user.rol == 'administrador':
