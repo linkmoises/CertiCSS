@@ -1439,7 +1439,7 @@ def editar_poster_admin(codigo_evento, nanoid_poster):
 @posters_bp.route('/tablero/posters/<codigo_evento>/resultados/podio/<nanoid_poster>/certificado')
 @login_required
 def certificado_podio(codigo_evento, nanoid_poster):
-    from app import generar_pdf_participante
+    from app.pdf_utils import generar_pdf_participante
     evento = collection_eventos.find_one({"codigo": codigo_evento})
     if not evento:
         abort(404)
