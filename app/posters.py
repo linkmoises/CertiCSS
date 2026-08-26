@@ -1257,6 +1257,54 @@ def eliminar_poster_admin(codigo_evento, nanoid_poster):
     return redirect(url_for('posters.admin_posters', codigo_evento=codigo_evento))
 
 
+@posters_bp.route('/tablero/posters/<codigo_evento>/evaluaciones/<evaluacion_id>/eliminar', methods=['POST'])
+@login_required
+def eliminar_evaluacion_poster(codigo_evento, evaluacion_id):
+    # Verificar permisos (solo administradores o coordinadores)
+    if current_user.rol not in ['administrador', 'denadoi']:
+        flash('No tienes permisos para realizar esta acción.', 'error')
+        return redirect(url_for('posters.resultados_poster', codigo_evento=codigo_evento))
+    
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+    
+    # Verificar que el concurso de póster esté habilitado
+    if not evento.get('concurso_poster', False):
+        flash('El concurso de póster no está habilitado para este evento.', 'error')
+        return redirect(url_for('events.listar_participantes', codigo_evento=codigo_evento))
+    
+    try:
+        oid = ObjectId(evaluacion_id)
+    except Exception:
+        flash('Identificador de evaluación inválido.', 'error')
+        return redirect(url_for('posters.resultados_poster', codigo_evento=codigo_evento))
+    
+    evaluacion = collection_evaluaciones_poster.find_one({
+        "_id": oid,
+        "codigo_evento": codigo_evento
+    })
+    
+    if not evaluacion:
+        flash('Evaluación no encontrada.', 'error')
+        return redirect(url_for('posters.resultados_poster', codigo_evento=codigo_evento))
+    
+    try:
+        result = collection_evaluaciones_poster.delete_one({"_id": oid})
+        
+        if result.deleted_count > 0:
+            log_event(f"Usuario [{current_user.email}] eliminó la evaluación de {evaluacion.get('nombres_jurado', '')} {evaluacion.get('apellidos_jurado', '')} (cédula: {evaluacion.get('cedula_jurado')}) al póster {evaluacion.get('nanoid_poster')} en el evento {codigo_evento}. Los promedios se recalcularon automáticamente.")
+            flash('Evaluación eliminada exitosamente. Los promedios se recalculan automáticamente al vuelo.', 'success')
+        else:
+            flash('Error al eliminar la evaluación.', 'error')
+            
+    except Exception as e:
+        flash(f'Error al eliminar la evaluación: {str(e)}', 'error')
+        log_event(f"Error al eliminar evaluación {evaluacion_id} del evento {codigo_evento}: {str(e)}")
+    
+    return redirect(url_for('posters.resultados_poster', codigo_evento=codigo_evento))
+
+
 @posters_bp.route('/tablero/editar_poster_admin/<codigo_evento>/<nanoid_poster>', methods=['GET', 'POST'])
 @login_required
 def editar_poster_admin(codigo_evento, nanoid_poster):
