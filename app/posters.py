@@ -54,6 +54,25 @@ def get_poster_file_url(archivo_poster, codigo_evento):
     return f"uploads/{codigo_evento}/posters/{archivo_poster}"
 
 
+def _ruta_archivo_poster(archivo_poster, codigo_evento):
+    """Resuelve la ruta en disco del archivo de un póster, compatible con formatos antiguos y nuevos."""
+    if not archivo_poster:
+        return None
+
+    upload_folder = current_app.config['UPLOAD_FOLDER']
+
+    # Formato nuevo (temporal): posters/{nanoid}_{filename}
+    if archivo_poster.startswith('posters/'):
+        return os.path.join(upload_folder, archivo_poster)
+
+    # Formato con carpeta completa: {codigo_evento}/posters/{...}
+    if archivo_poster.startswith(f"{codigo_evento}/"):
+        return os.path.join(upload_folder, archivo_poster)
+
+    # Formato original (y desconocido): uploads/{codigo_evento}/posters/{archivo}
+    return os.path.join(upload_folder, codigo_evento, 'posters', archivo_poster)
+
+
 def get_judge_session(codigo_evento, cedula_jurado):
     """
     Crea una sesión simulada para un jurado, permitiendo al administrador actuar en su nombre.
@@ -630,7 +649,10 @@ def evaluar_posters(codigo_evento):
     if not evento:
         abort(404)
         
-    posters = list(collection_posters.find({"codigo_evento": codigo_evento}).sort("numero_poster"))
+    posters = list(collection_posters.find({
+        "codigo_evento": codigo_evento,
+        "archivo_poster": {"$ne": None}
+    }).sort("numero_poster"))
     
     # Agregar URL de archivo a cada póster
     for poster in posters:
@@ -684,6 +706,11 @@ def evaluar_poster(codigo_evento, nanoid_poster):
     poster = collection_posters.find_one({"nanoid": nanoid_poster})
     if not poster:
         abort(404)
+    
+    # No se puede calificar un póster sin archivo
+    if not poster.get('archivo_poster'):
+        flash('Este póster no tiene archivo y no puede ser evaluado.', 'error')
+        return redirect(url_for('posters.evaluar_posters', codigo_evento=codigo_evento))
     
     # Agregar URL de archivo al póster
     poster['archivo_url'] = get_poster_file_url(poster.get('archivo_poster'), codigo_evento)
@@ -872,8 +899,11 @@ def concurso_investigacion_publico(codigo_evento):
     if not evento.get('concurso_poster', False):
         abort(404)
     
-    # Obtener los posters del evento
-    posters = list(collection_posters.find({"codigo_evento": codigo_evento}).sort("timestamp", -1))
+    # Obtener los posters del evento (solo los que tienen archivo)
+    posters = list(collection_posters.find({
+        "codigo_evento": codigo_evento,
+        "archivo_poster": {"$ne": None}
+    }).sort("timestamp", -1))
     
     # Agregar URL de archivo a cada póster
     for poster in posters:
@@ -895,8 +925,11 @@ def resultados_concurso_publico(codigo_evento):
     if not evento.get('concurso_poster', False):
         abort(404)
     
-    # Obtener pósters con sus promedios
-    posters = list(collection_posters.find({"codigo_evento": codigo_evento}))
+    # Obtener pósters con sus promedios (solo los que tienen archivo)
+    posters = list(collection_posters.find({
+        "codigo_evento": codigo_evento,
+        "archivo_poster": {"$ne": None}
+    }))
     
     resultados = []
     for poster in posters:
@@ -1154,6 +1187,72 @@ def eliminar_jurado_poster(codigo_evento, cedula_jurado):
     except Exception as e:
         flash(f'Error al eliminar el jurado: {str(e)}', 'error')
         log_event(f"Error al eliminar jurado {cedula_jurado} del evento {codigo_evento}: {str(e)}")
+    
+    return redirect(url_for('posters.admin_posters', codigo_evento=codigo_evento))
+
+
+@posters_bp.route('/tablero/posters/<codigo_evento>/<nanoid_poster>/eliminar', methods=['POST'])
+@login_required
+def eliminar_poster_admin(codigo_evento, nanoid_poster):
+    # Verificar permisos (solo administradores o coordinadores)
+    if current_user.rol not in ['administrador', 'denadoi']:
+        flash('No tienes permisos para realizar esta acción.', 'error')
+        return redirect(url_for('posters.admin_posters', codigo_evento=codigo_evento))
+    
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+    
+    # Verificar que el concurso de póster esté habilitado
+    if not evento.get('concurso_poster', False):
+        flash('El concurso de póster no está habilitado para este evento.', 'error')
+        return redirect(url_for('posters.admin_posters', codigo_evento=codigo_evento))
+    
+    poster = collection_posters.find_one({
+        "nanoid": nanoid_poster,
+        "codigo_evento": codigo_evento
+    })
+    
+    if not poster:
+        flash('Póster no encontrado.', 'error')
+        return redirect(url_for('posters.admin_posters', codigo_evento=codigo_evento))
+    
+    try:
+        # Eliminar las evaluaciones asociadas al póster
+        result_evaluaciones = collection_evaluaciones_poster.delete_many({
+            "codigo_evento": codigo_evento,
+            "nanoid_poster": nanoid_poster
+        })
+        
+        # Eliminar el póster
+        result_poster = collection_posters.delete_one({
+            "_id": poster['_id'],
+            "codigo_evento": codigo_evento
+        })
+        
+        # Eliminar el archivo físico solo si ningún otro póster lo referencia
+        archivo_eliminado = False
+        ruta_archivo = _ruta_archivo_poster(poster.get('archivo_poster'), codigo_evento)
+        otro_uso = collection_posters.find_one({
+            "codigo_evento": codigo_evento,
+            "archivo_poster": poster.get('archivo_poster'),
+            "_id": {"$ne": poster['_id']}
+        })
+        if ruta_archivo and os.path.exists(ruta_archivo) and not otro_uso:
+            os.remove(ruta_archivo)
+            archivo_eliminado = True
+        
+        if result_poster.deleted_count > 0:
+            detalle = f"Se eliminaron {result_evaluaciones.deleted_count} evaluaciones"
+            detalle += " y el archivo del póster." if archivo_eliminado else "."
+            log_event(f"Usuario [{current_user.email}] eliminó el póster #{poster['numero_poster']:02d} ({poster.get('titulo_poster')}) de {poster.get('nombres')} {poster.get('apellidos')} en el evento {codigo_evento}. {detalle}")
+            flash(f'Póster eliminado exitosamente. {detalle}', 'success')
+        else:
+            flash('Error al eliminar el póster.', 'error')
+            
+    except Exception as e:
+        flash(f'Error al eliminar el póster: {str(e)}', 'error')
+        log_event(f"Error al eliminar póster {nanoid_poster} del evento {codigo_evento}: {str(e)}")
     
     return redirect(url_for('posters.admin_posters', codigo_evento=codigo_evento))
 
