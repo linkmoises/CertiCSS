@@ -1,0 +1,369 @@
+{% include 'tablero-header.html' %}
+
+{% include 'tablero-sidebar.html' %}
+
+    <!-- Content -->
+    <div class="w-full lg:ps-64">
+        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+
+            <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+                <!-- Header -->
+                <div class="mb-5 pb-5 flex justify-between items-center border-b border-gray-200 dark:border-neutral-700">
+                    <div>
+                        <h2 class="text-2xl font-semibold text-gray-800 dark:text-neutral-200">Métricas Personalizadas</h2>
+                        <p class="text-sm text-gray-600 dark:text-neutral-400">
+                            Seleccione eventos por código para ver indicadores agregados
+                        </p>
+                    </div>
+                    <div>
+{% if modo == 'resultados' %}
+                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50" href="{{ url_for('metricas_personalizadas') }}">
+                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                            Nueva selección
+                        </a>
+{% endif %}
+                    </div>
+                </div>
+                <!-- End Header -->
+            </div>
+
+{% if modo == 'seleccion' %}
+
+            <!-- MODO SELECCIÓN -->
+            <div class="max-w-3xl px-2 mx-auto">
+                <div class="bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-neutral-900 dark:border-neutral-800">
+                    <div class="p-6">
+                        <div class="flex items-center gap-x-3 mb-4">
+                            <div class="shrink-0 flex justify-center items-center size-[46px] bg-blue-100 text-blue-600 rounded-full dark:bg-blue-800 dark:text-blue-200">
+                                <svg class="shrink-0 size-7" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-800 dark:text-neutral-200">Seleccionar eventos</h3>
+                                <p class="text-sm text-gray-500 dark:text-neutral-400">Ingrese los códigos de evento separados por coma</p>
+                            </div>
+                        </div>
+
+                        <form id="formSeleccion" method="GET" action="{{ url_for('metricas_personalizadas') }}">
+                            <label for="eventosInput" class="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-2">Códigos de evento</label>
+                            <textarea
+                                id="eventosInput"
+                                name="eventos"
+                                rows="4"
+                                class="block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-200 dark:focus:ring-neutral-600"
+                                placeholder="Ejemplo: ABC12345, DEF67890, GHI11223"
+                            ></textarea>
+                            <p class="mt-2 text-xs text-gray-500 dark:text-neutral-400">
+                                Separe múltiples códigos con coma o espacio. Los códigos se encuentran en la vista de cada evento.
+                            </p>
+                            <div class="mt-4 flex gap-x-2">
+                                <button type="submit" class="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                                    Generar indicadores
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- FIN MODO SELECCIÓN -->
+
+{% else %}
+
+            <!-- MODO RESULTADOS -->
+            {% if eventos|length == 0 %}
+
+            <div class="max-w-sm w-full min-h-[300px] flex flex-col justify-center mx-auto px-6">
+                <div class="flex justify-center items-center size-[46px] bg-gray-100 rounded-lg dark:bg-neutral-800">
+                    <svg class="shrink-0 size-6 text-gray-600 dark:text-neutral-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                </div>
+                <h2 class="mt-5 font-semibold text-gray-800 dark:text-white">Sin resultados</h2>
+                <p class="mt-2 text-sm text-gray-600 dark:text-neutral-400">
+                    No se encontraron eventos con los códigos ingresados.
+                </p>
+                <div class="mt-5">
+                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700" href="{{ url_for('metricas_personalizadas') }}">
+                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                        Intentar con otros códigos
+                    </a>
+                </div>
+            </div>
+
+            {% else %}
+
+            <!-- Tarjetas resumen -->
+            <div class="max-w-[85rem] px-2 mx-auto">
+                <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
+                    <!-- Total eventos -->
+                    <div class="flex flex-col bg-white border shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-800">
+                        <div class="p-4 md:p-5">
+                            <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-neutral-500">Eventos seleccionados</p>
+                            <div class="mt-1">
+                                <h3 class="text-xl sm:text-2xl font-medium text-gray-800 dark:text-neutral-200">{{ eventos|length }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Participantes -->
+                    <div class="flex flex-col bg-white border shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-800">
+                        <div class="p-4 md:p-5">
+                            <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-neutral-500">Participantes totales</p>
+                            <div class="mt-1">
+                                <h3 class="text-xl sm:text-2xl font-medium text-gray-800 dark:text-neutral-200">{{ total_participantes }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Ponentes -->
+                    <div class="flex flex-col bg-white border shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-800">
+                        <div class="p-4 md:p-5">
+                            <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-neutral-500">Ponentes totales</p>
+                            <div class="mt-1">
+                                <h3 class="text-xl sm:text-2xl font-medium text-gray-800 dark:text-neutral-200">{{ total_ponentes }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Encuestas -->
+                    <div class="flex flex-col bg-white border shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-800">
+                        <div class="p-4 md:p-5">
+                            <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-neutral-500">Encuestas recibidas</p>
+                            <div class="mt-1">
+                                <h3 class="text-xl sm:text-2xl font-medium text-gray-800 dark:text-neutral-200">{{ total_encuestas }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Promedio encuestados -->
+                    <div class="flex flex-col bg-white border shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-800">
+                        <div class="p-4 md:p-5">
+                            <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-neutral-500">% Encuestados (promedio)</p>
+                            <div class="mt-1">
+                                <h3 class="text-xl sm:text-2xl font-medium text-gray-800 dark:text-neutral-200">{{ promedio_encuestados }}%</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Fin tarjetas resumen -->
+
+            <!-- Añadir más eventos -->
+            <div class="max-w-[85rem] px-2 mx-auto">
+                <div class="bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-neutral-900 dark:border-neutral-800">
+                    <div class="px-6 py-4 flex flex-wrap items-center gap-3 border-b border-gray-200 dark:border-neutral-700">
+                        <label for="agregarEventos" class="text-sm font-medium text-gray-700 dark:text-neutral-300">Añadir más eventos:</label>
+                        <input
+                            type="text"
+                            id="agregarEventos"
+                            class="block w-72 border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-200 dark:focus:ring-neutral-600"
+                            placeholder="Código adicional"
+                        />
+                        <button
+                            type="button"
+                            id="btnAgregar"
+                            class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:bg-green-700"
+                        >
+                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                            Añadir
+                        </button>
+                        <span class="text-xs text-gray-400 dark:text-neutral-500">Códigos actuales: {{ codigos_seleccionados|join(', ') }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de indicadores -->
+            <div class="max-w-[85rem] px-2 mx-auto">
+                <div class="flex flex-col">
+                    <div class="-m-1.5 overflow-x-auto">
+                        <div class="p-1.5 min-w-full inline-block align-middle">
+                            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden dark:bg-neutral-900 dark:border-neutral-800">
+                                <!-- Header -->
+                                <div class="px-6 py-4 border-b border-gray-200 dark:border-neutral-700">
+                                    <h2 class="text-xl font-semibold text-gray-800 dark:text-neutral-200">Indicadores por evento</h2>
+                                </div>
+
+                                <!-- Table -->
+                                <table class="table-auto min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
+                                    <thead class="bg-gray-50 dark:bg-neutral-800">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3 text-start">
+                                                <span class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Título</span>
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-start">
+                                                <span class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Fecha(s)</span>
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-center">
+                                                <span class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Modalidad</span>
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-center">
+                                                <span class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Participantes</span>
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-center">
+                                                <span class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Encuestas</span>
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-center">
+                                                <span class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">% Encuestados</span>
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-center">
+                                                <span class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">% Participación</span>
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-center">
+                                                <span class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Detalles</span>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200 dark:divide-neutral-700">
+{% for evento in eventos %}
+                                        <tr class="bg-white hover:bg-gray-50 dark:bg-neutral-900 dark:hover:bg-neutral-800">
+                                            <td class="h-px w-72 min-w-72">
+                                                <div class="px-6 py-2">
+                                                    <p class="text-sm font-medium text-gray-800 dark:text-neutral-200 mb-1">
+                                                        <a class="text-blue-600 decoration-2 hover:underline" href="{{ url_for('resumen_evento', codigo_evento=evento.codigo) }}">
+                                                        {{ evento.nombre }}</a>
+                                                    </p>
+                                                    <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800 dark:bg-neutral-800 dark:text-neutral-200">
+                                                        {{ evento.codigo }}
+                                                    </span>
+                                                    <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800 dark:bg-neutral-800 dark:text-neutral-200">
+                                                        {{ evento.tipo }}
+                                                    </span>
+{% if evento.estado_evento == 'cerrado' %}
+                                                    <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200">
+                                                        Cerrado
+                                                    </span>
+{% elif evento.estado_evento == 'publicado' %}
+                                                    <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200">
+                                                        Finalizado
+                                                    </span>
+{% endif %}
+                                                </div>
+                                            </td>
+                                            <td class="size-px whitespace-nowrap text-center">
+                                                <span class="text-sm text-gray-500 dark:text-neutral-400">
+                                                {% if evento.fecha_inicio.date() == evento.fecha_fin.date() %}
+                                                    {{ evento.fecha_inicio.strftime('%d %b, %Y') }}
+                                                {% else %}
+                                                    {{ evento.fecha_inicio.strftime('%d') }} - {{ evento.fecha_fin.strftime('%d %b, %Y') }}
+                                                {% endif %}
+                                                </span>
+                                            </td>
+                                            <td class="size-px whitespace-nowrap text-center">
+                                                <span class="text-sm text-gray-500 dark:text-neutral-400">{{ evento.modalidad }}</span>
+                                            </td>
+                                            <td class="size-px whitespace-nowrap text-center">
+                                                <span class="text-sm font-medium text-gray-800 dark:text-neutral-200">{{ evento.total_participantes }}</span>
+                                            </td>
+                                            <td class="size-px whitespace-nowrap text-center">
+                                                <span class="text-sm font-medium text-gray-800 dark:text-neutral-200">{{ evento.total_encuestas }}</span>
+                                            </td>
+                                            <td class="size-px whitespace-nowrap text-center">
+{% if evento.porcentaje_encuestados >= 70 %}
+                                                <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200">
+{% elif evento.porcentaje_encuestados >= 40 %}
+                                                <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200">
+{% else %}
+                                                <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200">
+{% endif %}
+                                                    {{ evento.porcentaje_encuestados }}%
+                                                </span>
+                                            </td>
+                                            <td class="size-px whitespace-nowrap text-center">
+{% if evento.porcentaje_participacion >= 70 %}
+                                                <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200">
+{% elif evento.porcentaje_participacion >= 40 %}
+                                                <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200">
+{% else %}
+                                                <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200">
+{% endif %}
+                                                    {{ evento.porcentaje_participacion }}%
+                                                </span>
+                                            </td>
+                                            <td class="size-px whitespace-nowrap text-center">
+                                                <a class="text-blue-600 hover:underline text-sm" href="{{ url_for('resumen_evento', codigo_evento=evento.codigo) }}">
+                                                    Ver
+                                                </a>
+                                            </td>
+                                        </tr>
+{% endfor %}
+                                    </tbody>
+                                    <!-- Fila totales -->
+                                    <tfoot class="bg-gray-50 dark:bg-neutral-800">
+                                        <tr>
+                                            <td class="px-6 py-3" colspan="3">
+                                                <span class="text-sm font-semibold text-gray-800 dark:text-neutral-200">Totales / Promedios</span>
+                                            </td>
+                                            <td class="px-6 py-3 text-center">
+                                                <span class="text-sm font-bold text-gray-800 dark:text-neutral-200">{{ total_participantes }}</span>
+                                            </td>
+                                            <td class="px-6 py-3 text-center">
+                                                <span class="text-sm font-bold text-gray-800 dark:text-neutral-200">{{ total_encuestas }}</span>
+                                            </td>
+                                            <td class="px-6 py-3 text-center">
+                                                <span class="text-sm font-bold text-gray-800 dark:text-neutral-200">{{ promedio_encuestados }}%</span>
+                                            </td>
+                                            <td class="px-6 py-3 text-center">
+                                                <span class="text-sm font-bold text-gray-800 dark:text-neutral-200">{{ promedio_participacion }}%</span>
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Fin tabla -->
+
+            {% endif %}
+            <!-- FIN MODO RESULTADOS -->
+
+{% endif %}
+
+        </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var btnAgregar = document.getElementById('btnAgregar');
+    var inputAgregar = document.getElementById('agregarEventos');
+
+    if (btnAgregar && inputAgregar) {
+        btnAgregar.addEventListener('click', function() {
+            var nuevosCodigos = inputAgregar.value.trim();
+            if (!nuevosCodigos) return;
+
+            var actuales = {{ codigos_seleccionados|tojson }};
+            var separados = nuevosCodigos.split(/[,\s]+/).map(function(c) { return c.trim().toUpperCase(); }).filter(function(c) { return c.length > 0; });
+
+            var combinados = actuales.concat(separados);
+            combinados = combinados.filter(function(item, pos) { return combinados.indexOf(item) === pos; });
+
+            var url = '{{ url_for("metricas_personalizadas") }}?eventos=' + encodeURIComponent(combinados.join(', '));
+            window.location.href = url;
+        });
+
+        inputAgregar.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                btnAgregar.click();
+            }
+        });
+    }
+
+    var formSeleccion = document.getElementById('formSeleccion');
+    if (formSeleccion) {
+        formSeleccion.addEventListener('submit', function(e) {
+            var textarea = document.getElementById('eventosInput');
+            var valor = textarea.value.trim();
+            if (!valor) {
+                e.preventDefault();
+                return;
+            }
+            var codigos = valor.split(/[,\s]+/).map(function(c) { return c.trim().toUpperCase(); }).filter(function(c) { return c.length > 0; });
+            if (codigos.length === 0) {
+                e.preventDefault();
+                return;
+            }
+            textarea.value = codigos.join(', ');
+        });
+    }
+});
+</script>
+
+{% include 'tablero-footer.html' %}

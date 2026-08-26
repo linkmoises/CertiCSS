@@ -3680,6 +3680,94 @@ def tablero_metricas(page=1):
     )
 
 ###
+### Métricas personalizadas - selección por código de evento
+###
+@app.route('/tablero/metricas/personalizadas')
+@login_required
+def metricas_personalizadas():
+    if current_user.rol not in ('administrador', 'denadoi'):
+        abort(403)
+
+    eventos_param = request.args.get('eventos', '').strip()
+
+    if not eventos_param:
+        todos_eventos = list(collection_eventos.find(
+            {'registro_abierto': {'$ne': True}, 'tipo': {'$ne': 'Sesión Docente'}},
+            {'nombre': 1, 'codigo': 1, 'tipo': 1, 'modalidad': 1, 'fecha_inicio': 1, 'fecha_fin': 1}
+        ).sort('fecha_inicio', -1))
+        return render_template(
+            'metricas_personalizadas.html',
+            active_section='metricas',
+            modo='seleccion',
+            eventos_disponibles=todos_eventos,
+            codigos_seleccionados=[],
+        )
+
+    codigos = [c.strip().upper() for c in eventos_param.split(',') if c.strip()]
+    codigos_unicos = list(dict.fromkeys(codigos))
+
+    eventos = list(collection_eventos.find({'codigo': {'$in': codigos_unicos}}))
+
+    orden_map = {e['codigo']: i for i, e in enumerate(codigos_unicos)}
+    eventos.sort(key=lambda e: orden_map.get(e['codigo'], 999))
+
+    for evento in eventos:
+        codigo = evento['codigo']
+
+        evento['total_participantes'] = collection_participantes.count_documents({
+            'codigo_evento': codigo, 'rol': 'participante'
+        })
+
+        evento['total_ponentes'] = collection_participantes.count_documents({
+            'codigo_evento': codigo, 'rol': 'ponente'
+        })
+
+        instrumento = evento.get('instrumento', evento.get('instrumento_encuesta', 'legacy'))
+        filtro_encuesta = {'codigo_evento': codigo, 'respuestas': {'$exists': True, '$ne': {}}}
+        if instrumento == 'encuesta_v2':
+            evento['total_encuestas'] = collection_encuestas_v2.count_documents(filtro_encuesta)
+        else:
+            evento['total_encuestas'] = collection_encuestas.count_documents(filtro_encuesta)
+        evento['instrumento'] = instrumento
+
+        cupos_raw = evento.get('cupos', 0)
+        try:
+            cupos = int(cupos_raw) if cupos_raw else 0
+        except (ValueError, TypeError):
+            cupos = 0
+        evento['cupos'] = cupos
+        evento['porcentaje_participacion'] = round(
+            (evento['total_participantes'] / cupos * 100) if cupos > 0 else 0, 1
+        )
+        evento['porcentaje_encuestados'] = round(
+            (evento['total_encuestas'] / evento['total_participantes'] * 100)
+            if evento['total_participantes'] > 0 else 0, 1
+        )
+
+    total_participantes = sum(e['total_participantes'] for e in eventos)
+    total_ponentes = sum(e['total_ponentes'] for e in eventos)
+    total_encuestas = sum(e['total_encuestas'] for e in eventos)
+    promedio_encuestados = round(
+        (total_encuestas / total_participantes * 100) if total_participantes > 0 else 0, 1
+    )
+    promedio_participacion = round(
+        sum(e['porcentaje_participacion'] for e in eventos) / len(eventos), 1
+    ) if eventos else 0
+
+    return render_template(
+        'metricas_personalizadas.html',
+        active_section='metricas',
+        modo='resultados',
+        eventos=eventos,
+        codigos_seleccionados=codigos_unicos,
+        total_participantes=total_participantes,
+        total_ponentes=total_ponentes,
+        total_encuestas=total_encuestas,
+        promedio_encuestados=promedio_encuestados,
+        promedio_participacion=promedio_participacion,
+    )
+
+###
 ### Tablero de métricas propias
 ###
 @app.route('/tablero/metricas/mias')
