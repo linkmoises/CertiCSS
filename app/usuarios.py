@@ -9,6 +9,7 @@ from flask_login import login_user, current_user, login_required
 from bson.objectid import ObjectId
 from werkzeug.security import generate_password_hash
 from datetime import datetime
+from unicodedata import normalize
 from PIL import Image
 import os
 
@@ -184,6 +185,35 @@ def _ordenar_usuarios(usuarios):
 
 
 ###
+### Búsqueda de usuarios (tolerante a acentos y campos None)
+###
+def _normalizar(texto):
+    """Minúsculas y sin acentos, para búsquedas insensibles."""
+    if not isinstance(texto, str):
+        return ''
+    return normalize('NFKD', texto.lower()).encode('ascii', 'ignore').decode('ascii')
+
+
+def _filtrar_usuarios(usuarios, q):
+    """Filtra por nombres, apellidos, email, cédula o unidad ejecutora."""
+    termino = _normalizar(q).strip()
+    if not termino:
+        return usuarios
+    resultado = []
+    for u in usuarios:
+        campos = ' '.join([
+            _normalizar(u.get('nombres')),
+            _normalizar(u.get('apellidos')),
+            _normalizar(u.get('email')),
+            _normalizar(u.get('cedula')),
+            _normalizar(u.get('unidad_ejecutora')),
+        ])
+        if termino in campos:
+            resultado.append(u)
+    return resultado
+
+
+###
 ### Listado de usuarios
 ###
 @usuarios_bp.route('/tablero/usuarios')
@@ -197,6 +227,12 @@ def listar_usuarios(page=1):
     # Agregar foto_url a cada usuario
     for usuario in usuarios:
         usuario['foto_url'] = f"/static/usuarios/{usuario['foto']}" if usuario.get('foto') else "/static/assets/user-avatar.png"
+
+    # Aplicar búsqueda si se proporciona
+    q = (request.args.get('q') or '').strip()
+    total_coleccion = len(usuarios)
+    if q:
+        usuarios = _filtrar_usuarios(usuarios, q)
 
     # Aplicar el ordenamiento
     usuarios_ordenados = _ordenar_usuarios(usuarios)
@@ -252,7 +288,9 @@ def listar_usuarios(page=1):
         separadores_mostrar=separadores_mostrar,
         page=page,
         total_paginas=total_paginas,
-        total_usuarios=total_usuarios
+        total_usuarios=total_usuarios,
+        total_coleccion=total_coleccion,
+        q=q
     )
 
 

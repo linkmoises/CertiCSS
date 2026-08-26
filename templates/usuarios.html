@@ -36,11 +36,23 @@
                                             </svg>
                                             Añadir usuario
                                         </a>
-                                        {% if usuarios|length != 0 %}
+                                        {% if usuarios|length != 0 or q %}
                                         <div>
-                                            <input
-                                                class="text-gray-500 py-2 block w-full bg-white border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-blue-500"
-                                                type="text" id="search" placeholder="Filtrar usuarios...">
+                                            <form method="GET" action="{{ url_for('usuarios.listar_usuarios') }}"
+                                                class="inline-flex gap-x-1">
+                                                <input
+                                                    class="text-gray-500 py-2 block w-full bg-white border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-blue-500"
+                                                    type="search" id="search" name="q" value="{{ q }}"
+                                                    placeholder="Buscar por nombre, email, cédula o unidad...">
+                                                <button type="submit"
+                                                    class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
+                                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <circle cx="11" cy="11" r="8"/>
+                                                        <path d="m21 21-4.35-4.35"/>
+                                                    </svg>
+                                                    <span class="sr-only">Buscar</span>
+                                                </button>
+                                            </form>
                                         </div>
                                         {% endif %}
                                     </div>
@@ -385,16 +397,24 @@
                                 class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200">
 
                                 <div>
+                                    {% if q %}
+                                    <p class="text-sm text-gray-600">
+                                        <span class="font-semibold text-gray-800">{{ total_usuarios }}</span> resultado{{ 's' if total_usuarios != 1 }} para «<span class="font-semibold text-gray-800">{{ q }}</span>» de {{ total_coleccion }}
+                                        <a href="{{ url_for('usuarios.listar_usuarios') }}"
+                                            class="ms-2 inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline">Limpiar búsqueda</a>
+                                    </p>
+                                    {% else %}
                                     <p class="text-sm text-gray-600">
                                         <span class="font-semibold text-gray-800">{{ total_usuarios }}</span> {{
                                         'usuario registrado' if total_usuarios == 1 else 'usuarios registrados' }}
                                     </p>
+                                    {% endif %}
                                 </div>
 
                                 <div>
                                     <div class="inline-flex gap-x-2">
                                         {% if page > 1 %}
-                                        <a href="{{ url_for('usuarios.listar_usuarios', page=page-1) }}"
+                                        <a href="{{ url_for('usuarios.listar_usuarios', page=page-1, q=q if q else none) }}"
                                             class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
                                             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
                                                 height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -408,7 +428,7 @@
                                             Página {{ page }} de {{ total_paginas }}
                                         </p>
                                         {% if page < total_paginas %} <a
-                                            href="{{ url_for('usuarios.listar_usuarios', page=page+1) }}"
+                                            href="{{ url_for('usuarios.listar_usuarios', page=page+1, q=q if q else none) }}"
                                             class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
                                             Siguiente
                                             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
@@ -487,41 +507,6 @@
         form.appendChild(hiddenInput);
         form.submit();
     });
-</script>
-<script>
-    document.getElementById('search').addEventListener('input', function () {
-        const searchText = this.value.trim().toLowerCase(); // Texto de búsqueda
-        const rows = document.querySelectorAll('tr.bg-white'); // Todas las filas de la tabla
-
-        rows.forEach(row => {
-            const nombre = row.querySelector('.usuario-nombre').textContent.toLowerCase();
-            const rol = row.querySelector('.usuario-rol').textContent.toLowerCase();
-
-            // Verificar si el texto de búsqueda coincide con nombre o rol
-            if (nombre.includes(searchText) || rol.includes(searchText)) {
-                row.style.display = ''; // Mostrar la fila
-                // Resaltar coincidencias en nombre y rol
-                highlightText(row.querySelector('.usuario-nombre'), searchText);
-                highlightText(row.querySelector('.usuario-rol'), searchText);
-            } else {
-                row.style.display = 'none'; // Ocultar la fila
-            }
-        });
-    });
-
-    // Función para resaltar el texto coincidente
-    function highlightText(element, searchText) {
-        if (!searchText) {
-            // Si no hay texto de búsqueda, restaurar el contenido original
-            element.innerHTML = element.textContent;
-            return;
-        }
-
-        const text = element.textContent;
-        const regex = new RegExp(`(${searchText})`, 'gi'); // Expresión regular para buscar coincidencias
-        const highlightedText = text.replace(regex, '<span class="bg-yellow-200">$1</span>'); // Resaltar coincidencias
-        element.innerHTML = highlightedText; // Actualizar el contenido del elemento
-    }
 </script>
 </body>
 
