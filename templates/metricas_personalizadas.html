@@ -273,10 +273,15 @@
                                                     {{ evento.porcentaje_participacion }}%
                                                 </span>
                                             </td>
-                                            <td class="size-px whitespace-nowrap text-center">
-                                                <a class="text-blue-600 hover:underline text-sm" href="{{ url_for('resumen_evento', codigo_evento=evento.codigo) }}">
-                                                    Ver
-                                                </a>
+                                            <td class="size-px whitespace-nowrap">
+                                                <div class="px-6 py-2 flex flex-col gap-1">
+                                                    <a class="text-blue-600 hover:underline text-xs font-medium" href="{{ url_for('resumen_evento', codigo_evento=evento.codigo) }}">
+                                                        Ver datos
+                                                    </a>
+                                                    <a class="text-pink-600 hover:underline text-xs font-medium" href="{{ url_for('events.listar_participantes', codigo_evento=evento.codigo) }}">
+                                                        Listado participantes
+                                                    </a>
+                                                </div>
                                             </td>
                                         </tr>
 {% endfor %}
