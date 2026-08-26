@@ -3708,7 +3708,7 @@ def metricas_personalizadas():
 
     eventos = list(collection_eventos.find({'codigo': {'$in': codigos_unicos}}))
 
-    orden_map = {e['codigo']: i for i, e in enumerate(codigos_unicos)}
+    orden_map = {codigo: i for i, codigo in enumerate(codigos_unicos)}
     eventos.sort(key=lambda e: orden_map.get(e['codigo'], 999))
 
     for evento in eventos:
