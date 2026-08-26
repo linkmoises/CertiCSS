@@ -161,6 +161,11 @@
                                                     <th
                                                         class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                         Archivo</th>
+                                                    {% if puede_podio %}
+                                                    <th
+                                                        class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Certificado</th>
+                                                    {% endif %}
                                                 </tr>
                                             </thead>
                                             <tbody class="bg-white divide-y divide-gray-200">
@@ -232,6 +237,23 @@
                                                         <span class="text-gray-400 text-xs">Sin archivo</span>
                                                         {% endif %}
                                                     </td>
+                                                    {% if puede_podio and loop.index <= 3 %}
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                                                        <a href="{{ url_for('posters.certificado_podio', codigo_evento=evento.codigo, nanoid_poster=resultado.poster.nanoid) }}"
+                                                            class="inline-flex items-center gap-x-1 px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 hover:bg-green-200 transition-colors"
+                                                            title="Descargar certificado de podio - {{ loop.index }}° lugar">
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                            </svg>
+                                                            Certificado
+                                                        </a>
+                                                    </td>
+                                                    {% elif puede_podio %}
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-400">
+                                                        -
+                                                    </td>
+                                                    {% endif %}
                                                 </tr>
                                                 {% endfor %}
                                             </tbody>

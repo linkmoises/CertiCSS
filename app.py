@@ -7527,7 +7527,7 @@ def validate_attendance_template(evento):
         # Handle any filesystem errors or invalid path types gracefully
         return False
 
-def generar_pdf_participante(participante, afiche_path):
+def generar_pdf_participante(participante, afiche_path, lugar=None):
     codigo_evento = participante['codigo_evento']
     evento = collection_eventos.find_one({"codigo": codigo_evento})
 
@@ -7628,7 +7628,15 @@ def generar_pdf_participante(participante, afiche_path):
         rol_mostrar = participante['rol']
 
     if participante['rol'] == 'presentador_poster':
-        draw_centered_text(4.4 * inch, f"Por su participación en el concurso de trabajos de investigación realizado en:")
+        if lugar == 1:
+            texto_concurso = "Por obtener el primer lugar en el concurso de trabajos de investigación realizado en:"
+        elif lugar == 2:
+            texto_concurso = "Por obtener el segundo lugar en el concurso de trabajos de investigación realizado en:"
+        elif lugar == 3:
+            texto_concurso = "Por obtener el tercer lugar en el concurso de trabajos de investigación realizado en:"
+        else:
+            texto_concurso = "Por su participación en el concurso de trabajos de investigación realizado en:"
+        draw_centered_text(4.4 * inch, texto_concurso)
     elif evento.get('registro_abierto') is True:
         draw_centered_text(4.4 * inch, f"Por aprobar la actividad académica titulada:")
     else:
@@ -7805,7 +7813,10 @@ def generar_pdf_participante(participante, afiche_path):
     os.remove(qr_img_path)
 
     # Nombre del archivo PDF combinado a crear
-    output_pdf_filename = f"{participante['nanoid']}.pdf"
+    if lugar is not None:
+        output_pdf_filename = f"{participante['nanoid']}_podio.pdf"
+    else:
+        output_pdf_filename = f"{participante['nanoid']}.pdf"
     output_pdf_path = os.path.join(pdf_directory, output_pdf_filename)
 
     # Leer el PDF de fondo

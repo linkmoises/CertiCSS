@@ -4,7 +4,7 @@
 ### de concursos de investigación en CertiCSS.
 ###
 ###
-from flask import Blueprint, request, render_template, redirect, url_for, flash, session, abort, send_from_directory, Response, current_app
+from flask import Blueprint, request, render_template, redirect, url_for, flash, session, abort, send_from_directory, send_file, Response, current_app
 from flask_login import login_required, current_user
 from bson.objectid import ObjectId
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -24,7 +24,8 @@ from app import (
     collection_eventos,
     collection_participantes, 
     collection_posters,
-    collection_evaluaciones_poster
+    collection_evaluaciones_poster,
+    generar_pdf_participante
 )
 from app.logs import log_event
 
@@ -1127,13 +1128,25 @@ def resultados_poster(codigo_evento):
     # Diccionario de promedios para acceso rápido
     promedios_poster = {r['poster']['nanoid']: r['promedio'] for r in resultados}
     
+    # Verificar si el usuario puede descargar certificados de podio
+    es_admin = current_user.rol in ['administrador', 'denadoi']
+    es_autor = str(current_user.id) == str(evento.get('autor'))
+    es_coorganizador = collection_participantes.find_one({
+        "codigo_evento": codigo_evento,
+        "cedula": str(current_user.cedula),
+        "rol": "coorganizador"
+    })
+    tiene_certificado = bool(evento.get('certificado'))
+    puede_podio = tiene_certificado and (es_admin or es_autor or es_coorganizador)
+    
     return render_template('resultados_poster.html', 
                          evento=evento, 
                          resultados=resultados,
                          posters=posters,
                          jurados=jurados,
                          evaluaciones_por_poster=evaluaciones_por_poster,
-                         promedios_poster=promedios_poster)
+                         promedios_poster=promedios_poster,
+                         puede_podio=puede_podio)
 
 
 @posters_bp.route('/tablero/eliminar_jurado/<codigo_evento>/<cedula_jurado>', methods=['POST'])
@@ -1381,7 +1394,6 @@ def editar_poster_admin(codigo_evento, nanoid_poster):
                 flash('Póster actualizado exitosamente incluyendo el archivo PDF.', 'success')
             else:
                 flash('Solo se permiten archivos PDF para el póster.', 'error')
-                return render_template('editar_poster_admin.html', evento=evento, poster=poster)
         else:
             flash('Póster actualizado exitosamente.', 'success')
         
@@ -1420,3 +1432,83 @@ def editar_poster_admin(codigo_evento, nanoid_poster):
         return redirect(url_for('posters.admin_posters', codigo_evento=codigo_evento))
     
     return render_template('editar_poster_admin.html', evento=evento, poster=poster)
+
+
+###
+### Certificado de Podio (1er, 2do, 3er lugar)
+###
+@posters_bp.route('/tablero/posters/<codigo_evento>/resultados/podio/<nanoid_poster>/certificado')
+@login_required
+def certificado_podio(codigo_evento, nanoid_poster):
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+
+    if not evento.get('concurso_poster', False):
+        flash('El concurso de póster no está habilitado para este evento.', 'error')
+        return redirect(url_for('events.listar_participantes', codigo_evento=codigo_evento))
+
+    # Verificar permisos: administrador, denadoi, autor del evento o coorganizador
+    es_admin = current_user.rol in ['administrador', 'denadoi']
+    es_autor = str(current_user.id) == str(evento.get('autor'))
+    es_coorganizador = collection_participantes.find_one({
+        "codigo_evento": codigo_evento,
+        "cedula": str(current_user.cedula),
+        "rol": "coorganizador"
+    })
+    if not es_admin and not es_autor and not es_coorganizador:
+        flash('No tienes permisos para descargar certificados de podio.', 'error')
+        return redirect(url_for('posters.resultados_poster', codigo_evento=codigo_evento))
+
+    # Verificar que exista plantilla de certificado
+    afiche_path = evento.get('certificado')
+    if not afiche_path:
+        abort(404)
+
+    # Recalcular ranking al vuelo
+    posters = list(collection_posters.find({"codigo_evento": codigo_evento}))
+    resultados = []
+    for poster in posters:
+        evaluaciones = list(collection_evaluaciones_poster.find({
+            "codigo_evento": codigo_evento,
+            "nanoid_poster": poster['nanoid']
+        }))
+        if evaluaciones:
+            promedio = sum(e['puntuacion_final'] for e in evaluaciones) / len(evaluaciones)
+            resultados.append({
+                'poster': poster,
+                'promedio': promedio,
+                'num_evaluaciones': len(evaluaciones)
+            })
+    resultados.sort(key=lambda x: x['promedio'], reverse=True)
+
+    # Verificar que el poster esté en el top 3
+    posicion = None
+    for i, r in enumerate(resultados):
+        if r['poster']['nanoid'] == nanoid_poster:
+            posicion = i + 1
+            break
+
+    if posicion is None or posicion > 3:
+        flash('Este póster no se encuentra en los tres primeros lugares del podio.', 'error')
+        return redirect(url_for('posters.resultados_poster', codigo_evento=codigo_evento))
+
+    # Buscar el poster y su participante (presentador_poster)
+    poster = collection_posters.find_one({
+        "codigo_evento": codigo_evento,
+        "nanoid": nanoid_poster
+    })
+    if not poster:
+        abort(404)
+
+    participante = collection_participantes.find_one({
+        "codigo_evento": codigo_evento,
+        "cedula": poster['cedula'],
+        "rol": "presentador_poster"
+    })
+    if not participante:
+        flash('No se encontró el registro del participante para este póster.', 'error')
+        return redirect(url_for('posters.resultados_poster', codigo_evento=codigo_evento))
+
+    pdf_file = generar_pdf_participante(participante, afiche_path, lugar=posicion)
+    return send_file(pdf_file)
