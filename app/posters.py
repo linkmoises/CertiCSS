@@ -24,8 +24,7 @@ from app import (
     collection_eventos,
     collection_participantes, 
     collection_posters,
-    collection_evaluaciones_poster,
-    generar_pdf_participante
+    collection_evaluaciones_poster
 )
 from app.logs import log_event
 
@@ -1440,6 +1439,7 @@ def editar_poster_admin(codigo_evento, nanoid_poster):
 @posters_bp.route('/tablero/posters/<codigo_evento>/resultados/podio/<nanoid_poster>/certificado')
 @login_required
 def certificado_podio(codigo_evento, nanoid_poster):
+    from app import generar_pdf_participante
     evento = collection_eventos.find_one({"codigo": codigo_evento})
     if not evento:
         abort(404)
