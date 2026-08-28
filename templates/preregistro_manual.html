@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% from '_perfil_profesional.html' import perfil_profesional_select with context %}
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -116,41 +117,7 @@
                             <small id="cedula-error" class="text-red-500 text-sm hidden">Cédula inválida. Por favor, verifica el formato.</small>
                         </div>
 
-                        <div class="sm:col-span-3">
-                            <label for="perfil_profesional" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
-                                Perfil Profesional
-                            </label>
-                        </div>
-                        
-                        <div class="sm:col-span-9">
-                            <select id="perfil_profesional" name="perfil_profesional" 
-                                    class="py-2 px-3 pe-9 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" required>
-                                <option value="">Seleccione el perfil profesional</option>
-                                <option value="medico_general">Médico General - Consulta Externa</option>
-                                <option value="medico_urgencias">Médico General - Urgencias</option>
-                                <option value="medico_administrativo">Médico Administrativo</option>
-                                <option value="medico_especialista">Médico Especialista</option>
-                                <option value="medico_residente">Medico Residente</option>
-                                <option value="medico_interno">Médico Interno</option>
-                                <option value="odontologo">Odontólogo(a)</option>
-                                <option value="odontologo_especialista">Odontólogo(a) Especialista</option>
-                                <option value="odontologo_interno">Odontólogo interno</option>
-                                <option value="tao">Técnico en asistencia dental</option>
-                                <option value="enfermero">Enfermera(o)</option>
-                                <option value="tecnico_enfermeria">Técnico en Enfermería</option>
-                                <option value="laboratorista">Laboratorista</option>
-                                <option value="tecnico_laboratorio">Técnico de Laboratorio</option>
-                                <option value="fisioterapeuta">Fisioterapeuta</option>
-                                <option value="farmaceutico">Farmacéutico(a)</option>
-                                <option value="fonoaudiologo">Fonoaudiólogo(a)</option>
-                                <option value="psicologo">Psicólogo(a)</option>
-                                <option value="nutricionista">Nutricionista</option>
-                                <option value="trabajador_social">Trabajador Social</option>
-                                <option value="estudiante_salud">Estudiante de Ciencias de la Salud</option>
-                                <option value="administrativo">Personal administrativo</option>
-                                <option value="otro">Otro no listado</option>
-                            </select>
-                        </div>
+                        {{ perfil_profesional_select() }}
 
                         <div class="sm:col-span-3">
                             <label for="region" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
