@@ -3299,32 +3299,42 @@ def _buscar_certificados_resultados(cedula, token):
                 'tipo': 'examen'
             }))
             # Filtrar solo los que tienen qbank_config sin formativo=si
-            from app.plataforma import parse_qbank_config
-            ordenes_sumativos = []
-            for ex in examenes_sumativos:
-                qbank_config = ex.get('qbank_config', '')
-                if qbank_config:
-                    _, _, _, formativo, _, _ = parse_qbank_config(qbank_config)
-                    if not formativo:
-                        ordenes_sumativos.append(ex.get('orden'))
-                else:
-                    # Sin qbank_config configurado, no cuenta como sumativo
-                    pass
+            from app.plataforma import parse_qbank_config, mejor_resultado_examen, _id_str
+            examenes_sumativos = [
+                ex for ex in examenes_sumativos
+                if ex.get('qbank_config') and not parse_qbank_config(ex.get('qbank_config', ''))[3]
+            ]
 
-            if ordenes_sumativos:
+            if examenes_sumativos:
                 tiene_examen = True
-                # Buscar el mejor resultado solo entre exámenes sumativos
+                # Mejor intento POR examen (FK estable examen_id + fallback a
+                # orden para históricos). El certificado exige TODOS >=80.
+                ids_sum = [_id_str(ex) for ex in examenes_sumativos]
+                ords_sum = [ex.get('orden') for ex in examenes_sumativos]
                 resultados_examen = list(collection_exam_results.find({
                     'codigo_evento': codigo_evento,
                     'cedula_participante': participante['cedula'],
-                    'orden_examen': {'$in': ordenes_sumativos},
-                    'formativo': {'$ne': True}
-                }).sort('calificacion', -1).limit(1))
-                
-                if resultados_examen:
-                    mejor_resultado = resultados_examen[0]
-                    puntaje_examen = mejor_resultado.get('calificacion', 0)
+                    'formativo': {'$ne': True},
+                    '$or': [
+                        {'examen_id': {'$in': ids_sum}},
+                        {'examen_id': None, 'orden_examen': {'$in': ords_sum}},
+                        {'examen_id': {'$exists': False}, 'orden_examen': {'$in': ords_sum}},
+                    ],
+                }))
+
+                mejores = [
+                    mejor_resultado_examen(resultados_examen, ex)
+                    for ex in examenes_sumativos
+                ]
+                if all(m and m.get('calificacion', 0) >= 80 for m in mejores):
                     examen_completado = True
+                    puntaje_examen = min(m.get('calificacion', 0) for m in mejores)
+                elif any(mejores):
+                    examen_completado = True
+                    puntaje_examen = min(
+                        (m.get('calificacion', 0) for m in mejores if m), default=0
+                    )
+                # Sin ningún intento: examen_completado=False, puntaje 0
 
             # Check survey completion status
             requires_survey = requires_survey_completion(evento)
@@ -4647,10 +4657,17 @@ def tablero_metricas_lms_evento(codigo_evento):
             examenes.append(ex)
     
     total_examenes = len(examenes)
-    
+
+    # Match evaluable con FK estable examen_id + fallback a orden para
+    # históricos (ver mejor_resultado_examen en app/plataforma.py).
+    ids_evaluables = [str(ex["_id"]) for ex in examenes]
     match_evaluable = {"codigo_evento": codigo_evento}
     if ordenes_evaluables:
-        match_evaluable["orden_examen"] = {"$in": ordenes_evaluables}
+        match_evaluable["$or"] = [
+            {"examen_id": {"$in": ids_evaluables}},
+            {"examen_id": None, "orden_examen": {"$in": ordenes_evaluables}},
+            {"examen_id": {"$exists": False}, "orden_examen": {"$in": ordenes_evaluables}},
+        ]
     
     total_resultados = collection_exam_results.count_documents(match_evaluable)
     
@@ -4701,27 +4718,34 @@ def tablero_metricas_lms_evento(codigo_evento):
     
     participantes_lista = list(participantes_por_cedula.values())
     
-    # Obtener resultados de exámenes por cédula y por examen (solo evaluables)
+    # Obtener resultados de exámenes por cédula y por examen (solo evaluables).
+    # La clave de agrupación prefiere examen_id (estable) con fallback a orden.
     pipeline_intentos = [
         {"$match": match_evaluable},
         {"$group": {
-            "_id": {"cedula": "$cedula_participante", "orden": "$orden_examen"},
+            "_id": {"cedula": "$cedula_participante", "orden": "$orden_examen", "eid": "$examen_id"},
             "total_intentos": {"$max": "$numero_intento"},
             "mejor_calificacion": {"$max": "$calificacion"}
         }}
     ]
     resultados_raw = list(collection_exam_results.aggregate(pipeline_intentos))
-    
+
+    eid_a_orden = {str(ex["_id"]): ex.get("orden") for ex in examenes}
     resultados_por_cedula = {}
     for r in resultados_raw:
         cedula = r["_id"]["cedula"]
-        orden = r["_id"]["orden"]
+        orden = eid_a_orden.get(str(r["_id"].get("eid") or "")) or r["_id"]["orden"]
         if cedula not in resultados_por_cedula:
             resultados_por_cedula[cedula] = {}
-        resultados_por_cedula[cedula][orden] = {
+        actual = resultados_por_cedula[cedula].get(orden)
+        nuevo = {
             "total_intentos": r.get("total_intentos", 0),
             "mejor_calificacion": round(r.get("mejor_calificacion", 0), 1),
         }
+        # Si el mismo examen aparece por ambas claves (remap parcial),
+        # conservar el mejor.
+        if actual is None or nuevo["mejor_calificacion"] > actual["mejor_calificacion"]:
+            resultados_por_cedula[cedula][orden] = nuevo
     
     # Combinar datos de participantes con resultados de exámenes
     datos_participantes = []
@@ -4742,17 +4766,22 @@ def tablero_metricas_lms_evento(codigo_evento):
     promedio_intentos = round(sum(total_intentos_lista) / len(total_intentos_lista), 2) if total_intentos_lista else 0
     participantes_con_examenes = sum(1 for t in total_intentos_lista if t > 0)
     
-    # Añadir estadísticas por examen
+    # Añadir estadísticas por examen (match por examen_id + fallback a orden)
     for examen in examenes:
-        examen_resultados = collection_exam_results.count_documents({
+        match_un_examen = {
             "codigo_evento": codigo_evento,
-            "orden_examen": examen["orden"]
-        })
+            "$or": [
+                {"examen_id": str(examen["_id"])},
+                {"examen_id": None, "orden_examen": examen["orden"]},
+                {"examen_id": {"$exists": False}, "orden_examen": examen["orden"]},
+            ],
+        }
+        examen_resultados = collection_exam_results.count_documents(match_un_examen)
         examen["total_resultados"] = examen_resultados
-        
+
         # Media de intentos por participante para este examen
         pipeline_media_intentos = [
-            {"$match": {"codigo_evento": codigo_evento, "orden_examen": examen["orden"]}},
+            {"$match": match_un_examen},
             {"$group": {
                 "_id": "$cedula_participante",
                 "max_intento": {"$max": "$numero_intento"}
@@ -4767,10 +4796,7 @@ def tablero_metricas_lms_evento(codigo_evento):
         
         # Promedio de calificación para este examen específico
         pipeline_examen = [
-            {"$match": {
-                "codigo_evento": codigo_evento,
-                "orden_examen": examen["orden"]
-            }},
+            {"$match": match_un_examen},
             {"$group": {
                 "_id": None,
                 "promedio": {"$avg": "$calificacion"}
@@ -4781,11 +4807,7 @@ def tablero_metricas_lms_evento(codigo_evento):
         
         # Promedio solo primer intento
         pipeline_inicial = [
-            {"$match": {
-                "codigo_evento": codigo_evento,
-                "orden_examen": examen["orden"],
-                "numero_intento": 1
-            }},
+            {"$match": {**match_un_examen, "numero_intento": 1}},
             {"$group": {
                 "_id": None,
                 "promedio": {"$avg": "$calificacion"}
@@ -4796,7 +4818,7 @@ def tablero_metricas_lms_evento(codigo_evento):
         
         # Boxplot stats
         calificaciones_raw = list(collection_exam_results.find(
-            {"codigo_evento": codigo_evento, "orden_examen": examen["orden"]},
+            match_un_examen,
             {"calificacion": 1}
         ))
         calificaciones = sorted([r["calificacion"] for r in calificaciones_raw])
@@ -4813,7 +4835,7 @@ def tablero_metricas_lms_evento(codigo_evento):
         
         # Boxplot stats (solo primer intento)
         calificaciones_inicial_raw = list(collection_exam_results.find(
-            {"codigo_evento": codigo_evento, "orden_examen": examen["orden"], "numero_intento": 1},
+            {**match_un_examen, "numero_intento": 1},
             {"calificacion": 1}
         ))
         calificaciones_inicial = sorted([r["calificacion"] for r in calificaciones_inicial_raw])
@@ -4838,8 +4860,16 @@ def tablero_metricas_lms_evento(codigo_evento):
             if not examen.get("boxplot"):
                 continue
             titulo = examen.get("titulo", f"Examen {examen['orden']}")
+            match_swarm = {
+                "codigo_evento": codigo_evento,
+                "$or": [
+                    {"examen_id": str(examen["_id"])},
+                    {"examen_id": None, "orden_examen": examen["orden"]},
+                    {"examen_id": {"$exists": False}, "orden_examen": examen["orden"]},
+                ],
+            }
             calificaciones_raw = list(collection_exam_results.find(
-                {"codigo_evento": codigo_evento, "orden_examen": examen["orden"]},
+                match_swarm,
                 {"calificacion": 1}
             ))
             calificaciones = [r["calificacion"] for r in calificaciones_raw]
@@ -7767,31 +7797,33 @@ def generar_pdf(nanoid):
     # Check exam completion for LMS events (exento de requisitos de examen).
     # El personal autorizado del evento puede imprimir certificados anticipadamente.
     if evento.get('lms_activo') and not es_exento and not puede_editar:
-        from app.plataforma import parse_qbank_config
+        from app.plataforma import parse_qbank_config, mejor_resultado_examen, _id_str
         examenes = list(collection_eva.find({
             'codigo_evento': codigo_evento,
             'tipo': 'examen'
         }))
-        ordenes_sumativos = []
+        examenes_sumativos = []
         for ex in examenes:
             qbank_config = ex.get('qbank_config', '')
             if qbank_config:
                 _, _, _, formativo, _, _ = parse_qbank_config(qbank_config)
                 if not formativo:
-                    ordenes_sumativos.append(ex.get('orden'))
+                    examenes_sumativos.append(ex)
 
-        if ordenes_sumativos:
+        if examenes_sumativos:
+            ids_sumativos = [_id_str(ex) for ex in examenes_sumativos]
+            ordenes_sumativos = [ex.get('orden') for ex in examenes_sumativos]
             resultados = list(collection_exam_results.find({
                 'codigo_evento': codigo_evento,
                 'cedula_participante': participante['cedula'],
-                'orden_examen': {'$in': ordenes_sumativos}
+                '$or': [
+                    {'examen_id': {'$in': ids_sumativos}},
+                    {'examen_id': None, 'orden_examen': {'$in': ordenes_sumativos}},
+                    {'examen_id': {'$exists': False}, 'orden_examen': {'$in': ordenes_sumativos}},
+                ],
             }))
-            for orden in ordenes_sumativos:
-                mejor = max(
-                    [r for r in resultados if r.get('orden_examen') == orden],
-                    key=lambda r: r.get('calificacion', 0),
-                    default=None
-                )
+            for ex in examenes_sumativos:
+                mejor = mejor_resultado_examen(resultados, ex)
                 if not mejor or mejor.get('calificacion', 0) < 80:
                     flash('Debe aprobar todos los exámenes sumativos con puntaje ≥80% para descargar el certificado.', 'error')
                     return redirect(url_for('buscar_certificados'))

@@ -138,6 +138,27 @@ def breadcrumb_lms(contenidos_by_id, contenido):
     return modulo, submodulo
 
 
+def mejor_resultado_examen(resultados, examen):
+    """Mejor intento para un examen, con fallback para históricos.
+
+    Los resultados nuevos guardan `examen_id` (FK estable ante
+    reordenamientos). Los históricos solo tienen `orden_examen`, que es
+    mutable (mover/eliminar renumeran). Se prefiere `examen_id` y se cae
+    a `orden_examen` solo para docs sin `examen_id`.
+    """
+    eid = _id_str(examen)
+    cands = [
+        r for r in resultados
+        if r.get("examen_id") and str(r.get("examen_id")) == eid
+    ]
+    if not cands:
+        cands = [
+            r for r in resultados
+            if not r.get("examen_id") and r.get("orden_examen") == examen.get("orden")
+        ]
+    return max(cands, key=lambda r: r.get("calificacion", 0), default=None)
+
+
 ###
 ### LMS - Listado de actividades o contenidos
 ###
@@ -602,6 +623,31 @@ def mover_contenido(codigo_evento, orden, direccion):
         {"_id": contenido_destino["_id"]}, {"$set": {"orden": orden}}
     )
 
+    # Avisar si se movió un examen con intentos: las calificaciones se
+    # conservan por examen_id, pero conviene verificar el listado interno.
+    for movido in (contenido_actual, contenido_destino):
+        if movido.get("tipo") == "examen":
+            n = collection_exam_results.count_documents(
+                {
+                    "codigo_evento": codigo_evento,
+                    "$or": [
+                        {"examen_id": _id_str(movido)},
+                        {
+                            "examen_id": {"$in": [None]},
+                            "orden_examen": movido.get("orden"),
+                        },
+                    ],
+                }
+            )
+            if n > 0:
+                flash(
+                    f"«{movido.get('titulo', 'Examen')}» tiene {n} intento(s) registrado(s). "
+                    "Se movió conservando calificaciones (enlace por examen_id); "
+                    "verifica el listado de calificaciones.",
+                    "info",
+                )
+                break
+
     return redirect(
         url_for("plataforma.listar_contenidos", codigo_evento=codigo_evento)
     )
@@ -663,6 +709,24 @@ def eliminar_contenido(codigo_evento, orden):
     )
     for i, cont in enumerate(contenidos_restantes, start=1):
         collection_eva.update_one({"_id": cont["_id"]}, {"$set": {"orden": i}})
+
+    if contenido.get("tipo") == "examen":
+        n = collection_exam_results.count_documents(
+            {
+                "codigo_evento": codigo_evento,
+                "$or": [
+                    {"examen_id": contenido_id},
+                    {"examen_id": {"$in": [None]}, "orden_examen": orden},
+                ],
+            }
+        )
+        if n > 0:
+            flash(
+                f"Se eliminó un examen con {n} intento(s) registrado(s) y se renumeró "
+                "el resto. Las calificaciones históricas se conservan por examen_id; "
+                "verifica el listado de calificaciones.",
+                "info",
+            )
 
     return redirect(
         url_for("plataforma.listar_contenidos", codigo_evento=codigo_evento)
@@ -1039,6 +1103,8 @@ def ver_contenido(codigo_evento, orden):
                     resultado_examen = {
                         "codigo_evento": codigo_evento,
                         "orden_examen": orden,
+                        # FK estable ante reordenamientos (ver mejor_resultado_examen)
+                        "examen_id": _id_str(contenido_actual),
                         "cedula_participante": cedula_participante,
                         "numero_intento": numero_intento,
                         "calificacion": calificacion,
@@ -1070,15 +1136,20 @@ def ver_contenido(codigo_evento, orden):
             nanoid = participante.get("nanoid") if participante else None
 
             # Historial de intentos para exámenes sumativos
+            # (incluye FK estable examen_id + fallback a orden para históricos)
             intentos_historial = []
             if cedula and not formativo:
                 intentos_historial = list(
                     collection_exam_results.find(
                         {
                             "codigo_evento": codigo_evento,
-                            "orden_examen": orden,
                             "cedula_participante": cedula,
                             "formativo": formativo,
+                            "$or": [
+                                {"examen_id": _id_str(contenido_actual)},
+                                {"examen_id": None, "orden_examen": orden},
+                                {"examen_id": {"$exists": False}, "orden_examen": orden},
+                            ],
                         },
                         {
                             "numero_intento": 1,
@@ -1120,27 +1191,31 @@ def ver_contenido(codigo_evento, orden):
                         if not ex_formativo:
                             total_sumativos += 1
 
-                # Verificar cuáles sumativos están aprobados (>=80%)
+                # Verificar cuáles sumativos están aprobados (>=80%).
+                # FK estable: se matchea por examen_id con fallback a orden
+                # para históricos previos al blindaje/remap.
                 if total_sumativos > 0:
-                    ordenes_sumativos = []
+                    examenes_sumativos = []
                     for ex in examenes_evento:
                         qbank_config = ex.get('qbank_config', '')
                         if qbank_config:
                             _, _, _, ex_formativo, _, _ = parse_qbank_config(qbank_config)
                             if not ex_formativo:
-                                ordenes_sumativos.append(ex.get('orden'))
+                                examenes_sumativos.append(ex)
 
+                    ids_sumativos = [_id_str(ex) for ex in examenes_sumativos]
+                    ordenes_sumativos = [ex.get('orden') for ex in examenes_sumativos]
                     resultados_sumativos = list(collection_exam_results.find({
                         'codigo_evento': codigo_evento,
                         'cedula_participante': cedula,
-                        'orden_examen': {'$in': ordenes_sumativos}
+                        '$or': [
+                            {'examen_id': {'$in': ids_sumativos}},
+                            {'examen_id': None, 'orden_examen': {'$in': ordenes_sumativos}},
+                            {'examen_id': {'$exists': False}, 'orden_examen': {'$in': ordenes_sumativos}},
+                        ],
                     }))
-                    for orden_s in ordenes_sumativos:
-                        mejor = max(
-                            [r for r in resultados_sumativos if r.get('orden_examen') == orden_s],
-                            key=lambda r: r.get('calificacion', 0),
-                            default=None
-                        )
+                    for ex in examenes_sumativos:
+                        mejor = mejor_resultado_examen(resultados_sumativos, ex)
                         if mejor and mejor.get('calificacion', 0) >= 80:
                             aprobados_sumativos += 1
 
@@ -1950,6 +2025,8 @@ def enviar_resultado_examen():
         resultado_examen = {
             "codigo_evento": codigo_evento,
             "orden_examen": orden_examen,
+            # FK estable ante reordenamientos (ver mejor_resultado_examen)
+            "examen_id": _id_str(examen) if examen else None,
             "cedula_participante": cedula_participante,
             "numero_intento": numero_intento,
             "calificacion": float(calificacion),
