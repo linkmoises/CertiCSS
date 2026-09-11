@@ -78,7 +78,7 @@
                                         <tr>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ actividad.orden }}</td>
                                             <td class="px-6 w-80 py-4 whitespace-nowrap text-sm text-gray-800">{{ actividad.titulo }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ actividad.tipo }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{% if actividad.tipo == 'modulo' %}<span class="py-1 px-2 inline-flex items-center gap-x-1 text-xs font-bold uppercase rounded-md bg-gray-200 text-gray-800">Módulo (sección)</span>{% else %}{{ actividad.tipo }}{% endif %}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
                                                 <div class="flex gap-4">
                                                     <form

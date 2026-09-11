@@ -123,6 +123,11 @@ def crear_contenido(codigo_evento):
         elif tipo == "examen":
             contenido["qbank_config"] = request.form["qbank_config"]
 
+        elif tipo == "modulo":
+            # Módulo organizador: separador visual sin campos propios.
+            # Solo guarda titulo + descripcion, no es navegable.
+            pass
+
         collection_eva.insert_one(contenido)
 
         return redirect(
@@ -195,10 +200,34 @@ def editar_contenido(codigo_evento, orden):
                 return redirect(request.url)
         elif tipo == "examen":
             actualizacion["qbank_config"] = request.form["qbank_config"]
+        elif tipo == "modulo":
+            # Módulo organizador: sin campos propios.
+            pass
+
+        # Campos específicos por tipo: al cambiar de tipo se eliminan los
+        # campos huérfanos del tipo anterior para no arrastrar basura.
+        campos_por_tipo = {
+            "video": {"url_video"},
+            "texto": {"contenido_texto"},
+            "documento": {"documento"},
+            "caso_chatgpt": {"contenido_json"},
+            "examen": {"qbank_config"},
+            "modulo": set(),
+        }
+        todos_los_campos = set().union(*campos_por_tipo.values())
+        campos_a_conservar = campos_por_tipo.get(tipo, set())
+        campos_a_limpiar = {
+            campo: "" for campo in (todos_los_campos - campos_a_conservar)
+        }
 
         collection_eva.update_one(
             {"codigo_evento": codigo_evento, "orden": orden}, {"$set": actualizacion}
         )
+        if campos_a_limpiar:
+            collection_eva.update_one(
+                {"codigo_evento": codigo_evento, "orden": orden},
+                {"$unset": campos_a_limpiar},
+            )
 
         return redirect(
             url_for("plataforma.listar_contenidos", codigo_evento=codigo_evento)
@@ -439,7 +468,8 @@ def ver_plataforma(codigo_evento):
         abort(404)
 
     primer_contenido = collection_eva.find_one(
-        {"codigo_evento": codigo_evento}, sort=[("orden", 1)]
+        {"codigo_evento": codigo_evento, "tipo": {"$ne": "modulo"}},
+        sort=[("orden", 1)],
     )
 
     if primer_contenido:
@@ -453,11 +483,18 @@ def ver_plataforma(codigo_evento):
             )
         )
     else:
+        # Sin contenidos navegables (vacío o solo módulos): mostrar listado
+        # para no redirigir a un módulo no navegable.
+        contenidos = list(
+            collection_eva.find({"codigo_evento": codigo_evento}).sort("orden", 1)
+        )
         return render_template(
             "plataforma.html",
             evento=evento,
-            contenidos=[],
+            contenidos=contenidos,
             contenido_actual=None,
+            contenido_anterior=None,
+            contenido_siguiente=None,
             cedula=cedula,
             token=token,
         )
@@ -489,6 +526,46 @@ def ver_contenido(codigo_evento, orden):
     contenido_actual = next((c for c in contenidos if c["orden"] == orden), None)
     if not contenido_actual:
         abort(404)
+
+    # Los módulos son separadores visuales no navegables: redirigir al
+    # siguiente contenido navegable (o al anterior si es el último),
+    # preservando cedula/token para el acceso por documento.
+    if contenido_actual.get("tipo") == "modulo":
+        siguiente_navegable = next(
+            (
+                c
+                for c in contenidos
+                if c["orden"] > orden and c.get("tipo") != "modulo"
+            ),
+            None,
+        )
+        anterior_navegable = next(
+            (
+                c
+                for c in reversed(contenidos)
+                if c["orden"] < orden and c.get("tipo") != "modulo"
+            ),
+            None,
+        )
+        destino = siguiente_navegable or anterior_navegable
+        if destino:
+            return redirect(
+                url_for(
+                    "plataforma.ver_contenido",
+                    codigo_evento=codigo_evento,
+                    orden=destino["orden"],
+                    cedula=cedula,
+                    token=token,
+                )
+            )
+        return redirect(
+            url_for(
+                "plataforma.ver_plataforma",
+                codigo_evento=codigo_evento,
+                cedula=cedula,
+                token=token,
+            )
+        )
 
     # Convertir Markdown a HTML solo si el tipo es 'texto'
     if (
@@ -757,11 +834,13 @@ def ver_contenido(codigo_evento, orden):
                 certificado_disponible=certificado_disponible,
             )
 
-    # Encontrar el contenido anterior y el siguiente
-    indice_actual = contenidos.index(contenido_actual)
-    contenido_anterior = contenidos[indice_actual - 1] if indice_actual > 0 else None
+    # Encontrar el contenido anterior y el siguiente (saltando módulos,
+    # que son separadores no navegables)
+    navegables = [c for c in contenidos if c.get("tipo") != "modulo"]
+    indice_actual = navegables.index(contenido_actual)
+    contenido_anterior = navegables[indice_actual - 1] if indice_actual > 0 else None
     contenido_siguiente = (
-        contenidos[indice_actual + 1] if indice_actual < len(contenidos) - 1 else None
+        navegables[indice_actual + 1] if indice_actual < len(navegables) - 1 else None
     )
 
     return render_template(

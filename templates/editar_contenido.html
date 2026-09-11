@@ -91,6 +91,8 @@
                                                         %}selected{% endif %}>Caso clínico interactivo</option>
                                                     <option value="examen" {% if contenido.tipo=="examen" %}selected{%
                                                         endif %}>Examen (Banco de preguntas)</option>
+                                                    <option value="modulo" {% if contenido.tipo=="modulo" %}selected{%
+                                                        endif %}>Módulo (sección organizadora)</option>
                                                 </select>
 
                                                 <div id="video-section"
@@ -148,6 +150,12 @@
                                                         value="{{ contenido.qbank_config if contenido.qbank_config else '' }}">
                                                     <p class="mt-2 text-sm text-gray-500">Ejemplo: [O5W4YTK2 preguntas=3
                                                         aleatorio=no formativo=no persistencia=no evaluable=si]</p>
+                                                </div>
+
+                                                <div id="modulo-section"
+                                                    class="w-full inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200"
+                                                    {% if contenido.tipo !="modulo" %}style="display:none" {% endif %}>
+                                                    <p class="mt-2 text-sm text-gray-500">El módulo es un separador visual: solo usa título y descripción para organizar los contenidos siguientes. Se muestra en negritas en el listado y no tiene página propia.</p>
                                                 </div>
                                             </div>
                                             <!-- End Col -->
@@ -258,6 +266,7 @@
         document.getElementById('documento-section').style.display = this.value === 'documento' ? 'block' : 'none';
         document.getElementById('caso-chatgpt-section').style.display = this.value === 'caso_chatgpt' ? 'block' : 'none';
         document.getElementById('qbank-section').style.display = this.value === 'examen' ? 'block' : 'none';
+        document.getElementById('modulo-section').style.display = this.value === 'modulo' ? 'block' : 'none';
     });
 </script>
 </body>

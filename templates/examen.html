@@ -48,7 +48,10 @@
                     <div class="m-6">
                         <ul class="text-sm text-gray-500">
                             {% for contenido in contenidos %}
-                            <li class="gap-x-2 {% if contenido.orden == contenido_actual.orden %}font-bold{% endif %}">
+                            {% if contenido.tipo == 'modulo' %}
+                            <li class="font-bold text-gray-800 uppercase tracking-wide px-2 py-1 bg-gray-100 rounded">{{ contenido.titulo }}</li>
+                            {% else %}
+                            <li class="gap-x-2 {% if contenido_actual and contenido.orden == contenido_actual.orden %}font-bold{% endif %}">
                                 <a
                                     href="{{ url_for('plataforma.ver_contenido', codigo_evento=evento.codigo, orden=contenido.orden, cedula=cedula, token=token) }}">
                                     {{ contenido.orden|string|zfill(2) }} - {{ contenido.titulo }}
@@ -121,6 +124,7 @@
                                 </div>
                                 {% endif %}
                             </li>
+                            {% endif %}
                             {% endfor %}
                         </ul>
                         {% if current_user.is_authenticated %}
