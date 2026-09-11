@@ -1,0 +1,77 @@
+{# Sidebar jerárquico LMS: Módulo -> Submódulo -> Contenido + huérfanos.
+   Backward-compatible: si `arbol` no está definido, cae al listado plano legacy.
+   Requiere: contenidos, contenido_actual, evento, cedula, token, (opcional) arbol. #}
+{% if arbol is defined and arbol %}
+<ul class="text-sm text-gray-500 space-y-1">
+    {# Contenidos huérfanos (planos, sin módulo): cursos legacy se ven igual que antes #}
+    {% for h in arbol.huerfanos %}
+    {% if h.doc is defined %}
+    {# Nodo submódulo huérfano #}
+    <li>
+        <details open class="bg-yellow-50 border border-yellow-200 rounded">
+            <summary class="font-bold text-gray-800 px-2 py-1 cursor-pointer list-none">▸ {{ h.doc.titulo }} <span class="text-[10px] font-normal text-yellow-700">(submódulo)</span></summary>
+            <ul class="pl-4 pb-1">
+                {% for c in h.contenidos %}
+                <li class="gap-x-2 {% if contenido_actual and c.orden == contenido_actual.orden %}font-bold{% endif %}">
+                    <a href="{{ url_for('plataforma.ver_contenido', codigo_evento=evento.codigo, orden=c.orden, cedula=cedula, token=token) }}">{{ c.orden|string|zfill(2) }} - {{ c.titulo }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </details>
+    </li>
+    {% else %}
+    <li class="gap-x-2 {% if contenido_actual and h.orden == contenido_actual.orden %}font-bold{% endif %}">
+        <a href="{{ url_for('plataforma.ver_contenido', codigo_evento=evento.codigo, orden=h.orden, cedula=cedula, token=token) }}">{{ h.orden|string|zfill(2) }} - {{ h.titulo }}</a>
+    </li>
+    {% endif %}
+    {% endfor %}
+    {% for nodo in arbol.modulos %}
+    <li>
+        <details open class="bg-gray-100 rounded">
+            <summary class="font-bold text-gray-800 uppercase tracking-wide px-2 py-1 cursor-pointer list-none">📁 {{ nodo.doc.titulo }}</summary>
+            <ul class="pl-3 py-1 space-y-1">
+                {% for c in nodo.contenidos_directos %}
+                <li class="gap-x-2 {% if contenido_actual and c.orden == contenido_actual.orden %}font-bold{% endif %}">
+                    <a href="{{ url_for('plataforma.ver_contenido', codigo_evento=evento.codigo, orden=c.orden, cedula=cedula, token=token) }}">{{ c.orden|string|zfill(2) }} - {{ c.titulo }}</a>
+                </li>
+                {% endfor %}
+                {% for sub in nodo.submodulos %}
+                <li>
+                    <details open class="bg-white border border-gray-200 rounded ml-2">
+                        <summary class="font-semibold text-gray-700 px-2 py-1 cursor-pointer list-none text-[13px]">📂 {{ sub.doc.titulo }}</summary>
+                        <ul class="pl-4 pb-1">
+                            {% for c in sub.contenidos %}
+                            <li class="gap-x-2 {% if contenido_actual and c.orden == contenido_actual.orden %}font-bold{% endif %}">
+                                <a href="{{ url_for('plataforma.ver_contenido', codigo_evento=evento.codigo, orden=c.orden, cedula=cedula, token=token) }}">{{ c.orden|string|zfill(2) }} - {{ c.titulo }}</a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </details>
+                </li>
+                {% endfor %}
+            </ul>
+        </details>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+{# Fallback legacy plano #}
+<ul class="text-sm text-gray-500">
+    {% for contenido in contenidos %}
+    {% if contenido.tipo == 'modulo' %}
+    <li class="font-bold text-gray-800 uppercase tracking-wide px-2 py-1 bg-gray-100 rounded">{{ contenido.titulo }}</li>
+    {% elif contenido.tipo == 'submodulo' %}
+    <li class="font-semibold text-gray-700 px-4 py-1 bg-white border-l-4 border-gray-300 ml-2">{{ contenido.titulo }}</li>
+    {% else %}
+    <li class="gap-x-2 {% if contenido_actual and contenido.orden == contenido_actual.orden %}font-bold{% endif %}">
+        <a href="{{ url_for('plataforma.ver_contenido', codigo_evento=evento.codigo, orden=contenido.orden, cedula=cedula, token=token) }}">{{ contenido.orden|string|zfill(2) }} - {{ contenido.titulo }}</a>
+    </li>
+    {% endif %}
+    {% endfor %}
+</ul>
+{% endif %}
+{% if modulo_padre or submodulo_padre %}
+<p class="mt-3 text-xs text-gray-400">
+    {% if modulo_padre %}📁 {{ modulo_padre.titulo }}{% endif %}{% if submodulo_padre %} / 📂 {{ submodulo_padre.titulo }}{% endif %}
+</p>
+{% endif %}

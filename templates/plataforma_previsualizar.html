@@ -146,9 +146,9 @@
                                 {% endfor %}
                             </div>
                         </div>
-                        {% elif contenido_actual.tipo == 'modulo' %}
+                        {% elif contenido_actual.tipo == 'modulo' or contenido_actual.tipo == 'submodulo' %}
                         <div class="mx-auto">
-                            <h2 class="text-2xl font-bold mb-4">{{ contenido_actual.titulo }} (Módulo - Previsualización)</h2>
+                            <h2 class="text-2xl font-bold mb-4">{{ contenido_actual.titulo }} ({{ 'Módulo' if contenido_actual.tipo == 'modulo' else 'Submódulo' }} - Previsualización)</h2>
                             {% if contenido_actual.descripcion %}
                             <p class="text-sm text-gray-600">{{ contenido_actual.descripcion }}</p>
                             {% endif %}

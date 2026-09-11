@@ -33,6 +33,112 @@ plataforma_bp = Blueprint("plataforma", __name__)
 
 
 ###
+### LMS jerárquico: Módulo -> Submódulo -> Contenido (+ huérfanos)
+### Backward-compatible: cursos planos existentes (sin modulo_id/
+### submodulo_id) se tratan como huérfanos y se renderizan igual que antes.
+###
+TIPOS_NO_NAVEGABLES = {"modulo", "submodulo"}
+TIPOS_NAVEGABLES_EXAMEN = {"video", "texto", "documento", "caso_chatgpt", "examen"}
+
+
+def es_navegable(contenido):
+    """Un contenido es navegable si su tipo no es módulo/submódulo."""
+    return contenido.get("tipo") not in TIPOS_NO_NAVEGABLES
+
+
+def _id_str(doc):
+    try:
+        return str(doc.get("_id")) if doc.get("_id") is not None else None
+    except Exception:
+        return None
+
+
+def build_arbol_lms(contenidos):
+    """Construye árbol {huerfanos, modulos:[{doc, contenidos_directos, submodulos:[{doc, contenidos}]}]}.
+
+    Acepta docs legacy sin modulo_id/submodulo_id (los trata como huérfanos).
+    """
+    modulos_by_id = {}
+    submodulos_by_id = {}
+    for c in contenidos:
+        if c.get("tipo") == "modulo":
+            modulos_by_id[_id_str(c)] = {
+                "doc": c, "contenidos_directos": [], "submodulos": [],
+            }
+        elif c.get("tipo") == "submodulo":
+            submodulos_by_id[_id_str(c)] = {"doc": c, "contenidos": []}
+
+    # Vincular submódulos a su módulo padre (huérfano si el padre no existe)
+    submodulos_huerfanos = []
+    for sid, nodo in submodulos_by_id.items():
+        mid = nodo["doc"].get("modulo_id")
+        if mid and str(mid) in modulos_by_id:
+            modulos_by_id[str(mid)]["submodulos"].append(nodo)
+        else:
+            submodulos_huerfanos.append(nodo)
+
+    huerfanos = list(submodulos_huerfanos)
+    modulos = []
+    for mid, nodo in modulos_by_id.items():
+        modulos.append(nodo)
+    # Ordenar módulos/submódulos por `orden` para display estable
+    modulos.sort(key=lambda n: n["doc"].get("orden", 0))
+    for nodo in modulos:
+        nodo["submodulos"].sort(key=lambda s: s["doc"].get("orden", 0))
+
+    sub_por_id = {k: v for k, v in submodulos_by_id.items()}
+    for c in contenidos:
+        if c.get("tipo") in TIPOS_NO_NAVEGABLES:
+            continue
+        mid = c.get("modulo_id")
+        sid = c.get("submodulo_id")
+        mid = str(mid) if mid else None
+        sid = str(sid) if sid else None
+        if sid and sid in sub_por_id:
+            # Validar coherencia: el submódulo debe colgar del mismo módulo
+            sub_mid = sub_por_id[sid]["doc"].get("modulo_id")
+            sub_mid = str(sub_mid) if sub_mid else None
+            if mid and sub_mid and mid != sub_mid:
+                huerfanos.append(c)
+                continue
+            sub_por_id[sid]["contenidos"].append(c)
+        elif mid and mid in modulos_by_id:
+            modulos_by_id[mid]["contenidos_directos"].append(c)
+        else:
+            huerfanos.append(c)
+
+    # Ordenar contenidos por `orden` dentro de cada grupo
+    huerfanos.sort(key=lambda c: c.get("orden", 0) if isinstance(c, dict) else 0)
+    for nodo in modulos:
+        nodo["contenidos_directos"].sort(key=lambda c: c.get("orden", 0))
+        for sub in nodo["submodulos"]:
+            sub["contenidos"].sort(key=lambda c: c.get("orden", 0))
+    # huerfanos puede mezclar dicts de submódulo-nodo y contenidos; normalizar
+    huerfanos_docs = []
+    for h in huerfanos:
+        if isinstance(h, dict) and "doc" in h and "contenidos" in h:
+            huerfanos_docs.append(h)  # nodo submódulo huérfano
+        else:
+            huerfanos_docs.append(h)
+    return {"huerfanos": huerfanos_docs, "modulos": modulos}
+
+
+def breadcrumb_lms(contenidos_by_id, contenido):
+    """Retorna (modulo_doc|None, submodulo_doc|None) para un contenido."""
+    mid = contenido.get("modulo_id")
+    sid = contenido.get("submodulo_id")
+    mid = str(mid) if mid else None
+    sid = str(sid) if sid else None
+    modulo = contenidos_by_id.get(mid) if mid else None
+    submodulo = contenidos_by_id.get(sid) if sid else None
+    if modulo is not None and modulo.get("tipo") != "modulo":
+        modulo = None
+    if submodulo is not None and submodulo.get("tipo") != "submodulo":
+        submodulo = None
+    return modulo, submodulo
+
+
+###
 ### LMS - Listado de actividades o contenidos
 ###
 @plataforma_bp.route("/tablero/eventos/<codigo_evento>/lms")
@@ -44,12 +150,15 @@ def listar_contenidos(codigo_evento):
         abort(404)
 
     actividades = collection_eva.find({"codigo_evento": codigo_evento}).sort("orden", 1)
+    actividades = list(actividades)
+    arbol = build_arbol_lms(actividades)
 
     return render_template(
         "listar_contenido.html",
         codigo_evento=codigo_evento,
         evento=evento,
         actividades=actividades,
+        arbol=arbol,
     )
 
 
@@ -70,6 +179,8 @@ def crear_contenido(codigo_evento):
         titulo = request.form["titulo"]
         descripcion = request.form["descripcion"]
         tipo = request.form["tipo"]
+        modulo_id = (request.form.get("modulo_id") or "").strip() or None
+        submodulo_id = (request.form.get("submodulo_id") or "").strip() or None
 
         # Obtener el próximo número en la secuencia
         ultimo_contenido = collection_eva.find_one(
@@ -83,7 +194,60 @@ def crear_contenido(codigo_evento):
             "titulo": titulo,
             "descripcion": descripcion,
             "tipo": tipo,
+            "modulo_id": None,
+            "submodulo_id": None,
         }
+
+        if tipo == "submodulo":
+            # Submódulo: requiere módulo padre, sin padre propio adicional.
+            if not modulo_id:
+                flash("El submódulo requiere un módulo padre.", "error")
+                return redirect(request.url)
+            padre = collection_eva.find_one(
+                {"codigo_evento": codigo_evento, "tipo": "modulo"}
+            )
+            # Validar que el id corresponda a un módulo del evento
+            try:
+                padre = collection_eva.find_one(
+                    {"_id": ObjectId(modulo_id), "codigo_evento": codigo_evento}
+                )
+            except Exception:
+                padre = None
+            if not padre or padre.get("tipo") != "modulo":
+                flash("El módulo padre seleccionado no es válido.", "error")
+                return redirect(request.url)
+            contenido["modulo_id"] = str(padre["_id"])
+        elif tipo not in TIPOS_NO_NAVEGABLES:
+            # Contenido navegable: padres opcionales (modo mixto permite huérfanos)
+            if modulo_id:
+                try:
+                    padre = collection_eva.find_one(
+                        {"_id": ObjectId(modulo_id), "codigo_evento": codigo_evento}
+                    )
+                except Exception:
+                    padre = None
+                if not padre or padre.get("tipo") != "modulo":
+                    flash("El módulo padre seleccionado no es válido.", "error")
+                    return redirect(request.url)
+                contenido["modulo_id"] = str(padre["_id"])
+            if submodulo_id:
+                try:
+                    sub = collection_eva.find_one(
+                        {"_id": ObjectId(submodulo_id), "codigo_evento": codigo_evento}
+                    )
+                except Exception:
+                    sub = None
+                if not sub or sub.get("tipo") != "submodulo":
+                    flash("El submódulo padre seleccionado no es válido.", "error")
+                    return redirect(request.url)
+                # Coherencia: el submódulo debe colgar del mismo módulo
+                sub_mid = str(sub.get("modulo_id")) if sub.get("modulo_id") else None
+                if contenido["modulo_id"] and sub_mid != contenido["modulo_id"]:
+                    flash("El submódulo no pertenece al módulo seleccionado.", "error")
+                    return redirect(request.url)
+                if not contenido["modulo_id"] and sub_mid:
+                    contenido["modulo_id"] = sub_mid
+                contenido["submodulo_id"] = str(sub["_id"])
 
         if tipo == "video":
             contenido["url_video"] = request.form["url_video"]
@@ -128,13 +292,25 @@ def crear_contenido(codigo_evento):
             # Solo guarda titulo + descripcion, no es navegable.
             pass
 
+        elif tipo == "submodulo":
+            # Submódulo organizador: igual que módulo pero colgado de un padre.
+            pass
+
         collection_eva.insert_one(contenido)
 
         return redirect(
             url_for("plataforma.listar_contenidos", codigo_evento=codigo_evento)
         )
 
-    return render_template("crear_contenido.html", evento=evento)
+    modulos = list(
+        collection_eva.find({"codigo_evento": codigo_evento, "tipo": "modulo"}).sort("orden", 1)
+    )
+    submodulos = list(
+        collection_eva.find({"codigo_evento": codigo_evento, "tipo": "submodulo"}).sort("orden", 1)
+    )
+    return render_template(
+        "crear_contenido.html", evento=evento, modulos=modulos, submodulos=submodulos
+    )
 
 
 ###
@@ -164,8 +340,81 @@ def editar_contenido(codigo_evento, orden):
         titulo = request.form["titulo"]
         descripcion = request.form["descripcion"]
         tipo = request.form["tipo"]
+        modulo_id = (request.form.get("modulo_id") or "").strip() or None
+        submodulo_id = (request.form.get("submodulo_id") or "").strip() or None
+        tipo_anterior = contenido.get("tipo")
 
-        actualizacion = {"titulo": titulo, "descripcion": descripcion, "tipo": tipo}
+        # Proteger calificaciones: no convertir un examen con intentos en
+        # módulo/submódulo (dejaría resultados huérfanos).
+        if tipo_anterior == "examen" and tipo in TIPOS_NO_NAVEGABLES:
+            intentos = collection_exam_results.count_documents(
+                {
+                    "codigo_evento": codigo_evento,
+                    "orden_examen": orden,
+                }
+            )
+            if intentos > 0:
+                flash(
+                    "No se puede convertir un examen con intentos registrados en "
+                    "módulo/submódulo porque se perdería la trazabilidad de calificaciones.",
+                    "error",
+                )
+                return redirect(request.url)
+
+        actualizacion = {
+            "titulo": titulo,
+            "descripcion": descripcion,
+            "tipo": tipo,
+            "modulo_id": None,
+            "submodulo_id": None,
+        }
+
+        if tipo == "submodulo":
+            if not modulo_id:
+                flash("El submódulo requiere un módulo padre.", "error")
+                return redirect(request.url)
+            try:
+                padre = collection_eva.find_one(
+                    {"_id": ObjectId(modulo_id), "codigo_evento": codigo_evento}
+                )
+            except Exception:
+                padre = None
+            if not padre or padre.get("tipo") != "modulo":
+                flash("El módulo padre seleccionado no es válido.", "error")
+                return redirect(request.url)
+            if _id_str(contenido) and modulo_id == _id_str(contenido):
+                flash("Un submódulo no puede ser su propio padre.", "error")
+                return redirect(request.url)
+            actualizacion["modulo_id"] = str(padre["_id"])
+        elif tipo not in TIPOS_NO_NAVEGABLES:
+            if modulo_id:
+                try:
+                    padre = collection_eva.find_one(
+                        {"_id": ObjectId(modulo_id), "codigo_evento": codigo_evento}
+                    )
+                except Exception:
+                    padre = None
+                if not padre or padre.get("tipo") != "modulo":
+                    flash("El módulo padre seleccionado no es válido.", "error")
+                    return redirect(request.url)
+                actualizacion["modulo_id"] = str(padre["_id"])
+            if submodulo_id:
+                try:
+                    sub = collection_eva.find_one(
+                        {"_id": ObjectId(submodulo_id), "codigo_evento": codigo_evento}
+                    )
+                except Exception:
+                    sub = None
+                if not sub or sub.get("tipo") != "submodulo":
+                    flash("El submódulo padre seleccionado no es válido.", "error")
+                    return redirect(request.url)
+                sub_mid = str(sub.get("modulo_id")) if sub.get("modulo_id") else None
+                if actualizacion["modulo_id"] and sub_mid != actualizacion["modulo_id"]:
+                    flash("El submódulo no pertenece al módulo seleccionado.", "error")
+                    return redirect(request.url)
+                if not actualizacion["modulo_id"] and sub_mid:
+                    actualizacion["modulo_id"] = sub_mid
+                actualizacion["submodulo_id"] = str(sub["_id"])
 
         if tipo == "video":
             actualizacion["url_video"] = request.form["url_video"]
@@ -203,6 +452,9 @@ def editar_contenido(codigo_evento, orden):
         elif tipo == "modulo":
             # Módulo organizador: sin campos propios.
             pass
+        elif tipo == "submodulo":
+            # Submódulo organizador: sin campos propios.
+            pass
 
         # Campos específicos por tipo: al cambiar de tipo se eliminan los
         # campos huérfanos del tipo anterior para no arrastrar basura.
@@ -213,6 +465,7 @@ def editar_contenido(codigo_evento, orden):
             "caso_chatgpt": {"contenido_json"},
             "examen": {"qbank_config"},
             "modulo": set(),
+            "submodulo": set(),
         }
         todos_los_campos = set().union(*campos_por_tipo.values())
         campos_a_conservar = campos_por_tipo.get(tipo, set())
@@ -233,7 +486,19 @@ def editar_contenido(codigo_evento, orden):
             url_for("plataforma.listar_contenidos", codigo_evento=codigo_evento)
         )
 
-    return render_template("editar_contenido.html", evento=evento, contenido=contenido)
+    modulos = list(
+        collection_eva.find({"codigo_evento": codigo_evento, "tipo": "modulo"}).sort("orden", 1)
+    )
+    submodulos = list(
+        collection_eva.find({"codigo_evento": codigo_evento, "tipo": "submodulo"}).sort("orden", 1)
+    )
+    return render_template(
+        "editar_contenido.html",
+        evento=evento,
+        contenido=contenido,
+        modulos=modulos,
+        submodulos=submodulos,
+    )
 
 
 ###
@@ -259,6 +524,9 @@ def previsualizar_contenido(codigo_evento, orden):
     contenidos = list(
         collection_eva.find({"codigo_evento": codigo_evento}).sort("orden", 1)
     )
+    arbol = build_arbol_lms(contenidos)
+    contenidos_by_id = {_id_str(c): c for c in contenidos}
+    modulo_padre, submodulo_padre = breadcrumb_lms(contenidos_by_id, contenido)
 
     # Convertir Markdown a HTML solo si el tipo es 'texto'
     import markdown
@@ -289,6 +557,9 @@ def previsualizar_contenido(codigo_evento, orden):
         contenido_actual=contenido,
         contenidos=contenidos,
         preguntas=preguntas,
+        arbol=arbol,
+        modulo_padre=modulo_padre,
+        submodulo_padre=submodulo_padre,
     )
 
 
@@ -355,6 +626,35 @@ def eliminar_contenido(codigo_evento, orden):
     if not contenido:
         abort(404)
 
+    contenido_id = _id_str(contenido)
+    # Proteger jerarquía: no eliminar módulo/submódulo con hijos sin reasignar.
+    if contenido.get("tipo") == "modulo":
+        hijos = collection_eva.count_documents(
+            {"codigo_evento": codigo_evento, "modulo_id": contenido_id}
+        )
+        if hijos > 0:
+            flash(
+                f"No se puede eliminar el módulo: tiene {hijos} elemento(s) asignado(s). "
+                "Reasigna o elimina primero sus submódulos y contenidos.",
+                "error",
+            )
+            return redirect(
+                url_for("plataforma.listar_contenidos", codigo_evento=codigo_evento)
+            )
+    elif contenido.get("tipo") == "submodulo":
+        hijos = collection_eva.count_documents(
+            {"codigo_evento": codigo_evento, "submodulo_id": contenido_id}
+        )
+        if hijos > 0:
+            flash(
+                f"No se puede eliminar el submódulo: tiene {hijos} contenido(s) asignado(s). "
+                "Reasigna o elimina primero sus contenidos.",
+                "error",
+            )
+            return redirect(
+                url_for("plataforma.listar_contenidos", codigo_evento=codigo_evento)
+            )
+
     collection_eva.delete_one({"codigo_evento": codigo_evento, "orden": orden})
 
     # Reordenar los elementos después de la eliminación
@@ -400,16 +700,56 @@ def copiar_lms(codigo_evento):
             return redirect(url_for("plataforma.copiar_lms", codigo_evento=codigo_evento))
         
         upload_folder = current_app.config["UPLOAD_FOLDER"]
-        
+
+        # Copia en 3 pasadas para preservar jerarquía: módulos -> submódulos
+        # -> contenidos. Se mapean _id origen (str) a _id destino (str).
+        id_map = {}
         for contenido in contenidos:
+            if contenido.get("tipo") != "modulo":
+                continue
+            nuevo_contenido = {
+                "codigo_evento": codigo_destino,
+                "orden": contenido["orden"],
+                "titulo": contenido.get("titulo", ""),
+                "descripcion": contenido.get("descripcion", ""),
+                "tipo": "modulo",
+                "modulo_id": None,
+                "submodulo_id": None,
+            }
+            res = collection_eva.insert_one(nuevo_contenido)
+            id_map[str(contenido["_id"])] = str(res.inserted_id)
+
+        for contenido in contenidos:
+            if contenido.get("tipo") != "submodulo":
+                continue
+            old_mid = str(contenido.get("modulo_id")) if contenido.get("modulo_id") else None
+            nuevo_contenido = {
+                "codigo_evento": codigo_destino,
+                "orden": contenido["orden"],
+                "titulo": contenido.get("titulo", ""),
+                "descripcion": contenido.get("descripcion", ""),
+                "tipo": "submodulo",
+                "modulo_id": id_map.get(old_mid) if old_mid else None,
+                "submodulo_id": None,
+            }
+            res = collection_eva.insert_one(nuevo_contenido)
+            id_map[str(contenido["_id"])] = str(res.inserted_id)
+
+        for contenido in contenidos:
+            if contenido.get("tipo") in ("modulo", "submodulo"):
+                continue
             nuevo_orden = contenido["orden"]
-            
+
+            old_mid = str(contenido.get("modulo_id")) if contenido.get("modulo_id") else None
+            old_sid = str(contenido.get("submodulo_id")) if contenido.get("submodulo_id") else None
             nuevo_contenido = {
                 "codigo_evento": codigo_destino,
                 "orden": nuevo_orden,
                 "titulo": contenido.get("titulo", ""),
                 "descripcion": contenido.get("descripcion", ""),
                 "tipo": contenido.get("tipo", ""),
+                "modulo_id": id_map.get(old_mid) if old_mid else None,
+                "submodulo_id": id_map.get(old_sid) if old_sid else None,
             }
             
             if contenido.get("tipo") == "video":
@@ -468,7 +808,7 @@ def ver_plataforma(codigo_evento):
         abort(404)
 
     primer_contenido = collection_eva.find_one(
-        {"codigo_evento": codigo_evento, "tipo": {"$ne": "modulo"}},
+        {"codigo_evento": codigo_evento, "tipo": {"$nin": ["modulo", "submodulo"]}},
         sort=[("orden", 1)],
     )
 
@@ -488,6 +828,7 @@ def ver_plataforma(codigo_evento):
         contenidos = list(
             collection_eva.find({"codigo_evento": codigo_evento}).sort("orden", 1)
         )
+        arbol = build_arbol_lms(contenidos)
         return render_template(
             "plataforma.html",
             evento=evento,
@@ -497,6 +838,9 @@ def ver_plataforma(codigo_evento):
             contenido_siguiente=None,
             cedula=cedula,
             token=token,
+            arbol=arbol,
+            modulo_padre=None,
+            submodulo_padre=None,
         )
 
 
@@ -527,15 +871,15 @@ def ver_contenido(codigo_evento, orden):
     if not contenido_actual:
         abort(404)
 
-    # Los módulos son separadores visuales no navegables: redirigir al
+    # Los módulos/submódulos son separadores visuales no navegables: redirigir al
     # siguiente contenido navegable (o al anterior si es el último),
     # preservando cedula/token para el acceso por documento.
-    if contenido_actual.get("tipo") == "modulo":
+    if contenido_actual.get("tipo") in TIPOS_NO_NAVEGABLES:
         siguiente_navegable = next(
             (
                 c
                 for c in contenidos
-                if c["orden"] > orden and c.get("tipo") != "modulo"
+                if c["orden"] > orden and c.get("tipo") not in TIPOS_NO_NAVEGABLES
             ),
             None,
         )
@@ -543,7 +887,7 @@ def ver_contenido(codigo_evento, orden):
             (
                 c
                 for c in reversed(contenidos)
-                if c["orden"] < orden and c.get("tipo") != "modulo"
+                if c["orden"] < orden and c.get("tipo") not in TIPOS_NO_NAVEGABLES
             ),
             None,
         )
@@ -812,6 +1156,12 @@ def ver_contenido(codigo_evento, orden):
                 # Certificado disponible: todos los sumativos aprobados + encuesta completada (si aplica)
                 certificado_disponible = todos_aprobados and encuesta_completada
 
+            # Breadcrumb jerárquico (no afecta calificación)
+            contenidos_by_id_ex = {_id_str(c): c for c in contenidos}
+            modulo_padre_ex, submodulo_padre_ex = breadcrumb_lms(
+                contenidos_by_id_ex, contenido_actual
+            )
+            arbol_ex = build_arbol_lms(contenidos)
             return render_template(
                 "examen.html",
                 preguntas=preguntas,
@@ -832,16 +1182,22 @@ def ver_contenido(codigo_evento, orden):
                 todos_aprobados=todos_aprobados,
                 encuesta_completada=encuesta_completada,
                 certificado_disponible=certificado_disponible,
+                arbol=arbol_ex,
+                modulo_padre=modulo_padre_ex,
+                submodulo_padre=submodulo_padre_ex,
             )
 
-    # Encontrar el contenido anterior y el siguiente (saltando módulos,
-    # que son separadores no navegables)
-    navegables = [c for c in contenidos if c.get("tipo") != "modulo"]
+    # Encontrar el contenido anterior y el siguiente (saltando módulos y
+    # submódulos, que son separadores no navegables)
+    navegables = [c for c in contenidos if c.get("tipo") not in TIPOS_NO_NAVEGABLES]
     indice_actual = navegables.index(contenido_actual)
     contenido_anterior = navegables[indice_actual - 1] if indice_actual > 0 else None
     contenido_siguiente = (
         navegables[indice_actual + 1] if indice_actual < len(navegables) - 1 else None
     )
+    contenidos_by_id = {_id_str(c): c for c in contenidos}
+    modulo_padre, submodulo_padre = breadcrumb_lms(contenidos_by_id, contenido_actual)
+    arbol = build_arbol_lms(contenidos)
 
     return render_template(
         "plataforma.html",
@@ -852,6 +1208,9 @@ def ver_contenido(codigo_evento, orden):
         contenido_siguiente=contenido_siguiente,
         cedula=cedula,
         token=token,
+        arbol=arbol,
+        modulo_padre=modulo_padre,
+        submodulo_padre=submodulo_padre,
     )
 
 

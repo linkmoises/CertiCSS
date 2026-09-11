@@ -93,7 +93,33 @@
                                                         endif %}>Examen (Banco de preguntas)</option>
                                                     <option value="modulo" {% if contenido.tipo=="modulo" %}selected{%
                                                         endif %}>Módulo (sección organizadora)</option>
+                                                    <option value="submodulo" {% if contenido.tipo=="submodulo" %}selected{%
+                                                        endif %}>Submódulo (dentro de un módulo)</option>
                                                 </select>
+
+                                                <div id="jerarquia-section"
+                                                    class="w-full inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200"
+                                                    {% if contenido.tipo =="modulo" %}style="display:none" {% endif %}>
+                                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Ubicación jerárquica</label>
+                                                    <div class="grid sm:grid-cols-2 gap-2">
+                                                        <select id="modulo_id" name="modulo_id" class="py-2 px-3 block w-full border-gray-200 shadow-sm text-sm rounded-lg">
+                                                            <option value="">— Sin módulo (contenido plano) —</option>
+                                                            {% for m in modulos|default([]) %}
+                                                            {% if m._id|string != contenido._id|string %}
+                                                            <option value="{{ m._id }}" {% if contenido.modulo_id and contenido.modulo_id|string == m._id|string %}selected{% endif %}>{{ m.orden|string|zfill(2) }} - {{ m.titulo }}</option>
+                                                            {% endif %}
+                                                            {% endfor %}
+                                                        </select>
+                                                        <select id="submodulo_id" name="submodulo_id" class="py-2 px-3 block w-full border-gray-200 shadow-sm text-sm rounded-lg">
+                                                            <option value="">— Sin submódulo —</option>
+                                                            {% for s in submodulos|default([]) %}
+                                                            {% if s._id|string != contenido._id|string %}
+                                                            <option value="{{ s._id }}" data-modulo="{{ s.modulo_id|default('') }}" {% if contenido.submodulo_id and contenido.submodulo_id|string == s._id|string %}selected{% endif %}>{{ s.orden|string|zfill(2) }} - {{ s.titulo }}</option>
+                                                            {% endif %}
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                </div>
 
                                                 <div id="video-section"
                                                     class="w-full inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200"
@@ -156,6 +182,12 @@
                                                     class="w-full inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200"
                                                     {% if contenido.tipo !="modulo" %}style="display:none" {% endif %}>
                                                     <p class="mt-2 text-sm text-gray-500">El módulo es un separador visual: solo usa título y descripción para organizar los contenidos siguientes. Se muestra en negritas en el listado y no tiene página propia.</p>
+                                                </div>
+
+                                                <div id="submodulo-section"
+                                                    class="w-full inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200"
+                                                    {% if contenido.tipo !="submodulo" %}style="display:none" {% endif %}>
+                                                    <p class="mt-2 text-sm text-gray-500">El submódulo cuelga de un módulo padre (selecciónalo en “Ubicación jerárquica”). No es navegable ni evaluable.</p>
                                                 </div>
                                             </div>
                                             <!-- End Col -->
@@ -267,6 +299,8 @@
         document.getElementById('caso-chatgpt-section').style.display = this.value === 'caso_chatgpt' ? 'block' : 'none';
         document.getElementById('qbank-section').style.display = this.value === 'examen' ? 'block' : 'none';
         document.getElementById('modulo-section').style.display = this.value === 'modulo' ? 'block' : 'none';
+        document.getElementById('submodulo-section').style.display = this.value === 'submodulo' ? 'block' : 'none';
+        document.getElementById('jerarquia-section').style.display = this.value === 'modulo' ? 'none' : 'block';
     });
 </script>
 </body>
