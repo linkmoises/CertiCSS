@@ -14,6 +14,7 @@ from pdfrw import PdfReader, PdfWriter, PageMerge
 import qrcode
 
 from app import collection_eventos, collection_posters, collection_participantes
+from app.helpers import detectar_tipo_documento
 
 
 def generar_pdf_participante(participante, afiche_path, lugar=None):
@@ -106,7 +107,8 @@ def generar_pdf_participante(participante, afiche_path, lugar=None):
     draw_centered_text(6 * inch, f"{unidad_evento}", font='Helvetica-Bold', size=15)
     draw_centered_text(5.7 * inch, f"confiere el presente certificado a:")
     draw_centered_text(5.2 * inch, f"{participante['nombres']} {participante['apellidos']}", font="Helvetica-Bold", size=18)
-    draw_centered_text(4.8 * inch, f"Cédula: {participante['cedula']}", font="Helvetica-Oblique", size=14)
+    etiqueta_documento = "Cédula" if detectar_tipo_documento(participante['cedula']) == 'cedula' else "Pasaporte"
+    draw_centered_text(4.8 * inch, f"{etiqueta_documento}: {participante['cedula']}", font="Helvetica-Oblique", size=14)
     
     # Mostrar "concursante" en lugar de "presentador_poster"
     if participante['rol'] == 'presentador_poster':
@@ -129,7 +131,10 @@ def generar_pdf_participante(participante, afiche_path, lugar=None):
     elif evento.get('registro_abierto') is True:
         draw_centered_text(4.4 * inch, f"Por aprobar la actividad académica titulada:")
     else:
-        draw_centered_text(4.4 * inch, f"Por su asistencia en calidad de {rol_mostrar} en:")
+        if participante['rol'] in ('tallerista', 'instructor'):
+            draw_centered_text(4.4 * inch, f"Por su participación en calidad de {rol_mostrar} en:")
+        else:
+            draw_centered_text(4.4 * inch, f"Por su asistencia en calidad de {rol_mostrar} en:")
     
     # Usar ancho máximo de 7 pulgadas para el título del evento
     final_y_titulo = draw_centered_text(4 * inch, f"{titulo_evento}", font="Helvetica-Bold", size=14, max_width=9.5 * inch)

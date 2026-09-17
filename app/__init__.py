@@ -104,7 +104,7 @@ def listar_participantes(codigo_evento):
         })
     )
 
-    role_order = {"organizador": 0, "coorganizador": 1, "ponente": 2, "participante": 3}
+    role_order = {"organizador": 0, "coorganizador": 1, "ponente": 2, "tallerista": 2, "instructor": 2, "participante": 3}
 
     participantes = list(collection_participantes.find(
         {"codigo_evento": codigo_evento}
@@ -127,7 +127,7 @@ def listar_participantes(codigo_evento):
     participantes.sort(key=sort_key)
 
     total_participantes = len([p for p in participantes if p.get('rol') == 'participante'])
-    total_ponentes = len([p for p in participantes if p.get('rol') == 'ponente'])
+    total_ponentes = len([p for p in participantes if p.get('rol') in ('ponente', 'tallerista', 'instructor')])
 
     return render_template('participantes.html',
                            evento=evento,

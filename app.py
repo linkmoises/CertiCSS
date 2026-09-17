@@ -357,6 +357,7 @@ def editar_ponente(nanoid):
         apellidos = request.form.get('apellidos', '').strip()
         cedula = request.form.get('cedula', '').strip()
         perfil = request.form.get('perfil_profesional', '').strip()
+        rol = request.form.get('rol', '').strip()
         titulo_ponencia = request.form.get('titulo_ponencia', '').strip()
         fecha_evento = request.form.get('fecha_evento')
 
@@ -368,6 +369,9 @@ def editar_ponente(nanoid):
             "perfil": perfil,
             "titulo_ponencia": titulo_ponencia,
         }
+
+        if rol in ('ponente', 'tallerista', 'instructor', 'coorganizador'):
+            update_data["rol"] = rol
 
         # Handle fecha_evento
         if fecha_evento:
@@ -530,7 +534,7 @@ def tablero_coordinadores():
     # Tarjetas (excluyendo eventos con registro abierto)
     total_usuarios = collection_usuarios.count_documents({"rol": {"$ne": UserRole.ADMINISTRADOR.value}})
     total_eventos = collection_eventos.count_documents({'registro_abierto': {'$ne': True}})
-    total_ponentes = collection_participantes.count_documents({"rol": "ponente"})
+    total_ponentes = collection_participantes.count_documents({"rol": {"$in": ['ponente', 'tallerista', 'instructor']}})
     total_participantes = collection_participantes.count_documents({"rol": "participante"})
 
     # Próximos eventos y eventos vigentes (no borrador, sin registro abierto)
@@ -1575,11 +1579,12 @@ def registrar_ponente(codigo_evento):
         cedula = request.form['cedula']
         perfil = request.form['perfil_profesional']
         rol = request.form['rol']
-        titulo_ponencia = request.form['titulo_ponencia']
+        titulo_ponencia = request.form.get('titulo_ponencia', '').strip()
         fecha_evento = request.form.get('fecha_evento')
 
-        # Generar nanoid
-        nanoid = generate_nanoid(cedula, codigo_evento, titulo_ponencia)
+        # Generar nanoid. Para roles sin ponencia (tallerista/instructor) usar
+        # el rol como semilla para evitar colisiones de nanoid.
+        nanoid = generate_nanoid(cedula, codigo_evento, titulo_ponencia or rol)
 
         # Determine the date to use for registration
         if not fecha_evento:
@@ -2678,7 +2683,7 @@ def eliminar_participante_bd(codigo_evento, id_participante, origen=None):
     participantes_cursor = collection_participantes.find({"codigo_evento": codigo_evento})
 
     total_participantes = collection_participantes.count_documents({"codigo_evento": codigo_evento, "rol": "participante"})
-    total_ponentes = collection_participantes.count_documents({"codigo_evento": codigo_evento, "rol": "ponente"})
+    total_ponentes = collection_participantes.count_documents({"codigo_evento": codigo_evento, "rol": {"$in": ['ponente', 'tallerista', 'instructor']}})
 
     participantes = list(participantes_cursor)
 
@@ -3406,12 +3411,12 @@ def _buscar_certificados_resultados(cedula, token):
 
             # Verificar si el usuario tiene un rol exento (ponente/organizador/coorganizador)
             # ya sea en este registro o en otro registro del mismo evento
-            es_exento = participante.get('rol') in ['ponente', 'organizador', 'coorganizador']
+            es_exento = participante.get('rol') in ['ponente', 'tallerista', 'instructor', 'organizador', 'coorganizador']
             if not es_exento:
                 registro_exento = collection_participantes.find_one({
                     'cedula': cedula,
                     'codigo_evento': codigo_evento,
-                    'rol': {'$in': ['ponente', 'organizador', 'coorganizador']}
+                    'rol': {'$in': ['ponente', 'tallerista', 'instructor', 'organizador', 'coorganizador']}
                 })
                 if registro_exento:
                     es_exento = True
@@ -3745,7 +3750,7 @@ def tablero_metricas(page=1):
         'tipo': {'$ne': 'Sesión Docente'}
     }
     total_eventos_cerrados = collection_eventos.count_documents(filtro_cerrados)    # Contar el número total de ponentes
-    total_ponentes = collection_participantes.count_documents({"rol": "ponente"})
+    total_ponentes = collection_participantes.count_documents({"rol": {"$in": ['ponente', 'tallerista', 'instructor']}})
     # Contar el número total de participantes
     total_participantes = collection_participantes.count_documents({"rol": "participante"})
 
@@ -3780,7 +3785,7 @@ def tablero_metricas(page=1):
         # Total de ponentes en este evento
         evento["total_ponentes"] = collection_participantes.count_documents({
             "codigo_evento": codigo_evento, 
-            "rol": "ponente"
+            "rol": {"$in": ['ponente', 'tallerista', 'instructor']}
         })
 
         instrumento = evento.get('instrumento', evento.get('instrumento_encuesta', 'legacy'))
@@ -3929,7 +3934,7 @@ def mis_metricas(page=1):
 
     total_ponentes = collection_participantes.count_documents({
         "codigo_evento": {"$in": codigos_eventos_usuario},
-        "rol": "ponente"
+        "rol": {"$in": ['ponente', 'tallerista', 'instructor']}
     })
     total_participantes = len(collection_participantes.distinct(
         "cedula",
@@ -3973,7 +3978,7 @@ def mis_metricas(page=1):
 
         evento["total_ponentes"] = collection_participantes.count_documents({
             "codigo_evento": codigo_evento,
-            "rol": "ponente"
+            "rol": {"$in": ['ponente', 'tallerista', 'instructor']}
         })
 
     return render_template(
@@ -7814,12 +7819,12 @@ def generar_pdf(nanoid):
     
     # Verificar si el usuario tiene un rol exento en este evento,
     # ya sea en este registro o en otro registro del mismo evento
-    es_exento = rol_participante in ['ponente', 'organizador', 'coorganizador']
+    es_exento = rol_participante in ['ponente', 'tallerista', 'instructor', 'organizador', 'coorganizador']
     if not es_exento:
         registro_exento = collection_participantes.find_one({
             'cedula': participante['cedula'],
             'codigo_evento': codigo_evento,
-            'rol': {'$in': ['ponente', 'organizador', 'coorganizador']}
+            'rol': {'$in': ['ponente', 'tallerista', 'instructor', 'organizador', 'coorganizador']}
         })
         if registro_exento:
             es_exento = True

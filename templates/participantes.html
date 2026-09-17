@@ -247,7 +247,7 @@
                                 </td>
                                 <td class="size-px whitespace-nowrap text-center">
                                     <div class="px-2 py-2">
-                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium {% if participante.rol == 'participante' %}bg-blue-100 text-blue-800{% elif participante.rol == 'organizador' %}bg-teal-100 text-teal-800{% elif participante.rol == 'coorganizador' %}bg-teal-100 text-teal-800{% elif participante.rol == 'ponente' %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">{{ participante.rol }}</span><br />
+                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium {% if participante.rol == 'participante' %}bg-blue-100 text-blue-800{% elif participante.rol == 'organizador' %}bg-teal-100 text-teal-800{% elif participante.rol == 'coorganizador' %}bg-teal-100 text-teal-800{% elif participante.rol in ('ponente', 'tallerista', 'instructor') %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">{{ participante.rol }}</span><br />
                                     </div>
                                 </td>
                                 <td class="size-px whitespace-nowrap text-center">
@@ -261,8 +261,8 @@
                                 <td class="size-px whitespace-nowrap">
                                     <div class="px-2 py-2">
 {% if participante.get('fecha_evento') %}
-                                        <span class="text-sm text-gray-500">{{ participante.fecha_evento | date('%d %b, %Y') }}{% if participante.get('registro_extemporaneo') %} - (extemp){% elif participante.rol == 'ponente' %} - (ponente){% else %} - (evento){% endif %}</span>
-{% if participante.get('registro_extemporaneo') or participante.rol == 'ponente' %}
+                                        <span class="text-sm text-gray-500">{{ participante.fecha_evento | date('%d %b, %Y') }}{% if participante.get('registro_extemporaneo') %} - (extemp){% elif participante.rol == 'ponente' %} - (ponente){% elif participante.rol in ('tallerista', 'instructor') %} - ({{ participante.rol }}){% else %} - (evento){% endif %}</span>
+{% if participante.get('registro_extemporaneo') or participante.rol in ('ponente', 'tallerista', 'instructor') %}
                                         <br><span class="text-xs text-gray-400">Reg: {{ participante.timestamp.strftime('%d %b, %Y - %H:%M') }}</span>
 {% endif %}
 {% else %}
@@ -279,13 +279,13 @@
                                         </a><br />
 {% endif %}
 {% if puede_editar and (evento.estado_evento != 'cerrado' or current_user.rol == 'administrador') %}
-{% if participante.rol == 'ponente' %}
+{% if participante.rol in ('ponente', 'tallerista', 'instructor') %}
                                         <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('editar_ponente', nanoid=participante.nanoid) }}">
-                                            Corregir ponente
+                                            Corregir {{ participante.rol }}
                                         </a><br />
                                         <form action="{{ url_for('eliminar_participante', nanoid=participante.nanoid) }}" method="post" style="display:inline;">
-                                            <button class="text-sm text-red-600 decoration-2 hover:underline" type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este ponente? Esta acción no se puede deshacer.');">
-                                                Eliminar ponente
+                                            <button class="text-sm text-red-600 decoration-2 hover:underline" type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este {{ participante.rol }}? Esta acción no se puede deshacer.');">
+                                                Eliminar {{ participante.rol }}
                                             </button>
                                         </form>
 {% elif participante.rol == 'organizador' %}
@@ -338,10 +338,10 @@
 {% if evento.fecha_fin and evento.fecha_fin != evento.fecha_inicio %}
                                     <span class="font-semibold text-gray-800">{{ total_participantes }}</span> {{ 'registro' if total_participantes == 1 else 'registros' }} / 
                                     <span class="font-semibold text-gray-800">{{ participantes|selectattr('rol', 'equalto', 'participante')|map(attribute='cedula')|unique|list|length }}</span> {{ 'participante único' if (participantes|selectattr('rol', 'equalto', 'participante')|map(attribute='cedula')|unique|list|length) == 1 else 'participantes únicos' }} / 
-                                    <span class="font-semibold text-gray-800">{{ total_ponentes }}</span> {{ 'ponente' if total_ponentes == 1 else 'ponentes' }}
+                                    <span class="font-semibold text-gray-800">{{ total_ponentes }}</span> {{ 'expositor' if total_ponentes == 1 else 'expositores' }}
 {% else %}
                                     <span class="font-semibold text-gray-800">{{ total_participantes }}</span> {{ 'participante' if total_participantes == 1 else 'participantes' }} / 
-                                    <span class="font-semibold text-gray-800">{{ total_ponentes }}</span> {{ 'ponente' if total_ponentes == 1 else 'ponentes' }}
+                                    <span class="font-semibold text-gray-800">{{ total_ponentes }}</span> {{ 'expositor' if total_ponentes == 1 else 'expositores' }}
 {% endif %}
                                 </p>
                             </div>

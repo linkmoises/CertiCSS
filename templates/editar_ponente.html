@@ -75,28 +75,48 @@
 
                                 <div class="sm:col-span-3">
                                     <label for="cedula" class="inline-block text-sm text-gray-800 mt-2.5">
-                                        Cédula
+                                        Documento (cédula o pasaporte)
                                     </label>
                                 </div>
                                 <!-- End Col -->
                             
                                 <div class="sm:col-span-9">
-                                    <input id="cedula" name="cedula" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" placeholder="8-123-456" value="{{ ponente.cedula }}" required>
+                                    <input id="cedula" name="cedula" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" placeholder="8-123-456 / AB123456 / 12345678" value="{{ ponente.cedula }}" required>
                                 </div>
                                 <!-- End Col -->
 
                                 {{ perfil_profesional_select(selected=ponente.perfil) }}
                                 <!-- End Col -->
 
+{% if ponente.rol in ['ponente', 'tallerista', 'instructor'] %}
                                 <div class="sm:col-span-3">
+                                    <label for="rol" class="inline-block text-sm text-gray-800 mt-2.5">
+                                        Tipo
+                                    </label>
+                                </div>
+                                <!-- End Col -->
+                            
+                                <div class="sm:col-span-9">
+                                    <select id="rol" name="rol" onchange="toggleCamposPonente(this)" class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" required>
+                                        <option value="ponente" {% if ponente.rol == 'ponente' %}selected{% endif %}>Ponente</option>
+                                        <option value="tallerista" {% if ponente.rol == 'tallerista' %}selected{% endif %}>Tallerista</option>
+                                        <option value="instructor" {% if ponente.rol == 'instructor' %}selected{% endif %}>Instructor</option>
+                                    </select>
+                                </div>
+                                <!-- End Col -->
+{% else %}
+                                <input type="hidden" name="rol" value="{{ ponente.rol }}">
+{% endif %}
+
+                                <div class="sm:col-span-3" id="titulo_ponencia_label">
                                     <label for="titulo_ponencia" class="inline-block text-sm text-gray-800 mt-2.5">
                                         Ponencia
                                     </label>
                                 </div>
                                 <!-- End Col -->
                             
-                                <div class="sm:col-span-9">
-                                    <input id="titulo_ponencia" name="titulo_ponencia" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" placeholder="Ingrese el título de la ponencia..." value="{{ ponente.titulo_ponencia }}" required>
+                                <div class="sm:col-span-9" id="titulo_ponencia_wrapper">
+                                    <input id="titulo_ponencia" name="titulo_ponencia" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" placeholder="Ingrese el título de la ponencia..." value="{{ ponente.titulo_ponencia }}">
                                 </div>
                                 <!-- End Col -->
 
@@ -146,6 +166,21 @@
             <p>Este evento es avalado por DENADOI y potenciado por la plataforma CertiCSS.</p>
         </div>
     </footer>
+
+<script>
+function toggleCamposPonente(select) {
+    const esPonente = select.value === 'ponente';
+    document.getElementById('titulo_ponencia_label').style.display = esPonente ? '' : 'none';
+    document.getElementById('titulo_ponencia_wrapper').style.display = esPonente ? '' : 'none';
+}
+
+(function () {
+    const rolSelect = document.getElementById('rol');
+    if (rolSelect) {
+        toggleCamposPonente(rolSelect);
+    }
+})();
+</script>
 
 </body>
 </html>

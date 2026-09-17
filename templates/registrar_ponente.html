@@ -92,7 +92,7 @@
 
                                 <div class="sm:col-span-3">
                                     <label for="cedula" class="inline-block text-sm text-gray-800 mt-2.5">
-                                        Cédula
+                                        Documento (cédula o pasaporte)
                                     </label>
                                 </div>
                                 <!-- End Col -->
@@ -100,9 +100,9 @@
                                 <div class="sm:col-span-9">
                                     <input id="cedula" name="cedula" type="text" 
                                         class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" 
-                                        placeholder="8-123-456" required 
+                                        placeholder="8-123-456 / AB123456 / 12345678" required 
                                         onblur="validarCedula(this)" />
-                                    <small id="cedula-error" class="text-red-500 text-sm hidden">Cédula inválida. Por favor, verifica el formato.</small>
+                                    <small id="cedula-error" class="text-red-500 text-sm hidden">Documento inválido. Use una cédula (ej. 8-123-456) o un pasaporte (ej. AB123456 o 12345678).</small>
                                 </div>
                                 <!-- End Col -->
 
@@ -110,13 +110,29 @@
                                 <!-- End Col -->
 
                                 <div class="sm:col-span-3">
+                                    <label for="rol" class="inline-block text-sm text-gray-800 mt-2.5">
+                                        Tipo
+                                    </label>
+                                </div>
+                                <!-- End Col -->
+                            
+                                <div class="sm:col-span-9">
+                                    <select id="rol" name="rol" onchange="toggleCamposPonente(this)" class="py-2 px-3 pe-9 block w-full sm:w-auto border-gray-200 shadow-sm -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" required>
+                                        <option value="ponente">Ponente</option>
+                                        <option value="tallerista">Tallerista</option>
+                                        <option value="instructor">Instructor</option>
+                                    </select>
+                                </div>
+                                <!-- End Col -->
+
+                                <div class="sm:col-span-3" id="titulo_ponencia_label">
                                     <label for="titulo_ponencia" class="inline-block text-sm text-gray-800 mt-2.5">
                                         Ponencia
                                     </label>
                                 </div>
                                 <!-- End Col -->
                             
-                                <div class="sm:col-span-9">
+                                <div class="sm:col-span-9" id="titulo_ponencia_wrapper">
                                     <input id="titulo_ponencia" name="titulo_ponencia" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" placeholder="Ingrese el título de la ponencia...">
                                 </div>
                                 <!-- End Col -->
@@ -143,12 +159,10 @@
                                 <input type="hidden" name="fecha_evento" value="{{ evento.fecha_inicio.strftime('%Y-%m-%d') if evento.fecha_inicio else '' }}">
 {% endif %}
 
-                                <input type="hidden" name="rol" value="ponente">
-
                                 <div class="sm:col-span-12 gap-2">
                                     <button type="submit" class="w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="{{ url_for('events.crear_evento') }}">
                                         <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                                        Registrar datos de ponente
+                                        Registrar datos de ponente, tallerista o instructor
                                     </button>
                                 </div>
 
@@ -178,10 +192,12 @@ function validarCedula(input) {
     const errorMessage = document.getElementById('cedula-error');
 
     const patrones = [
-        /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$|^[A-Z]{2}\d{6,20}$/
+        /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/, // Cédulas panameñas con guiones
+        /^[A-Z]{2}\d{6,20}$/,                          // Pasaportes alfanuméricos
+        /^\d{6,12}$/                                   // Cédula de 8 dígitos o pasaporte numérico continuo
     ];
 
-    // Verificar si la cédula cumple con alguno de los patrones
+    // Verificar si el documento cumple con alguno de los patrones
     const esValido = patrones.some(patron => patron.test(cedula));
 
     if (esValido) {
@@ -193,6 +209,13 @@ function validarCedula(input) {
         input.classList.add('border-red-500');
         errorMessage.classList.remove('hidden');
     }
+}
+
+function toggleCamposPonente(select) {
+    const rol = select.value;
+    const esPonente = rol === 'ponente';
+    document.getElementById('titulo_ponencia_label').style.display = esPonente ? '' : 'none';
+    document.getElementById('titulo_ponencia_wrapper').style.display = esPonente ? '' : 'none';
 }
 </script>
 </body>

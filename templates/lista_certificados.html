@@ -207,6 +207,8 @@
                                             <option value="">Todos los roles</option>
                                             <option value="participante">Participante</option>
                                             <option value="ponente">Ponente</option>
+                                            <option value="tallerista">Tallerista</option>
+                                            <option value="instructor">Instructor</option>
                                             <option value="organizador">Organizador</option>
                                             <option value="coorganizador">Coorganizador</option>
                                             <option value="jurado_poster">Jurado Poster</option>
@@ -326,8 +328,10 @@
                                                 <div class="px-6 py-2">
                                                     <p class="text-sm text-gray-500 mb-2">
                                                         <span class="font-semibold">{{ resultado['titulo_evento'] }}</span><br />
-                                                        {% if resultado['rol'] == 'ponente' %}
-                                                        — Ponencia: {{ resultado['ponencia']}}<br />
+{% if resultado['rol'] == 'ponente' %}
+                                                            — Ponencia: {{ resultado['ponencia']}}<br />
+                                                        {% elif resultado['rol'] in ['tallerista', 'instructor'] %}
+                                                            — Horas: {{ resultado['carga_horaria'] }}<br />
                                                         {% endif %}
                                                         — {{ resultado['nombres'] }} {{ resultado['apellidos']}} <br />
                                                         — {{ resultado['cedula']}}

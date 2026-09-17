@@ -20,6 +20,8 @@ ROLES_PERMITIDOS = ['administrador', 'denadoi']
 ROLES_DISPONIBLES = [
     ('participante', 'Participante'),
     ('ponente', 'Ponente'),
+    ('tallerista', 'Tallerista'),
+    ('instructor', 'Instructor'),
     ('organizador', 'Organizador'),
     ('coorganizador', 'Coorganizador'),
     ('jurado_poster', 'Jurado Poster'),

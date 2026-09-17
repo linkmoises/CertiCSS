@@ -132,6 +132,26 @@ def validate_cedula(cedula: str) -> Tuple[bool, Optional[str]]:
     return False, "Formato de cédula inválido. Use formato N-NNN-NNNN o 8 dígitos"
 
 
+def detectar_tipo_documento(valor):
+    """
+    Detecta el tipo de documento (cédula o pasaporte) por su formato.
+
+    Regla:
+    - Contiene guiones (8-123-456, PE-1-234, etc.) -> cédula panameña.
+    - Sin guiones (cadena continua, alfanumérica o solo dígitos) -> pasaporte.
+
+    Args:
+        valor: Número de documento como se guardó en el participante.
+
+    Returns:
+        'cedula' o 'pasaporte'.
+    """
+    doc = str(valor or '').strip()
+    if '-' in doc:
+        return 'cedula'
+    return 'pasaporte'
+
+
 def validate_email(email: str) -> Tuple[bool, Optional[str]]:
     """
     Valida el formato de correo electrónico.
