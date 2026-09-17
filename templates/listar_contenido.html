@@ -78,7 +78,7 @@
                                         <tr>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ actividad.orden }}</td>
                                             <td class="px-6 w-80 py-4 whitespace-nowrap text-sm text-gray-800">{{ actividad.titulo }}{% if actividad.modulo_id %} <span class="text-[11px] text-gray-400">· en módulo</span>{% endif %}{% if actividad.submodulo_id %} <span class="text-[11px] text-gray-400">/ submódulo</span>{% endif %}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{% if actividad.tipo == 'modulo' %}<span class="py-1 px-2 inline-flex items-center gap-x-1 text-xs font-bold uppercase rounded-md bg-gray-200 text-gray-800">Módulo (sección)</span>{% elif actividad.tipo == 'submodulo' %}<span class="py-1 px-2 inline-flex items-center gap-x-1 text-xs font-bold uppercase rounded-md bg-blue-100 text-blue-800">Submódulo</span>{% else %}{{ actividad.tipo }}{% endif %}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{% if actividad.tipo == 'modulo' %}<span class="py-1 px-2 inline-flex items-center gap-x-1 text-xs font-bold uppercase rounded-md bg-gray-200 text-gray-800">Módulo (sección)</span>{% elif actividad.tipo == 'submodulo' %}<span class="py-1 px-2 inline-flex items-center gap-x-1 text-xs font-bold uppercase rounded-md bg-blue-100 text-blue-800">Submódulo</span>{% elif actividad.tipo == 'tarea' %}<span class="py-1 px-2 inline-flex items-center gap-x-1 text-xs font-bold uppercase rounded-md bg-purple-100 text-purple-800">Tarea manual</span>{% else %}{{ actividad.tipo }}{% endif %}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
                                                 <div class="flex gap-4">
                                                     <form
@@ -139,6 +139,19 @@
                                                         </svg>
                                                         Editar
                                                     </a>
+                                                    {% if actividad.tipo == 'tarea' %}
+                                                    <a href="{{ url_for('plataforma.calificar_tarea', codigo_evento=codigo_evento, orden=actividad.orden) }}"
+                                                        class="inline-flex items-center gap-x-2 text-sm font-medium text-purple-600 hover:text-purple-800">
+                                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg"
+                                                            width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                            stroke="currentColor" stroke-width="2"
+                                                            stroke-linecap="round" stroke-linejoin="round">
+                                                            <path d="M15 11l-9 9H3v-3l9-9z" />
+                                                            <path d="m14 7 3 3" />
+                                                        </svg>
+                                                        Calificar
+                                                    </a>
+                                                    {% endif %}
                                                     <form
                                                         action="{{ url_for('plataforma.eliminar_contenido', codigo_evento=codigo_evento, orden=actividad.orden) }}"
                                                         method="POST" class="inline">

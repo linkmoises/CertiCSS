@@ -96,14 +96,14 @@
                                 {% if nanoid and not formativo %}
                                 <div class="mt-3 p-3 rounded bg-blue-50 border border-blue-200">
                                     <div class="text-sm text-blue-800 mb-2">
-                                        <b>Progreso del certificado:</b> {{ aprobados_sumativos }} de {{ total_sumativos }} exámenes sumativos aprobados
+                                        <b>Progreso del certificado:</b> {{ aprobados_sumativos + aprobadas_tareas|default(0) }} de {{ total_sumativos + total_tareas|default(0) }} evaluaciones aprobadas (exámenes + tareas)
                                     </div>
-                                    {% if total_sumativos > 0 and not todos_aprobados %}
+                                    {% if (total_sumativos + total_tareas|default(0)) > 0 and not todos_aprobados %}
                                     <div class="w-full bg-blue-200 rounded-full h-2 mb-2">
-                                        <div class="bg-blue-600 h-2 rounded-full" style="width: {{ (aprobados_sumativos / total_sumativos * 100)|int }}%"></div>
+                                        <div class="bg-blue-600 h-2 rounded-full" style="width: {{ ((aprobados_sumativos + aprobadas_tareas|default(0)) / (total_sumativos + total_tareas|default(0)) * 100)|int }}%"></div>
                                     </div>
-                                    <p class="text-xs text-blue-600">Debe aprobar todos los exámenes sumativos para obtener su certificado.</p>
-                                    {% elif total_sumativos > 0 and todos_aprobados and not encuesta_completada %}
+                                    <p class="text-xs text-blue-600">Debe aprobar todas las evaluaciones (exámenes sumativos y tareas) con ≥80% para obtener su certificado.</p>
+                                    {% elif (total_sumativos + total_tareas|default(0)) > 0 and todos_aprobados and not encuesta_completada %}
                                     <p class="text-xs text-yellow-600">Todos los exámenes aprobados. Complete la encuesta de evaluación para obtener su certificado.</p>
                                     {% elif certificado_disponible %}
                                     <div class="flex items-center gap-2 text-green-700 text-sm font-medium">

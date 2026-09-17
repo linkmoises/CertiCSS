@@ -157,7 +157,7 @@
                                 <!-- End Col -->
                             
                                 <div class="sm:col-span-9">
-                                    <input id="otp" name="otp" type="text" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" placeholder="Ingrese el código OTP...">
+                                    <input id="otp" name="otp" type="text" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" autocapitalize="characters" autocorrect="off" autocomplete="off" maxlength="4" class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" placeholder="Ingrese el código OTP...">
                                 </div>
                                 <!-- End Col -->
 

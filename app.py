@@ -83,6 +83,7 @@ collection_encuestas_v2 = db['encuestas_v2']
 collection_qbanks = db['qbanks']
 collection_qbanks_data = db['qbanks_data']
 collection_exam_results = db['exam_results']
+collection_tarea_entregas = db['tarea_entregas']
 collection_participantes_temporales = db['participantes_temporales']
 collection_posters = db['posters']
 collection_evaluaciones_poster = db['evaluaciones_poster']
@@ -694,8 +695,10 @@ def registrar():
 
     # Proceso según tipo de evento
     if usa_otp:
-        # Eventos presenciales y virtual sincrónica usan OTP
-        otp_ingresado = request.form.get('otp', '')
+        # Eventos presenciales y virtual sincrónica usan OTP.
+        # Se normaliza a mayúsculas: el código generado es A-Z/0-9 y el
+        # error más frecuente es que el participante lo escriba en minúsculas.
+        otp_ingresado = request.form.get('otp', '').strip().upper()
 
         otp_doc = collection_otps.find_one({"_id": codigo_evento})
         if not otp_doc or datetime.now() > otp_doc['valid_until'] or otp_ingresado != otp_doc['code']:
@@ -3335,6 +3338,53 @@ def _buscar_certificados_resultados(cedula, token):
                         (m.get('calificacion', 0) for m in mejores if m), default=0
                     )
                 # Sin ningún intento: examen_completado=False, puntaje 0
+
+            # Tareas manuales: cuentan igual que las sumativas (>=80).
+            # La plantilla bloquea con `not examen_completado or puntaje < 80`,
+            # así que el puntaje es el mínimo global y sin todas las tareas
+            # calificadas el certificado queda bloqueado.
+            tareas_evento = list(collection_eva.find({
+                'codigo_evento': codigo_evento,
+                'tipo': 'tarea'
+            }))
+            if tareas_evento:
+                tiene_examen = True
+                ids_tareas = [_id_str(t) for t in tareas_evento]
+                ords_tareas = [t.get('orden') for t in tareas_evento]
+                entregas_tareas = list(collection_tarea_entregas.find({
+                    'codigo_evento': codigo_evento,
+                    'cedula_participante': participante['cedula'],
+                    '$or': [
+                        {'tarea_id': {'$in': ids_tareas}},
+                        {'tarea_id': None, 'orden_tarea': {'$in': ords_tareas}},
+                        {'tarea_id': {'$exists': False}, 'orden_tarea': {'$in': ords_tareas}},
+                    ],
+                }))
+                notas_tareas = []
+                for t in tareas_evento:
+                    tid = _id_str(t)
+                    ent = next(
+                        (e for e in entregas_tareas
+                         if e.get('tarea_id') and str(e.get('tarea_id')) == tid),
+                        None,
+                    )
+                    if ent is None:
+                        ent = next(
+                            (e for e in entregas_tareas
+                             if not e.get('tarea_id') and e.get('orden_tarea') == t.get('orden')),
+                            None,
+                        )
+                    if ent and ent.get('calificacion') is not None:
+                        notas_tareas.append(ent.get('calificacion', 0))
+                todas_calificadas = len(notas_tareas) == len(tareas_evento)
+                if notas_tareas:
+                    if examenes_sumativos and 'mejores' in locals() and any(mejores):
+                        puntaje_examen = min([puntaje_examen] + notas_tareas)
+                    elif not examenes_sumativos:
+                        puntaje_examen = min(notas_tareas)
+                        examen_completado = True
+                if not todas_calificadas:
+                    examen_completado = False
 
             # Check survey completion status
             requires_survey = requires_survey_completion(evento)
@@ -7826,6 +7876,40 @@ def generar_pdf(nanoid):
                 mejor = mejor_resultado_examen(resultados, ex)
                 if not mejor or mejor.get('calificacion', 0) < 80:
                     flash('Debe aprobar todos los exámenes sumativos con puntaje ≥80% para descargar el certificado.', 'error')
+                    return redirect(url_for('buscar_certificados'))
+
+        # Tareas manuales: cuentan igual que las sumativas (>=80%).
+        tareas_evento = list(collection_eva.find({
+            'codigo_evento': codigo_evento,
+            'tipo': 'tarea'
+        }))
+        if tareas_evento:
+            ids_tareas = [_id_str(t) for t in tareas_evento]
+            ordenes_tareas = [t.get('orden') for t in tareas_evento]
+            entregas = list(collection_tarea_entregas.find({
+                'codigo_evento': codigo_evento,
+                'cedula_participante': participante['cedula'],
+                '$or': [
+                    {'tarea_id': {'$in': ids_tareas}},
+                    {'tarea_id': None, 'orden_tarea': {'$in': ordenes_tareas}},
+                    {'tarea_id': {'$exists': False}, 'orden_tarea': {'$in': ordenes_tareas}},
+                ],
+            }))
+            for t in tareas_evento:
+                tid = _id_str(t)
+                ent = next(
+                    (e for e in entregas
+                     if e.get('tarea_id') and str(e.get('tarea_id')) == tid),
+                    None,
+                )
+                if ent is None:
+                    ent = next(
+                        (e for e in entregas
+                         if not e.get('tarea_id') and e.get('orden_tarea') == t.get('orden')),
+                        None,
+                    )
+                if not ent or ent.get('calificacion') is None or ent.get('calificacion', 0) < 80:
+                    flash('Debe aprobar todas las tareas calificables con puntaje ≥80% para descargar el certificado.', 'error')
                     return redirect(url_for('buscar_certificados'))
 
     ##afiche_path = f"static/assets/plantilla-certificado.pdf"

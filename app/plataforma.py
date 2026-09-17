@@ -25,6 +25,7 @@ from app import (
     collection_participantes,
     collection_qbanks,
     collection_qbanks_data,
+    collection_tarea_entregas,
     db,
 )
 from app.auth import token_required, lms_required, lms_edit_required
@@ -38,7 +39,10 @@ plataforma_bp = Blueprint("plataforma", __name__)
 ### submodulo_id) se tratan como huérfanos y se renderizan igual que antes.
 ###
 TIPOS_NO_NAVEGABLES = {"modulo", "submodulo"}
-TIPOS_NAVEGABLES_EXAMEN = {"video", "texto", "documento", "caso_chatgpt", "examen"}
+TIPOS_NAVEGABLES_EXAMEN = {"video", "texto", "documento", "caso_chatgpt", "examen", "tarea"}
+
+# Umbral de aprobación para evaluaciones sumativas y tareas manuales.
+UMBRAL_APROBACION = 80
 
 
 def es_navegable(contenido):
@@ -136,6 +140,177 @@ def breadcrumb_lms(contenidos_by_id, contenido):
     if submodulo is not None and submodulo.get("tipo") != "submodulo":
         submodulo = None
     return modulo, submodulo
+
+
+def puede_calificar_evento(evento):
+    """¿Puede el usuario actual calificar tareas manuales de este evento?
+
+    Pueden: administradores, rol denadoi, autor del evento y
+    coorganizadores registrados en participantes con cuenta (match por
+    cédula, igual que el resto del sistema).
+    """
+    if not current_user.is_authenticated:
+        return False
+    if getattr(current_user, "rol", None) in ("administrador", "denadoi"):
+        return True
+    try:
+        if str(current_user.id) == str(evento.get("autor")):
+            return True
+    except Exception:
+        pass
+    cedula = getattr(current_user, "cedula", None)
+    if not cedula:
+        return False
+    return collection_participantes.find_one(
+        {
+            "codigo_evento": evento.get("codigo"),
+            "cedula": str(cedula),
+            "rol": "coorganizador",
+        }
+    ) is not None
+
+
+def estado_tareas_evento(codigo_evento, cedula_participante):
+    """Tareas manuales del evento y entrega de un participante por tarea.
+
+    Retorna (tareas, por_tarea) donde por_tarea[tarea_id_str] es el doc de
+    entrega/calificación o None. El match es por tarea_id estable con
+    fallback a orden_tarea para históricos.
+    """
+    tareas = list(
+        collection_eva.find(
+            {"codigo_evento": codigo_evento, "tipo": "tarea"}
+        ).sort("orden", 1)
+    )
+    if not tareas or not cedula_participante:
+        return tareas, {}
+    ids = [_id_str(t) for t in tareas]
+    ordenes = [t.get("orden") for t in tareas]
+    entregas = list(
+        collection_tarea_entregas.find(
+            {
+                "codigo_evento": codigo_evento,
+                "cedula_participante": cedula_participante,
+                "$or": [
+                    {"tarea_id": {"$in": ids}},
+                    {"tarea_id": None, "orden_tarea": {"$in": ordenes}},
+                    {
+                        "tarea_id": {"$exists": False},
+                        "orden_tarea": {"$in": ordenes},
+                    },
+                ],
+            }
+        )
+    )
+    por_tarea = {}
+    for t in tareas:
+        tid = _id_str(t)
+        match = next(
+            (
+                e
+                for e in entregas
+                if e.get("tarea_id") and str(e.get("tarea_id")) == tid
+            ),
+            None,
+        )
+        if match is None:
+            match = next(
+                (
+                    e
+                    for e in entregas
+                    if not e.get("tarea_id")
+                    and e.get("orden_tarea") == t.get("orden")
+                ),
+                None,
+            )
+        por_tarea[tid] = match
+    return tareas, por_tarea
+
+
+def progreso_lms(codigo_evento, cedula_participante, evento):
+    """Progreso combinado de sumativas + tareas manuales (umbral 80).
+
+    Las tareas manuales cuentan igual que los exámenes sumativos para el
+    certificado: todas deben estar aprobadas con >=80.
+    """
+    res = {
+        "total_sumativos": 0,
+        "aprobados_sumativos": 0,
+        "total_tareas": 0,
+        "aprobadas_tareas": 0,
+        "todos_aprobados": False,
+        "encuesta_completada": False,
+        "certificado_disponible": False,
+    }
+    if not cedula_participante:
+        return res
+    examenes = list(
+        collection_eva.find(
+            {"codigo_evento": codigo_evento, "tipo": "examen"}
+        )
+    )
+    sumativos = [
+        ex
+        for ex in examenes
+        if ex.get("qbank_config")
+        and not parse_qbank_config(ex.get("qbank_config", ""))[3]
+    ]
+    res["total_sumativos"] = len(sumativos)
+    if sumativos:
+        ids_sum = [_id_str(ex) for ex in sumativos]
+        ords_sum = [ex.get("orden") for ex in sumativos]
+        resultados = list(
+            collection_exam_results.find(
+                {
+                    "codigo_evento": codigo_evento,
+                    "cedula_participante": cedula_participante,
+                    "$or": [
+                        {"examen_id": {"$in": ids_sum}},
+                        {
+                            "examen_id": None,
+                            "orden_examen": {"$in": ords_sum},
+                        },
+                        {
+                            "examen_id": {"$exists": False},
+                            "orden_examen": {"$in": ords_sum},
+                        },
+                    ],
+                }
+            )
+        )
+        for ex in sumativos:
+            mejor = mejor_resultado_examen(resultados, ex)
+            if mejor and mejor.get("calificacion", 0) >= UMBRAL_APROBACION:
+                res["aprobados_sumativos"] += 1
+    tareas, por_tarea = estado_tareas_evento(codigo_evento, cedula_participante)
+    res["total_tareas"] = len(tareas)
+    for t in tareas:
+        ent = por_tarea.get(_id_str(t))
+        if (
+            ent
+            and ent.get("calificacion") is not None
+            and ent.get("calificacion", 0) >= UMBRAL_APROBACION
+        ):
+            res["aprobadas_tareas"] += 1
+    res["todos_aprobados"] = (
+        res["aprobados_sumativos"] == res["total_sumativos"]
+        and res["aprobadas_tareas"] == res["total_tareas"]
+    )
+    from app.verifica_encuesta import (
+        requires_survey_completion,
+        has_completed_survey_v2,
+    )
+
+    if requires_survey_completion(evento):
+        res["encuesta_completada"] = has_completed_survey_v2(
+            cedula_participante, codigo_evento
+        )
+    else:
+        res["encuesta_completada"] = True
+    res["certificado_disponible"] = (
+        res["todos_aprobados"] and res["encuesta_completada"]
+    )
+    return res
 
 
 def mejor_resultado_examen(resultados, examen):
@@ -308,6 +483,11 @@ def crear_contenido(codigo_evento):
         elif tipo == "examen":
             contenido["qbank_config"] = request.form["qbank_config"]
 
+        elif tipo == "tarea":
+            contenido["requiere_entrega"] = request.form.get("requiere_entrega") == "si"
+            contenido["permite_archivo"] = request.form.get("permite_archivo") == "si"
+            contenido["instrucciones"] = request.form.get("instrucciones", "").strip()
+
         elif tipo == "modulo":
             # Módulo organizador: separador visual sin campos propios.
             # Solo guarda titulo + descripcion, no es navegable.
@@ -365,8 +545,9 @@ def editar_contenido(codigo_evento, orden):
         submodulo_id = (request.form.get("submodulo_id") or "").strip() or None
         tipo_anterior = contenido.get("tipo")
 
-        # Proteger calificaciones: no convertir un examen con intentos en
-        # módulo/submódulo (dejaría resultados huérfanos).
+        # Proteger calificaciones: no convertir un examen o tarea con
+        # calificaciones/entregas en módulo/submódulo (dejaría resultados
+        # huérfanos).
         if tipo_anterior == "examen" and tipo in TIPOS_NO_NAVEGABLES:
             intentos = collection_exam_results.count_documents(
                 {
@@ -378,6 +559,20 @@ def editar_contenido(codigo_evento, orden):
                 flash(
                     "No se puede convertir un examen con intentos registrados en "
                     "módulo/submódulo porque se perdería la trazabilidad de calificaciones.",
+                    "error",
+                )
+                return redirect(request.url)
+        if tipo_anterior == "tarea" and tipo in TIPOS_NO_NAVEGABLES:
+            entregas = collection_tarea_entregas.count_documents(
+                {
+                    "codigo_evento": codigo_evento,
+                    "orden_tarea": orden,
+                }
+            )
+            if entregas > 0:
+                flash(
+                    "No se puede convertir una tarea con entregas o calificaciones "
+                    "en módulo/submódulo porque se perdería la trazabilidad.",
                     "error",
                 )
                 return redirect(request.url)
@@ -470,6 +665,10 @@ def editar_contenido(codigo_evento, orden):
                 return redirect(request.url)
         elif tipo == "examen":
             actualizacion["qbank_config"] = request.form["qbank_config"]
+        elif tipo == "tarea":
+            actualizacion["requiere_entrega"] = request.form.get("requiere_entrega") == "si"
+            actualizacion["permite_archivo"] = request.form.get("permite_archivo") == "si"
+            actualizacion["instrucciones"] = request.form.get("instrucciones", "").strip()
         elif tipo == "modulo":
             # Módulo organizador: sin campos propios.
             pass
@@ -485,6 +684,7 @@ def editar_contenido(codigo_evento, orden):
             "documento": {"documento"},
             "caso_chatgpt": {"contenido_json"},
             "examen": {"qbank_config"},
+            "tarea": {"requiere_entrega", "permite_archivo", "instrucciones"},
             "modulo": set(),
             "submodulo": set(),
         }
@@ -623,8 +823,8 @@ def mover_contenido(codigo_evento, orden, direccion):
         {"_id": contenido_destino["_id"]}, {"$set": {"orden": orden}}
     )
 
-    # Avisar si se movió un examen con intentos: las calificaciones se
-    # conservan por examen_id, pero conviene verificar el listado interno.
+    # Avisar si se movió un examen o tarea con calificaciones: se conservan
+    # por examen_id/tarea_id, pero conviene verificar el listado interno.
     for movido in (contenido_actual, contenido_destino):
         if movido.get("tipo") == "examen":
             n = collection_exam_results.count_documents(
@@ -643,6 +843,27 @@ def mover_contenido(codigo_evento, orden, direccion):
                 flash(
                     f"«{movido.get('titulo', 'Examen')}» tiene {n} intento(s) registrado(s). "
                     "Se movió conservando calificaciones (enlace por examen_id); "
+                    "verifica el listado de calificaciones.",
+                    "info",
+                )
+                break
+        elif movido.get("tipo") == "tarea":
+            n = collection_tarea_entregas.count_documents(
+                {
+                    "codigo_evento": codigo_evento,
+                    "$or": [
+                        {"tarea_id": _id_str(movido)},
+                        {
+                            "tarea_id": {"$in": [None]},
+                            "orden_tarea": movido.get("orden"),
+                        },
+                    ],
+                }
+            )
+            if n > 0:
+                flash(
+                    f"«{movido.get('titulo', 'Tarea')}» tiene {n} entrega(s)/calificación(es) registrada(s). "
+                    "Se movió conservando calificaciones (enlace por tarea_id); "
                     "verifica el listado de calificaciones.",
                     "info",
                 )
@@ -728,8 +949,193 @@ def eliminar_contenido(codigo_evento, orden):
                 "info",
             )
 
+    if contenido.get("tipo") == "tarea":
+        n = collection_tarea_entregas.count_documents(
+            {
+                "codigo_evento": codigo_evento,
+                "$or": [
+                    {"tarea_id": contenido_id},
+                    {"tarea_id": {"$in": [None]}, "orden_tarea": orden},
+                ],
+            }
+        )
+        if n > 0:
+            flash(
+                f"Se eliminó una tarea con {n} entrega(s)/calificación(es) registrada(s) "
+                "y se renumeró el resto. Los registros históricos se conservan por "
+                "tarea_id; verifica el listado de calificaciones.",
+                "info",
+            )
+
     return redirect(
         url_for("plataforma.listar_contenidos", codigo_evento=codigo_evento)
+    )
+
+
+###
+### LMS - Calificar tarea manual (autor / coorganizador con cuenta / admin-denadoi)
+###
+@plataforma_bp.route(
+    "/tablero/eventos/<codigo_evento>/lms/<int:orden>/calificar",
+    methods=["GET"],
+)
+@login_required
+@lms_required
+def calificar_tarea(codigo_evento, orden):
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+    contenido = collection_eva.find_one(
+        {"codigo_evento": codigo_evento, "orden": orden}
+    )
+    if not contenido or contenido.get("tipo") != "tarea":
+        abort(404)
+    if not puede_calificar_evento(evento):
+        abort(403)
+
+    tarea_id = _id_str(contenido)
+    participantes = list(
+        collection_participantes.find(
+            {"codigo_evento": codigo_evento, "rol": "participante"}
+        ).sort([("apellidos", 1), ("nombres", 1)])
+    )
+    entregas = {
+        e.get("cedula_participante"): e
+        for e in collection_tarea_entregas.find(
+            {
+                "codigo_evento": codigo_evento,
+                "$or": [
+                    {"tarea_id": tarea_id},
+                    {"tarea_id": None, "orden_tarea": orden},
+                    {"tarea_id": {"$exists": False}, "orden_tarea": orden},
+                ],
+            }
+        )
+    }
+    filtro = (request.args.get("filtro") or "todos").strip()
+    if filtro not in ("todos", "pendientes", "calificados"):
+        filtro = "todos"
+    q = (request.args.get("q") or "").strip().lower()
+    filas = []
+    for p in participantes:
+        ent = entregas.get(p.get("cedula"))
+        calif = ent.get("calificacion") if ent else None
+        estado = (
+            "calificado"
+            if (calif is not None)
+            else ("entregado" if ent else "sin_entrega")
+        )
+        if filtro == "pendientes" and estado == "calificado":
+            continue
+        if filtro == "calificados" and estado != "calificado":
+            continue
+        if q and q not in (
+            f"{p.get('nombres', '')} {p.get('apellidos', '')} "
+            f"{p.get('cedula', '')}".lower()
+        ):
+            continue
+        filas.append({"participante": p, "entrega": ent, "estado": estado})
+
+    return render_template(
+        "calificar_tarea.html",
+        evento=evento,
+        contenido=contenido,
+        filas=filas,
+        filtro=filtro,
+        q=request.args.get("q", ""),
+    )
+
+
+@plataforma_bp.route(
+    "/tablero/eventos/<codigo_evento>/lms/<int:orden>/calificar/<cedula>",
+    methods=["POST"],
+)
+@login_required
+@lms_required
+def guardar_calificacion_tarea(codigo_evento, orden, cedula):
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+    contenido = collection_eva.find_one(
+        {"codigo_evento": codigo_evento, "orden": orden}
+    )
+    if not contenido or contenido.get("tipo") != "tarea":
+        abort(404)
+    if not puede_calificar_evento(evento):
+        abort(403)
+
+    nota_raw = (request.form.get("calificacion") or "").strip().replace(",", ".")
+    try:
+        calificacion = float(nota_raw)
+    except (TypeError, ValueError):
+        flash("La calificación debe ser un número entre 0 y 100.", "error")
+        return redirect(
+            url_for(
+                "plataforma.calificar_tarea",
+                codigo_evento=codigo_evento,
+                orden=orden,
+            )
+        )
+    if calificacion < 0 or calificacion > 100:
+        flash("La calificación debe estar entre 0 y 100.", "error")
+        return redirect(
+            url_for(
+                "plataforma.calificar_tarea",
+                codigo_evento=codigo_evento,
+                orden=orden,
+            )
+        )
+    feedback = (request.form.get("feedback") or "").strip()[:2000]
+    tarea_id = _id_str(contenido)
+    entrega = collection_tarea_entregas.find_one(
+        {
+            "codigo_evento": codigo_evento,
+            "cedula_participante": cedula,
+            "$or": [
+                {"tarea_id": tarea_id},
+                {"tarea_id": None, "orden_tarea": orden},
+                {"tarea_id": {"$exists": False}, "orden_tarea": orden},
+            ],
+        }
+    )
+    ahora = datetime.now()
+    datos = {
+        "tarea_id": tarea_id,
+        "orden_tarea": orden,
+        "calificacion": round(calificacion, 1),
+        "feedback": feedback,
+        "estado": "calificado",
+        "calificado_por": getattr(current_user, "id", None),
+        "fecha_calificacion": ahora,
+        "titulo_tarea": contenido.get("titulo", "Sin título"),
+        "titulo_evento": evento.get("titulo", "Sin título"),
+    }
+    if entrega:
+        collection_tarea_entregas.update_one(
+            {"_id": entrega["_id"]}, {"$set": datos}
+        )
+    else:
+        # Calificación directa sin entrega previa (tarea sin entrega
+        # requerida o participante calificado de oficio).
+        datos.update(
+            {
+                "codigo_evento": codigo_evento,
+                "cedula_participante": cedula,
+                "texto_entrega": "",
+                "archivo_path": None,
+                "fecha_entrega": None,
+            }
+        )
+        collection_tarea_entregas.insert_one(datos)
+    flash(f"Calificación guardada para {cedula}.", "success")
+    return redirect(
+        url_for(
+            "plataforma.calificar_tarea",
+            codigo_evento=codigo_evento,
+            orden=orden,
+            filtro=request.form.get("filtro", "todos"),
+            q=request.form.get("q", ""),
+        )
     )
 
 
@@ -848,6 +1254,11 @@ def copiar_lms(codigo_evento):
             
             elif contenido.get("tipo") == "examen":
                 nuevo_contenido["qbank_config"] = contenido.get("qbank_config", "")
+
+            elif contenido.get("tipo") == "tarea":
+                nuevo_contenido["requiere_entrega"] = bool(contenido.get("requiere_entrega", False))
+                nuevo_contenido["permite_archivo"] = bool(contenido.get("permite_archivo", False))
+                nuevo_contenido["instrucciones"] = contenido.get("instrucciones", "")
             
             collection_eva.insert_one(nuevo_contenido)
         
@@ -1169,9 +1580,12 @@ def ver_contenido(codigo_evento, orden):
                     flash('¡Examen aprobado! Completa la encuesta de evaluación para descargar tu certificado.', 'success')
                     return redirect(url_for('encuesta_satisfaccion', codigo_evento=codigo_evento, cedula=cedula, from_examen=1))
 
-            # Calcular progreso de sumativas y estado del certificado (solo para exámenes sumativos)
+            # Calcular progreso de sumativas+tareas y estado del certificado.
+            # Las tareas manuales cuentan igual que los exámenes sumativos.
             total_sumativos = 0
             aprobados_sumativos = 0
+            total_tareas = 0
+            aprobadas_tareas = 0
             todos_aprobados = False
             encuesta_completada = False
             certificado_disponible = False
@@ -1216,10 +1630,28 @@ def ver_contenido(codigo_evento, orden):
                     }))
                     for ex in examenes_sumativos:
                         mejor = mejor_resultado_examen(resultados_sumativos, ex)
-                        if mejor and mejor.get('calificacion', 0) >= 80:
+                        if mejor and mejor.get('calificacion', 0) >= UMBRAL_APROBACION:
                             aprobados_sumativos += 1
 
-                    todos_aprobados = (aprobados_sumativos == total_sumativos)
+                # Tareas manuales: cuentan igual que las sumativas (>=80).
+                tareas_evento, entregas_tareas = estado_tareas_evento(
+                    codigo_evento, cedula
+                )
+                total_tareas = len(tareas_evento)
+                for t in tareas_evento:
+                    ent = entregas_tareas.get(_id_str(t))
+                    if (
+                        ent
+                        and ent.get("calificacion") is not None
+                        and ent.get("calificacion", 0) >= UMBRAL_APROBACION
+                    ):
+                        aprobadas_tareas += 1
+
+                todos_aprobados = (
+                    (total_sumativos + total_tareas) > 0
+                    and aprobados_sumativos == total_sumativos
+                    and aprobadas_tareas == total_tareas
+                )
 
                 # Verificar encuesta
                 requiere_encuesta = requires_survey_completion(evento)
@@ -1254,6 +1686,8 @@ def ver_contenido(codigo_evento, orden):
                 respuestas_guardadas=respuestas_guardadas,
                 total_sumativos=total_sumativos,
                 aprobados_sumativos=aprobados_sumativos,
+                total_tareas=total_tareas,
+                aprobadas_tareas=aprobadas_tareas,
                 todos_aprobados=todos_aprobados,
                 encuesta_completada=encuesta_completada,
                 certificado_disponible=certificado_disponible,
@@ -1261,6 +1695,160 @@ def ver_contenido(codigo_evento, orden):
                 modulo_padre=modulo_padre_ex,
                 submodulo_padre=submodulo_padre_ex,
             )
+
+
+
+    # Mostrar tarea de calificación manual si el tipo es 'tarea'
+    if contenido_actual.get("tipo") == "tarea":
+        tarea_id = _id_str(contenido_actual)
+        requiere_entrega = bool(contenido_actual.get("requiere_entrega", False))
+        permite_archivo = bool(contenido_actual.get("permite_archivo", False))
+        instrucciones_html = None
+        if contenido_actual.get("instrucciones"):
+            instrucciones_html = markdown.markdown(
+                contenido_actual["instrucciones"]
+            )
+
+        entrega = None
+        if cedula:
+            entrega = collection_tarea_entregas.find_one(
+                {
+                    "codigo_evento": codigo_evento,
+                    "cedula_participante": cedula,
+                    "$or": [
+                        {"tarea_id": tarea_id},
+                        {"tarea_id": None, "orden_tarea": orden},
+                        {
+                            "tarea_id": {"$exists": False},
+                            "orden_tarea": orden,
+                        },
+                    ],
+                }
+            )
+
+        if request.method == "POST":
+            if not cedula:
+                abort(401)
+            if not requiere_entrega:
+                abort(403)
+            texto_entrega = (request.form.get("texto_entrega") or "").strip()
+            archivo_path = entrega.get("archivo_path") if entrega else None
+            archivo_file = (
+                request.files.get("archivo") if permite_archivo else None
+            )
+            if archivo_file and archivo_file.filename:
+                if not archivo_file.filename.lower().endswith(".pdf"):
+                    flash("Solo se permiten archivos PDF.", "error")
+                    return redirect(request.url)
+                evento_folder = os.path.join(
+                    current_app.config["UPLOAD_FOLDER"], codigo_evento
+                )
+                os.makedirs(evento_folder, exist_ok=True)
+                safe_ced = re.sub(r"[^A-Za-z0-9_-]", "_", cedula)
+                archivo_filename = (
+                    f"tarea-{codigo_evento}-{orden:02d}-{safe_ced}.pdf"
+                )
+                archivo_file.save(
+                    os.path.join(evento_folder, archivo_filename)
+                )
+                archivo_path = f"{codigo_evento}/{archivo_filename}"
+            if not texto_entrega and not archivo_path:
+                flash(
+                    "Debes escribir tu entrega o adjuntar el archivo PDF.",
+                    "error",
+                )
+                return redirect(request.url)
+            ahora = datetime.now()
+            if entrega:
+                collection_tarea_entregas.update_one(
+                    {"_id": entrega["_id"]},
+                    {
+                        "$set": {
+                            "tarea_id": tarea_id,
+                            "orden_tarea": orden,
+                            "texto_entrega": texto_entrega,
+                            "archivo_path": archivo_path,
+                            "fecha_entrega": ahora,
+                            "titulo_tarea": contenido_actual.get(
+                                "titulo", "Sin título"
+                            ),
+                            "titulo_evento": evento.get(
+                                "titulo", "Sin título"
+                            ),
+                        }
+                    },
+                )
+            else:
+                collection_tarea_entregas.insert_one(
+                    {
+                        "codigo_evento": codigo_evento,
+                        "tarea_id": tarea_id,
+                        "orden_tarea": orden,
+                        "cedula_participante": cedula,
+                        "texto_entrega": texto_entrega,
+                        "archivo_path": archivo_path,
+                        "calificacion": None,
+                        "feedback": "",
+                        "estado": "pendiente",
+                        "fecha_entrega": ahora,
+                        "titulo_tarea": contenido_actual.get(
+                            "titulo", "Sin título"
+                        ),
+                        "titulo_evento": evento.get("titulo", "Sin título"),
+                    }
+                )
+            flash("Entrega guardada correctamente.", "success")
+            return redirect(request.url)
+
+        participante = (
+            collection_participantes.find_one(
+                {
+                    "cedula": cedula,
+                    "codigo_evento": codigo_evento,
+                    "rol": "participante",
+                }
+            )
+            if cedula
+            else None
+        )
+        nanoid = participante.get("nanoid") if participante else None
+        prog = (
+            progreso_lms(codigo_evento, cedula, evento)
+            if (cedula and nanoid and evento.get("lms_activo"))
+            else None
+        )
+        contenidos_by_id_t = {_id_str(c): c for c in contenidos}
+        modulo_padre_t, submodulo_padre_t = breadcrumb_lms(
+            contenidos_by_id_t, contenido_actual
+        )
+        arbol_t = build_arbol_lms(contenidos)
+        navegables_t = [
+            c for c in contenidos if c.get("tipo") not in TIPOS_NO_NAVEGABLES
+        ]
+        idx_t = navegables_t.index(contenido_actual)
+        anterior_t = navegables_t[idx_t - 1] if idx_t > 0 else None
+        siguiente_t = (
+            navegables_t[idx_t + 1] if idx_t < len(navegables_t) - 1 else None
+        )
+        return render_template(
+            "plataforma.html",
+            evento=evento,
+            contenidos=contenidos,
+            contenido_actual=contenido_actual,
+            contenido_anterior=anterior_t,
+            contenido_siguiente=siguiente_t,
+            cedula=cedula,
+            token=token,
+            arbol=arbol_t,
+            modulo_padre=modulo_padre_t,
+            submodulo_padre=submodulo_padre_t,
+            instrucciones_html=instrucciones_html,
+            entrega=entrega,
+            requiere_entrega=requiere_entrega,
+            permite_archivo=permite_archivo,
+            nanoid=nanoid,
+            prog=prog,
+        )
 
     # Encontrar el contenido anterior y el siguiente (saltando módulos y
     # submódulos, que son separadores no navegables)

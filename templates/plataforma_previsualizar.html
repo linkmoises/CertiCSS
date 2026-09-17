@@ -146,6 +146,25 @@
                                 {% endfor %}
                             </div>
                         </div>
+                        {% elif contenido_actual.tipo == 'tarea' %}
+                        <div class="mx-auto">
+                            <h2 class="text-2xl font-bold mb-4">{{ contenido_actual.titulo }} (Previsualización)</h2>
+                            {% if contenido_actual.descripcion %}
+                            <p class="text-sm text-gray-600 mb-4">{{ contenido_actual.descripcion }}</p>
+                            {% endif %}
+                            <div class="p-4 rounded bg-purple-50 border border-purple-200 text-purple-800 text-sm mb-4">
+                                Tarea calificable manualmente — aprueba con ≥80%.
+                                {% if contenido_actual.requiere_entrega %}
+                                El participante entrega texto{% if contenido_actual.permite_archivo %} y/o PDF{% endif %}.
+                                {% else %}
+                                Sin entrega: se califica directo sobre inscritos.
+                                {% endif %}
+                            </div>
+                            {% if contenido_actual.instrucciones %}
+                            <p class="text-sm font-medium text-gray-700 mb-1">Instrucciones:</p>
+                            <p class="text-sm text-gray-600 whitespace-pre-line">{{ contenido_actual.instrucciones }}</p>
+                            {% endif %}
+                        </div>
                         {% elif contenido_actual.tipo == 'modulo' or contenido_actual.tipo == 'submodulo' %}
                         <div class="mx-auto">
                             <h2 class="text-2xl font-bold mb-4">{{ contenido_actual.titulo }} ({{ 'Módulo' if contenido_actual.tipo == 'modulo' else 'Submódulo' }} - Previsualización)</h2>
