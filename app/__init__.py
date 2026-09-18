@@ -93,15 +93,18 @@ def listar_participantes(codigo_evento):
     if not evento:
         abort(404)
 
-    puede_editar = (
+    cedula_usuario = str(getattr(current_user, "cedula", "") or "").strip()
+    es_coorganizador = bool(collection_participantes.find_one({
+        "codigo_evento": codigo_evento,
+        "cedula": cedula_usuario,
+        "rol": {"$in": ["organizador", "coorganizador"]}
+    })) if cedula_usuario else False
+
+    puede_editar = bool(
         current_user.rol == 'administrador' or
         current_user.rol == 'denadoi' or
         str(current_user.id) == str(evento.get("autor")) or
-        collection_participantes.find_one({
-            "codigo_evento": codigo_evento,
-            "cedula": str(current_user.cedula),
-            "rol": "coorganizador"
-        })
+        es_coorganizador
     )
 
     role_order = {"organizador": 0, "coorganizador": 1, "ponente": 2, "tallerista": 2, "instructor": 2, "participante": 3}
@@ -136,4 +139,5 @@ def listar_participantes(codigo_evento):
                            total_participantes=total_participantes,
                            total_ponentes=total_ponentes,
                            codigo_evento=codigo_evento,
-                           puede_editar=puede_editar)
+                           puede_editar=puede_editar,
+                           es_organizador=es_coorganizador)
