@@ -3729,6 +3729,17 @@ def herramientas():
     return render_template('herramientas.html', active_section='herramientas')
 
 ###
+### Mockups de diseño (demo interna, solo usuarios autenticados)
+###
+@app.route('/mockups/<path:filename>')
+@login_required
+def mockups_demo(filename):
+    permitidas = ('.html', '.png', '.css', '.js', '.svg', '.jpg', '.jpeg')
+    if not filename.lower().endswith(permitidas):
+        abort(404)
+    return send_from_directory('mockups', filename)
+
+###
 ### Tablero de Métricas
 ###
 @app.route('/tablero/metricas')
