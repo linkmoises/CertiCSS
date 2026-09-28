@@ -92,12 +92,14 @@
                             <span id="otp" class="font-bold">{{ otp }}{% endif %}</span>
                         </p>
                     </div>
+                    {% if not evento.get('evento_padre', False) %}
                     <div class="qr-code">
                         <img class="block float-right mt-8 w-64 h-64 border-4 border-black rounded-xl" src="{{ url_for('static', filename='uploads/' + evento.codigo + '-qr.png') }}" alt="Código QR" class="w-64 h-64"/><br />
                         <p class="mt-8 bg-white block text-black float-right p-4 text-3xl border-4 border-black rounded-xl">
                             {{ BASE_URL }}{{ evento.codigo }}
                         </p>
                     </div>
+                    {% endif %}
                 </div>
                 <!-- End Col -->
             </div>

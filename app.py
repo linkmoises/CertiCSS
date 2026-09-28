@@ -622,6 +622,10 @@ def registrar_participante(codigo_evento):
     if evento is None:
         abort(404)
 
+    if evento.get('evento_padre', False):
+        flash("Este es un evento padre. Los participantes se registran en los eventos hijos.", "warning")
+        return redirect(url_for('events.ver_evento', codigo_evento=codigo_evento))
+
     modalidad = evento.get("modalidad", "")
     usa_otp = modalidad in ["Presencial", "Virtual sincrónica"]
     requiere_preregistro = modalidad == "Híbrida"
@@ -689,6 +693,10 @@ def registrar():
     if evento is None:
         flash("El código del evento no es válido.", "error")
         return redirect(url_for('registrar_participante', codigo_evento=codigo_evento))
+
+    if evento.get('evento_padre', False):
+        flash("No se puede registrar directamente en un evento padre.", "error")
+        return redirect(url_for('buscar_certificados'))
 
     modalidad = evento.get("modalidad", "")
     usa_otp = modalidad in ["Presencial", "Virtual sincrónica"]
@@ -1564,6 +1572,13 @@ def preregistro(codigo_evento):
 def registrar_ponente(codigo_evento):
     evento = collection_eventos.find_one({"codigo": codigo_evento})
 
+    if evento is None:
+        abort(404)
+
+    if evento.get('evento_padre', False):
+        flash("No se puede registrar directamente en un evento padre.", "error")
+        return redirect(url_for('events.ver_evento', codigo_evento=codigo_evento))
+
     afiche_750 = evento.get('afiche_750')
     afiche_url = url_for('static', filename='uploads/' + afiche_750.split('/')[-1]) if afiche_750 else None
 
@@ -1635,6 +1650,13 @@ def registrar_ponente(codigo_evento):
 @login_required
 def registrar_organizador(codigo_evento):
     evento = collection_eventos.find_one({"codigo": codigo_evento})
+
+    if evento is None:
+        abort(404)
+
+    if evento.get('evento_padre', False):
+        flash("No se puede registrar directamente en un evento padre.", "error")
+        return redirect(url_for('events.ver_evento', codigo_evento=codigo_evento))
 
     afiche_750 = evento.get('afiche_750')
     afiche_url = url_for('static', filename='uploads/' + afiche_750.split('/')[-1]) if afiche_750 else None
@@ -1856,10 +1878,14 @@ def registrar_extemporaneo(codigo_evento):
     if not evento:
         # Registrar intento de acceso a evento inexistente
         log_event(f"Usuario [{current_user.email}] intentó registro extemporáneo para evento inexistente: {codigo_evento}")
-        
+
         flash('Evento no encontrado.', 'error')
         return redirect(url_for('home'))
-    
+
+    if evento.get('evento_padre', False):
+        flash("No se puede registrar directamente en un evento padre.", "error")
+        return redirect(url_for('events.ver_evento', codigo_evento=codigo_evento))
+
     # Verificar si el usuario es organizador
     es_organizador = collection_participantes.find_one({
         "codigo_evento": codigo_evento,
@@ -3194,7 +3220,8 @@ def mostrar_evento(codigo_evento):
 
     if evento:
 
-        qr_path = generate_qr_code(codigo_evento)
+        if not evento.get('evento_padre', False):
+            qr_path = generate_qr_code(codigo_evento)
 
         otp_doc = collection_otps.find_one({"_id": codigo_evento})
         if otp_doc and datetime.now() < otp_doc['valid_until']:
