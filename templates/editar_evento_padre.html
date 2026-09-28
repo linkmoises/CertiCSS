@@ -36,6 +36,7 @@
                 {% endwith %}
 
                 <form id="eventoPadreForm" action="{{ url_for('events.editar_evento_padre', codigo_evento=evento.codigo) }}" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="estado_evento" value="{{ evento.estado_evento }}">
                     <!-- Grid -->
                     <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
 
@@ -392,8 +393,14 @@
 
 <script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
 <script>
-    const unidadesPorProvincia = {{ unidades_por_region | default({}) | tojson }};
-    const unidadesJerarquizadas = {{ unidades_jerarquizadas | default({}) | tojson }};
+    let unidadesPorProvincia = {};
+    let unidadesJerarquizadas = {};
+    try {
+        unidadesPorProvincia = {{ unidades_por_region | default({}) | tojson }};
+        unidadesJerarquizadas = {{ unidades_jerarquizadas | default({}) | tojson }};
+    } catch(e) {
+        console.error('Error cargando unidades:', e);
+    }
 
     function actualizarUnidades() {
         const provinciaSeleccionada = document.getElementById("region").value;
@@ -433,6 +440,10 @@
             actualizarUnidades();
         }
         toggleEnlaceVirtual();
+    });
+
+    document.getElementById('eventoPadreForm').addEventListener('submit', function(e) {
+        console.log('Formulario enviado');
     });
 </script>
 </body>
