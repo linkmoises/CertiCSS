@@ -244,6 +244,7 @@
                                             Resumen
                                         </a><br />
 {% if current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor or evento.es_organizador)) %}
+{% if not evento.get('evento_padre', False) %}
 {% if evento.get('lms_activo', evento.modalidad != 'Presencial') %}
                                         <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('plataforma.listar_contenidos', codigo_evento=evento.codigo) }}">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-copy-icon lucide-book-copy"><path d="M2 16V4a2 2 0 0 1 2-2h11"/><path d="M22 18H11a2 2 0 1 0 0 4h10.5a.5.5 0 0 0 .5-.5v-15a.5.5 0 0 0-.5-.5H11a2 2 0 0 0-2 2v12"/><path d="M5 14H4a2 2 0 1 0 0 4h1"/></svg>
@@ -263,6 +264,12 @@
                                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-external-link-icon lucide-external-link"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
                                             QR cierre
                                         </a>
+{% else %}
+                                        <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('subir_archivo_evento', codigo_evento=evento.codigo) }}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-stack-icon lucide-file-stack"><path d="M21 7h-3a2 2 0 0 1-2-2V2"/><path d="M21 6v6.5c0 .8-.7 1.5-1.5 1.5h-7c-.8 0-1.5-.7-1.5-1.5v-9c0-.8.7-1.5 1.5-1.5H17Z"/><path d="M7 8v8.8c0 .3.2.6.4.8.2.2.5.4.8.4H15"/><path d="M3 12v8.8c0 .3.2.6.4.8.2.2.5.4.8.4H11"/></svg>
+                                            Repositorio
+                                        </a>
+{% endif %}
 {% endif %}
                                     </div>
                                     </a>
@@ -284,6 +291,7 @@
                                 </td>
                                 <td class="size-px whitespace-nowrap">
                                     <div class="px-6 py-2">
+{% if not evento.get('evento_padre', False) %}
 {% if current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor or evento.es_organizador)) %}
                                         <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('registrar_participante', codigo_evento=evento.codigo) }}">
                                             Añadir participante
@@ -294,6 +302,7 @@
                                         <a class="inline-flex items-center gap-x-1 text-sm text-teal-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('events.registrar_organizador', codigo_evento=evento.codigo) }}">
                                             Añadir coorganizador
                                         </a><br />
+{% endif %}
 {% endif %}
                                         <a class="inline-flex items-center gap-x-1 text-sm text-pink-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('events.listar_participantes', codigo_evento=evento.codigo) }}">
                                             Listado de participantes
@@ -310,17 +319,21 @@
                                             Editar
                                         </a><br />
 {% endif %}
-{% if current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor)) %}  
+{% if current_user.rol == 'administrador' or (evento.estado_evento != 'cerrado' and (current_user.rol == 'denadoi' or current_user.id == evento.autor)) %}
+{% if not evento.get('evento_padre', False) or not evento.get('eventos_hijos') %}
                                         <form action="{{ url_for('events.eliminar_evento', codigo_evento=evento.codigo) }}" method="post" style="display:inline;">
                                             <button class="text-sm text-red-600 decoration-2 hover:underline" type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este evento?');">
                                                 Eliminar
                                             </button>
                                         </form><br />
+{% endif %}
+{% if not evento.get('evento_padre', False) %}
                                         <form action="{{ url_for('events.cerrar_evento', codigo_evento=evento.codigo) }}" method="post" style="display:inline;">
                                             <button class="text-sm text-red-800 decoration-2 hover:underline" type="submit" onclick="return confirm('¿Estás seguro de que deseas cerrar este evento?');">
                                                 Cerrar
                                             </button>
                                         </form>
+{% endif %}
 {% endif %}
                                     </div>
                                 </td>

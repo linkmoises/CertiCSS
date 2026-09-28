@@ -312,6 +312,44 @@
                         {% endif %}
 
                         <div class="sm:col-span-3">
+                            <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                                Evento Padre
+                            </label>
+                        </div>
+                        <!-- End Col -->
+
+                        <div class="sm:col-span-9">
+                            <div class="flex items-center mt-2.5">
+                                <input type="checkbox" id="evento_padre" name="evento_padre" {% if
+                                    evento.get('evento_padre', False) %}checked{% endif %}
+                                    class="shrink-0 border-gray-200 rounded text-indigo-600 focus:ring-indigo-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-indigo-500 dark:checked:border-indigo-500 dark:focus:ring-offset-gray-800">
+                                <label for="evento_padre" class="text-sm text-gray-500 ms-3 dark:text-neutral-400">
+                                    Es un evento padre (agrupa varios eventos hijos)
+                                </label>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-neutral-400">
+                                Los eventos padres agrupan varios eventos hijos. El certificado se genera con la sumatoria
+                                de horas de los eventos hijos y la asistencia se marca por cada evento individual.
+                            </p>
+                        </div>
+                        <!-- End Col -->
+
+                        <div id="eventos_hijos_section" class="sm:col-span-12" {% if not evento.get('evento_padre', False) %}style="display: none;"{% endif %}>
+                            <div class="border border-gray-200 rounded-lg p-4 mt-4 dark:border-neutral-700">
+                                <label class="block text-sm font-medium text-gray-800 mb-2 dark:text-neutral-200">
+                                    Eventos hijos
+                                </label>
+                                <p class="text-xs text-gray-500 mb-3 dark:text-neutral-400">
+                                    Ingrese los códigos de los eventos hijos separados por comas
+                                </p>
+                                <input type="text" id="eventos_hijos" name="eventos_hijos"
+                                    class="py-2 px-3 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                                    placeholder="Ej: ABC123, DEF456, GHI789"
+                                    value="{{ evento.get('eventos_hijos', [])|join(', ') }}">
+                            </div>
+                        </div>
+
+                        <div class="sm:col-span-3">
                             <label for="carga_horaria"
                                 class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                 Carga horaria académica
@@ -1111,6 +1149,16 @@
         document.getElementById('enlace_virtual_group').classList.toggle('hidden', !show);
         document.getElementById('enlace_virtual_input').classList.toggle('hidden', !show);
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const eventoPadreCheckbox = document.getElementById('evento_padre');
+        const eventosHijosSection = document.getElementById('eventos_hijos_section');
+        if (eventoPadreCheckbox && eventosHijosSection) {
+            eventoPadreCheckbox.addEventListener('change', function() {
+                eventosHijosSection.style.display = this.checked ? 'block' : 'none';
+            });
+        }
+    });
 </script>
 
 </html>

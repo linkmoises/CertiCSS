@@ -300,6 +300,8 @@ def crear_evento():
         concurso_poster = request.form.get('concurso_poster') == 'on'
         registro_abierto = request.form.get('registro_abierto') == 'on'
         lms_activo = request.form.get('lms_activo') == 'on'
+        evento_padre = request.form.get('evento_padre') == 'on'
+        eventos_hijos = [c.strip() for c in request.form.get('eventos_hijos', '').split(',') if c.strip()]
         avales = request.form.getlist('aval')
 
         fecha_inicio_str = request.form['fecha_inicio']
@@ -398,6 +400,8 @@ def crear_evento():
             'concurso_poster': concurso_poster,
             'registro_abierto': registro_abierto,
             'lms_activo': lms_activo,
+            'evento_padre': evento_padre,
+            'eventos_hijos': eventos_hijos if evento_padre else [],
             'avales': avales,
             'instrumento': instrumento,
             'enlace_virtual': enlace_virtual
@@ -549,6 +553,8 @@ def editar_evento(codigo_evento):
         concurso_poster = request.form.get('concurso_poster') == 'on'
         registro_abierto = request.form.get('registro_abierto') == 'on'
         lms_activo = request.form.get('lms_activo') == 'on'
+        evento_padre = request.form.get('evento_padre') == 'on'
+        eventos_hijos = [c.strip() for c in request.form.get('eventos_hijos', '').split(',') if c.strip()]
         avales = request.form.getlist('aval')
         aval_cmp_tipo = request.form.get('aval_cmp_tipo')
         aval_cmp_horas = request.form.get('aval_cmp_horas')
@@ -639,6 +645,8 @@ def editar_evento(codigo_evento):
             'concurso_poster': concurso_poster,
             'registro_abierto': registro_abierto,
             'lms_activo': lms_activo,
+            'evento_padre': evento_padre,
+            'eventos_hijos': eventos_hijos if evento_padre else [],
             'avales': avales,
             'aval_cmp_tipo': aval_cmp_tipo,
             'aval_cmp_horas': aval_cmp_horas,
@@ -685,22 +693,26 @@ def cerrar_evento(codigo_evento):
 @login_required
 def eliminar_evento(codigo_evento):
     from app.events.services import get_event_by_code, get_collection_eventos, get_collection_participantes
-    
+
     collection_participantes = get_collection_participantes()
     evento = get_event_by_code(get_collection_eventos(), codigo_evento)
     if not evento:
         flash("Evento no encontrado", "danger")
         return redirect(url_for('events.listar_eventos'))
-    
+
+    if evento.get('evento_padre') and evento.get('eventos_hijos'):
+        flash("No puede eliminar un evento padre que tiene eventos hijos asignados.", "danger")
+        return redirect(url_for('events.ver_evento', codigo_evento=codigo_evento))
+
     es_autor = str(current_user.id) == str(evento.get('autor'))
     total_participantes = collection_participantes.count_documents({"codigo_evento": codigo_evento})
-    
+
     if current_user.rol != 'administrador' and not (es_autor and total_participantes == 0):
         flash("No tienes permisos para eliminar este evento", "danger")
         return redirect(url_for('events.ver_evento', codigo_evento=codigo_evento))
-    
+
     get_collection_eventos().delete_one({"codigo": codigo_evento})
-    
+
     log_event(f"Usuario [{current_user.email}] ha eliminado el evento {codigo_evento}.")
     flash(f"Evento {codigo_evento} eliminado exitosamente.", "success")
     return redirect(url_for('events.listar_eventos'))

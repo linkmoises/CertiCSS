@@ -109,6 +109,49 @@ def listar_participantes(codigo_evento):
 
     role_order = {"organizador": 0, "coorganizador": 1, "ponente": 2, "tallerista": 2, "instructor": 2, "participante": 3}
 
+    if evento.get('evento_padre'):
+        eventos_hijos = list(collection_eventos.find({
+            "codigo": {"$in": evento.get('eventos_hijos', [])}
+        }).sort("fecha_inicio", 1))
+
+        codigos_hijos = [h['codigo'] for h in eventos_hijos]
+        todos_participantes = list(collection_participantes.find({
+            "codigo_evento": {"$in": codigos_hijos},
+            "rol": "participante"
+        }))
+
+        participantes_unicos = {}
+        for p in todos_participantes:
+            cedula = p['cedula']
+            if cedula not in participantes_unicos:
+                participantes_unicos[cedula] = {
+                    'nombres': p['nombres'],
+                    'apellidos': p['apellidos'],
+                    'cedula': cedula,
+                    'asistencia': {codigo: False for codigo in codigos_hijos},
+                    'horas_asistidas': 0
+                }
+            participantes_unicos[cedula]['asistencia'][p['codigo_evento']] = True
+
+        for cedula, data in participantes_unicos.items():
+            for hijo in eventos_hijos:
+                if data['asistencia'][hijo['codigo']]:
+                    data['horas_asistidas'] += int(hijo.get('carga_horaria', 0))
+
+        participantes_list = sorted(participantes_unicos.values(), key=lambda x: x['apellidos'])
+
+        return render_template('participantes.html',
+                               evento=evento,
+                               participantes=participantes_list,
+                               nombre_evento=evento['nombre'],
+                               total_participantes=len(participantes_list),
+                               total_ponentes=0,
+                               codigo_evento=codigo_evento,
+                               puede_editar=puede_editar,
+                               es_organizador=es_coorganizador,
+                               evento_padre=True,
+                               eventos_hijos=eventos_hijos)
+
     participantes = list(collection_participantes.find(
         {"codigo_evento": codigo_evento}
     ))
@@ -140,4 +183,6 @@ def listar_participantes(codigo_evento):
                            total_ponentes=total_ponentes,
                            codigo_evento=codigo_evento,
                            puede_editar=puede_editar,
-                           es_organizador=es_coorganizador)
+                           es_organizador=es_coorganizador,
+                           evento_padre=False,
+                           eventos_hijos=[])

@@ -7869,11 +7869,17 @@ def generar_pdf(nanoid):
     )
     if not evento.get('registro_abierto', False) and not puede_editar:
         fecha_fin_evento = parse_event_date(evento.get('fecha_fin', None))
+        if evento.get('evento_padre') and evento.get('eventos_hijos'):
+            eventos_hijos = list(collection_eventos.find({
+                "codigo": {"$in": evento.get('eventos_hijos', [])}
+            }).sort("fecha_inicio", -1))
+            if eventos_hijos:
+                fecha_fin_evento = parse_event_date(eventos_hijos[0].get('fecha_fin', None))
         if fecha_fin_evento and datetime.now() < fecha_fin_evento:
             flash('El certificado estará disponible al finalizar el evento.', 'error')
             return redirect(url_for('buscar_certificados'))
-    
-    if requires_survey_completion(evento) and not skip_survey and not puede_editar:
+
+    if requires_survey_completion(evento) and not skip_survey and not puede_editar and not evento.get('evento_padre', False):
         if not has_completed_survey_v2(participante['cedula'], codigo_evento):
             flash('Debe completar la encuesta antes de descargar el certificado.', 'error')
             return redirect(url_for('buscar_certificados'))
@@ -8377,9 +8383,12 @@ def descargar_constancia(nanoid):
     # Obtener el evento asociado al participante
     codigo_evento = participante['codigo_evento']
     evento = collection_eventos.find_one({"codigo": codigo_evento})
-    
+
     if not evento:
         abort(404)  # Si no se encuentra el evento
+
+    if evento.get('evento_padre', False):
+        abort(404)
 
     # Bloqueo por fecha y hora de finalización del evento (solo eventos regulares).
     # Los eventos de "registro abierto" no se bloquean por tiempo.
@@ -8387,6 +8396,12 @@ def descargar_constancia(nanoid):
     es_admin = current_user.is_authenticated and getattr(current_user, 'rol', None) in ['administrador', 'denadoi']
     if not evento.get('registro_abierto', False) and not es_admin:
         fecha_fin_evento = parse_event_date(evento.get('fecha_fin', None))
+        if evento.get('evento_padre') and evento.get('eventos_hijos'):
+            eventos_hijos = list(collection_eventos.find({
+                "codigo": {"$in": evento.get('eventos_hijos', [])}
+            }).sort("fecha_inicio", -1))
+            if eventos_hijos:
+                fecha_fin_evento = parse_event_date(eventos_hijos[0].get('fecha_fin', None))
         if fecha_fin_evento and datetime.now() < fecha_fin_evento:
             flash('La constancia estará disponible al finalizar el evento.', 'error')
             return redirect(url_for('buscar_certificados'))

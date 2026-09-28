@@ -26,13 +26,13 @@ def generar_pdf_participante(participante, afiche_path, lugar=None):
     carga_horaria_evento = evento.get('carga_horaria', '08')
     fecha_fin_evento = evento.get('fecha_fin')
     fecha_inicio_evento = evento.get('fecha_inicio')
-    
+
     # Convert to date objects for comparison if they're strings
     if isinstance(fecha_inicio_evento, str):
         fecha_inicio_evento = datetime.strptime(fecha_inicio_evento, '%Y-%m-%d %H:%M:%S')
     if isinstance(fecha_fin_evento, str):
         fecha_fin_evento = datetime.strptime(fecha_fin_evento, '%Y-%m-%d %H:%M:%S')
-    
+
     # Format dates based on same/different months and days
     if fecha_inicio_evento.date() == fecha_fin_evento.date():
         # Single day event: "05 de agosto de 2025"
@@ -45,6 +45,44 @@ def generar_pdf_participante(participante, afiche_path, lugar=None):
         # Different months: "31 de agosto al 02 de septiembre de 2025"
         fecha_inicio_formateada = fecha_inicio_evento.strftime('%d de %B')
         fecha_fin_formateada = f"{fecha_inicio_formateada} al {fecha_fin_evento.strftime('%d de %B de %Y')}"
+
+    # Lógica especial para eventos padre
+    if evento.get('evento_padre'):
+        eventos_hijos = list(collection_eventos.find({
+            "codigo": {"$in": evento.get('eventos_hijos', [])}
+        }).sort("fecha_inicio", 1))
+
+        if eventos_hijos:
+            horas_totales = sum(int(h.get('carga_horaria', 0)) for h in eventos_hijos)
+            horas_asistidas = 0
+            for hijo in eventos_hijos:
+                registro = collection_participantes.find_one({
+                    "cedula": participante['cedula'],
+                    "codigo_evento": hijo['codigo'],
+                    "rol": "participante"
+                })
+                if registro:
+                    horas_asistidas += int(hijo.get('carga_horaria', 0))
+
+            fecha_inicio_real = eventos_hijos[0]['fecha_inicio']
+            fecha_fin_real = eventos_hijos[-1]['fecha_fin']
+
+            if isinstance(fecha_inicio_real, str):
+                fecha_inicio_real = datetime.strptime(fecha_inicio_real, '%Y-%m-%d %H:%M:%S')
+            if isinstance(fecha_fin_real, str):
+                fecha_fin_real = datetime.strptime(fecha_fin_real, '%Y-%m-%d %H:%M:%S')
+
+            if fecha_inicio_real.date() == fecha_fin_real.date():
+                fecha_rango = fecha_fin_real.strftime('%d de %B de %Y')
+            elif fecha_inicio_real.month == fecha_fin_real.month:
+                fecha_rango = f"{fecha_inicio_real.strftime('%d')} al {fecha_fin_real.strftime('%d')} de {fecha_fin_real.strftime('%B de %Y')}"
+            else:
+                fecha_rango = f"{fecha_inicio_real.strftime('%d de %B')} al {fecha_fin_real.strftime('%d de %B de %Y')}"
+
+            carga_horaria_evento = str(horas_asistidas)
+            fecha_fin_formateada = fecha_rango
+            fecha_inicio_evento = fecha_inicio_real
+            fecha_fin_evento = fecha_fin_real
 
     # Definir la ruta donde se guardará el PDF
     pdf_directory = 'static/certificados/'
