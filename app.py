@@ -3324,6 +3324,25 @@ def _buscar_certificados_resultados(cedula, token):
     if not participantes:
         return render_template('lista_certificados.html', cedula=cedula, resultados=None)
 
+    # Detectar eventos padres de los eventos hijos
+    codigos_hijos = set(p['codigo_evento'] for p in participantes)
+    eventos_padres = list(collection_eventos.find({
+        "evento_padre": True,
+        "eventos_hijos": {"$in": list(codigos_hijos)}
+    }))
+
+    for padre in eventos_padres:
+        participantes_hijo = sorted(
+            [p for p in participantes if p['codigo_evento'] in padre.get('eventos_hijos', [])],
+            key=lambda x: x.get('timestamp', datetime.min),
+            reverse=True
+        )
+        if participantes_hijo:
+            participante_virtual = participantes_hijo[0].copy()
+            participante_virtual['codigo_evento'] = padre['codigo']
+            participante_virtual['es_evento_padre'] = True
+            participantes.append(participante_virtual)
+
     resultados = []
 
     for participante in participantes:
