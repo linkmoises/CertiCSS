@@ -300,8 +300,6 @@ def crear_evento():
         concurso_poster = request.form.get('concurso_poster') == 'on'
         registro_abierto = request.form.get('registro_abierto') == 'on'
         lms_activo = request.form.get('lms_activo') == 'on'
-        evento_padre = request.form.get('evento_padre') == 'on'
-        eventos_hijos = [c.strip() for c in request.form.get('eventos_hijos', '').split(',') if c.strip()]
         avales = request.form.getlist('aval')
 
         fecha_inicio_str = request.form['fecha_inicio']
@@ -400,8 +398,6 @@ def crear_evento():
             'concurso_poster': concurso_poster,
             'registro_abierto': registro_abierto,
             'lms_activo': lms_activo,
-            'evento_padre': evento_padre,
-            'eventos_hijos': eventos_hijos if evento_padre else [],
             'avales': avales,
             'instrumento': instrumento,
             'enlace_virtual': enlace_virtual
@@ -553,8 +549,6 @@ def editar_evento(codigo_evento):
         concurso_poster = request.form.get('concurso_poster') == 'on'
         registro_abierto = request.form.get('registro_abierto') == 'on'
         lms_activo = request.form.get('lms_activo') == 'on'
-        evento_padre = request.form.get('evento_padre') == 'on'
-        eventos_hijos = [c.strip() for c in request.form.get('eventos_hijos', '').split(',') if c.strip()]
         avales = request.form.getlist('aval')
         aval_cmp_tipo = request.form.get('aval_cmp_tipo')
         aval_cmp_horas = request.form.get('aval_cmp_horas')
@@ -645,8 +639,6 @@ def editar_evento(codigo_evento):
             'concurso_poster': concurso_poster,
             'registro_abierto': registro_abierto,
             'lms_activo': lms_activo,
-            'evento_padre': evento_padre,
-            'eventos_hijos': eventos_hijos if evento_padre else [],
             'avales': avales,
             'aval_cmp_tipo': aval_cmp_tipo,
             'aval_cmp_horas': aval_cmp_horas,
@@ -1071,3 +1063,224 @@ def db_resultados_examenes(page=1):
 def db_encuestas(page=1):
     from main_app import db_encuestas as original
     return original(page)
+
+
+@events_bp.route('/eventos-padre/crear', methods=['GET', 'POST'])
+@login_required
+def crear_evento_padre():
+    from app.events.services import obtener_codigo_unico, get_collection_eventos
+    from app import app
+    import os
+    from PIL import Image
+
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        region = request.form['region']
+        unidad_ejecutora = request.form['unidad_ejecutora']
+        lugar = request.form.get('lugar', '')
+        tipo = request.form['tipo']
+        modalidad = request.form['modalidad']
+        descripcion = request.form.get('descripcion', '')
+        estado_evento = request.form.get('estado_evento', 'borrador')
+        enlace_virtual = request.form.get('enlace_virtual', '').strip() or None
+        eventos_hijos = [c.strip() for c in request.form.get('eventos_hijos', '').split(',') if c.strip()]
+
+        if estado_evento not in ('publicado', 'borrador'):
+            flash('Debe seleccionar un estado de publicación válido.', 'danger')
+            return redirect(url_for('events.crear_evento_padre'))
+
+        codigo = obtener_codigo_unico(get_collection_eventos())
+
+        afiche_file = request.files.get('afiche_evento')
+        fondo_file = request.files.get('fondo_evento')
+        programa_file = request.files.get('programa_evento')
+        certificado_file = request.files.get('certificado_evento')
+        constancia_file = request.files.get('constancia_evento')
+
+        afiche_path = None
+        fondo_path = None
+        programa_path = None
+        certificado_path = None
+        constancia_path = None
+        resized_afiche_path = None
+
+        upload_folder = app.config['UPLOAD_FOLDER']
+
+        if afiche_file:
+            afiche_filename = f"{codigo}-afiche.jpg"
+            afiche_path = os.path.join(upload_folder, afiche_filename)
+            image = Image.open(afiche_file)
+            image.convert('RGB').save(afiche_path, 'JPEG')
+            image.thumbnail((750, 750))
+            resized_afiche_path = os.path.join(upload_folder, f"{codigo}-afiche-750.jpg")
+            image.save(resized_afiche_path, 'JPEG')
+
+        if fondo_file:
+            fondo_filename = f"{codigo}-fondo.jpg"
+            fondo_path = os.path.join(upload_folder, fondo_filename)
+            image = Image.open(fondo_file)
+            image.convert('RGB').save(fondo_path, 'JPEG')
+
+        if programa_file:
+            programa_filename = f"{codigo}-programa.pdf"
+            programa_path = os.path.join(upload_folder, programa_filename)
+            programa_file.save(programa_path)
+
+        if certificado_file:
+            certificado_filename = f"{codigo}-certificado.pdf"
+            certificado_path = os.path.join(upload_folder, certificado_filename)
+            certificado_file.save(certificado_path)
+
+        if constancia_file:
+            constancia_filename = f"{codigo}-constancia.pdf"
+            constancia_path = os.path.join(upload_folder, constancia_filename)
+            constancia_file.save(constancia_path)
+
+        from datetime import datetime
+        get_collection_eventos().insert_one({
+            'nombre': nombre,
+            'codigo': codigo,
+            'region': region,
+            'unidad_ejecutora': unidad_ejecutora,
+            'lugar': lugar,
+            'tipo': tipo,
+            'modalidad': modalidad,
+            'descripcion': descripcion,
+            'cupos': '0',
+            'carga_horaria': '0',
+            'fecha_inicio': datetime.now(),
+            'fecha_fin': datetime.now(),
+            'estado_evento': estado_evento,
+            'afiche': afiche_path,
+            'afiche_750': resized_afiche_path,
+            'fondo': fondo_path,
+            'programa': programa_path,
+            'certificado': certificado_path,
+            'constancia': constancia_path,
+            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'autor': current_user.id,
+            'checkin_masivo': False,
+            'concurso_poster': False,
+            'registro_abierto': False,
+            'lms_activo': False,
+            'evento_padre': True,
+            'eventos_hijos': eventos_hijos,
+            'avales': [],
+            'instrumento': 'encuesta_v2',
+            'enlace_virtual': enlace_virtual
+        })
+
+        log_event(f"Usuario [{current_user.email}] ha creado el evento padre {codigo} exitosamente.")
+        return redirect(url_for('events.mis_eventos'))
+
+    return render_template('crear_evento_padre.html')
+
+
+@events_bp.route('/eventos-padre/<codigo_evento>/editar', methods=['GET', 'POST'])
+@login_required
+def editar_evento_padre(codigo_evento):
+    from app.events.services import get_event_by_code, get_collection_eventos, check_user_can_edit_event, get_collection_participantes
+    from app import app
+    import os
+    from PIL import Image
+    from datetime import datetime
+
+    evento = get_event_by_code(get_collection_eventos(), codigo_evento)
+
+    if not evento:
+        flash("Evento no encontrado", "danger")
+        return redirect(url_for('events.listar_eventos'))
+
+    if not check_user_can_edit_event(evento, current_user, get_collection_participantes()):
+        flash("No tienes permisos para editar este evento", "danger")
+        return redirect(url_for('events.ver_evento', codigo_evento=codigo_evento))
+
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        region = request.form['region']
+        unidad_ejecutora = request.form['unidad_ejecutora']
+        lugar = request.form.get('lugar', '')
+        tipo = request.form['tipo']
+        modalidad = request.form['modalidad']
+        descripcion = request.form.get('descripcion', '')
+        estado_evento = request.form.get('estado_evento', 'borrador')
+        enlace_virtual = request.form.get('enlace_virtual', '').strip() or None
+        eventos_hijos = [c.strip() for c in request.form.get('eventos_hijos', '').split(',') if c.strip()]
+
+        if estado_evento not in ('publicado', 'borrador', 'cerrado'):
+            flash('Debe seleccionar un estado de evento válido.', 'danger')
+            return redirect(url_for('events.editar_evento_padre', codigo_evento=codigo_evento))
+
+        afiche_file = request.files.get('afiche_evento')
+        fondo_file = request.files.get('fondo_evento')
+        programa_file = request.files.get('programa_evento')
+        certificado_file = request.files.get('certificado_evento')
+        constancia_file = request.files.get('constancia_evento')
+
+        afiche_path = evento.get('afiche')
+        fondo_path = evento.get('fondo')
+        resized_afiche_path = evento.get('afiche_750')
+        programa_path = evento.get('programa')
+        certificado_path = evento.get('certificado')
+        constancia_path = evento.get('constancia')
+
+        upload_folder = app.config['UPLOAD_FOLDER']
+
+        if afiche_file:
+            afiche_filename = f"{codigo_evento}-afiche.jpg"
+            afiche_path = os.path.join(upload_folder, afiche_filename)
+            image = Image.open(afiche_file)
+            image.convert('RGB').save(afiche_path, 'JPEG')
+            image.thumbnail((750, 750))
+            resized_afiche_path = os.path.join(upload_folder, f"{codigo_evento}-afiche-750.jpg")
+            image.save(resized_afiche_path, 'JPEG')
+
+        if fondo_file:
+            fondo_filename = f"{codigo_evento}-fondo.jpg"
+            fondo_path = os.path.join(upload_folder, fondo_filename)
+            image = Image.open(fondo_file)
+            image.convert('RGB').save(fondo_path, 'JPEG')
+
+        if programa_file:
+            programa_filename = f"{codigo_evento}-programa.pdf"
+            programa_path = os.path.join(upload_folder, programa_filename)
+            programa_file.save(programa_path)
+
+        if certificado_file:
+            certificado_filename = f"{codigo_evento}-certificado.pdf"
+            certificado_path = os.path.join(upload_folder, certificado_filename)
+            certificado_file.save(certificado_path)
+
+        if constancia_file:
+            constancia_filename = f"{codigo_evento}-constancia.pdf"
+            constancia_path = os.path.join(upload_folder, constancia_filename)
+            constancia_file.save(constancia_path)
+
+        update_data = {
+            'nombre': nombre,
+            'region': region,
+            'unidad_ejecutora': unidad_ejecutora,
+            'lugar': lugar,
+            'tipo': tipo,
+            'modalidad': modalidad,
+            'descripcion': descripcion,
+            'estado_evento': estado_evento,
+            'afiche': afiche_path,
+            'afiche_750': resized_afiche_path,
+            'fondo': fondo_path,
+            'programa': programa_path,
+            'certificado': certificado_path,
+            'constancia': constancia_path,
+            'eventos_hijos': eventos_hijos,
+            'enlace_virtual': enlace_virtual
+        }
+
+        get_collection_eventos().update_one(
+            {"codigo": codigo_evento},
+            {"$set": update_data}
+        )
+
+        log_event(f"Usuario [{current_user.email}] ha editado el evento padre {codigo_evento}.")
+        return redirect(url_for('events.ver_evento', codigo_evento=codigo_evento))
+
+    return render_template('editar_evento_padre.html', evento=evento)
