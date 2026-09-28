@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CertiCSS · Mockup — Escala de Wells (muestra)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { darkMode: 'class' };
+  // Aplica el tema guardado antes del primer pintado para evitar parpadeo
+  (function () {
+    try {
+      const guardado = localStorage.getItem('caprini-theme');
+      const oscuro = guardado ? guardado === 'dark'
+        : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.classList.toggle('dark', oscuro);
+    } catch (e) { /* localStorage no disponible: respeta el sistema */ }
+  })();
+</script>
+</head>
+<body class="bg-gray-50 dark:bg-neutral-900">
+
+<!-- ========== HEADER (mismo lenguaje que tablero-header.html) ========== -->
+<header class="sticky top-0 inset-x-0 z-[48] w-full bg-white border-b text-sm py-2.5 dark:bg-neutral-800 dark:border-neutral-700">
+  <nav class="px-4 sm:px-6 flex basis-full items-center w-full mx-auto">
+    <div class="me-5">
+      <span class="flex items-center gap-x-2.5 flex-none rounded-md text-xl font-semibold">
+        <img src="css-logo.png" alt="Logo CSS" class="h-9 w-auto">
+        <span>CertiCSS <span class="text-xs font-normal text-gray-400">· mockup</span></span>
+      </span>
+    </div>
+    <div class="w-full flex items-center justify-end ms-auto gap-x-1">
+      <span class="text-xs text-gray-500 dark:text-neutral-400 hidden sm:block">Departamento Nacional de Docencia e Investigación</span>
+      <span class="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-800/30 dark:text-blue-200">Muestra educativa</span>
+      <button type="button" onclick="alternarTema()" title="Alternar modo oscuro / claro"
+        class="size-[38px] inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-800 hover:bg-gray-100 dark:text-neutral-200 dark:hover:bg-neutral-700">
+        <svg id="icono-sol" class="size-4 hidden dark:block" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+        <svg id="icono-luna" class="size-4 block dark:hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        <span class="sr-only">Alternar modo oscuro / claro</span>
+      </button>
+    </div>
+  </nav>
+</header>
+
+<!-- ========== CONTENT (misma grilla de tarjetas que herramientas.html) ========== -->
+<div class="w-full">
+  <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+    <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+
+      <!-- Título sección -->
+      <section id="wells-mockup">
+        <div class="mb-5 pb-5 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 border-b border-gray-200 dark:border-neutral-700">
+          <div>
+            <h2 class="text-2xl font-semibold text-gray-800 dark:text-neutral-200">Escala de Wells — probabilidad clínica de TVP</h2>
+            <p class="text-sm text-gray-500 dark:text-neutral-400 mt-1">Mockup en <code>mockups/</code>. Cálculo efímero en el navegador, no se guarda nada. Marque todos los criterios presentes.</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="limpiar()" class="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 hover:bg-gray-50 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-200">Limpiar</button>
+            <button onclick="window.print()" class="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700">Imprimir</button>
+          </div>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-4 sm:gap-6 items-start">
+          <!-- Columna formulario (2/3) -->
+          <div class="lg:col-span-2 space-y-4">
+            <form id="wells" onsubmit="return false;">
+
+              <!-- Card criterios +1 -->
+              <div class="flex flex-col bg-white border shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-800">
+                <div class="p-4 md:p-5 flex justify-between gap-x-3 border-b border-gray-200 dark:border-neutral-800">
+                  <div>
+                    <p class="text-sm uppercase tracking-wide text-gray-500 dark:text-neutral-500">Suma 1 punto cada criterio</p>
+                    <p class="text-xs text-gray-400 mt-1">Antecedentes, inmovilización y signos locales.</p>
+                  </div>
+                  <div class="shrink-0 flex justify-center items-center size-[46px] bg-blue-600 text-white rounded-full font-semibold">+1</div>
+                </div>
+                <div class="p-4 md:p-5 grid sm:grid-cols-2 gap-x-4">
+                  <label class="flex items-start gap-2 text-sm text-gray-700 dark:text-neutral-300 py-1"><input type="checkbox" value="1" class="mt-1 accent-blue-600"> Neoplasia activa (tratamiento en últimos 6 meses o paliativo)</label>
+                  <label class="flex items-start gap-2 text-sm text-gray-700 dark:text-neutral-300 py-1"><input type="checkbox" value="1" class="mt-1 accent-blue-600"> Parálisis, paresia o inmovilización con yeso de MMII</label>
+                  <label class="flex items-start gap-2 text-sm text-gray-700 dark:text-neutral-300 py-1"><input type="checkbox" value="1" class="mt-1 accent-blue-600"> Encamamiento ≥3 días o cirugía mayor reciente (&lt;12 sem, con anestesia general o regional)</label>
+                  <label class="flex items-start gap-2 text-sm text-gray-700 dark:text-neutral-300 py-1"><input type="checkbox" value="1" class="mt-1 accent-blue-600"> Dolor localizado en el trayecto del sistema venoso profundo</label>
+                  <label class="flex items-start gap-2 text-sm text-gray-700 dark:text-neutral-300 py-1"><input type="checkbox" value="1" class="mt-1 accent-blue-600"> Tumefacción de toda la pierna</label>
+                  <label class="flex items-start gap-2 text-sm text-gray-700 dark:text-neutral-300 py-1"><input type="checkbox" value="1" class="mt-1 accent-blue-600"> Aumento del perímetro de pantorrilla &gt;3 cm vs. pierna sana (10 cm bajo la tuberosidad tibial)</label>
+                  <label class="flex items-start gap-2 text-sm text-gray-700 dark:text-neutral-300 py-1"><input type="checkbox" value="1" class="mt-1 accent-blue-600"> Edema con fóvea limitado a la pierna sintomática</label>
+                  <label class="flex items-start gap-2 text-sm text-gray-700 dark:text-neutral-300 py-1"><input type="checkbox" value="1" class="mt-1 accent-blue-600"> Venas superficiales colaterales (no varicosas)</label>
+                  <label class="flex items-start gap-2 text-sm text-gray-700 dark:text-neutral-300 py-1"><input type="checkbox" value="1" class="mt-1 accent-blue-600"> TVP documentada previamente</label>
+                </div>
+              </div>
+
+              <!-- Card criterio −2 -->
+              <div class="flex flex-col bg-white border shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-800">
+                <div class="p-4 md:p-5 flex justify-between gap-x-3 border-b border-gray-200 dark:border-neutral-800">
+                  <div>
+                    <p class="text-sm uppercase tracking-wide text-gray-500 dark:text-neutral-500">Resta 2 puntos</p>
+                    <p class="text-xs text-gray-400 mt-1">Diagnóstico alternativo verosímil.</p>
+                  </div>
+                  <div class="shrink-0 flex justify-center items-center size-[46px] bg-neutral-600 text-white rounded-full font-semibold">−2</div>
+                </div>
+                <div class="p-4 md:p-5">
+                  <label class="flex items-start gap-2 text-sm text-gray-700 dark:text-neutral-300 py-1"><input type="checkbox" value="-2" class="mt-1 accent-blue-600"> Diagnóstico alternativo al menos tan probable como la TVP (ej. rotura de quiste de Baker, celulitis, lesión muscular)</label>
+                </div>
+              </div>
+
+            </form>
+          </div>
+
+          <!-- Columna resultado (1/3, fija) -->
+          <div class="lg:sticky lg:top-20 space-y-4">
+            <div id="resultado" class="flex flex-col bg-white border shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-800 border-l-8">
+              <div class="p-4 md:p-5">
+                <p class="text-sm uppercase tracking-wide text-gray-500 dark:text-neutral-500">Puntaje total</p>
+                <p class="mt-1 flex items-baseline gap-x-2">
+                  <span id="puntaje" class="text-4xl font-semibold text-gray-800 dark:text-neutral-200">0</span>
+                  <span class="text-xs text-gray-400">puntos · <span id="conteo">0 criterios</span></span>
+                </p>
+                <p id="nivel" class="mt-2 text-sm font-medium text-gray-800 dark:text-neutral-200">Nivel: —</p>
+                <p id="dos-niveles" class="mt-1 text-xs text-gray-500 dark:text-neutral-400">Modelo de dos niveles: —</p>
+              </div>
+              <div class="p-4 md:p-5 border-t border-gray-200 dark:border-neutral-800">
+                <p class="text-sm uppercase tracking-wide text-gray-500 dark:text-neutral-500">Probabilidad (3 niveles)</p>
+                <div class="mt-3 grid grid-cols-3 gap-1 text-center text-[11px]">
+                  <div id="sem-bajo" class="rounded bg-green-100 text-green-800 py-1">≤0<br>Baja</div>
+                  <div id="sem-moderado" class="rounded bg-yellow-100 text-yellow-800 py-1">1–2<br>Moderada</div>
+                  <div id="sem-alto" class="rounded bg-red-100 text-red-800 py-1">≥3<br>Alta</div>
+                </div>
+                <!-- Panel dinámico: intervención + protocolo según puntaje -->
+                <div id="intervencion" class="mt-3 p-3 rounded-lg bg-gray-50 border border-gray-200 dark:bg-neutral-800 dark:border-neutral-700">
+                  <p id="intervencion-titulo" class="text-sm font-semibold text-gray-800 dark:text-neutral-200">Intervención sugerida</p>
+                  <p id="accion" class="mt-1 text-sm text-gray-600 dark:text-neutral-400">Marque los criterios para orientar la conducta.</p>
+                  <a id="protocolo-enlace" href="#" onclick="return false;" class="mt-2 inline-flex items-center gap-x-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400">
+                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                    <span id="protocolo">Ver protocolo institucional (ejemplo)</span>
+                  </a>
+                  <p id="protocolo-codigo" class="mt-1 text-[11px] text-gray-400">/tablero/protocolos/&lt;codigo&gt;</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex flex-col bg-white border shadow-sm rounded-xl overflow-hidden dark:bg-neutral-900 dark:border-neutral-800">
+              <img src="testimage.png" alt="Afiche del curso Insuficiencia vascular en atención primaria (imagen de ejemplo)" class="w-full aspect-square object-cover">
+              <div class="p-4 md:p-5">
+                <span class="inline-flex items-center gap-x-1.5 py-1 px-2.5 rounded-full text-[11px] font-medium bg-purple-100 text-purple-800 dark:bg-purple-800/30 dark:text-purple-200">Curso relacionado</span>
+                <p class="mt-2 text-sm font-semibold text-gray-800 dark:text-neutral-200">Insuficiencia vascular en atención primaria</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-neutral-400">Profundice en prevención y manejo del riesgo trombótico en el primer nivel de atención.</p>
+                <p class="mt-2 text-[11px] text-gray-400">Virtual asincrónica · 20 horas · DENADOI</p>
+              </div>
+              <a href="#" onclick="return false;" class="py-3 px-4 md:px-5 inline-flex justify-between items-center text-sm text-gray-600 border-t border-gray-200 hover:bg-gray-50 dark:border-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-800">
+                Ver curso <span class="text-[11px] text-gray-400">(ejemplo)</span>
+                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+              </a>
+            </div>
+
+            <div class="flex flex-col bg-white border shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-800">
+              <div class="p-4 md:p-5">
+                <p class="text-sm uppercase tracking-wide text-gray-500 dark:text-neutral-500">Referencia y descargo</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-neutral-400">Escala de Wells para TVP (Wells PS et al., <em>Lancet</em> 1997; validaciones posteriores). Muestra educativa: no reemplaza el juicio clínico ni el protocolo CSS vigente. La conducta definitiva (imagen, dímero D, anticoagulación) debe seguir el protocolo oficial.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <footer class="w-full mx-auto px-4 pt-4">
+        <div class="flex flex-wrap justify-between items-center gap-2">
+          <p class="text-xs text-gray-600 dark:text-neutral-400">© Departamento Nacional de Docencia e Investigación · mockup local sin backend</p>
+          <span class="text-xs text-gray-400">mockups/wells.html</span>
+        </div>
+      </footer>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const form = document.getElementById('wells');
+const box = document.getElementById('resultado');
+
+function calcular() {
+  let total = 0, n = 0;
+  form.querySelectorAll('input:checked').forEach(c => { total += parseInt(c.value, 10); n += 1; });
+  document.getElementById('puntaje').textContent = total;
+  document.getElementById('conteo').textContent = n + (n === 1 ? ' criterio' : ' criterios');
+
+  let nivel, dosNiveles, titulo, accion, protoNombre, protoCodigo, cls, panel;
+  if (total <= 0) {
+    nivel = 'Probabilidad baja (≤0)'; cls = 'border-green-500';
+    dosNiveles = 'Modelo de dos niveles: TVP improbable (≤1)';
+    titulo = 'Intervención: dímero D';
+    accion = 'Solicite dímero D: si es negativo, se descarta TVP; si es positivo, proceda a eco-Doppler de miembros inferiores.';
+    protoNombre = 'Protocolo CSS-DENADOI-PT-021 v1.0 — Abordaje de TVP, probabilidad baja (ficticio)';
+    protoCodigo = '/tablero/protocolos/CSS-DENADOI-PT-021';
+    panel = 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800';
+  } else if (total <= 2) {
+    nivel = 'Probabilidad moderada (1–2)'; cls = 'border-yellow-500';
+    dosNiveles = 'Modelo de dos niveles: TVP probable (≥2)' + (total === 1 ? ' — con 1 punto: improbable, confirme con dímero D' : '');
+    titulo = 'Intervención: dímero D + imagen según algoritmo';
+    accion = 'Solicite dímero D de alta sensibilidad y eco-Doppler según algoritmo local; no descarte solo con clínica.';
+    protoNombre = 'Protocolo CSS-DENADOI-PT-022 v1.0 — Abordaje de TVP, probabilidad moderada (ficticio)';
+    protoCodigo = '/tablero/protocolos/CSS-DENADOI-PT-022';
+    panel = 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800';
+  } else {
+    nivel = 'Probabilidad alta (≥3)'; cls = 'border-red-500';
+    dosNiveles = 'Modelo de dos niveles: TVP probable (≥2)';
+    titulo = 'Intervención: imagen urgente ± anticoagulación';
+    accion = 'Eco-Doppler urgente; el dímero D no excluye. Si la sospecha es alta y no hay sangrado, valorar anticoagulación mientras se confirma, según protocolo.';
+    protoNombre = 'Protocolo CSS-DENADOI-PT-023 v1.0 — Abordaje de TVP, probabilidad alta (ficticio)';
+    protoCodigo = '/tablero/protocolos/CSS-DENADOI-PT-023';
+    panel = 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800';
+  }
+  document.getElementById('nivel').textContent = 'Nivel: ' + nivel;
+  document.getElementById('dos-niveles').textContent = dosNiveles;
+  document.getElementById('intervencion-titulo').textContent = titulo;
+  document.getElementById('accion').textContent = accion;
+  document.getElementById('protocolo').textContent = protoNombre;
+  document.getElementById('protocolo-codigo').textContent = protoCodigo;
+  box.classList.remove('border-green-500', 'border-yellow-500', 'border-red-500');
+  box.classList.add(cls);
+  // Resaltar el segmento activo del semáforo y teñir el panel dinámico
+  const semIds = ['sem-bajo', 'sem-moderado', 'sem-alto'];
+  semIds.forEach(id => document.getElementById(id).classList.remove('ring-2', 'ring-offset-1', 'ring-gray-800', 'font-bold'));
+  const activo = total <= 0 ? 'sem-bajo' : total <= 2 ? 'sem-moderado' : 'sem-alto';
+  document.getElementById(activo).classList.add('ring-2', 'ring-offset-1', 'ring-gray-800', 'font-bold');
+  const interv = document.getElementById('intervencion');
+  interv.classList.remove('bg-green-50', 'bg-yellow-50', 'bg-red-50', 'bg-gray-50', 'border-green-200', 'border-yellow-200', 'border-red-200', 'border-gray-200', 'dark:bg-green-900/20', 'dark:bg-yellow-900/20', 'dark:bg-red-900/20', 'dark:border-green-800', 'dark:border-yellow-800', 'dark:border-red-800');
+  panel.split(' ').forEach(c => interv.classList.add(c));
+}
+
+function limpiar() { form.reset(); calcular(); }
+function alternarTema() {
+  const oscuro = document.documentElement.classList.toggle('dark');
+  try { localStorage.setItem('caprini-theme', oscuro ? 'dark' : 'light'); } catch (e) {}
+}
+form.addEventListener('change', calcular);
+calcular();
+</script>
+</body>
+</html>
