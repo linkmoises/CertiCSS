@@ -824,6 +824,21 @@
         if (eventoPadreCheckbox && eventosHijosSection) {
             eventoPadreCheckbox.addEventListener('change', function() {
                 eventosHijosSection.style.display = this.checked ? 'block' : 'none';
+                toggleRequired();
+            });
+        }
+
+        function toggleRequired() {
+            const esPadre = eventoPadreCheckbox.checked;
+            ['carga_horaria', 'fecha_inicio_date', 'fecha_fin_date'].forEach(id => {
+                const campo = document.getElementById(id);
+                if (campo) {
+                    if (esPadre) {
+                        campo.removeAttribute('required');
+                    } else {
+                        campo.setAttribute('required', 'required');
+                    }
+                }
             });
         }
     });
