@@ -158,6 +158,8 @@
                                                 </span>
                                                 <br>
                                                 <span class="text-xs text-gray-500">{{ hijo.fecha_inicio.strftime('%d/%m/%Y') }}</span>
+                                                <br>
+                                                <a href="{{ url_for('events.listar_participantes', codigo_evento=hijo.codigo) }}" class="text-xs text-blue-600 hover:underline" target="_blank">Ver participantes</a>
                                             </th>
                                             {% endfor %}
                                             <th scope="col" class="px-4 py-3 text-center">
