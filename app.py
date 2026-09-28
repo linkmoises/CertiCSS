@@ -3517,7 +3517,7 @@ def _buscar_certificados_resultados(cedula, token):
                 'fecha_inicio': evento.get('fecha_inicio', None),
                 'modalidad_evento': evento.get('modalidad', 'No disponible'),
                 'lms_activo': evento.get('lms_activo', evento.get('modalidad') != 'Presencial'),
-                'tipo_evento': evento.get('tipo', 'General'),  # Agregar tipo de evento
+                'tipo_evento': evento.get('tipo', 'General'),
                 'carga_horaria': evento.get('carga_horaria', '0'),
                 'carga_prorrateada': carga_prorrateada,
                 'tiene_archivos': tiene_archivos,
@@ -3533,6 +3533,7 @@ def _buscar_certificados_resultados(cedula, token):
                 'es_exento': es_exento,
                 'autor_nombre': autor_nombre,
                 'autor_whatsapp': autor_whatsapp,
+                'evento_padre': evento.get('evento_padre', False),
             }
             resultados.append(resultado)
         else:
