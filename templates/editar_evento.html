@@ -1163,7 +1163,9 @@
     });
 
     function toggleRequired() {
-        const esPadre = document.getElementById('evento_padre').checked;
+        const checkbox = document.getElementById('evento_padre');
+        if (!checkbox) return;
+        const esPadre = checkbox.checked;
         ['carga_horaria', 'fecha_inicio_date', 'fecha_fin_date'].forEach(id => {
             const campo = document.getElementById(id);
             if (campo) {
