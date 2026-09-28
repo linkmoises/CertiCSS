@@ -8002,6 +8002,15 @@ def generar_pdf(nanoid):
     ##afiche_path = f"static/assets/plantilla-certificado.pdf"
     afiche_path = evento.get('certificado')
 
+    # Si el evento es hijo de un padre, usar la plantilla del padre
+    if not afiche_path:
+        evento_padre = collection_eventos.find_one({
+            "evento_padre": True,
+            "eventos_hijos": {"$in": [codigo_evento]}
+        })
+        if evento_padre:
+            afiche_path = evento_padre.get('certificado')
+
     # Si no se ha subido el certificado del evento, devuelve error 404
     if not afiche_path:
         abort(404)
