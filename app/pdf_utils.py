@@ -21,6 +21,15 @@ def generar_pdf_participante(participante, afiche_path, lugar=None):
     codigo_evento = participante['codigo_evento']
     evento = collection_eventos.find_one({"codigo": codigo_evento})
 
+    # Si el evento es hijo de un padre, usar los datos del padre
+    evento_padre = collection_eventos.find_one({
+        "evento_padre": True,
+        "eventos_hijos": {"$in": [codigo_evento]}
+    })
+    if evento_padre:
+        evento = evento_padre
+        codigo_evento = evento['codigo']
+
     titulo_evento = evento.get('nombre', 'Título no disponible')
     unidad_evento = evento.get('unidad_ejecutora', 'Unidad ejecutora no disponible')
     carga_horaria_evento = evento.get('carga_horaria', '08')
