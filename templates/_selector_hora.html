@@ -6,10 +6,12 @@
     {% for nombre_grupo, horas in grupos %}
     <optgroup label="{{ nombre_grupo }}">
         {% for h in horas %}
-        {% set valor_hora = '%02d:00'|format(h) %}
+        {% for m in [0, 30] %}
+        {% set valor_hora = '%02d:%02d'|format(h, m) %}
         {% set sufijo = 'a.m.' if h < 12 else 'p.m.' %}
-        {% set etiqueta = ('12' if h % 12 == 0 else '%d'|format(h % 12)) ~ ':00 ' ~ sufijo %}
+        {% set etiqueta = ('12' if h % 12 == 0 else '%d'|format(h % 12)) ~ ':' ~ '%02d'|format(m) ~ ' ' ~ sufijo %}
         <option value="{{ valor_hora }}"{% if valor == valor_hora %} selected{% endif %}>{{ etiqueta }}</option>
+        {% endfor %}
         {% endfor %}
     </optgroup>
     {% endfor %}
