@@ -789,6 +789,80 @@ def cargar_funcionarios_css():
         return set()
 
 ###
+### Validación de cédula para eventos abiertos
+###
+@app.route('/inscripcion/<codigo_evento>/validar-cedula', methods=['GET', 'POST'])
+def validar_cedula(codigo_evento):
+    
+    # Verificar si el evento existe y tiene registro abierto
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        logger.warning(f"Evento no encontrado: {codigo_evento}")
+        abort(404)
+    
+    # Verificar que el evento tenga registro abierto habilitado
+    if not evento.get('registro_abierto', False):
+        flash('Este evento no tiene registro abierto habilitado.', 'error')
+        return redirect(url_for('home'))
+    
+    # Verificar si el evento está cerrado
+    evento_cerrado = evento.get('estado_evento') == 'cerrado'
+    
+    if request.method == 'POST':
+        if evento_cerrado:
+            flash('Este evento está cerrado y no acepta más registros.', 'error')
+            return redirect(url_for('validar_cedula', codigo_evento=codigo_evento))
+        
+        cedula = request.form.get('cedula', '').strip()
+        
+        if not cedula:
+            flash('Por favor ingrese su cédula.', 'error')
+            return redirect(url_for('validar_cedula', codigo_evento=codigo_evento))
+        
+        # Verificar cédula contra el cache de funcionarios CSS
+        funcionarios_css = cargar_funcionarios_css()
+        
+        if not funcionarios_css:
+            flash('La base de datos de funcionarios está vacía. Contacte al administrador para cargar la planilla de funcionarios.', 'error')
+            return redirect(url_for('validar_cedula', codigo_evento=codigo_evento))
+        
+        if cedula not in funcionarios_css:
+            flash('No encontramos sus datos en la base de datos de funcionarios de la CSS. Por favor verifique que esten correctamente escritos.', 'error')
+            return redirect(url_for('validar_cedula', codigo_evento=codigo_evento))
+        
+        # Verificar si ya está registrado en el evento
+        ya_registrado = collection_participantes.find_one({
+            "cedula": cedula,
+            "codigo_evento": codigo_evento,
+            "rol": "participante"
+        })
+        
+        if ya_registrado:
+            # Ya está registrado: generar token y redirigir directo a la plataforma
+            from app.auth import generate_token
+            token = generate_token(cedula)
+            return redirect(url_for('plataforma.ver_contenido',
+                                   codigo_evento=codigo_evento,
+                                   orden=1,
+                                   cedula=cedula,
+                                   token=token))
+        else:
+            # No está registrado: redirigir al formulario completo
+            return redirect(url_for('registrar_abierto', codigo_evento=codigo_evento, cedula=cedula))
+    
+    # GET: mostrar formulario de validación de cédula
+    nombre_evento = evento.get('nombre', 'Evento')
+    afiche_url = evento.get('afiche_750', '')
+    
+    return render_template('validar_cedula.html',
+                         evento=evento,
+                         codigo_evento=codigo_evento,
+                         nombre_evento=nombre_evento,
+                         afiche_url=afiche_url,
+                         evento_cerrado=evento_cerrado)
+
+
+###
 ### Registro de participantes en eventos abiertos
 ###
 @app.route('/inscripcion/<codigo_evento>', methods=['GET', 'POST'])
@@ -807,6 +881,10 @@ def registrar_abierto(codigo_evento):
     
     # Verificar si el evento está cerrado
     evento_cerrado = evento.get('estado_evento') == 'cerrado'
+    
+    # Si es GET sin cédula, redirigir a la validación de cédula
+    if request.method == 'GET' and not request.args.get('cedula'):
+        return redirect(url_for('validar_cedula', codigo_evento=codigo_evento))
     
     if request.method == 'POST':
         if evento_cerrado:

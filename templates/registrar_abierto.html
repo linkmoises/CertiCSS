@@ -113,8 +113,9 @@
 
                             <div class="sm:col-span-9">
                                 <input id="cedula" name="cedula" type="text"
-                                    class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
-                                    placeholder="8-123-456" required onblur="validarCedula(this)" />
+                                    class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none bg-gray-50"
+                                    placeholder="8-123-456" required readonly
+                                    value="{{ request.args.get('cedula', '') }}" />
                                 <small id="cedula-error" class="text-red-500 text-sm hidden">Cédula inválida. Por favor,
                                     verifica el formato.</small>
                             </div>

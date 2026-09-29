@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{{ nombre_evento }} - Validación de Cédula</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- favicons -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicons/favicon-96x96.png') }}"
+        sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicons/favicon.svg') }}" />
+    <link rel="apple-touch-icon" sizes="180x180"
+        href="{{ url_for('static', filename='assets/favicons/apple-touch-icon.png') }}" />
+    <meta name="apple-mobile-web-app-title" content="CertiCSS" />
+    <link rel="manifest" href="{{ url_for('static', filename='assets/favicons/site.webmanifest') }}" />
+    {% if UMAMI_URL %}
+    {{ UMAMI_URL | safe }}
+    {% endif %}
+</head>
+
+<body class="bg-gray-50 dark:bg-neutral-900">
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main id="content">
+
+        <!-- Card -->
+        <div class="max-w-[85rem] px-4 pt-10 sm:px-6 lg:px-8 lg:pt-14 mx-auto">
+            <!-- Grid -->
+            <div class="bg-white grid sm:grid-cols-2 sm:items-center gap-8 border border-gray-200 rounded-xl">
+
+                <div class="sm:order-2">
+                    <div class="relative pt-[100%] sm:pt-[100%]">
+                        {% if afiche_url %}
+                        <img class="size-full absolute top-0 start-0 object-cover rounded-r-xl"
+                            src="{{ BASE_URL }}{{ afiche_url }}" alt="{{ nombre_evento }}">
+                        {% else %}
+                        <img class="size-full absolute top-0 start-0 object-cover rounded-r-xl"
+                            src="{{ url_for('static', filename='assets/afiche-generico.jpg') }}"
+                            alt="{{ nombre_evento }}">
+                        {% endif %}
+                    </div>
+                </div>
+                <!-- End Col -->
+
+                <div class="sm:order-1">
+
+                    <!-- Mostrar mensajes -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+                    <div class="mb-4">
+                        <ul>
+                            {% for category, message in messages %}
+                            <li
+                                class="{{ 'p-2 text-sm bg-red-100 text-red-800 rounded-r-xl' if category == 'error' else 'p-2 text-sm bg-green-100 text-green-800 rounded-r-xl' }}">
+                                {{ message }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+{% endif %}
+{% endwith %}
+
+                    <div class="m-8">
+{% if evento_cerrado %}
+                        <div class="bg-white p-8 border border-gray-200 rounded-xl text-center">
+                            <h1 class="text-2xl font-bold text-gray-800 mb-4">Evento Cerrado</h1>
+                            <p class="text-gray-600 mb-4 text-sm">Lo sentimos, este evento está cerrado y no se permiten
+                                añadir más registros de participantes.</p>
+                            <a href="{{ url_for('catalogo_abiertos', page=1) }}"
+                                class="inline-block text-sm py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                Volver al catálogo
+                            </a>
+                        </div>
+{% else %}
+                        <h2 class="text-xl font-bold text-gray-800">Validación de Cédula</h2>
+                        <p class="text-sm text-gray-600 mb-4">{{ nombre_evento }}</p>
+                        <p class="text-sm text-gray-500 mb-6">Ingrese su cédula para verificar su elegibilidad y continuar con la inscripción.</p>
+                        <form action="{{ url_for('validar_cedula', codigo_evento=codigo_evento) }}" method="post">
+                            <div class="mt-4 grid sm:grid-cols-12 gap-2 sm:gap-6">
+                                <div class="sm:col-span-3">
+                                    <label for="cedula" class="inline-block text-sm text-gray-800 mt-2.5">
+                                        Cédula
+                                    </label>
+                                </div>
+                                <!-- End Col -->
+
+                                <div class="sm:col-span-9">
+                                    <input id="cedula" name="cedula" type="text"
+                                        class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                                        placeholder="8-123-456" required onblur="validarCedula(this)" />
+                                    <small id="cedula-error" class="text-red-500 text-sm hidden">Cédula inválida. Por favor,
+                                        verifica el formato.</small>
+                                </div>
+                                <!-- End Col -->
+
+                                <div class="sm:col-span-12 gap-2">
+                                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6">
+                                        <div class="flex">
+                                            <div class="flex-shrink-0">
+                                                <svg class="h-4 w-4 text-blue-400 mt-0.5"
+                                                    xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                    fill="currentColor" viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M8 1a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm0 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                                                </svg>
+                                            </div>
+                                            <div class="ml-3">
+                                                <p class="text-xs text-blue-800">
+                                                    Debe ser funcionario(a) de la Caja de Seguro Social para inscribirse en esta actividad.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="submit"
+                                        class="w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        Validar cédula
+                                    </button>
+                                </div>
+
+                            </div>
+                        </form>
+{% endif %}
+                    </div>
+                </div>
+                <!-- End Col -->
+            </div>
+            <!-- End Grid -->
+        </div>
+        <!-- End Card -->
+
+    </main>
+
+    <footer class="mt-auto w-full max-w-[85rem] px-4 sm:px-6 lg:px-8 mx-auto">
+        <div class="text-center text-xs text-gray-500 my-8 space-x-4">
+            <a href="{{ url_for('catalogo_abiertos', page=1) }}" class="hover:underline">Volver al catálogo de eventos abiertos</a>
+            <span class="text-gray-300">|</span>
+            <a href="{{ url_for('home') }}" class="hover:underline">Inicio</a>
+            <span class="text-gray-300">|</span>
+            <a href="https://denadoi.css.gob.pa/" target="_blank" rel="noopener" class="hover:underline">DENADOI</a>
+            {% if current_user.is_authenticated %}
+            <span class="text-gray-300">|</span>
+            <a href="{{ url_for('tablero_coordinadores') }}" class="hover:underline">Tablero</a>
+            {% endif %}
+        </div>
+    </footer>
+
+    <script>
+        function validarCedula(input) {
+            const cedula = input.value.trim();
+            input.value = cedula;
+            const errorMessage = document.getElementById('cedula-error');
+
+            const patrones = [
+                /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$|^[A-Z]{2}\d{6,20}$/
+            ];
+
+            const esValido = patrones.some(patron => patron.test(cedula));
+
+            if (esValido) {
+                input.classList.remove('border-red-500');
+                input.classList.add('border-gray-200');
+                errorMessage.classList.add('hidden');
+            } else {
+                input.classList.remove('border-gray-200');
+                input.classList.add('border-red-500');
+                errorMessage.classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+
+</html>
