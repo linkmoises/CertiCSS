@@ -89,6 +89,36 @@
                             </div>
                             <!-- End Col -->
 
+                            <div class="sm:col-span-3">
+                                <span class="inline-block text-sm text-gray-800">
+                                    Unidad organizadora
+                                </span>
+                            </div>
+                            <!-- End Col -->
+
+                            <div class="sm:col-span-9">
+                                <p class="text-gray-500 text-sm mt-0.5">{{ evento.unidad_ejecutora or 'Por determinar' }}</p>
+                            </div>
+                            <!-- End Col -->
+
+                            <div class="sm:col-span-3">
+                                <span class="inline-block text-sm text-gray-800">
+                                    Organizador de actividad
+                                </span>
+                            </div>
+                            <!-- End Col -->
+
+                            <div class="sm:col-span-9">
+                                <p class="text-gray-500 text-sm mt-0.5">
+                                    {% if evento.autor_info %}
+                                    {{ evento.autor_info.nombres }} {{ evento.autor_info.apellidos }}
+                                    {% else %}
+                                    Por determinar
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <!-- End Col -->
+
                             {% if evento.enlace_virtual %}
                             <div class="sm:col-span-3">
                                 <span class="inline-block text-sm text-gray-800">

@@ -3013,6 +3013,12 @@ def resumen_evento(codigo_evento):
     if not evento:
         abort(404)
 
+    if evento.get("autor"):
+        evento["autor_info"] = collection_usuarios.find_one(
+            {"_id": ObjectId(evento["autor"])},
+            {"nombres": 1, "apellidos": 1, "foto": 1}
+        )
+
     return render_template('resumen_evento.html', evento=evento)
 
 ###
