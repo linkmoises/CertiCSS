@@ -29,7 +29,7 @@
                                 <div class="inline-flex gap-x-2">
                                     <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700" href="{{ url_for('events.mis_coorganizados') }}">
                                         <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                                        Coorganizaciones
+                                        Eventos coorganizados
                                     </a>
                                     <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="{{ url_for('events.crear_evento') }}">
                                         <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
@@ -141,8 +141,12 @@
                                         <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
                                             {{ evento.unidad_ejecutora }}
                                         </span><br />
-                                        {% from '_avatar.html' import avatar %}
-                                        {{ avatar(evento.autor_info, size='size-8') }}
+                                        {% from '_avatar.html' import avatar_group %}
+                                        {% set all_authors = [evento.autor_info] if evento.autor_info else [] %}
+                                        {% if evento.coorganizadores_info %}
+                                            {% set all_authors = all_authors + evento.coorganizadores_info %}
+                                        {% endif %}
+                                        {{ avatar_group(all_authors, size='size-8') }}
                                     </div>
                                 </td>
                                 <td class="size-px whitespace-nowrap">

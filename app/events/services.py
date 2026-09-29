@@ -31,6 +31,33 @@ def get_collection_usuarios():
     return _collection_usuarios
 
 
+def enrich_event_with_authors(evento, collection_usuarios, collection_participantes):
+    from bson.objectid import ObjectId
+    if evento.get("autor"):
+        evento["autor_info"] = collection_usuarios.find_one(
+            {"_id": ObjectId(evento["autor"])},
+            {"nombres": 1, "apellidos": 1, "foto": 1}
+        )
+    coorganizadores = list(collection_participantes.find({
+        "codigo_evento": evento.get("codigo"),
+        "rol": "coorganizador"
+    }))
+    coorganizadores_info = []
+    for coorg in coorganizadores:
+        usuario = collection_usuarios.find_one({"cedula": coorg["cedula"]})
+        if usuario:
+            coorganizadores_info.append(usuario)
+        else:
+            coorganizadores_info.append({
+                "nombres": coorg["nombres"],
+                "apellidos": coorg["apellidos"],
+                "foto": None,
+                "_id": None
+            })
+    evento["coorganizadores_info"] = coorganizadores_info
+    return evento
+
+
 def get_collection_preregistro():
     return _collection_preregistro
 
@@ -97,11 +124,7 @@ def format_event_stats(collection_eventos, collection_participantes, collection_
         }) is not None or (str(current_user.id) == str(evento.get("autor")))
         evento["es_organizador"] = es_organizador
         
-        if evento.get("autor"):
-            evento["autor_info"] = collection_usuarios.find_one(
-                {"_id": ObjectId(evento["autor"])},
-                {"nombres": 1, "apellidos": 1, "foto": 1}
-            )
+        enrich_event_with_authors(evento, collection_usuarios, collection_participantes)
 
     return {
         'total_eventos': total_eventos,

@@ -7,6 +7,7 @@ import re
 from app.auth.services import roles_required, UserRole
 from app.logs import log_event
 from app.unidades_data import REGION_LABEL as _REGION_ETIQUETAS
+from app.events.services import enrich_event_with_authors
 
 events_bp = Blueprint('events', __name__, url_prefix='/tablero')
 
@@ -126,12 +127,7 @@ def listar_eventos(page=1):
             "rol": "coorganizador"
         }) is not None
         evento["es_organizador"] = es_organizador
-
-        if evento.get("autor"):
-            evento["autor_info"] = collection_usuarios.find_one(
-                {"_id": ObjectId(evento["autor"])},
-                {"nombres": 1, "apellidos": 1, "foto": 1}
-            )
+        enrich_event_with_authors(evento, collection_usuarios, collection_participantes)
 
     collection_eventos = get_collection_eventos()
 
@@ -205,7 +201,8 @@ def mis_eventos(page=1):
             "rol": "coorganizador"
         }) is not None 
         evento["es_organizador"] = es_organizador
-    
+        enrich_event_with_authors(evento, collection_usuarios, collection_participantes)
+
     return render_template('mis_eventos.html',
         eventos=eventos,
         total_eventos=total_eventos,
@@ -250,11 +247,7 @@ def mis_coorganizados(page=1):
 
     for evento in eventos:
         evento["es_organizador"] = True
-        if evento.get("autor"):
-            evento["autor_info"] = collection_usuarios.find_one(
-                {"_id": ObjectId(evento["autor"])},
-                {"nombres": 1, "apellidos": 1, "foto": 1}
-            )
+        enrich_event_with_authors(evento, collection_usuarios, collection_participantes)
 
     return render_template('eventos_coorganizados.html',
         eventos=eventos,
@@ -778,13 +771,8 @@ def listar_eventos_digitales(page=1):
         })
         
         evento["tiene_lms"] = evento["total_contenidos"] > 0
-        
-        if evento.get("autor"):
-            evento["autor_info"] = collection_usuarios.find_one(
-                {"_id": ObjectId(evento["autor"])},
-                {"nombres": 1, "apellidos": 1, "foto": 1}
-            )
-    
+        enrich_event_with_authors(evento, collection_usuarios, collection_participantes)
+
     return render_template('docencia_digital.html',
         eventos=eventos,
         total_eventos=total_eventos,
@@ -877,13 +865,8 @@ def listar_eventos_abiertos(page=1):
             "rol": "coorganizador"
         }) is not None 
         evento["es_organizador"] = es_organizador
-        
-        if evento.get("autor"):
-            evento["autor_info"] = collection_usuarios.find_one(
-                {"_id": ObjectId(evento["autor"])},
-                {"nombres": 1, "apellidos": 1, "foto": 1}
-            )
-        
+        enrich_event_with_authors(evento, collection_usuarios, collection_participantes)
+
         evento["total_participantes"] = collection_participantes.count_documents({
             "codigo_evento": codigo_evento,
             "rol": "participante"

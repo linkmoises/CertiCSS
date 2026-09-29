@@ -106,6 +106,7 @@ app.register_blueprint(auth_routes_bp)
 ### Events module initialization
 ###
 from app.events import events_bp, init_events_services
+from app.events.services import enrich_event_with_authors
 init_events_services(collection_eventos, collection_participantes, collection_usuarios, collection_preregistro, collection_eva)
 app.register_blueprint(events_bp)
 
@@ -567,12 +568,7 @@ def tablero_coordinadores():
             "rol": "coorganizador",
         }) is not None or (str(current_user.id) == str(evento.get("autor")))
         evento["es_organizador"] = es_organizador
-        
-        if evento.get("autor"):
-            evento["autor_info"] = collection_usuarios.find_one(
-                {"_id": ObjectId(evento["autor"])},
-                {"nombres": 1, "apellidos": 1, "foto": 1}
-            )
+        enrich_event_with_authors(evento, collection_usuarios, collection_participantes)
 
     num_eventos = len(eventos)
 
@@ -3013,11 +3009,7 @@ def resumen_evento(codigo_evento):
     if not evento:
         abort(404)
 
-    if evento.get("autor"):
-        evento["autor_info"] = collection_usuarios.find_one(
-            {"_id": ObjectId(evento["autor"])},
-            {"nombres": 1, "apellidos": 1, "foto": 1}
-        )
+    enrich_event_with_authors(evento, collection_usuarios, collection_participantes)
 
     if evento.get("unidad_ejecutora"):
         unidad = collection_unidades.find_one({

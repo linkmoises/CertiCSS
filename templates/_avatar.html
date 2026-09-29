@@ -4,7 +4,7 @@
 {% set foto_url = '/static/usuarios/' ~ user.foto if user.foto else '/static/assets/user-avatar.png' %}
 {% set profile_url = url_for('usuarios.mostrar_usuario', user_id=user._id) if user._id else '#' %}
 {% if link %}
-<a href="{{ profile_url }}" class="inline-block"{% if tooltip %} title="{{ user.nombres }} {{ user.apellidos }}"{% endif %}>
+<a href="{{ profile_url }}" class="inline-block transition-transform duration-200 hover:scale-110 hover:ring-2 hover:ring-blue-500 hover:ring-offset-2 rounded-full"{% if tooltip %} title="{{ user.nombres }} {{ user.apellidos }}"{% endif %}>
 {% endif %}
     {% if user.foto %}
     <img class="{{ size }} rounded-full object-cover mt-2" src="{{ foto_url }}" alt="{{ user.nombres }} {{ user.apellidos }}">
@@ -16,5 +16,15 @@
 {% if link %}
 </a>
 {% endif %}
+{% endif %}
+{% endmacro %}
+
+{% macro avatar_group(users, size='size-8') %}
+{% if users %}
+<div class="flex -space-x-2">
+    {% for user in users %}
+    {{ avatar(user, size=size, link=true, tooltip=true) }}
+    {% endfor %}
+</div>
 {% endif %}
 {% endmacro %}

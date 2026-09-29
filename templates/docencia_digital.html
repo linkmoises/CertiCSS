@@ -141,8 +141,12 @@
                                         <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
                                             {{ evento.unidad_ejecutora }}
                                         </span><br />
-                                        {% from '_avatar.html' import avatar %}
-                                        {{ avatar(evento.autor_info, size='size-8') }}
+                                        {% from '_avatar.html' import avatar_group %}
+                                        {% set all_authors = [evento.autor_info] if evento.autor_info else [] %}
+                                        {% if evento.coorganizadores_info %}
+                                            {% set all_authors = all_authors + evento.coorganizadores_info %}
+                                        {% endif %}
+                                        {{ avatar_group(all_authors, size='size-8') }}
                                     </div>
                                 </td>
                                 <td class="size-px whitespace-nowrap">
