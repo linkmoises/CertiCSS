@@ -300,6 +300,7 @@ def crear_evento():
         concurso_poster = request.form.get('concurso_poster') == 'on'
         registro_abierto = request.form.get('registro_abierto') == 'on'
         lms_activo = request.form.get('lms_activo') == 'on'
+        certificado_solo_expositores = request.form.get('certificado_solo_expositores') == 'on'
         avales = request.form.getlist('aval')
 
         fecha_inicio_str = request.form['fecha_inicio']
@@ -398,6 +399,7 @@ def crear_evento():
             'concurso_poster': concurso_poster,
             'registro_abierto': registro_abierto,
             'lms_activo': lms_activo,
+            'certificado_solo_expositores': certificado_solo_expositores,
             'avales': avales,
             'instrumento': instrumento,
             'enlace_virtual': enlace_virtual
@@ -549,6 +551,7 @@ def editar_evento(codigo_evento):
         concurso_poster = request.form.get('concurso_poster') == 'on'
         registro_abierto = request.form.get('registro_abierto') == 'on'
         lms_activo = request.form.get('lms_activo') == 'on'
+        certificado_solo_expositores = request.form.get('certificado_solo_expositores') == 'on'
         avales = request.form.getlist('aval')
         aval_cmp_tipo = request.form.get('aval_cmp_tipo')
         aval_cmp_horas = request.form.get('aval_cmp_horas')
@@ -639,6 +642,7 @@ def editar_evento(codigo_evento):
             'concurso_poster': concurso_poster,
             'registro_abierto': registro_abierto,
             'lms_activo': lms_activo,
+            'certificado_solo_expositores': certificado_solo_expositores,
             'avales': avales,
             'aval_cmp_tipo': aval_cmp_tipo,
             'aval_cmp_horas': aval_cmp_horas,

@@ -3549,6 +3549,17 @@ def _buscar_certificados_resultados(cedula, token):
             constancia_plantilla = es_legacy or bool(constancia_custom and constancia_custom.strip())
             certificado_plantilla = bool(certificado_custom and certificado_custom.strip())
 
+            if certificado_plantilla and evento.get('certificado_solo_expositores', False):
+                roles_permitidos = ['ponente', 'tallerista', 'instructor']
+                if participante.get('rol') not in roles_permitidos:
+                    registro_permitido = collection_participantes.find_one({
+                        'cedula': cedula,
+                        'codigo_evento': codigo_evento,
+                        'rol': {'$in': roles_permitidos}
+                    })
+                    if not registro_permitido:
+                        certificado_plantilla = False
+
             resultado = {
                 'nombres': participante['nombres'],
                 'apellidos': participante['apellidos'],
@@ -7925,7 +7936,19 @@ def generar_pdf(nanoid):
         })
         if registro_exento:
             es_exento = True
-    
+
+    if evento.get('certificado_solo_expositores', False):
+        roles_permitidos = ['ponente', 'tallerista', 'instructor']
+        if rol_participante not in roles_permitidos:
+            registro_permitido = collection_participantes.find_one({
+                'cedula': participante['cedula'],
+                'codigo_evento': codigo_evento,
+                'rol': {'$in': roles_permitidos}
+            })
+            if not registro_permitido:
+                flash('No tiene permiso para descargar este certificado.', 'error')
+                return redirect(url_for('buscar_certificados'))
+
     skip_survey = (tipo_evento == 'Sesión Docente') or es_exento
     
     # Bloqueo por fecha y hora de finalización del evento (solo eventos regulares).
