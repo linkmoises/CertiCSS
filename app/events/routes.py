@@ -193,13 +193,14 @@ def mis_eventos(page=1):
     )
     
     collection_participantes = get_collection_participantes()
-    
+    collection_usuarios = get_collection_usuarios()
+
     for evento in eventos:
         es_organizador = collection_participantes.find_one({
             "codigo_evento": evento["codigo"],
             "cedula": str(current_user.cedula),
             "rol": "coorganizador"
-        }) is not None 
+        }) is not None
         evento["es_organizador"] = es_organizador
         enrich_event_with_authors(evento, collection_usuarios, collection_participantes)
 
