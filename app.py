@@ -1777,6 +1777,52 @@ def registrar_organizador(codigo_evento):
         afiche_url=afiche_url
     )
 
+
+###
+### Edición de coorganizador
+###
+@app.route('/editar_coorganizador/<nanoid>', methods=['GET', 'POST'])
+@login_required
+def editar_coorganizador(nanoid):
+    coorganizador = collection_participantes.find_one({"nanoid": nanoid, "rol": "coorganizador"})
+
+    if not coorganizador:
+        abort(404)
+
+    codigo_evento = coorganizador['codigo_evento']
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+
+    if not evento:
+        abort(404)
+
+    afiche_750 = evento.get('afiche_750')
+    afiche_url = url_for('static', filename='uploads/' + afiche_750.split('/')[-1]) if afiche_750 else None
+
+    if request.method == 'POST':
+        nombres = request.form['nombres'].strip()
+        apellidos = request.form['apellidos'].strip()
+        cedula = request.form['cedula'].strip()
+
+        collection_participantes.update_one(
+            {"nanoid": nanoid},
+            {"$set": {
+                "nombres": nombres,
+                "apellidos": apellidos,
+                "cedula": cedula
+            }}
+        )
+
+        flash("Datos del coorganizador actualizados exitosamente.", "success")
+        log_event(f"Usuario [{current_user.email}] actualizó al coorganizador {cedula} en el evento {codigo_evento}.")
+        return redirect(url_for('events.listar_participantes', codigo_evento=codigo_evento))
+
+    return render_template('editar_coorganizador.html',
+        coorganizador=coorganizador,
+        evento=evento,
+        afiche_url=afiche_url
+    )
+
+
 ###
 ### Funciones de extracción y validación de datos de formulario para registro extemporáneo
 ###

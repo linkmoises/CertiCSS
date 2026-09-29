@@ -410,7 +410,7 @@
                                             </button>
                                         </form>
 {% elif participante.rol == 'coorganizador' %}
-                                        <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('editar_ponente', nanoid=participante.nanoid) }}">
+                                        <a class="inline-flex items-center gap-x-1 text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium" href="{{ url_for('editar_coorganizador', nanoid=participante.nanoid) }}">
                                             Corregir coorganizador
                                         </a><br />
                                         <form action="{{ url_for('eliminar_participante', nanoid=participante.nanoid) }}" method="post" style="display:inline;">
