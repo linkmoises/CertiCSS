@@ -497,6 +497,10 @@ def catalogo_unidades():
         ("nombre", 1)                 # Nombre alfabético ascendente (A-Z)
     ]))
     
+    # Obtener provincias y tipos únicos para los filtros
+    provincias = sorted(set(u.get('provincia', '') for u in unidades if u.get('provincia')))
+    tipos = sorted(set(u.get('tipo', '') for u in unidades if u.get('tipo')))
+    
     # Agregar URL de foto y coordinador para cada unidad
     for unidad in unidades:
         # Agregar URL de foto
@@ -565,7 +569,7 @@ def catalogo_unidades():
             unidad['coordinador_nombre'] = 'Designación/asociación pendiente'
             unidad['coordinador_rol'] = 'Coordinador Local'
     
-    return render_template('catalogo_unidades.html', unidades=unidades)
+    return render_template('catalogo_unidades.html', unidades=unidades, provincias=provincias, tipos=tipos)
 
 
 ###

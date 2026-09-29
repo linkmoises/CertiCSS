@@ -161,14 +161,9 @@
                     </label>
                     <select id="filtro-provincia" class="w-full rounded-lg border-gray-300 text-sm">
                         <option value="">Todas</option>
-                        <option value="bocas-del-toro">Bocas Del Toro</option>
-                        <option value="coclé">Coclé</option>
-                        <option value="colón">Colón</option>
-                        <option value="chiriquí">Chiriquí</option>
-                        <option value="herrera">Herrera</option>
-                        <option value="los-santos">Los Santos</option>
-                        <option value="panamá">Panamá</option>
-                        <option value="panamá-oeste">Panamá Oeste</option>
+                        {% for provincia in provincias %}
+                        <option value="{{ provincia|lower|replace(' ', '-') }}">{{ provincia }}</option>
+                        {% endfor %}
                     </select>
                 </div>
 
@@ -179,12 +174,9 @@
                     </label>
                     <select id="filtro-tipo" class="w-full rounded-lg border-gray-300 text-sm">
                         <option value="">Todos</option>
-                        <option value="hospital">Hospital</option>
-                        <option value="policlínica">Policlínica</option>
-                        <option value="capps">CAPPS</option>
-                        <option value="ulaps">ULAPS</option>
-                        <option value="ulsyso">ULSySO</option>
-                        <option value="coordinación-regional">Coordinación Regional</option>
+                        {% for tipo in tipos %}
+                        <option value="{{ tipo|lower|replace(' ', '-') }}">{{ tipo }}</option>
+                        {% endfor %}
                     </select>
                 </div>
 
