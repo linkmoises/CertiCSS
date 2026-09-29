@@ -97,7 +97,15 @@
                             <!-- End Col -->
 
                             <div class="sm:col-span-9">
-                                <p class="text-gray-500 text-sm mt-0.5">{{ evento.unidad_ejecutora or 'Por determinar' }}</p>
+                                <p class="text-gray-500 text-sm mt-0.5">
+                                    {% if evento.unidad_slug %}
+                                    <a href="{{ url_for('unidades.docencia_unidad', codigo_unidad=evento.unidad_slug) }}" class="text-blue-600 hover:underline">
+                                        {{ evento.unidad_ejecutora }}
+                                    </a>
+                                    {% else %}
+                                    {{ evento.unidad_ejecutora or 'Por determinar' }}
+                                    {% endif %}
+                                </p>
                             </div>
                             <!-- End Col -->
 
@@ -308,8 +316,12 @@
     </main>
 
     <footer class="mt-auto w-full max-w-[85rem] px-4 sm:px-6 lg:px-8 mx-auto">
-        <div class="text-center text-xs text-gray-500 my-8">
-            <p>Este evento es potenciado por la plataforma <a href="{{ url_for('home') }}">CertiCSS</a>.</p>
+        <div class="text-center text-xs text-gray-500 my-8 space-x-4">
+            <a href="{{ url_for('home') }}" class="hover:underline">Inicio</a>
+            <span class="text-gray-300">|</span>
+            <a href="{{ url_for('catalogo', page=1) }}" class="hover:underline">Catálogo general de eventos</a>
+            <span class="text-gray-300">|</span>
+            <a href="https://denadoi.css.gob.pa/" target="_blank" rel="noopener" class="hover:underline">DENADOI CertiCSS</a>
         </div>
     </footer>
 

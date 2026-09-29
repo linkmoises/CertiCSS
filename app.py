@@ -3019,6 +3019,14 @@ def resumen_evento(codigo_evento):
             {"nombres": 1, "apellidos": 1, "foto": 1}
         )
 
+    if evento.get("unidad_ejecutora"):
+        unidad = collection_unidades.find_one({
+            "nombre": evento["unidad_ejecutora"],
+            "activo": True
+        }, {"slug": 1})
+        if unidad:
+            evento["unidad_slug"] = unidad["slug"]
+
     return render_template('resumen_evento.html', evento=evento)
 
 ###
