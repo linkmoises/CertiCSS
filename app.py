@@ -3028,7 +3028,21 @@ def resumen_evento(codigo_evento):
             evento["unidad_slug"] = unidad["slug"]
             evento["unidad_categoria"] = unidad.get("categoria", "")
 
-    return render_template('resumen_evento.html', evento=evento)
+    puede_editar = False
+    if current_user.is_authenticated:
+        if current_user.rol in ('administrador', 'denadoi'):
+            puede_editar = True
+        elif str(current_user.id) == str(evento.get('autor', '')):
+            puede_editar = True
+        else:
+            es_organizador = collection_participantes.find_one({
+                "codigo_evento": codigo_evento,
+                "cedula": str(current_user.cedula),
+                "rol": {"$in": ["organizador", "coorganizador"]}
+            })
+            puede_editar = es_organizador is not None
+
+    return render_template('resumen_evento.html', evento=evento, puede_editar=puede_editar)
 
 ###
 ### Descargar archivo ICS para calendario
