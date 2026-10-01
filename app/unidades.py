@@ -735,7 +735,7 @@ def docencia_unidad_administrativa(codigo_unidad, page=1):
     eventos = list(collection_eventos.find(filtro_docencia).sort("fecha_inicio", -1).skip(skip).limit(per_page))
     
     return render_template('catalogo_unidad.html',
-                         codigo_unidad=slug,
+                         codigo_unidad=codigo_unidad,
                          unidad=unidad,
                          eventos=eventos,
                          page=page,

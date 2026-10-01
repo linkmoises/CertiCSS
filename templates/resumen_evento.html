@@ -100,7 +100,7 @@
                                 <p class="text-gray-500 text-sm mt-0.5">
                                     {% if evento.unidad_slug %}
                                         {% if evento.unidad_categoria == 'administrativa' %}
-                                        <a href="{{ url_for('unidades.docencia_unidad_administrativa', slug=evento.unidad_slug) }}" class="text-blue-600 hover:underline">
+                                        <a href="{{ url_for('unidades.docencia_unidad_administrativa', codigo_unidad=evento.unidad_slug) }}" class="text-blue-600 hover:underline">
                                             {{ evento.unidad_ejecutora }}
                                         </a>
                                         {% else %}
