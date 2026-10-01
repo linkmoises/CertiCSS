@@ -540,23 +540,21 @@ def tablero_coordinadores():
     total_ponentes = collection_participantes.count_documents({"rol": {"$in": ['ponente', 'tallerista', 'instructor']}})
     total_participantes = collection_participantes.count_documents({"rol": "participante"})
 
-    # Próximos eventos y eventos vigentes (no borrador, sin registro abierto)
-    inicio_hoy = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    fin_hoy = inicio_hoy.replace(hour=23, minute=59, second=59, microsecond=999999)
-    
+    # Eventos en curso: el momento actual cae dentro del rango de fechas,
+    # sin importar el autor. Se excluyen:
+    #   - actividades virtuales asincrónicas (disponibles de forma permanente)
+    #   - eventos con registro abierto y LMS activo a la vez
+    ahora = datetime.now()
+
     eventos_cursor = collection_eventos.find({
-        "$or": [
-            # Eventos que empiezan hoy o en el futuro
-            {"fecha_inicio": {"$gte": inicio_hoy}},
-            # Eventos en curso (hoy está entre fecha_inicio y fecha_fin)
-            {
-                "fecha_inicio": {"$lte": fin_hoy},
-                "fecha_fin": {"$gte": inicio_hoy}
-            }
-        ],
+        "fecha_inicio": {"$lte": ahora},
+        "fecha_fin": {"$gte": ahora},
         "estado_evento": {"$ne": "borrador"},
-        'registro_abierto': {'$ne': True}
-    }).sort("fecha_inicio", 1).limit(5)
+        "modalidad": {"$ne": "Virtual asincrónica"},
+        "$nor": [
+            {"registro_abierto": True, "lms_activo": True}
+        ]
+    }).sort("fecha_fin", 1)
 
     eventos = list(eventos_cursor)
 
