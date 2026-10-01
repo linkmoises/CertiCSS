@@ -288,7 +288,7 @@
             </a>
         {% endset %}
 
-        {{ tabla_eventos(eventos, num_eventos, 'Eventos en curso', 'Eventos que se encuentran en ejecución', 'No hay eventos en curso', 'No hay actividades en ejecución en este momento.', 'eventos en curso', acciones_en_curso) }}
+        {{ tabla_eventos(eventos, num_eventos, 'Eventos en curso', 'Eventos que se encuentran en ejecución', 'No hay eventos en curso', 'No hay actividades en ejecución en este momento.', 'eventos en curso', acciones_en_curso, current_user) }}
 
         <!-- MIS PROXIMOS EVENTOS -->
         {% if current_user.rol != 'administrador' %}
@@ -332,7 +332,7 @@
             </a>
         {% endset %}
 
-        {{ tabla_eventos(mis_eventos, num_mis_eventos, 'Mis próximos eventos', 'Eventos que creaste o coorganizas', 'No tienes eventos próximos', 'No tienes actividades programadas ni en curso.', 'eventos', acciones_mis_eventos) }}
+        {{ tabla_eventos(mis_eventos, num_mis_eventos, 'Mis próximos eventos', 'Eventos que creaste o coorganizas', 'No tienes eventos próximos', 'No tienes actividades programadas ni en curso.', 'eventos', acciones_mis_eventos, current_user) }}
         {% endif %}
         <!-- FIN MIS PROXIMOS EVENTOS -->
 
