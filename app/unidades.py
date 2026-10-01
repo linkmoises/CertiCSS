@@ -699,10 +699,10 @@ def catalogo_unidades_administrativas():
 ###
 ### Docencia de una unidad administrativa específica
 ###
-@unidades_bp.route('/catalogo/unidades-administrativas/<slug>')
-@unidades_bp.route('/catalogo/unidades-administrativas/<slug>/page/<int:page>')
-def docencia_unidad_administrativa(slug, page=1):
-    unidad = collection_unidades.find_one({"slug": slug, "categoria": "administrativa", "activo": True})
+@unidades_bp.route('/catalogo/unidades-administrativas/<codigo_unidad>')
+@unidades_bp.route('/catalogo/unidades-administrativas/<codigo_unidad>/page/<int:page>')
+def docencia_unidad_administrativa(codigo_unidad, page=1):
+    unidad = collection_unidades.find_one({"slug": codigo_unidad, "categoria": "administrativa", "activo": True})
     
     if not unidad:
         flash('Unidad administrativa no encontrada.', 'error')
