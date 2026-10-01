@@ -715,12 +715,12 @@ def docencia_unidad_administrativa(slug, page=1):
     per_page = 15
     skip = (page - 1) * per_page
     
-    # Docencia: match por nombre canónico + aliases, SIN restricción de región
+    # Catálogo: match por nombre canónico + aliases, SIN restricción de región
     # (todas comparten "administrativas"; robusto ante eventos históricos con otra región)
+    # y SIN filtro por tipo: las administrativas publican cursos, seminarios, jornadas, etc.
     nombres_busqueda = nombres_equivalentes(unidad)
     filtro_docencia = {
         "estado_evento": {"$ne": "borrador"},
-        'tipo': 'Sesión Docente',
         'unidad_ejecutora': {"$in": nombres_busqueda}
     }
     
