@@ -649,23 +649,49 @@ def _backfill_slugs_administrativas():
 @unidades_bp.route('/catalogo/unidades-administrativas')
 def catalogo_unidades_administrativas():
     _backfill_slugs_administrativas()
-    
+
     # Índice en árbol de administrativas activas
-    unidades_arbol = [(doc, nivel) for doc, nivel in aplanar_arbol(arbol_administrativas())
-                      if doc.get('activo', True)]
-    
+    arbol = arbol_administrativas()
+
+    # Podar nodos inactivos del árbol
+    def podar_activos(nodos):
+        resultado = []
+        for nodo in nodos:
+            if not nodo['unidad'].get('activo', True):
+                continue
+            nodo['hijos'] = podar_activos(nodo['hijos'])
+            resultado.append(nodo)
+        return resultado
+
+    arbol = podar_activos(arbol)
+
     # Contar dependientes y agregar URL de logo
     conteo_dependientes = {}
-    for doc, _nivel in unidades_arbol:
-        conteo_dependientes[str(doc['_id'])] = len(descendientes_administrativas(doc['_id']))
-        if doc.get('foto'):
-            doc['foto_url'] = f"/static/uploads/unidades/{doc['foto']}"
-        else:
-            doc['foto_url'] = "/static/assets/unidades/default.jpg"
-    
+    def procesar_nodos(nodos):
+        for nodo in nodos:
+            doc = nodo['unidad']
+            conteo_dependientes[str(doc['_id'])] = len(descendientes_administrativas(doc['_id']))
+            if doc.get('foto'):
+                doc['foto_url'] = f"/static/uploads/unidades/{doc['foto']}"
+            else:
+                doc['foto_url'] = "/static/assets/unidades/default.jpg"
+            procesar_nodos(nodo['hijos'])
+
+    procesar_nodos(arbol)
+
+    # Extraer tipos únicos para el filtro
+    tipos = set()
+    def extraer_tipos(nodos):
+        for nodo in nodos:
+            if nodo['unidad'].get('tipo'):
+                tipos.add(nodo['unidad']['tipo'])
+            extraer_tipos(nodo['hijos'])
+    extraer_tipos(arbol)
+
     return render_template('catalogo_unidades_administrativas.html',
-                           unidades=unidades_arbol,
-                           conteo_dependientes=conteo_dependientes)
+                           unidades=arbol,
+                           conteo_dependientes=conteo_dependientes,
+                           tipos=sorted(tipos))
 
 
 ###

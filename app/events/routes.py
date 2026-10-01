@@ -287,9 +287,17 @@ def crear_evento():
         lugar = request.form['lugar']
         tipo = request.form['tipo']
         cupos = request.form['cupos']
-        carga_horaria = request.form['carga_horaria']
+        carga_horaria = request.form['carga_horaria'].strip()
         modalidad = request.form['modalidad']
         descripcion = request.form['descripcion']
+        if not carga_horaria or not carga_horaria.isdigit():
+            flash('La carga horaria debe ser un número entero válido.', 'danger')
+            return redirect(url_for('events.crear_evento',
+                                    nombre=nombre, region=region,
+                                    unidad_ejecutora=unidad_ejecutora,
+                                    lugar=lugar, tipo=tipo, cupos=cupos,
+                                    carga_horaria=carga_horaria,
+                                    modalidad=modalidad, descripcion=descripcion))
         checkin_masivo = request.form.get('checkin_masivo') == 'on'
         concurso_poster = request.form.get('concurso_poster') == 'on'
         registro_abierto = request.form.get('registro_abierto') == 'on'
@@ -424,7 +432,7 @@ def copiar_evento(codigo_evento):
         'modalidad': evento.get('modalidad', ''),
         'tipo': evento.get('tipo', ''),
         'cupos': evento.get('cupos', ''),
-        'carga_horaria': evento.get('carga_horaria', ''),
+        'carga_horaria': evento.get('carga_horaria', '0') or '0',
         'descripcion': evento.get('descripcion', ''),
     }
     

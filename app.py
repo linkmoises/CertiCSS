@@ -3800,7 +3800,11 @@ def _buscar_certificados_resultados(cedula, token):
                 if carga_prorrateada is not None:
                     carga = float(carga_prorrateada)
                 else:
-                    carga = float(r.get('carga_horaria', 0))
+                    carga_horaria_val = r.get('carga_horaria', 0)
+                    if carga_horaria_val is None or carga_horaria_val == '':
+                        carga = 0
+                    else:
+                        carga = float(carga_horaria_val)
             except (ValueError, TypeError):
                 carga = 0
             sumas[tipo] = sumas.get(tipo, 0) + carga
