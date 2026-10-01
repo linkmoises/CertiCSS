@@ -603,6 +603,8 @@ def tablero_coordinadores():
             .sort("fecha_fin", 1)
         )
 
+        mis_eventos = mis_eventos[:5]
+
         for evento in mis_eventos:
             evento["es_organizador"] = True
             enrich_event_with_authors(evento, collection_usuarios, collection_participantes)
