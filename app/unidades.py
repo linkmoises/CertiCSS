@@ -621,13 +621,15 @@ def docencia_unidad(codigo_unidad, page=1):
     # Obtener eventos paginados
     eventos = list(collection_eventos.find(filtro_docencia).sort("fecha_inicio", -1).skip(skip).limit(per_page))
     
-    return render_template('catalogo_unidad.html', 
-                         codigo_unidad=codigo_unidad, 
-                         unidad=unidad, 
+    return render_template('catalogo_unidad.html',
+                         codigo_unidad=codigo_unidad,
+                         unidad=unidad,
                          eventos=eventos,
                          page=page,
                          total_pages=total_pages,
-                         total_eventos=total_eventos)
+                         total_eventos=total_eventos,
+                         ruta_paginacion='unidades.docencia_unidad',
+                         ruta_catalogo='unidades.catalogo_unidades')
 
 
 def _backfill_slugs_administrativas():
@@ -732,13 +734,15 @@ def docencia_unidad_administrativa(slug, page=1):
     
     eventos = list(collection_eventos.find(filtro_docencia).sort("fecha_inicio", -1).skip(skip).limit(per_page))
     
-    return render_template('catalogo_unidad.html', 
-                         codigo_unidad=slug, 
-                         unidad=unidad, 
+    return render_template('catalogo_unidad.html',
+                         codigo_unidad=slug,
+                         unidad=unidad,
                          eventos=eventos,
                          page=page,
                          total_pages=total_pages,
-                         total_eventos=total_eventos)
+                         total_eventos=total_eventos,
+                         ruta_paginacion='unidades.docencia_unidad_administrativa',
+                         ruta_catalogo='unidades.catalogo_unidades_administrativas')
 
 
 ###
