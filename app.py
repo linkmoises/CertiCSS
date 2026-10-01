@@ -570,6 +570,46 @@ def tablero_coordinadores():
 
     num_eventos = len(eventos)
 
+    # Mis próximos eventos: los que el usuario autorizó o coorganiza, más
+    # los propios que están en curso. Los próximos se listan primero.
+    # Se excluye registro abierto + LMS activo a la vez (igual que
+    # "Eventos en curso").
+    mis_eventos = []
+    if current_user.rol != UserRole.ADMINISTRADOR.value:
+        codigos_coorganizados = collection_participantes.distinct(
+            'codigo_evento',
+            {'cedula': str(current_user.cedula), 'rol': 'coorganizador'}
+        )
+
+        filtro_mis = {
+            "$or": [
+                {"autor": current_user.id},
+                {"codigo": {"$in": codigos_coorganizados}},
+            ],
+            "fecha_fin": {"$gte": ahora},
+            "estado_evento": {"$ne": "borrador"},
+            "$nor": [
+                {"registro_abierto": True, "lms_activo": True}
+            ]
+        }
+
+        # Próximos primero (empieza antes primero), luego los que están
+        # en curso (terminan antes primero).
+        mis_eventos = list(
+            collection_eventos.find(dict(filtro_mis, fecha_inicio={"$gt": ahora}))
+            .sort("fecha_inicio", 1)
+        )
+        mis_eventos += list(
+            collection_eventos.find(dict(filtro_mis, fecha_inicio={"$lte": ahora}))
+            .sort("fecha_fin", 1)
+        )
+
+        for evento in mis_eventos:
+            evento["es_organizador"] = True
+            enrich_event_with_authors(evento, collection_usuarios, collection_participantes)
+
+    num_mis_eventos = len(mis_eventos)
+
     # Mensajería interna reciente (panel "Notificaciones institucionales" del tablero)
     from bson.objectid import ObjectId as _ObjectId
     collection_mensajes_tablero = db['mensajes']
@@ -601,6 +641,8 @@ def tablero_coordinadores():
         total_participantes=total_participantes,
         eventos=eventos,
         num_eventos=num_eventos,
+        mis_eventos=mis_eventos,
+        num_mis_eventos=num_mis_eventos,
         mensajes_recientes=mensajes_recientes,
         mensajes_sin_leer=mensajes_sin_leer
     )
