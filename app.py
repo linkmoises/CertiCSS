@@ -587,7 +587,6 @@ def tablero_coordinadores():
                 {"codigo": {"$in": codigos_coorganizados}},
             ],
             "fecha_fin": {"$gte": ahora},
-            "estado_evento": {"$ne": "borrador"},
             "$nor": [
                 {"registro_abierto": True, "lms_activo": True}
             ]
