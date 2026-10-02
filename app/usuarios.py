@@ -7,6 +7,7 @@
 from flask import Blueprint, request, render_template, redirect, url_for, flash, abort, jsonify
 from flask_login import login_user, current_user, login_required
 from bson.objectid import ObjectId
+from bson.errors import InvalidId
 from werkzeug.security import generate_password_hash
 from datetime import datetime
 from unicodedata import normalize
@@ -534,13 +535,16 @@ def eliminar_foto(user_id):
 @login_required
 def mostrar_usuario(user_id):
     # Obtener los datos del usuario desde la base de datos usando el user_id
-    usuario = collection_usuarios.find_one({"_id": ObjectId(user_id)})
-
-    foto_url = f"/static/usuarios/{usuario['foto']}" if usuario.get('foto') else None
+    try:
+        usuario = collection_usuarios.find_one({"_id": ObjectId(user_id)})
+    except InvalidId:
+        usuario = None
 
     if not usuario:
         flash("Usuario no encontrado", "danger")
         return redirect(url_for('usuarios.listar_usuarios'))  # Redirigir a la lista de usuarios si no se encuentra
+
+    foto_url = f"/static/usuarios/{usuario['foto']}" if usuario.get('foto') else None
 
     # Obtener eventos creados por el usuario (ordenados por fecha de inicio descendente)
     eventos = list(collection_eventos.find(

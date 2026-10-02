@@ -1,15 +1,15 @@
-{% macro avatar(user, size='size-8', link=true, tooltip=true) %}
+{% macro avatar(user, size='size-8', link=true, tooltip=true, link_class='inline-block', spaced=true) %}
 {% if user %}
 {% set initials = ((user.nombres[:1] if user.nombres else '') ~ (user.apellidos[:1] if user.apellidos else ''))|upper %}
 {% set foto_url = '/static/usuarios/' ~ user.foto if user.foto else '/static/assets/user-avatar.png' %}
 {% set profile_url = url_for('usuarios.mostrar_usuario', user_id=user._id) if user._id else '#' %}
 {% if link %}
-<a href="{{ profile_url }}" class="inline-block"{% if tooltip %} title="{{ user.nombres }} {{ user.apellidos }}"{% endif %}>
+<a href="{{ profile_url }}" class="{{ link_class }}"{% if tooltip %} title="{{ user.nombres }} {{ user.apellidos }}"{% endif %}>
 {% endif %}
     {% if user.foto %}
-    <img class="{{ size }} rounded-full object-cover mt-2 transition-transform duration-200 hover:scale-110 hover:ring-2 hover:ring-blue-500 hover:ring-offset-2" src="{{ foto_url }}" alt="{{ user.nombres }} {{ user.apellidos }}">
+    <img class="{{ size }} rounded-full object-cover{% if spaced %} mt-2{% endif %} transition-transform duration-200 hover:scale-110 hover:ring-2 hover:ring-blue-500 hover:ring-offset-2" src="{{ foto_url }}" alt="{{ user.nombres }} {{ user.apellidos }}">
     {% else %}
-    <div class="{{ size }} rounded-full mt-2 bg-blue-600 flex items-center justify-center text-white font-medium transition-transform duration-200 hover:scale-110 hover:ring-2 hover:ring-blue-500 hover:ring-offset-2{% if size == 'size-8' %} text-xs{% elif size == 'size-10' %} text-sm{% else %} text-base{% endif %}"{% if tooltip %} title="{{ user.nombres }} {{ user.apellidos }}"{% endif %}>
+    <div class="{{ size }} rounded-full{% if spaced %} mt-2{% endif %} bg-blue-600 flex items-center justify-center text-white font-medium transition-transform duration-200 hover:scale-110 hover:ring-2 hover:ring-blue-500 hover:ring-offset-2{% if size == 'size-8' %} text-xs{% elif size == 'size-10' %} text-sm{% else %} text-base{% endif %}"{% if tooltip %} title="{{ user.nombres }} {{ user.apellidos }}"{% endif %}>
         {{ initials }}
     </div>
     {% endif %}

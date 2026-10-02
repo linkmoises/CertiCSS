@@ -91,7 +91,7 @@
             <!-- Card -->
             <div class="flex flex-col">
                 <div class="-m-1.5 overflow-x-auto">
-                    <div class="p-1.5 min-w-full inline-block align-middle">
+                    <div class="p-1.5 w-full">
                         <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
 
                             <!-- Header -->
@@ -143,42 +143,52 @@
                             {% if mensajes_recientes %}
 
                             <!-- Body -->
+                            {% from '_avatar.html' import avatar %}
                             <ul class="divide-y divide-gray-200 dark:divide-neutral-700">
                                 {% for m in mensajes_recientes %}
-                                <li>
-                                    <a class="flex items-center gap-x-4 px-6 py-4 hover:bg-gray-50 dark:hover:bg-neutral-700/50 {{ 'bg-blue-50/60 dark:bg-blue-900/10' if m.no_leido }}"
-                                        href="{{ url_for('mensajeria.ver', mensaje_id=m._id) }}">
-                                        <img class="shrink-0 size-10 rounded-full"
-                                            src="{{ '/static/usuarios/' + m.remitente_info.foto if m.remitente_info and m.remitente_info.foto else '/static/assets/user-avatar.png' }}"
-                                            alt="{{ m.remitente_nombre }}">
-                                        <div class="min-w-0 flex-1">
-                                            <div class="flex items-center gap-x-2">
-                                                <span class="text-sm font-semibold text-gray-800 truncate dark:text-neutral-200">
-                                                    {{ m.remitente_nombre or 'Usuario' }}
-                                                </span>
-                                                {% if m.es_global %}
-                                                <span class="inline-flex items-center gap-x-1 py-0.5 px-2 rounded-full text-xs font-medium bg-purple-100 text-purple-800">Difusión</span>
-                                                {% endif %}
-                                                {% if m.no_leido %}
-                                                <span class="size-2 rounded-full bg-blue-600 shrink-0"></span>
-                                                {% endif %}
-                                                <span class="ms-auto text-sm text-gray-400 whitespace-nowrap">{{ m.fecha | date('%d/%m/%Y %H:%M') }}</span>
-                                            </div>
-                                            <p class="text-sm truncate {{ 'font-semibold' if m.no_leido }} text-gray-800 dark:text-neutral-300">
-                                                {{ m.asunto }}
-                                            </p>
-                                            <p class="text-sm text-gray-500 truncate dark:text-neutral-400">
-                                                {{ m.cuerpo }}
-                                                {% if m.total_adjuntos > 0 %}
-                                                <span class="inline-flex items-center gap-x-1 text-gray-400">
-                                                    ·
-                                                    <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-                                                    {{ m.total_adjuntos }}
-                                                </span>
-                                                {% endif %}
-                                            </p>
+                                <li
+                                    class="relative flex items-center gap-x-4 px-6 py-4 hover:bg-gray-50 dark:hover:bg-neutral-700/50 {{ 'bg-blue-50/60 dark:bg-blue-900/10' if m.no_leido }}">
+                                    {{ avatar(m.remitente_info, size='size-10', link_class='shrink-0 relative z-10', spaced=false) }}
+                                    <div class="min-w-0 flex-1">
+                                        <div class="flex items-center gap-x-2">
+                                            {% if m.remitente_info %}
+                                            <a class="relative z-10 min-w-0 text-sm font-semibold text-gray-800 truncate hover:text-blue-600 hover:underline dark:text-neutral-200"
+                                                href="{{ url_for('usuarios.mostrar_usuario', user_id=m.remitente_id) }}"
+                                                title="{{ m.remitente_nombre }}">
+                                                {{ m.remitente_nombre or 'Usuario' }}
+                                            </a>
+                                            {% else %}
+                                            <span class="min-w-0 text-sm font-semibold text-gray-800 truncate dark:text-neutral-200">
+                                                {{ m.remitente_nombre or 'Usuario' }}
+                                            </span>
+                                            {% endif %}
+                                            {% if m.es_global %}
+                                            <span
+                                                class="shrink-0 inline-flex items-center gap-x-1 py-0.5 px-2 rounded-full text-xs font-medium bg-purple-100 text-purple-800">Difusión</span>
+                                            {% endif %}
+                                            {% if m.no_leido %}
+                                            <span class="size-2 rounded-full bg-blue-600 shrink-0"></span>
+                                            {% endif %}
+                                            <span
+                                                class="ms-auto shrink-0 text-sm text-gray-400 whitespace-nowrap">{{ m.fecha | date('%d/%m/%Y %H:%M') }}</span>
                                         </div>
-                                    </a>
+                                        <p class="text-sm truncate {{ 'font-semibold' if m.no_leido }} text-gray-800 dark:text-neutral-300">
+                                            {{ m.asunto }}
+                                        </p>
+                                        <p class="text-sm text-gray-500 truncate dark:text-neutral-400">
+                                            {{ m.cuerpo }}
+                                            {% if m.total_adjuntos > 0 %}
+                                            <span class="inline-flex items-center gap-x-1 text-gray-400">
+                                                ·
+                                                <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                                                {{ m.total_adjuntos }}
+                                            </span>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    <a class="absolute inset-0" href="{{ url_for('mensajeria.ver', mensaje_id=m._id) }}"
+                                        aria-label="{{ m.asunto or 'Ver mensaje' }}"><span
+                                            class="sr-only">Ver mensaje</span></a>
                                 </li>
                                 {% endfor %}
                             </ul>
