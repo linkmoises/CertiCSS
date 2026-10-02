@@ -542,8 +542,9 @@ def tablero_coordinadores():
 
     ahora = datetime.now()
 
-    # Mis próximos eventos: los que el usuario autorizó o coorganiza, más
-    # los propios que están en curso. Los próximos se listan primero.
+    # Mis próximos eventos: los que el usuario autorizó o coorganiza y aún no
+    # han terminado. Los que están en curso se listan primero porque son los
+    # más accionables; después los que aún no empiezan.
     # Se excluye registro abierto + LMS activo a la vez (igual que
     # "Eventos en curso").
     mis_eventos = []
@@ -564,18 +565,22 @@ def tablero_coordinadores():
             ]
         }
 
-        # Próximos primero (empieza antes primero), luego los que están
-        # en curso (terminan antes primero).
-        mis_eventos = list(
-            collection_eventos.find(dict(filtro_mis, fecha_inicio={"$gt": ahora}))
-            .sort("fecha_inicio", 1)
-        )
-        mis_eventos += list(
+        # En curso primero (termina antes primero), luego los que aún no
+        # empiezan (empieza antes primero).
+        #
+        # Al ir los en curso delante, siempre quedan visibles mientras exista
+        # alguno, en vez de ser desplazados por una lista larga de próximos.
+        tope = 5
+        en_curso = list(
             collection_eventos.find(dict(filtro_mis, fecha_inicio={"$lte": ahora}))
             .sort("fecha_fin", 1)
         )
+        proximos = list(
+            collection_eventos.find(dict(filtro_mis, fecha_inicio={"$gt": ahora}))
+            .sort("fecha_inicio", 1)
+        )
 
-        mis_eventos = mis_eventos[:5]
+        mis_eventos = (en_curso + proximos)[:tope]
 
         for evento in mis_eventos:
             evento["es_organizador"] = True
