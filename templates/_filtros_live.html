@@ -1,0 +1,71 @@
+{% macro filtros_live(filtros, opciones, region_etiquetas, q, por_pagina, por_pagina_opciones) %}
+<div class="px-6 py-4 border-b border-gray-200 bg-gray-50 dark:border-neutral-700 dark:bg-neutral-800/50">
+    <form method="get" action="{{ url_for('events.eventos_live') }}" id="filtrosLiveForm" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 items-end">
+        <div>
+            <label for="fl-q" class="block text-xs font-medium text-gray-500 mb-1">Buscar</label>
+            <input type="text" id="fl-q" name="q" value="{{ q }}" placeholder="Nombre o código" class="py-1.5 px-2 block w-full text-sm rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300">
+        </div>
+        <div>
+            <label for="fl-estado" class="block text-xs font-medium text-gray-500 mb-1">Estado</label>
+            <select id="fl-estado" name="estado" onchange="this.form.submit()" class="py-1.5 px-2 pe-7 block w-full text-sm rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300">
+                <option value="">Todos</option>
+                {% for valor in opciones.estados %}
+                <option value="{{ valor }}" {% if filtros.get('estado') == valor %}selected{% endif %}>{{ valor|capitalize }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="fl-tipo" class="block text-xs font-medium text-gray-500 mb-1">Tipo</label>
+            <select id="fl-tipo" name="tipo" onchange="this.form.submit()" class="py-1.5 px-2 pe-7 block w-full text-sm rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300">
+                <option value="">Todos</option>
+                {% for valor in opciones.tipos %}
+                <option value="{{ valor }}" {% if filtros.get('tipo') == valor %}selected{% endif %}>{{ valor }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="fl-modalidad" class="block text-xs font-medium text-gray-500 mb-1">Modalidad</label>
+            <select id="fl-modalidad" name="modalidad" onchange="this.form.submit()" class="py-1.5 px-2 pe-7 block w-full text-sm rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300">
+                <option value="">Todas</option>
+                {% for valor in opciones.modalidades %}
+                <option value="{{ valor }}" {% if filtros.get('modalidad') == valor %}selected{% endif %}>{{ valor }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="fl-region" class="block text-xs font-medium text-gray-500 mb-1">Región</label>
+            <select id="fl-region" name="region" onchange="this.form.submit()" class="py-1.5 px-2 pe-7 block w-full text-sm rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300">
+                <option value="">Todas</option>
+                {% for valor in opciones.regiones %}
+                <option value="{{ valor }}" {% if filtros.get('region') == valor %}selected{% endif %}>{{ region_etiquetas.get(valor, valor) }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="fl-unidad" class="block text-xs font-medium text-gray-500 mb-1">Unidad ejecutora</label>
+            <select id="fl-unidad" name="unidad_ejecutora" onchange="this.form.submit()" class="py-1.5 px-2 pe-7 block w-full text-sm rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300">
+                <option value="">Todas</option>
+                {% for valor in opciones.unidades %}
+                <option value="{{ valor }}" {% if filtros.get('unidad_ejecutora') == valor %}selected{% endif %}>{{ valor }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="fl-por-pagina" class="block text-xs font-medium text-gray-500 mb-1">Por página</label>
+            <select id="fl-por-pagina" name="por_pagina" onchange="this.form.submit()" class="py-1.5 px-2 pe-7 block w-full text-sm rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300">
+                {% for n in por_pagina_opciones %}
+                <option value="{{ n }}" {% if por_pagina == n %}selected{% endif %}>{{ n }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-span-2 sm:col-span-3 lg:col-span-4 xl:col-span-7 flex flex-wrap gap-x-2 gap-y-1 mt-1">
+            <button type="submit" class="py-1.5 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700">
+                Filtrar
+            </button>
+            <a href="{{ url_for('events.eventos_live') }}" class="py-1.5 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700">
+                Limpiar
+            </a>
+        </div>
+    </form>
+</div>
+{% endmacro %}

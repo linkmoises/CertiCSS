@@ -1,4 +1,4 @@
-{% macro tabla_eventos(eventos, num_eventos, titulo, subtitulo, vacio_titulo, vacio_texto, etiqueta_conteo, acciones_encabezado, current_user) %}
+{% macro tabla_eventos(eventos, num_eventos, titulo, subtitulo, vacio_titulo, vacio_texto, etiqueta_singular, etiqueta_plural, acciones_encabezado, current_user) %}
 <div class="max-w-[85rem] px-2 pt-1 mx-auto">
     <!-- Card -->
     <div class="flex flex-col">
@@ -76,7 +76,7 @@
                         <div>
                             <p class="text-sm text-gray-600 dark:text-neutral-400">
                                 <span class="font-semibold text-gray-800 dark:text-neutral-200">0</span>
-                                {{ etiqueta_conteo }}
+                                {{ etiqueta_plural }}
                             </p>
                         </div>
 
@@ -361,17 +361,8 @@
                         class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200">
                         <div>
                             <p class="text-sm text-gray-600">
-                                <span class="font-semibold text-gray-800">{{ num_eventos }}</span> {{ 'evento' if num_eventos == 1 else 'eventos' }}
+                                <span class="font-semibold text-gray-800">{{ num_eventos }}</span> {{ etiqueta_singular if num_eventos == 1 else etiqueta_plural }}
                             </p>
-                        </div>
-
-                        <div>{% if eventos|length == 0 %}
-                            <div class="inline-flex gap-x-2">
-                                <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-gray-50"
-                                    href="{{ url_for('events.listar_eventos') }}">
-                                    Ver todos
-                                </a>
-                            </div>{% endif %}
                         </div>
                     </div>
                     <!-- End Footer -->

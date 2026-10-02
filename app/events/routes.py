@@ -258,6 +258,127 @@ def mis_coorganizados(page=1):
     )
 
 
+def _construir_filtros_live(args):
+    """Filtros de la vista en vivo: estado, tipo, modalidad, región, unidad y búsqueda.
+
+    A diferencia de _construir_filtros_listado, no aplica exclusión de registro
+    abierto ni periodo, porque la vista en vivo tiene su propio filtro base.
+    """
+    filtro = {}
+    filtros_args = {}
+
+    q = (args.get('q') or '').strip()
+    if q:
+        patron = {'$regex': re.escape(q), '$options': 'i'}
+        filtro['$or'] = [{'nombre': patron}, {'codigo': patron}]
+        filtros_args['q'] = q
+
+    for campo, campo_mongo in _CAMPOS_FILTRO.items():
+        valor = (args.get(campo) or '').strip()
+        if valor:
+            filtro[campo_mongo] = valor
+            filtros_args[campo] = valor
+
+    por_pagina = args.get('por_pagina', type=int)
+    if por_pagina not in _POR_PAGINA_OPCIONES:
+        por_pagina = 20
+
+    return filtro, filtros_args, por_pagina
+
+
+@events_bp.route('/live')
+@events_bp.route('/live/page/<int:page>')
+@login_required
+@roles_required(
+    UserRole.COORDINADOR_LOCAL,
+    UserRole.COORDINADOR_REGIONAL,
+    UserRole.COORDINADOR_NACIONAL,
+    UserRole.SUBDIRECTOR_DOCENCIA,
+    UserRole.COORDINADOR_ADMINISTRATIVO,
+    UserRole.DENADOI,
+    UserRole.SIMULACION,
+    UserRole.ADMINISTRADOR,
+)
+def eventos_live(page=1):
+    from app.events.services import (
+        get_collection_eventos,
+        get_collection_participantes,
+        get_collection_usuarios,
+    )
+
+    collection_eventos = get_collection_eventos()
+    collection_participantes = get_collection_participantes()
+    collection_usuarios = get_collection_usuarios()
+
+    ahora = datetime.now()
+    filtro_base = {
+        "fecha_inicio": {"$lte": ahora},
+        "fecha_fin": {"$gte": ahora},
+        "estado_evento": {"$ne": "borrador"},
+        "modalidad": {"$ne": "Virtual asincrónica"},
+        "$nor": [
+            {"registro_abierto": True, "lms_activo": True}
+        ]
+    }
+
+    filtro_extra, filtros_args, por_pagina = _construir_filtros_live(request.args)
+    filtro = {**filtro_base, **filtro_extra}
+
+    total_eventos = collection_eventos.count_documents(filtro)
+    total_paginas = (total_eventos + por_pagina - 1) // por_pagina if total_eventos > 0 else 1
+
+    if page < 1 or (total_eventos > 0 and page > total_paginas):
+        abort(404)
+
+    eventos = list(
+        collection_eventos.find(filtro)
+        .sort([("fecha_fin", 1), ("codigo", 1)])
+        .skip((page - 1) * por_pagina)
+        .limit(por_pagina)
+    )
+
+    for evento in eventos:
+        es_organizador = collection_participantes.find_one({
+            "codigo_evento": evento["codigo"],
+            "cedula": str(current_user.cedula),
+            "rol": "coorganizador"
+        }) is not None
+        evento["es_organizador"] = es_organizador
+        enrich_event_with_authors(evento, collection_usuarios, collection_participantes)
+
+    region_filtro = filtros_args.get('region')
+    if region_filtro:
+        unidades_distintas = collection_eventos.distinct(
+            'unidad_ejecutora', {'region': region_filtro}
+        )
+    else:
+        unidades_distintas = collection_eventos.distinct('unidad_ejecutora')
+
+    opciones = {
+        'estados': sorted(e for e in collection_eventos.distinct('estado_evento') if e),
+        'tipos': sorted(t for t in collection_eventos.distinct('tipo') if t),
+        'modalidades': sorted(m for m in collection_eventos.distinct('modalidad') if m),
+        'regiones': sorted(
+            (r for r in collection_eventos.distinct('region') if r),
+            key=lambda r: _REGION_ETIQUETAS.get(r, r)
+        ),
+        'unidades': sorted(u for u in unidades_distintas if u),
+    }
+
+    return render_template('live.html',
+        eventos=eventos,
+        total_eventos=total_eventos,
+        page=page,
+        total_paginas=total_paginas,
+        por_pagina=por_pagina,
+        por_pagina_opciones=_POR_PAGINA_OPCIONES,
+        filtros=filtros_args,
+        opciones=opciones,
+        region_etiquetas=_REGION_ETIQUETAS,
+        q=(request.args.get('q') or '').strip()
+    )
+
+
 @events_bp.route('/eventos/nuevo', methods=['GET', 'POST'])
 @login_required
 def crear_evento():

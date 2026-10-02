@@ -540,35 +540,7 @@ def tablero_coordinadores():
     total_ponentes = collection_participantes.count_documents({"rol": {"$in": ['ponente', 'tallerista', 'instructor']}})
     total_participantes = collection_participantes.count_documents({"rol": "participante"})
 
-    # Eventos en curso: el momento actual cae dentro del rango de fechas,
-    # sin importar el autor. Se excluyen:
-    #   - actividades virtuales asincrónicas (disponibles de forma permanente)
-    #   - eventos con registro abierto y LMS activo a la vez
     ahora = datetime.now()
-
-    eventos_cursor = collection_eventos.find({
-        "fecha_inicio": {"$lte": ahora},
-        "fecha_fin": {"$gte": ahora},
-        "estado_evento": {"$ne": "borrador"},
-        "modalidad": {"$ne": "Virtual asincrónica"},
-        "$nor": [
-            {"registro_abierto": True, "lms_activo": True}
-        ]
-    }).sort("fecha_fin", 1)
-
-    eventos = list(eventos_cursor)
-
-    # Marcar si el usuario es organizador de cada evento y obtener info del autor
-    for evento in eventos:
-        es_organizador = collection_participantes.find_one({
-            "codigo_evento": evento.get("codigo"),
-            "cedula": str(current_user.cedula),
-            "rol": "coorganizador",
-        }) is not None or (str(current_user.id) == str(evento.get("autor")))
-        evento["es_organizador"] = es_organizador
-        enrich_event_with_authors(evento, collection_usuarios, collection_participantes)
-
-    num_eventos = len(eventos)
 
     # Mis próximos eventos: los que el usuario autorizó o coorganiza, más
     # los propios que están en curso. Los próximos se listan primero.
@@ -640,8 +612,6 @@ def tablero_coordinadores():
         total_eventos=total_eventos,
         total_ponentes=total_ponentes,
         total_participantes=total_participantes,
-        eventos=eventos,
-        num_eventos=num_eventos,
         mis_eventos=mis_eventos,
         num_mis_eventos=num_mis_eventos,
         mensajes_recientes=mensajes_recientes,
