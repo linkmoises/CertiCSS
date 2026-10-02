@@ -137,15 +137,15 @@
                                 </div>
                                 
                                 <!-- Texto de la pregunta -->
-                                <p class="text-sm text-justify py-1">{{ pregunta.pregunta_html|safe }}</p>
+                                <p class="lms-contenido text-sm text-justify py-1">{{ pregunta.pregunta_html|safe }}</p>
                                 
                                 <!-- Imágenes de la pregunta -->
                                 {% if pregunta.imagenes %}
-                                <div class="my-2">
+                                <div class="my-2 max-w-md">
                                     {% for imagen in pregunta.imagenes %}
                                     <img src="{{ url_for('static', filename='uploads/' + imagen) }}" 
                                          alt="Imagen de pregunta" 
-                                         class="max-w-md h-auto my-1">
+                                         class="max-w-full h-auto my-1">
                                     {% endfor %}
                                 </div>
                                 {% endif %}
@@ -159,7 +159,7 @@
                                         {% if opcion.imagen %}
                                         <br><img src="{{ url_for('static', filename='uploads/' + opcion.imagen) }}" 
                                                  alt="Imagen de opción" 
-                                                 class="max-w-xs h-auto my-1">
+                                                 class="max-w-full h-auto my-1">
                                         {% endif %}
                                     </li>
                                     {% endfor %}

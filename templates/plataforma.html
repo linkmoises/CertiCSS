@@ -30,7 +30,7 @@
             <!-- Grid -->
             <div class="bg-white grid sm:grid-cols-2 border border-gray-200 rounded-xl lg:grid-cols-12">
 
-                <div class="sm:order-1 lg:col-span-3 border-r border-gray-200">
+                <div class="sm:order-1 lg:col-span-3 min-w-0 border-r border-gray-200">
                     <div class="relative pt-[100%] sm:pt-[100%]">
                         {% if evento.afiche_750 %}
                         <img class="size-full absolute top-0 start-0 object-cover rounded-l-xl"
@@ -81,7 +81,7 @@
                 </div>
                 <!-- End Col -->
 
-                <div class="sm:order-2 lg:col-span-9">
+                <div class="sm:order-2 lg:col-span-9 min-w-0">
 
                     <div class="m-8">
 
@@ -98,7 +98,7 @@
                         </div>
                         <br />
                         {% elif contenido_actual.tipo == 'texto' %}
-                        <div class="prose text-gray-600 w-full text-sm !max-w-none">
+                        <div class="lms-contenido prose text-gray-600 w-full text-sm !max-w-none">
                             {{ contenido_actual.contenido_texto | safe }}
                         </div>
                         {% elif contenido_actual.tipo == 'documento' %}
@@ -131,7 +131,7 @@
                             <p class="text-sm text-gray-600 mb-4">{{ contenido_actual.descripcion }}</p>
                             {% endif %}
                             {% if instrucciones_html %}
-                            <div class="prose text-gray-600 w-full text-sm !max-w-none mb-4">
+                            <div class="lms-contenido prose text-gray-600 w-full text-sm !max-w-none mb-4">
                                 {{ instrucciones_html | safe }}
                             </div>
                             {% endif %}

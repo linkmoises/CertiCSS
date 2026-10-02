@@ -30,7 +30,7 @@
             <!-- Grid -->
             <div class="bg-white grid sm:grid-cols-2 border border-gray-200 rounded-xl lg:grid-cols-12">
 
-                <div class="sm:order-1 lg:col-span-3 border-r border-gray-200">
+                <div class="sm:order-1 lg:col-span-3 min-w-0 border-r border-gray-200">
                     <div class="relative pt-[100%] sm:pt-[100%]">
                         {% if evento.afiche_750 %}
                         <img class="size-full absolute top-0 start-0 object-cover rounded-l-xl"
@@ -69,7 +69,7 @@
                 </div>
                 <!-- End Col -->
 
-                <div class="sm:order-2 lg:col-span-9">
+                <div class="sm:order-2 lg:col-span-9 min-w-0">
 
                     <div class="m-8">
                         <div class="mx-auto">
@@ -151,13 +151,13 @@
                             {% endif %}
                             {% for pregunta in preguntas %}
                             <div class="mb-6 border-b pb-4">
-                                <div class="mb-2 font-semibold">{{ loop.index }}. {{ pregunta.pregunta_html|safe }}
+                                <div class="mb-2 font-semibold lms-contenido">{{ loop.index }}. {{ pregunta.pregunta_html|safe }}
                                 </div>
                                 <!-- Imágenes de la pregunta -->
                                 {% if pregunta.imagenes %}
-                                <div class="my-2">
+                                <div class="my-2 max-w-md">
                                     {% for imagen in pregunta.imagenes %}
-                                    <img src="{{ url_for('static', filename='uploads/' + imagen) }}" alt="Imagen de pregunta" class="max-w-md h-auto border p-1 m-1">
+                                    <img src="{{ url_for('static', filename='uploads/' + imagen) }}" alt="Imagen de pregunta" class="max-w-full h-auto border p-1 m-1">
                                     {% endfor %}
                                 </div>
                                 {% endif %}
@@ -237,14 +237,14 @@
                                 {% for pregunta in preguntas %}
                                 {% set idx = loop.index0 %}
                                 <div class="mb-6 border-b pb-4">
-                                    <div class="mb-2 font-semibold">{{ loop.index }}. {{ pregunta.pregunta_html|safe }}
+                                    <div class="mb-2 font-semibold lms-contenido">{{ loop.index }}. {{ pregunta.pregunta_html|safe }}
                                     </div>
                                     <!-- Imágenes de la pregunta -->
                                     {% if pregunta.imagenes %}
                                     <div class="my-2 max-w-md">
                                         {% for imagen in pregunta.imagenes %}
                                         <a href="{{ url_for('static', filename='uploads/' + imagen) }}" target="_blank">
-                                            <img src="{{ url_for('static', filename='uploads/' + imagen) }}" alt="Imagen" class="max-w-md h-auto border p-1 m-1">
+                                            <img src="{{ url_for('static', filename='uploads/' + imagen) }}" alt="Imagen" class="max-w-full h-auto border p-1 m-1">
                                         </a>
                                         <p class="text-sm text-center italic text-gray-400">(Click para ver tamaño completo)</p>
                                         {% endfor %}

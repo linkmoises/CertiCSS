@@ -45,3 +45,13 @@ pre#log-content {
 .highlight {
     background-color: yellow; /* Color de resaltado */
 }
+
+/* Contenido de actividades del LMS (texto, instrucciones y preguntas) con HTML
+   escrito a mano por los autores. Sin esto, un <img> con max-width en linea
+   (copiado de un editor) se sale de la pantalla en moviles y obliga a desplazar
+   horizontalmente. max-width: 100% respeta el ancho del contenedor y height: auto
+   conserva la proporción; nunca agranda una imagen pequena. */
+.lms-contenido img {
+    max-width: 100% !important;
+    height: auto !important;
+}
