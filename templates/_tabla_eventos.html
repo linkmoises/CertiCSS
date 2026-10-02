@@ -1,4 +1,4 @@
-{% macro tabla_eventos(eventos, num_eventos, titulo, subtitulo, vacio_titulo, vacio_texto, etiqueta_singular, etiqueta_plural, acciones_encabezado, current_user) %}
+{% macro tabla_eventos(eventos, num_eventos, titulo, subtitulo, vacio_titulo, vacio_texto, etiqueta_singular, etiqueta_plural, acciones_encabezado, current_user, filtros_html='', paginacion_html='') %}
 <div class="max-w-[85rem] px-2 pt-1 mx-auto">
     <!-- Card -->
     <div class="flex flex-col">
@@ -24,6 +24,10 @@
                         </div>
                     </div>
                     <!-- End Header -->
+
+                    {% if filtros_html %}
+                        {{ filtros_html }}
+                    {% endif %}
 
                     {% if eventos|length == 0 %}
 
@@ -355,6 +359,10 @@
                         </tbody>
                     </table>
                     <!-- End Table -->
+
+                    {% if paginacion_html %}
+                        {{ paginacion_html }}
+                    {% endif %}
 
                     <!-- Footer -->
                     <div
