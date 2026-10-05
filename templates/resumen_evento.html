@@ -115,6 +115,7 @@
                             </div>
                             <!-- End Col -->
 
+                            {% if not evento.registro_abierto %}
                             <div class="sm:col-span-3">
                                 <span class="inline-block text-sm text-gray-800">
                                     Organizador de actividad
@@ -132,6 +133,7 @@
                                 </p>
                             </div>
                             <!-- End Col -->
+                            {% endif %}
 
                             {% if evento.enlace_virtual %}
                             <div class="sm:col-span-3">
