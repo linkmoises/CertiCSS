@@ -1764,7 +1764,19 @@ def registrar_organizador(codigo_evento):
         apellidos = request.form['apellidos']
         cedula = request.form['cedula']
         rol = request.form['rol']
-        
+
+        # Un organizador/coorganizador se registra una sola vez por evento.
+        # La restricción por fecha aplica solo a participantes, por lo que sin
+        # esta validación la misma persona puede quedar registrada varias veces.
+        ya_registrado = collection_participantes.find_one({
+            'cedula': cedula,
+            'codigo_evento': codigo_evento,
+            'rol': rol
+        })
+        if ya_registrado:
+            flash(f"La persona con cédula {cedula} ya está registrada como {rol} en este evento.", "error")
+            return redirect(url_for('events.listar_participantes', codigo_evento=codigo_evento))
+
         titulo_ponencia = rol                # hack para poder registrar
 
         # Generar nanoid

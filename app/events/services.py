@@ -43,7 +43,13 @@ def enrich_event_with_authors(evento, collection_usuarios, collection_participan
         "rol": "coorganizador"
     }))
     coorganizadores_info = []
+    cedulas_vistas = set()
     for coorg in coorganizadores:
+        # El mismo coorganizador puede estar registrado más de una vez
+        # (registros históricos en fechas distintas). Solo se muestra una vez.
+        if coorg["cedula"] in cedulas_vistas:
+            continue
+        cedulas_vistas.add(coorg["cedula"])
         usuario = collection_usuarios.find_one({"cedula": coorg["cedula"]})
         if usuario:
             coorganizadores_info.append(usuario)
