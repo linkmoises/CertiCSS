@@ -13,8 +13,105 @@ from reportlab.pdfgen import canvas
 from pdfrw import PdfReader, PdfWriter, PageMerge
 import qrcode
 
-from app import collection_eventos, collection_posters, collection_participantes
+from app import (collection_eventos, collection_posters, collection_participantes,
+                  collection_exam_results, collection_tarea_entregas, collection_eva)
 from app.helpers import detectar_tipo_documento
+
+
+def _a_datetime(valor):
+    if isinstance(valor, datetime):
+        return valor
+    if isinstance(valor, str):
+        for formato in ('%Y-%m-%d %H:%M:%S', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%d'):
+            try:
+                return datetime.strptime(valor[:19], formato)
+            except ValueError:
+                continue
+    return None
+
+
+def obtener_fecha_aprobacion(evento, cedula, codigo_evento):
+    """Fecha en que el participante aprobó todas las evaluaciones del evento.
+
+    Devuelve la fecha de la última evaluación aprobada (sumativos con >= 80%
+    y tareas calificadas con >= 80%), es decir, el momento en que se cumplió
+    el requisito. Si el evento no tiene LMS o no hay evaluaciones, o el
+    participante está exento, devuelve None y se usa la fecha_fin del evento.
+    """
+    if not evento or not evento.get('lms_activo'):
+        return None
+
+    # Import local para evitar dependencia circular con el blueprint plataforma.
+    from app.plataforma import parse_qbank_config, mejor_resultado_examen, _id_str
+
+    fechas = []
+
+    examenes = list(collection_eva.find({
+        'codigo_evento': codigo_evento,
+        'tipo': 'examen'
+    }))
+    examenes_sumativos = []
+    for ex in examenes:
+        qbank_config = ex.get('qbank_config', '')
+        if qbank_config:
+            _, _, _, formativo, _, _ = parse_qbank_config(qbank_config)
+            if not formativo:
+                examenes_sumativos.append(ex)
+
+    if examenes_sumativos:
+        ids_sumativos = [_id_str(ex) for ex in examenes_sumativos]
+        ordenes_sumativos = [ex.get('orden') for ex in examenes_sumativos]
+        resultados = list(collection_exam_results.find({
+            'codigo_evento': codigo_evento,
+            'cedula_participante': cedula,
+            '$or': [
+                {'examen_id': {'$in': ids_sumativos}},
+                {'examen_id': None, 'orden_examen': {'$in': ordenes_sumativos}},
+                {'examen_id': {'$exists': False}, 'orden_examen': {'$in': ordenes_sumativos}},
+            ],
+        }))
+        for ex in examenes_sumativos:
+            mejor = mejor_resultado_examen(resultados, ex)
+            if mejor and mejor.get('calificacion', 0) >= 80:
+                fecha = _a_datetime(mejor.get('fecha_envio'))
+                if fecha:
+                    fechas.append(fecha)
+
+    tareas = list(collection_eva.find({
+        'codigo_evento': codigo_evento,
+        'tipo': 'tarea'
+    }))
+    if tareas:
+        ids_tareas = [_id_str(t) for t in tareas]
+        ordenes_tareas = [t.get('orden') for t in tareas]
+        entregas = list(collection_tarea_entregas.find({
+            'codigo_evento': codigo_evento,
+            'cedula_participante': cedula,
+            '$or': [
+                {'tarea_id': {'$in': ids_tareas}},
+                {'tarea_id': None, 'orden_tarea': {'$in': ordenes_tareas}},
+                {'tarea_id': {'$exists': False}, 'orden_tarea': {'$in': ordenes_tareas}},
+            ],
+        }))
+        for t in tareas:
+            tid = _id_str(t)
+            ent = next(
+                (e for e in entregas
+                 if e.get('tarea_id') and str(e.get('tarea_id')) == tid),
+                None,
+            )
+            if not ent:
+                ent = next(
+                    (e for e in entregas
+                     if not e.get('tarea_id') and e.get('orden_tarea') == t.get('orden')),
+                    None,
+                )
+            if ent and ent.get('calificacion') is not None and ent.get('calificacion') >= 80:
+                fecha = _a_datetime(ent.get('fecha_calificacion'))
+                if fecha:
+                    fechas.append(fecha)
+
+    return max(fechas) if fechas else None
 
 
 def generar_pdf_participante(participante, afiche_path, lugar=None):
@@ -303,8 +400,20 @@ def generar_pdf_participante(participante, afiche_path, lugar=None):
 
         next_y = fecha_y - 0.3 * inch
 
-    # Format just the end date for the 'Dado en...' line
-    fecha_fin_simple = fecha_fin_evento.strftime('%d de %B de %Y')
+    # Fecha de la línea 'Dado en...': si el participante aprobó todas las
+    # evaluaciones se usa la fecha de aprobación; si no, la fecha_fin del evento.
+    # Las evaluaciones cuelgan del evento propio del participante (no del padre).
+    codigo_evento_evaluaciones = participante['codigo_evento']
+    if evento.get('codigo') != codigo_evento_evaluaciones:
+        evento_evaluaciones = collection_eventos.find_one(
+            {"codigo": codigo_evento_evaluaciones}
+        ) or evento
+    else:
+        evento_evaluaciones = evento
+    fecha_aprobacion = obtener_fecha_aprobacion(
+        evento_evaluaciones, participante['cedula'], codigo_evento_evaluaciones
+    )
+    fecha_fin_simple = (fecha_aprobacion or fecha_fin_evento).strftime('%d de %B de %Y')
     # Usar next_y si está definido (para ponentes) o la posición fija para participantes
     final_position = next_y if 'next_y' in locals() else 2.7 * inch
     # Determinar la provincia basada en la región
