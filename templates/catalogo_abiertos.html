@@ -142,21 +142,21 @@
                             <span class="absolute top-0 end-0 rounded-se-xl rounded-es-xl text-xs font-medium bg-gray-800 text-white py-1.5 px-3 dark:bg-neutral-900">
                                 {{ evento.modalidad }}
                             </span>
-                            <div class="absolute top-0 start-0 flex flex-col items-start">
-                                {% if evento.metadata and evento.metadata.es_destacado %}
-                                <span class="rounded-ss-xl rounded-ee-xl text-xs font-medium bg-amber-500 text-white py-1.5 px-3 dark:bg-amber-600">
-                                    Destacado
-                                </span>
-                                {% endif %}
-                                <div class="flex flex-col gap-1 items-start mt-1 ms-1">
-                                    {% if evento.metadata and evento.metadata.es_nuevo %}
-                                    <span class="text-xs font-bold uppercase bg-green-500 text-white py-1 px-2 rounded-md shadow">Nuevo</span>
-                                    {% endif %}
-                                    {% if evento.metadata and evento.metadata.es_modulo_aprendizaje %}
-                                    <span class="text-xs font-bold uppercase bg-purple-600 text-white py-1 px-2 rounded-md shadow">Módulo</span>
-                                    {% endif %}
-                                </div>
-                            </div>
+                            {% if evento.metadata and evento.metadata.es_destacado %}
+                            <span class="absolute top-0 start-0 rounded-ss-xl rounded-ee-xl text-xs font-medium bg-amber-500 text-white py-1.5 px-3 dark:bg-amber-600">
+                                Destacado
+                            </span>
+                            {% endif %}
+                            {% if evento.metadata and evento.metadata.es_nuevo %}
+                            <span class="absolute top-0 start-0 rounded-ss-xl rounded-ee-xl text-xs font-medium bg-green-600 text-white py-1.5 px-3">
+                                Nuevo
+                            </span>
+                            {% endif %}
+                            {% if evento.metadata and evento.metadata.es_modulo_aprendizaje %}
+                            <span class="absolute bottom-0 start-0 rounded-es-xl rounded-se-xl text-xs font-medium bg-purple-600 text-white py-1.5 px-3">
+                                Módulo
+                            </span>
+                            {% endif %}
                           </div>
                         <div class="p-4 md:p-6">
                             <span class="block mb-1 text-xs font-semibold uppercase text-blue-600 dark:text-blue-500">
