@@ -1,0 +1,138 @@
+{% include 'tablero-header.html' %}
+
+{% include 'tablero-sidebar.html' %}
+
+<div class="w-full lg:ps-64">
+    <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+        <div class="max-w-[85rem] px-2 pt-1 mx-auto">
+            <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-7 dark:bg-neutral-800">
+                <div class="mb-8">
+                    <h2 class="text-xl font-bold text-gray-800 dark:text-neutral-200">
+                        Metadatos del evento
+                    </h2>
+                    <p class="text-sm text-gray-600 dark:text-neutral-400">
+                        {{ evento.nombre }} ({{ evento.codigo }})
+                    </p>
+                </div>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div class="mb-4">
+                    <ul>
+                        {% for category, message in messages %}
+                        <li class="{{ 'p-2 text-sm bg-red-100 text-red-800 rounded-xl' if category in ['error', 'danger'] else 'p-2 text-sm bg-green-100 text-green-800 rounded-xl' }}">
+                            {{ message }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                {% endwith %}
+
+                <form action="{{ url_for('events.editar_metadatos', codigo_evento=evento.codigo) }}" method="post">
+                    <input type="hidden" name="accion" value="guardar">
+                    <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
+
+                        <div class="sm:col-span-12">
+                            <label class="inline-flex items-center gap-x-3 text-sm text-gray-800 dark:text-neutral-200">
+                                <input type="checkbox" name="es_nuevo" {% if metadata.es_nuevo %}checked{% endif %}
+                                    class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700">
+                                Marcar como evento nuevo
+                            </label>
+                            <p class="text-xs text-gray-500 mt-1">Retíralo manualmente cuando ya no sea novedad.</p>
+                        </div>
+
+                        <div class="sm:col-span-12">
+                            <label class="inline-flex items-center gap-x-3 text-sm text-gray-800 dark:text-neutral-200">
+                                <input type="checkbox" name="es_modulo_aprendizaje" {% if metadata.es_modulo_aprendizaje %}checked{% endif %}
+                                    class="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700">
+                                Es módulo de aprendizaje (agrupa varios videos en orden lógico)
+                            </label>
+                        </div>
+
+                        <div class="sm:col-span-12">
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5 dark:text-neutral-200">Especialidades</label>
+                            <div class="flex flex-wrap gap-2">
+                                {% for esp in especialidades %}
+                                <label class="inline-flex items-center gap-x-2 text-sm text-gray-800 dark:text-neutral-200">
+                                    <input type="checkbox" name="especialidades" value="{{ esp.nombre }}"
+                                        {% if esp.nombre in (metadata.especialidades or []) %}checked{% endif %}
+                                        class="shrink-0 border-gray-200 rounded text-blue-600 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700">
+                                    {{ esp.nombre }}
+                                </label>
+                                {% else %}
+                                <p class="text-sm text-gray-500">No hay especialidades registradas. Crea una abajo.</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="sm:col-span-6">
+                            <label for="especialidad_nueva" class="block text-sm font-medium text-gray-700 mb-1.5 dark:text-neutral-200">
+                                Añadir nueva especialidad a este evento
+                            </label>
+                            <input type="text" id="especialidad_nueva" name="especialidad_nueva" placeholder="Ej.: Cardiología"
+                                class="py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400">
+                            <p class="text-xs text-gray-500 mt-1">Si no existe, se crea automáticamente y se asigna al evento.</p>
+                        </div>
+
+                        <div class="sm:col-span-12">
+                            <button type="submit"
+                                class="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700">
+                                Guardar metadatos
+                            </button>
+                            <a href="{{ url_for('events.listar_eventos_abiertos') }}"
+                                class="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 dark:bg-neutral-900 dark:border-neutral-700 dark:text-white ml-2">
+                                Volver
+                            </a>
+                        </div>
+                    </div>
+                </form>
+
+                <hr class="my-8 border-gray-200 dark:border-neutral-700">
+
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-neutral-200 mb-4">Administrar especialidades</h3>
+
+                <form action="{{ url_for('events.editar_metadatos', codigo_evento=evento.codigo) }}" method="post" class="mb-6 flex gap-2">
+                    <input type="hidden" name="accion" value="crear_especialidad">
+                    <input type="text" name="nueva_especialidad" placeholder="Nueva especialidad"
+                        class="py-2 px-3 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400">
+                    <button type="submit" class="py-2 px-4 text-sm font-medium rounded-lg bg-green-600 text-white hover:bg-green-700">Crear</button>
+                </form>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
+                        <thead>
+                            <tr>
+                                <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Nombre</th>
+                                <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-neutral-700">
+                            {% for esp in especialidades %}
+                            <tr>
+                                <td class="px-6 py-4 text-sm text-gray-800 dark:text-neutral-200">{{ esp.nombre }}</td>
+                                <td class="px-6 py-4 text-sm">
+                                    <form action="{{ url_for('events.editar_metadatos', codigo_evento=evento.codigo) }}" method="post" class="inline-flex items-center gap-2">
+                                        <input type="hidden" name="accion" value="renombrar_especialidad">
+                                        <input type="hidden" name="old_nombre" value="{{ esp.nombre }}">
+                                        <input type="text" name="new_nombre" placeholder="Nuevo nombre"
+                                            class="py-1 px-2 border-gray-200 shadow-sm text-xs rounded-lg focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400">
+                                        <button type="submit" class="text-blue-600 hover:underline">Renombrar</button>
+                                    </form>
+                                    <form action="{{ url_for('events.editar_metadatos', codigo_evento=evento.codigo) }}" method="post" class="inline-flex items-center ml-3"
+                                        onsubmit="return confirm('¿Eliminar la especialidad {{ esp.nombre }}? Se quitará de todos los eventos.');">
+                                        <input type="hidden" name="accion" value="eliminar_especialidad">
+                                        <input type="hidden" name="nombre_eliminar" value="{{ esp.nombre }}">
+                                        <button type="submit" class="text-red-600 hover:underline">Eliminar</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

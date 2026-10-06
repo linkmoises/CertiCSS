@@ -87,6 +87,8 @@ collection_tarea_entregas = db['tarea_entregas']
 collection_participantes_temporales = db['participantes_temporales']
 collection_posters = db['posters']
 collection_evaluaciones_poster = db['evaluaciones_poster']
+collection_eventos_metadata = db['eventos_metadata']
+collection_especialidades = db['especialidades']
 collection_progreso = db['progreso']
 collection_unidades = db['unidades']
 collection_otps = db['otps']
@@ -107,7 +109,7 @@ app.register_blueprint(auth_routes_bp)
 ###
 from app.events import events_bp, init_events_services
 from app.events.services import enrich_event_with_authors
-init_events_services(collection_eventos, collection_participantes, collection_usuarios, collection_preregistro, collection_eva)
+init_events_services(collection_eventos, collection_participantes, collection_usuarios, collection_preregistro, collection_eva, collection_eventos_metadata=collection_eventos_metadata, collection_especialidades=collection_especialidades)
 app.register_blueprint(events_bp)
 
 ###
@@ -501,6 +503,22 @@ def catalogo_abiertos(page=1):
         "estado_evento": "publicado"
     }
 
+    # Filtros por metadatos
+    especialidad = request.args.get('especialidad', '').strip()
+    solo_nuevos = request.args.get('nuevo') == '1'
+    solo_modulos = request.args.get('modulo') == '1'
+
+    if especialidad or solo_nuevos or solo_modulos:
+        filtro_meta = {}
+        if especialidad:
+            filtro_meta['especialidades'] = especialidad
+        if solo_nuevos:
+            filtro_meta['es_nuevo'] = True
+        if solo_modulos:
+            filtro_meta['es_modulo_aprendizaje'] = True
+        codigos_filtrados = collection_eventos_metadata.distinct('codigo_evento', filtro_meta)
+        filtro_catalogo['codigo'] = {'$in': codigos_filtrados}
+
     # Contar total de eventos abiertos
     total_eventos = collection_eventos.count_documents(filtro_catalogo)
     total_pages = (total_eventos + per_page - 1) // per_page  # Calcular el total de páginas
@@ -513,7 +531,20 @@ def catalogo_abiertos(page=1):
     eventos_cursor = collection_eventos.find(filtro_catalogo).sort("fecha_inicio", -1).skip(skip).limit(per_page)
     eventos = list(eventos_cursor)
 
-    return render_template('catalogo_abiertos.html', eventos=eventos, page=page, total_pages=total_pages)
+    # Enriquecer con metadatos para mostrar badges
+    from app.events.services import get_metadata_map
+    metadata_map = get_metadata_map([e.get('codigo') for e in eventos])
+    for e in eventos:
+        e['metadata'] = metadata_map.get(e.get('codigo')) or {}
+
+    especialidades_disponibles = sorted(
+        collection_especialidades.distinct('nombre'),
+        key=lambda n: (n or '').lower()
+    )
+
+    return render_template('catalogo_abiertos.html', eventos=eventos, page=page, total_pages=total_pages,
+                           especialidades_disponibles=especialidades_disponibles,
+                           filtro_especialidad=especialidad, filtro_nuevo=solo_nuevos, filtro_modulo=solo_modulos)
 
 ###
 ### Dashboard

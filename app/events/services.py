@@ -8,15 +8,25 @@ _collection_participantes = None
 _collection_usuarios = None
 _collection_preregistro = None
 _collection_eva = None
+_collection_eventos_metadata = None
+_collection_especialidades = None
 
 
-def init_events_services(collection_eventos, collection_participantes, collection_usuarios, collection_preregistro, collection_eva=None):
-    global _collection_eventos, _collection_participantes, _collection_usuarios, _collection_preregistro, _collection_eva
+def init_events_services(collection_eventos, collection_participantes, collection_usuarios, collection_preregistro, collection_eva=None, collection_eventos_metadata=None, collection_especialidades=None):
+    global _collection_eventos, _collection_participantes, _collection_usuarios, _collection_preregistro, _collection_eva, _collection_eventos_metadata, _collection_especialidades
     _collection_eventos = collection_eventos
     _collection_participantes = collection_participantes
     _collection_usuarios = collection_usuarios
     _collection_preregistro = collection_preregistro
     _collection_eva = collection_eva
+    _collection_eventos_metadata = collection_eventos_metadata
+    _collection_especialidades = collection_especialidades
+
+    if _collection_eventos_metadata is not None:
+        try:
+            _collection_eventos_metadata.create_index('codigo_evento', unique=True)
+        except Exception:
+            pass
 
 
 def get_collection_eventos():
@@ -70,6 +80,83 @@ def get_collection_preregistro():
 
 def get_collection_eva():
     return _collection_eva
+
+
+def get_collection_eventos_metadata():
+    return _collection_eventos_metadata
+
+
+def get_collection_especialidades():
+    return _collection_especialidades
+
+
+def get_metadata_by_codigo(codigo_evento):
+    if _collection_eventos_metadata is None:
+        return None
+    return _collection_eventos_metadata.find_one({'codigo_evento': codigo_evento})
+
+
+def get_metadata_map(codigos):
+    if _collection_eventos_metadata is None:
+        return {}
+    docs = _collection_eventos_metadata.find({'codigo_evento': {'$in': list(codigos)}})
+    return {d['codigo_evento']: d for d in docs}
+
+
+def upsert_event_metadata(codigo_evento, data, actualizado_por=None):
+    if _collection_eventos_metadata is None:
+        return None
+    data = dict(data)
+    data['actualizado_en'] = datetime.now()
+    if actualizado_por:
+        data['actualizado_por'] = actualizado_por
+    return _collection_eventos_metadata.update_one(
+        {'codigo_evento': codigo_evento},
+        {'$set': data, '$setOnInsert': {'codigo_evento': codigo_evento}},
+        upsert=True
+    )
+
+
+def list_especialidades():
+    if _collection_especialidades is None:
+        return []
+    return sorted(_collection_especialidades.find(), key=lambda e: e.get('nombre', '').lower())
+
+
+def create_especialidad(nombre, creada_por=None):
+    nombre = (nombre or '').strip()
+    if not nombre or _collection_especialidades is None:
+        return None
+    existente = _collection_especialidades.find_one({'nombre': {'$regex': f'^{re.escape(nombre)}$', '$options': 'i'}})
+    if existente:
+        return existente
+    doc = {'nombre': nombre, 'creada_por': creada_por, 'fecha': datetime.now()}
+    _collection_especialidades.insert_one(doc)
+    return doc
+
+
+def rename_especialidad(old_nombre, new_nombre):
+    new_nombre = (new_nombre or '').strip()
+    if not new_nombre or _collection_especialidades is None:
+        return False
+    _collection_especialidades.update_one({'nombre': old_nombre}, {'$set': {'nombre': new_nombre}})
+    if _collection_eventos_metadata is not None:
+        for doc in _collection_eventos_metadata.find({'especialidades': old_nombre}):
+            nuevas = [new_nombre if e == old_nombre else e for e in doc.get('especialidades', [])]
+            _collection_eventos_metadata.update_one({'_id': doc['_id']}, {'$set': {'especialidades': nuevas}})
+    return True
+
+
+def delete_especialidad(nombre):
+    if _collection_especialidades is None:
+        return False
+    _collection_especialidades.delete_one({'nombre': nombre})
+    if _collection_eventos_metadata is not None:
+        _collection_eventos_metadata.update_many(
+            {'especialidades': nombre},
+            {'$pull': {'especialidades': nombre}}
+        )
+    return True
 
 
 def parse_event_date(date_value):

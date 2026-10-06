@@ -784,6 +784,72 @@ def editar_evento(codigo_evento):
     return render_template('editar_evento.html', evento=evento)
 
 
+@events_bp.route('/eventos/<codigo_evento>/metadatos', methods=['GET', 'POST'])
+@login_required
+def editar_metadatos(codigo_evento):
+    from app.events.services import (
+        get_event_by_code, get_collection_eventos, check_user_can_edit_event,
+        get_collection_participantes, get_metadata_by_codigo, upsert_event_metadata,
+        list_especialidades, create_especialidad, rename_especialidad, delete_especialidad,
+    )
+
+    evento = get_event_by_code(get_collection_eventos(), codigo_evento)
+    if not evento:
+        flash("Evento no encontrado", "danger")
+        return redirect(url_for('events.listar_eventos'))
+
+    if not check_user_can_edit_event(evento, current_user, get_collection_participantes()):
+        flash("No tienes permisos para editar los metadatos de este evento", "danger")
+        return redirect(url_for('events.ver_evento', codigo_evento=codigo_evento))
+
+    if request.method == 'POST':
+        accion = request.form.get('accion', 'guardar')
+
+        if accion == 'crear_especialidad':
+            nombre = request.form.get('nueva_especialidad', '').strip()
+            if nombre:
+                create_especialidad(nombre, creada_por=str(current_user.id))
+                flash(f'Especialidad "{nombre}" creada.', 'success')
+            return redirect(url_for('events.editar_metadatos', codigo_evento=codigo_evento))
+
+        if accion == 'renombrar_especialidad':
+            viejo = request.form.get('old_nombre', '').strip()
+            nuevo = request.form.get('new_nombre', '').strip()
+            if viejo and nuevo:
+                rename_especialidad(viejo, nuevo)
+                flash('Especialidad renombrada.', 'success')
+            return redirect(url_for('events.editar_metadatos', codigo_evento=codigo_evento))
+
+        if accion == 'eliminar_especialidad':
+            nombre = request.form.get('nombre_eliminar', '').strip()
+            if nombre:
+                delete_especialidad(nombre)
+                flash('Especialidad eliminada.', 'success')
+            return redirect(url_for('events.editar_metadatos', codigo_evento=codigo_evento))
+
+        especialidades = request.form.getlist('especialidades')
+        nueva = request.form.get('especialidad_nueva', '').strip()
+        if nueva:
+            existente = create_especialidad(nueva, creada_por=str(current_user.id))
+            nombre_final = existente['nombre'] if existente and isinstance(existente, dict) else nueva
+            if nombre_final not in especialidades:
+                especialidades.append(nombre_final)
+
+        upsert_event_metadata(codigo_evento, {
+            'es_nuevo': request.form.get('es_nuevo') == 'on',
+            'especialidades': [e.strip() for e in especialidades if e.strip()],
+            'es_modulo_aprendizaje': request.form.get('es_modulo_aprendizaje') == 'on',
+        }, actualizado_por=str(current_user.cedula))
+
+        log_event(f"Usuario [{current_user.email}] ha actualizado metadatos del evento {codigo_evento}.")
+        flash('Metadatos guardados correctamente.', 'success')
+        return redirect(url_for('events.editar_metadatos', codigo_evento=codigo_evento))
+
+    metadata = get_metadata_by_codigo(codigo_evento) or {}
+    especialidades = list_especialidades()
+    return render_template('editar_metadatos.html', evento=evento, metadata=metadata, especialidades=especialidades)
+
+
 @events_bp.route('/eventos/<codigo_evento>/cerrar', methods=['POST'])
 @login_required
 def cerrar_evento(codigo_evento):
