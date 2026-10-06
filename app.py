@@ -507,8 +507,9 @@ def catalogo_abiertos(page=1):
     especialidad = request.args.get('especialidad', '').strip()
     solo_nuevos = request.args.get('nuevo') == '1'
     solo_modulos = request.args.get('modulo') == '1'
+    solo_destacados = request.args.get('destacado') == '1'
 
-    if especialidad or solo_nuevos or solo_modulos:
+    if especialidad or solo_nuevos or solo_modulos or solo_destacados:
         filtro_meta = {}
         if especialidad:
             filtro_meta['especialidades'] = especialidad
@@ -516,26 +517,41 @@ def catalogo_abiertos(page=1):
             filtro_meta['es_nuevo'] = True
         if solo_modulos:
             filtro_meta['es_modulo_aprendizaje'] = True
+        if solo_destacados:
+            filtro_meta['es_destacado'] = True
         codigos_filtrados = collection_eventos_metadata.distinct('codigo_evento', filtro_meta)
         filtro_catalogo['codigo'] = {'$in': codigos_filtrados}
 
-    # Contar total de eventos abiertos
-    total_eventos = collection_eventos.count_documents(filtro_catalogo)
-    total_pages = (total_eventos + per_page - 1) // per_page  # Calcular el total de páginas
+    # Total + página en una sola consulta con orden Destacados > Nuevos > fecha desc
+    pipeline = [
+        {"$match": filtro_catalogo},
+        {"$lookup": {
+            "from": "eventos_metadata",
+            "localField": "codigo",
+            "foreignField": "codigo_evento",
+            "as": "meta"
+        }},
+        {"$addFields": {
+            "es_destacado": {"$ifNull": [{"$arrayElemAt": ["$meta.es_destacado", 0]}, False]},
+            "es_nuevo": {"$ifNull": [{"$arrayElemAt": ["$meta.es_nuevo", 0]}, False]},
+        }},
+        {"$sort": {"es_destacado": -1, "es_nuevo": -1, "fecha_inicio": -1, "codigo": 1}},
+        {"$facet": {
+            "total": [{"$count": "n"}],
+            "data": [{"$skip": skip}, {"$limit": per_page}],
+        }},
+    ]
 
-    # Verificar si la página solicitada es válida
+    resultado = list(collection_eventos.aggregate(pipeline))[0]
+    total_eventos = resultado['total'][0]['n'] if resultado['total'] else 0
+    total_pages = (total_eventos + per_page - 1) // per_page
+
     if page < 1 or (total_pages > 0 and page > total_pages):
-        abort(404)  # Forzar un error 404 si la página no existe
+        abort(404)
 
-    # Obtener eventos paginados
-    eventos_cursor = collection_eventos.find(filtro_catalogo).sort("fecha_inicio", -1).skip(skip).limit(per_page)
-    eventos = list(eventos_cursor)
-
-    # Enriquecer con metadatos para mostrar badges
-    from app.events.services import get_metadata_map
-    metadata_map = get_metadata_map([e.get('codigo') for e in eventos])
+    eventos = resultado['data']
     for e in eventos:
-        e['metadata'] = metadata_map.get(e.get('codigo')) or {}
+        e['metadata'] = (e.get('meta') or [{}])[0]
 
     especialidades_disponibles = sorted(
         collection_especialidades.distinct('nombre'),
@@ -544,7 +560,8 @@ def catalogo_abiertos(page=1):
 
     return render_template('catalogo_abiertos.html', eventos=eventos, page=page, total_pages=total_pages,
                            especialidades_disponibles=especialidades_disponibles,
-                           filtro_especialidad=especialidad, filtro_nuevo=solo_nuevos, filtro_modulo=solo_modulos)
+                           filtro_especialidad=especialidad, filtro_nuevo=solo_nuevos, filtro_modulo=solo_modulos,
+                           filtro_destacado=solo_destacados)
 
 ###
 ### Dashboard

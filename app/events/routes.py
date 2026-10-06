@@ -837,6 +837,7 @@ def editar_metadatos(codigo_evento):
 
         upsert_event_metadata(codigo_evento, {
             'es_nuevo': request.form.get('es_nuevo') == 'on',
+            'es_destacado': request.form.get('es_destacado') == 'on',
             'especialidades': [e.strip() for e in especialidades if e.strip()],
             'es_modulo_aprendizaje': request.form.get('es_modulo_aprendizaje') == 'on',
         }, actualizado_por=str(current_user.cedula))

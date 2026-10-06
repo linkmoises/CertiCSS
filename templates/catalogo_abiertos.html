@@ -111,6 +111,10 @@
                         <input type="checkbox" name="modulo" value="1" {% if filtro_modulo %}checked{% endif %} class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                         Solo módulos de aprendizaje
                     </label>
+                    <label class="inline-flex items-center gap-x-2 text-sm text-gray-800 dark:text-neutral-200">
+                        <input type="checkbox" name="destacado" value="1" {% if filtro_destacado %}checked{% endif %} class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        Solo destacados
+                    </label>
                     <button type="submit" class="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700">Filtrar</button>
                     <a href="{{ url_for('catalogo_abiertos') }}" class="py-2 px-4 text-sm text-gray-600 hover:underline">Limpiar</a>
                 </div>
@@ -138,13 +142,20 @@
                             <span class="absolute top-0 end-0 rounded-se-xl rounded-es-xl text-xs font-medium bg-gray-800 text-white py-1.5 px-3 dark:bg-neutral-900">
                                 {{ evento.modalidad }}
                             </span>
-                            <div class="absolute top-2 start-2 flex flex-col gap-1 items-start">
-                                {% if evento.metadata and evento.metadata.es_nuevo %}
-                                <span class="text-xs font-bold uppercase bg-green-500 text-white py-1 px-2 rounded-md shadow">Nuevo</span>
+                            <div class="absolute top-0 start-0 flex flex-col items-start">
+                                {% if evento.metadata and evento.metadata.es_destacado %}
+                                <span class="rounded-ss-xl rounded-ee-xl text-xs font-medium bg-amber-500 text-white py-1.5 px-3 dark:bg-amber-600">
+                                    Destacado
+                                </span>
                                 {% endif %}
-                                {% if evento.metadata and evento.metadata.es_modulo_aprendizaje %}
-                                <span class="text-xs font-bold uppercase bg-purple-600 text-white py-1 px-2 rounded-md shadow">Módulo</span>
-                                {% endif %}
+                                <div class="flex flex-col gap-1 items-start mt-1 ms-1">
+                                    {% if evento.metadata and evento.metadata.es_nuevo %}
+                                    <span class="text-xs font-bold uppercase bg-green-500 text-white py-1 px-2 rounded-md shadow">Nuevo</span>
+                                    {% endif %}
+                                    {% if evento.metadata and evento.metadata.es_modulo_aprendizaje %}
+                                    <span class="text-xs font-bold uppercase bg-purple-600 text-white py-1 px-2 rounded-md shadow">Módulo</span>
+                                    {% endif %}
+                                </div>
                             </div>
                           </div>
                         <div class="p-4 md:p-6">
@@ -182,14 +193,14 @@
         <div class="text-center mb-12">
             <div class="inline-flex gap-x-2">
                 {% if page > 1 %}
-                    <a href="{{ url_for('catalogo_abiertos', page=page-1, especialidad=filtro_especialidad, nuevo='1' if filtro_nuevo else '', modulo='1' if filtro_modulo else '') }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                    <a href="{{ url_for('catalogo_abiertos', page=page-1, especialidad=filtro_especialidad, nuevo='1' if filtro_nuevo else '', modulo='1' if filtro_modulo else '', destacado='1' if filtro_destacado else '') }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
                         <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
                         Anterior
                     </a>
                 {% endif %}
                 <p class="px-3 py-2 text-sm text-gray-600">Página {{ page }} de {{ total_pages }}</p>
                 {% if page < total_pages %}
-                    <a href="{{ url_for('catalogo_abiertos', page=page+1, especialidad=filtro_especialidad, nuevo='1' if filtro_nuevo else '', modulo='1' if filtro_modulo else '') }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                    <a href="{{ url_for('catalogo_abiertos', page=page+1, especialidad=filtro_especialidad, nuevo='1' if filtro_nuevo else '', modulo='1' if filtro_modulo else '', destacado='1' if filtro_destacado else '') }}" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
                         Siguiente
                         <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                     </a>
