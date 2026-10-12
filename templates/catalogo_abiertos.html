@@ -166,7 +166,7 @@
                                 {{ evento.nombre }} <!-- Nombre del evento -->
                             </h3>
                             <p class="mt-3 text-gray-500 dark:text-neutral-500">
-                                Duración: {{ evento.carga_horaria }} {{ 'hora' if evento.carga_horaria == 1 else 'horas' }}
+                                Duración: {{ evento.carga_horaria }} {{ 'hora' if (evento.carga_horaria | int) == 1 else 'horas' }}
                             </p>
                             {% if evento.metadata and evento.metadata.especialidades %}
                             <div class="mt-2 flex flex-wrap gap-1">
