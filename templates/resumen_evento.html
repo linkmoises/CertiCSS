@@ -159,7 +159,7 @@
                             <!-- End Col -->
 
                             <div class="sm:col-span-9">
-                                <p class="text-gray-500 text-sm mt-0.5">{{ evento.carga_horaria }} hora(s)</p>
+                                <p class="text-gray-500 text-sm mt-0.5">{{ evento.carga_horaria }} {{ 'hora' if evento.carga_horaria == 1 else 'horas' }}</p>
                             </div>
                             <!-- End Col -->
 
@@ -267,7 +267,7 @@
                                     <path
                                         d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
                                     </svg>
-                                    Inscribirme en la actividad
+                                    Ingresar o inscribirme en la actividad
                                 </a>
                             </div>
                             <div class="sm:col-span-12 gap-2">
