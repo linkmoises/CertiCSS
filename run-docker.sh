@@ -60,7 +60,7 @@ echo "$VERSION" > version.txt
 echo "Versión generada: $VERSION"
 
 echo "Construyendo y levantando contenedores..."
-docker compose build $BUILD_OPTS && docker compose up --force-recreate -d
+docker compose build $BUILD_OPTS && docker compose pull tunnel && docker compose up --force-recreate -d
 
 echo "Limpiando imágenes, contenedores y cache no utilizados..."
 docker image prune -f

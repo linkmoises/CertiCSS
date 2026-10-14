@@ -48,6 +48,7 @@ services:
 
   tunnel:
     image: cloudflare/cloudflared:latest
+    pull_policy: always
     restart: always
     command: tunnel --no-autoupdate run --token ${TUNNEL_TOKEN}
     env_file:
