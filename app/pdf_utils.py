@@ -114,6 +114,69 @@ def obtener_fecha_aprobacion(evento, cedula, codigo_evento):
     return max(fechas) if fechas else None
 
 
+###
+### Cálculo de horas para certificados y constancias.
+###
+### En los eventos con LMS (virtuales) el participante se inscribe una sola vez y
+### la acreditación depende de aprobar las evaluaciones, no de la asistencia
+### diaria: el certificado debe reflejar la carga horaria TOTAL de la actividad.
+### En los eventos presenciales con control de asistencia se mantiene el
+### prorrateo por días, con un piso de 1 hora (nunca "0 horas").
+###
+MODALIDADES_VIRTUALES = ('Virtual asincrónica', 'Virtual sincrónica')
+
+
+def es_evento_lms(evento):
+    """True si el evento tiene LMS activo.
+
+    Fallback para eventos legacy creados antes de existir el campo
+    `lms_activo`: las modalidades virtuales son las que ya usaban la
+    plataforma LMS.
+    """
+    if not evento:
+        return False
+    if 'lms_activo' in evento:
+        return bool(evento.get('lms_activo'))
+    return evento.get('modalidad') in MODALIDADES_VIRTUALES
+
+
+def _a_int(valor, defecto=0):
+    try:
+        return int(float(valor))
+    except (TypeError, ValueError):
+        return defecto
+
+
+def calcular_horas_certificado(evento, carga_horaria, dias_asistidos, duracion_evento_dias):
+    """Horas que se imprimen en el certificado/constancia.
+
+    Devuelve (horas, prorrateado):
+    - `horas`: entero con las horas a imprimir.
+    - `prorrateado`: True si el valor proviene del prorrateo por asistencia.
+    """
+    total = _a_int(carga_horaria)
+
+    # Eventos con LMS: carga horaria total de la actividad.
+    if es_evento_lms(evento):
+        return total, False
+
+    # Evento de un solo día o sin registros de asistencia: carga total.
+    if duracion_evento_dias <= 1 or not dias_asistidos:
+        return total, False
+
+    horas_por_dia = total / duracion_evento_dias
+    if dias_asistidos == 1:
+        horas = round(horas_por_dia)
+    else:
+        horas = round(horas_por_dia * dias_asistidos)
+
+    # Nunca "0 horas": si el prorrateo redondea a 0 se reporta 1 hora.
+    if horas <= 0 and total > 0:
+        horas = 1
+
+    return horas, True
+
+
 def generar_pdf_participante(participante, afiche_path, lugar=None):
     codigo_evento = participante['codigo_evento']
     evento = collection_eventos.find_one({"codigo": codigo_evento})
@@ -185,7 +248,8 @@ def generar_pdf_participante(participante, afiche_path, lugar=None):
             else:
                 fecha_rango = f"{fecha_inicio_real.strftime('%d de %B')} al {fecha_fin_real.strftime('%d de %B de %Y')}"
 
-            carga_horaria_evento = str(horas_asistidas)
+            carga_horaria_evento = str(horas_totales) if es_evento_lms(evento) \
+                else str(horas_asistidas or horas_totales)
             fecha_fin_formateada = fecha_rango
             fecha_inicio_evento = fecha_inicio_real
             fecha_fin_evento = fecha_fin_real
@@ -311,7 +375,8 @@ def generar_pdf_participante(participante, afiche_path, lugar=None):
         min_next_y = poster_y - 0.9 * inch  # Espaciado mínimo para títulos cortos
         next_y = min(final_y - 0.3 * inch, min_next_y)
     elif participante['rol'] == 'participante':
-        # --- Prorating logic for participants only ---
+        # --- Cálculo de horas para participantes (total en eventos con LMS,
+        #     prorrateo por días de asistencia en el resto) ---
         todos_registros = list(collection_participantes.find({
             "cedula": participante['cedula'],
             "codigo_evento": codigo_evento,
@@ -329,11 +394,18 @@ def generar_pdf_participante(participante, afiche_path, lugar=None):
                     continue
 
         duracion_evento_dias = (fecha_fin_evento.date() - fecha_inicio_evento.date()).days + 1
-        texto_horas = "hora" if str(carga_horaria_evento) == "1" else "horas"
         tipo_actividad = "Actividad académica virtual" if evento.get('registro_abierto') is True else "Actividad académica"
 
-        if duracion_evento_dias == 1 or len(registros_validos) == 0:
-            actividad_y = draw_centered_text(base_y, f"{tipo_actividad} con una duración de {carga_horaria_evento} {texto_horas}")
+        # Horas del certificado: en eventos con LMS se refleja la carga horaria
+        # total de la actividad; en el resto se prorratea por días de asistencia.
+        horas_certificado, prorrateado = calcular_horas_certificado(
+            evento, carga_horaria_evento, len(registros_validos), duracion_evento_dias
+        )
+        carga_horaria_impresa = str(horas_certificado)
+        texto_horas = "hora" if horas_certificado == 1 else "horas"
+
+        if not prorrateado:
+            actividad_y = draw_centered_text(base_y, f"{tipo_actividad} con una duración de {carga_horaria_impresa} {texto_horas}")
             if evento.get('registro_abierto') is not True:
                 fecha_y = draw_centered_text(actividad_y - 0.3 * inch, f"Asistencia: {fecha_fin_formateada}")
             else:
@@ -341,9 +413,7 @@ def generar_pdf_participante(participante, afiche_path, lugar=None):
             next_y = fecha_y - 0.3 * inch
         elif len(registros_validos) == 1:
             fecha_asistencia = datetime.strptime(registros_validos[0]['indice_registro'], '%Y%m%d')
-            horas_totales = int(carga_horaria_evento)
-            horas_por_dia = horas_totales / duracion_evento_dias
-            horas_asistencia = round(horas_por_dia)
+            horas_asistencia = horas_certificado
             horas_texto = "hora" if horas_asistencia == 1 else "horas"
 
             fecha_asistencia_formateada = fecha_asistencia.strftime('%d de %B de %Y')
@@ -359,13 +429,11 @@ def generar_pdf_participante(participante, afiche_path, lugar=None):
 
             fechas_asistencia.sort()
 
-            horas_totales = int(carga_horaria_evento)
-            horas_por_dia = horas_totales / duracion_evento_dias
-            horas_asistencia = round(horas_por_dia * len(registros_validos))
+            horas_asistencia = horas_certificado
             horas_texto = "hora" if horas_asistencia == 1 else "horas"
 
             if len(registros_validos) == duracion_evento_dias:
-                actividad_y = draw_centered_text(base_y, f"{tipo_actividad} con una duración de {carga_horaria_evento} {texto_horas}")
+                actividad_y = draw_centered_text(base_y, f"{tipo_actividad} con una duración de {carga_horaria_impresa} {texto_horas}")
                 if evento.get('registro_abierto') is not True:
                     fecha_y = draw_centered_text(actividad_y - 0.3 * inch, f"Asistencia: {fecha_fin_formateada}")
                 else:

@@ -411,8 +411,8 @@ def crear_evento():
         carga_horaria = request.form['carga_horaria'].strip()
         modalidad = request.form['modalidad']
         descripcion = request.form['descripcion']
-        if not carga_horaria or not carga_horaria.isdigit():
-            flash('La carga horaria debe ser un número entero válido.', 'danger')
+        if not carga_horaria or not carga_horaria.isdigit() or int(carga_horaria) < 1:
+            flash('La carga horaria debe ser un número entero válido mayor a cero.', 'danger')
             return redirect(url_for('events.crear_evento',
                                     nombre=nombre, region=region,
                                     unidad_ejecutora=unidad_ejecutora,
@@ -669,7 +669,7 @@ def editar_evento(codigo_evento):
         modalidad = request.form['modalidad']
         descripcion = request.form['descripcion']
         cupos = request.form['cupos']
-        carga_horaria = request.form['carga_horaria']
+        carga_horaria = request.form['carga_horaria'].strip()
         checkin_masivo = request.form.get('checkin_masivo') == 'on'
         concurso_poster = request.form.get('concurso_poster') == 'on'
         registro_abierto = request.form.get('registro_abierto') == 'on'
@@ -682,6 +682,10 @@ def editar_evento(codigo_evento):
         enlace_virtual = request.form.get('enlace_virtual', '').strip() or None
         fecha_inicio_str = request.form['fecha_inicio']
         fecha_fin_str = request.form['fecha_fin']
+
+        if not carga_horaria or not carga_horaria.isdigit() or int(carga_horaria) < 1:
+            flash('La carga horaria debe ser un número entero válido mayor a cero.', 'danger')
+            return redirect(url_for('events.editar_evento', codigo_evento=codigo_evento))
         
         fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%dT%H:%M')
         fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%dT%H:%M')

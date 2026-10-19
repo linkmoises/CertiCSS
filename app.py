@@ -3692,7 +3692,10 @@ def _buscar_certificados_resultados(cedula, token):
                 if registro_exento:
                     es_exento = True
 
-            # Prorrateo para participantes en eventos multi-día
+            # Prorrateo para participantes en eventos multi-día.
+            # En eventos con LMS la acreditación es por evaluación, no por
+            # asistencia diaria: se refleja la carga horaria total de la
+            # actividad (igual que en el certificado).
             carga_prorrateada = None
             if participante.get('rol') == 'participante':
                 fi_evento = evento.get('fecha_inicio')
@@ -3713,9 +3716,11 @@ def _buscar_certificados_resultados(cedula, token):
                                 "$lte": ff_evento.strftime('%Y%m%d')
                             }
                         })
-                        if 0 < count < duracion_dias:
-                            carga_total = float(evento.get('carga_horaria', 0))
-                            carga_prorrateada = round((carga_total / duracion_dias) * count)
+                        horas_calc, prorrateado = calcular_horas_certificado(
+                            evento, evento.get('carga_horaria', 0), count, duracion_dias
+                        )
+                        if prorrateado and 0 < count < duracion_dias:
+                            carga_prorrateada = horas_calc
 
             # Datos de contacto del organizador (autor del evento) para el mensaje
             # "Contacte al organizador" cuando falte la constancia.
@@ -8092,7 +8097,8 @@ def validate_attendance_template(evento):
         # Handle any filesystem errors or invalid path types gracefully
         return False
 
-from app.pdf_utils import generar_pdf_participante
+from app.pdf_utils import (generar_pdf_participante, calcular_horas_certificado,
+                            es_evento_lms)
 
 ###
 ###
@@ -8512,95 +8518,75 @@ def generar_constancia_asistencia(participante, afiche_path):
                 # Si hay error al parsear la fecha, ignorar este registro
                 continue
 
+    # Horas de la constancia: en eventos con LMS se refleja la carga horaria
+    # total de la actividad; en el resto se prorratea por días de asistencia.
+    horas_asistencia, prorrateado = calcular_horas_certificado(
+        evento, carga_horaria_evento, len(registros_validos), duracion_evento_dias
+    )
+
     # Lógica mejorada para manejar asistencia parcial vs completa
-    if duracion_evento_dias == 1:
-        # Evento de un solo día
-        if len(registros_validos) > 0:
-            # Verificar que el registro sea del día del evento
+    if not prorrateado:
+        # Actividad de un solo día, sin registros de asistencia o con LMS:
+        # se informa la carga horaria total de la actividad.
+        if duracion_evento_dias == 1:
             texto_constancia += (
                 f"en el evento <b>'{titulo_evento}'</b>, realizado en modalidad "
                 f"<b>{modalidad_evento.lower()}</b> y organizado por la unidad ejecutora <b>'{ue_evento}'</b>, "
-                f"el {ff_formateada} con una duración de {carga_horaria_evento} horas académicas."
+                f"el {ff_formateada} con una duración de {horas_asistencia} horas académicas."
             )
         else:
-            # No hay registros válidos para el día del evento
             texto_constancia += (
                 f"en el evento <b>'{titulo_evento}'</b>, realizado en modalidad "
                 f"<b>{modalidad_evento.lower()}</b> y organizado por la unidad ejecutora <b>'{ue_evento}'</b>, "
-                f"el {ff_formateada} con una duración de {carga_horaria_evento} horas académicas."
+                f"del {ff_formateada} con una duración de {horas_asistencia} horas académicas."
             )
+    elif len(registros_validos) == 1:
+        # Solo un registro de asistencia válido en evento de múltiples días
+        fecha_asistencia = datetime.strptime(registros_validos[0]['indice_registro'], '%Y%m%d')
+        fecha_asistencia_formateada = fecha_asistencia.strftime('%d de %B de %Y')
+
+        texto_constancia += (
+            f"por su participación el día <b>{fecha_asistencia_formateada}</b> "
+            f"en el evento <b>'{titulo_evento}'</b>, realizado en modalidad "
+            f"<b>{modalidad_evento.lower()}</b> y organizado por la unidad ejecutora <b>'{ue_evento}'</b>, "
+            f"programado del {ff_formateada}. "
+            f"Horas de asistencia: <b>{horas_asistencia} horas académicas</b>."
+        )
     else:
-        # Evento de múltiples días
-        if len(registros_validos) == 0:
-            # No hay registros válidos dentro del rango del evento
+        # Múltiples registros de asistencia válidos
+        dias_asistencia = []
+        for registro in registros_validos:
+            if registro.get('indice_registro'):
+                fecha = datetime.strptime(registro['indice_registro'], '%Y%m%d')
+                dias_asistencia.append(fecha.strftime('%d de %B de %Y'))
+
+        # Ordenar las fechas cronológicamente
+        dias_asistencia.sort(key=lambda x: datetime.strptime(x, '%d de %B de %Y'))
+
+        if len(registros_validos) == duracion_evento_dias:
+            # Asistió todos los días del evento
             texto_constancia += (
+                f"por su participación completa "
                 f"en el evento <b>'{titulo_evento}'</b>, realizado en modalidad "
                 f"<b>{modalidad_evento.lower()}</b> y organizado por la unidad ejecutora <b>'{ue_evento}'</b>, "
-                f"del {ff_formateada} con una duración de {carga_horaria_evento} horas académicas."
+                f"del {ff_formateada} con una duración de {horas_asistencia} horas académicas."
             )
-        elif len(registros_validos) == 1:
-            # Solo un registro de asistencia válido en evento de múltiples días
-            fecha_asistencia = datetime.strptime(registros_validos[0]['indice_registro'], '%Y%m%d')
-            fecha_asistencia_formateada = fecha_asistencia.strftime('%d de %B de %Y')
-            
-            # Calcular horas proporcionales (asumiendo distribución equitativa por día)
-            try:
-                horas_totales = int(carga_horaria_evento)
-                horas_por_dia = horas_totales / duracion_evento_dias
-                horas_asistencia = round(horas_por_dia)
-            except (ValueError, ZeroDivisionError):
-                horas_asistencia = "N/A"
-            
+        else:
+            # Asistió parcialmente
+            if len(dias_asistencia) == 1:
+                dias_texto = dias_asistencia[0]
+            elif len(dias_asistencia) == 2:
+                dias_texto = f"{dias_asistencia[0]} y {dias_asistencia[1]}"
+            else:
+                dias_texto = ', '.join(dias_asistencia[:-1]) + f" y {dias_asistencia[-1]}"
+
             texto_constancia += (
-                f"por su participación el día <b>{fecha_asistencia_formateada}</b> "
+                f"por su participación los días <b>{dias_texto}</b> "
                 f"en el evento <b>'{titulo_evento}'</b>, realizado en modalidad "
                 f"<b>{modalidad_evento.lower()}</b> y organizado por la unidad ejecutora <b>'{ue_evento}'</b>, "
                 f"programado del {ff_formateada}. "
                 f"Horas de asistencia: <b>{horas_asistencia} horas académicas</b>."
             )
-        else:
-            # Múltiples registros de asistencia válidos
-            dias_asistencia = []
-            for registro in registros_validos:
-                if registro.get('indice_registro'):
-                    fecha = datetime.strptime(registro['indice_registro'], '%Y%m%d')
-                    dias_asistencia.append(fecha.strftime('%d de %B de %Y'))
-            
-            # Ordenar las fechas cronológicamente
-            dias_asistencia.sort(key=lambda x: datetime.strptime(x, '%d de %B de %Y'))
-            
-            # Calcular horas proporcionales
-            try:
-                horas_totales = int(carga_horaria_evento)
-                horas_por_dia = horas_totales / duracion_evento_dias
-                horas_asistencia = round(horas_por_dia * len(registros_validos))
-            except (ValueError, ZeroDivisionError):
-                horas_asistencia = "N/A"
-            
-            if len(registros_validos) == duracion_evento_dias:
-                # Asistió todos los días del evento
-                texto_constancia += (
-                    f"por su participación completa "
-                    f"en el evento <b>'{titulo_evento}'</b>, realizado en modalidad "
-                    f"<b>{modalidad_evento.lower()}</b> y organizado por la unidad ejecutora <b>'{ue_evento}'</b>, "
-                    f"del {ff_formateada} con una duración de {carga_horaria_evento} horas académicas."
-                )
-            else:
-                # Asistió parcialmente
-                if len(dias_asistencia) == 1:
-                    dias_texto = dias_asistencia[0]
-                elif len(dias_asistencia) == 2:
-                    dias_texto = f"{dias_asistencia[0]} y {dias_asistencia[1]}"
-                else:
-                    dias_texto = ', '.join(dias_asistencia[:-1]) + f" y {dias_asistencia[-1]}"
-                
-                texto_constancia += (
-                    f"por su participación los días <b>{dias_texto}</b> "
-                    f"en el evento <b>'{titulo_evento}'</b>, realizado en modalidad "
-                    f"<b>{modalidad_evento.lower()}</b> y organizado por la unidad ejecutora <b>'{ue_evento}'</b>, "
-                    f"programado del {ff_formateada}. "
-                    f"Horas de asistencia: <b>{horas_asistencia} horas académicas</b>."
-                )
 
     # Crear un párrafo
     constancia_paragraph = Paragraph(texto_constancia, style)
