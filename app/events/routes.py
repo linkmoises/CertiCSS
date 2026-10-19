@@ -49,6 +49,51 @@ def listar_eventos_anteriores(page=1):
     return redirect(url_for('events.listar_eventos', **destino))
 
 
+def _parsear_fecha_filtro(valor):
+    """Parsea una fecha del filtro (YYYY-MM-DD). Devuelve date o None.
+
+    Las fechas invalidas se ignoran (filtro sin fecha) en vez de romper el listado.
+    """
+    valor = (valor or '').strip()
+    if not valor:
+        return None
+    try:
+        return datetime.strptime(valor, '%Y-%m-%d').date()
+    except ValueError:
+        return None
+
+
+def _condicion_filtro_fechas(fecha_desde, fecha_hasta):
+    """Condicion de rango: la fecha de inicio del evento dentro del rango.
+
+    Se generan dos ramas para tolerar los eventos legacy que guardan las
+    fechas como texto ISO en vez de fecha BSON: sin la segunda rama esos
+    eventos quedarian fuera del filtro en silencio.
+    """
+    ramas = []
+    desde_dt = hasta_dt = desde_str = hasta_str = None
+
+    if fecha_desde:
+        desde_dt = datetime(fecha_desde.year, fecha_desde.month, fecha_desde.day)
+        desde_str = desde_dt.strftime('%Y-%m-%d %H:%M:%S')
+    if fecha_hasta:
+        hasta_dt = datetime(fecha_hasta.year, fecha_hasta.month, fecha_hasta.day,
+                            23, 59, 59, 999999)
+        hasta_str = fecha_hasta.strftime('%Y-%m-%d') + ' 23:59:59'
+
+    for limite_inferior, limite_superior in ((desde_dt, hasta_dt),
+                                             (desde_str, hasta_str)):
+        condicion = {}
+        if limite_inferior is not None:
+            condicion['$gte'] = limite_inferior
+        if limite_superior is not None:
+            condicion['$lte'] = limite_superior
+        if condicion:
+            ramas.append({'fecha_inicio': condicion})
+
+    return {'$or': ramas}
+
+
 def _construir_filtros_listado(args):
     """
     Construye el filtro Mongo y los argumentos activos del listado unificado.
@@ -66,6 +111,17 @@ def _construir_filtros_listado(args):
         'registro_abierto': {'$ne': True},
     }
 
+    # Rango de fechas (opcional). Si viene invertido se corrige.
+    fecha_desde = _parsear_fecha_filtro(args.get('fecha_desde'))
+    fecha_hasta = _parsear_fecha_filtro(args.get('fecha_hasta'))
+    if fecha_desde and fecha_hasta and fecha_desde > fecha_hasta:
+        fecha_desde, fecha_hasta = fecha_hasta, fecha_desde
+    rango_activo = bool(fecha_desde or fecha_hasta)
+
+    # El rango de fechas reemplaza al filtro de periodo (proximos/anteriores).
+    if rango_activo:
+        periodo = 'todos'
+
     ahora = datetime.now()
     if periodo == 'proximos':
         filtro['fecha_inicio'] = {'$gte': ahora.replace(hour=0, minute=0, second=0, microsecond=0)}
@@ -77,9 +133,19 @@ def _construir_filtros_listado(args):
         patron = {'$regex': re.escape(q), '$options': 'i'}
         filtro['$or'] = [{'nombre': patron}, {'codigo': patron}]
 
+    if rango_activo:
+        # Va en $and: el filtro de busqueda ya usa el $or de nivel raiz.
+        filtro['$and'] = filtro.get('$and', []) + [
+            _condicion_filtro_fechas(fecha_desde, fecha_hasta)
+        ]
+
     filtros_args = {}
     if q:
         filtros_args['q'] = q
+    if fecha_desde:
+        filtros_args['fecha_desde'] = fecha_desde.strftime('%Y-%m-%d')
+    if fecha_hasta:
+        filtros_args['fecha_hasta'] = fecha_hasta.strftime('%Y-%m-%d')
     for campo, campo_mongo in _CAMPOS_FILTRO.items():
         valor = (args.get(campo) or '').strip()
         if valor:
@@ -107,7 +173,10 @@ def listar_eventos(page=1):
 
     filtro, filtros_args, periodo, por_pagina = _construir_filtros_listado(request.args)
 
-    sort_order = 1 if periodo == 'proximos' else -1
+    # Con rango de fechas el listado va en orden cronologico (mas antiguo
+    # primero); el rango de fechas reemplaza al filtro de periodo.
+    rango_activo = bool(filtros_args.get('fecha_desde') or filtros_args.get('fecha_hasta'))
+    sort_order = 1 if (periodo == 'proximos' or rango_activo) else -1
     eventos, total_eventos, total_paginas = paginate_events(
         get_collection_eventos(),
         filtro,
@@ -157,6 +226,7 @@ def listar_eventos(page=1):
         page=page,
         total_paginas=total_paginas,
         periodo=periodo,
+        rango_activo=rango_activo,
         por_pagina=por_pagina,
         por_pagina_opciones=_POR_PAGINA_OPCIONES,
         filtros=filtros_args,

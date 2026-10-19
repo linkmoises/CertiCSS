@@ -3770,7 +3770,7 @@ def _buscar_certificados_resultados(cedula, token):
                 'certificado_plantilla': certificado_plantilla,
                 'titulo_evento': evento.get('nombre', 'Título no disponible'),
                 'fecha_evento': fecha_evento,
-                'fecha_inicio': evento.get('fecha_inicio', None),
+                'fecha_inicio': parse_event_date(evento.get('fecha_inicio', None)),
                 'modalidad_evento': evento.get('modalidad', 'No disponible'),
                 'lms_activo': evento.get('lms_activo', evento.get('modalidad') != 'Presencial'),
                 'tipo_evento': evento.get('tipo', 'General'),
@@ -7949,13 +7949,22 @@ from datetime import date
 
 def calcular_estado(fecha_inicio, fecha_fin=None):
     ahora = datetime.now()
-    
+
+    # Normalizar fechas: algunos eventos legacy las guardan como texto ISO
+    fecha_inicio = parse_event_date(fecha_inicio)
+    fecha_fin = parse_event_date(fecha_fin) if fecha_fin is not None else None
+
+    if fecha_inicio is None and fecha_fin is None:
+        return ""
+
     # Si solo se pasa un parámetro (compatibilidad hacia atrás)
     if fecha_fin is None:
         hoy = date.today()
         # Convertir fecha a date si es datetime
         if isinstance(fecha_inicio, datetime):
             fecha_inicio = fecha_inicio.date()
+        if fecha_inicio is None:
+            return ""
         if fecha_inicio == hoy:
             return Markup('<span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-red-100 text-red-800">En curso</span>')
         elif fecha_inicio < hoy:
@@ -7975,6 +7984,8 @@ def calcular_estado(fecha_inicio, fecha_fin=None):
     # Fallback a la lógica original si no hay datetime completos
     hoy = date.today()
     fecha_inicio_date = fecha_inicio.date() if isinstance(fecha_inicio, datetime) else fecha_inicio
+    if fecha_inicio_date is None:
+        return ""
     if fecha_inicio_date == hoy:
         return Markup('<span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-red-100 text-red-800">En curso</span>')
     elif fecha_inicio_date < hoy:
@@ -8008,6 +8019,65 @@ def estado_evento(evento):
         return ""
 
 app.jinja_env.filters['estado_evento'] = estado_evento
+
+
+def rango_fechas_evento(evento, separador=' - '):
+    """Filtro que formatea el rango de fechas de un evento.
+
+    Normaliza con parse_event_date porque algunos eventos legacy guardan las
+    fechas como texto ISO en vez de fecha BSON.
+    """
+    if not isinstance(evento, dict):
+        return ''
+
+    fecha_inicio = parse_event_date(evento.get('fecha_inicio'))
+    fecha_fin = parse_event_date(evento.get('fecha_fin')) or fecha_inicio
+    if not fecha_inicio:
+        return ''
+
+    if fecha_fin and fecha_inicio.date() == fecha_fin.date():
+        return fecha_inicio.strftime('%d %b, %Y')
+    if fecha_fin:
+        return f"{fecha_inicio.strftime('%d')}{separador}{fecha_fin.strftime('%d %b, %Y')}"
+    return fecha_inicio.strftime('%d %b, %Y')
+
+
+def rango_fechas_largo_evento(evento, separador=' - '):
+    """Igual que `rango_fechas` pero con el formato largo en español."""
+    if not isinstance(evento, dict):
+        return ''
+
+    fecha_inicio = parse_event_date(evento.get('fecha_inicio'))
+    fecha_fin = parse_event_date(evento.get('fecha_fin')) or fecha_inicio
+    if not fecha_inicio:
+        return ''
+
+    if fecha_fin and fecha_inicio.date() == fecha_fin.date():
+        return fecha_inicio.strftime('%d de %B de %Y')
+    if fecha_fin:
+        return f"{fecha_inicio.strftime('%d')}{separador}{fecha_fin.strftime('%d de %B de %Y')}"
+    return fecha_inicio.strftime('%d de %B de %Y')
+
+
+def formatear_fecha_evento(fecha, formato='%d %b, %Y'):
+    """Formatea una fecha de evento (BSON date o texto ISO).
+
+    Devuelve '' si la fecha no existe o no se puede interpretar.
+    """
+    valor = parse_event_date(fecha)
+    return valor.strftime(formato) if valor else ''
+
+
+def fecha_evento_date(fecha):
+    """Fecha de evento como date (o None). Para comparaciones."""
+    valor = parse_event_date(fecha)
+    return valor.date() if valor else None
+
+
+app.jinja_env.filters['rango_fechas'] = rango_fechas_evento
+app.jinja_env.filters['rango_fechas_largo'] = rango_fechas_largo_evento
+app.jinja_env.filters['fecha_evento'] = formatear_fecha_evento
+app.jinja_env.filters['fecha_evento_date'] = fecha_evento_date
 
 ###
 ### generación de certificado

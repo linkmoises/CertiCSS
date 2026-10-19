@@ -235,11 +235,7 @@
                                             </td>
                                             <td class="size-px whitespace-nowrap text-center">
                                                 <span class="text-sm text-gray-500 dark:text-neutral-400">
-                                                {% if evento.fecha_inicio.date() == evento.fecha_fin.date() %}
-                                                    {{ evento.fecha_inicio.strftime('%d %b, %Y') }}
-                                                {% else %}
-                                                    {{ evento.fecha_inicio.strftime('%d') }} - {{ evento.fecha_fin.strftime('%d %b, %Y') }}
-                                                {% endif %}
+                                                {{ evento|rango_fechas }}
                                                 </span>
                                             </td>
                                             <td class="size-px whitespace-nowrap text-center">

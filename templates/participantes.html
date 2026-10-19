@@ -157,7 +157,7 @@
                                                     {{ hijo.nombre[:20] }}{% if hijo.nombre|length > 20 %}...{% endif %}
                                                 </span>
                                                 <br>
-                                                <span class="text-xs text-gray-500">{{ hijo.fecha_inicio.strftime('%d/%m/%Y') }}</span>
+                                                <span class="text-xs text-gray-500">{{ hijo.fecha_inicio|fecha_evento('%d/%m/%Y') }}</span>
                                                 <br>
                                                 <a href="{{ url_for('events.listar_participantes', codigo_evento=hijo.codigo) }}" class="text-xs text-blue-600 hover:underline" target="_blank">Ver participantes</a>
                                             </th>

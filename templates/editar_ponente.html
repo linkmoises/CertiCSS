@@ -139,7 +139,7 @@
                                 </div>
                                 <!-- End Col -->
 {% else %}
-                                <input type="hidden" name="fecha_evento" value="{{ evento.fecha_inicio.strftime('%Y-%m-%d') if evento.fecha_inicio else '' }}">
+                                <input type="hidden" name="fecha_evento" value="{{ (evento.fecha_inicio|fecha_evento('%Y-%m-%d')) }}">
 {% endif %}
 
                                 <div class="sm:col-span-12 gap-2">

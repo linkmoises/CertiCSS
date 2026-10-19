@@ -60,11 +60,19 @@
                             <form method="get" action="{{ url_for('events.listar_eventos') }}" id="filtrosForm" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-3 items-end">
                                 <div>
                                     <label for="f-periodo" class="block text-xs font-medium text-gray-500 mb-1">Periodo</label>
-                                    <select id="f-periodo" name="periodo" onchange="this.form.submit()" class="py-1.5 px-2 pe-7 block w-full text-sm rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300">
+                                    <select id="f-periodo" name="periodo" onchange="document.getElementById('f-fecha-desde').value='';document.getElementById('f-fecha-hasta').value='';this.form.submit()" class="py-1.5 px-2 pe-7 block w-full text-sm rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300">
                                         <option value="todos" {% if periodo == 'todos' %}selected{% endif %}>Todos</option>
                                         <option value="proximos" {% if periodo == 'proximos' %}selected{% endif %}>Próximos</option>
                                         <option value="anteriores" {% if periodo == 'anteriores' %}selected{% endif %}>Anteriores</option>
                                     </select>
+                                </div>
+                                <div>
+                                    <label for="f-fecha-desde" class="block text-xs font-medium text-gray-500 mb-1">Desde</label>
+                                    <input type="date" id="f-fecha-desde" name="fecha_desde" value="{{ filtros.get('fecha_desde', '') }}" class="py-1.5 px-2 block w-full text-sm rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300">
+                                </div>
+                                <div>
+                                    <label for="f-fecha-hasta" class="block text-xs font-medium text-gray-500 mb-1">Hasta</label>
+                                    <input type="date" id="f-fecha-hasta" name="fecha_hasta" value="{{ filtros.get('fecha_hasta', '') }}" class="py-1.5 px-2 block w-full text-sm rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300">
                                 </div>
                                 <div>
                                     <label for="f-q" class="block text-xs font-medium text-gray-500 mb-1">Buscar</label>
@@ -147,7 +155,11 @@
                                 No hay eventos
                             </h2>
                             <p class="mt-2 text-sm text-gray-600 dark:text-neutral-400">
+                                {% if rango_activo %}
+                                No hay eventos con fecha de inicio en el rango seleccionado.
+                                {% else %}
                                 Sin eventos disponibles para fechas próximas.
+                                {% endif %}
                             </p>
                             
                             <div class="mt-5 flex flex-col sm:flex-row gap-2">
@@ -294,7 +306,7 @@
                                 </td>
                                 <td class="size-px whitespace-nowrap text-center">
                                     <a class="block relative z-10" href="#">
-                                        <span class="text-sm text-gray-500">{% if evento.fecha_inicio.date() == evento.fecha_fin.date() %}{{ evento.fecha_inicio.strftime('%d %b, %Y') }}{% else %}{{ evento.fecha_inicio.strftime('%d') }} - {{ evento.fecha_fin.strftime('%d %b, %Y') }}{% endif %}</span>
+                                        <span class="text-sm text-gray-500">{{ evento|rango_fechas }}</span>
                                     </a>
                                 </td>
                                 <td class="size-px whitespace-nowrap">

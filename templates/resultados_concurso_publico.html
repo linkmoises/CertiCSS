@@ -321,7 +321,7 @@
                 </div>
                 <div class="text-sm text-gray-500">
                     <p>{{ evento.unidad_ejecutora }}</p>
-                    <p class="text-center md:text-right">{{ evento.fecha_fin.strftime('%B %Y') if evento.fecha_fin else '' }}</p>
+                    <p class="text-center md:text-right">{{ evento.fecha_fin|fecha_evento('%B %Y') }}</p>
                 </div>
             </div>
         </div>

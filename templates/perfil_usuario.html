@@ -144,13 +144,9 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {% if evento.fecha_inicio and evento.fecha_fin %}
-                                            {% if evento.fecha_inicio.date() == evento.fecha_fin.date() %}
-                                                {{ evento.fecha_inicio.strftime('%d %b, %Y') }}
-                                            {% else %}
-                                                {{ evento.fecha_inicio.strftime('%d') }} - {{ evento.fecha_fin.strftime('%d %b, %Y') }}
-                                            {% endif %}
+                                            {{ evento|rango_fechas }}
                                         {% elif evento.fecha_inicio %}
-                                            {{ evento.fecha_inicio.strftime('%d %b, %Y') }}
+                                            {{ evento.fecha_inicio|fecha_evento }}
                                         {% else %}
                                             -
                                         {% endif %}
@@ -161,8 +157,8 @@
                                             Cerrado
                                         </span>
                                         {% elif evento.fecha_inicio and evento.fecha_fin %}
-                                            {% set fecha_inicio_dt = evento.fecha_inicio.date() if evento.fecha_inicio else none %}
-                                            {% set fecha_fin_dt = evento.fecha_fin.date() if evento.fecha_fin else none %}
+                                            {% set fecha_inicio_dt = evento.fecha_inicio|fecha_evento_date %}
+                                            {% set fecha_fin_dt = evento.fecha_fin|fecha_evento_date %}
                                             {% set hoy = now().date() %}
                                             {% if fecha_fin_dt and fecha_fin_dt < hoy %}
                                                 <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-green-100 text-green-800">
@@ -184,7 +180,7 @@
                                             href="{{ url_for('events.ver_evento', codigo_evento=evento.codigo) }}">
                                             Ver datos
                                         </a>
-                                        {% set es_finalizado_o_cerrado = (evento.estado_evento == 'cerrado') or (evento.fecha_inicio and evento.fecha_fin and evento.fecha_fin.date() < now().date()) %}
+                                        {% set es_finalizado_o_cerrado = (evento.estado_evento == 'cerrado') or (evento.fecha_inicio and evento.fecha_fin and (evento.fecha_fin|fecha_evento_date) and (evento.fecha_fin|fecha_evento_date) < now().date()) %}
                                         {% if es_finalizado_o_cerrado %}
                                         <span class="mx-2">|</span>
                                         {% if evento.get('instrumento') == 'encuesta_v2' %}

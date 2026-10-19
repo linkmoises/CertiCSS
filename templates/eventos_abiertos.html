@@ -174,7 +174,7 @@
 
                                         <td class="size-px whitespace-nowrap text-center">
                                             <a class="block relative z-10" href="#">
-                                                <span class="text-sm text-gray-500">i: {{ evento.fecha_inicio.strftime('%d %b, %Y') }}<br />f: {{ evento.fecha_fin.strftime('%d %b, %Y') }}</span>
+                                                <span class="text-sm text-gray-500">i: {{ evento.fecha_inicio|fecha_evento }}<br />f: {{ evento.fecha_fin|fecha_evento }}</span>
                                             </a>
                                         </td>
 
