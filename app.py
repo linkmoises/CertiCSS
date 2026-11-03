@@ -18,7 +18,7 @@ from io import BytesIO, StringIO
 import csv
 from enum import Enum
 from functools import wraps
-from app.helpers import generate_otp, generate_nanoid, generar_codigo_evento, obtener_codigo_unico, allowed_file
+from app.helpers import generate_otp, generate_nanoid, generar_codigo_evento, obtener_codigo_unico, allowed_file, es_mes_de_la_patria
 from app.template_selection import determine_template_path, parse_event_date, is_legacy_event
 from app.logs import get_logger
 from app.analisis import analisis_bp, puede_editar_analisis
@@ -123,6 +123,10 @@ from app.auth import UserRole, ALLOWED_USER_ROLES
 @app.context_processor                                      # Variable BASE_URL
 def inject_base_url():
     return dict(BASE_URL=app.config['BASE_URL'])
+
+@app.context_processor                                      # Cinta tricolor del hero (solo en noviembre)
+def inject_mes_de_la_patria():
+    return dict(mes_de_la_patria=es_mes_de_la_patria())
 
 app.jinja_env.globals['now'] = datetime.now                 # Variable now para fecha actual
 

@@ -2,6 +2,22 @@
     bottom: -1px;
 }
 
+/* Cinta tricolor del hero: en pantallas pequenas el SVG escalado deja las
+   bandas casi invisibles, asi que se usa la variante de bandas gruesas. */
+.hero-cinta--movil {
+    display: none;
+}
+
+@media (max-width: 639px) {
+    .hero-cinta--escritorio {
+        display: none;
+    }
+
+    .hero-cinta--movil {
+        display: inline;
+    }
+}
+
 .toggle-bg {
     cursor: pointer;
 }

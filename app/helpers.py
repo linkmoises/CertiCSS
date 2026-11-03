@@ -9,7 +9,7 @@ import re
 import random
 import string
 import hashlib
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional, Tuple, List
 
 # Detección de MIME types (opcional - fallback a extensión si no está disponible)
@@ -32,6 +32,23 @@ ALLOWED_DOCUMENT_MIMETYPES = {
     'text/plain',
     'text/markdown',
 }
+
+# Panamá no aplica horario de verano: UTC-5 todo el año.
+_ZONA_PANAMA = timezone(timedelta(hours=-5))
+
+
+def es_mes_de_la_patria(momento=None):
+    """Indica si en Panamá es noviembre, el mes de la patria.
+
+    `momento` debe ser un datetime. Si trae zona horaria se convierte a hora de
+    Panamá; si no la trae se asume que ya está en hora de Panamá.
+    """
+    if momento is None:
+        momento = datetime.now(timezone.utc)
+    if momento.tzinfo is not None:
+        momento = momento.astimezone(_ZONA_PANAMA)
+    return momento.month == 11
+
 
 def generate_otp():
     """Genera un código OTP de 4 dígitos (mayúsculas y números)."""
