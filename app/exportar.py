@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, session, send_file
+from flask import Blueprint, render_template, request, flash, redirect, url_for, session, send_file, abort
 from app import db, collection_eventos, collection_participantes, collection_usuarios
 from app.participantes_pdf import generar_pdf_lista_participantes
 from pymongo import MongoClient
@@ -261,6 +261,24 @@ def exportar_participantes_csv_route(codigo_evento):
     return exportar_participantes_csv(evento, codigo_evento)
 
 
+def _puede_descargar_lista(evento, codigo_evento):
+    """Mismos permisos que la gestión del evento: administrador, DENADOI,
+    creador, organizador o coorganizador."""
+    if current_user.rol in ('administrador', 'denadoi'):
+        return True
+    if str(current_user.id) == str(evento.get('autor')):
+        return True
+
+    cedula_usuario = str(getattr(current_user, 'cedula', '') or '').strip()
+    if not cedula_usuario:
+        return False
+    return collection_participantes.find_one({
+        'codigo_evento': codigo_evento,
+        'cedula': cedula_usuario,
+        'rol': {'$in': ['organizador', 'coorganizador']},
+    }) is not None
+
+
 @exportar_bp.route('/tablero/exportar/participantes/<codigo_evento>/pdf')
 @login_required
 def exportar_participantes_pdf_route(codigo_evento):
@@ -269,6 +287,9 @@ def exportar_participantes_pdf_route(codigo_evento):
     if not evento:
         flash('Evento no encontrado', 'error')
         return redirect(url_for('exportar.exportar_eventos'))
+
+    if not _puede_descargar_lista(evento, codigo_evento):
+        abort(403)
 
     participantes = list(collection_participantes.find({
         'codigo_evento': codigo_evento
