@@ -15,6 +15,7 @@ from xml.sax.saxutils import escape
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.units import cm
 from reportlab.lib.utils import simpleSplit
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Paragraph, Table, TableStyle
@@ -29,7 +30,8 @@ MARGEN_DERECHO = 45
 ANCHO_CONTENIDO = PAGE_WIDTH - MARGEN_IZQUIERDO - MARGEN_DERECHO
 
 # Área útil entre la barra superior y la franja inferior del membrete.
-MARGEN_SUPERIOR = 78
+# El margen superior incluye 1 cm adicional de aire bajo el membrete.
+MARGEN_SUPERIOR = 78 + 1 * cm
 MARGEN_INFERIOR = 52
 
 # Orden de aparición en la lista: organizadores primero y participantes al final.
@@ -227,8 +229,8 @@ def _estilo_celda(negrita=False):
     return ParagraphStyle(
         name='CeldaLista',
         fontName='Helvetica-Bold' if negrita else 'Helvetica',
-        fontSize=7.6,
-        leading=8.2,
+        fontSize=7.4,
+        leading=7.8,
         textColor=colors.HexColor('#111111'),
     )
 
@@ -253,14 +255,14 @@ def _crear_tabla(filas):
 
         celdas = []
         for valor, ancho in zip((nombre, cedula, perfil, unidad), anchos):
-            texto = _ajustar_texto(valor, 'Helvetica', 7.6, ancho - 8, 2)
+            texto = _ajustar_texto(valor, 'Helvetica', 7.4, ancho - 8, 2)
             celdas.append(Paragraph(escape(texto), estilo_celda))
         datos.append(celdas)
 
     tabla = Table(
         datos,
         colWidths=anchos,
-        rowHeights=[19] + [18.5] * len(filas),
+        rowHeights=[19] + [18] * len(filas),
     )
     tabla.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#E0E0E0')),
@@ -275,24 +277,57 @@ def _crear_tabla(filas):
     return tabla
 
 
-def _dibujar_nota_y_firma(c, y, nombre_autor):
-    """Dibuja la nota de fe (gris 50%) y el espacio de firma del creador."""
+def _dibujar_pagina(c, y, indice, total_paginas):
+    """Escribe 'Página X de N' justo debajo de la tabla y devuelve la nueva Y."""
+    y -= 12
+    c.setFont('Helvetica', 8)
+    c.setFillColor(colors.HexColor('#404040'))
+    c.drawRightString(
+        PAGE_WIDTH - MARGEN_DERECHO, y,
+        f"Página {indice} de {total_paginas}",
+    )
+    return y
+
+
+def _dibujar_nota_y_firma(c, y, nombre_autor, evento_cerrado=False):
+    """Dibuja la declaración de fe (gris 50%) y el espacio de firma del organizador.
+
+    Si el evento sigue abierto se advierte antes de la declaración que el
+    listado es preliminar y puede cambiar hasta el cierre del evento.
+    """
     ancho_nota = ANCHO_CONTENIDO - 10
+    y_nota = y - 10
+
+    if not evento_cerrado:
+        aviso = (
+            "Aviso: el evento se encuentra abierto. Este listado es preliminar "
+            "y puede tener modificaciones hasta el cierre del evento dentro de "
+            "la plataforma DENADOI-CertiCSS."
+        )
+        aviso = _ajustar_texto(aviso, 'Helvetica-BoldOblique', 8.5, ancho_nota, 3)
+        c.setFont('Helvetica-BoldOblique', 8.5)
+        c.setFillColor(colors.HexColor('#555555'))
+        for linea in simpleSplit(aviso, 'Helvetica-BoldOblique', 8.5, ancho_nota):
+            c.drawString(MARGEN_IZQUIERDO + 4, y_nota, linea)
+            y_nota -= 10
+        y_nota -= 4
+
     texto = (
-        f"Por este medio yo, {nombre_autor} doy fé que las personas de este "
-        "listado se encontraban presentes en la actividad docente."
+        f"Por medio de la presente, yo, {nombre_autor}, en mi calidad de "
+        "responsable de la organización del evento, doy fe de que las personas "
+        "incluidas en este listado se encontraban presentes durante el "
+        "desarrollo de la actividad docente."
     )
     texto = _ajustar_texto(texto, 'Helvetica', 8.8, ancho_nota, 4)
 
     c.setFont('Helvetica', 8.8)
     c.setFillColor(GRIS_NOTA)
-    y_nota = y - 14
     for linea in simpleSplit(texto, 'Helvetica', 8.8, ancho_nota):
         c.drawString(MARGEN_IZQUIERDO + 4, y_nota, linea)
         y_nota -= 10.5
 
     # Espacio en blanco para firmar y raya de firma centrada.
-    y_linea = y_nota - 38
+    y_linea = y_nota - 30
     c.setStrokeColor(colors.black)
     c.setLineWidth(0.8)
     ancho_firma = 240
@@ -323,6 +358,7 @@ def generar_pdf_lista_participantes(evento, participantes, nombre_autor,
     total_paginas = len(paginas)
 
     nombre_autor = str(nombre_autor or '').strip() or '________________'
+    evento_cerrado = str(evento.get('estado_evento', '')).strip().lower() == 'cerrado'
 
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=letter)
@@ -344,16 +380,15 @@ def generar_pdf_lista_participantes(evento, participantes, nombre_autor,
         x_tabla = (PAGE_WIDTH - ancho_tabla) / 2
         tabla.drawOn(c, x_tabla, y - alto_tabla)
 
-        if indice == total_paginas:
-            _dibujar_nota_y_firma(c, y - alto_tabla, nombre_autor)
-
-        # Nota de paginación en la esquina inferior derecha.
-        c.setFont('Helvetica', 8)
-        c.setFillColor(colors.HexColor('#404040'))
-        c.drawRightString(
-            PAGE_WIDTH - MARGEN_DERECHO, 70,
-            f"Página {indice} de {total_paginas}",
+        y_despues_tabla = _dibujar_pagina(
+            c, y - alto_tabla, indice, total_paginas
         )
+
+        if indice == total_paginas:
+            _dibujar_nota_y_firma(
+                c, y_despues_tabla, nombre_autor, evento_cerrado
+            )
+
         c.showPage()
 
     c.save()
