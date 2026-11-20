@@ -3498,7 +3498,24 @@ def validar_certificado():
             evento = collection_eventos.find_one({"codigo": participante['codigo_evento']})
 
             if evento:
-                return render_template('certificado_valido.html', participante=participante, evento=evento)
+                # En el catálogo abierto la acreditación es por examen: se
+                # muestra una sola fecha (aprobación), no la ventana de
+                # inscripción inicio-fin.
+                fecha_certificado = None
+                if evento.get('registro_abierto'):
+                    from app.pdf_utils import obtener_fecha_aprobacion
+                    fecha_certificado = (
+                        obtener_fecha_aprobacion(
+                            evento, participante['cedula'],
+                            participante['codigo_evento']
+                        )
+                        or parse_event_date(evento.get('fecha_fin'))
+                        or parse_event_date(evento.get('fecha_inicio'))
+                    )
+                return render_template('certificado_valido.html',
+                                       participante=participante,
+                                       evento=evento,
+                                       fecha_certificado=fecha_certificado)
             else:
                 return render_template('certificado_invalido.html')
         else:
@@ -3761,6 +3778,18 @@ def _buscar_certificados_resultados(cedula, token):
                     if not registro_permitido:
                         certificado_plantilla = False
 
+            # Catálogo abierto: la acreditación es por examen, así que la
+            # lista muestra una sola fecha (la de aprobación) en lugar de la
+            # ventana de inscripción inicio-fin.
+            fecha_aprobacion = None
+            if evento.get('registro_abierto'):
+                from app.pdf_utils import obtener_fecha_aprobacion
+                fecha_aprobacion = (
+                    obtener_fecha_aprobacion(evento, participante['cedula'], codigo_evento)
+                    or fecha_evento
+                    or parse_event_date(evento.get('fecha_inicio'))
+                )
+
             resultado = {
                 'nombres': participante['nombres'],
                 'apellidos': participante['apellidos'],
@@ -3775,6 +3804,7 @@ def _buscar_certificados_resultados(cedula, token):
                 'titulo_evento': evento.get('nombre', 'Título no disponible'),
                 'fecha_evento': fecha_evento,
                 'fecha_inicio': parse_event_date(evento.get('fecha_inicio', None)),
+                'fecha_aprobacion': fecha_aprobacion,
                 'modalidad_evento': evento.get('modalidad', 'No disponible'),
                 'lms_activo': evento.get('lms_activo', evento.get('modalidad') != 'Presencial'),
                 'tipo_evento': evento.get('tipo', 'General'),

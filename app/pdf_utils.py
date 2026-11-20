@@ -35,10 +35,16 @@ def obtener_fecha_aprobacion(evento, cedula, codigo_evento):
 
     Devuelve la fecha de la última evaluación aprobada (sumativos con >= 80%
     y tareas calificadas con >= 80%), es decir, el momento en que se cumplió
-    el requisito. Si el evento no tiene LMS o no hay evaluaciones, o el
-    participante está exento, devuelve None y se usa la fecha_fin del evento.
+    el requisito. Si el evento no tiene evaluaciones, o el participante está
+    exento, devuelve None y se usa la fecha_fin del evento.
+
+    Aplica a eventos con LMS y también a los del catálogo abierto
+    (`registro_abierto`), donde la acreditación es por examen aunque el flag
+    `lms_activo` no esté marcado.
     """
-    if not evento or not evento.get('lms_activo'):
+    if not evento:
+        return None
+    if not evento.get('lms_activo') and not evento.get('registro_abierto'):
         return None
 
     # Import local para evitar dependencia circular con el blueprint plataforma.
@@ -404,12 +410,15 @@ def generar_pdf_participante(participante, afiche_path, lugar=None):
         carga_horaria_impresa = str(horas_certificado)
         texto_horas = "hora" if horas_certificado == 1 else "horas"
 
+        # En el catálogo abierto no hay asistencia que acreditar: el
+        # certificado muestra una sola fecha (la aprobación del examen).
+        mostrar_asistencia = evento.get('registro_abierto') is not True
+
         if not prorrateado:
             actividad_y = draw_centered_text(base_y, f"{tipo_actividad} con una duración de {carga_horaria_impresa} {texto_horas}")
-            if evento.get('registro_abierto') is not True:
+            fecha_y = actividad_y
+            if mostrar_asistencia:
                 fecha_y = draw_centered_text(actividad_y - 0.3 * inch, f"Asistencia: {fecha_fin_formateada}")
-            else:
-                fecha_y = actividad_y
             next_y = fecha_y - 0.3 * inch
         elif len(registros_validos) == 1:
             fecha_asistencia = datetime.strptime(registros_validos[0]['indice_registro'], '%Y%m%d')
@@ -418,7 +427,9 @@ def generar_pdf_participante(participante, afiche_path, lugar=None):
 
             fecha_asistencia_formateada = fecha_asistencia.strftime('%d de %B de %Y')
             actividad_y = draw_centered_text(base_y, f"{tipo_actividad} con una duración de {horas_asistencia} {horas_texto}")
-            fecha_y = draw_centered_text(actividad_y - 0.3 * inch, f"Asistencia: {fecha_asistencia_formateada}")
+            fecha_y = actividad_y
+            if mostrar_asistencia:
+                fecha_y = draw_centered_text(actividad_y - 0.3 * inch, f"Asistencia: {fecha_asistencia_formateada}")
             next_y = fecha_y - 0.3 * inch
         else:
             fechas_asistencia = []
@@ -434,26 +445,27 @@ def generar_pdf_participante(participante, afiche_path, lugar=None):
 
             if len(registros_validos) == duracion_evento_dias:
                 actividad_y = draw_centered_text(base_y, f"{tipo_actividad} con una duración de {carga_horaria_impresa} {texto_horas}")
-                if evento.get('registro_abierto') is not True:
+                fecha_y = actividad_y
+                if mostrar_asistencia:
                     fecha_y = draw_centered_text(actividad_y - 0.3 * inch, f"Asistencia: {fecha_fin_formateada}")
-                else:
-                    fecha_y = actividad_y
             else:
                 actividad_y = draw_centered_text(base_y, f"{tipo_actividad} con una duración de {horas_asistencia} {horas_texto}")
 
-                if fechas_asistencia:
-                    primer_mes = fechas_asistencia[0].month
-                    mismo_mes = all(f.month == primer_mes for f in fechas_asistencia)
-                    if mismo_mes:
-                        dias_str = ', '.join(f.strftime('%d') for f in fechas_asistencia[:-1])
-                        fecha_texto = f"Asistencia: {dias_str} y {fechas_asistencia[-1].strftime('%d')} de {fechas_asistencia[0].strftime('%B de %Y')}"
+                fecha_y = actividad_y
+                if mostrar_asistencia:
+                    if fechas_asistencia:
+                        primer_mes = fechas_asistencia[0].month
+                        mismo_mes = all(f.month == primer_mes for f in fechas_asistencia)
+                        if mismo_mes:
+                            dias_str = ', '.join(f.strftime('%d') for f in fechas_asistencia[:-1])
+                            fecha_texto = f"Asistencia: {dias_str} y {fechas_asistencia[-1].strftime('%d')} de {fechas_asistencia[0].strftime('%B de %Y')}"
+                        else:
+                            fechas_str = ', '.join(f.strftime('%d de %B') for f in fechas_asistencia[:-1])
+                            fecha_texto = f"Asistencia: {fechas_str} y {fechas_asistencia[-1].strftime('%d de %B de %Y')}"
                     else:
-                        fechas_str = ', '.join(f.strftime('%d de %B') for f in fechas_asistencia[:-1])
-                        fecha_texto = f"Asistencia: {fechas_str} y {fechas_asistencia[-1].strftime('%d de %B de %Y')}"
-                else:
-                    fecha_texto = f"Asistencia: {fecha_fin_formateada}"
+                        fecha_texto = f"Asistencia: {fecha_fin_formateada}"
 
-                fecha_y = draw_centered_text(actividad_y - 0.3 * inch, fecha_texto, max_width=9.5 * inch)
+                    fecha_y = draw_centered_text(actividad_y - 0.3 * inch, fecha_texto, max_width=9.5 * inch)
 
             next_y = fecha_y - 0.3 * inch
     else:

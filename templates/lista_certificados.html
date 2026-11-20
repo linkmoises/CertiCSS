@@ -352,7 +352,9 @@
                                             <td class="h-px w-1/6">
                                                 <div class="px-6 py-2">
                                                     <p class="text-sm text-gray-500 mb-2">
-                                                        {% if resultado['fecha_evento'] and resultado['fecha_inicio'] %}
+                                                        {% if resultado.registro_abierto and resultado.fecha_aprobacion %}
+                                                        {{ resultado.fecha_aprobacion.strftime('%d de %B de %Y') }}
+                                                        {% elif resultado['fecha_evento'] and resultado['fecha_inicio'] %}
                                                         {% if resultado['fecha_inicio'].date() == resultado['fecha_evento'].date() %}
                                                         {{ resultado['fecha_inicio'].strftime('%d de %B de %Y') }}
                                                         {% elif resultado['fecha_inicio'].month != resultado['fecha_evento'].month or resultado['fecha_inicio'].year != resultado['fecha_evento'].year %}
