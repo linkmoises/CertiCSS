@@ -29,10 +29,9 @@ PAGE_WIDTH, PAGE_HEIGHT = letter
 FILAS_POR_PAGINA = 25
 
 # Cada fila de datos mide 17pt y cada etiqueta de grupo 15pt. El presupuesto
-# de un día de un evento de una sola jornada es el de la lista actual
-# (25 filas); cuando el documento separa jornadas, el título del día consume
-# el espacio equivalente a dos filas para que la declaración de fe siga
-# cabiendo en la última página de cada bloque.
+# de página es el de la lista original (25 filas); las etiquetas de grupo y,
+# en eventos de varios días, el título de la jornada se descuentan de ese
+# presupuesto para que la declaración de fe siga cabiendo en la última página.
 ALTO_FILA = 17
 ALTO_SECCION = 15
 ALTO_TITULO_DIA = 14
@@ -436,18 +435,17 @@ def _estilo_seccion():
     )
 
 
-def _items_de_grupos(grupos, con_etiquetas=False):
+def _items_de_grupos(grupos):
     """Convierte los grupos de una jornada en filas y etiquetas de tabla.
 
-    En un evento de una sola jornada se mantiene el formato compacto sin
-    etiquetas; al separar por días cada grupo se identifica con su etiqueta.
+    Cada grupo con filas se identifica con su etiqueta, tanto en eventos de
+    una jornada como en los de varios días.
     """
     items = []
     for etiqueta, filas in grupos:
         if not filas:
             continue
-        if con_etiquetas:
-            items.append(('seccion', etiqueta))
+        items.append(('seccion', etiqueta))
         items.extend(('fila', participante) for participante in filas)
     return items
 
@@ -632,9 +630,7 @@ def generar_pdf_lista_participantes(evento, participantes, nombre_autor,
     c.setTitle(f"Lista de participantes - {evento.get('nombre', '')}")
 
     for dia, grupos in secciones:
-        paginas = _paginar_items(
-            _items_de_grupos(grupos, separar_dias), presupuesto
-        )
+        paginas = _paginar_items(_items_de_grupos(grupos), presupuesto)
         total_paginas = len(paginas)
 
         for indice, items in enumerate(paginas, start=1):
