@@ -598,7 +598,7 @@ def _dibujar_nota_y_firma(c, y, nombre_autor, evento_cerrado=False):
 
 def _dibujar_titulo_dia(c, y, dia):
     """Escribe la jornada a la que pertenece la página y devuelve la nueva Y."""
-    texto = f"Jornada del {_fecha_con_mes(dia)}"
+    texto = f"Asistencia del {_fecha_con_mes(dia)}"
     c.setFont('Helvetica-Bold', 10.5)
     c.setFillColor(colors.HexColor('#1A1A1A'))
     c.drawCentredString(PAGE_WIDTH / 2, y, texto)
