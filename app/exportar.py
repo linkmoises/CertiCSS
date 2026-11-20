@@ -1,15 +1,39 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session, send_file
-from app import db, collection_eventos, collection_participantes
+from app import db, collection_eventos, collection_participantes, collection_usuarios
+from app.participantes_pdf import generar_pdf_lista_participantes
 from pymongo import MongoClient
 from config import config
 from datetime import datetime
 from flask_login import login_required, current_user
+from bson.objectid import ObjectId
+from bson.errors import InvalidId
 import csv
 import io
 import os
 import zipfile
 
 exportar_bp = Blueprint('exportar', __name__)
+
+
+def _nombre_creador_evento(evento):
+    """Nombre completo de la persona que creó el evento, para la nota de fe."""
+    autor = evento.get('autor')
+    if autor:
+        filtro = None
+        try:
+            filtro = {'_id': ObjectId(autor)}
+        except (InvalidId, TypeError, ValueError):
+            if isinstance(autor, str) and '@' in autor:
+                filtro = {'email': autor}
+        if filtro:
+            usuario = collection_usuarios.find_one(
+                filtro, {'nombres': 1, 'apellidos': 1}
+            )
+            if usuario:
+                nombre = f"{usuario.get('nombres', '')} {usuario.get('apellidos', '')}"
+                if nombre.strip():
+                    return nombre.strip()
+    return str(evento.get('autor_nombre') or '').strip()
 
 
 ###
@@ -235,6 +259,33 @@ def exportar_participantes_csv_route(codigo_evento):
         flash('Evento no encontrado', 'error')
         return redirect(url_for('exportar.exportar_eventos'))
     return exportar_participantes_csv(evento, codigo_evento)
+
+
+@exportar_bp.route('/tablero/exportar/participantes/<codigo_evento>/pdf')
+@login_required
+def exportar_participantes_pdf_route(codigo_evento):
+    """Exportar la lista completa de participantes en formato PDF."""
+    evento = collection_eventos.find_one({'codigo': codigo_evento})
+    if not evento:
+        flash('Evento no encontrado', 'error')
+        return redirect(url_for('exportar.exportar_eventos'))
+
+    participantes = list(collection_participantes.find({
+        'codigo_evento': codigo_evento
+    }))
+    nombre_autor = _nombre_creador_evento(evento)
+
+    pdf_bytes = generar_pdf_lista_participantes(evento, participantes, nombre_autor)
+    nombre_archivo = (
+        f'lista_participantes_{codigo_evento}_'
+        f'{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
+    )
+    return send_file(
+        io.BytesIO(pdf_bytes),
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name=nombre_archivo,
+    )
 
 
 def exportar_participantes_csv(evento, codigo_evento):
