@@ -1,15 +1,18 @@
 ###
 ###
-### Generación del PDF con la lista completa de participantes de un evento.
+### Generación del PDF con la lista de participantes de un evento.
 ###
 ### El documento usa tamaño carta, la plantilla genérica de membrete como fondo
-### de página completa y una tabla de 25 filas por página con las columnas
-### Nombre, Cédula, Perfil profesional y Unidad ejecutora. La última página
-### incluye la nota de fe y el espacio para la firma del creador del evento.
+### de página completa y una tabla con las columnas Nombre, Cédula, Perfil
+### profesional y Unidad ejecutora. Un evento de una sola jornada produce una
+### lista única; un evento de varios días separa el documento en bloques por
+### día, repitiendo en cada bloque al organizador y al equipo organizador y
+### cerrando con la declaración de fe y la firma del creador del evento.
 ###
 ###
 import io
 import os
+from datetime import datetime, timedelta
 from xml.sax.saxutils import escape
 
 from reportlab.lib import colors
@@ -24,6 +27,17 @@ from app.template_selection import parse_event_date
 
 PAGE_WIDTH, PAGE_HEIGHT = letter
 FILAS_POR_PAGINA = 25
+
+# Cada fila de datos mide 17pt y cada etiqueta de grupo 15pt. El presupuesto
+# de un día de un evento de una sola jornada es el de la lista actual
+# (25 filas); cuando el documento separa jornadas, el título del día consume
+# el espacio equivalente a dos filas para que la declaración de fe siga
+# cabiendo en la última página de cada bloque.
+ALTO_FILA = 17
+ALTO_SECCION = 15
+ALTO_TITULO_DIA = 14
+PRESUPUESTO_PAGINA = FILAS_POR_PAGINA * ALTO_FILA
+PRESUPUESTO_PAGINA_CON_DIA = PRESUPUESTO_PAGINA - 2 * ALTO_FILA
 
 MARGEN_IZQUIERDO = 45
 MARGEN_DERECHO = 45
@@ -49,6 +63,27 @@ ORDEN_ROLES = {
 
 ETIQUETA_RESPONSABLE = 'Responsable de la actividad'
 ETIQUETA_EQUIPO = 'Equipo organizador'
+
+# Grupos visibles en cada jornada, en el orden en que se imprimen.
+ETIQUETA_ORGANIZADORES = 'Organizador y equipo organizador'
+ETIQUETA_EXPOSITORES = 'Expositores'
+ETIQUETA_PARTICIPANTES = 'Participantes'
+
+GRUPOS_JORNADA = (
+    ('organizadores', ETIQUETA_ORGANIZADORES),
+    ('expositores', ETIQUETA_EXPOSITORES),
+    ('participantes', ETIQUETA_PARTICIPANTES),
+)
+
+ROLES_ORGANIZACION = frozenset({'organizador', 'coorganizador', 'apoyo operativo'})
+ROLES_EXPOSITORES = frozenset({
+    'ponente', 'tallerista', 'instructor', 'presentador_poster',
+})
+# Roles que se registran una sola vez para todo el evento y, por lo tanto,
+# deben repetirse en la lista de cada jornada.
+ROLES_EVENTO_COMPLETO = ROLES_ORGANIZACION | frozenset({
+    'presentador_poster', 'jurado_poster',
+})
 
 PERFILES_PROFESIONALES = {
     'medico_general': 'Médico General - Consulta Externa',
@@ -157,11 +192,12 @@ def _clave_orden(participante):
 
 
 def preparar_participantes(participantes):
-    """Ordena y depura la lista: un registro por cédula, de organizador a participante.
+    """Ordena y deduplica una lista: un registro por cédula.
 
-    Un mismo funcionario puede tener varios registros en el evento (uno por día
-    de asistencia). Para una lista firmada se muestra una sola vez, conservando
-    el registro de mayor jerarquía y, dentro de ese grupo, el más reciente.
+    Dentro de una misma jornada y grupo un funcionario puede tener varios
+    registros; se conserva el de mayor jerarquía y, dentro de ese grupo, el
+    primero por apellidos. La separación por jornadas se hace antes, en
+    `preparar_listas_por_dia`.
     """
     ordenados = sorted(
         participantes,
@@ -179,6 +215,137 @@ def preparar_participantes(participantes):
         if clave not in unicos:
             unicos[clave] = participante
     return list(unicos.values())
+
+
+def dias_del_evento(evento):
+    """Días del evento como fechas, de inicio a fin."""
+    if not isinstance(evento, dict):
+        return []
+    inicio = parse_event_date(evento.get('fecha_inicio'))
+    if not inicio:
+        return []
+
+    fin = parse_event_date(evento.get('fecha_fin')) or inicio
+    if fin.date() < inicio.date():
+        fin = inicio
+
+    dias = []
+    actual = inicio.date()
+    ultimo = fin.date()
+    # Los eventos académicos no duran años; el límite evita que una fecha
+    # errónea en la base de datos genere miles de páginas.
+    while actual <= ultimo and len(dias) < 366:
+        dias.append(actual)
+        actual += timedelta(days=1)
+    return dias
+
+
+def _rol(participante):
+    return str(participante.get('rol', '') or '').strip().lower()
+
+
+def _grupo_de(rol):
+    if rol in ROLES_ORGANIZACION:
+        return 'organizadores'
+    if rol in ROLES_EXPOSITORES:
+        return 'expositores'
+    return 'participantes'
+
+
+def _dia_de_registro(participante):
+    """Día al que pertenece un registro, según los campos que guarda el sistema."""
+    fecha = str(participante.get('fecha_evento', '') or '').strip()
+    if fecha:
+        try:
+            return datetime.strptime(fecha[:10], '%Y-%m-%d').date()
+        except ValueError:
+            pass
+
+    marca = participante.get('fecha_checkin')
+    if isinstance(marca, datetime):
+        return marca.date()
+
+    indice = str(participante.get('indice_registro', '') or '').strip()
+    if len(indice) == 8 and indice.isdigit():
+        try:
+            return datetime.strptime(indice, '%Y%m%d').date()
+        except ValueError:
+            pass
+
+    marca = participante.get('timestamp')
+    if isinstance(marca, datetime):
+        return marca.date()
+    if isinstance(marca, str) and marca.strip():
+        try:
+            return datetime.fromisoformat(marca.replace('Z', '+00:00')).date()
+        except ValueError:
+            return None
+    return None
+
+
+def preparar_listas_por_dia(evento, participantes):
+    """Agrupa los registros por jornada y por grupo.
+
+    Devuelve ``[(dia, [(etiqueta, filas), ...]), ...]`` en orden cronológico.
+    Los organizadores y demás roles que se registran una sola vez para todo el
+    evento se repiten en cada jornada; expositores y participantes aparecen
+    únicamente en el día de su registro, usando la fecha del evento, la de
+    check-in o el índice de registro. Un registro con fecha fuera del rango se
+    lista en la jornada más cercana. Dentro de cada jornada una persona figura
+    una sola vez, en el grupo de mayor jerarquía.
+    """
+    dias = dias_del_evento(evento)
+    base = dias or [None]
+    por_dia = {
+        dia: {nombre: [] for nombre, _ in GRUPOS_JORNADA} for dia in base
+    }
+
+    for participante in participantes or []:
+        if not isinstance(participante, dict):
+            continue
+        rol = _rol(participante)
+        grupo = _grupo_de(rol)
+        dia = _dia_de_registro(participante)
+
+        if rol in ROLES_EVENTO_COMPLETO:
+            destinos = base
+        elif dias:
+            # Un registro fuera del rango del evento (por ejemplo, la fecha de
+            # preinscripción) se lista en la jornada más cercana.
+            if dia is None or dia < dias[0]:
+                destino = dias[0]
+            elif dia > dias[-1]:
+                destino = dias[-1]
+            else:
+                destino = dia
+            destinos = [destino]
+        else:
+            destinos = [None]
+
+        for destino in destinos:
+            por_dia[destino][grupo].append(participante)
+
+    secciones = []
+    for dia in base:
+        vistos = set()
+        grupos = []
+        for nombre, etiqueta in GRUPOS_JORNADA:
+            filas = []
+            for participante in preparar_participantes(por_dia[dia][nombre]):
+                cedula = str(participante.get('cedula', '') or '').strip()
+                clave = cedula or id(participante)
+                if clave in vistos:
+                    continue
+                vistos.add(clave)
+                filas.append(participante)
+            if filas:
+                grupos.append((etiqueta, aplicar_etiquetas_organizacion(filas)))
+        if grupos:
+            secciones.append((dia, grupos))
+
+    if secciones:
+        return secciones
+    return [(dias[0] if dias else None, [])]
 
 
 def aplicar_etiquetas_organizacion(participantes):
@@ -259,14 +426,79 @@ def _estilo_celda(negrita=False):
     )
 
 
-def _crear_tabla(filas):
+def _estilo_seccion():
+    return ParagraphStyle(
+        name='EtiquetaGrupo',
+        fontName='Helvetica-Bold',
+        fontSize=7.6,
+        leading=8,
+        textColor=colors.HexColor('#002060'),
+    )
+
+
+def _items_de_grupos(grupos, con_etiquetas=False):
+    """Convierte los grupos de una jornada en filas y etiquetas de tabla.
+
+    En un evento de una sola jornada se mantiene el formato compacto sin
+    etiquetas; al separar por días cada grupo se identifica con su etiqueta.
+    """
+    items = []
+    for etiqueta, filas in grupos:
+        if not filas:
+            continue
+        if con_etiquetas:
+            items.append(('seccion', etiqueta))
+        items.extend(('fila', participante) for participante in filas)
+    return items
+
+
+def _paginar_items(items, presupuesto):
+    """Reparte las filas en páginas respetando el alto disponible.
+
+    Una etiqueta de grupo nunca queda sola al final de una página.
+    """
+    paginas = []
+    actual = []
+    usado = 0
+
+    for posicion, item in enumerate(items):
+        alto = ALTO_SECCION if item[0] == 'seccion' else ALTO_FILA
+        necesario = alto
+        if item[0] == 'seccion' and posicion + 1 < len(items):
+            necesario += ALTO_FILA
+
+        if actual and usado + necesario > presupuesto:
+            paginas.append(actual)
+            actual = []
+            usado = 0
+
+        actual.append(item)
+        usado += alto
+
+    if actual or not paginas:
+        paginas.append(actual)
+    return paginas
+
+
+def _crear_tabla(items):
     encabezados = ['Nombre', 'Cédula', 'Perfil profesional', 'Unidad ejecutora']
     anchos = [168, 66, 148, 140]
     estilo_encabezado = _estilo_celda(negrita=True)
     estilo_celda = _estilo_celda()
+    estilo_seccion = _estilo_seccion()
 
     datos = [[Paragraph(escape(titulo), estilo_encabezado) for titulo in encabezados]]
-    for participante in filas:
+    alturas = [19]
+    filas_seccion = []
+
+    for tipo, valor in items:
+        if tipo == 'seccion':
+            datos.append([Paragraph(escape(valor), estilo_seccion), '', '', ''])
+            alturas.append(ALTO_SECCION)
+            filas_seccion.append(len(datos) - 1)
+            continue
+
+        participante = valor
         nombre = ', '.join(
             parte for parte in (
                 str(participante.get('apellidos', '') or '').strip(),
@@ -278,17 +510,14 @@ def _crear_tabla(filas):
         unidad = str(participante.get('unidad', '') or '').strip()
 
         celdas = []
-        for valor, ancho in zip((nombre, cedula, perfil, unidad), anchos):
-            texto = _ajustar_texto(valor, 'Helvetica', 7.4, ancho - 8, 2)
+        for texto_valor, ancho in zip((nombre, cedula, perfil, unidad), anchos):
+            texto = _ajustar_texto(texto_valor, 'Helvetica', 7.4, ancho - 8, 2)
             celdas.append(Paragraph(escape(texto), estilo_celda))
         datos.append(celdas)
+        alturas.append(ALTO_FILA)
 
-    tabla = Table(
-        datos,
-        colWidths=anchos,
-        rowHeights=[19] + [17] * len(filas),
-    )
-    tabla.setStyle(TableStyle([
+    tabla = Table(datos, colWidths=anchos, rowHeights=alturas)
+    estilos = [
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#E0E0E0')),
         ('GRID', (0, 0), (-1, -1), 0.4, GRIS_LINEA),
         ('BOX', (0, 0), (-1, -1), 0.8, colors.HexColor('#555555')),
@@ -297,7 +526,11 @@ def _crear_tabla(filas):
         ('RIGHTPADDING', (0, 0), (-1, -1), 4),
         ('TOPPADDING', (0, 0), (-1, -1), 0.5),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 0.5),
-    ]))
+    ]
+    for fila in filas_seccion:
+        estilos.append(('SPAN', (0, fila), (-1, fila)))
+        estilos.append(('BACKGROUND', (0, fila), (-1, fila), colors.HexColor('#F2F2F2')))
+    tabla.setStyle(TableStyle(estilos))
     return tabla
 
 
@@ -363,58 +596,77 @@ def _dibujar_nota_y_firma(c, y, nombre_autor, evento_cerrado=False):
     c.drawCentredString(PAGE_WIDTH / 2, y_linea - 13, nombre_autor)
 
 
+def _dibujar_titulo_dia(c, y, dia):
+    """Escribe la jornada a la que pertenece la página y devuelve la nueva Y."""
+    texto = f"Jornada del {_fecha_con_mes(dia)}"
+    c.setFont('Helvetica-Bold', 10.5)
+    c.setFillColor(colors.HexColor('#1A1A1A'))
+    c.drawCentredString(PAGE_WIDTH / 2, y, texto)
+    return y - ALTO_TITULO_DIA
+
+
 def generar_pdf_lista_participantes(evento, participantes, nombre_autor,
                                     membrete_path=None):
-    """Genera el PDF de la lista completa y devuelve sus bytes.
+    """Genera el PDF de la lista de participantes y devuelve sus bytes.
 
-    La lista incluye todos los roles, ordenados de organizador a participante,
-    con 25 filas por página. La plantilla de membrete se dibuja como fondo de
-    página completa y la última página lleva la nota de fe y la firma.
+    Los eventos de una sola jornada producen una lista única. Los eventos de
+    varios días separan el documento en bloques por día: en cada bloque se
+    repite el organizador y el equipo organizador, se listan los expositores y
+    participantes de ese día, se pagina "Página X de N" dentro del bloque y se
+    cierra con la declaración de fe y la firma del responsable.
+
+    La plantilla de membrete se dibuja como fondo de página completa.
     """
     membrete_path = membrete_path or MEMBRETE_POR_DEFECTO
-    filas = aplicar_etiquetas_organizacion(
-        preparar_participantes(participantes or [])
-    )
-
-    paginas = [
-        filas[inicio:inicio + FILAS_POR_PAGINA]
-        for inicio in range(0, len(filas), FILAS_POR_PAGINA)
-    ] or [[]]
-    total_paginas = len(paginas)
+    secciones = preparar_listas_por_dia(evento, participantes or [])
+    separar_dias = len(dias_del_evento(evento)) > 1 or len(secciones) > 1
 
     nombre_autor = str(nombre_autor or '').strip() or '________________'
     evento_cerrado = str(evento.get('estado_evento', '')).strip().lower() == 'cerrado'
+    presupuesto = (
+        PRESUPUESTO_PAGINA_CON_DIA if separar_dias else PRESUPUESTO_PAGINA
+    )
 
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=letter)
     c.setTitle(f"Lista de participantes - {evento.get('nombre', '')}")
 
-    for indice, grupo in enumerate(paginas, start=1):
-        if os.path.exists(membrete_path):
-            c.drawImage(
-                membrete_path, 0, 0,
-                width=PAGE_WIDTH, height=PAGE_HEIGHT,
-                preserveAspectRatio=False, mask=None,
-            )
-
-        y = PAGE_HEIGHT - MARGEN_SUPERIOR
-        y = _dibujar_encabezado(c, evento, y)
-
-        tabla = _crear_tabla(grupo)
-        ancho_tabla, alto_tabla = tabla.wrapOn(c, ANCHO_CONTENIDO, y - MARGEN_INFERIOR)
-        x_tabla = (PAGE_WIDTH - ancho_tabla) / 2
-        tabla.drawOn(c, x_tabla, y - alto_tabla)
-
-        y_despues_tabla = _dibujar_pagina(
-            c, y - alto_tabla, indice, total_paginas
+    for dia, grupos in secciones:
+        paginas = _paginar_items(
+            _items_de_grupos(grupos, separar_dias), presupuesto
         )
+        total_paginas = len(paginas)
 
-        if indice == total_paginas:
-            _dibujar_nota_y_firma(
-                c, y_despues_tabla, nombre_autor, evento_cerrado
+        for indice, items in enumerate(paginas, start=1):
+            if os.path.exists(membrete_path):
+                c.drawImage(
+                    membrete_path, 0, 0,
+                    width=PAGE_WIDTH, height=PAGE_HEIGHT,
+                    preserveAspectRatio=False, mask=None,
+                )
+
+            y = PAGE_HEIGHT - MARGEN_SUPERIOR
+            y = _dibujar_encabezado(c, evento, y)
+            if separar_dias and dia is not None:
+                y = _dibujar_titulo_dia(c, y, dia)
+
+            tabla = _crear_tabla(items)
+            ancho_tabla, alto_tabla = tabla.wrapOn(
+                c, ANCHO_CONTENIDO, y - MARGEN_INFERIOR
+            )
+            x_tabla = (PAGE_WIDTH - ancho_tabla) / 2
+            tabla.drawOn(c, x_tabla, y - alto_tabla)
+
+            y_despues_tabla = _dibujar_pagina(
+                c, y - alto_tabla, indice, total_paginas
             )
 
-        c.showPage()
+            if indice == total_paginas:
+                _dibujar_nota_y_firma(
+                    c, y_despues_tabla, nombre_autor, evento_cerrado
+                )
+
+            c.showPage()
 
     c.save()
     return buffer.getvalue()

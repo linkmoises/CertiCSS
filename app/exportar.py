@@ -282,11 +282,16 @@ def _puede_descargar_lista(evento, codigo_evento):
 @exportar_bp.route('/tablero/exportar/participantes/<codigo_evento>/pdf')
 @login_required
 def exportar_participantes_pdf_route(codigo_evento):
-    """Exportar la lista completa de participantes en formato PDF."""
+    """Exportar la lista de participantes en formato PDF."""
     evento = collection_eventos.find_one({'codigo': codigo_evento})
     if not evento:
         flash('Evento no encontrado', 'error')
         return redirect(url_for('exportar.exportar_eventos'))
+
+    # Los eventos padre agrupan actividades; sus participantes viven en los
+    # eventos hijos, así que no producen una lista propia.
+    if evento.get('evento_padre'):
+        abort(403)
 
     if not _puede_descargar_lista(evento, codigo_evento):
         abort(403)
