@@ -555,8 +555,9 @@ def _dibujar_nota_y_firma(c, y, nombre_autor, evento_cerrado=False):
 
     if not evento_cerrado:
         aviso = (
-            "Aviso: el evento está abierto; este listado es preliminar y puede "
-            "cambiar hasta su cierre en la plataforma DENADOI-CertiCSS."
+            "Aviso: este listado tiene carácter preliminar. La información de los "
+            "participantes puede actualizarse o corregirse mientras "
+            "el evento permanezca abierto en la plataforma DENADOI-CertiCSS."
         )
         aviso = _ajustar_texto(aviso, 'Helvetica-BoldOblique', 8.5, ancho_nota, 3)
         c.setFont('Helvetica-BoldOblique', 8.5)
