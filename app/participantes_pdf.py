@@ -47,6 +47,9 @@ ORDEN_ROLES = {
     'participante': 4,
 }
 
+ETIQUETA_RESPONSABLE = 'Responsable de la actividad'
+ETIQUETA_EQUIPO = 'Equipo organizador'
+
 PERFILES_PROFESIONALES = {
     'medico_general': 'Médico General - Consulta Externa',
     'medico_urgencias': 'Médico General - Urgencias',
@@ -143,6 +146,8 @@ def etiqueta_perfil(perfil):
     if not perfil:
         return ''
     clave = str(perfil).strip()
+    if clave in (ETIQUETA_RESPONSABLE, ETIQUETA_EQUIPO):
+        return clave
     return PERFILES_PROFESIONALES.get(clave, clave.replace('_', ' ').title())
 
 
@@ -174,6 +179,25 @@ def preparar_participantes(participantes):
         if clave not in unicos:
             unicos[clave] = participante
     return list(unicos.values())
+
+
+def aplicar_etiquetas_organizacion(participantes):
+    """Etiqueta el perfil de organizadores y coorganizadores.
+
+    El organizador figura como responsable de la actividad y los
+    coorganizadores como equipo organizador, sin importar el perfil que
+    tuvieran registrado. Devuelve copias para no modificar los datos originales.
+    """
+    etiquetados = []
+    for participante in participantes:
+        rol = str(participante.get('rol', '') or '').strip().lower()
+        copia = dict(participante)
+        if rol == 'organizador':
+            copia['perfil'] = ETIQUETA_RESPONSABLE
+        elif rol == 'coorganizador':
+            copia['perfil'] = ETIQUETA_EQUIPO
+        etiquetados.append(copia)
+    return etiquetados
 
 
 def _ajustar_texto(texto, fuente, tamano, ancho, max_lineas):
@@ -262,7 +286,7 @@ def _crear_tabla(filas):
     tabla = Table(
         datos,
         colWidths=anchos,
-        rowHeights=[19] + [18] * len(filas),
+        rowHeights=[19] + [17] * len(filas),
     )
     tabla.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#E0E0E0')),
@@ -271,15 +295,15 @@ def _crear_tabla(filas):
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ('LEFTPADDING', (0, 0), (-1, -1), 4),
         ('RIGHTPADDING', (0, 0), (-1, -1), 4),
-        ('TOPPADDING', (0, 0), (-1, -1), 1),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
+        ('TOPPADDING', (0, 0), (-1, -1), 0.5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 0.5),
     ]))
     return tabla
 
 
 def _dibujar_pagina(c, y, indice, total_paginas):
     """Escribe 'Página X de N' justo debajo de la tabla y devuelve la nueva Y."""
-    y -= 12
+    y -= 10
     c.setFont('Helvetica', 8)
     c.setFillColor(colors.HexColor('#404040'))
     c.drawRightString(
@@ -296,13 +320,12 @@ def _dibujar_nota_y_firma(c, y, nombre_autor, evento_cerrado=False):
     listado es preliminar y puede cambiar hasta el cierre del evento.
     """
     ancho_nota = ANCHO_CONTENIDO - 10
-    y_nota = y - 10
+    y_nota = y - 20
 
     if not evento_cerrado:
         aviso = (
-            "Aviso: el evento se encuentra abierto. Este listado es preliminar "
-            "y puede tener modificaciones hasta el cierre del evento dentro de "
-            "la plataforma DENADOI-CertiCSS."
+            "Aviso: el evento está abierto; este listado es preliminar y puede "
+            "cambiar hasta su cierre en la plataforma DENADOI-CertiCSS."
         )
         aviso = _ajustar_texto(aviso, 'Helvetica-BoldOblique', 8.5, ancho_nota, 3)
         c.setFont('Helvetica-BoldOblique', 8.5)
@@ -310,7 +333,7 @@ def _dibujar_nota_y_firma(c, y, nombre_autor, evento_cerrado=False):
         for linea in simpleSplit(aviso, 'Helvetica-BoldOblique', 8.5, ancho_nota):
             c.drawString(MARGEN_IZQUIERDO + 4, y_nota, linea)
             y_nota -= 10
-        y_nota -= 4
+        y_nota -= 6
 
     texto = (
         f"Por medio de la presente, yo, {nombre_autor}, en mi calidad de "
@@ -327,7 +350,7 @@ def _dibujar_nota_y_firma(c, y, nombre_autor, evento_cerrado=False):
         y_nota -= 10.5
 
     # Espacio en blanco para firmar y raya de firma centrada.
-    y_linea = y_nota - 30
+    y_linea = y_nota - 24
     c.setStrokeColor(colors.black)
     c.setLineWidth(0.8)
     ancho_firma = 240
@@ -349,7 +372,9 @@ def generar_pdf_lista_participantes(evento, participantes, nombre_autor,
     página completa y la última página lleva la nota de fe y la firma.
     """
     membrete_path = membrete_path or MEMBRETE_POR_DEFECTO
-    filas = preparar_participantes(participantes or [])
+    filas = aplicar_etiquetas_organizacion(
+        preparar_participantes(participantes or [])
+    )
 
     paginas = [
         filas[inicio:inicio + FILAS_POR_PAGINA]
