@@ -18,6 +18,13 @@ from app import (collection_eventos, collection_posters, collection_participante
 from app.helpers import detectar_tipo_documento
 
 
+# Roles que se registran para un día concreto del evento y guardan esa fecha en
+# `fecha_evento`. Su certificado debe mostrar el día en que participaron, no el
+# rango ni la fecha de fin del evento. Los organizadores quedan fuera: guardan
+# en `indice_registro` el día en que se les registró, no el de la actividad.
+ROLES_CON_FECHA_PARTICIPACION = frozenset({'ponente', 'tallerista', 'instructor'})
+
+
 def _a_datetime(valor):
     if isinstance(valor, datetime):
         return valor
@@ -27,6 +34,27 @@ def _a_datetime(valor):
                 return datetime.strptime(valor[:19], formato)
             except ValueError:
                 continue
+    return None
+
+
+def _fecha_participacion(participante):
+    """Día de participación guardado al registrar a un expositor.
+
+    Prioriza `fecha_evento`, que es lo que guarda el formulario de registro
+    (ponente, tallerista, instructor y registro extemporáneo), y cae a
+    `indice_registro` (formato YYYYMMDD) de los registros antiguos. Devuelve
+    None si el registro no trae una fecha utilizable.
+    """
+    fecha = _a_datetime(participante.get('fecha_evento'))
+    if fecha:
+        return fecha
+
+    indice = str(participante.get('indice_registro', '') or '').strip()
+    if len(indice) == 8 and indice.isdigit():
+        try:
+            return datetime.strptime(indice, '%Y%m%d')
+        except ValueError:
+            return None
     return None
 
 
@@ -220,6 +248,14 @@ def generar_pdf_participante(participante, afiche_path, lugar=None):
         # Different months: "31 de agosto al 02 de septiembre de 2025"
         fecha_inicio_formateada = fecha_inicio_evento.strftime('%d de %B')
         fecha_fin_formateada = f"{fecha_inicio_formateada} al {fecha_fin_evento.strftime('%d de %B de %Y')}"
+
+    # Día en que participó el expositor. `fecha_evento` es la fecha elegida al
+    # añadir la participación, así que los eventos de varios días no deben
+    # imprimir el rango ni la fecha de fin del evento.
+    fecha_participacion = _fecha_participacion(participante)
+    fecha_participacion_formateada = (
+        fecha_participacion.strftime('%d de %B de %Y') if fecha_participacion else None
+    )
 
     # Lógica especial para eventos padre
     if evento.get('evento_padre'):
@@ -476,7 +512,11 @@ def generar_pdf_participante(participante, afiche_path, lugar=None):
         if evento.get('registro_abierto') is True:
             fecha_y = actividad_y
         else:
-            fecha_y = draw_centered_text(actividad_y - 0.3 * inch, fecha_fin_formateada)
+            fecha_mostrada = fecha_fin_formateada
+            if (participante.get('rol') in ROLES_CON_FECHA_PARTICIPACION
+                    and fecha_participacion_formateada):
+                fecha_mostrada = fecha_participacion_formateada
+            fecha_y = draw_centered_text(actividad_y - 0.3 * inch, fecha_mostrada)
 
         next_y = fecha_y - 0.3 * inch
 
@@ -493,7 +533,12 @@ def generar_pdf_participante(participante, afiche_path, lugar=None):
     fecha_aprobacion = obtener_fecha_aprobacion(
         evento_evaluaciones, participante['cedula'], codigo_evento_evaluaciones
     )
-    fecha_fin_simple = (fecha_aprobacion or fecha_fin_evento).strftime('%d de %B de %Y')
+    # Los expositores se acreditan por su participación, no por evaluación: si
+    # el registro guarda el día en que participaron, ese es el que se imprime.
+    fecha_documento = fecha_aprobacion
+    if not fecha_documento and participante.get('rol') in ROLES_CON_FECHA_PARTICIPACION:
+        fecha_documento = fecha_participacion
+    fecha_fin_simple = (fecha_documento or fecha_fin_evento).strftime('%d de %B de %Y')
     # Usar next_y si está definido (para ponentes) o la posición fija para participantes
     final_position = next_y if 'next_y' in locals() else 2.7 * inch
     # Determinar la provincia basada en la región
