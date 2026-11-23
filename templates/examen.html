@@ -72,6 +72,17 @@
                 <div class="sm:order-2 lg:col-span-9 min-w-0">
 
                     <div class="m-8">
+                        {% with mensajes = get_flashed_messages(with_categories=true) %}
+                        {% if mensajes %}
+                        <div class="mb-4 space-y-2">
+                            {% for categoria, mensaje in mensajes %}
+                            <div class="p-3 rounded-lg border text-sm {% if categoria == 'error' %}bg-red-50 border-red-200 text-red-800{% else %}bg-green-50 border-green-200 text-green-800{% endif %}">
+                                {{ mensaje }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% endwith %}
                         <div class="mx-auto">
                             <h2 class="text-2xl font-bold mb-4">{{ contenido.titulo }}</h2>
                             {% if puntaje is not none and puntaje[1] == 0 %}

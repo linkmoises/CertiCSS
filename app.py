@@ -275,6 +275,21 @@ except Exception as e:
     logger.error(f"Error al crear índices para encuestas_v2: {e}")
 
 ###
+### Índice único de progreso por contenido (avance secuencial LMS)
+###
+try:
+    existing_indexes = collection_progreso.index_information()
+    if "progreso_unico" not in existing_indexes:
+        collection_progreso.create_index(
+            [("codigo_evento", 1), ("cedula_participante", 1), ("contenido_id", 1)],
+            unique=True,
+            name="progreso_unico",
+        )
+        logger.info("Índice progreso_unico creado en collection_progreso")
+except Exception as e:
+    logger.error(f"Error al crear índice en collection_progreso: {e}")
+
+###
 ### Crear índice TTL para OTPs (auto-expiración en MongoDB)
 ###
 try:

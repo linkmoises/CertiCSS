@@ -53,6 +53,32 @@
                             </div>
                             <!-- End Header -->
 
+                            <!-- Avance secuencial -->
+                            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                                <form action="{{ url_for('plataforma.configurar_secuencial', codigo_evento=codigo_evento) }}"
+                                    method="POST" class="flex flex-col sm:flex-row sm:items-center gap-3">
+                                    <div class="flex-1">
+                                        <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-800">
+                                            <input type="checkbox" name="lms_secuencial" value="1"
+                                                class="size-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                {% if evento.get('lms_secuencial') %}checked{% endif %}>
+                                            Avance secuencial
+                                        </label>
+                                        <p class="mt-1 text-xs text-gray-500">
+                                            Con esta opción activa, cada participante debe completar un contenido
+                                            antes de abrir el siguiente: video al 50% reproducido, texto/documento
+                                            al abrirlo, examen al enviar un intento y tarea al entregarla. Al
+                                            activarlo en un curso ya iniciado, cada participante vuelve a su primer
+                                            contenido no completado.
+                                        </p>
+                                    </div>
+                                    <button type="submit"
+                                        class="py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                                        Guardar
+                                    </button>
+                                </form>
+                            </div>
+
                             <!-- Body -->
                             <div class="overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200">

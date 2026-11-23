@@ -40,6 +40,7 @@ collection_eventos = db['eventos']              # importado de config.py
 collection_usuarios = db['usuarios']            # importado de config.py
 collection_participantes = db['participantes']  # importado de config.py
 collection_eva = db['eva']
+collection_progreso = db['progreso']
 collection_tokens = db['tokens']
 collection_qbanks = db['qbanks']
 collection_qbanks_data = db['qbanks_data']

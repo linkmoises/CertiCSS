@@ -23,6 +23,7 @@ from app import (
     collection_eventos,
     collection_exam_results,
     collection_participantes,
+    collection_progreso,
     collection_qbanks,
     collection_qbanks_data,
     collection_tarea_entregas,
@@ -168,6 +169,205 @@ def puede_calificar_evento(evento):
             "rol": "coorganizador",
         }
     ) is not None
+
+
+###
+### LMS secuencial: progreso por contenido y desbloqueo en orden
+###
+UMBRAL_VIDEO_PORCENTAJE = 50
+# Ventana máxima de reproducción aceptada en un solo reporte del reproductor.
+MAX_DELTA_SEGUNDOS = 30.0
+
+
+def secuencial_activo(evento):
+    """¿El evento exige completar cada contenido antes de avanzar?"""
+    return bool(evento.get("lms_secuencial"))
+
+
+def clave_contenido(contenido):
+    """Identificador estable de un contenido para el registro de progreso."""
+    return _id_str(contenido) or f"orden:{contenido.get('orden')}"
+
+
+def youtube_video_id(url):
+    """Extrae el ID de un video de YouTube desde cualquier forma de URL."""
+    if not url:
+        return None
+    texto = str(url).strip()
+    for patron in (
+        r"youtu\.be/([A-Za-z0-9_-]{11})",
+        r"youtube(?:-nocookie)?\.com/embed/([A-Za-z0-9_-]{11})",
+        r"youtube(?:-nocookie)?\.com/shorts/([A-Za-z0-9_-]{11})",
+        r"youtube(?:-nocookie)?\.com/live/([A-Za-z0-9_-]{11})",
+        r"youtube(?:-nocookie)?\.com/v/([A-Za-z0-9_-]{11})",
+        r"[?&]v=([A-Za-z0-9_-]{11})",
+    ):
+        coincidencia = re.search(patron, texto)
+        if coincidencia:
+            return coincidencia.group(1)
+    return None
+
+
+def url_video_embed(url):
+    """URL de embed con la IFrame API habilitada, o None si no es YouTube."""
+    video_id = youtube_video_id(url)
+    if not video_id:
+        return None
+    return f"https://www.youtube.com/embed/{video_id}?enablejsapi=1&rel=0"
+
+
+def _progreso_del_participante(codigo_evento, cedula):
+    if not cedula:
+        return {}
+    return {
+        doc.get("contenido_id"): doc
+        for doc in collection_progreso.find(
+            {"codigo_evento": codigo_evento, "cedula_participante": str(cedula)}
+        )
+    }
+
+
+def _examen_enviado(codigo_evento, cedula, contenido):
+    return collection_exam_results.find_one(
+        {
+            "codigo_evento": codigo_evento,
+            "cedula_participante": str(cedula),
+            "$or": [
+                {"examen_id": clave_contenido(contenido)},
+                {"examen_id": None, "orden_examen": contenido.get("orden")},
+                {
+                    "examen_id": {"$exists": False},
+                    "orden_examen": contenido.get("orden"),
+                },
+            ],
+        }
+    ) is not None
+
+
+def _tarea_enviada(codigo_evento, cedula, contenido):
+    return collection_tarea_entregas.find_one(
+        {
+            "codigo_evento": codigo_evento,
+            "cedula_participante": str(cedula),
+            "$or": [
+                {"tarea_id": clave_contenido(contenido)},
+                {"tarea_id": None, "orden_tarea": contenido.get("orden")},
+                {
+                    "tarea_id": {"$exists": False},
+                    "orden_tarea": contenido.get("orden"),
+                },
+            ],
+        }
+    ) is not None
+
+
+def contenido_se_completa_al_abrir(contenido):
+    """¿Basta abrir el contenido para darlo por completado?"""
+    tipo = contenido.get("tipo")
+    if tipo == "video":
+        # Sin ID de YouTube no se puede medir reproducción: se completa al abrir.
+        return youtube_video_id(contenido.get("url_video")) is None
+    if tipo == "examen":
+        return not contenido.get("qbank_config")
+    if tipo == "tarea":
+        return not contenido.get("requiere_entrega")
+    return es_navegable(contenido)
+
+
+def contenido_completado(codigo_evento, cedula, contenido, progreso=None):
+    """Estado de completitud de un contenido según su tipo y el progreso."""
+    tipo = contenido.get("tipo")
+    if tipo == "examen" and contenido.get("qbank_config"):
+        return _examen_enviado(codigo_evento, cedula, contenido)
+    if tipo == "tarea" and contenido.get("requiere_entrega"):
+        return _tarea_enviada(codigo_evento, cedula, contenido)
+    if contenido_se_completa_al_abrir(contenido):
+        doc = (progreso or {}).get(clave_contenido(contenido)) or {}
+        return bool(doc.get("completado"))
+    doc = (progreso or {}).get(clave_contenido(contenido)) or {}
+    return bool(doc.get("completado"))
+
+
+def estado_secuencial(codigo_evento, cedula, contenidos):
+    """Completitud de los contenidos navegables y el primer pendiente.
+
+    Devuelve (completados, primer_pendiente): `completados` es un dict
+    clave_contenido -> bool y `primer_pendiente` el doc del primer contenido
+    no completado en orden, o None si ya completó todo.
+    """
+    progreso = _progreso_del_participante(codigo_evento, cedula)
+    completados = {}
+    primer_pendiente = None
+    for contenido in contenidos:
+        if not es_navegable(contenido):
+            continue
+        completado = contenido_completado(codigo_evento, cedula, contenido, progreso)
+        completados[clave_contenido(contenido)] = completado
+        if not completado and primer_pendiente is None:
+            primer_pendiente = contenido
+    return completados, primer_pendiente
+
+
+def marcar_contenido_visto(codigo_evento, cedula, contenido, porcentaje=100):
+    """Registra un contenido como completado al abrirlo."""
+    ahora = datetime.now()
+    collection_progreso.update_one(
+        {
+            "codigo_evento": codigo_evento,
+            "cedula_participante": str(cedula),
+            "contenido_id": clave_contenido(contenido),
+        },
+        {
+            "$set": {
+                "orden": contenido.get("orden"),
+                "tipo": contenido.get("tipo"),
+                "completado": True,
+                "fecha_actualizacion": ahora,
+            },
+            "$setOnInsert": {"fecha_inicio": ahora, "fecha_completado": ahora},
+            "$max": {"porcentaje": int(porcentaje)},
+        },
+        upsert=True,
+    )
+
+
+def registrar_progreso_video(codigo_evento, cedula, contenido, delta, duracion):
+    """Acumula segundos reproducidos de un video y evalúa el umbral del 50%.
+
+    El cliente informa solo el tiempo nuevo reproducido (`delta`). El servidor
+    acumula entre sesiones y exige haber visto la mitad del video. Devuelve
+    (porcentaje, completado).
+    """
+    filtro = {
+        "codigo_evento": codigo_evento,
+        "cedula_participante": str(cedula),
+        "contenido_id": clave_contenido(contenido),
+    }
+    doc = collection_progreso.find_one(filtro) or {}
+    segundos = float(doc.get("segundos_vistos") or 0)
+    if segundos > duracion:
+        # El contenido cambió de duración: el acumulado anterior ya no sirve.
+        segundos = 0
+    segundos = min(duracion, segundos + delta)
+    porcentaje = int(round(segundos * 100 / duracion))
+    completado = bool(doc.get("completado")) or porcentaje >= UMBRAL_VIDEO_PORCENTAJE
+    ahora = datetime.now()
+    actualizacion = {
+        "$set": {
+            "orden": contenido.get("orden"),
+            "tipo": "video",
+            "segundos_vistos": segundos,
+            "duracion": duracion,
+            "porcentaje": porcentaje,
+            "completado": completado,
+            "fecha_actualizacion": ahora,
+        },
+        "$setOnInsert": {"fecha_inicio": ahora},
+    }
+    if completado and not doc.get("completado"):
+        actualizacion["$set"]["fecha_completado"] = ahora
+    collection_progreso.update_one(filtro, actualizacion, upsert=True)
+    return porcentaje, completado
 
 
 def estado_tareas_evento(codigo_evento, cedula_participante):
@@ -355,6 +555,34 @@ def listar_contenidos(codigo_evento):
         evento=evento,
         actividades=actividades,
         arbol=arbol,
+    )
+
+
+@plataforma_bp.route(
+    "/tablero/eventos/<codigo_evento>/lms/secuencial", methods=["POST"]
+)
+@login_required
+@lms_required
+def configurar_secuencial(codigo_evento):
+    """Activa o desactiva el avance secuencial del curso."""
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+
+    activo = request.form.get("lms_secuencial") == "1"
+    collection_eventos.update_one(
+        {"codigo": codigo_evento}, {"$set": {"lms_secuencial": activo}}
+    )
+    if activo:
+        flash(
+            "Avance secuencial activado: cada participante deberá completar un "
+            "contenido antes de abrir el siguiente.",
+            "success",
+        )
+    else:
+        flash("Avance secuencial desactivado.", "success")
+    return redirect(
+        url_for("plataforma.listar_contenidos", codigo_evento=codigo_evento)
     )
 
 
@@ -1282,6 +1510,22 @@ def ver_plataforma(codigo_evento):
     if not evento:
         abort(404)
 
+    if secuencial_activo(evento) and cedula and not puede_calificar_evento(evento):
+        contenidos_evento = list(
+            collection_eva.find({"codigo_evento": codigo_evento}).sort("orden", 1)
+        )
+        _, pendiente = estado_secuencial(codigo_evento, cedula, contenidos_evento)
+        if pendiente:
+            return redirect(
+                url_for(
+                    "plataforma.ver_contenido",
+                    codigo_evento=codigo_evento,
+                    orden=pendiente["orden"],
+                    cedula=cedula,
+                    token=token,
+                )
+            )
+
     primer_contenido = collection_eva.find_one(
         {"codigo_evento": codigo_evento, "tipo": {"$nin": ["modulo", "submodulo"]}},
         sort=[("orden", 1)],
@@ -1316,6 +1560,10 @@ def ver_plataforma(codigo_evento):
             arbol=arbol,
             modulo_padre=None,
             submodulo_padre=None,
+            secuencial=False,
+            contenidos_completados={},
+            primer_pendiente_orden=None,
+            siguiente_bloqueado=False,
         )
 
 
@@ -1386,6 +1634,61 @@ def ver_contenido(codigo_evento, orden):
             )
         )
 
+    # --- Avance secuencial (opt-in por evento) ---
+    # El bloqueo se evalúa aquí, antes de renderizar: el HTML puede ocultar
+    # enlaces, pero la regla vive en el servidor.
+    secuencial = (
+        secuencial_activo(evento)
+        and bool(cedula)
+        and not puede_calificar_evento(evento)
+    )
+
+    def _nav_secuencial():
+        if not secuencial:
+            return {
+                "secuencial": False,
+                "contenidos_completados": {},
+                "primer_pendiente_orden": None,
+            }
+        completados, pendiente = estado_secuencial(codigo_evento, cedula, contenidos)
+        return {
+            "secuencial": True,
+            "contenidos_completados": completados,
+            "primer_pendiente_orden": pendiente.get("orden") if pendiente else None,
+        }
+
+    nav = _nav_secuencial()
+    if secuencial:
+        actual_completado = nav["contenidos_completados"].get(
+            clave_contenido(contenido_actual), False
+        )
+        if (
+            not actual_completado
+            and nav["primer_pendiente_orden"] is not None
+            and contenido_actual["orden"] > nav["primer_pendiente_orden"]
+        ):
+            flash("Completa los contenidos anteriores para continuar.", "error")
+            return redirect(
+                url_for(
+                    "plataforma.ver_contenido",
+                    codigo_evento=codigo_evento,
+                    orden=nav["primer_pendiente_orden"],
+                    cedula=cedula,
+                    token=token,
+                )
+            )
+        if not actual_completado and contenido_se_completa_al_abrir(contenido_actual):
+            marcar_contenido_visto(codigo_evento, cedula, contenido_actual)
+            nav = _nav_secuencial()
+
+    def _siguiente_bloqueado(nav_actual, siguiente):
+        if not nav_actual.get("secuencial") or not siguiente:
+            return False
+        if nav_actual["contenidos_completados"].get(clave_contenido(siguiente)):
+            return False
+        pendiente = nav_actual.get("primer_pendiente_orden")
+        return pendiente is not None and siguiente["orden"] > pendiente
+
     # Convertir Markdown a HTML solo si el tipo es 'texto'
     if (
         contenido_actual.get("tipo") == "texto"
@@ -1393,6 +1696,11 @@ def ver_contenido(codigo_evento, orden):
     ):
         contenido_actual["contenido_texto"] = markdown.markdown(
             contenido_actual["contenido_texto"]
+        )
+
+    if contenido_actual.get("tipo") == "video":
+        contenido_actual["url_video_embed"] = url_video_embed(
+            contenido_actual.get("url_video")
         )
 
     # Mostrar examen si el tipo es 'examen' y tiene qbank_config
@@ -1669,6 +1977,9 @@ def ver_contenido(codigo_evento, orden):
                 contenidos_by_id_ex, contenido_actual
             )
             arbol_ex = build_arbol_lms(contenidos)
+            if secuencial and request.method == "POST":
+                # El intento se guardó arriba: recalcular desbloqueo.
+                nav = _nav_secuencial()
             return render_template(
                 "examen.html",
                 preguntas=preguntas,
@@ -1694,6 +2005,7 @@ def ver_contenido(codigo_evento, orden):
                 arbol=arbol_ex,
                 modulo_padre=modulo_padre_ex,
                 submodulo_padre=submodulo_padre_ex,
+                **nav,
             )
 
 
@@ -1830,6 +2142,11 @@ def ver_contenido(codigo_evento, orden):
         siguiente_t = (
             navegables_t[idx_t + 1] if idx_t < len(navegables_t) - 1 else None
         )
+        if secuencial and request.method == "POST":
+            # La entrega ya se guardó arriba: recalcular desbloqueo.
+            nav = _nav_secuencial()
+        nav_t = dict(nav)
+        nav_t["siguiente_bloqueado"] = _siguiente_bloqueado(nav_t, siguiente_t)
         return render_template(
             "plataforma.html",
             evento=evento,
@@ -1848,6 +2165,7 @@ def ver_contenido(codigo_evento, orden):
             permite_archivo=permite_archivo,
             nanoid=nanoid,
             prog=prog,
+            **nav_t,
         )
 
     # Encontrar el contenido anterior y el siguiente (saltando módulos y
@@ -1861,6 +2179,7 @@ def ver_contenido(codigo_evento, orden):
     contenidos_by_id = {_id_str(c): c for c in contenidos}
     modulo_padre, submodulo_padre = breadcrumb_lms(contenidos_by_id, contenido_actual)
     arbol = build_arbol_lms(contenidos)
+    nav["siguiente_bloqueado"] = _siguiente_bloqueado(nav, contenido_siguiente)
 
     return render_template(
         "plataforma.html",
@@ -1874,7 +2193,44 @@ def ver_contenido(codigo_evento, orden):
         arbol=arbol,
         modulo_padre=modulo_padre,
         submodulo_padre=submodulo_padre,
+        **nav,
     )
+
+
+@plataforma_bp.route(
+    "/plataforma/<codigo_evento>/<int:orden>/progreso", methods=["POST"]
+)
+@token_required
+def registrar_progreso(codigo_evento, orden):
+    """Acumula el tiempo reproducido de un video y evalúa el umbral del 50%."""
+    cedula = request.args.get("cedula")
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+    contenido = collection_eva.find_one(
+        {"codigo_evento": codigo_evento, "orden": orden}
+    )
+    if not contenido:
+        abort(404)
+    if contenido.get("tipo") != "video":
+        return jsonify({"error": "El contenido no es un video."}), 400
+    if not secuencial_activo(evento) or puede_calificar_evento(evento):
+        return jsonify({"completado": True, "porcentaje": 100})
+
+    datos = request.get_json(silent=True) or request.form
+    try:
+        delta = float(datos.get("delta") or 0)
+        duracion = float(datos.get("duracion") or 0)
+    except (TypeError, ValueError):
+        return jsonify({"error": "Datos de progreso inválidos."}), 400
+    if not cedula or delta <= 0 or duracion <= 0:
+        return jsonify({"error": "Datos de progreso inválidos."}), 400
+
+    delta = min(delta, MAX_DELTA_SEGUNDOS)
+    porcentaje, completado = registrar_progreso_video(
+        codigo_evento, cedula, contenido, delta, duracion
+    )
+    return jsonify({"porcentaje": porcentaje, "completado": completado})
 
 
 ###

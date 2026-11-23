@@ -1,6 +1,26 @@
 {# Sidebar jerárquico LMS: Módulo -> Submódulo -> Contenido + huérfanos.
    Backward-compatible: si `arbol` no está definido, cae al listado plano legacy.
-   Requiere: contenidos, contenido_actual, evento, cedula, token, (opcional) arbol. #}
+   Requiere: contenidos, contenido_actual, evento, cedula, token, (opcional) arbol.
+   Opcional (avance secuencial): secuencial, contenidos_completados,
+   primer_pendiente_orden. #}
+{% set secuencial = secuencial|default(false) %}
+{% set contenidos_completados = contenidos_completados|default({}) %}
+{% set primer_pendiente_orden = primer_pendiente_orden|default(none) %}
+
+{% macro _item_contenido(c, contenido_actual, evento, cedula, token, secuencial,
+                         completados, primer_pendiente_orden) -%}
+{%- set completado = completados.get(c._id|string, false) if completados else false -%}
+{%- set desbloqueado = (not secuencial) or completado or
+    (primer_pendiente_orden is not none and c.orden <= primer_pendiente_orden) -%}
+<li class="gap-x-2 {% if contenido_actual and c.orden == contenido_actual.orden %}font-bold{% endif %}">
+    {% if desbloqueado %}
+    <a href="{{ url_for('plataforma.ver_contenido', codigo_evento=evento.codigo, orden=c.orden, cedula=cedula, token=token) }}">{{ c.orden|string|zfill(2) }} - {{ c.titulo }}</a>{% if completado %} <span class="text-green-600" title="Completado">✔</span>{% endif %}
+    {% else %}
+    <span class="text-gray-400 cursor-not-allowed" title="Completa los contenidos anteriores">🔒 {{ c.orden|string|zfill(2) }} - {{ c.titulo }}</span>
+    {% endif %}
+</li>
+{%- endmacro %}
+
 {% if arbol is defined and arbol %}
 <ul class="text-sm text-gray-500 space-y-1">
     {# Contenidos huérfanos (planos, sin módulo): cursos legacy se ven igual que antes #}
@@ -12,17 +32,15 @@
             <summary class="font-bold text-gray-800 px-2 py-1 cursor-pointer list-none">▸ {{ h.doc.titulo }} <span class="text-[10px] font-normal text-yellow-700">(submódulo)</span></summary>
             <ul class="pl-4 pb-1">
                 {% for c in h.contenidos %}
-                <li class="gap-x-2 {% if contenido_actual and c.orden == contenido_actual.orden %}font-bold{% endif %}">
-                    <a href="{{ url_for('plataforma.ver_contenido', codigo_evento=evento.codigo, orden=c.orden, cedula=cedula, token=token) }}">{{ c.orden|string|zfill(2) }} - {{ c.titulo }}</a>
-                </li>
+                {{ _item_contenido(c, contenido_actual, evento, cedula, token, secuencial,
+                                   contenidos_completados, primer_pendiente_orden) }}
                 {% endfor %}
             </ul>
         </details>
     </li>
     {% else %}
-    <li class="gap-x-2 {% if contenido_actual and h.orden == contenido_actual.orden %}font-bold{% endif %}">
-        <a href="{{ url_for('plataforma.ver_contenido', codigo_evento=evento.codigo, orden=h.orden, cedula=cedula, token=token) }}">{{ h.orden|string|zfill(2) }} - {{ h.titulo }}</a>
-    </li>
+    {{ _item_contenido(h, contenido_actual, evento, cedula, token, secuencial,
+                       contenidos_completados, primer_pendiente_orden) }}
     {% endif %}
     {% endfor %}
     {% for nodo in arbol.modulos %}
@@ -31,9 +49,8 @@
             <summary class="font-bold text-gray-800 uppercase tracking-wide px-2 py-1 cursor-pointer list-none">📁 {{ nodo.doc.titulo }}</summary>
             <ul class="pl-3 py-1 space-y-1">
                 {% for c in nodo.contenidos_directos %}
-                <li class="gap-x-2 {% if contenido_actual and c.orden == contenido_actual.orden %}font-bold{% endif %}">
-                    <a href="{{ url_for('plataforma.ver_contenido', codigo_evento=evento.codigo, orden=c.orden, cedula=cedula, token=token) }}">{{ c.orden|string|zfill(2) }} - {{ c.titulo }}</a>
-                </li>
+                {{ _item_contenido(c, contenido_actual, evento, cedula, token, secuencial,
+                                   contenidos_completados, primer_pendiente_orden) }}
                 {% endfor %}
                 {% for sub in nodo.submodulos %}
                 <li>
@@ -41,9 +58,8 @@
                         <summary class="font-semibold text-gray-700 px-2 py-1 cursor-pointer list-none text-[13px]">📂 {{ sub.doc.titulo }}</summary>
                         <ul class="pl-4 pb-1">
                             {% for c in sub.contenidos %}
-                            <li class="gap-x-2 {% if contenido_actual and c.orden == contenido_actual.orden %}font-bold{% endif %}">
-                                <a href="{{ url_for('plataforma.ver_contenido', codigo_evento=evento.codigo, orden=c.orden, cedula=cedula, token=token) }}">{{ c.orden|string|zfill(2) }} - {{ c.titulo }}</a>
-                            </li>
+                            {{ _item_contenido(c, contenido_actual, evento, cedula, token, secuencial,
+                                               contenidos_completados, primer_pendiente_orden) }}
                             {% endfor %}
                         </ul>
                     </details>
@@ -63,9 +79,8 @@
     {% elif contenido.tipo == 'submodulo' %}
     <li class="font-semibold text-gray-700 px-4 py-1 bg-white border-l-4 border-gray-300 ml-2">{{ contenido.titulo }}</li>
     {% else %}
-    <li class="gap-x-2 {% if contenido_actual and contenido.orden == contenido_actual.orden %}font-bold{% endif %}">
-        <a href="{{ url_for('plataforma.ver_contenido', codigo_evento=evento.codigo, orden=contenido.orden, cedula=cedula, token=token) }}">{{ contenido.orden|string|zfill(2) }} - {{ contenido.titulo }}</a>
-    </li>
+    {{ _item_contenido(contenido, contenido_actual, evento, cedula, token, secuencial,
+                       contenidos_completados, primer_pendiente_orden) }}
     {% endif %}
     {% endfor %}
 </ul>

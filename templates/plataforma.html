@@ -85,17 +85,127 @@
 
                     <div class="m-8">
 
+                        {% with mensajes = get_flashed_messages(with_categories=true) %}
+                        {% if mensajes %}
+                        <div class="mb-4 space-y-2">
+                            {% for categoria, mensaje in mensajes %}
+                            <div class="p-3 rounded-lg border text-sm {% if categoria == 'error' %}bg-red-50 border-red-200 text-red-800{% else %}bg-green-50 border-green-200 text-green-800{% endif %}">
+                                {{ mensaje }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+
                         {% if contenido_actual %}
 
                         {% if contenido_actual.tipo == 'video' %}
                         <h2 class="text-xl font-bold text-gray-800 pb-4">{{ contenido_actual.titulo }}</h2>
                         <div style="display: flex; justify-content: center;">
-                            <iframe style="aspect-ratio: 16 / 9; width: 100% !important;"
-                                src="{{ contenido_actual.url_video }}" title="{{ contenido_actual.titulo }}"
+                            <iframe id="lms-video-player" style="aspect-ratio: 16 / 9; width: 100% !important;"
+                                src="{{ contenido_actual.url_video_embed if (secuencial and contenido_actual.url_video_embed) else contenido_actual.url_video }}" title="{{ contenido_actual.titulo }}"
                                 frameborder="0"
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                 referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                         </div>
+                        {% if secuencial and contenido_actual.url_video_embed %}
+                        <p id="lms-video-progreso" class="mt-3 text-sm text-gray-600">
+                            Progreso del video: 0% (mínimo 50% para continuar)
+                        </p>
+                        <script>
+                        (function () {
+                            var reproductor = null;
+                            var duracion = 0;
+                            var pendiente = 0;
+                            var ultimaPosicion = null;
+                            var completado = false;
+                            var enviando = false;
+                            var urlProgreso = {{ url_for('plataforma.registrar_progreso', codigo_evento=evento.codigo, orden=contenido_actual.orden, cedula=cedula, token=token) | tojson }};
+                            var estado = document.getElementById('lms-video-progreso');
+                            var enlaceSiguiente = document.getElementById('lms-siguiente');
+                            var botonBloqueado = document.getElementById('lms-siguiente-bloqueado');
+
+                            function pintar(porcentaje) {
+                                if (!estado) return;
+                                if (completado) {
+                                    estado.textContent = '✔ Video completado';
+                                    estado.className = 'mt-3 text-sm font-semibold text-green-700';
+                                } else {
+                                    estado.textContent = 'Progreso del video: ' + porcentaje + '% (mínimo 50% para continuar)';
+                                }
+                            }
+
+                            function desbloquear() {
+                                if (enlaceSiguiente) enlaceSiguiente.classList.remove('hidden');
+                                if (botonBloqueado) botonBloqueado.classList.add('hidden');
+                            }
+
+                            function enviar() {
+                                if (!duracion || pendiente < 1 || enviando || completado) return;
+                                var delta = pendiente;
+                                pendiente = 0;
+                                enviando = true;
+                                fetch(urlProgreso, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ delta: delta, duracion: duracion }),
+                                    keepalive: true
+                                }).then(function (respuesta) {
+                                    return respuesta.json();
+                                }).then(function (datos) {
+                                    enviando = false;
+                                    if (!datos) return;
+                                    if (typeof datos.porcentaje === 'number') pintar(datos.porcentaje);
+                                    if (datos.completado) {
+                                        completado = true;
+                                        pintar(100);
+                                        desbloquear();
+                                    }
+                                }).catch(function () { enviando = false; });
+                            }
+
+                            function tick() {
+                                if (!reproductor) return;
+                                if (!duracion && reproductor.getDuration) {
+                                    duracion = reproductor.getDuration() || 0;
+                                }
+                                if (!duracion) return;
+                                var posicion = reproductor.getCurrentTime();
+                                if (ultimaPosicion !== null) {
+                                    var avance = posicion - ultimaPosicion;
+                                    // Ignora saltos de la barra y retrocesos.
+                                    if (avance > 0 && avance <= 3) pendiente += avance;
+                                }
+                                ultimaPosicion = posicion;
+                                if (pendiente >= 5) enviar();
+                            }
+
+                            window.onYouTubeIframeAPIReady = function () {
+                                reproductor = new YT.Player('lms-video-player', {
+                                    events: {
+                                        onReady: function (evento) {
+                                            duracion = evento.target.getDuration() || 0;
+                                            setInterval(tick, 1000);
+                                        },
+                                        onStateChange: function (evento) {
+                                            if (evento.data === YT.PlayerState.PLAYING) {
+                                                ultimaPosicion = reproductor.getCurrentTime();
+                                            } else if (evento.data === YT.PlayerState.PAUSED ||
+                                                       evento.data === YT.PlayerState.ENDED) {
+                                                enviar();
+                                            }
+                                        }
+                                    }
+                                });
+                            };
+
+                            // Cargar la IFrame API después de definir el callback.
+                            var apiYoutube = document.createElement('script');
+                            apiYoutube.src = 'https://www.youtube.com/iframe_api';
+                            document.head.appendChild(apiYoutube);
+                        })();
+                        </script>
+                        {% endif %}
                         <br />
                         {% elif contenido_actual.tipo == 'texto' %}
                         <div class="lms-contenido prose text-gray-600 w-full text-sm !max-w-none">
@@ -222,8 +332,8 @@
                             {% endif %}
 
                             {% if contenido_siguiente %}
-                            <a href="{{ url_for('plataforma.ver_contenido', codigo_evento=evento.codigo, orden=contenido_siguiente.orden, cedula=cedula, token=token) }}"
-                                class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                            <a id="lms-siguiente" href="{{ url_for('plataforma.ver_contenido', codigo_evento=evento.codigo, orden=contenido_siguiente.orden, cedula=cedula, token=token) }}"
+                                class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700{% if siguiente_bloqueado|default(false) %} hidden{% endif %}">
                                 <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" stroke-linejoin="round">
@@ -231,6 +341,15 @@
                                 </svg>
                                 Siguiente
                             </a>
+                            <button id="lms-siguiente-bloqueado" disabled
+                                class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700{% if not siguiente_bloqueado|default(false) %} hidden{% endif %}">
+                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m9 18 6-6-6-6"></path>
+                                </svg>
+                                Siguiente
+                            </button>
                             {% else %}
                             <button disabled
                                 class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
