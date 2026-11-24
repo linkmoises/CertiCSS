@@ -6,6 +6,8 @@
 {% set secuencial = secuencial|default(false) %}
 {% set contenidos_completados = contenidos_completados|default({}) %}
 {% set primer_pendiente_orden = primer_pendiente_orden|default(none) %}
+{% set modulo_padre = modulo_padre|default(none) %}
+{% set submodulo_padre = submodulo_padre|default(none) %}
 
 {% macro _item_contenido(c, contenido_actual, evento, cedula, token, secuencial,
                          completados, primer_pendiente_orden) -%}
@@ -28,7 +30,7 @@
     {% if h.doc is defined %}
     {# Nodo submódulo huérfano #}
     <li>
-        <details open class="bg-yellow-50 border border-yellow-200 rounded">
+        <details{% if submodulo_padre and submodulo_padre._id|string == h.doc._id|string %} open{% endif %} class="bg-yellow-50 border border-yellow-200 rounded" data-lms-nodo="{{ h.doc._id }}">
             <summary class="font-bold text-gray-800 px-2 py-1 cursor-pointer list-none">▸ {{ h.doc.titulo }} <span class="text-[10px] font-normal text-yellow-700">(submódulo)</span></summary>
             <ul class="pl-4 pb-1">
                 {% for c in h.contenidos %}
@@ -45,7 +47,7 @@
     {% endfor %}
     {% for nodo in arbol.modulos %}
     <li>
-        <details open class="bg-gray-100 rounded">
+        <details{% if modulo_padre and modulo_padre._id|string == nodo.doc._id|string %} open{% endif %} class="bg-gray-100 rounded" data-lms-nodo="{{ nodo.doc._id }}">
             <summary class="font-bold text-gray-800 uppercase tracking-wide px-2 py-1 cursor-pointer list-none">📁 {{ nodo.doc.titulo }}</summary>
             <ul class="pl-3 py-1 space-y-1">
                 {% for c in nodo.contenidos_directos %}
@@ -54,7 +56,7 @@
                 {% endfor %}
                 {% for sub in nodo.submodulos %}
                 <li>
-                    <details open class="bg-white border border-gray-200 rounded ml-2">
+                    <details{% if submodulo_padre and submodulo_padre._id|string == sub.doc._id|string %} open{% endif %} class="bg-white border border-gray-200 rounded ml-2" data-lms-nodo="{{ sub.doc._id }}">
                         <summary class="font-semibold text-gray-700 px-2 py-1 cursor-pointer list-none text-[13px]">📂 {{ sub.doc.titulo }}</summary>
                         <ul class="pl-4 pb-1">
                             {% for c in sub.contenidos %}
@@ -90,3 +92,28 @@
     {% if modulo_padre %}📁 {{ modulo_padre.titulo }}{% endif %}{% if submodulo_padre %} / 📂 {{ submodulo_padre.titulo }}{% endif %}
 </p>
 {% endif %}
+<script>
+(function () {
+    // Recuerda qué módulos/submódulos abrió o cerró el participante.
+    var prefijo = 'lms-arbol:' + {{ evento.codigo|tojson }} + ':';
+    var listo = false;
+    setTimeout(function () { listo = true; }, 300);
+    document.querySelectorAll('details[data-lms-nodo]').forEach(function (detalle) {
+        var clave = prefijo + detalle.getAttribute('data-lms-nodo');
+        try {
+            var guardado = window.localStorage.getItem(clave);
+            if (guardado === '1') {
+                detalle.open = true;
+            } else if (guardado === '0') {
+                detalle.open = false;
+            }
+        } catch (error) { /* almacenamiento no disponible */ }
+        detalle.addEventListener('toggle', function () {
+            if (!listo) return;
+            try {
+                window.localStorage.setItem(clave, detalle.open ? '1' : '0');
+            } catch (error) { /* almacenamiento no disponible */ }
+        });
+    });
+})();
+</script>
