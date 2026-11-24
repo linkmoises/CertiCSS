@@ -30,6 +30,7 @@ from app import (
     db,
 )
 from app.auth import token_required, lms_required, lms_edit_required
+from app.mantenimiento_lms import contar_sin_enlace
 
 plataforma_bp = Blueprint("plataforma", __name__)
 
@@ -388,33 +389,23 @@ def registrar_progreso_video(codigo_evento, cedula, contenido, delta, duracion):
     return porcentaje, completado
 
 
-def avisar_calificaciones_historicas(codigo_evento):
-    """Avisa si reordenar puede desalinear calificaciones sin enlace estable.
+def _bloquear_reorden_si_hay_historicos(codigo_evento, accion):
+    """Impide cambiar órdenes si hay calificaciones que dependen de ellos.
 
-    Los resultados nuevos se enlazan por examen_id/tarea_id. Los históricos
-    solo tienen orden_examen/orden_tarea, así que cambiar el orden los
-    desalinea.
+    Los registros históricos sin examen_id/tarea_id se resuelven por orden;
+    cambiarlo los desalinearía. Hasta que se enlacen por id, no se permite
+    reordenar.
     """
-    intentos = collection_exam_results.count_documents(
-        {
-            "codigo_evento": codigo_evento,
-            "$or": [{"examen_id": None}, {"examen_id": {"$exists": False}}],
-        }
+    examenes, tareas = contar_sin_enlace(codigo_evento)
+    if not examenes and not tareas:
+        return False
+    flash(
+        f"No se puede {accion}: este evento tiene {examenes} intento(s) de "
+        f"examen y {tareas} entrega(s) sin enlace estable por id. Ejecuta "
+        "scripts/backfill_lms_fks.py para este evento y vuelve a intentarlo.",
+        "error",
     )
-    entregas = collection_tarea_entregas.count_documents(
-        {
-            "codigo_evento": codigo_evento,
-            "$or": [{"tarea_id": None}, {"tarea_id": {"$exists": False}}],
-        }
-    )
-    if intentos or entregas:
-        flash(
-            "Hay calificaciones históricas sin enlace estable por id "
-            f"({intentos} intento(s) de examen, {entregas} entrega(s)). "
-            "El reordenamiento puede desalinearlas: revisa el listado de "
-            "calificaciones de este evento.",
-            "info",
-        )
+    return True
 
 
 def estado_tareas_evento(codigo_evento, cedula_participante):
@@ -672,6 +663,10 @@ def crear_contenido(codigo_evento):
             ):
                 flash("La posición seleccionada ya no existe.", "error")
                 return redirect(request.url)
+            if _bloquear_reorden_si_hay_historicos(
+                codigo_evento, "insertar en una posición"
+            ):
+                return redirect(request.url)
             nuevo_orden = posicion_destino + 1
 
         contenido = {
@@ -806,7 +801,6 @@ def crear_contenido(codigo_evento):
                 },
                 {"$inc": {"orden": 1}},
             )
-            avisar_calificaciones_historicas(codigo_evento)
 
         collection_eva.insert_one(contenido)
 
@@ -1128,6 +1122,11 @@ def mover_contenido(codigo_evento, orden, direccion):
     if not evento:
         abort(404)
 
+    if _bloquear_reorden_si_hay_historicos(codigo_evento, "mover contenidos"):
+        return redirect(
+            url_for("plataforma.listar_contenidos", codigo_evento=codigo_evento)
+        )
+
     contenido_actual = collection_eva.find_one(
         {"codigo_evento": codigo_evento, "orden": orden}
     )
@@ -1219,6 +1218,9 @@ def reordenar_contenidos(codigo_evento):
         "plataforma.listar_contenidos", codigo_evento=codigo_evento
     )
 
+    if _bloquear_reorden_si_hay_historicos(codigo_evento, "reordenar contenidos"):
+        return redirect(destino_lista)
+
     try:
         mover_orden = int(request.form.get("mover_orden", ""))
     except (TypeError, ValueError):
@@ -1251,14 +1253,12 @@ def reordenar_contenidos(codigo_evento):
             collection_eva.update_one(
                 {"_id": actual["_id"]}, {"$set": {"orden": 1}}
             )
-        avisar_calificaciones_historicas(codigo_evento)
     elif destino == "final":
         if actual["orden"] == maximo:
             return redirect(destino_lista)
         collection_eva.update_one(
             {"_id": actual["_id"]}, {"$set": {"orden": maximo + 1}}
         )
-        avisar_calificaciones_historicas(codigo_evento)
     elif destino.startswith("despues:"):
         try:
             destino_orden = int(destino.split(":", 1)[1])
@@ -1299,7 +1299,6 @@ def reordenar_contenidos(codigo_evento):
             )
         else:
             return redirect(destino_lista)
-        avisar_calificaciones_historicas(codigo_evento)
     else:
         flash("Selecciona una posición de destino.", "error")
         return redirect(destino_lista)
