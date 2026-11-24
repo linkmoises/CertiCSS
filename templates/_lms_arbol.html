@@ -14,9 +14,9 @@
     (primer_pendiente_orden is not none and c.orden <= primer_pendiente_orden) -%}
 <li class="gap-x-2 {% if contenido_actual and c.orden == contenido_actual.orden %}font-bold{% endif %}">
     {% if desbloqueado %}
-    <a href="{{ url_for('plataforma.ver_contenido', codigo_evento=evento.codigo, orden=c.orden, cedula=cedula, token=token) }}">{{ c.orden|string|zfill(2) }} - {{ c.titulo }}</a>{% if completado %} <span class="text-green-600" title="Completado">✔</span>{% endif %}
+    <a href="{{ url_for('plataforma.ver_contenido', codigo_evento=evento.codigo, orden=c.orden, cedula=cedula, token=token) }}">{{ c.titulo }}</a>{% if c.tipo == 'examen' %} <span class="ml-1 px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase bg-amber-100 text-amber-800" title="Actividad evaluativa">Examen</span>{% endif %}{% if completado %} <span class="text-green-600" title="Completado">✔</span>{% endif %}
     {% else %}
-    <span class="text-gray-400 cursor-not-allowed" title="Completa los contenidos anteriores">🔒 {{ c.orden|string|zfill(2) }} - {{ c.titulo }}</span>
+    <span class="text-gray-400 cursor-not-allowed" title="Completa los contenidos anteriores">🔒 {{ c.titulo }}</span>{% if c.tipo == 'examen' %} <span class="ml-1 px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase bg-amber-100 text-amber-800" title="Actividad evaluativa">Examen</span>{% endif %}
     {% endif %}
 </li>
 {%- endmacro %}
