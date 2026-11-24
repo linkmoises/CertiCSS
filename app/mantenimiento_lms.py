@@ -81,6 +81,10 @@ def _elegir_contenido(doc, candidatos, campo_titulo, campo_orden):
     if len(coincidencias) == 1:
         return coincidencias[0], None
     if not coincidencias:
+        # Evento con un solo examen/tarea: aunque el título se haya cambiado,
+        # el registro solo puede pertenecer a ese contenido.
+        if len(candidatos) == 1:
+            return candidatos[0], None
         return None, "sin_coincidencia"
 
     # Títulos repetidos: el orden original desempata si apunta a uno solo.
