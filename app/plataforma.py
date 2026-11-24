@@ -216,6 +216,24 @@ def url_video_embed(url):
     return f"https://www.youtube.com/embed/{video_id}?enablejsapi=1&rel=0"
 
 
+def guardar_material_pdf(archivo, codigo_evento, orden):
+    """Guarda la presentación PDF opcional de un video.
+
+    Devuelve (ruta_relativa, nombre_original) o (None, None) si no se subió
+    archivo. Lanza ValueError si el archivo no es PDF.
+    """
+    if not archivo or not archivo.filename:
+        return None, None
+    if not archivo.filename.lower().endswith(".pdf"):
+        raise ValueError("La presentación debe ser un archivo PDF.")
+    evento_folder = os.path.join(current_app.config["UPLOAD_FOLDER"], codigo_evento)
+    os.makedirs(evento_folder, exist_ok=True)
+    nombre_archivo = f"presentacion-{codigo_evento}-{int(orden):02d}.pdf"
+    archivo.save(os.path.join(evento_folder, nombre_archivo))
+    nombre_original = os.path.basename(archivo.filename)[:120]
+    return f"{codigo_evento}/{nombre_archivo}", nombre_original
+
+
 def _progreso_del_participante(codigo_evento, cedula):
     if not cedula:
         return {}
@@ -675,6 +693,16 @@ def crear_contenido(codigo_evento):
 
         if tipo == "video":
             contenido["url_video"] = request.form["url_video"]
+            try:
+                material_pdf, material_pdf_nombre = guardar_material_pdf(
+                    request.files.get("material_pdf"), codigo_evento, nuevo_orden
+                )
+            except ValueError as error:
+                flash(str(error), "error")
+                return redirect(request.url)
+            if material_pdf:
+                contenido["material_pdf"] = material_pdf
+                contenido["material_pdf_nombre"] = material_pdf_nombre
 
         elif tipo == "texto":
             contenido["contenido_texto"] = request.form["contenido_texto"]
@@ -862,6 +890,19 @@ def editar_contenido(codigo_evento, orden):
 
         if tipo == "video":
             actualizacion["url_video"] = request.form["url_video"]
+            if request.form.get("eliminar_material_pdf") == "1":
+                actualizacion["material_pdf"] = ""
+                actualizacion["material_pdf_nombre"] = ""
+            try:
+                material_pdf, material_pdf_nombre = guardar_material_pdf(
+                    request.files.get("material_pdf"), codigo_evento, orden
+                )
+            except ValueError as error:
+                flash(str(error), "error")
+                return redirect(request.url)
+            if material_pdf:
+                actualizacion["material_pdf"] = material_pdf
+                actualizacion["material_pdf_nombre"] = material_pdf_nombre
         elif tipo == "texto":
             actualizacion["contenido_texto"] = request.form["contenido_texto"]
         elif tipo == "documento":
@@ -907,7 +948,7 @@ def editar_contenido(codigo_evento, orden):
         # Campos específicos por tipo: al cambiar de tipo se eliminan los
         # campos huérfanos del tipo anterior para no arrastrar basura.
         campos_por_tipo = {
-            "video": {"url_video"},
+            "video": {"url_video", "material_pdf", "material_pdf_nombre"},
             "texto": {"contenido_texto"},
             "documento": {"documento"},
             "caso_chatgpt": {"contenido_json"},
@@ -1452,6 +1493,31 @@ def copiar_lms(codigo_evento):
             
             if contenido.get("tipo") == "video":
                 nuevo_contenido["url_video"] = contenido.get("url_video", "")
+                if contenido.get("material_pdf"):
+                    import shutil
+
+                    old_material = contenido["material_pdf"]
+                    old_material_path = os.path.join(
+                        upload_folder, old_material
+                    )
+                    if os.path.exists(old_material_path):
+                        evento_folder_destino = os.path.join(
+                            upload_folder, codigo_destino
+                        )
+                        os.makedirs(evento_folder_destino, exist_ok=True)
+                        new_material = (
+                            f"presentacion-{codigo_destino}-{nuevo_orden:02d}.pdf"
+                        )
+                        shutil.copy2(
+                            old_material_path,
+                            os.path.join(evento_folder_destino, new_material),
+                        )
+                        nuevo_contenido["material_pdf"] = (
+                            f"{codigo_destino}/{new_material}"
+                        )
+                        nuevo_contenido["material_pdf_nombre"] = contenido.get(
+                            "material_pdf_nombre", ""
+                        )
             
             elif contenido.get("tipo") == "texto":
                 nuevo_contenido["contenido_texto"] = contenido.get("contenido_texto", "")

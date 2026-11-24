@@ -68,6 +68,15 @@
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                 referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                         </div>
+                        {% if contenido_actual.material_pdf %}
+                        <div class="mt-4">
+                            <a class="inline-flex items-center gap-x-2 py-2 px-3 text-sm font-medium rounded-lg border border-transparent bg-indigo-900 text-white hover:bg-blue-800 focus:outline-none focus:bg-blue-700"
+                                href="{{ url_for('static', filename='uploads/' + contenido_actual.material_pdf) }}"
+                                target="_blank" rel="noopener">
+                                📄 Descargar presentación{% if contenido_actual.material_pdf_nombre %} ({{ contenido_actual.material_pdf_nombre }}){% endif %}
+                            </a>
+                        </div>
+                        {% endif %}
                         <br />
                         {% elif contenido_actual.tipo == 'texto' %}
                         <div class="lms-contenido prose text-gray-600 w-full text-sm !max-w-none">
