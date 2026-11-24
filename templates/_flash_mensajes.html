@@ -1,0 +1,13 @@
+{# Mensajes flash del tablero: error/danger rojo, warning ámbar, info azul,
+   success verde. #}
+{% with mensajes = get_flashed_messages(with_categories=true) %}
+{% if mensajes %}
+<div class="space-y-2">
+    {% for categoria, mensaje in mensajes %}
+    <div class="p-3 rounded-lg border text-sm {% if categoria in ('error', 'danger') %}bg-red-50 border-red-200 text-red-800{% elif categoria == 'warning' %}bg-amber-50 border-amber-200 text-amber-800{% elif categoria == 'info' %}bg-blue-50 border-blue-200 text-blue-800{% else %}bg-green-50 border-green-200 text-green-800{% endif %}">
+        {{ mensaje }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}

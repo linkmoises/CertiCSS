@@ -6,6 +6,8 @@
     <div class="w-full lg:ps-64">
         <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
 
+            {% include '_flash_mensajes.html' %}
+
             <!-- TABLA RESUMEN EVENTOS -->
             <div class="max-w-[85rem] px-2 pt-1 mx-auto">
                 <!-- Card -->
@@ -96,6 +98,17 @@
                                                     </select>
                                                 </div>
                                                 <p class="mt-1 text-xs text-gray-500">Contenidos huérfanos se muestran como lista plana (compatible con cursos existentes).</p>
+                                            </div>
+
+                                            <div class="w-full mt-4">
+                                                <label for="posicion" class="block text-sm font-medium text-gray-700 mb-1.5">Posición en el listado</label>
+                                                <select id="posicion" name="posicion" class="py-2 px-3 block w-full border-gray-200 shadow-sm text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500">
+                                                    <option value="final">Al final (después de todo)</option>
+                                                    {% for a in actividades|default([]) %}
+                                                    <option value="despues:{{ a.orden }}">Después de {{ a.orden }} · {{ a.titulo }}{% if a.tipo == 'modulo' %} (módulo){% elif a.tipo == 'submodulo' %} (submódulo){% endif %}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                <p class="mt-1 text-xs text-gray-500">El contenido se inserta justo después del elemento elegido; los siguientes se corren un puesto.</p>
                                             </div>
 
                                             <div id="modulo_fields" style="display: none;" class="w-full inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">

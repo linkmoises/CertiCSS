@@ -216,7 +216,7 @@ def url_video_embed(url):
     return f"https://www.youtube.com/embed/{video_id}?enablejsapi=1&rel=0"
 
 
-def guardar_material_pdf(archivo, codigo_evento, orden):
+def guardar_material_pdf(archivo, codigo_evento):
     """Guarda la presentación PDF opcional de un video.
 
     Devuelve (ruta_relativa, nombre_original) o (None, None) si no se subió
@@ -228,7 +228,7 @@ def guardar_material_pdf(archivo, codigo_evento, orden):
         raise ValueError("La presentación debe ser un archivo PDF.")
     evento_folder = os.path.join(current_app.config["UPLOAD_FOLDER"], codigo_evento)
     os.makedirs(evento_folder, exist_ok=True)
-    nombre_archivo = f"presentacion-{codigo_evento}-{int(orden):02d}.pdf"
+    nombre_archivo = f"presentacion-{codigo_evento}-{uuid.uuid4().hex[:8]}.pdf"
     archivo.save(os.path.join(evento_folder, nombre_archivo))
     nombre_original = os.path.basename(archivo.filename)[:120]
     return f"{codigo_evento}/{nombre_archivo}", nombre_original
@@ -386,6 +386,35 @@ def registrar_progreso_video(codigo_evento, cedula, contenido, delta, duracion):
         actualizacion["$set"]["fecha_completado"] = ahora
     collection_progreso.update_one(filtro, actualizacion, upsert=True)
     return porcentaje, completado
+
+
+def avisar_calificaciones_historicas(codigo_evento):
+    """Avisa si reordenar puede desalinear calificaciones sin enlace estable.
+
+    Los resultados nuevos se enlazan por examen_id/tarea_id. Los históricos
+    solo tienen orden_examen/orden_tarea, así que cambiar el orden los
+    desalinea.
+    """
+    intentos = collection_exam_results.count_documents(
+        {
+            "codigo_evento": codigo_evento,
+            "$or": [{"examen_id": None}, {"examen_id": {"$exists": False}}],
+        }
+    )
+    entregas = collection_tarea_entregas.count_documents(
+        {
+            "codigo_evento": codigo_evento,
+            "$or": [{"tarea_id": None}, {"tarea_id": {"$exists": False}}],
+        }
+    )
+    if intentos or entregas:
+        flash(
+            "Hay calificaciones históricas sin enlace estable por id "
+            f"({intentos} intento(s) de examen, {entregas} entrega(s)). "
+            "El reordenamiento puede desalinearlas: revisa el listado de "
+            "calificaciones de este evento.",
+            "info",
+        )
 
 
 def estado_tareas_evento(codigo_evento, cedula_participante):
@@ -630,6 +659,21 @@ def crear_contenido(codigo_evento):
         )
         nuevo_orden = (ultimo_contenido["orden"] + 1) if ultimo_contenido else 1
 
+        # Posición elegida: al final (por defecto) o después de un contenido.
+        posicion = (request.form.get("posicion") or "final").strip()
+        posicion_destino = None
+        if posicion.startswith("despues:"):
+            try:
+                posicion_destino = int(posicion.split(":", 1)[1])
+            except (TypeError, ValueError):
+                posicion_destino = None
+            if posicion_destino is None or not collection_eva.find_one(
+                {"codigo_evento": codigo_evento, "orden": posicion_destino}
+            ):
+                flash("La posición seleccionada ya no existe.", "error")
+                return redirect(request.url)
+            nuevo_orden = posicion_destino + 1
+
         contenido = {
             "codigo_evento": codigo_evento,
             "orden": nuevo_orden,
@@ -695,7 +739,7 @@ def crear_contenido(codigo_evento):
             contenido["url_video"] = request.form["url_video"]
             try:
                 material_pdf, material_pdf_nombre = guardar_material_pdf(
-                    request.files.get("material_pdf"), codigo_evento, nuevo_orden
+                    request.files.get("material_pdf"), codigo_evento
                 )
             except ValueError as error:
                 flash(str(error), "error")
@@ -716,7 +760,7 @@ def crear_contenido(codigo_evento):
                 
                 # Generar nombre único para el documento
                 extension = os.path.splitext(documento_file.filename)[1] or '.pdf'
-                documento_filename = f"documento-{codigo_evento}-{nuevo_orden:02d}{extension}"
+                documento_filename = f"documento-{codigo_evento}-{uuid.uuid4().hex[:8]}{extension}"
                 documento_path = os.path.join(evento_folder, documento_filename)
                 documento_file.save(documento_path)
                 
@@ -753,6 +797,17 @@ def crear_contenido(codigo_evento):
             # Submódulo organizador: igual que módulo pero colgado de un padre.
             pass
 
+        if posicion_destino is not None:
+            # Desplazar los posteriores solo cuando el contenido ya es válido.
+            collection_eva.update_many(
+                {
+                    "codigo_evento": codigo_evento,
+                    "orden": {"$gte": nuevo_orden},
+                },
+                {"$inc": {"orden": 1}},
+            )
+            avisar_calificaciones_historicas(codigo_evento)
+
         collection_eva.insert_one(contenido)
 
         return redirect(
@@ -766,7 +821,13 @@ def crear_contenido(codigo_evento):
         collection_eva.find({"codigo_evento": codigo_evento, "tipo": "submodulo"}).sort("orden", 1)
     )
     return render_template(
-        "crear_contenido.html", evento=evento, modulos=modulos, submodulos=submodulos
+        "crear_contenido.html",
+        evento=evento,
+        modulos=modulos,
+        submodulos=submodulos,
+        actividades=list(
+            collection_eva.find({"codigo_evento": codigo_evento}).sort("orden", 1)
+        ),
     )
 
 
@@ -895,7 +956,7 @@ def editar_contenido(codigo_evento, orden):
                 actualizacion["material_pdf_nombre"] = ""
             try:
                 material_pdf, material_pdf_nombre = guardar_material_pdf(
-                    request.files.get("material_pdf"), codigo_evento, orden
+                    request.files.get("material_pdf"), codigo_evento
                 )
             except ValueError as error:
                 flash(str(error), "error")
@@ -914,7 +975,7 @@ def editar_contenido(codigo_evento, orden):
                 
                 # Generar nombre único para el documento
                 extension = os.path.splitext(documento_file.filename)[1] or '.pdf'
-                documento_filename = f"documento-{codigo_evento}-{orden:02d}{extension}"
+                documento_filename = f"documento-{codigo_evento}-{uuid.uuid4().hex[:8]}{extension}"
                 documento_path = os.path.join(evento_folder, documento_filename)
                 documento_file.save(documento_path)
                 
@@ -1141,6 +1202,110 @@ def mover_contenido(codigo_evento, orden, direccion):
     return redirect(
         url_for("plataforma.listar_contenidos", codigo_evento=codigo_evento)
     )
+
+
+@plataforma_bp.route(
+    "/tablero/eventos/<codigo_evento>/lms/reordenar", methods=["POST"]
+)
+@login_required
+@lms_required
+def reordenar_contenidos(codigo_evento):
+    """Mueve un contenido a una posición elegida sin flechas una por una."""
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+
+    destino_lista = url_for(
+        "plataforma.listar_contenidos", codigo_evento=codigo_evento
+    )
+
+    try:
+        mover_orden = int(request.form.get("mover_orden", ""))
+    except (TypeError, ValueError):
+        flash("Selecciona el contenido que quieres mover.", "error")
+        return redirect(destino_lista)
+
+    destino = (request.form.get("destino") or "").strip()
+    contenidos = list(
+        collection_eva.find({"codigo_evento": codigo_evento}).sort("orden", 1)
+    )
+    actual = next((c for c in contenidos if c.get("orden") == mover_orden), None)
+    if not actual:
+        flash("El contenido a mover ya no existe.", "error")
+        return redirect(destino_lista)
+
+    minimo = contenidos[0]["orden"] if contenidos else 1
+    maximo = contenidos[-1]["orden"] if contenidos else 0
+
+    if destino == "inicio":
+        if actual["orden"] == minimo:
+            return redirect(destino_lista)
+        if minimo > 1:
+            collection_eva.update_one(
+                {"_id": actual["_id"]}, {"$set": {"orden": minimo - 1}}
+            )
+        else:
+            collection_eva.update_many(
+                {"codigo_evento": codigo_evento}, {"$inc": {"orden": 1}}
+            )
+            collection_eva.update_one(
+                {"_id": actual["_id"]}, {"$set": {"orden": 1}}
+            )
+        avisar_calificaciones_historicas(codigo_evento)
+    elif destino == "final":
+        if actual["orden"] == maximo:
+            return redirect(destino_lista)
+        collection_eva.update_one(
+            {"_id": actual["_id"]}, {"$set": {"orden": maximo + 1}}
+        )
+        avisar_calificaciones_historicas(codigo_evento)
+    elif destino.startswith("despues:"):
+        try:
+            destino_orden = int(destino.split(":", 1)[1])
+        except (TypeError, ValueError):
+            destino_orden = None
+        destino_doc = next(
+            (c for c in contenidos if c.get("orden") == destino_orden), None
+        )
+        if destino_doc is None:
+            flash("La posición de destino ya no existe.", "error")
+            return redirect(destino_lista)
+        if destino_doc["_id"] == actual["_id"]:
+            flash("No puedes mover un contenido después de sí mismo.", "error")
+            return redirect(destino_lista)
+        if actual["orden"] < destino_orden:
+            # Bajar: el destino y los intermedios suben un puesto.
+            collection_eva.update_many(
+                {
+                    "codigo_evento": codigo_evento,
+                    "orden": {"$gt": actual["orden"], "$lte": destino_orden},
+                },
+                {"$inc": {"orden": -1}},
+            )
+            collection_eva.update_one(
+                {"_id": actual["_id"]}, {"$set": {"orden": destino_orden}}
+            )
+        elif actual["orden"] > destino_orden:
+            # Subir: los intermedios bajan un puesto.
+            collection_eva.update_many(
+                {
+                    "codigo_evento": codigo_evento,
+                    "orden": {"$gt": destino_orden, "$lt": actual["orden"]},
+                },
+                {"$inc": {"orden": 1}},
+            )
+            collection_eva.update_one(
+                {"_id": actual["_id"]}, {"$set": {"orden": destino_orden + 1}}
+            )
+        else:
+            return redirect(destino_lista)
+        avisar_calificaciones_historicas(codigo_evento)
+    else:
+        flash("Selecciona una posición de destino.", "error")
+        return redirect(destino_lista)
+
+    flash("Contenido reordenado.", "success")
+    return redirect(destino_lista)
 
 
 ###
@@ -1506,7 +1671,7 @@ def copiar_lms(codigo_evento):
                         )
                         os.makedirs(evento_folder_destino, exist_ok=True)
                         new_material = (
-                            f"presentacion-{codigo_destino}-{nuevo_orden:02d}.pdf"
+                            f"presentacion-{codigo_destino}-{uuid.uuid4().hex[:8]}.pdf"
                         )
                         shutil.copy2(
                             old_material_path,
@@ -1535,7 +1700,7 @@ def copiar_lms(codigo_evento):
                             os.makedirs(evento_folder_destino, exist_ok=True)
                             
                             extension = os.path.splitext(old_filename)[1] or ".pdf"
-                            new_filename = f"documento-{codigo_destino}-{nuevo_orden:02d}{extension}"
+                            new_filename = f"documento-{codigo_destino}-{uuid.uuid4().hex[:8]}{extension}"
                             new_file_path = os.path.join(evento_folder_destino, new_filename)
                             
                             import shutil
