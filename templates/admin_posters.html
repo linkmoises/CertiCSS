@@ -213,6 +213,40 @@
                                 </div>
                             </div>
                             {% endif %}
+                            <!-- Publicación de resultados -->
+                            <div class="px-6 py-4 border-b border-gray-200 {% if estado_publicacion.completa or resultados_publicados %}bg-green-50{% else %}bg-amber-50{% endif %}">
+                                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-800">
+                                            {% if estado_publicacion.completa %}
+                                            Evaluación completa: los resultados están publicados en la página pública.
+                                            {% elif resultados_publicados %}
+                                            Resultados publicados manualmente antes de completar la evaluación.
+                                            {% else %}
+                                            Resultados ocultos: {{ estado_publicacion.realizadas }} de {{
+                                            estado_publicacion.esperadas }} evaluaciones recibidas.
+                                            {% endif %}
+                                        </p>
+                                        <p class="text-xs text-gray-600">
+                                            La página pública solo muestra el podio cuando todos los jurados evalúan
+                                            todos los trabajos, o cuando los responsables lo publican aquí.
+                                        </p>
+                                    </div>
+                                    {% if not estado_publicacion.completa %}
+                                    <form method="POST"
+                                        action="{{ url_for('posters.publicar_resultados_concurso', codigo_evento=evento.codigo) }}">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                        <input type="hidden" name="accion"
+                                            value="{{ 'ocultar' if resultados_publicados else 'publicar' }}">
+                                        <button type="submit"
+                                            class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent {% if resultados_publicados %}bg-gray-600 hover:bg-gray-700{% else %}bg-amber-600 hover:bg-amber-700{% endif %} text-white focus:outline-none">
+                                            {{ 'Ocultar resultados' if resultados_publicados else 'Publicar resultados ahora' }}
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+
                             <!-- Body -->
                             <div class="bg-white p-6">
                                 <!-- Lista de Jurados -->

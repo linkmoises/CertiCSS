@@ -269,6 +269,43 @@ def puede_gestionar_concurso(evento, codigo_evento, usuario, participantes):
     }) is not None
 
 
+def estado_evaluacion(posters, jurados, evaluaciones):
+    """
+    Describe el avance del concurso contra la matriz completa: cada jurado debe
+    haber evaluado cada póster. Solo entonces la evaluación está completa.
+
+    Devuelve un dict con total_posters, total_jurados, esperadas, realizadas,
+    faltantes y completa.
+    """
+    nanoids = {p.get('nanoid') for p in posters if p.get('nanoid')}
+    cedulas = {j.get('cedula') for j in jurados if j.get('cedula')}
+
+    esperadas = len(nanoids) * len(cedulas)
+    combinaciones = {(n, c) for n in nanoids for c in cedulas}
+    realizadas = {
+        (e.get('nanoid_poster'), e.get('cedula_jurado'))
+        for e in evaluaciones
+    } & combinaciones
+
+    return {
+        'total_posters': len(nanoids),
+        'total_jurados': len(cedulas),
+        'esperadas': esperadas,
+        'realizadas': len(realizadas),
+        'faltantes': esperadas - len(realizadas),
+        'completa': bool(esperadas) and len(realizadas) == esperadas,
+    }
+
+
+def resultados_visibles(evento, estado):
+    """
+    Indica si los resultados pueden mostrarse públicamente: cuando la
+    evaluación está completa o cuando los responsables del evento publicaron
+    los resultados de forma forzada.
+    """
+    return bool(estado.get('completa')) or bool(evento.get('resultados_publicados'))
+
+
 def get_judge_session(codigo_evento, cedula_jurado):
     """
     Crea una sesión simulada para un jurado, permitiendo al administrador actuar en su nombre.
@@ -1150,22 +1187,45 @@ def resultados_concurso_publico(codigo_evento):
     if not evento.get('concurso_poster', False):
         abort(404)
     
-    # Obtener pósters con sus promedios (solo los que tienen archivo)
+    # Pósters participantes (solo los que tienen archivo)
     posters = list(collection_posters.find({
         "codigo_evento": codigo_evento,
         "archivo_poster": {"$ne": None}
+    }).sort("numero_poster", 1))
+    
+    jurados = list(collection_participantes.find({
+        "codigo_evento": codigo_evento,
+        "rol": "jurado_poster"
     }))
+    
+    evaluaciones = list(collection_evaluaciones_poster.find({
+        "codigo_evento": codigo_evento
+    }))
+    recalcular_puntuaciones(evaluaciones)
+    
+    estado = estado_evaluacion(posters, jurados, evaluaciones)
+    publicados = resultados_visibles(evento, estado)
+    
+    # Antes del anuncio oficial no se calcula ni se envía ningún puntaje: la
+    # página pública no debe exponer datos parciales ni en atributos del HTML.
+    if not publicados:
+        return render_template('resultados_concurso_publico.html',
+                               evento=evento,
+                               publicados=False,
+                               posters=posters,
+                               estado=estado,
+                               resultados=[])
+    
+    evaluaciones_por_poster = {}
+    for evaluacion in evaluaciones:
+        evaluaciones_por_poster.setdefault(evaluacion.get('nanoid_poster'), []).append(evaluacion)
     
     resultados = []
     for poster in posters:
-        evaluaciones = list(collection_evaluaciones_poster.find({
-            "codigo_evento": codigo_evento,
-            "nanoid_poster": poster['nanoid']
-        }))
-        recalcular_puntuaciones(evaluaciones)
+        evaluaciones_poster = evaluaciones_por_poster.get(poster['nanoid'], [])
         
-        if evaluaciones:
-            promedio = sum(e['puntuacion_final'] for e in evaluaciones) / len(evaluaciones)
+        if evaluaciones_poster:
+            promedio = sum(e['puntuacion_final'] for e in evaluaciones_poster) / len(evaluaciones_poster)
             # Crear una copia del poster sin información sensible
             poster_publico = {
                 'nombres': poster['nombres'],
@@ -1179,14 +1239,17 @@ def resultados_concurso_publico(codigo_evento):
             resultados.append({
                 'poster': poster_publico,
                 'promedio': promedio,
-                'num_evaluaciones': len(evaluaciones)
+                'num_evaluaciones': len(evaluaciones_poster)
             })
     
     # Ordenar por promedio descendente
     resultados.sort(key=lambda x: x['promedio'], reverse=True)
     
     return render_template('resultados_concurso_publico.html', 
-                         evento=evento, 
+                         evento=evento,
+                         publicados=True,
+                         posters=posters,
+                         estado=estado,
                          resultados=resultados)
 
 
@@ -1291,6 +1354,47 @@ def reset_contrasena_concurso(codigo_evento):
     return redirect(url_for('posters.admin_posters', codigo_evento=codigo_evento))
 
 
+@posters_bp.route('/tablero/posters/<codigo_evento>/publicar_resultados', methods=['POST'])
+@login_required
+def publicar_resultados_concurso(codigo_evento):
+    """
+    Permite a los responsables del evento publicar u ocultar los resultados
+    públicos antes de que la matriz de evaluaciones esté completa.
+    """
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+
+    if not puede_gestionar_concurso(evento, codigo_evento, current_user, collection_participantes):
+        flash('No tienes permisos para realizar esta acción.', 'error')
+        return redirect(url_for('events.listar_participantes', codigo_evento=codigo_evento))
+
+    if not validate_csrf_token(request.form.get('csrf_token', '')):
+        flash('Sesión inválida. Intente nuevamente.', 'error')
+        return redirect(url_for('posters.admin_posters', codigo_evento=codigo_evento))
+
+    publicar = request.form.get('accion', 'publicar') == 'publicar'
+    responsable = str(getattr(current_user, 'cedula', '') or getattr(current_user, 'email', '') or '')
+    ahora = datetime.now() if publicar else None
+
+    collection_eventos.update_one(
+        {'codigo': codigo_evento},
+        {'$set': {
+            'resultados_publicados': publicar,
+            'resultados_publicados_en': ahora,
+            'resultados_publicados_por': responsable if publicar else None,
+        }}
+    )
+
+    log_event(f"Resultados del concurso {codigo_evento}: {'publicados' if publicar else 'ocultados'} por {responsable}")
+    if publicar:
+        flash('Resultados publicados. La página pública ya muestra el podio.', 'success')
+    else:
+        flash('Resultados ocultados. La página pública vuelve a mostrar solo la evaluación en curso.', 'success')
+
+    return redirect(url_for('posters.admin_posters', codigo_evento=codigo_evento))
+
+
 @posters_bp.route('/tablero/posters/<codigo_evento>')
 @login_required
 def admin_posters(codigo_evento):
@@ -1391,6 +1495,11 @@ def admin_posters(codigo_evento):
                          promedios_poster=promedios_poster,
                          jurado_activo=jurado_activo,
                          participantes_reset=participantes_reset,
+                         estado_publicacion=estado_evaluacion(
+                             [p for p in posters if p.get('archivo_poster')],
+                             jurados,
+                             evaluaciones),
+                         resultados_publicados=bool(evento.get('resultados_publicados')),
                          csrf_token=generate_csrf_token())
 
 
