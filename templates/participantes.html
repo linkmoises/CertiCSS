@@ -361,7 +361,7 @@
                                 </td>
                                 <td class="size-px whitespace-nowrap text-center">
                                     <div class="px-2 py-2">
-                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium {% if participante.rol == 'participante' %}bg-blue-100 text-blue-800{% elif participante.rol == 'organizador' %}bg-teal-100 text-teal-800{% elif participante.rol == 'coorganizador' %}bg-teal-100 text-teal-800{% elif participante.rol in ('ponente', 'tallerista', 'instructor') %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">{{ etiqueta_rol(participante.rol) }}</span><br />
+                                        <span class="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium {% if participante.rol == 'participante' %}bg-blue-100 text-blue-800{% elif participante.rol == 'organizador' %}bg-teal-100 text-teal-800{% elif participante.rol == 'coorganizador' %}bg-teal-100 text-teal-800{% elif participante.rol in ('ponente', 'tallerista', 'instructor') %}bg-green-100 text-green-800{% elif participante.rol == 'presentador_poster' %}bg-purple-100 text-purple-800{% elif participante.rol == 'jurado_poster' %}bg-amber-100 text-amber-800{% else %}bg-gray-100 text-gray-800{% endif %}">{{ etiqueta_rol(participante.rol) }}</span><br />
                                     </div>
                                 </td>
                                 <td class="size-px whitespace-nowrap text-center">
