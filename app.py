@@ -60,6 +60,10 @@ def nl2br(text):
 
 app.jinja_env.filters['nl2br'] = nl2br
 
+# Texto enriquecido de la mensajería: saneado también al renderizar.
+from app.rich_text import sanitizar_html
+app.jinja_env.filters['rich_text'] = sanitizar_html
+
 ###
 ### Configuraciones comunes
 ###
@@ -659,7 +663,10 @@ def tablero_coordinadores():
 
     num_mis_eventos = len(mis_eventos)
 
-    # Mensajería interna reciente (panel "Notificaciones institucionales" del tablero)
+    # Mensajería interna reciente (panel "Notificaciones institucionales" del
+    # tablero). Solo se muestran mensajes recibidos que aún no se han leído:
+    # al leerlos desaparecen del panel y quedan disponibles en la bandeja,
+    # donde el usuario puede archivarlos.
     from bson.objectid import ObjectId as _ObjectId
     collection_mensajes_tablero = db['mensajes']
     uid = str(current_user.id)
@@ -667,6 +674,8 @@ def tablero_coordinadores():
         "$or": [{"destinatarios": uid}, {"es_global": True}],
         "remitente_id": {"$ne": uid},
         "eliminado_para": {"$ne": uid},
+        "archivado_para": {"$ne": uid},
+        "leido_por": {"$ne": uid},
     }
     mensajes_recientes = list(collection_mensajes_tablero.find(query_mensajes_tablero)
                               .sort("fecha", -1).limit(5))
@@ -678,10 +687,10 @@ def tablero_coordinadores():
             {"nombres": 1, "apellidos": 1, "foto": 1})}
     for m in mensajes_recientes:
         m['remitente_info'] = remitentes_map.get(m['remitente_id'])
-        m['no_leido'] = uid not in (m.get('leido_por') or [])
+        m['no_leido'] = True
         m['total_adjuntos'] = len(m.get('adjuntos') or [])
     mensajes_sin_leer = collection_mensajes_tablero.count_documents(
-        {**query_mensajes_tablero, "leido_por": {"$ne": uid}})
+        query_mensajes_tablero)
 
     return render_template('tablero.html',
         total_usuarios=total_usuarios,

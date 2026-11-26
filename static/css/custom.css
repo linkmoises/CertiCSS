@@ -71,3 +71,105 @@ pre#log-content {
     max-width: 100% !important;
     height: auto !important;
 }
+/* Texto enriquecido de la mensajería interna. El HTML se sanitiza en el
+   servidor y aquí se le da la presentación que Tailwind Preflight elimina
+   (márgenes, viñetas, enlaces, citas). */
+.mensaje-rico p {
+    margin: 0 0 0.75rem;
+}
+
+.mensaje-rico p:last-child {
+    margin-bottom: 0;
+}
+
+.mensaje-rico ul,
+.mensaje-rico ol {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+}
+
+.mensaje-rico ul {
+    list-style: disc;
+}
+
+.mensaje-rico ol {
+    list-style: decimal;
+}
+
+.mensaje-rico li {
+    margin: 0.15rem 0;
+}
+
+.mensaje-rico blockquote {
+    margin: 0.5rem 0;
+    padding-left: 0.75rem;
+    border-left: 3px solid #d1d5db;
+    color: #4b5563;
+}
+
+.mensaje-rico a {
+    color: #2563eb;
+    text-decoration: underline;
+}
+
+.mensaje-rico code,
+.mensaje-rico pre {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    background-color: #f3f4f6;
+    border-radius: 0.25rem;
+}
+
+.mensaje-rico code {
+    padding: 0.1rem 0.25rem;
+}
+
+.mensaje-rico pre {
+    padding: 0.5rem 0.75rem;
+    white-space: pre-wrap;
+    overflow-x: auto;
+}
+
+.mensaje-rico h1,
+.mensaje-rico h2,
+.mensaje-rico h3,
+.mensaje-rico h4 {
+    font-weight: 600;
+    margin: 0.75rem 0 0.5rem;
+}
+
+.mensaje-rico:empty::before {
+    content: attr(data-placeholder);
+    color: #9ca3af;
+    pointer-events: none;
+}
+
+.dark .mensaje-rico blockquote {
+    border-color: #4b5563;
+    color: #d1d5db;
+}
+
+.dark .mensaje-rico code,
+.dark .mensaje-rico pre {
+    background-color: #262626;
+}
+
+.editor-rico-boton {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.8125rem;
+    line-height: 1.25rem;
+    color: #374151;
+    background-color: transparent;
+}
+
+.editor-rico-boton:hover {
+    background-color: #e5e7eb;
+}
+
+.dark .editor-rico-boton {
+    color: #d1d5db;
+}
+
+.dark .editor-rico-boton:hover {
+    background-color: #404040;
+}

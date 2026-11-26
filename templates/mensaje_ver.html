@@ -10,11 +10,33 @@
                 <!-- Encabezado -->
                 <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-4">
                     <h2 class="text-xl font-semibold text-gray-800 dark:text-neutral-200">{{ mensaje.asunto }}</h2>
-                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700"
-                        href="{{ url_for('mensajeria.bandeja') }}">
-                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-                        Volver a la bandeja
-                    </a>
+                    <div class="flex items-center gap-2">
+                        {% if mensaje.es_destinatario %}
+                            {% if mensaje.archivado %}
+                            <form method="POST" action="{{ url_for('mensajeria.desarchivar', mensaje_id=mensaje._id) }}">
+                                <button type="submit"
+                                    class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700">
+                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                                    Desarchivar
+                                </button>
+                            </form>
+                            {% else %}
+                            <form method="POST" action="{{ url_for('mensajeria.archivar', mensaje_id=mensaje._id) }}">
+                                <input type="hidden" name="caja" value="recibidos">
+                                <button type="submit"
+                                    class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700">
+                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/></svg>
+                                    Archivar
+                                </button>
+                            </form>
+                            {% endif %}
+                        {% endif %}
+                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                            href="{{ url_for('mensajeria.bandeja') }}">
+                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                            Volver a la bandeja
+                        </a>
+                    </div>
                 </div>
 
                 <!-- HILO -->
@@ -48,7 +70,11 @@
                         </div>
                         <!-- Cuerpo -->
                         <div class="px-5 py-4">
+                            {% if m.cuerpo_html %}
+                            <div class="mensaje-rico text-base text-gray-700 leading-relaxed dark:text-neutral-300">{{ m.cuerpo_html | rich_text | safe }}</div>
+                            {% else %}
                             <p class="text-base text-gray-700 whitespace-pre-line leading-relaxed dark:text-neutral-300">{{ m.cuerpo }}</p>
+                            {% endif %}
                         </div>
                         {% if m.adjuntos %}
                         <!-- Adjuntos -->
@@ -79,9 +105,10 @@
                         action="{{ url_for('mensajeria.responder', mensaje_id=mensaje._id) }}" id="formRespuesta">
                         <div class="p-5 space-y-4">
                             <p class="text-base font-semibold text-gray-800 dark:text-neutral-200">Responder</p>
-                            <textarea name="cuerpo" rows="4" required
-                                class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300"
-                                placeholder="Escribe tu respuesta..."></textarea>
+                            {% set editor_id = 'editorRespuesta' %}
+                            {% set campo_html = 'cuerpo_html' %}
+                            {% set placeholder = 'Escribe tu respuesta...' %}
+                            {% include '_editor_rico.html' %}
                             <input type="file" name="adjuntos" multiple accept=".pdf,.png,.jpg,.jpeg,.ppt,.pptx"
                                 class="block w-full border border-gray-200 rounded-lg text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300">
                             <p class="text-sm text-gray-400">La respuesta se envía al remitente original. Hasta 5 archivos de 10 MB (PDF, imágenes, PPT/PPTX).</p>
@@ -107,7 +134,8 @@
 <script src="{{ url_for('static', filename='node_modules/preline/dist/preline.js') }}"></script>
 
 <script>
-    document.getElementById('formRespuesta').addEventListener('submit', function () {
+    document.getElementById('formRespuesta').addEventListener('submit', function (evento) {
+        if (evento.defaultPrevented) { return; }
         const btn = this.querySelector('button[type="submit"]');
         btn.disabled = true;
         btn.textContent = 'Enviando...';

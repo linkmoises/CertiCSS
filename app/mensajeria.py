@@ -29,6 +29,7 @@ from app import (
 from app.logs import log_event
 from app.helpers import allowed_file
 from app.auth.services import roles_required, UserRole
+from app.rich_text import sanitizar_html, html_a_texto
 from app.unidades_data import REGION_LABEL, CSS_A_REGION
 
 mensajeria_bp = Blueprint('mensajeria', __name__)
@@ -51,6 +52,8 @@ ROLES_LISTAS = [UserRole.ADMINISTRADOR.value, UserRole.DENADOI.value]
 
 PAGE_SIZE = 20
 
+CAJAS = ('recibidos', 'enviados', 'archivados')
+
 
 ###
 ### Helpers de permisos y datos
@@ -67,6 +70,47 @@ def _nombre_usuario(doc):
 
 def _region_label(codigo):
     return REGION_LABEL.get(codigo, codigo)
+
+
+def _filtro_recibidos(uid, archivados=False):
+    """Filtro de mensajes recibidos por un usuario.
+
+    De forma predeterminada excluye los archivados y los eliminados para ese
+    usuario; con ``archivados=True`` devuelve solo los que archivó.
+    """
+    filtro = {
+        "$or": [{"destinatarios": uid}, {"es_global": True}],
+        "remitente_id": {"$ne": uid},
+        "eliminado_para": {"$ne": uid},
+    }
+    if archivados:
+        filtro["archivado_para"] = uid
+    else:
+        filtro["archivado_para"] = {"$ne": uid}
+    return filtro
+
+
+def _filtro_enviados(uid):
+    return {"remitente_id": uid, "eliminado_para": {"$ne": uid}}
+
+
+def _es_destinatario(mensaje, uid):
+    """True si el usuario recibió el mensaje (no si lo escribió)."""
+    return (uid in (mensaje.get('destinatarios') or [])
+            or bool(mensaje.get('es_global'))) and str(mensaje.get('remitente_id')) != uid
+
+
+def _cuerpo_desde_form(datos):
+    """Devuelve (texto_plano, html_sanitizado) del cuerpo enviado.
+
+    El editor enriquecido publica ``cuerpo_html``. Si no viene (por ejemplo,
+    un formulario sin JavaScript), se acepta el campo de texto ``cuerpo``.
+    """
+    html_bruto = (datos.get('cuerpo_html') or '').strip()
+    if html_bruto:
+        cuerpo_html = sanitizar_html(html_bruto)
+        return html_a_texto(cuerpo_html), cuerpo_html
+    return (datos.get('cuerpo') or '').strip(), ''
 
 
 def _destinatarios_visibles(usuario):
@@ -238,6 +282,7 @@ def _marcar_leido(mensaje):
 def _enriquecer_con_remitente(mensajes):
     """Agrega remitente_info y estado de leído a una lista de mensajes."""
     cache = {}
+    uid = current_user.id
     for m in mensajes:
         rid = str(m.get('remitente_id'))
         if rid not in cache:
@@ -246,8 +291,10 @@ def _enriquecer_con_remitente(mensajes):
                 {"nombres": 1, "apellidos": 1, "foto": 1}
             )
         m['remitente_info'] = cache[rid]
-        m['no_leido'] = (current_user.id not in (m.get('leido_por') or [])
-                         and str(m.get('remitente_id')) != current_user.id)
+        m['no_leido'] = (uid not in (m.get('leido_por') or [])
+                         and rid != uid)
+        m['es_destinatario'] = _es_destinatario(m, uid)
+        m['archivado'] = uid in (m.get('archivado_para') or [])
         m['total_adjuntos'] = len(m.get('adjuntos') or [])
     return mensajes
 
@@ -261,6 +308,7 @@ def _contar_no_leidos():
         ],
         "remitente_id": {"$ne": current_user.id},
         "eliminado_para": {"$ne": current_user.id},
+        "archivado_para": {"$ne": current_user.id},
         "leido_por": {"$ne": current_user.id},
     }
     return collection_mensajes.count_documents(query)
@@ -275,23 +323,15 @@ def _contar_no_leidos():
 @roles_required(*ROLES_TABLERO)
 def bandeja(page=1):
     caja = request.args.get('caja', 'recibidos')
-    if caja not in ('recibidos', 'enviados'):
+    if caja not in CAJAS:
         caja = 'recibidos'
 
     if caja == 'enviados':
-        query = {
-            "remitente_id": current_user.id,
-            "eliminado_para": {"$ne": current_user.id},
-        }
+        query = _filtro_enviados(current_user.id)
+    elif caja == 'archivados':
+        query = _filtro_recibidos(current_user.id, archivados=True)
     else:
-        query = {
-            "$or": [
-                {"destinatarios": current_user.id},
-                {"es_global": True},
-            ],
-            "remitente_id": {"$ne": current_user.id},
-            "eliminado_para": {"$ne": current_user.id},
-        }
+        query = _filtro_recibidos(current_user.id)
 
     total = collection_mensajes.count_documents(query)
     total_pages = max(1, (total + PAGE_SIZE - 1) // PAGE_SIZE)
@@ -333,7 +373,7 @@ def bandeja(page=1):
 def nuevo():
     if request.method == 'POST':
         asunto = (request.form.get('asunto') or '').strip()
-        cuerpo = (request.form.get('cuerpo') or '').strip()
+        cuerpo, cuerpo_html = _cuerpo_desde_form(request.form)
         difusion = request.form.get('difusion') == 'todos'
         ids_destinatarios = request.form.getlist('destinatarios')
         ids_listas = request.form.getlist('listas')
@@ -385,11 +425,13 @@ def nuevo():
             "listas_usadas": nombres_listas,
             "asunto": asunto,
             "cuerpo": cuerpo,
+            "cuerpo_html": cuerpo_html,
             "adjuntos": [],
             "respuesta_a": None,
             "fecha": datetime.now(),
             "leido_por": [],
             "eliminado_para": [],
+            "archivado_para": [],
         })
 
         # Adjuntos
@@ -506,6 +548,9 @@ def ver(mensaje_id):
 
     _marcar_leido(mensaje)
 
+    mensaje['es_destinatario'] = _es_destinatario(mensaje, current_user.id)
+    mensaje['archivado'] = current_user.id in (mensaje.get('archivado_para') or [])
+
     hilo = _hilo_del_mensaje(mensaje)
     _enriquecer_con_remitente(hilo)
 
@@ -544,12 +589,11 @@ def responder(mensaje_id):
     if not original or not _acceso_mensaje(original, current_user):
         abort(403)
 
-    cuerpo = (request.form.get('cuerpo') or '').strip()
+    cuerpo, cuerpo_html = _cuerpo_desde_form(request.form)
     asunto_form = (request.form.get('asunto') or '').strip()
     if not cuerpo:
         flash('El mensaje de respuesta no puede estar vacío.', 'error')
         return redirect(url_for('mensajeria.ver', mensaje_id=mensaje_id))
-
     # La respuesta va dirigida al remitente del mensaje original
     remitente_original = str(original.get('remitente_id'))
     if remitente_original == current_user.id:
@@ -578,11 +622,13 @@ def responder(mensaje_id):
         "listas_usadas": [],
         "asunto": asunto,
         "cuerpo": cuerpo,
+        "cuerpo_html": cuerpo_html,
         "adjuntos": [],
         "respuesta_a": raiz_id,
         "fecha": datetime.now(),
         "leido_por": [],
         "eliminado_para": [],
+        "archivado_para": [],
     })
 
     archivos = request.files.getlist('adjuntos')
@@ -626,6 +672,59 @@ def eliminar(mensaje_id):
               f"el mensaje '{mensaje.get('asunto')}'.")
     flash('Mensaje eliminado.', 'success')
     return redirect(url_for('mensajeria.bandeja'))
+
+
+###
+### Archivar / restaurar (por usuario, sin borrar el mensaje)
+###
+
+def _caja_destino(valor, defecto='recibidos'):
+    return valor if valor in CAJAS else defecto
+
+
+@mensajeria_bp.route('/tablero/mensajes/<mensaje_id>/archivar', methods=['POST'])
+@roles_required(*ROLES_TABLERO)
+def archivar(mensaje_id):
+    try:
+        mensaje = collection_mensajes.find_one({"_id": ObjectId(mensaje_id)})
+    except Exception:
+        abort(404)
+    if not mensaje or not _acceso_mensaje(mensaje, current_user):
+        abort(403)
+    if not _es_destinatario(mensaje, current_user.id):
+        abort(403)
+
+    collection_mensajes.update_one(
+        {"_id": mensaje['_id']},
+        {"$addToSet": {"archivado_para": current_user.id}}
+    )
+    log_event(f"Usuario [{current_user.email}] archivó el mensaje "
+              f"'{mensaje.get('asunto')}'.")
+    flash('Mensaje archivado. Lo puedes recuperar en "Archivados".', 'success')
+    return redirect(url_for('mensajeria.bandeja',
+                            caja=_caja_destino(request.form.get('caja'))))
+
+
+@mensajeria_bp.route('/tablero/mensajes/<mensaje_id>/desarchivar', methods=['POST'])
+@roles_required(*ROLES_TABLERO)
+def desarchivar(mensaje_id):
+    try:
+        mensaje = collection_mensajes.find_one({"_id": ObjectId(mensaje_id)})
+    except Exception:
+        abort(404)
+    if not mensaje or not _acceso_mensaje(mensaje, current_user):
+        abort(403)
+    if not _es_destinatario(mensaje, current_user.id):
+        abort(403)
+
+    collection_mensajes.update_one(
+        {"_id": mensaje['_id']},
+        {"$pull": {"archivado_para": current_user.id}}
+    )
+    log_event(f"Usuario [{current_user.email}] restauró el mensaje "
+              f"'{mensaje.get('asunto')}' desde archivados.")
+    flash('Mensaje devuelto a la bandeja de recibidos.', 'success')
+    return redirect(url_for('mensajeria.bandeja', caja='recibidos'))
 
 
 ###

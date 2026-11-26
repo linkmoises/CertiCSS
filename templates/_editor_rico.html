@@ -1,0 +1,95 @@
+{% set editor_id = editor_id | default('editorMensaje') %}
+{% set campo_html = campo_html | default('cuerpo_html') %}
+{% set contenido_inicial = contenido_inicial | default('') %}
+{% set placeholder = placeholder | default('Escribe tu mensaje...') %}
+<div class="editor-rico" data-editor-rico="{{ editor_id }}">
+    <div class="editor-rico-js">
+    <div class="flex flex-wrap items-center gap-1 px-2 py-1.5 border border-b-0 border-gray-200 rounded-t-lg bg-gray-50 dark:bg-neutral-700 dark:border-neutral-600">
+        <button type="button" data-comando="bold" title="Negrita" aria-label="Negrita"
+            class="editor-rico-boton font-bold">B</button>
+        <button type="button" data-comando="italic" title="Cursiva" aria-label="Cursiva"
+            class="editor-rico-boton italic">I</button>
+        <button type="button" data-comando="underline" title="Subrayado" aria-label="Subrayado"
+            class="editor-rico-boton underline">U</button>
+        <span class="w-px h-5 bg-gray-300 dark:bg-neutral-500 mx-0.5"></span>
+        <button type="button" data-comando="insertUnorderedList" title="Lista con viñetas" aria-label="Lista con viñetas"
+            class="editor-rico-boton">• Lista</button>
+        <button type="button" data-comando="insertOrderedList" title="Lista numerada" aria-label="Lista numerada"
+            class="editor-rico-boton">1. Lista</button>
+        <button type="button" data-comando="formatBlock" data-valor="blockquote" title="Cita" aria-label="Cita"
+            class="editor-rico-boton">❝ Cita</button>
+        <span class="w-px h-5 bg-gray-300 dark:bg-neutral-500 mx-0.5"></span>
+        <button type="button" data-comando="enlace" title="Insertar enlace" aria-label="Insertar enlace"
+            class="editor-rico-boton">Enlace</button>
+        <button type="button" data-comando="quitar" title="Quitar formato" aria-label="Quitar formato"
+            class="editor-rico-boton">Quitar formato</button>
+    </div>
+    <div id="{{ editor_id }}" contenteditable="true" role="textbox" aria-multiline="true"
+        data-placeholder="{{ placeholder }}"
+        class="mensaje-rico whitespace-pre-wrap min-h-[10rem] py-2 px-3 block w-full border border-gray-200 rounded-b-lg text-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300"></div>
+    <input type="hidden" name="{{ campo_html }}" id="{{ editor_id }}_html" value="">
+    </div>
+    <noscript>
+        <style>.editor-rico-js { display: none !important; }</style>
+        <textarea name="cuerpo" rows="7" required
+            class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300"
+            placeholder="{{ placeholder }}">{{ contenido_inicial }}</textarea>
+        <p class="text-xs text-gray-400 mt-1.5">
+            El editor con formato requiere JavaScript; escribe el mensaje en texto plano.
+        </p>
+    </noscript>
+</div>
+<script>
+(function () {
+    var raiz = document.querySelector('[data-editor-rico="{{ editor_id }}"]');
+    if (!raiz) { return; }
+    var editor = document.getElementById('{{ editor_id }}');
+    var oculto = document.getElementById('{{ editor_id }}_html');
+    var inicial = {{ contenido_inicial | tojson }};
+    var formulario = editor.closest('form');
+
+    try { document.execCommand('defaultParagraphSeparator', false, 'p'); } catch (e) { }
+
+    if (inicial && !editor.dataset.cargado) {
+        editor.innerText = inicial;
+        editor.dataset.cargado = '1';
+    }
+
+    function sincronizar() {
+        oculto.value = editor.innerHTML;
+    }
+
+    raiz.querySelectorAll('[data-comando]').forEach(function (boton) {
+        boton.addEventListener('mousedown', function (evento) { evento.preventDefault(); });
+        boton.addEventListener('click', function () {
+            var comando = boton.dataset.comando;
+            editor.focus();
+            if (comando === 'enlace') {
+                var url = window.prompt('Dirección del enlace (https://...)');
+                if (url) { document.execCommand('createLink', false, url); }
+            } else if (comando === 'quitar') {
+                document.execCommand('removeFormat');
+            } else if (comando === 'formatBlock') {
+                document.execCommand('formatBlock', false, boton.dataset.valor);
+            } else {
+                document.execCommand(comando, false, null);
+            }
+            sincronizar();
+        });
+    });
+
+    editor.addEventListener('input', sincronizar);
+    editor.addEventListener('blur', sincronizar);
+
+    if (formulario) {
+        formulario.addEventListener('submit', function (evento) {
+            sincronizar();
+            if (!editor.innerText.trim()) {
+                evento.preventDefault();
+                window.alert('Escribe el contenido del mensaje.');
+                editor.focus();
+            }
+        });
+    }
+})();
+</script>

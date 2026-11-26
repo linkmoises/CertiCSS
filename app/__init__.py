@@ -30,6 +30,10 @@ def format_date(value, format='%d/%m/%y'):
 # Registrar el filtro en la aplicación
 app.jinja_env.filters['date'] = format_date                  # importado de config.py
 
+# Texto enriquecido de la mensajería
+from app.rich_text import sanitizar_html
+app.jinja_env.filters['rich_text'] = sanitizar_html
+
 app.jinja_env.globals['REGION_LABEL'] = REGION_LABEL
 # Espejo para el objeto Flask de este paquete, que usan las pruebas; la app
 # realmente servida se crea en app.py y registra el global allí.
