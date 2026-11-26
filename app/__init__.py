@@ -31,6 +31,8 @@ def format_date(value, format='%d/%m/%y'):
 app.jinja_env.filters['date'] = format_date                  # importado de config.py
 
 app.jinja_env.globals['REGION_LABEL'] = REGION_LABEL
+# Espejo para el objeto Flask de este paquete, que usan las pruebas; la app
+# realmente servida se crea en app.py y registra el global allí.
 app.jinja_env.globals['etiqueta_rol'] = etiqueta_rol
 
 # Configuración de MongoDB

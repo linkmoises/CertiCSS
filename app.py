@@ -49,6 +49,10 @@ def format_date(value, format='%d/%m/%y'):
 # Registrar el filtro en la aplicación
 app.jinja_env.filters['date'] = format_date
 
+# Etiquetas legibles de roles para plantillas (la app servida es esta)
+from app.helpers import etiqueta_rol
+app.jinja_env.globals['etiqueta_rol'] = etiqueta_rol
+
 def nl2br(text):
     if not text:
         return ''
