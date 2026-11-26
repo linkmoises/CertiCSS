@@ -1373,7 +1373,32 @@ def publicar_resultados_concurso(codigo_evento):
         flash('Sesión inválida. Intente nuevamente.', 'error')
         return redirect(url_for('posters.admin_posters', codigo_evento=codigo_evento))
 
-    publicar = request.form.get('accion', 'publicar') == 'publicar'
+    publicar = request.form.get('accion', '')
+    if publicar not in ('publicar', 'ocultar'):
+        flash('Acción no válida para los resultados del concurso.', 'error')
+        return redirect(url_for('posters.admin_posters', codigo_evento=codigo_evento))
+
+    publicar = publicar == 'publicar'
+
+    # Ocultar solo tiene efecto si la evaluación no está completa: cuando lo
+    # está, los resultados son públicos por regla y el flag no los tapa.
+    if not publicar:
+        posters_participantes = list(collection_posters.find({
+            "codigo_evento": codigo_evento,
+            "archivo_poster": {"$ne": None}
+        }))
+        jurados = list(collection_participantes.find({
+            "codigo_evento": codigo_evento,
+            "rol": "jurado_poster"
+        }))
+        evaluaciones = list(collection_evaluaciones_poster.find({
+            "codigo_evento": codigo_evento
+        }))
+        if estado_evaluacion(posters_participantes, jurados, evaluaciones)['completa']:
+            flash('La evaluación está completa, así que los resultados ya son públicos '
+                  'y no se pueden ocultar.', 'error')
+            return redirect(url_for('posters.admin_posters', codigo_evento=codigo_evento))
+
     responsable = str(getattr(current_user, 'cedula', '') or getattr(current_user, 'email', '') or '')
     ahora = datetime.now() if publicar else None
 
@@ -1388,9 +1413,9 @@ def publicar_resultados_concurso(codigo_evento):
 
     log_event(f"Resultados del concurso {codigo_evento}: {'publicados' if publicar else 'ocultados'} por {responsable}")
     if publicar:
-        flash('Resultados publicados. La página pública ya muestra el podio.', 'success')
+        flash('Resultados publicados. La página pública ya muestra los resultados del concurso.', 'success')
     else:
-        flash('Resultados ocultados. La página pública vuelve a mostrar solo la evaluación en curso.', 'success')
+        flash('Resultados ocultados. La página pública vuelve a mostrar la evaluación en curso.', 'success')
 
     return redirect(url_for('posters.admin_posters', codigo_evento=codigo_evento))
 
