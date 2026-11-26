@@ -83,6 +83,124 @@ ROLES_EXCLUYENTES = {
 # Longitud mínima aceptada al restablecer una contraseña del concurso.
 LONGITUD_MINIMA_CONTRASENA = 6
 
+# Rúbrica publicada en static/resources/rubricas-evaluacion.pdf y
+# manual-participante.pdf: Contenido 60%, Presentación visual 20% y
+# Presentación oral 20%. Los pesos son fijos y no se configuran por evento.
+PESO_CONTENIDO = 0.6
+PESO_VISUAL = 0.2
+PESO_ORAL = 0.2
+
+CRITERIOS_CONTENIDO = (
+    'introduccion_objetivos',
+    'metodologia',
+    'resultados',
+    'conclusiones',
+)
+CRITERIOS_VISUAL = ('diseno_organizacion', 'imagenes_graficos')
+CRITERIOS_ORAL = ('claridad_comunicacion', 'dominio_tema')
+CRITERIOS_PUNTUACION = CRITERIOS_CONTENIDO + CRITERIOS_VISUAL + CRITERIOS_ORAL
+
+PUNTUACION_MINIMA = 1
+PUNTUACION_MAXIMA = 10
+
+
+def validar_puntuaciones(datos):
+    """
+    Valida las puntuaciones de una evaluación.
+
+    Cada criterio es obligatorio, entero y debe estar entre 1 y 10. Devuelve
+    (valores, None) si todo es correcto, o (None, mensaje) si hay un error.
+    """
+    valores = {}
+
+    for criterio in CRITERIOS_PUNTUACION:
+        crudo = datos.get(criterio)
+        if crudo is None or (isinstance(crudo, str) and not crudo.strip()):
+            return None, 'Debe calificar todos los criterios antes de guardar.'
+
+        try:
+            valor = int(crudo)
+        except (TypeError, ValueError):
+            return None, 'Las puntuaciones deben ser números enteros entre 1 y 10.'
+
+        if valor < PUNTUACION_MINIMA or valor > PUNTUACION_MAXIMA:
+            return None, (f'Las puntuaciones deben estar entre {PUNTUACION_MINIMA} y '
+                          f'{PUNTUACION_MAXIMA}. Revise los criterios.')
+
+        valores[criterio] = valor
+
+    return valores, None
+
+
+def componentes_ponderados(valores):
+    """
+    Devuelve (contenido, visual, oral) ya ponderados por la rúbrica publicada:
+    contenido sobre 6.0, visual y oral sobre 2.0. Los tres suman la puntuación
+    final sobre 10.
+    """
+    contenido = sum(valores[c] for c in CRITERIOS_CONTENIDO) / len(CRITERIOS_CONTENIDO)
+    visual = sum(valores[c] for c in CRITERIOS_VISUAL) / len(CRITERIOS_VISUAL)
+    oral = sum(valores[c] for c in CRITERIOS_ORAL) / len(CRITERIOS_ORAL)
+
+    return (PESO_CONTENIDO * contenido,
+            PESO_VISUAL * visual,
+            PESO_ORAL * oral)
+
+
+def calcular_puntuacion_final(valores):
+    """
+    Calcula la puntuación final (escala 1-10) con la rúbrica publicada:
+    Contenido 60%, Presentación visual 20% y Presentación oral 20%.
+    """
+    return sum(componentes_ponderados(valores))
+
+
+def _valores_de_evaluacion(evaluacion):
+    """Extrae los ocho criterios de un documento de evaluación, o None."""
+    if not all(criterio in evaluacion for criterio in CRITERIOS_PUNTUACION):
+        return None
+
+    try:
+        return {criterio: int(evaluacion[criterio]) for criterio in CRITERIOS_PUNTUACION}
+    except (TypeError, ValueError):
+        return None
+
+
+def puntuacion_de_evaluacion(evaluacion):
+    """
+    Devuelve la puntuación final de una evaluación.
+
+    Los documentos guardan los criterios crudos, así que se recalcula con la
+    rúbrica vigente: las evaluaciones guardadas con la fórmula anterior quedan
+    corregidas sin reescribir la base. Si faltan los criterios (documentos muy
+    antiguos), se usa el valor almacenado.
+    """
+    valores = _valores_de_evaluacion(evaluacion)
+    if valores is None:
+        return evaluacion.get('puntuacion_final', 0)
+
+    return calcular_puntuacion_final(valores)
+
+
+def recalcular_puntuaciones(evaluaciones):
+    """
+    Recalcula en memoria la puntuación final y los aportes por bloque de cada
+    evaluación con la rúbrica vigente. No escribe en la base: las evaluaciones
+    guardadas con la fórmula anterior se muestran ya corregidas.
+    """
+    for evaluacion in evaluaciones:
+        valores = _valores_de_evaluacion(evaluacion)
+        if valores is None:
+            continue
+
+        contenido, visual, oral = componentes_ponderados(valores)
+        evaluacion['contenido_score'] = contenido
+        evaluacion['presentacion_visual_score'] = visual
+        evaluacion['presentacion_oral_score'] = oral
+        evaluacion['puntuacion_final'] = contenido + visual + oral
+
+    return evaluaciones
+
 
 def buscar_conflicto_rol(coleccion, codigo_evento, cedula, rol_solicitado):
     """
@@ -779,6 +897,8 @@ def evaluar_posters(codigo_evento):
         
         for eval in evaluaciones:
             evaluaciones_existentes[eval['nanoid_poster']] = eval
+        
+        recalcular_puntuaciones(list(evaluaciones_existentes.values()))
     
     return render_template('evaluar_posters.html', 
                          evento=evento, 
@@ -838,15 +958,18 @@ def evaluar_poster(codigo_evento, nanoid_poster):
             flash('No se pudo identificar al jurado. Por favor, inicie sesión nuevamente.', 'error')
             return redirect(url_for('posters.jurado_login', codigo_evento=codigo_evento))
             
-        # Recoger puntuaciones
-        introduccion_objetivos = int(request.form.get('introduccion_objetivos', 0))
-        metodologia = int(request.form.get('metodologia', 0))
-        resultados = int(request.form.get('resultados', 0))
-        conclusiones = int(request.form.get('conclusiones', 0))
-        diseno_organizacion = int(request.form.get('diseno_organizacion', 0))
-        imagenes_graficos = int(request.form.get('imagenes_graficos', 0))
-        claridad_comunicacion = int(request.form.get('claridad_comunicacion', 0))
-        dominio_tema = int(request.form.get('dominio_tema', 0))
+        # Recoger y validar puntuaciones: obligatorias, enteras y en escala 1-10
+        valores, error_puntuaciones = validar_puntuaciones(request.form)
+        if error_puntuaciones:
+            flash(error_puntuaciones, 'error')
+            enviado = {criterio: request.form.get(criterio, '')
+                       for criterio in CRITERIOS_PUNTUACION}
+            enviado['comentarios'] = request.form.get('comentarios', '').strip()
+            return render_template('evaluar_poster.html',
+                                   evento=evento,
+                                   poster=poster,
+                                   evaluacion=enviado)
+
         comentarios = request.form.get('comentarios', '').strip()
         
         # Obtener nombres del jurado según el tipo de sesión
@@ -854,11 +977,10 @@ def evaluar_poster(codigo_evento, nanoid_poster):
         apellidos_jurado = session.get('jurado_apellidos') or (session.get('jurado_user', {}).get('apellidos') or '')
         email_jurado = session.get('jurado_email') or (session.get('jurado_user', {}).get('email') or '')
         
-        # Calcular puntuaciones
-        contenido_score = (introduccion_objetivos + metodologia + resultados + conclusiones) / 4.0
-        presentacion_visual_score = (diseno_organizacion + imagenes_graficos) / 2.0
-        presentacion_oral_score = (claridad_comunicacion + dominio_tema) / 2.0
-        puntuacion_final = (contenido_score + presentacion_visual_score + presentacion_oral_score) / 3.0
+        # Calcular puntuaciones con la rúbrica publicada (60/20/20):
+        # contenido sobre 6.0, visual y oral sobre 2.0, final sobre 10.
+        contenido_score, presentacion_visual_score, presentacion_oral_score = componentes_ponderados(valores)
+        puntuacion_final = contenido_score + presentacion_visual_score + presentacion_oral_score
         
         # Crear o actualizar evaluación
         evaluacion_data = {
@@ -868,14 +990,14 @@ def evaluar_poster(codigo_evento, nanoid_poster):
             'nombres_jurado': nombres_jurado,
             'apellidos_jurado': apellidos_jurado,
             'email_jurado': email_jurado,
-            'introduccion_objetivos': introduccion_objetivos,
-            'metodologia': metodologia,
-            'resultados': resultados,
-            'conclusiones': conclusiones,
-            'diseno_organizacion': diseno_organizacion,
-            'imagenes_graficos': imagenes_graficos,
-            'claridad_comunicacion': claridad_comunicacion,
-            'dominio_tema': dominio_tema,
+            'introduccion_objetivos': valores['introduccion_objetivos'],
+            'metodologia': valores['metodologia'],
+            'resultados': valores['resultados'],
+            'conclusiones': valores['conclusiones'],
+            'diseno_organizacion': valores['diseno_organizacion'],
+            'imagenes_graficos': valores['imagenes_graficos'],
+            'claridad_comunicacion': valores['claridad_comunicacion'],
+            'dominio_tema': valores['dominio_tema'],
             'contenido_score': contenido_score,
             'presentacion_visual_score': presentacion_visual_score,
             'presentacion_oral_score': presentacion_oral_score,
@@ -931,6 +1053,7 @@ def ver_calificaciones(codigo_evento):
         "codigo_evento": codigo_evento,
         "nanoid_poster": poster['nanoid']
     }))
+    recalcular_puntuaciones(evaluaciones)
     
     # Obtener datos de jurados
     jurados_data = {}
@@ -1039,6 +1162,7 @@ def resultados_concurso_publico(codigo_evento):
             "codigo_evento": codigo_evento,
             "nanoid_poster": poster['nanoid']
         }))
+        recalcular_puntuaciones(evaluaciones)
         
         if evaluaciones:
             promedio = sum(e['puntuacion_final'] for e in evaluaciones) / len(evaluaciones)
@@ -1204,6 +1328,7 @@ def admin_posters(codigo_evento):
     evaluaciones = list(collection_evaluaciones_poster.find({
         "codigo_evento": codigo_evento
     }))
+    recalcular_puntuaciones(evaluaciones)
     
     # Agrupar evaluaciones por póster
     evaluaciones_por_poster = {}
@@ -1290,6 +1415,7 @@ def resultados_poster(codigo_evento):
             "codigo_evento": codigo_evento,
             "nanoid_poster": poster['nanoid']
         }))
+        recalcular_puntuaciones(evaluaciones)
         
         if evaluaciones:
             promedio = sum(e['puntuacion_final'] for e in evaluaciones) / len(evaluaciones)
@@ -1312,6 +1438,7 @@ def resultados_poster(codigo_evento):
     all_evaluaciones = list(collection_evaluaciones_poster.find({
         "codigo_evento": codigo_evento
     }))
+    recalcular_puntuaciones(all_evaluaciones)
     
     # Agrupar evaluaciones por póster
     evaluaciones_por_poster = {}
@@ -1683,6 +1810,7 @@ def certificado_podio(codigo_evento, nanoid_poster):
             "codigo_evento": codigo_evento,
             "nanoid_poster": poster['nanoid']
         }))
+        recalcular_puntuaciones(evaluaciones)
         if evaluaciones:
             promedio = sum(e['puntuacion_final'] for e in evaluaciones) / len(evaluaciones)
             resultados.append({
