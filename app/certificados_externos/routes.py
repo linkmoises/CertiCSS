@@ -8,7 +8,7 @@ from werkzeug.utils import secure_filename
 
 from app import db, collection_participantes
 from app.auth_decorators import generate_token, verify_token
-from app.helpers import allowed_file
+from app.helpers import allowed_file, etiqueta_rol
 from app.logs import log_event
 from app.certificados_externos import certificados_externos_bp, collection_certificados_externos
 
@@ -24,8 +24,8 @@ ROLES_DISPONIBLES = [
     ('instructor', 'Instructor'),
     ('organizador', 'Organizador'),
     ('coorganizador', 'Coorganizador'),
-    ('jurado_poster', 'Jurado Poster'),
-    ('presentador_poster', 'Presentador Poster'),
+    ('jurado_poster', etiqueta_rol('jurado_poster')),
+    ('presentador_poster', etiqueta_rol('presentador_poster')),
 ]
 
 

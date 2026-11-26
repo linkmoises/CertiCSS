@@ -36,6 +36,20 @@ ALLOWED_DOCUMENT_MIMETYPES = {
 # Panamá no aplica horario de verano: UTC-5 todo el año.
 _ZONA_PANAMA = timezone(timedelta(hours=-5))
 
+# Etiquetas legibles para los roles internos que no deben mostrarse crudos en
+# pantalla, listas ni certificados. El resto de roles se muestra tal cual.
+ETIQUETAS_ROL = {
+    'presentador_poster': 'Concursante',
+    'jurado_poster': 'Jurado',
+}
+
+
+def etiqueta_rol(rol):
+    """Devuelve la etiqueta visible de un rol, o el rol tal cual si no tiene."""
+    if not rol:
+        return ''
+    return ETIQUETAS_ROL.get(rol, rol)
+
 
 def es_mes_de_la_patria(momento=None):
     """Indica si en Panamá es noviembre, el mes de la patria.

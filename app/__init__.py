@@ -4,6 +4,7 @@ from pymongo import MongoClient
 from config import config
 from datetime import datetime
 from app.unidades_data import REGION_LABEL
+from app.helpers import etiqueta_rol
 # from app.auth import token_required
 # from flask_login import login_required, current_user
 
@@ -30,6 +31,7 @@ def format_date(value, format='%d/%m/%y'):
 app.jinja_env.filters['date'] = format_date                  # importado de config.py
 
 app.jinja_env.globals['REGION_LABEL'] = REGION_LABEL
+app.jinja_env.globals['etiqueta_rol'] = etiqueta_rol
 
 # Configuración de MongoDB
 client = MongoClient(config.MONGO_URI)          # importado de config.py

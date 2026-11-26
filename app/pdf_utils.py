@@ -15,7 +15,7 @@ import qrcode
 
 from app import (collection_eventos, collection_posters, collection_participantes,
                   collection_exam_results, collection_tarea_entregas, collection_eva)
-from app.helpers import detectar_tipo_documento
+from app.helpers import detectar_tipo_documento, etiqueta_rol
 
 
 # Roles que se registran para un día concreto del evento y guardan esa fecha en
@@ -360,13 +360,8 @@ def generar_pdf_participante(participante, afiche_path, lugar=None):
     etiqueta_documento = "Cédula" if detectar_tipo_documento(participante['cedula']) == 'cedula' else "Pasaporte"
     draw_centered_text(4.8 * inch, f"{etiqueta_documento}: {participante['cedula']}", font="Helvetica-Oblique", size=14)
     
-    # Mostrar "concursante" en lugar de "presentador_poster"
-    if participante['rol'] == 'presentador_poster':
-        rol_mostrar = "concursante"
-    elif participante['rol'] == 'jurado_poster':
-        rol_mostrar = "jurado"
-    else:
-        rol_mostrar = participante['rol']
+    # Los roles internos del concurso se muestran con su etiqueta legible
+    rol_mostrar = etiqueta_rol(participante['rol']).lower()
 
     if participante['rol'] == 'presentador_poster':
         if lugar == 1:

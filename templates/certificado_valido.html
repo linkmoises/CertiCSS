@@ -57,7 +57,7 @@
 
                     <p class="mt-2 text-sm text-gray-600"><strong>Nombres:</strong> {{ participante.nombres }} {{ participante.apellidos }}</p>
                     <p class="mt-2 text-sm text-gray-600"><strong>Evento:</strong> {{ evento.nombre }}</p>
-                    <p class="mt-2 text-sm text-gray-600"><strong>Rol:</strong> {{ participante.rol }}</p>
+                    <p class="mt-2 text-sm text-gray-600"><strong>Rol:</strong> {{ etiqueta_rol(participante.rol) }}</p>
                     {% if fecha_certificado %}
                     <p class="mt-2 text-sm text-gray-600"><strong>Fecha:</strong> {{ fecha_certificado.strftime('%d de %B de %Y') }}</p>
                     {% else %}
