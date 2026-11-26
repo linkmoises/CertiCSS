@@ -39,7 +39,7 @@
 
                         <div class="mt-1 flex items-center gap-x-2">
                             <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
-                                {{ "%.2f"|format(resultados[0].promedio) }}/10
+                                {{ ("%.2f"|format(resultados[0].promedio) ~ "/10") if resultados else "—" }}
                             </h3>
                         </div>
                     </div>
@@ -57,7 +57,7 @@
 
                         <div class="mt-1 flex items-center gap-x-2">
                             <h3 class="text-xl sm:text-2xl font-medium text-gray-800">
-                                {{ "%.2f"|format(resultados | sum(attribute='promedio') / resultados|length) }}/10
+                                {{ ("%.2f"|format(resultados | sum(attribute='promedio') / resultados|length) ~ "/10") if resultados else "—" }}
                             </h3>
                         </div>
                     </div>
