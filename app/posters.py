@@ -1233,13 +1233,15 @@ def admin_posters(codigo_evento):
         }
     
     # Personas cuyas contraseñas puede restablecer el organizador: concursantes
-    # (una entrada por cédula, aunque tengan varios pósters) y jurados.
+    # (una entrada por cédula, aunque tengan varios pósters) y jurados. Se
+    # deduplica por rol y cédula para no ocultar a quien tiene ambos roles en
+    # datos anteriores a la exclusividad.
     participantes_reset = []
-    cedulas_vistas = set()
+    objetivos_vistos = set()
     for poster in posters:
         cedula = poster.get('cedula')
-        if cedula and cedula not in cedulas_vistas:
-            cedulas_vistas.add(cedula)
+        if cedula and ('presentador_poster', cedula) not in objetivos_vistos:
+            objetivos_vistos.add(('presentador_poster', cedula))
             participantes_reset.append({
                 'rol': 'presentador_poster',
                 'rol_etiqueta': 'Concursante',
@@ -1247,8 +1249,8 @@ def admin_posters(codigo_evento):
                 'nombre': f"{poster.get('nombres', '')} {poster.get('apellidos', '')}".strip()
             })
     for jurado in jurados:
-        if jurado['cedula'] not in cedulas_vistas:
-            cedulas_vistas.add(jurado['cedula'])
+        if ('jurado_poster', jurado['cedula']) not in objetivos_vistos:
+            objetivos_vistos.add(('jurado_poster', jurado['cedula']))
             participantes_reset.append({
                 'rol': 'jurado_poster',
                 'rol_etiqueta': 'Jurado',
@@ -1565,17 +1567,13 @@ def editar_poster_admin(codigo_evento, nanoid_poster):
             'titulo_poster': titulo_poster
         }
         
-        # La contraseña se actualiza en todos los pósters del concursante:
-        # poster_login busca por cédula, así que una sola debe quedar con el
-        # hash nuevo para que no dependa de cuál registro se lea primero.
-        if nueva_passphrase:
-            if len(nueva_passphrase) < LONGITUD_MINIMA_CONTRASENA:
-                flash(f'La contraseña debe tener al menos {LONGITUD_MINIMA_CONTRASENA} caracteres.', 'error')
-                return redirect(url_for('posters.editar_poster_admin', codigo_evento=codigo_evento, nanoid_poster=nanoid_poster))
-            collection_posters.update_many(
-                {"codigo_evento": codigo_evento, "cedula": poster.get('cedula')},
-                {"$set": {"passphrase": generate_password_hash(nueva_passphrase)}}
-            )
+        # La contraseña se valida aquí; si no cumple el mínimo se informa y se
+        # conserva la anterior, sin descartar los demás cambios del formulario.
+        cambiar_contrasena = bool(nueva_passphrase)
+        if cambiar_contrasena and len(nueva_passphrase) < LONGITUD_MINIMA_CONTRASENA:
+            flash(f'La contraseña debe tener al menos {LONGITUD_MINIMA_CONTRASENA} caracteres. '
+                  'Se conservó la anterior.', 'error')
+            cambiar_contrasena = False
         
         # Manejar subida de archivo PDF (opcional)
         poster_file = request.files.get('poster_file')
@@ -1604,6 +1602,15 @@ def editar_poster_admin(codigo_evento, nanoid_poster):
             {"nanoid": nanoid_poster},
             {"$set": update_data}
         )
+        
+        # La contraseña se actualiza en todos los pósters del concursante:
+        # poster_login busca por cédula, así que todos sus registros deben
+        # quedar con el hash nuevo para no depender del orden de lectura.
+        if cambiar_contrasena:
+            collection_posters.update_many(
+                {"codigo_evento": codigo_evento, "cedula": poster.get('cedula')},
+                {"$set": {"passphrase": generate_password_hash(nueva_passphrase)}}
+            )
         
         # También actualizar en participantes si existe
         collection_participantes.update_one(
