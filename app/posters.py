@@ -80,6 +80,9 @@ ROLES_EXCLUYENTES = {
     'jurado_poster': 'presentador_poster',
 }
 
+# Longitud mínima aceptada al restablecer una contraseña del concurso.
+LONGITUD_MINIMA_CONTRASENA = 6
+
 
 def buscar_conflicto_rol(coleccion, codigo_evento, cedula, rol_solicitado):
     """
@@ -107,6 +110,45 @@ def validar_confirmacion_contrasena(contrasena, confirmacion):
     if (contrasena or '') != (confirmacion or ''):
         return 'Las contraseñas no coinciden. Verifíquelas e intente nuevamente.'
     return None
+
+
+def validar_nueva_contrasena(contrasena, confirmacion):
+    """
+    Verifica una contraseña nueva: debe coincidir con su confirmación y tener
+    la longitud mínima. Devuelve el mensaje de error, o None si es válida.
+    """
+    error_confirmacion = validar_confirmacion_contrasena(contrasena, confirmacion)
+    if error_confirmacion:
+        return error_confirmacion
+
+    if len(contrasena or '') < LONGITUD_MINIMA_CONTRASENA:
+        return f'La contraseña debe tener al menos {LONGITUD_MINIMA_CONTRASENA} caracteres.'
+
+    return None
+
+
+def puede_gestionar_concurso(evento, codigo_evento, usuario, participantes):
+    """
+    Indica si el usuario puede gestionar el concurso de pósters del evento.
+    Mismos permisos que la gestión del evento: administrador, DENADOI, creador,
+    organizador o coorganizador.
+    """
+    rol = getattr(usuario, 'rol', None)
+    if rol in ('administrador', 'denadoi'):
+        return True
+
+    if str(getattr(usuario, 'id', '')) == str(evento.get('autor')):
+        return True
+
+    cedula_usuario = str(getattr(usuario, 'cedula', '') or '').strip()
+    if not cedula_usuario:
+        return False
+
+    return participantes.find_one({
+        'codigo_evento': codigo_evento,
+        'cedula': cedula_usuario,
+        'rol': {'$in': ['organizador', 'coorganizador']},
+    }) is not None
 
 
 def get_judge_session(codigo_evento, cedula_jurado):
@@ -1064,6 +1106,67 @@ def login_as_judge(codigo_evento, cedula_jurado):
     return redirect(url_for('posters.evaluar_posters', codigo_evento=codigo_evento))
 
 
+@posters_bp.route('/tablero/posters/<codigo_evento>/reset_contrasena', methods=['POST'])
+@login_required
+def reset_contrasena_concurso(codigo_evento):
+    """
+    Permite al organizador o coorganizador restablecer la contraseña de un
+    concursante o de un jurado del concurso.
+    """
+    evento = collection_eventos.find_one({"codigo": codigo_evento})
+    if not evento:
+        abort(404)
+
+    if not puede_gestionar_concurso(evento, codigo_evento, current_user, collection_participantes):
+        flash('No tienes permisos para realizar esta acción.', 'error')
+        return redirect(url_for('events.listar_participantes', codigo_evento=codigo_evento))
+
+    if not validate_csrf_token(request.form.get('csrf_token', '')):
+        flash('Sesión inválida. Intente nuevamente.', 'error')
+        return redirect(url_for('posters.admin_posters', codigo_evento=codigo_evento))
+
+    rol = request.form.get('rol', '').strip()
+    cedula = request.form.get('cedula', '').strip()
+    nueva_passphrase = request.form.get('nueva_passphrase', '').strip()
+    confirmacion = request.form.get('nueva_passphrase_confirmacion', '').strip()
+
+    if rol not in ROLES_EXCLUYENTES:
+        flash('Rol no válido para restablecer la contraseña.', 'error')
+        return redirect(url_for('posters.admin_posters', codigo_evento=codigo_evento))
+
+    if not cedula:
+        flash('Debe indicar la cédula de la persona.', 'error')
+        return redirect(url_for('posters.admin_posters', codigo_evento=codigo_evento))
+
+    error_contrasena = validar_nueva_contrasena(nueva_passphrase, confirmacion)
+    if error_contrasena:
+        flash(error_contrasena, 'error')
+        return redirect(url_for('posters.admin_posters', codigo_evento=codigo_evento))
+
+    contrasena_hash = generate_password_hash(nueva_passphrase)
+
+    if rol == 'jurado_poster':
+        resultado = collection_participantes.update_one(
+            {'codigo_evento': codigo_evento, 'cedula': cedula, 'rol': rol},
+            {'$set': {'passphrase': contrasena_hash}}
+        )
+    else:
+        # Un concursante puede tener varios pósters: la contraseña es la misma
+        # en todos sus registros, así que se actualizan todos a la vez.
+        resultado = collection_posters.update_many(
+            {'codigo_evento': codigo_evento, 'cedula': cedula},
+            {'$set': {'passphrase': contrasena_hash}}
+        )
+
+    if getattr(resultado, 'matched_count', 0) == 0:
+        flash('No se encontró un registro con esa cédula en este evento.', 'error')
+        return redirect(url_for('posters.admin_posters', codigo_evento=codigo_evento))
+
+    log_event(f"Se restableció la contraseña de la cédula {cedula} ({rol}) en el concurso {codigo_evento}")
+    flash('Contraseña restablecida. Compártala con la persona por un canal seguro.', 'success')
+    return redirect(url_for('posters.admin_posters', codigo_evento=codigo_evento))
+
+
 @posters_bp.route('/tablero/posters/<codigo_evento>')
 @login_required
 def admin_posters(codigo_evento):
@@ -1074,6 +1177,12 @@ def admin_posters(codigo_evento):
     # Verificar que el concurso de póster esté habilitado
     if not evento.get('concurso_poster', False):
         flash('El concurso de póster no está habilitado para este evento.', 'error')
+        return redirect(url_for('events.listar_participantes', codigo_evento=codigo_evento))
+    
+    # Solo el creador, organizadores, coorganizadores, DENADOI o administradores
+    # gestionan el concurso.
+    if not puede_gestionar_concurso(evento, codigo_evento, current_user, collection_participantes):
+        flash('No tienes permisos para gestionar el concurso de este evento.', 'error')
         return redirect(url_for('events.listar_participantes', codigo_evento=codigo_evento))
     
     # Obtener todos los pósters ordenados por número
@@ -1123,13 +1232,39 @@ def admin_posters(codigo_evento):
             'apellidos': session.get('jurado_apellidos')
         }
     
+    # Personas cuyas contraseñas puede restablecer el organizador: concursantes
+    # (una entrada por cédula, aunque tengan varios pósters) y jurados.
+    participantes_reset = []
+    cedulas_vistas = set()
+    for poster in posters:
+        cedula = poster.get('cedula')
+        if cedula and cedula not in cedulas_vistas:
+            cedulas_vistas.add(cedula)
+            participantes_reset.append({
+                'rol': 'presentador_poster',
+                'rol_etiqueta': 'Concursante',
+                'cedula': cedula,
+                'nombre': f"{poster.get('nombres', '')} {poster.get('apellidos', '')}".strip()
+            })
+    for jurado in jurados:
+        if jurado['cedula'] not in cedulas_vistas:
+            cedulas_vistas.add(jurado['cedula'])
+            participantes_reset.append({
+                'rol': 'jurado_poster',
+                'rol_etiqueta': 'Jurado',
+                'cedula': jurado['cedula'],
+                'nombre': f"{jurado.get('nombres', '')} {jurado.get('apellidos', '')}".strip()
+            })
+
     return render_template('admin_posters.html', 
                          evento=evento,
                          posters=posters,
                          jurados=jurados,
                          evaluaciones_por_poster=evaluaciones_por_poster,
                          promedios_poster=promedios_poster,
-                         jurado_activo=jurado_activo)
+                         jurado_activo=jurado_activo,
+                         participantes_reset=participantes_reset,
+                         csrf_token=generate_csrf_token())
 
 
 @posters_bp.route('/tablero/posters/<codigo_evento>/resultados')
@@ -1430,9 +1565,17 @@ def editar_poster_admin(codigo_evento, nanoid_poster):
             'titulo_poster': titulo_poster
         }
         
-        # Actualizar passphrase si se proporciona una nueva
+        # La contraseña se actualiza en todos los pósters del concursante:
+        # poster_login busca por cédula, así que una sola debe quedar con el
+        # hash nuevo para que no dependa de cuál registro se lea primero.
         if nueva_passphrase:
-            update_data['passphrase'] = generate_password_hash(nueva_passphrase)
+            if len(nueva_passphrase) < LONGITUD_MINIMA_CONTRASENA:
+                flash(f'La contraseña debe tener al menos {LONGITUD_MINIMA_CONTRASENA} caracteres.', 'error')
+                return redirect(url_for('posters.editar_poster_admin', codigo_evento=codigo_evento, nanoid_poster=nanoid_poster))
+            collection_posters.update_many(
+                {"codigo_evento": codigo_evento, "cedula": poster.get('cedula')},
+                {"$set": {"passphrase": generate_password_hash(nueva_passphrase)}}
+            )
         
         # Manejar subida de archivo PDF (opcional)
         poster_file = request.files.get('poster_file')
