@@ -73,6 +73,42 @@ def _ruta_archivo_poster(archivo_poster, codigo_evento):
     return os.path.join(upload_folder, codigo_evento, 'posters', archivo_poster)
 
 
+# Roles del concurso que se excluyen entre sí: una misma persona no puede ser
+# jurado y concursante en el mismo evento.
+ROLES_EXCLUYENTES = {
+    'presentador_poster': 'jurado_poster',
+    'jurado_poster': 'presentador_poster',
+}
+
+
+def buscar_conflicto_rol(coleccion, codigo_evento, cedula, rol_solicitado):
+    """
+    Devuelve el rol en conflicto si la cédula ya está registrada con el rol
+    opuesto en el mismo evento. Devuelve None si no hay conflicto.
+    """
+    rol_opuesto = ROLES_EXCLUYENTES.get(rol_solicitado)
+    if not rol_opuesto:
+        return None
+
+    conflicto = coleccion.find_one({
+        'cedula': cedula,
+        'codigo_evento': codigo_evento,
+        'rol': rol_opuesto
+    })
+
+    return rol_opuesto if conflicto else None
+
+
+def validar_confirmacion_contrasena(contrasena, confirmacion):
+    """
+    Verifica que la contraseña y su confirmación coincidan.
+    Devuelve el mensaje de error a mostrar, o None si son iguales.
+    """
+    if (contrasena or '') != (confirmacion or ''):
+        return 'Las contraseñas no coinciden. Verifíquelas e intente nuevamente.'
+    return None
+
+
 def get_judge_session(codigo_evento, cedula_jurado):
     """
     Crea una sesión simulada para un jurado, permitiendo al administrador actuar en su nombre.
@@ -133,10 +169,22 @@ def registrar_poster(codigo_evento):
         # Obtener múltiples archivos de pósters
         archivos_posters = request.files.getlist('archivo_poster[]')
         passphrase = request.form.get('passphrase', '').strip()
+        passphrase_confirmacion = request.form.get('passphrase_confirmacion', '').strip()
         
         # Validaciones básicas
         if not all([nombres, apellidos, cedula, email, passphrase]):
             flash('Todos los campos obligatorios deben ser completados.', 'error')
+            return render_template('registrar_poster.html', evento=evento)
+        
+        error_confirmacion = validar_confirmacion_contrasena(passphrase, passphrase_confirmacion)
+        if error_confirmacion:
+            flash(error_confirmacion, 'error')
+            return render_template('registrar_poster.html', evento=evento)
+        
+        # Un jurado no puede registrarse como concursante en el mismo evento
+        if buscar_conflicto_rol(collection_participantes, codigo_evento, cedula, 'presentador_poster'):
+            flash('Esta cédula ya está registrada como jurado en este evento. '
+                  'Una persona no puede ser jurado y concursante a la vez.', 'error')
             return render_template('registrar_poster.html', evento=evento)
         
         if not titulos_posters:
@@ -285,7 +333,7 @@ def poster_login(codigo_evento):
             return redirect(url_for('posters.editar_poster', codigo_evento=codigo_evento))
         else:
             record_failed_ip_attempt(ip_address)
-            flash('Cédula o passphrase incorrectos.', 'error')
+            flash('Cédula o contraseña incorrectos.', 'error')
     
     return render_template('poster_login.html', evento=evento, csrf_token=generate_csrf_token())
 
@@ -535,10 +583,22 @@ def registrar_jurado(codigo_evento):
         institucion = request.form.get('institucion', '').strip()
         especialidad = request.form.get('especialidad', '').strip()
         passphrase = request.form.get('passphrase', '').strip()
+        passphrase_confirmacion = request.form.get('passphrase_confirmacion', '').strip()
         
         # Validaciones básicas
         if not all([nombres, apellidos, cedula, email, especialidad, passphrase]):
             flash('Todos los campos son obligatorios.', 'error')
+            return render_template('registrar_jurado.html', evento=evento)
+        
+        error_confirmacion = validar_confirmacion_contrasena(passphrase, passphrase_confirmacion)
+        if error_confirmacion:
+            flash(error_confirmacion, 'error')
+            return render_template('registrar_jurado.html', evento=evento)
+        
+        # Un concursante no puede registrarse como jurado en el mismo evento
+        if buscar_conflicto_rol(collection_participantes, codigo_evento, cedula, 'jurado_poster'):
+            flash('Esta cédula ya está registrada como participante en este evento. '
+                  'Una persona no puede ser jurado y concursante a la vez.', 'error')
             return render_template('registrar_jurado.html', evento=evento)
         
         # Verificar si ya existe un jurado con la misma cédula y evento
@@ -575,7 +635,7 @@ def registrar_jurado(codigo_evento):
             'tipo_evento': evento.get('modalidad', 'Virtual')
         })
         
-        flash('Registro de jurado exitoso. Guarde su passphrase para acceder a las evaluaciones.', 'success')
+        flash('Registro de jurado exitoso. Guarde su contraseña para acceder a las evaluaciones.', 'success')
         return redirect(url_for('posters.registrar_jurado', codigo_evento=codigo_evento))
     
     return render_template('registrar_jurado.html', evento=evento)
@@ -625,7 +685,7 @@ def jurado_login(codigo_evento):
             return redirect(url_for('posters.evaluar_posters', codigo_evento=codigo_evento))
         else:
             record_failed_ip_attempt(ip_address)
-            flash('Cédula o passphrase incorrectos.', 'error')
+            flash('Cédula o contraseña incorrectos.', 'error')
     
     return render_template('jurado_login.html', evento=evento, csrf_token=generate_csrf_token())
 
