@@ -281,17 +281,24 @@ function actualizarUnidadesConcurso() {
 
     const bloque = unidadesConcurso.find((r) => r.clave === region.value);
     unidad.innerHTML = '<option value="">Seleccione una unidad ejecutora</option>';
-    if (!bloque) return;
+    if (bloque) {
+        bloque.unidades.forEach((nombre) => {
+            const opcion = document.createElement('option');
+            opcion.value = nombre;
+            opcion.textContent = nombre;
+            unidad.appendChild(opcion);
+        });
+    }
 
-    bloque.unidades.forEach((nombre) => {
-        const opcion = document.createElement('option');
-        opcion.value = nombre;
-        opcion.textContent = nombre;
-        unidad.appendChild(opcion);
-    });
+    // Igual que en el registro de participantes: escape si la unidad no está
+    const otra = document.createElement('option');
+    otra.value = 'Otra unidad';
+    otra.textContent = 'Otra unidad';
+    unidad.appendChild(otra);
 }
 
 document.getElementById('region').addEventListener('change', actualizarUnidadesConcurso);
+document.addEventListener('DOMContentLoaded', actualizarUnidadesConcurso);
 </script>
 </body>
 </html>
