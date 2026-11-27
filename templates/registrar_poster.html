@@ -110,9 +110,30 @@
                                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                             </div>
                                             <div>
-                                                <label for="institucion" class="block text-sm font-medium text-gray-700 mb-1">Institución</label>
-                                                <input type="text" id="institucion" name="institucion" 
+                                                <label for="region" class="block text-sm font-medium text-gray-700 mb-1">Región *</label>
+                                                <select id="region" name="region" required
                                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                    <option value="">Seleccione una región</option>
+                                                    {% for region in regiones_concurso|default([], true) %}
+                                                    <option value="{{ region.clave }}">{{ region.nombre }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label for="unidad" class="block text-sm font-medium text-gray-700 mb-1">Unidad ejecutora *</label>
+                                                <select id="unidad" name="unidad" required
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                    <option value="">Seleccione la región primero</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label for="perfil_profesional" class="block text-sm font-medium text-gray-700 mb-1">Perfil profesional *</label>
+                                                <select id="perfil_profesional" name="perfil_profesional" required
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                    {% for valor, etiqueta in perfiles_profesionales %}
+                                                    <option value="{{ valor }}">{{ etiqueta }}</option>
+                                                    {% endfor %}
+                                                </select>
                                             </div>
                                         </div>
 
@@ -228,6 +249,28 @@
     </footer>
 
 <script>
+// Unidades ejecutoras por región, igual que en el registro de participantes
+const unidadesConcurso = {{ regiones_concurso|default([], true)|tojson }};
+
+function actualizarUnidadesConcurso() {
+    const region = document.getElementById('region');
+    const unidad = document.getElementById('unidad');
+    if (!region || !unidad) return;
+
+    const bloque = unidadesConcurso.find((r) => r.clave === region.value);
+    unidad.innerHTML = '<option value="">Seleccione una unidad ejecutora</option>';
+    if (!bloque) return;
+
+    bloque.unidades.forEach((nombre) => {
+        const opcion = document.createElement('option');
+        opcion.value = nombre;
+        opcion.textContent = nombre;
+        unidad.appendChild(opcion);
+    });
+}
+
+document.getElementById('region').addEventListener('change', actualizarUnidadesConcurso);
+
 // Contador de pósters
 let posterCount = 1;
 

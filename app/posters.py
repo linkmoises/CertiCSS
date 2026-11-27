@@ -306,6 +306,37 @@ def resultados_visibles(evento, estado):
     return bool(estado.get('completa')) or bool(evento.get('resultados_publicados'))
 
 
+def validar_ubicacion(region, unidad, perfil_profesional):
+    """
+    Valida los campos de ubicación normalizada del registro del concurso.
+    Devuelve el mensaje de error a mostrar, o None si están completos.
+    """
+    if not str(region or '').strip():
+        return 'Debe seleccionar la región.'
+    if not str(unidad or '').strip():
+        return 'Debe seleccionar la unidad ejecutora.'
+    if not str(perfil_profesional or '').strip():
+        return 'Debe seleccionar el perfil profesional.'
+    return None
+
+
+def regiones_para_formulario():
+    """
+    Regiones con sus unidades ejecutoras activas, para los formularios del
+    concurso. Se arma aquí y se pasa explícito a la plantilla.
+    """
+    from app.unidades_data import unidades_por_region, REGION_LABEL
+
+    regiones = []
+    for clave, unidades in unidades_por_region().items():
+        regiones.append({
+            'clave': clave,
+            'nombre': REGION_LABEL.get(clave, clave),
+            'unidades': list(unidades),
+        })
+    return regiones
+
+
 def get_judge_session(codigo_evento, cedula_jurado):
     """
     Crea una sesión simulada para un jurado, permitiendo al administrador actuar en su nombre.
@@ -328,6 +359,7 @@ def get_judge_session(codigo_evento, cedula_jurado):
 
 # Import helper functions
 from app.helpers import generate_nanoid, allowed_file
+from app.participantes_pdf import etiqueta_perfil
 from app.auth import token_required, generate_csrf_token, validate_csrf_token, get_client_ip, check_ip_blocked, record_failed_ip_attempt
 from app.usuarios import roles_required
 
@@ -360,7 +392,9 @@ def registrar_poster(codigo_evento):
         cedula = request.form.get('cedula', '').strip()
         email = request.form.get('email', '').strip()
         telefono = request.form.get('telefono', '').strip()
-        institucion = request.form.get('institucion', '').strip()
+        region = request.form.get('region', '').strip()
+        unidad = request.form.get('unidad', '').strip()
+        perfil_profesional = request.form.get('perfil_profesional', '').strip()
         # Obtener múltiples títulos de pósters
         titulos_posters = [t.strip() for t in request.form.getlist('titulo_poster[]') if t.strip()]
         # Obtener múltiples archivos de pósters
@@ -371,26 +405,32 @@ def registrar_poster(codigo_evento):
         # Validaciones básicas
         if not all([nombres, apellidos, cedula, email, passphrase]):
             flash('Todos los campos obligatorios deben ser completados.', 'error')
-            return render_template('registrar_poster.html', evento=evento)
+            return render_template('registrar_poster.html', evento=evento, regiones_concurso=regiones_para_formulario())
         
         error_confirmacion = validar_confirmacion_contrasena(passphrase, passphrase_confirmacion)
         if error_confirmacion:
             flash(error_confirmacion, 'error')
-            return render_template('registrar_poster.html', evento=evento)
+            return render_template('registrar_poster.html', evento=evento, regiones_concurso=regiones_para_formulario())
+        
+        error_ubicacion = validar_ubicacion(region, unidad, perfil_profesional)
+        if error_ubicacion:
+            flash(error_ubicacion, 'error')
+            return render_template('registrar_poster.html', evento=evento,
+                                   regiones_concurso=regiones_para_formulario())
         
         # Un jurado no puede registrarse como concursante en el mismo evento
         if buscar_conflicto_rol(collection_participantes, codigo_evento, cedula, 'presentador_poster'):
             flash('Esta cédula ya está registrada como jurado en este evento. '
                   'Una persona no puede ser jurado y concursante a la vez.', 'error')
-            return render_template('registrar_poster.html', evento=evento)
+            return render_template('registrar_poster.html', evento=evento, regiones_concurso=regiones_para_formulario())
         
         if not titulos_posters:
             flash('Debe registrar al menos un póster con título.', 'error')
-            return render_template('registrar_poster.html', evento=evento)
+            return render_template('registrar_poster.html', evento=evento, regiones_concurso=regiones_para_formulario())
         
         if len(archivos_posters) != len(titulos_posters):
             flash('Cada póster debe tener un título y un archivo asociado.', 'error')
-            return render_template('registrar_poster.html', evento=evento)
+            return render_template('registrar_poster.html', evento=evento, regiones_concurso=regiones_para_formulario())
         
         # Verificar si el participante ya existe
         participante_existente = collection_participantes.find_one({
@@ -410,11 +450,11 @@ def registrar_poster(codigo_evento):
                 'cedula': cedula,
                 'email': email,
                 'telefono': telefono,
-                'institucion': institucion,
+                'institucion': unidad,
                 'rol': 'presentador_poster',
-                'perfil': institucion,
-                'region': '',
-                'unidad': '',
+                'perfil': perfil_profesional,
+                'region': region,
+                'unidad': unidad,
                 'codigo_evento': codigo_evento,
                 'nanoid': nanoid_participante,
                 'timestamp': datetime.now()
@@ -450,7 +490,10 @@ def registrar_poster(codigo_evento):
                 'cedula': cedula,
                 'email': email,
                 'telefono': telefono,
-                'institucion': institucion,
+                'institucion': unidad,
+                'perfil': perfil_profesional,
+                'region': region,
+                'unidad': unidad,
                 'titulo_poster': titulo_poster,
                 'passphrase': generate_password_hash(passphrase),
                 'codigo_evento': codigo_evento,
@@ -482,9 +525,9 @@ def registrar_poster(codigo_evento):
             return redirect(url_for('posters.poster_login', codigo_evento=codigo_evento))
         else:
             flash('No se pudo registrar ningún póster. Por favor, verifique los archivos.', 'error')
-            return render_template('registrar_poster.html', evento=evento)
+            return render_template('registrar_poster.html', evento=evento, regiones_concurso=regiones_para_formulario())
     
-    return render_template('registrar_poster.html', evento=evento)
+    return render_template('registrar_poster.html', evento=evento, regiones_concurso=regiones_para_formulario())
 
 
 ###
@@ -777,26 +820,32 @@ def registrar_jurado(codigo_evento):
         apellidos = request.form.get('apellidos', '').strip()
         cedula = request.form.get('cedula', '').strip()
         email = request.form.get('email', '').strip()
-        institucion = request.form.get('institucion', '').strip()
-        especialidad = request.form.get('especialidad', '').strip()
+        region = request.form.get('region', '').strip()
+        unidad = request.form.get('unidad', '').strip()
+        perfil_profesional = request.form.get('perfil_profesional', '').strip()
         passphrase = request.form.get('passphrase', '').strip()
         passphrase_confirmacion = request.form.get('passphrase_confirmacion', '').strip()
         
         # Validaciones básicas
-        if not all([nombres, apellidos, cedula, email, especialidad, passphrase]):
+        if not all([nombres, apellidos, cedula, email, passphrase]):
             flash('Todos los campos son obligatorios.', 'error')
-            return render_template('registrar_jurado.html', evento=evento)
+            return render_template('registrar_jurado.html', evento=evento, regiones_concurso=regiones_para_formulario())
         
         error_confirmacion = validar_confirmacion_contrasena(passphrase, passphrase_confirmacion)
         if error_confirmacion:
             flash(error_confirmacion, 'error')
-            return render_template('registrar_jurado.html', evento=evento)
+            return render_template('registrar_jurado.html', evento=evento, regiones_concurso=regiones_para_formulario())
+        
+        error_ubicacion = validar_ubicacion(region, unidad, perfil_profesional)
+        if error_ubicacion:
+            flash(error_ubicacion, 'error')
+            return render_template('registrar_jurado.html', evento=evento, regiones_concurso=regiones_para_formulario())
         
         # Un concursante no puede registrarse como jurado en el mismo evento
         if buscar_conflicto_rol(collection_participantes, codigo_evento, cedula, 'jurado_poster'):
             flash('Esta cédula ya está registrada como participante en este evento. '
                   'Una persona no puede ser jurado y concursante a la vez.', 'error')
-            return render_template('registrar_jurado.html', evento=evento)
+            return render_template('registrar_jurado.html', evento=evento, regiones_concurso=regiones_para_formulario())
         
         # Verificar si ya existe un jurado con la misma cédula y evento
         jurado_existente = collection_participantes.find_one({
@@ -807,7 +856,7 @@ def registrar_jurado(codigo_evento):
         
         if jurado_existente:
             flash('Ya existe un registro de jurado para esta cédula en este evento.', 'error')
-            return render_template('registrar_jurado.html', evento=evento)
+            return render_template('registrar_jurado.html', evento=evento, regiones_concurso=regiones_para_formulario())
         
         # Generar nanoid
         nanoid = generate_nanoid(cedula, codigo_evento, "jurado")
@@ -818,13 +867,13 @@ def registrar_jurado(codigo_evento):
             'apellidos': apellidos,
             'cedula': cedula,
             'email': email,
-            'institucion': institucion,
-            'especialidad': especialidad,
+            'institucion': unidad,
+            'especialidad': etiqueta_perfil(perfil_profesional),
             'passphrase': generate_password_hash(passphrase),
             'rol': 'jurado_poster',
-            'perfil': especialidad,
-            'region': '',
-            'unidad': '',
+            'perfil': perfil_profesional,
+            'region': region,
+            'unidad': unidad,
             'codigo_evento': codigo_evento,
             'nanoid': nanoid,
             'timestamp': datetime.now(),
@@ -835,7 +884,7 @@ def registrar_jurado(codigo_evento):
         flash('Registro de jurado exitoso. Guarde su contraseña para acceder a las evaluaciones.', 'success')
         return redirect(url_for('posters.registrar_jurado', codigo_evento=codigo_evento))
     
-    return render_template('registrar_jurado.html', evento=evento)
+    return render_template('registrar_jurado.html', evento=evento, regiones_concurso=regiones_para_formulario())
 
 
 ###
