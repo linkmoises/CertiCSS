@@ -15,15 +15,15 @@
     <!-- metadatos -->
     <meta property="og:title" content="DENADOI - CertiCSS"/>
     <meta property="og:description" content="Plataforma de eventos académicos del Departamento Nacional de Docencia e Invetsigación de la Caja de Seguro Social"/>
-    <meta property="og:image" content="{{ BASE_URL}}{{ url_for('static', filename='assets/og-certicss.jpg') }}"/>
+    <meta property="og:image" content="{{ BASE_URL.rstrip('/') }}{{ url_for('static', filename='assets/og-certicss.jpg') }}"/>
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:url" content="{{ BASE_URL}}"/>
+    <meta property="og:url" content="{{ BASE_URL.rstrip('/') }}{{ request.path }}"/>
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="DENADOI - CertiCSS">
     <meta name="twitter:description" content="Plataforma de eventos académicos del Departamento Nacional de Docencia e Invetsigación de la Caja de Seguro Social">
-    <meta name="twitter:image" content="{{ BASE_URL}}{{ url_for('static', filename='assets/og-certicss.jpg') }}">
-    <meta name="twitter:url" content="{{ BASE_URL}}">
+    <meta name="twitter:image" content="{{ BASE_URL.rstrip('/') }}{{ url_for('static', filename='assets/og-certicss.jpg') }}">
+    <meta name="twitter:url" content="{{ BASE_URL.rstrip('/') }}{{ request.path }}">
 {% if UMAMI_URL %}
     {{ UMAMI_URL | safe }}
 {% endif %}
