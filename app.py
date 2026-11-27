@@ -3628,6 +3628,9 @@ def _buscar_certificados_resultados(cedula, token):
             examen_completado = False
             puntaje_examen = 0
             tiene_examen = False
+            # Fechas de aprobación de evaluaciones y tareas (la actividad se
+            # acredita el día en que se aprueba, no al cerrar el evento).
+            fechas_aprobacion = []
             
             # Verificar si el evento tiene exámenes sumativos (no formativos)
             examenes_sumativos = list(collection_eva.find({
@@ -3636,6 +3639,7 @@ def _buscar_certificados_resultados(cedula, token):
             }))
             # Filtrar solo los que tienen qbank_config sin formativo=si
             from app.plataforma import parse_qbank_config, mejor_resultado_examen, _id_str
+            from app.pdf_utils import _a_datetime
             examenes_sumativos = [
                 ex for ex in examenes_sumativos
                 if ex.get('qbank_config') and not parse_qbank_config(ex.get('qbank_config', ''))[3]
@@ -3667,10 +3671,20 @@ def _buscar_certificados_resultados(cedula, token):
                     puntaje_examen = min(m.get('calificacion', 0) for m in mejores)
                 elif any(mejores):
                     examen_completado = True
+                    # Un examen sin intento cuenta como 0: el mínimo global no
+                    # debe ignorar evaluaciones sin resolver.
                     puntaje_examen = min(
-                        (m.get('calificacion', 0) for m in mejores if m), default=0
+                        (m.get('calificacion', 0) if m else 0 for m in mejores),
+                        default=0,
                     )
                 # Sin ningún intento: examen_completado=False, puntaje 0
+
+                # Fecha de aprobación de cada sumativa aprobada.
+                for mejor in mejores:
+                    if mejor and mejor.get('calificacion', 0) >= 80:
+                        fecha_ex = _a_datetime(mejor.get('fecha_envio'))
+                        if fecha_ex:
+                            fechas_aprobacion.append(fecha_ex)
 
             # Tareas manuales: cuentan igual que las sumativas (>=80).
             # La plantilla bloquea con `not examen_completado or puntaje < 80`,
@@ -3709,6 +3723,10 @@ def _buscar_certificados_resultados(cedula, token):
                         )
                     if ent and ent.get('calificacion') is not None:
                         notas_tareas.append(ent.get('calificacion', 0))
+                        if ent.get('calificacion', 0) >= 80:
+                            fecha_t = _a_datetime(ent.get('fecha_calificacion'))
+                            if fecha_t:
+                                fechas_aprobacion.append(fecha_t)
                 todas_calificadas = len(notas_tareas) == len(tareas_evento)
                 if notas_tareas:
                     if examenes_sumativos and 'mejores' in locals() and any(mejores):
@@ -3818,6 +3836,20 @@ def _buscar_certificados_resultados(cedula, token):
                     or parse_event_date(evento.get('fecha_inicio'))
                 )
 
+            # Fecha con la que la actividad suma horas al perfil. La
+            # acreditación ocurre el día de aprobación: en eventos con
+            # evaluación solo acredita quien aprobó todas (>=80), y con la
+            # fecha de la última aprobación. Sin evaluación, o rol exento de
+            # evaluación, se mantiene la fecha de fin del evento.
+            if es_exento or not tiene_examen:
+                fecha_acreditacion = fecha_evento
+            elif examen_completado and puntaje_examen >= 80:
+                fecha_acreditacion = (
+                    max(fechas_aprobacion) if fechas_aprobacion else fecha_evento
+                )
+            else:
+                fecha_acreditacion = None  # no aprobó: no acredita horas
+
             resultado = {
                 'nombres': participante['nombres'],
                 'apellidos': participante['apellidos'],
@@ -3833,6 +3865,7 @@ def _buscar_certificados_resultados(cedula, token):
                 'fecha_evento': fecha_evento,
                 'fecha_inicio': parse_event_date(evento.get('fecha_inicio', None)),
                 'fecha_aprobacion': fecha_aprobacion,
+                'fecha_acreditacion': fecha_acreditacion,
                 'modalidad_evento': evento.get('modalidad', 'No disponible'),
                 'lms_activo': evento.get('lms_activo', evento.get('modalidad') != 'Presencial'),
                 'tipo_evento': evento.get('tipo', 'General'),
@@ -3867,6 +3900,7 @@ def _buscar_certificados_resultados(cedula, token):
                 'titulo_evento': 'Evento no encontrado',
                 'fecha_evento': None,
                 'fecha_inicio': None,
+                'fecha_acreditacion': None,
                 'modalidad_evento': 'No disponible',
                 'tipo_evento': 'General',  # Agregar tipo de evento por defecto
                 'carga_horaria': '0',
@@ -3928,7 +3962,10 @@ def _buscar_certificados_resultados(cedula, token):
         eventos_vistos = set()
         sumas = {}
         for r in resultados:
-            fecha = r.get('fecha_evento')
+            # Las horas se acreditan el día de aprobación de la actividad
+            # (fecha_acreditacion), no al cerrar el evento. Sin aprobación
+            # no hay acreditación.
+            fecha = r.get('fecha_acreditacion')
             if isinstance(fecha, datetime):
                 fecha = fecha.date()
             if not (fecha and inicio <= fecha <= fin):
